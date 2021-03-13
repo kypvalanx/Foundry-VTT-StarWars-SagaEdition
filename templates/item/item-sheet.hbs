@@ -1,0 +1,275 @@
+<form class="{{cssClass}}" autocomplete="off">
+    <header class="sheet-header">
+        <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" alt="{{item.name}}"/>
+        <div class="header-fields">
+            <h1 class="charname"><label>
+                <input name="name" type="text" value="{{item.name}}" placeholder="Name"/>
+            </label></h1>
+            <div class="grid grid-2col">
+                <div class="resource">
+                    <label class="resource-label">Cost</label>
+                    <label>
+                        <input type="text" name="data.cost" value="{{data.cost}}" data-dtype="String"/>
+                    </label>
+                </div>
+                <div class="resource">
+                    <label class="resource-label">Weight</label>
+                    <label>
+                        <input type="text" name="data.weight" value="{{data.weight}}" data-dtype="String"/>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    {{!-- Sheet Tab Navigation --}}
+    <nav class="sheet-tabs tabs" data-group="primary">
+        <a class="item" data-tab="description">Description</a>
+        <a class="item" data-tab="stripping">Stripping</a>
+        <a class="item" data-tab="modifications">Modifications</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+
+        {{!-- Description Tab --}}
+        <div class="tab" data-group="primary" data-tab="description">
+            <p>{{{data.description}}}</p>
+            {{#if data.weapon}}
+                <p><b>Weapon Type: </b>{{data.weapon.weaponType}}</p>
+                <p><b>Weapon Range: </b>{{data.weapon.finalWeaponRange}}</p>
+                <p><b>Size: </b>{{data.finalSize}}</p>
+                <p><b>Cost: </b>{{data.cost}}</p>
+                {{#if data.weapon.finalDamage}}<p><b>Damage: </b>{{data.weapon.finalDamage}}</p>{{/if}}
+                {{#if data.weapon.finalStun}}<p><b>Stun Setting: </b>{{data.weapon.finalStun}}</p>{{/if}}
+                {{#if data.weapon.finalRatesOfFire}}<p><b>Rate Of Fire: </b>{{data.weapon.finalRatesOfFire}}</p>{{/if}}
+                <p><b>Weight: </b>{{data.weight}}</p>
+                <p><b>Type: </b>{{data.weapon.type}}</p>
+                <p><b>Availability: </b>{{data.availability}}</p>
+            {{/if}}
+            <!--            {{editor content=data.description target="data.description" button=true owner=owner
+                                     editable=editable}}-->
+        </div>
+
+        {{!-- Attributes Tab --}}
+        <div class="tab stripping" data-group="primary" data-tab="stripping">
+            <div class="resource flex-group-center">
+                <label class="resource-label">Upgrade Points: </label>
+                <label class="attribute-value">{{data.upgradePoints}}</label>
+            </div>
+            {{#if data.weapon}}
+                <div class="resource flex-group-center">
+                    <label for="data.health.value" class="resource-label">Weapon Stripping</label>
+                    <table>
+                        <tr>
+                            <th><label>Reduce Damage Dice</label></th>
+                            <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                               name="data.weapon.stripping.damage" {{checked
+                                        data.weapon.stripping.damage}}/></label></td>
+                        </tr>
+
+                        {{#if data.weapon.stripping.canMakeDiminutive}}
+                            <tr>
+                                <th><label>Make Weapon Diminutive</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeDiminutive" {{checked
+                                            data.weapon.stripping.makeDiminutive}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeTiny}}
+                            <tr>
+                                <th><label>Make Weapon Tiny</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeTiny" {{checked
+                                            data.weapon.stripping.makeTiny}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeSmall}}
+                            <tr>
+                                <th><label>Make Weapon Small</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeSmall" {{checked
+                                            data.weapon.stripping.makeSmall}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeMedium}}
+                            <tr>
+                                <th><label>Make Weapon Medium</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeMedium" {{checked
+                                            data.weapon.stripping.makeMedium}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeLarge}}
+                            <tr>
+                                <th><label>Make Weapon Large</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeLarge" {{checked
+                                            data.weapon.stripping.makeLarge}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeHuge}}
+                            <tr>
+                                <th><label>Make Weapon Huge</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeHuge" {{checked
+                                            data.weapon.stripping.makeHuge}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeGargantuan}}
+                            <tr>
+                                <th><label>Make Weapon Gargantuan</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeGargantuan" {{checked
+                                            data.weapon.stripping.makeGargantuan}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canMakeColossal}}
+                            <tr>
+                                <th><label>Make Weapon Colossal</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.makeColossal" {{checked
+                                            data.weapon.stripping.makeColossal}}/></label></td>
+                            </tr>
+                        {{/if}}
+
+                        {{#if data.weapon.stripping.canReduceRange}}
+                            <tr>
+                                <th><label>Reduce Range</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.range" {{checked
+                                            data.weapon.stripping.range}}/></label></td>
+                            </tr>
+                        {{/if}}
+
+
+                        {{#if data.weapon.stripping.canStripDesign}}
+                            <tr>
+                                <th><label>Redesign</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.design" {{checked
+                                            data.weapon.stripping.design}}/></label></td>
+                            </tr>
+                        {{/if}}
+
+                        {{#if data.weapon.stripping.canStripStun}}
+                            <tr>
+                                <th><label>Remove Stun Setting</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.stun" {{checked
+                                            data.weapon.stripping.stun}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.weapon.stripping.canStripAutofire}}
+                            <tr>
+                                <th><label>Remove Autofire</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.weapon.stripping.autofire" {{checked
+                                            data.weapon.stripping.autofire}}/></label></td>
+                            </tr>
+                        {{/if}}
+                    </table>
+                </div>
+            {{/if}}
+            {{#if data.armor}}
+                <div class="resource flex-group-center">
+                    <label for="data.health.value" class="resource-label">Armor Stripping</label>
+                    <table>
+                        {{#if data.armor.stripping.canMakeMedium}}
+                            <tr>
+                                <th><label>Make Medium Armor</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.armor.stripping.makeMedium" {{checked
+                                            data.armor.stripping.makeMedium}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.armor.stripping.canMakeHeavy}}
+                            <tr>
+                                <th><label>Make Heavy Armor</label></th>
+                                <td><label class="attribute-value checkbox"><input type="checkbox"
+                                                                                   name="data.armor.stripping.makeHeavy" {{checked
+                                            data.armor.stripping.makeHeavy}}/></label></td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.armor.stripping.canReduceDefensiveMaterial}}
+                            <tr>
+                                <th><label>Reduce Defensive Material By: </label></th>
+                                <td>
+                                    <div class="value grid grid-3col">
+                                        <div><a class="item-control value-plus" title="Edit Item"
+                                                name="data.armor.stripping.reduceDefensiveMaterial"><i
+                                                class="fas fa-plus"></i></a>
+                                        </div>
+                                        <div><label class="attribute-value checkbox">
+                                            <input class="value" type="number"
+                                                   name="data.armor.stripping.reduceDefensiveMaterial"
+                                                   value="{{data.armor.stripping.reduceDefensiveMaterial}}">
+                                        </label></div>
+                                        <div><a class="item-control value-minus" title="Edit Item"
+                                                name="data.armor.stripping.reduceDefensiveMaterial"><i
+                                                class="fas fa-minus"></i></a></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {{/if}}
+                        {{#if data.armor.stripping.canReduceJointProtection}}
+                            <tr>
+                                <th><label>Reduce Joint Protection By: </label></th>
+                                <td>
+                                    <div class="value grid grid-3col">
+                                        <div><a class="item-control value-plus" title="Edit Item"
+                                                name="data.armor.stripping.reduceJointProtection"><i
+                                                class="fas fa-plus"></i></a>
+                                        </div>
+                                        <div><label class="attribute-value checkbox">
+                                            <input class="value" type="number"
+                                                   name="data.armor.stripping.reduceJointProtection"
+                                                   value="{{data.armor.stripping.reduceJointProtection}}">
+                                        </label></div>
+                                        <div><a class="item-control value-minus" title="Edit Item"
+                                                name="data.armor.stripping.reduceJointProtection"><i
+                                                class="fas fa-minus"></i></a></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {{/if}}
+                    </table>
+                </div>
+            {{/if}}
+
+            {{!-- As you add new fields, add them in here! --}}
+            <ol class="attributes-list">
+                {{#each data.attributes as |attr key|}}
+                    <li class="attribute flexrow" data-attribute="{{key}}">
+                        <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+                               value="{{key}}">{{key}}</label>
+                        <input name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder=""
+                               title=""/>
+                        <!--                      //<label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.dtype}}">{{attr.value}}</label>-->
+                    </li>
+                {{/each}}
+            </ol>
+        </div>
+
+        {{!-- Modifications Tab --}}
+        <div class="tab items" data-group="primary" data-tab="modifications">
+            <div class="resource flex-group-center">
+                <label class="resource-label">Upgrade Points: </label>
+                <label class="attribute-value">{{data.upgradePoints}}</label>
+            </div>
+            <ol class="items-list">
+                {{#each item.mods as |item id|}}
+                    <li class="item flexrow draggable" data-item-id="{{item._id}}">
+                        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
+                        </div>
+                        <h4 class="item-name">{{item.name}}</h4>
+                        <div class="item-controls">
+                            <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                            <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </li>
+                {{/each}}
+            </ol>
+        </div>
+    </section>
+</form>

@@ -1,0 +1,69 @@
+.resource-label {
+  font-weight: bold;
+  text-transform: uppercase;
+}
+.center{
+  text-align: center;
+}
+table.fixed{
+  table-layout: fixed;
+  tr {
+    line-height: 28px;
+    td {
+      white-space: nowrap;
+      .direct{
+        text-decoration: underline;
+      }
+
+      span {
+        display: inline-block;
+        width: 100%;
+      }
+
+      span.short{
+        width: 85%;
+      }
+
+      input {
+        display: inline-block;
+        width: 100%;
+      }
+
+      input.short{
+        width: 85%;
+      }
+    }
+  }
+}
+.direct{
+  cursor: text;
+}
+.draggable{
+
+}
+
+.border{
+  border: 1px solid black;
+}
+table.skill {
+  tr {
+    height: 30px;
+
+    th {
+      text-align: left;
+    }
+  }
+}
+
+.warning{
+  opacity: 50%;
+  background-color: yellow;
+}
+
+.shrink{
+  resize: both;
+  display: inline-block;
+}
+.rollEquation{
+  word-wrap: break-word;
+}

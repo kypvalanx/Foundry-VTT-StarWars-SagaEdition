@@ -1,0 +1,399 @@
+{
+  "Actor": {
+    "types": ["character", "npc"],
+    "templates": {
+      "common": {
+        "health": {
+          "value": 10,
+          "min": 0,
+          "max": 10,
+          "condition": 0
+        },
+        "equippedIds": [],
+        "classesfirst": "",
+        "abilities": {
+          "str": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          },
+          "dex": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          },
+          "con": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          },
+          "int": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          },
+          "wis": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          },
+          "cha": {
+            "total": 10,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus":0,
+            "bonus":0,
+            "base": 10
+          }
+        },
+        "skills": {
+          "acrobatics": {
+            "value": 0,
+            "ability": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/acrobatics"
+          },
+          "climb": {
+            "value": 0,
+            "ability": "str",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/climb"
+          },
+          "deception": {
+            "value": 0,
+            "ability": "cha",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/deception"
+          },
+          "endurance": {
+            "value": 0,
+            "ability": "con",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/endurance"
+          },
+          "gather information": {
+            "value": 0,
+            "ability": "cha",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/gather_information"
+          },
+          "initiative": {
+            "value": 0,
+            "ability": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/initiative"
+          },
+          "jump": {
+            "value": 0,
+            "ability": "str",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/jump"
+          },
+          "knowledge (bureaucracy)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (galactic lore)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (life sciences)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (physical sciences)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (social sciences)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (tactics)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "knowledge (technology)": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/knowledge"
+          },
+          "mechanics": {
+            "value": 0,
+            "ability": "int",
+            "uut": false,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/mechanics"
+          },
+          "perception": {
+            "value": 0,
+            "ability": "wis",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/perception"
+          },
+          "persuasion": {
+            "value": 0,
+            "ability": "cha",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/persuasion"
+          },
+          "pilot": {
+            "value": 0,
+            "ability": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/pilot"
+          },
+          "ride": {
+            "value": 0,
+            "ability": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/ride"
+          },
+          "stealth": {
+            "value": 0,
+            "ability": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/stealth"
+          },
+          "survival": {
+            "value": 0,
+            "ability": "wis",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/survival"
+          },
+          "swim": {
+            "value": 0,
+            "ability": "str",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/swim"
+          },
+          "treat injury": {
+            "value": 0,
+            "ability": "wis",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/treat_injury"
+          },
+          "use computer": {
+            "value": 0,
+            "ability": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/use_computer"
+          },
+          "use the force": {
+            "value": 0,
+            "ability": "cha",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/use_the_force"
+          }
+        }
+      }
+    },
+    "character": {
+      "templates": ["common"],
+      "biography": "",
+      "attributes": {
+        "level": {
+          "value": 1
+        }
+      }
+    }
+  },
+  "Item": {
+    "types": ["weapon", "armor", "equipment", "feat", "talent", "species", "class", "upgrade", "forcePower", "forceTradition","forceTechnique","forceSecret","forceRegimen","classFeature", "ability"],
+    "templates": {
+      "base": {
+        "description": "",
+        "attributes": {},
+        "choices": [],
+        "payload": ""
+      },
+      "item": {
+        "equipable": false,
+        "droidPart": false,
+        "bioPart": false,
+        "isMod": false,
+        "cost": "",
+        "weight": "",
+        "availability": "",
+        "size": ""
+      },
+      "modifiable": {
+        "items": []
+      },
+      "mod": {
+        "hasItemOwner": false
+      },
+      "prerequisites": {
+        "prerequisites": []
+      },
+      "categories": {
+        "categories": []
+      },
+      "health": {
+
+      },
+      "source": {
+        "supplyingClass": "",
+        "supplyingSpecies": "",
+        "supplyingFeature": "",
+        "supplyingFeat": "",
+        "isSupplied": false
+      }
+    },
+    "ability":{
+      "templates":["base", "categories", "source"]
+    },
+    "weapon":{
+      "templates":["base", "item", "categories", "modifiable", "source"],
+      "weapon": {}
+    },
+    "armor":{
+      "templates":["base", "item", "categories", "modifiable", "source"],
+      "armor": {}
+    },
+    "equipment":{
+      "templates":["base", "item", "categories", "modifiable", "source"],
+      "equipment": {}
+    },
+    "template":{
+      "templates":["base", "mod"]
+    },
+    "upgrade":{
+      "templates":["base", "item", "mod"],
+      "upgrade": {}
+    },
+    "feat":{
+      "templates":["base", "prerequisites", "categories", "source"]
+    },
+    "talent":{
+      "templates":["base", "prerequisites", "categories", "source"],
+      "talentTree": ""
+    },
+    "species":{
+      "templates":["base", "categories"],
+      "ages":{}
+    },
+    "forcePower":{
+      "templates":["base", "categories", "source"]
+    },
+    "forceTradition":{
+      "templates":["base", "categories", "source"]
+    },
+    "forceTechnique":{
+      "templates":["base", "categories", "source"]
+    },
+    "forceSecret":{
+      "templates":["base", "categories", "source"]
+    },
+    "forceRegimen":{
+      "templates":["base", "categories", "source"]
+    },
+    "class":{
+      "templates":["base", "prerequisites", "health"]
+    },
+    "classFeature":{
+      "templates":["base", "source"]
+    }
+  }
+}
