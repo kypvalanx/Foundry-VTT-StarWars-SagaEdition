@@ -53,7 +53,7 @@ export class SWSEActorSheet extends ActorSheet {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
 
-        html.find("input.skill").on("change", (event) =>{
+        html.find("input.skill").on("change", (event) => {
             let data = {};
             data["data.skills." + event.currentTarget.dataset.id + ".trained"] = event.currentTarget.checked;
             this.actor.update(data);
@@ -92,21 +92,11 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
         });
 
-        html.find("#generationType").on("click", async event => {
-            let content = `<p>Select an Attribute Generation Type</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-            await Dialog.prompt({
-                title: "Select an Attribute Generation Type",
-                content: content,
-                callback: async (html) => {
-                    let key = html.find("#choice")[0].value;
-                    possibleFeatTypes = [key];
-                }
-            });
-            console.log("ping")
-        })
+        html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
+        html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
+        html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
+        html.find("#assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
+        html.find("#assignManual").on("click", async event => this._selectAttributesManually(event, this));
 
 
         // Add Inventory Item
@@ -136,7 +126,7 @@ export class SWSEActorSheet extends ActorSheet {
                 content: title,
                 yes: async () => {
                     let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
-                    if(itemToDelete.data.data.items) {
+                    if (itemToDelete.data.data.items) {
                         for (let childItem of itemToDelete.data.data.items) {
                             let ownedItem = this.actor.getOwnedItem(childItem._id);
                             await itemToDelete.revokeOwnership(ownedItem);
@@ -149,7 +139,8 @@ export class SWSEActorSheet extends ActorSheet {
                         return val !== li.data("itemId")
                     });
                 },
-                no: () => {},
+                no: () => {
+                },
             });
         });
 
@@ -157,6 +148,55 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.rollable').click(this._onRoll.bind(this));
 
         html.find('a[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+    }
+
+
+    async _selectAttributeGeneration(event, sheet) {
+        let genType = sheet.actor.getAttributeGenerationType();
+        let rollSelected = genType === 'Roll' ? 'selected' : '';
+        let arraySelected = genType === 'Standard Array' ? 'selected' : '';
+        let pointBuySelected = genType === 'Point Buy' ? 'selected' : '';
+        let manualSelected = genType === 'Manual' ? 'selected' : '';
+
+        let content = `<p>Select an Attribute Generation Type</p>
+                        <div>
+                          <select id='choice'>
+                            <option ${rollSelected}>Roll</option>
+                            <option ${arraySelected}>Standard Array</option>
+                            <option ${pointBuySelected}>Point Buy</option>
+                            <option ${manualSelected}>Manual</option>
+                          </select> 
+                        </div>`;
+
+        await Dialog.prompt({
+            title: "Select an Attribute Generation Type",
+            content: content,
+            callback: async (html) => {
+                let key = html.find("#choice")[0].value;
+                sheet.actor.setAttributeGenerationType(key);
+            }
+        });
+    }
+
+    getPointBuyTotal() {
+        return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
+    }
+
+    updateTotal(html) {
+        let total = this.getTotal(html);
+
+        html.find(".adjustable-total").each((i, item) => {
+            item.innerHTML = total
+        })
+    }
+
+    getTotal(html) {
+        let abilityCost = CONFIG.SWSE.Abilities.abilityCost;
+        let total = 0;
+        html.find(".adjustable-value").each((i, item) => {
+            total += abilityCost[item.innerHTML];
+        })
+        return total;
     }
 
     _onDragMiscStart(event, type) {
@@ -286,18 +326,18 @@ export class SWSEActorSheet extends ActorSheet {
         const value = el.tagName.toUpperCase() === "INPUT" ? Number(el.value) : Number(el.innerText);
 
         let name = el.getAttribute("name");
-        if(el.dataset.name){
-          name = el.dataset.name;
+        if (el.dataset.name) {
+            name = el.dataset.name;
         }
 
         if (name) {
-          let updateTarget = this.actor;
-          if (el.dataset.item) {
-            updateTarget = this.actor.getOwnedItem(el.dataset.item)
-          }
-          let data = {};
-          data[name] = value;
-          updateTarget.update(data);
+            let updateTarget = this.actor;
+            if (el.dataset.item) {
+                updateTarget = this.actor.getOwnedItem(el.dataset.item)
+            }
+            let data = {};
+            data[name] = value;
+            updateTarget.update(data);
         }
 
         // Update on lose focus
@@ -317,16 +357,16 @@ export class SWSEActorSheet extends ActorSheet {
         // Replace span element with an input (text) element
         const newEl = document.createElement(`INPUT`);
         newEl.type = type;
-      if (el.dataset?.dtype) newEl.dataset.dtype = el.dataset.dtype;
-      if (el.dataset?.item) newEl.dataset.item = el.dataset.item;
+        if (el.dataset?.dtype) newEl.dataset.dtype = el.dataset.dtype;
+        if (el.dataset?.item) newEl.dataset.item = el.dataset.item;
 
         // Set value of new input element
         let prevValue = el.innerText;
         if (el.classList.contains("placeholder")) prevValue = "";
 
         let name = el.getAttribute("name");
-        if(el.dataset.name){
-          name = el.dataset.name;
+        if (el.dataset.name) {
+            name = el.dataset.name;
         }
         let item = el.dataset.item;
         let maxValue;
@@ -334,9 +374,9 @@ export class SWSEActorSheet extends ActorSheet {
             newEl.setAttribute("name", name);
 
             let source = this.actor.data;
-            if(item){
-              source = this.actor.getOwnedItem(item);
-              name = "data." + name; //TODO make this less hacky
+            if (item) {
+                source = this.actor.getOwnedItem(item);
+                name = "data." + name; //TODO make this less hacky
             }
             prevValue = getProperty(source, name);
             if (prevValue && typeof prevValue !== "string") prevValue = prevValue.toString();
@@ -435,7 +475,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         } else if (item.data.type === "class") {
             let meetsPrereqs = this._meetsClassPrereqs(item.data.data.prerequisites);
-            if(meetsPrereqs.doesFail){
+            if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",
                     content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
@@ -447,7 +487,7 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }).render(true);
                 return;
-            } else if(!meetsPrereqs.doesFail && meetsPrereqs.failureList.length>0){
+            } else if (!meetsPrereqs.doesFail && meetsPrereqs.failureList.length > 0) {
                 new Dialog({
                     title: "You MAY Meet the Prerequisites!",
                     content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
@@ -459,7 +499,7 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }).render(true);
             }
-            if(!item.data.data.prerequisites.isPrestige && item.data.data.feats.feats.length > 0){
+            if (!item.data.data.prerequisites.isPrestige && item.data.data.feats.feats.length > 0) {
                 await this.addClassFeats(item, additionalEntitiesToAdd);
             }
         } else if (item.data.type === "feat") {
@@ -468,15 +508,15 @@ export class SWSEActorSheet extends ActorSheet {
             let possibleFeatTypes = [];
 
             let optionString = "";
-            for(let category of item.data.bonusFeatCategories){
-                if(this.actor.data.availableItems[category] > 0){
+            for (let category of item.data.bonusFeatCategories) {
+                if (this.actor.data.availableItems[category] > 0) {
                     possibleFeatTypes.push(category);
                     optionString += `<option value="${category}">${category}</option>`;
                 }
             }
             console.log(possibleFeatTypes)
 
-            if(possibleFeatTypes.length > 1){
+            if (possibleFeatTypes.length > 1) {
                 let content = `<p>Select an unused feat type.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
@@ -491,8 +531,8 @@ export class SWSEActorSheet extends ActorSheet {
                 });
             }
             let filteredCategories = [];
-            for(let category of item.data.data.categories){
-                if(!category.endsWith(" Bonus Feats")){
+            for (let category of item.data.data.categories) {
+                if (!category.endsWith(" Bonus Feats")) {
                     possibleFeatTypes.push(category);
                 }
             }
@@ -502,47 +542,50 @@ export class SWSEActorSheet extends ActorSheet {
             item.data.data.categories = filteredCategories;
 
 
-            if(item.data.data.prerequisites){
+            if (item.data.data.prerequisites) {
                 let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if(meetsPrereqs.doesFail){
+                if (meetsPrereqs.doesFail) {
                     return;
                 }
             }
-        } else if ( item.data.type === "forcePower" || item.data.type === "forceTechnique"  || item.data.type === "forceSecret") {
+        } else if (item.data.type === "forcePower" || item.data.type === "forceTechnique" || item.data.type === "forceSecret") {
 
-            if(item.data.type === "forceSecret"){
-                if(!this.actor.data.availableItems["Force Secrets"]){
+            if (item.data.type === "forceSecret") {
+                if (!this.actor.data.availableItems["Force Secrets"]) {
                     await Dialog.prompt({
                         title: "You can't take any more Force Secrets",
                         content: "You can't take any more Force Secrets",
-                        callback: () =>{}
+                        callback: () => {
+                        }
                     });
                     return;
                 }
-            }else if(item.data.type === "forceTechnique"){
-                if(!this.actor.data.availableItems["Force Techniques"]){
+            } else if (item.data.type === "forceTechnique") {
+                if (!this.actor.data.availableItems["Force Techniques"]) {
                     await Dialog.prompt({
                         title: "You can't take any more Force Techniques",
                         content: "You can't take any more Force Techniques",
-                        callback: () =>{}
+                        callback: () => {
+                        }
                     });
                     return;
                 }
-            }else if(item.data.type === "forcePower"){
-                if(!this.actor.data.availableItems["Force Powers"]){
+            } else if (item.data.type === "forcePower") {
+                if (!this.actor.data.availableItems["Force Powers"]) {
                     await Dialog.prompt({
                         title: "You can't take any more Force Powers",
                         content: "You can't take any more Force Powers",
-                        callback: () =>{}
+                        callback: () => {
+                        }
                     });
                     return;
                 }
             }
 
 
-            if(item.data.data.prerequisites){
+            if (item.data.data.prerequisites) {
                 let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if(meetsPrereqs.doesFail){
+                if (meetsPrereqs.doesFail) {
                     return;
                 }
             }
@@ -551,9 +594,9 @@ export class SWSEActorSheet extends ActorSheet {
             let possibleTalentTrees = [];
             let optionString = "";
 
-            if(item.data.talentTree === this.actor.data.data.bonusTalentTree){
-                for(let [id,item] of Object.entries(this.actor.data.availableItems)){
-                    if(id.includes("Talent") && !id.includes("Force") && item > 0){
+            if (item.data.talentTree === this.actor.data.data.bonusTalentTree) {
+                for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
+                    if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                         optionString += `<option value="${id}">${id}</option>`
                         possibleTalentTrees.push(id);
                     }
@@ -575,14 +618,15 @@ export class SWSEActorSheet extends ActorSheet {
             //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
             // }
 
-            if(possibleTalentTrees.length === 0){
+            if (possibleTalentTrees.length === 0) {
                 await Dialog.prompt({
                     title: "You can't take any more talents of that type",
                     content: "You can't take any more talents of that type",
-                    callback: () =>{}
+                    callback: () => {
+                    }
                 });
                 return;
-            } else if (possibleTalentTrees.length > 1){
+            } else if (possibleTalentTrees.length > 1) {
                 let content = `<p>Select an unused talent source.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
@@ -597,8 +641,8 @@ export class SWSEActorSheet extends ActorSheet {
                 });
             }
             let filteredCategories = [];
-            for(let category of item.data.data.categories){
-                if(!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")){
+            for (let category of item.data.data.categories) {
+                if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
                     filteredCategories.push(category);
                 }
             }
@@ -607,9 +651,9 @@ export class SWSEActorSheet extends ActorSheet {
 
             item.data.data.categories = filteredCategories;
 
-            if(item.data.prerequisites){
+            if (item.data.prerequisites) {
                 let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.prerequisites);
-                if(meetsPrereqs.doesFail){
+                if (meetsPrereqs.doesFail) {
                     return;
                 }
             }
@@ -683,7 +727,7 @@ export class SWSEActorSheet extends ActorSheet {
                         if (selectedChoice.items && selectedChoice.items.length > 0) {
                             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
                         }
-                        if(selectedChoice.payload && selectedChoice.payload !== ""){
+                        if (selectedChoice.payload && selectedChoice.payload !== "") {
                             item.data.data.payload = selectedChoice.payload;
                             console.log(item)
                         }
@@ -882,8 +926,8 @@ export class SWSEActorSheet extends ActorSheet {
 
     _formatPrerequisites(failureList) {
         let format = "<ul>";
-        for(let fail of failureList){
-            format = format + "<li>"+ fail.message +"</li>";
+        for (let fail of failureList) {
+            format = format + "<li>" + fail.message + "</li>";
         }
         return format + "</ul>";
     }
@@ -892,59 +936,59 @@ export class SWSEActorSheet extends ActorSheet {
     //TODO clean this shit up
     _meetsClassPrereqs(prerequisites) {
         let failureList = [];
-        for(let [key, value] of Object.entries(prerequisites.prerequisites)) {
+        for (let [key, value] of Object.entries(prerequisites.prerequisites)) {
             value = value.trim();
             key = key.trim();
-            if(key.toLowerCase() === 'trained skills'){
+            if (key.toLowerCase() === 'trained skills') {
                 this.checkTrainedSkills(value, failureList, key);
-            }else if(key.toLowerCase() === 'minimum level'){
-                if(this.actor.data.prerequisites.charLevel < parseInt(value)){
+            } else if (key.toLowerCase() === 'minimum level') {
+                if (this.actor.data.prerequisites.charLevel < parseInt(value)) {
                     failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                 }
-            }else if(key.toLowerCase() === 'base attack bonus'){
-                if(this.actor.data.prerequisites.bab < parseInt(value)){
+            } else if (key.toLowerCase() === 'base attack bonus') {
+                if (this.actor.data.prerequisites.bab < parseInt(value)) {
                     failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                 }
-            }else if(key.toLowerCase() === 'species'){
-                if(this.actor.data.prerequisites.species === value.toLowerCase){
+            } else if (key.toLowerCase() === 'species') {
+                if (this.actor.data.prerequisites.species === value.toLowerCase) {
                     failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                 }
-            }else if(key.toLowerCase() === 'force techniques'){
+            } else if (key.toLowerCase() === 'force techniques') {
                 let result = /at least (\w*)/.exec(value.toLowerCase());
-                if(result != null){
-                    if(this.actor.data.prerequisites.techniques.length < this._fromOrdinal(result[1])){
+                if (result != null) {
+                    if (this.actor.data.prerequisites.techniques.length < this._fromOrdinal(result[1])) {
                         failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                     }
                 }
-            }else if(key.toLowerCase() === 'force powers'){
+            } else if (key.toLowerCase() === 'force powers') {
                 if (!this.actor.data.prerequisites.powers.includes(value.trim().toLowerCase())) {
                     failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                 }
-            }else if(key.toLowerCase() === 'droid systems'){
+            } else if (key.toLowerCase() === 'droid systems') {
                 if (!this.actor.data.prerequisites.equippedItems.includes(value.trim().toLowerCase())) {
                     failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                 }
-            }else if(key.toLowerCase() === 'feats') {
+            } else if (key.toLowerCase() === 'feats') {
                 this.checkFeats(value, failureList, key);
-            }else if(key.toLowerCase() === 'talents' || key.toLowerCase() === 'talent') {
+            } else if (key.toLowerCase() === 'talents' || key.toLowerCase() === 'talent') {
                 this.checkTalents(value, failureList, key);
-            }else if(key.toLowerCase() === 'special') {
-                if(value.toLowerCase() === 'must be a droid.' || value.toLowerCase() === 'must be a droid'){
-                    if(!this.actor.data.prerequisites.isDroid){
+            } else if (key.toLowerCase() === 'special') {
+                if (value.toLowerCase() === 'must be a droid.' || value.toLowerCase() === 'must be a droid') {
+                    if (!this.actor.data.prerequisites.isDroid) {
                         failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
                     }
                 } else {
                     failureList.push({fail: false, message: `<b>${key}:</b> ${value}`});
                 }
 
-            }else{
-                console.error("UNIDENTIFIED PREREQ","[" + key + "]", value);
+            } else {
+                console.error("UNIDENTIFIED PREREQ", "[" + key + "]", value);
                 failureList.push({fail: true, message: `<b>${key}:</b> ${value} [UNIDENTIFIED]`});
             }
         }
         let doesFail = false;
-        for(let fail of failureList){
-            if(fail.fail === true){
+        for (let fail of failureList) {
+            if (fail.fail === true) {
                 doesFail = true;
                 break;
             }
@@ -1011,7 +1055,7 @@ export class SWSEActorSheet extends ActorSheet {
         let toks = [];
         if (value.includes(', ')) {
             toks = value.split(", ");
-        } else if(value.includes(" and ")) {
+        } else if (value.includes(" and ")) {
             toks = value.split(" and ");
         } else {
             toks[0] = value;
@@ -1028,15 +1072,15 @@ export class SWSEActorSheet extends ActorSheet {
 
     _fromOrdinal(numberWord) {
         let num = numberWord.toLowerCase();
-        if(num === 'zero'){
+        if (num === 'zero') {
             return 0;
-        } else if(num === 'one'){
+        } else if (num === 'one') {
             return 1;
-        } else if(num === 'two'){
+        } else if (num === 'two') {
             return 2;
-        } else if(num === 'three'){
+        } else if (num === 'three') {
             return 3;
-        } else if(num === 'four'){
+        } else if (num === 'four') {
             return 4;
         } else {
             console.error(`${numberWord} is unrecognized`);
@@ -1045,10 +1089,10 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _hasFeat(value) {
-        if(value.includes(" or ")){
+        if (value.includes(" or ")) {
             let toks = value.split(" or ");
             let hasFeat = false;
-            for(let tok of toks){
+            for (let tok of toks) {
                 hasFeat = hasFeat || this.actor.data.prerequisites.feats.includes(tok.trim().toLowerCase());
             }
             return hasFeat;
@@ -1061,24 +1105,24 @@ export class SWSEActorSheet extends ActorSheet {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
             if (key === 'EXOTIC_WEAPON') {
-                for(let weapon of game.generated.exoticWeapons){
-                    resolvedOptions[weapon] = {abilities: [], items:[], payload:weapon};
+                for (let weapon of game.generated.exoticWeapons) {
+                    resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
                 }
             } else if (key === 'PROFICIENT_WEAPON') {
-                for(let weapon of this.actor.data.proficiency.weapon){
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items:[], payload:weapon.titleCase()};
+                for (let weapon of this.actor.data.proficiency.weapon) {
+                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                 }
             } else if (key === 'FOCUS_WEAPON') {
-                for(let weapon of this.actor.data.proficiency.focus){
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items:[], payload:weapon.titleCase()};
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                 }
-            }else if (key === 'TRAINED_SKILL') {
-                for(let weapon of this.actor.data.prerequisites.trainedSkills){
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items:[], payload:weapon.titleCase()};
+            } else if (key === 'TRAINED_SKILL') {
+                for (let weapon of this.actor.data.prerequisites.trainedSkills) {
+                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                 }
-            }else if (key === 'FOCUS_SKILL') {
-                for(let weapon of this.actor.data.prerequisites.focusSkills){
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items:[], payload:weapon.titleCase()};
+            } else if (key === 'FOCUS_SKILL') {
+                for (let weapon of this.actor.data.prerequisites.focusSkills) {
+                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                 }
             } else {
                 resolvedOptions[key] = value;
@@ -1086,4 +1130,217 @@ export class SWSEActorSheet extends ActorSheet {
         }
         return resolvedOptions;
     }
+
+    async _selectAttributeScores(event, sheet, scores, canReRoll) {
+        if(Object.keys(scores).length === 0){
+            let existingValues = sheet.actor.getAttributes();
+
+            scores = {str: 8, dex: 8, con:8, int:8, wis:8, cha:8};
+            for (let val in existingValues) {
+                scores[val] = existingValues[val];
+            }
+        }
+
+        let data = {
+            canReRoll,
+            abilities: CONFIG.SWSE.Abilities.droidSkip,
+            isDroid: sheet.actor.data.data.isDroid,
+            scores
+        };
+        const template = `systems/swse/templates/dialog/roll-and-standard-array.hbs`;
+
+        let content = await renderTemplate(template, data);
+
+        let response = await Dialog.confirm({
+            title: "Assign Ability Scores",
+            content: content,
+            yes: async (html) => {
+                let response = {str: 8, dex: 8, con:8, int:8, wis:8, cha:8};
+                html.find(".container").each((i, item) => {
+                    let ability = $(item).data("ability");
+                    let value = 8;
+                    if(item.innerText) {
+                        value = parseInt(item.innerText);
+                    }
+                    if(ability) {
+                        response[ability] = value;
+                    }
+                })
+                return response;
+            },
+            no: async (html) => {
+
+            },
+            render: (html) => {
+                html.find(".movable").each((i, item) => {
+                    item.setAttribute("draggable", true);
+                    item.addEventListener("dragstart", (ev) => this._onDragStartMovable(ev), false);
+                });
+
+                html.find(".container").each((i, item) => {
+                    item.addEventListener("drop", (ev) => this._onDragEndMovable(ev), false);
+                });
+
+                if(canReRoll){
+                    html.find("#reRoll").each((i, button) => {
+                        button.addEventListener("click", (event) => {
+                            let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
+                            html.find(".movable").each((i, item) => {
+                                let roll = new Roll(rollFormula).roll();
+                                item.innerHTML = roll.total;
+                            });
+                        })
+                    })
+                }
+            }
+        });
+        if(response) {
+            sheet.actor.setAttributes(response);
+        }
+    }
+    async _selectAttributesManually(event, sheet) {
+        let existingValues = sheet.actor.getAttributes();
+        let combined = {};
+        for (let val in existingValues) {
+            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
+        }
+
+        let data = {
+            availablePoints: sheet.getPointBuyTotal(),
+            abilityCost: CONFIG.SWSE.Abilities.abilityCost,
+            abilities: combined,
+            isDroid: sheet.actor.data.data.isDroid
+        };
+        const template = `systems/swse/templates/dialog/manual-attributes.hbs`;
+
+        let content = await renderTemplate(template, data);
+
+        let response = await Dialog.confirm({
+            title: "Assign Ability Score Points",
+            content: content,
+            yes: async (html) => {
+                let response = {};
+                html.find(".adjustable-value").each((i, item) => {
+                    response[$(item).data("label")] = Math.min(Math.max(parseInt(item.value), 8), 18);
+                })
+                return response;
+            },
+            render: (html) => {
+                sheet.updateTotal(html);
+
+                html.find(".adjustable-plus").on("click", (event) => {
+                    const parent = $(event.currentTarget).parents(".adjustable");
+                    const valueContainer = parent.children(".adjustable-value");
+                    valueContainer.each((i, item) => {
+                        item.innerHTML = parseInt(item.innerHTML) + 1;
+                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html) > sheet.getPointBuyTotal()) {
+                            item.innerHTML = parseInt(item.innerHTML) - 1;
+                        }
+                    });
+                    sheet.updateTotal(html);
+                });
+                html.find(".adjustable-minus").on("click", (event) => {
+                    const parent = $(event.currentTarget).parents(".adjustable");
+                    const valueContainer = parent.children(".adjustable-value");
+                    valueContainer.each((i, item) => {
+                        item.innerHTML = parseInt(item.innerHTML) - 1;
+                        if (parseInt(item.innerHTML) < 8) {
+                            item.innerHTML = parseInt(item.innerHTML) + 1;
+                        }
+                    });
+                    sheet.updateTotal(html);
+                });
+            }
+        });
+        if(response) {
+            sheet.actor.setAttributes(response);
+        }
+
+    }
+
+    async _assignAttributePoints(event, sheet) {
+        let existingValues = sheet.actor.getAttributes();
+        let combined = {};
+        for (let val in existingValues) {
+            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
+        }
+
+        let data = {
+            availablePoints: sheet.getPointBuyTotal(),
+            abilityCost: CONFIG.SWSE.Abilities.abilityCost,
+            abilities: combined,
+            isDroid: sheet.actor.data.data.isDroid
+        };
+        const template = `systems/swse/templates/dialog/point-buy.hbs`;
+
+        let content = await renderTemplate(template, data);
+
+        let response = await Dialog.confirm({
+            title: "Assign Ability Score Points",
+            content: content,
+            yes: async (html) => {
+                let response = {};
+                html.find(".adjustable-value").each((i, item) => {
+                    response[$(item).data("label")] = parseInt(item.innerHTML);
+                })
+                return response;
+            },
+            render: (html) => {
+                sheet.updateTotal(html);
+
+                html.find(".adjustable-plus").on("click", (event) => {
+                    const parent = $(event.currentTarget).parents(".adjustable");
+                    const valueContainer = parent.children(".adjustable-value");
+                    valueContainer.each((i, item) => {
+                        item.innerHTML = parseInt(item.innerHTML) + 1;
+                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html) > sheet.getPointBuyTotal()) {
+                            item.innerHTML = parseInt(item.innerHTML) - 1;
+                        }
+                    });
+                    sheet.updateTotal(html);
+                });
+                html.find(".adjustable-minus").on("click", (event) => {
+                    const parent = $(event.currentTarget).parents(".adjustable");
+                    const valueContainer = parent.children(".adjustable-value");
+                    valueContainer.each((i, item) => {
+                        item.innerHTML = parseInt(item.innerHTML) - 1;
+                        if (parseInt(item.innerHTML) < 8) {
+                            item.innerHTML = parseInt(item.innerHTML) + 1;
+                        }
+                    });
+                    sheet.updateTotal(html);
+                });
+            }
+        });
+        if(response) {
+            sheet.actor.setAttributes(response);
+        }
+    }
+
+    _onDragStartMovable(ev) {
+        //ev.dataTransfer.dropEffect = "move";
+        ev.dataTransfer.setData("text/plain", ev.target.id);
+    }
+
+    _onDragOver(ev) {
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+    }
+
+    _onDragEndMovable(ev) {
+        ev.preventDefault();
+        // Get the id of the target and add the moved element to the target's DOM
+        const data = ev.dataTransfer.getData("text/plain");
+        // console.log(data)
+        // console.log(ev)
+        // console.log( ev.target)
+        // console.log( ev.currentTarget)
+
+        //console.log(ev, ev.target, typeof ev.target)
+        console.log(ev.target.classList)
+        if(ev.target.children.length === 0 && ev.target.classList.contains("container")) {
+            ev.target.appendChild(document.getElementById(data));
+        }
+    }
+
 }

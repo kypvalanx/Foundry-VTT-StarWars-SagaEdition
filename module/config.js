@@ -28,6 +28,14 @@ SWSE.Abilities.abilitiesShort = {
     wis: "SWSE.AbilityShortWis",
     cha: "SWSE.AbilityShortCha",
 };
+SWSE.Abilities.droidSkip = {
+    str: false,
+    dex: false,
+    con: true,
+    int: false,
+    wis: false,
+    cha: false,
+};
 
 SWSE.Abilities.standardScorePackage = [15,14,13,12,10,8];
 

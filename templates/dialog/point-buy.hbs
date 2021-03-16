@@ -1,0 +1,18 @@
+<div>
+    <div class="grid"><div class="adjustable-total align-right">0</div><div>/{{availablePoints}} Points</div></div>
+    <table>
+        <thead></thead>
+        <tbody>
+    {{#each abilities as |ability key|}}
+        {{#unlessBoth ability.skip ../isDroid}}
+            <tr class="adjustable">
+                <th class="attribute-label">{{key}}</th>
+                <td class="adjustable-minus"><button data-op="-" data-attrubute="{{key}}">-</button></td>
+                <td class="adjustable-value" data-label="{{key}}">{{ability.val}}</td>
+                <td class="adjustable-plus"><button data-op="+" data-attrubute="{{key}}">+</button></td>
+            </tr>
+        {{/unlessBoth}}
+    {{/each}}
+        </tbody>
+    </table>
+</div>

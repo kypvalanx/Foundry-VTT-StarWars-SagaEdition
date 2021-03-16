@@ -353,3 +353,31 @@
 .toggle-hide{
 
 }
+
+.plus,.minus {
+  width: 30px
+}
+
+.attribute-label{
+  width: 200px;
+}
+
+.align-right{
+  -webkit-box-pack: end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.movable, .container{
+  width: 50px;
+  height: 50px;
+}
+.container{
+  border: 1px dotted dimgray;
+}
+.movable{
+  padding: 17px;
+  text-align: center;
+  border: 1px solid;
+}

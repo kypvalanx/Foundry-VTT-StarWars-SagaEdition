@@ -60,6 +60,14 @@ Hooks.once('init', async function() {
   })
 });
 
+Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+  return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+});
+
+Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
+  return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
+});
+
 Hooks.on("ready", function() {
   game.generated = {};
   game.generated.exoticWeapons= [];

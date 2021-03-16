@@ -1,0 +1,17 @@
+<div>
+    <table>
+        <thead></thead>
+        <tbody>
+    {{#each abilities as |ability key|}}
+        {{#unlessBoth ability.skip ../isDroid}}
+            <tr>
+                <th>{{key}}</th>
+                <td><label>
+                    <input class="adjustable-value" data-label="{{key}}" value="{{val}}">
+                </label></td>
+            </tr>
+        {{/unlessBoth}}
+    {{/each}}
+        </tbody>
+    </table>
+</div>

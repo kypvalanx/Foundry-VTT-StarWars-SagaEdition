@@ -112,6 +112,24 @@ export class SWSEActor extends Actor {
         }
     }
 
+    setAttributes(attributes){
+        let update = {};
+        for(let [key, ability] of Object.entries(attributes)){
+            update[`data.abilities.${key}.base`] = ability;
+        }
+        this.update(update);
+    }
+
+
+
+    getAttributes() {
+        let response = {};
+        for (let [key, ability] of Object.entries(this.data.data.abilities)) {
+            response[key] = ability.base;
+        }
+        return response;
+    }
+
     async _generateSkillData(actorData) {
         let firstClass = await this._getFirstClass(actorData);
         let intBonus = await this._getAttributeMod(actorData, "int")
@@ -997,6 +1015,8 @@ export class SWSEActor extends Actor {
         return this._uppercaseFirstLetters(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
     }
 
+
+
     rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
@@ -1129,5 +1149,16 @@ export class SWSEActor extends Actor {
         // }
 
         super._onCreate(data, options, userId, context);
+    }
+
+
+
+
+    getAttributeGenerationType(){
+        return this.data.data.attributeGenerationType;
+    }
+
+    setAttributeGenerationType(attributeGenerationType){
+        this.update({'data.attributeGenerationType': attributeGenerationType})
     }
 }

@@ -285,7 +285,19 @@ customBonus: {{ability.customBonus}}">{{ability.bonus}}</span></td>
               </tbody>
           </table>
 
-          <button id="generationType">Select Ability Generation Type</button>
+          <button id="generationType">Select Attribute Generation Type</button>
+          {{#ifEquals data.attributeGenerationType "Roll"}}
+              <button id="rollAbilities">Roll Abilities</button>
+          {{/ifEquals}}
+          {{#ifEquals data.attributeGenerationType "Standard Array"}}
+              <button id="assignStandardArray">Assign Standard Array</button>
+          {{/ifEquals}}
+          {{#ifEquals data.attributeGenerationType "Point Buy"}}
+              <button id="assignAttributePoints">Assign Attribute Points</button>
+          {{/ifEquals}}
+          {{#ifEquals data.attributeGenerationType "Manual"}}
+              <button id="assignManual">Assign Attributes Manually</button>
+          {{/ifEquals}}
       </div>
       
       
