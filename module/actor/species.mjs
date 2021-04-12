@@ -1,4 +1,4 @@
-import {filterItemsByType} from "../util.js";
+import {filterItemsByType} from "../util.mjs";
 
 export class SpeciesHandler {
     generateSpeciesData(actor) {

@@ -1,5 +1,5 @@
-import {SWSEActor} from "./actor.js";
-import {resolveValueArray} from "../util.js";
+import {SWSEActor} from "./actor.mjs";
+import {resolveValueArray} from "../util.mjs";
 
 export function resolveDefenses(actor) {
     let fort = _resolveFort(actor);
@@ -19,7 +19,7 @@ export function _resolveFort(actor) {
     total.push(_getClassDefBonus('fortitude', actorData));
     total.push(_getEquipmentFortBonus(actorData));
     total.push(SWSEActor.getConditionBonus(actor.data.condition));
-    return resolveValueArray(actor, total)
+    return resolveValueArray(total, actor)
 }
 
 export function _resolveWill(actor) {
@@ -31,7 +31,7 @@ export function _resolveWill(actor) {
     total.push(_getClassDefBonus('will', actorData));
     total.push(_getAbilityDefBonus('will', actor));
     total.push(SWSEActor.getConditionBonus(actor.data.condition));
-    return resolveValueArray(actor, total)
+    return resolveValueArray(total, actor)
 }
 
 export function _resolveRef(actor) {
@@ -45,7 +45,7 @@ export function _resolveRef(actor) {
     total.push(_getNaturalArmorBonus(actorData));
     total.push(_getAbilityRefMod(actor));
     total.push(SWSEActor.getConditionBonus(actor.data.condition));
-    return resolveValueArray(actor, total)
+    return resolveValueArray(total, actor)
 
 }
 

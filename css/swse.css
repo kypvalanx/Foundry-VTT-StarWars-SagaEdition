@@ -380,4 +380,9 @@
   padding: 17px;
   text-align: center;
   border: 1px solid;
+  cursor: move;
+}
+
+tr.skill, tr.ability, div.attack{
+  cursor:move;
 }

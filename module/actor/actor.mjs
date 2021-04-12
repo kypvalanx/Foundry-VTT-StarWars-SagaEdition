@@ -1,10 +1,12 @@
-import {resolveHealth} from "./health.js";
-import {AttackHandler} from "./attacks.js";
-import {OffenseHandler} from "./offense.js";
-import {SpeciesHandler} from "./species.js";
-import {PrerequisitesHandler} from "./prerequisites.js";
-import {filterItemsByType} from "../util.js";
-import {resolveDefenses} from "./defense.js";
+import {resolveHealth} from "./health.mjs";
+import {AttackHandler} from "./attacks.mjs";
+import {OffenseHandler} from "./offense.mjs";
+import {SpeciesHandler} from "./species.mjs";
+import {PrerequisitesHandler} from "./prerequisites.mjs";
+import {filterItemsByType} from "../util.mjs";
+import {resolveDefenses} from "./defense.mjs";
+import {resolveValueArray} from "../util.mjs";
+
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -19,7 +21,6 @@ export class SWSEActor extends Actor {
      */
     async prepareData() {
         super.prepareData();
-        console.log(this);
         const actorData = this.data;
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
@@ -56,6 +57,7 @@ export class SWSEActor extends Actor {
         this._reduceProvidedItemsByExistingItems(actorData);
 
         actorData.data.health = await resolveHealth(this);
+        console.log(`===============================health: ${actorData.data.health}===================================`, actorData.data.health)
         actorData.data.defense = await resolveDefenses(this);
         actorData.data.offense = await new OffenseHandler().resolveOffense(this);
 
@@ -75,7 +77,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    resolveValue(variableName) {
+    getVariable(variableName) {
         let value = this.resolvedVariables.get(variableName);
         if (!value) {
             console.error("could not find " + variableName);
@@ -101,8 +103,20 @@ export class SWSEActor extends Actor {
     _generateAbilityData(actor) {
         let actorData = actor.data;
         for (let [key, ability] of Object.entries(actorData.data.abilities)) {
+            let bonuses = [];
+            bonuses.push(ability.classLevelBonus);
+            bonuses.push(ability.speciesBonus);
+            bonuses.push(ability.ageBonus);
+            bonuses.push(ability.equipmentBonus);
+            bonuses.push(ability.buffBonus);
+            bonuses.push(ability.customBonus);
+
+            for(let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)){
+                bonuses.push(levelAttributeBonus[key])
+            }
+
             // Calculate the modifier using d20 rules.
-            ability.bonus = ability.classLevelBonus + ability.speciesBonus + ability.ageBonus + ability.equipmentBonus + ability.buffBonus + ability.customBonus;
+            ability.bonus = resolveValueArray(bonuses, this)
             ability.total = ability.base + ability.bonus;
             ability.mod = Math.floor((ability.total - 10) / 2);
             ability.roll = ability.mod + SWSEActor.getConditionBonus(actorData.condition)
@@ -132,7 +146,7 @@ export class SWSEActor extends Actor {
 
     async _generateSkillData(actorData) {
         let firstClass = await this._getFirstClass(actorData);
-        let intBonus = await this._getAttributeMod(actorData, "int")
+        let intBonus = await this.getAttributeMod("int")
         let remainingSkills = 0;
         if (firstClass) {
             remainingSkills = parseInt(firstClass.data.skills.perLevel) + parseInt(intBonus);
@@ -142,11 +156,11 @@ export class SWSEActor extends Actor {
         for (let [key, skill] of Object.entries(actorData.data.skills)) {
             skill.isClass = classSkills.has(key);
             // Calculate the modifier using d20 rules.
-            skill.value = this.getHalfCharacterLevel(actorData) + this._getAttributeMod(actorData, skill.ability) + (skill.trained === true ? 5 : 0) + SWSEActor.getConditionBonus(actorData.condition) + this._getAbilitySkillBonus(key, actorData);
+            skill.value = this.getHalfCharacterLevel(actorData) + this.getAttributeMod(skill.ability) + (skill.trained === true ? 5 : 0) + SWSEActor.getConditionBonus(actorData.condition) + this._getAbilitySkillBonus(key, actorData);
             skill.key = `@${this.cleanKey(key)}`;
             this.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
             skill.title = `Half character level: ${this.getHalfCharacterLevel(actorData)}
-            Attribute Mod: ${this._getAttributeMod(actorData, skill.ability)}
+            Attribute Mod: ${this.getAttributeMod(skill.ability)}
             Trained Skill Bonus: ${(skill.trained === true ? 5 : 0)}
             Condition Bonus: ${SWSEActor.getConditionBonus(actorData)}
             Ability Skill Bonus: ${this._getAbilitySkillBonus(key, actorData)}`;
@@ -169,11 +183,11 @@ export class SWSEActor extends Actor {
         }
     }
 
-    getHalfCharacterLevel(actorData) {
+    getHalfCharacterLevel(actorData = this.data) {
         return Math.floor(this.getCharacterLevel(actorData) / 2);
     }
 
-    getCharacterLevel(actorData) {
+    getCharacterLevel(actorData = this.data) {
         if (actorData.classes) {
             this.resolvedVariables.set("@charLevel", actorData.classes.length);
             return actorData.classes.length;
@@ -273,6 +287,31 @@ export class SWSEActor extends Actor {
             return this.update({'data.classesfirst': this.getNonPrestigeClasses()[0]._id});
         }
 
+        let hasUpdate = false;
+        let numOfAttributeBonuses = Math.floor(actorData.classes.length /4);
+        if(!actorData.data.levelAttributeBonus){
+            actorData.data.levelAttributeBonus = {};
+            hasUpdate = true;
+        }
+
+        for(let [level, value] of Object.entries(actorData.data.levelAttributeBonus)){
+            if(level > numOfAttributeBonuses * 4 && value !== null){
+                actorData.data.levelAttributeBonus[level] = null;
+                console.log("delete", level, actorData.data.levelAttributeBonus)
+                hasUpdate = true;
+            }
+        }
+        for(let i = 1; i <= numOfAttributeBonuses; i++){
+            let level = i * 4;
+            if(!actorData.data.levelAttributeBonus[level]){
+                actorData.data.levelAttributeBonus[level]={};
+                console.log("add", level, actorData.data.levelAttributeBonus)
+                hasUpdate = true;
+            }
+        }
+        if(hasUpdate){
+            return this.update({'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
+        }
     }
 
     _getClassFeatures(className, classObjects, i) {
@@ -370,20 +409,16 @@ export class SWSEActor extends Actor {
         return classSkills;
     }
 
-    _getAttributeMod(actorData, ability) {
-        return actorData.data.abilities[ability].mod;
+    getAttributeMod(ability) {
+        return this.data.data.abilities[ability].mod;
     }
 
     _getFirstClass(actorData) {
-        if (!actorData.classes) {
-            return undefined;
-        }
-        for (let charClass of actorData.classes) {
+        for (let charClass of actorData?.classes ? actorData.classes : []) {
             if (charClass.first === true) {
                 return charClass;
             }
         }
-
         return undefined;
     }
 
@@ -1160,5 +1195,16 @@ export class SWSEActor extends Actor {
 
     setAttributeGenerationType(attributeGenerationType){
         this.update({'data.attributeGenerationType': attributeGenerationType})
+    }
+
+    getAttributeLevelBonus(level){
+        console.log(this.data)
+        return this.data.data.levelAttributeBonus[level];
+    }
+
+    setAttributeLevelBonus(level, attributeLevelBonus){
+        let data = {};
+        data[`data.levelAttributeBonus.${level}`] = attributeLevelBonus;
+        this.update(data)
     }
 }

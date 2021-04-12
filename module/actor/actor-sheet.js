@@ -97,6 +97,9 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
         html.find("#assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
         html.find("#assignManual").on("click", async event => this._selectAttributesManually(event, this));
+        html.find(".leveledAttributeBonus").each((i, button) =>{
+            button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
+        })
 
 
         // Add Inventory Item
@@ -503,8 +506,6 @@ export class SWSEActorSheet extends ActorSheet {
                 await this.addClassFeats(item, additionalEntitiesToAdd);
             }
         } else if (item.data.type === "feat") {
-            console.log(item.data.bonusFeatCategories, this.actor.data.availableFeats);
-
             let possibleFeatTypes = [];
 
             let optionString = "";
@@ -514,7 +515,6 @@ export class SWSEActorSheet extends ActorSheet {
                     optionString += `<option value="${category}">${category}</option>`;
                 }
             }
-            console.log(possibleFeatTypes)
 
             if (possibleFeatTypes.length > 1) {
                 let content = `<p>Select an unused feat type.</p>
@@ -657,11 +657,9 @@ export class SWSEActorSheet extends ActorSheet {
                     return;
                 }
             }
-
         }
 
         await this.activateChoices(item, additionalEntitiesToAdd);
-        console.log(additionalEntitiesToAdd)
         additionalEntitiesToAdd.push(item)
         await super._onDropItemCreate(additionalEntitiesToAdd);
     }
@@ -1145,7 +1143,8 @@ export class SWSEActorSheet extends ActorSheet {
             canReRoll,
             abilities: CONFIG.SWSE.Abilities.droidSkip,
             isDroid: sheet.actor.data.data.isDroid,
-            scores
+            scores,
+            formula: CONFIG.SWSE.Abilities.defaultAbilityRoll
         };
         const template = `systems/swse/templates/dialog/roll-and-standard-array.hbs`;
 
@@ -1187,6 +1186,21 @@ export class SWSEActorSheet extends ActorSheet {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
                                 let roll = new Roll(rollFormula).roll();
+                                let title = "";
+                                for(let part of roll.parts){
+                                    for(let result of part.results){
+                                        if(title !== "") {
+                                            title += ", "
+                                        }
+                                            if(result.discarded){
+                                                title += `(Ignored: ${result.result})`
+                                            } else {
+                                                title += result.result
+                                            }
+
+                                    }
+                                }
+                                item.title = title;
                                 item.innerHTML = roll.total;
                             });
                         })
@@ -1224,38 +1238,69 @@ export class SWSEActorSheet extends ActorSheet {
                     response[$(item).data("label")] = Math.min(Math.max(parseInt(item.value), 8), 18);
                 })
                 return response;
-            },
-            render: (html) => {
-                sheet.updateTotal(html);
-
-                html.find(".adjustable-plus").on("click", (event) => {
-                    const parent = $(event.currentTarget).parents(".adjustable");
-                    const valueContainer = parent.children(".adjustable-value");
-                    valueContainer.each((i, item) => {
-                        item.innerHTML = parseInt(item.innerHTML) + 1;
-                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html) > sheet.getPointBuyTotal()) {
-                            item.innerHTML = parseInt(item.innerHTML) - 1;
-                        }
-                    });
-                    sheet.updateTotal(html);
-                });
-                html.find(".adjustable-minus").on("click", (event) => {
-                    const parent = $(event.currentTarget).parents(".adjustable");
-                    const valueContainer = parent.children(".adjustable-value");
-                    valueContainer.each((i, item) => {
-                        item.innerHTML = parseInt(item.innerHTML) - 1;
-                        if (parseInt(item.innerHTML) < 8) {
-                            item.innerHTML = parseInt(item.innerHTML) + 1;
-                        }
-                    });
-                    sheet.updateTotal(html);
-                });
             }
         });
         if(response) {
             sheet.actor.setAttributes(response);
         }
 
+    }
+
+    async _selectAttributeLevelBonuses(event, sheet) {
+        let level = $(event.currentTarget).data("level");
+        let bonus = sheet.actor.getAttributeLevelBonus(level);
+
+        let combined = {};
+        for (let val of Object.keys(CONFIG.SWSE.Abilities.droidSkip)) {
+            combined[val] = {val: bonus[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
+        }
+
+        let availableBonuses = [false, false];
+        for(let i = 0; i < 2-Object.values(bonus).filter(b => b !== null).length; i++){
+            availableBonuses[i] = true;
+        }
+
+        let data = {
+            abilityCost: CONFIG.SWSE.Abilities.abilityCost,
+            abilities: combined,
+            isDroid: sheet.actor.data.data.isDroid,
+            availableBonuses
+        };
+        const template = `systems/swse/templates/dialog/level-attribute-bonus.hbs`;
+
+        let content = await renderTemplate(template, data);
+
+        let response = await Dialog.confirm({
+            title: "Assign Ability Score Points",
+            content: content,
+            yes: async (html) => {
+                let response = {};
+                html.find(".container").each((i, item) => {
+                    let ability = $(item).data("ability");
+                    let value = null;
+                    if(item.innerText) {
+                        value = parseInt(item.innerText);
+                    }
+                    if(ability) {
+                        response[ability] = value;
+                    }
+                })
+                return response;
+            },
+            render: (html) => {
+                html.find(".movable").each((i, item) => {
+                    item.setAttribute("draggable", true);
+                    item.addEventListener("dragstart", (ev) => this._onDragStartMovable(ev), false);
+                });
+
+                html.find(".container").each((i, item) => {
+                    item.addEventListener("drop", (ev) => this._onDragEndMovable(ev), false);
+                });
+            }
+        });
+        if(response) {
+            sheet.actor.setAttributeLevelBonus(level, response);
+        }
     }
 
     async _assignAttributePoints(event, sheet) {
@@ -1342,5 +1387,4 @@ export class SWSEActorSheet extends ActorSheet {
             ev.target.appendChild(document.getElementById(data));
         }
     }
-
 }

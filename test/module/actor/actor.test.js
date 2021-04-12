@@ -1,4 +1,4 @@
-const SWSEActor = require( "../../../module/actor/actor");
+const SWSEActor = require( "../../../module/actor/actor.mjs");
 
 test('initial SWSE Actor Test', () => {
     let json = {

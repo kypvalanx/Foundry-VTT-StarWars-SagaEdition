@@ -255,10 +255,8 @@
               <thead>
               <tr>
                   <th>Ability</th>
-                  <th>Base</th>
+                  <th>Score</th>
                   <th>Temporary Bonus</th>
-                  <th>Bonus</th>
-                  <th>Total</th>
                   <th>Modifier</th>
               </tr>
               </thead>
@@ -266,18 +264,15 @@
               {{#each data.abilities as |ability id|}}
                   {{#unless ability.skip}}
                       <tr class="ability" data-label="{{ability.label}}">
-                          <th><a class="rollable" title="Roll 1d20 + {{ability.roll
-                          }}" data-label="{{ability.label}}" data-roll="1d20 + {{ability.roll}}"><i class="fas fa-dice"></i>
+                          <th><a class="rollable" title="Roll 1d20 + {{ability.roll}}" data-label="{{ability.label}}" data-roll="1d20 + {{ability.roll}}"><i class="fas fa-dice"></i>
                           </a>{{ability.label}}</th>
-                          <td><span class="center text-box direct" name="data.abilities.{{id}}.base" data-dtype="Number">{{ability.base}}</span></td>
-                          <td><span class="center text-box direct" name="data.abilities.{{id}}.customBonus" data-dtype="Number">{{ability.customBonus}}</span></td>
-                          <td><span class="center" name="data.abilities.{{id}}.value" data-dtype="Number" title="classLevelBonus: {{ability.classLevelBonus}}
+                          <td><span class="center" title="classLevelBonus: {{ability.classLevelBonus}}
 speciesBonus: {{ability.speciesBonus}}
 ageBonus: {{ability.ageBonus}}
 equipmentBonus: {{ability.equipmentBonus}}
 buffBonus: {{ability.buffBonus}}
-customBonus: {{ability.customBonus}}">{{ability.bonus}}</span></td>
-                          <td><span class="center" name="data.abilities.{{id}}.value" data-dtype="Number">{{ability.total}}</span></td>
+customBonus: {{ability.customBonus}}">{{ability.total}}</span></td>
+                          <td><span class="center text-box direct" name="data.abilities.{{id}}.customBonus" data-dtype="Number">{{ability.customBonus}}</span></td>
                           <td><span class="center">{{ability.roll}}</span></td>
                       </tr>
                   {{/unless}}
@@ -298,6 +293,9 @@ customBonus: {{ability.customBonus}}">{{ability.bonus}}</span></td>
           {{#ifEquals data.attributeGenerationType "Manual"}}
               <button id="assignManual">Assign Attributes Manually</button>
           {{/ifEquals}}
+          {{#each data.levelAttributeBonus as |bonus key|}}
+              {{#if bonus}}<button class="leveledAttributeBonus" data-level="{{key}}">Select Level {{key}} Attribute Bonuses</button>{{/if}}
+          {{/each}}
       </div>
       
       

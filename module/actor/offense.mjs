@@ -1,4 +1,4 @@
-import {SWSEActor} from "./actor.js";
+import {SWSEActor} from "./actor.mjs";
 
 export class OffenseHandler {
     async resolveOffense(actor) {
