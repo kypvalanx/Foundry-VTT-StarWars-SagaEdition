@@ -2,9 +2,9 @@
   "name": "swse",
   "title": "Star Wars: Saga Edition",
   "description": "The Star Wars: Saga Edition system for FoundryVTT!",
-  "version": "1.0.0",
-  "minimumCoreVersion": "0.5.5",
-  "compatibleCoreVersion": "0.5.5",
+  "version": "0.1.0",
+  "minimumCoreVersion": "0.7.8",
+  "compatibleCoreVersion": "0.7.8",
   "templateVersion": 2,
   "author": "Andy Lijewski",
   "esmodules": ["module/swse.js"],
@@ -18,12 +18,12 @@
       "path": "lang/en.json"
     }
   ],
-  "gridDistance": 5,
-  "gridUnits": "ft",
+  "gridDistance": 1,
+  "gridUnits": "square",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
-  "url": "",
-  "manifest": "",
+  "url": "https://gitlab.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",
+  "manifest": "https://gitlab.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/-/raw/master/system.json",
   "download": "",
-  "license": "LICENSE.txt"
+  "license": "https://creativecommons.org/licenses/by-sa/3.0/legalcode"
 }
