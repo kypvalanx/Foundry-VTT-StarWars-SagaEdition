@@ -29,7 +29,7 @@ async function importCompendium(jsonImport, compendiumName, entity) {
         return;
     }
 
-    console.log(`${compendiumName}`);
+    console.log(`Generating ${compendiumName}`);
     ui.notifications.info(`Updating ${compendiumName}... ${content.entries.length} entries`);
     for (let i of content.entries) {
         let entity = await pack.createEntity(i);
