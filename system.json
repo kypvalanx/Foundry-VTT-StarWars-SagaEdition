@@ -22,8 +22,8 @@
   "gridUnits": "square",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
-  "url": "https://gitlab.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",
-  "manifest": "https://gitlab.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/-/raw/master/system.json",
+  "url": "https://github.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",
+  "manifest": "https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/main/system.json",
   "download": "",
   "license": "https://creativecommons.org/licenses/by-sa/3.0/legalcode"
 }
