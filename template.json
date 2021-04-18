@@ -300,7 +300,7 @@
     }
   },
   "Item": {
-    "types": ["weapon", "armor", "equipment", "feat", "talent", "species", "class", "upgrade", "forcePower", "forceTradition","forceTechnique","forceSecret","forceRegimen","classFeature", "ability"],
+    "types": ["weapon", "armor", "equipment", "feat", "talent", "species", "class", "upgrade", "forcePower", "forceTradition","forceTechnique","forceSecret","forceRegimen","classFeature", "ability", "template"],
     "templates": {
       "base": {
         "description": "",

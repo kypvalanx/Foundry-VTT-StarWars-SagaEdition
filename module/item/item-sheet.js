@@ -23,19 +23,34 @@ export class SWSEItemSheet extends ItemSheet {
     //return `${path}/item-sheet.hbs`;
     // Alternatively, you could use the following return statement to do a
     // unique item sheet by type, like `weapon-sheet.html`.
-    
-    if(this.item.data.type === 'species'){
+
+    console.log(this.item)
+
+    let type = this.item.data.type;
+    if(type === 'species'){
       return `${path}/species-sheet.hbs`;
     }    
-    if(this.item.data.type === 'feat'){
+    if(type === 'feat'){
       return `${path}/feat-sheet.hbs`;
     }    
-    if(this.item.data.type === 'talent'){
+    if(type === 'talent'){
       return `${path}/talent-sheet.hbs`;
     }
+    if(type === 'armor'){
+      return `${path}/item-sheet.hbs`;
+    }
+    if(type === 'weapon'){
+      return `${path}/item-sheet.hbs`;
+    }
+    if(type === 'equipment'){
+      return `${path}/item-sheet.hbs`;
+    }
+    if(type === 'upgrade'){
+      return `${path}/item-sheet.hbs`;
+    }
     
-    return `${path}/item-sheet.hbs`;
-    //return `${path}/${this.item.data.type}-sheet.html`;
+    return `${path}/feat-sheet.hbs`;
+    //return `${path}/${this.item.data.type}-sheet.html`; //TODO add sheets for each type
   }
 
   /* -------------------------------------------- */

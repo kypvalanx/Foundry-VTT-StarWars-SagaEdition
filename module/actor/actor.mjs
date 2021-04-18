@@ -57,7 +57,6 @@ export class SWSEActor extends Actor {
         this._reduceProvidedItemsByExistingItems(actorData);
 
         actorData.data.health = await resolveHealth(this);
-        console.log(`===============================health: ${actorData.data.health}===================================`, actorData.data.health)
         actorData.data.defense = await resolveDefenses(this);
         actorData.data.offense = await new OffenseHandler().resolveOffense(this);
 

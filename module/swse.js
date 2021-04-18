@@ -5,6 +5,7 @@ import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {registerSystemSettings} from "./settings/system.js";
+import {generateCompendiums} from "./compendium/generation.js";
 
 
 Hooks.once('init', async function() {
@@ -32,6 +33,7 @@ Hooks.once('init', async function() {
   CONFIG.Item.entityClass = SWSEItem;
 
   registerSystemSettings();
+
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);
@@ -68,7 +70,11 @@ Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
   return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
 });
 
-Hooks.on("ready", function() {
+Hooks.on("ready", async function() {
+
+
+  await generateCompendiums();
+
   game.generated = {};
   game.generated.exoticWeapons= [];
   let pack = game.packs.get('world.swse-items');
