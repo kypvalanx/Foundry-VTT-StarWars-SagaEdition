@@ -661,6 +661,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         await this.activateChoices(item, additionalEntitiesToAdd);
         additionalEntitiesToAdd.push(item)
+        console.log(additionalEntitiesToAdd)
         await super._onDropItemCreate(additionalEntitiesToAdd);
     }
 
@@ -702,21 +703,27 @@ export class SWSEActorSheet extends ActorSheet {
         if (choices && choices.length > 0) {
             for (let choice of choices) {
                 let options = await this._explodeOptions(choice.options);
+                console.log(choice.options, options)
 
                 let optionString = "";
                 for (let optionLabel of Object.keys(options)) {
                     optionString += `<option value="${optionLabel}">${optionLabel}</option>`
                 }
 
-                let content = `<p>${choice.description ? choice.description : ""}</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
+                if(optionString !== "") {
+                    optionString = `<div><select id='choice'>${optionString}</select> 
+                        </div>`
+                }
+
+
+                let greetingString = optionString !== "" ? choice.description : choice.noOptions;
+                let content = `<p>${greetingString}</p>${optionString}`;
 
                 await Dialog.prompt({
-                    title: "Select an option and click ok.",
+                    title: greetingString,
                     content: content,
                     callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
+                        let key = html.find("#choice")[0]?.value;
                         let selectedChoice = options[key];
                         console.log(selectedChoice)
                         if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {

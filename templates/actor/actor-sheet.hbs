@@ -414,7 +414,7 @@ customBonus: {{ability.customBonus}}">{{ability.total}}</span></td>
         </div>
         <ol class="items-list">
         {{#each actor.feats as |item id|}}
-            <li class="item feat flexrow" data-item-id="{{item._id}}">
+            <li class="item feat flexrow" data-item-name="{{item.name}}" data-item-id="{{item._id}}">
 <!--                <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/></div>-->
                 <h4 class="item-name"><b>{{item.name}}</b></h4>
                 {{#if item.data.prerequisites }}<h4 class="item-name"><b>Prerequisites:</b> {{item.data.prerequisites}}</h4>{{/if}}

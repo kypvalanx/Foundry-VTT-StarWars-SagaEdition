@@ -338,6 +338,7 @@
         "supplyingSpecies": "",
         "supplyingFeature": "",
         "supplyingFeat": "",
+        "supplier": "",
         "isSupplied": false
       }
     },

@@ -3,9 +3,8 @@ import {AttackHandler} from "./attacks.mjs";
 import {OffenseHandler} from "./offense.mjs";
 import {SpeciesHandler} from "./species.mjs";
 import {PrerequisitesHandler} from "./prerequisites.mjs";
-import {filterItemsByType} from "../util.mjs";
+import {filterItemsByType, resolveValueArray} from "../util.mjs";
 import {resolveDefenses} from "./defense.mjs";
-import {resolveValueArray} from "../util.mjs";
 
 
 /**
@@ -15,24 +14,35 @@ import {resolveValueArray} from "../util.mjs";
 export class SWSEActor extends Actor {
     resolvedVariables = new Map();
     resolvedLabels = new Map();
+    isUpdating = false;
 
     /**
      * Augment the basic actor data with additional dynamic data.
      */
     async prepareData() {
+        if (this.isUpdating) {
+            setTimeout(() => this.prepareData(), 300);
+            return;
+        }
+        this.isUpdating = true;
         super.prepareData();
         const actorData = this.data;
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
         if (actorData.type === 'character') await this._prepareCharacterData(actorData);
+        this.isUpdating = false;
     }
 
     /**
      * Prepare Character type specific data
      */
     async _prepareCharacterData(actorData) {
+
+
         new SpeciesHandler().generateSpeciesData(this);
-        if(await this._generateClassData(actorData)){
+        if (await this._generateClassData(actorData)) {
+
+            this.refresh();
             return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
         }
         await this._handleCondition(actorData);
@@ -62,9 +72,16 @@ export class SWSEActor extends Actor {
 
         await new PrerequisitesHandler().resolvePrerequisites(this);
         await new AttackHandler().generateAttacks(this);
-        await this._manageAutomaticItems(actorData);
-        actorData.visibleAbilities = await this.filterOutInvisibleAbilities(actorData);
+        if (await this._manageAutomaticItems(actorData)) {
 
+            this.refresh();
+            return;//do not continue to process.
+        }
+        actorData.visibleAbilities = await this.filterOutInvisibleAbilities(actorData);
+        this.refresh();
+    }
+
+    refresh() {
         try {
             if (this.sheet?.rendered) {
                 this.sheet.render(true);
@@ -110,7 +127,7 @@ export class SWSEActor extends Actor {
             bonuses.push(ability.buffBonus);
             bonuses.push(ability.customBonus);
 
-            for(let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)){
+            for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
                 bonuses.push(levelAttributeBonus[key])
             }
 
@@ -120,19 +137,18 @@ export class SWSEActor extends Actor {
             ability.mod = Math.floor((ability.total - 10) / 2);
             ability.roll = ability.mod + SWSEActor.getConditionBonus(actorData.condition)
             ability.label = key.toUpperCase();
-            this.resolvedVariables.set("@"+ability.label, "1d20 + " + ability.roll);
-            this.resolvedLabels.set("@"+ability.label, ability.label);
+            this.resolvedVariables.set("@" + ability.label, "1d20 + " + ability.roll);
+            this.resolvedLabels.set("@" + ability.label, ability.label);
         }
     }
 
-    setAttributes(attributes){
+    setAttributes(attributes) {
         let update = {};
-        for(let [key, ability] of Object.entries(attributes)){
+        for (let [key, ability] of Object.entries(attributes)) {
             update[`data.abilities.${key}.base`] = ability;
         }
         this.update(update);
     }
-
 
 
     getAttributes() {
@@ -287,28 +303,28 @@ export class SWSEActor extends Actor {
         }
 
         let hasUpdate = false;
-        let numOfAttributeBonuses = Math.floor(actorData.classes.length /4);
-        if(!actorData.data.levelAttributeBonus){
+        let numOfAttributeBonuses = Math.floor(actorData.classes.length / 4);
+        if (!actorData.data.levelAttributeBonus) {
             actorData.data.levelAttributeBonus = {};
             hasUpdate = true;
         }
 
-        for(let [level, value] of Object.entries(actorData.data.levelAttributeBonus)){
-            if(level > numOfAttributeBonuses * 4 && value !== null){
+        for (let [level, value] of Object.entries(actorData.data.levelAttributeBonus)) {
+            if (level > numOfAttributeBonuses * 4 && value !== null) {
                 actorData.data.levelAttributeBonus[level] = null;
                 console.log("delete", level, actorData.data.levelAttributeBonus)
                 hasUpdate = true;
             }
         }
-        for(let i = 1; i <= numOfAttributeBonuses; i++){
+        for (let i = 1; i <= numOfAttributeBonuses; i++) {
             let level = i * 4;
-            if(!actorData.data.levelAttributeBonus[level]){
-                actorData.data.levelAttributeBonus[level]={};
+            if (!actorData.data.levelAttributeBonus[level]) {
+                actorData.data.levelAttributeBonus[level] = {};
                 console.log("add", level, actorData.data.levelAttributeBonus)
                 hasUpdate = true;
             }
         }
-        if(hasUpdate){
+        if (hasUpdate) {
             return this.update({'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
         }
     }
@@ -322,10 +338,18 @@ export class SWSEActor extends Actor {
                 if (feature === 'Defense Bonuses' || feature === 'Starting Feats') {
                     continue;
                 } else if (feature === 'Talent') {
-                    features.push({className: className, feature: `Talent (${className})`});
+                    features.push({
+                        className: className,
+                        feature: `Talent (${className})`,
+                        supplier: {id: classObjects[i]._id, name: classObjects[i].name}
+                    });
                     continue;
                 }
-                features.push({className: className, feature: feature});
+                features.push({
+                    className: className,
+                    feature: feature,
+                    supplier: {id: classObjects[i]._id, name: classObjects[i].name}
+                });
             }
         }
         return features;
@@ -461,37 +485,27 @@ export class SWSEActor extends Actor {
     }
 
     async _manageAutomaticItems(actorData) {
-        let classes = new Set();
-        for (let charClass of actorData.classes) {
-            classes.add(charClass.name);
-        }
+        let itemIds = actorData.items.flatMap(i => [i._id, i.flags.core?.sourceId?.split(".")[3]]);
 
         let removal = [];
         for (let item of actorData.items) {
-            if (item.data.supplyingClass && (item.data.supplyingClass !== "" && !classes.has(item.data.supplyingClass))) {
-                removal.push(item._id);
-            }
-            if (item.data.supplyingFeature && (item.data.supplyingFeature !== "" && actorData.activeFeatures.filter(feature => feature.feature === item.data.supplyingFeature).length === 0)) {
-                removal.push(item._id);
-            }
-            if (item.data.supplyingSpecies && (item.data.supplyingSpecies !== "" && (actorData.species == null || actorData.species.name !== item.data.supplyingSpecies))) {
-                removal.push(item._id);
-            }
-            if (item.data.supplyingFeat && (item.data.supplyingFeat !== "" && actorData.feats.filter(feat => feat.name === item.data.supplyingFeat).length === 0)) {
-                removal.push(item._id);
-            }
-            if (item.type === 'feat' && item.data.prerequisites && this.meetsFeatPrerequisites(item.data.prerequisites, false).doesFail) {
-                removal.push(item._id);
-            }
+            let itemData = item.data;
+            if (itemData.isSupplied) {
 
-            if (item.name === 'Precise Shot' && item.data.supplyingFeat === 'Point-Blank Shot' && !game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                removal.push(item._id);
+                if (!itemIds.includes(itemData.supplier.id) || !itemData.supplier) {
+                    removal.push(item._id)
+                }
+
+                if (item.name === 'Precise Shot' && itemData.supplier.name === 'Point-Blank Shot' && !game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
+                    removal.push(item._id);
+                }
             }
         }
         if (removal.length > 0) {
-            await this.deleteEmbeddedEntity("OwnedItem", removal, {});
+            console.log("deleting:", removal)
+            return await this.deleteEmbeddedEntity("OwnedItem", removal, {});
         } else {
-            await this._addItemsFromItems(actorData);
+            return await this._addItemsFromItems(actorData);
         }
     }
 
@@ -525,7 +539,7 @@ export class SWSEActor extends Actor {
             let existingAbilities = await filterItemsByType("ability", actorData.items);
             let abilityExists = undefined === await existingAbilities.find(ability => ability.name === feature.feature)
             if (abilityExists) {
-                let parentItem = {data: {type: 'feature'}, name: feature.feature}
+                let parentItem = {data: {type: 'feature'}, name: feature.feature, id: feature.supplier.id}
                 await this.addItemsFromCompendium('ability', parentItem, entities, feature.feature, false, true);
             }
         }
@@ -541,9 +555,11 @@ export class SWSEActor extends Actor {
             if (feat.name === 'Point-Blank Shot') {
                 if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
                     if (undefined === actorData.feats.find(feat => feat.name === "Precise Shot")) {
+                        console.log(feat)
                         await this.addItemsFromCompendium('feat', {
-                            name: 'Point-Blank Shot',
-                            data: {type: 'feat'}
+                            name: feat.name,
+                            data: {type: 'feat'},
+                            id: feat._id
                         }, entities, 'Precise Shot', false, true);
                     }
                 }
@@ -559,12 +575,11 @@ export class SWSEActor extends Actor {
             let feats = await filterItemsByType("feat", actorData.items);
             let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
             if (featDoesntExist) {
-                let parentItem;
-                if (ability.data.supplyingSpecies !== '') {
-                    parentItem = {data: {type: 'species'}, name: ability.data.supplyingSpecies}
-                } else if (ability.data.supplyingClass !== '') {
-                    parentItem = {data: {type: 'class'}, name: ability.data.supplyingClass}
-                }
+                let parentItem = ability.data.isSupplied ? {
+                    data: {type: ability.data.supplier.type},
+                    name: ability.data.supplier.name,
+                    id: ability.data.supplier.id
+                } : undefined;
                 await this.addItemsFromCompendium('feat', parentItem, entities, bonusFeat, false, true)
             }
         }
@@ -602,19 +617,9 @@ export class SWSEActor extends Actor {
                     }
 
                     if (parentItem) {
-                        let type = parentItem.data.type;
-
-                        if (type === 'class') {
-                            data.supplyingClass = parentItem.name;
-                        } else if (type === 'species') {
-                            data.supplyingSpecies = parentItem.name;
-                        } else if (type === 'feature') {
-                            data.supplyingFeature = parentItem.name;
-                        } else if (type === 'feat') {
-                            data.supplyingFeat = parentItem.name;
-                        }
+                        data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
                         data.isSupplied = true;
-                        data.categories = data.categories.filter(category => !category.includes('Bonus Feats'))
+                        data.categories = data.categories.filter(category => !category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
                     }
 
                     if (payload !== "") {
@@ -639,6 +644,7 @@ export class SWSEActor extends Actor {
             itemData = [];
             itemData.push(temp);
         }
+        //console.log(new Error().stack);
         await this.createEmbeddedEntity("OwnedItem", itemData, {renderSheet: false});
     }
 
@@ -975,19 +981,19 @@ export class SWSEActor extends Actor {
     async filterOutInvisibleAbilities(actorData) {
         let filtered = [];
         for (let ability of actorData.generalAbilities) {
-            if (ability.name === 'Species' || ability.name === 'Homebrew Content' || ability.name === 'Web Enhancements' || ability.name === 'Natural Armor'
-                || ability.name.startsWith('Bonus Class Skill') || ability.name.startsWith('Bonus Trained Skill') || ability.name.includes('Creations')) {
-
-                continue;
-            } else if (ability.name.startsWith("Bonus Feat") || ability.name.startsWith("Conditional Bonus Feat")) {
-                let bonusFeat = await this.cleanFeatName(ability.data.payload);
-                let feats = await filterItemsByType("feat", actorData.items);
-                let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
-                if (!featDoesntExist) {
-                    continue;
-                }
-                //TODO add prerequisites here?  or even better on ability creation
-            }
+            // if (ability.name === 'Species' || ability.name === 'Homebrew Content' || ability.name === 'Web Enhancements' || ability.name === 'Natural Armor'
+            //     || ability.name.startsWith('Bonus Class Skill') || ability.name.startsWith('Bonus Trained Skill') || ability.name.includes('Creations')) {
+            //
+            //     continue;
+            // } else if (ability.name.startsWith("Bonus Feat") || ability.name.startsWith("Conditional Bonus Feat")) {
+            //     let bonusFeat = await this.cleanFeatName(ability.data.payload);
+            //     let feats = await filterItemsByType("feat", actorData.items);
+            //     let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
+            //     if (!featDoesntExist) {
+            //         continue;
+            //     }
+            //     //TODO add prerequisites here?  or even better on ability creation
+            // }
             filtered.push(ability)
         }
         return filtered;
@@ -1000,7 +1006,7 @@ export class SWSEActor extends Actor {
             this.reduceAvailableItem(actorData, type);
         }
         for (let feat of actorData.feats) {
-            if (feat.data.supplyingClass !== '' || feat.data.supplyingSpecies !== '' || feat.data.supplyingFeat !== '' || feat.data.supplyingFeature !== '') {
+            if (feat.data.isSupplied) {
                 continue;
             }
             let type = 'General Feats';
@@ -1032,6 +1038,7 @@ export class SWSEActor extends Actor {
         }
     }
 
+    //TODO this seems Force Training specific.  maybe move it.
     generateProvidedItemsFromItems(actorData) {
         for (let feat of actorData.feats) {
             if (feat.name === 'Force Training') {
@@ -1048,7 +1055,6 @@ export class SWSEActor extends Actor {
     cleanKey(key) {
         return this._uppercaseFirstLetters(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
     }
-
 
 
     rollVariable(variable) {
@@ -1069,11 +1075,11 @@ export class SWSEActor extends Actor {
 
         let attacks = new AttackHandler().generateAttacksFromWeapon(item.data, this);
 
-        let templateType="attack";
+        let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
 
         let content = '';
-        for(let attack of attacks){
+        for (let attack of attacks) {
             content += `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
                        <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
         }
@@ -1122,7 +1128,7 @@ export class SWSEActor extends Actor {
     async rollAttack(variable) {
         let attack = this.resolvedAttacks.get(variable);
 
-        let templateType="attack";
+        let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
 
         let content = `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">Roll Attack</button></p>
@@ -1176,7 +1182,7 @@ export class SWSEActor extends Actor {
     }
 
     async _onCreate(data, options, userId, context) {
-        if (data.type === "character") await this.update({ "token.actorLink": true }, { updateChanges: false });
+        if (data.type === "character") await this.update({"token.actorLink": true}, {updateChanges: false});
 
         // if (userId === game.user._id) {
         //     await updateChanges.call(this);
@@ -1186,22 +1192,20 @@ export class SWSEActor extends Actor {
     }
 
 
-
-
-    getAttributeGenerationType(){
+    getAttributeGenerationType() {
         return this.data.data.attributeGenerationType;
     }
 
-    setAttributeGenerationType(attributeGenerationType){
+    setAttributeGenerationType(attributeGenerationType) {
         this.update({'data.attributeGenerationType': attributeGenerationType})
     }
 
-    getAttributeLevelBonus(level){
+    getAttributeLevelBonus(level) {
         console.log(this.data)
         return this.data.data.levelAttributeBonus[level];
     }
 
-    setAttributeLevelBonus(level, attributeLevelBonus){
+    setAttributeLevelBonus(level, attributeLevelBonus) {
         let data = {};
         data[`data.levelAttributeBonus.${level}`] = attributeLevelBonus;
         this.update(data)
