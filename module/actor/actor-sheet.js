@@ -1187,8 +1187,8 @@ export class SWSEActorSheet extends ActorSheet {
                             html.find(".movable").each((i, item) => {
                                 let roll = new Roll(rollFormula).roll();
                                 let title = "";
-                                for(let part of roll.parts){
-                                    for(let result of part.results){
+                                for(let term of roll.terms){
+                                    for(let result of term.results){
                                         if(title !== "") {
                                             title += ", "
                                         }
