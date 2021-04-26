@@ -31,6 +31,7 @@ export class OffenseHandler {
         for (let value of classLevels.values()) {
             bab += value.bab;
         }
+        actorData.prerequisites.bab = bab;
         return bab;
     }
 

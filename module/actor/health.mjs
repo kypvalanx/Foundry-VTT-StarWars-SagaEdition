@@ -31,8 +31,7 @@ function resolveCharClass(actorData, ignoreCon) {
 
 function resolveRolledHp(charClass) {
     let health = charClass.data.health;
-    if (charClass.first) {
-        health.rolledHp = health.firstLevel;
+    if (charClass.data.attributes.first) {
         return health.rolledHp;
     }
     health.rolledHp = health.rolledHp ? health.rolledHp : 1;

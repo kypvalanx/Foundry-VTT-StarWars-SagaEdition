@@ -1,36 +1,11 @@
 export class PrerequisitesHandler {
     async resolvePrerequisites(actor) {
         let actorData = actor.data
-        actorData.prerequisites = {};
         let prerequisites = actorData.prerequisites;
-        prerequisites.trainedSkills = [];
-        prerequisites.focusSkills = [];
-        prerequisites.masterSkills = [];
-        for (let [key, skill] of Object.entries(actorData.data.skills)) {
-            if (skill.trained) {
-                prerequisites.trainedSkills.push(key.toLowerCase());
-            }
-        }
-        for (let feat of actorData.feats) {
-            let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.name);
-            if (proficiency) {
-                prerequisites.focusSkills.push(proficiency[1].toLowerCase());
-            }
-            proficiency = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.name);
-            if (proficiency) {
-                prerequisites.masterSkills.push(proficiency[1].toLowerCase());
-            }
-        }
+
 
         prerequisites.charLevel = actor.getCharacterLevel(actorData);
-        prerequisites.feats = [];
-        prerequisites.isForceTrained = false;
-        for (let feat of actorData.feats) {
-            prerequisites.feats.push(feat.name.toLowerCase());
-            if ('force training' === feat.name.toLowerCase()) {
-                prerequisites.isForceTrained = true;
-            }
-        }
+
         prerequisites.talentTrees = {}
         prerequisites.talents = [];
         prerequisites.forceTalentTreesCount = 0;
@@ -78,7 +53,6 @@ export class PrerequisitesHandler {
             prerequisites.equippedItems.push(item.name.toLowerCase());
         }
 
-        prerequisites.bab = actorData.data.offense.bab;
 
         prerequisites.isDroid = actorData.data.isDroid;
     }

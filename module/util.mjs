@@ -11,6 +11,7 @@ export function resolveValueArray(values, actor) {
         } else if (typeof value === 'string' && value.startsWith("@")) {
             //ask Actor to resolve
             try {
+                console.log(value)
                 let value = actor.getVariable(value);
                 if (value) {
                     total += resolveValueArray(value, actor);

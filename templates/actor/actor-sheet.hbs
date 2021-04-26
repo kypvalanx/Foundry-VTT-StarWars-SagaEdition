@@ -312,17 +312,10 @@ customBonus: {{ability.customBonus}}">{{ability.total}}</span></td>
             <tr class="charclass item" data-item-id="{{class._id}}">
                 <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24" height="24" alt="{{class.name}}"/></td>
                 <td><h4 class="item-name">{{class.name}}</h4></td>
-                <td><span class="text-box {{#unless class.first}}direct short{{/unless}} center" data-item="{{class._id}}" data-name="data.health.rolledHp" data-dtype="Number">{{class.data.health.rolledHp}}</span>
-                    {{#unless class.first}}
+                <td><span class="text-box {{#unless class.data.attributes.first}}direct short{{/unless}} center" data-item="{{class._id}}" data-name="data.health.rolledHp" data-dtype="Number">{{class.data.health.rolledHp}}</span>
+                    {{#unless class.data.attributes.first}}
                     <a class="rollable" title="Re-roll {{class.data.health.levelUp}}" data-item="{{class._id}}" data-name="data.health.rolledHp" data-roll="{{class.data.health.levelUp}}"><i class="fas fa-dice"></i>
                     </a>{{/unless}}</td>
-<!--                <td>-->
-<!--                    {{#unless class.data.prerequisites.isPrestige}}-->
-<!--                    <label>-->
-<!--                        <input class="direct" type="radio" name="data.classes.first" value="{{class._id}}" {{#if class.first}}checked{{/if}} data-dtype="Boolean"/>-->
-<!--                    </label>-->
-<!--                        {{/unless}}-->
-<!--                </td>-->
                 <td class="item-controls">
                     <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                     {{#if class.isLatest}}<a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>{{/if}}

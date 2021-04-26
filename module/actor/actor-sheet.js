@@ -474,6 +474,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
 
             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, item.data.data.categories);
+            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this.getFeatsFromCategories(item.data.data.categories));
             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, item.data.data.attributes.items);
 
         } else if (item.data.type === "class") {
@@ -502,8 +503,16 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }).render(true);
             }
-            if (!item.data.data.prerequisites.isPrestige && item.data.data.feats.feats.length > 0) {
-                await this.addClassFeats(item, additionalEntitiesToAdd);
+            if (!item.data.data.prerequisites.isPrestige) {
+                if(item.data.data.feats.feats.length > 0) {
+                    await this.addClassFeats(item, additionalEntitiesToAdd);
+                }
+                item.data.data.attributes.first = this.actor.data.classes.length === 0;
+
+                if(item.data.data.attributes.first){
+                    item.data.data.health.rolledHp = item.data.data.health.firstLevel;
+                }
+
             }
         } else if (item.data.type === "feat") {
             let possibleFeatTypes = [];
@@ -660,6 +669,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         await this.activateChoices(item, additionalEntitiesToAdd);
+        //await this._addItemsFromItems(actorData);
         additionalEntitiesToAdd.push(item)
         console.log(additionalEntitiesToAdd)
         await super._onDropItemCreate(additionalEntitiesToAdd);
@@ -732,6 +742,9 @@ export class SWSEActorSheet extends ActorSheet {
                         if (selectedChoice.items && selectedChoice.items.length > 0) {
                             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
                         }
+                        if (selectedChoice.feats && selectedChoice.feats.length > 0) {
+                            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, selectedChoice.feats, false);
+                        }
                         if (selectedChoice.payload && selectedChoice.payload !== "") {
                             item.data.data.payload = selectedChoice.payload;
                             console.log(item)
@@ -743,8 +756,11 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addClassFeats(item, additionalEntitiesToAdd) {
-        if (Object.keys(this.actor.data.classes).length === 0 || this.actor.getNonPrestigeClasses().size === 0) {
-            let newVar = await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await item.data.data.feats.feats.map(feat => `Bonus Feat (${this.actor.cleanFeatName(feat)})`));
+        let feats = item.data.data.feats.feats;
+        let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
+        if (nonPrestigeClasses.length === 0) {
+             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanFeatName(feat)})`));
+            let newVar =await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanFeatName(feat)), false)
 
             let featString = newVar.notificationMessage;
 
@@ -760,7 +776,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
         } else if (this._isFirstLevelOfClass(item.data.name)) {
             let options = "";
-            for (let feat of item.data.data.feats.feats) {
+            for (let feat of feats) {
                 options += `<option value="${feat}">${feat}</option>`
             }
 
@@ -1393,5 +1409,17 @@ export class SWSEActorSheet extends ActorSheet {
         if(ev.target.children.length === 0 && ev.target.classList.contains("container")) {
             ev.target.appendChild(document.getElementById(data));
         }
+    }
+
+    getFeatsFromCategories(categories = []) {
+        let feats = [];
+        for(let category of categories) {
+            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category);
+            if(result){
+                feats.push(result[1])
+            }
+            console.log(result)
+        }
+        return feats;
     }
 }
