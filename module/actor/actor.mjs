@@ -23,6 +23,7 @@ export class SWSEActor extends Actor {
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
         if (actorData.type === 'character') await this._prepareCharacterData(actorData);
+        if (actorData.type === 'npc') await this._prepareCharacterData(actorData);
     }
 
     /**
@@ -656,16 +657,18 @@ export class SWSEActor extends Actor {
         let notificationMessage = "";
         let pack = this.getCompendium(compendium);
         let index = await pack.getIndex();
-        for (let itemName of itemNames.filter(itemName => itemName !== null)) {
+        for (let itemName of itemNames.filter(itemName => itemName)) {
             let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
             let payload = "";
             if (result) {
                 itemName = result[1];
                 payload = result[2];
             }
-            let entry = await index.find(f => f.name === this.cleanItemName(itemName));
+            let cleanItemName = this.cleanItemName(itemName);
+            let entry = await index.find(f => f.name === cleanItemName);
             if (!entry) {
-                entry = await index.find(f => f.name === this.cleanItemName(itemName + " (" + payload + ")"));
+                cleanItemName = this.cleanItemName(itemName + " (" + payload + ")");
+                entry = await index.find(f => f.name === cleanItemName);
             }
 
             if (!entry) {

@@ -122,13 +122,6 @@ export class SWSEActorSheet extends ActorSheet {
             console.log(item)
             item.sheet.render(true);
         });
-        // html.find('.item-edit').parents(".item").dblclick(ev =>{
-        //     let target = ev.currentTarget;
-        //     console.log(target)
-        //     console.log(target.dataset['itemId'])
-        //     const item = this.actor.getOwnedItem(target.dataset['itemId']);
-        //     item.sheet.render(true);
-        // });
 
         // Delete Inventory Item
         html.find('.item-delete').click(ev => {
@@ -221,15 +214,6 @@ export class SWSEActorSheet extends ActorSheet {
             result.sceneId = canvas.scene._id;
             result.tokenId = this.actor.token._id;
         }
-
-        // switch (type) {
-        //     case "concentration":
-        //     case "cl": {
-        //         const elem = event.currentTarget.closest(".tab.spellbook-group");
-        //         result.altType = elem.dataset.tab;
-        //         break;
-        //     }
-        // }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(result));
     }
@@ -485,7 +469,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
 
             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, item.data.data.categories);
-            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this.getFeatsFromCategories(item.data.data.categories));
+            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this._getFeatsFromCategories(item.data.data.categories));
             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, item.data.data.attributes.items);
 
         } else if (item.data.type === "class") {
@@ -1430,26 +1414,18 @@ export class SWSEActorSheet extends ActorSheet {
         ev.preventDefault();
         // Get the id of the target and add the moved element to the target's DOM
         const data = ev.dataTransfer.getData("text/plain");
-        // console.log(data)
-        // console.log(ev)
-        // console.log( ev.target)
-        // console.log( ev.currentTarget)
-
-        //console.log(ev, ev.target, typeof ev.target)
-        console.log(ev.target.classList)
         if (ev.target.children.length === 0 && ev.target.classList.contains("container")) {
             ev.target.appendChild(document.getElementById(data));
         }
     }
 
-    getFeatsFromCategories(categories = []) {
+    _getFeatsFromCategories(categories = []) {
         let feats = [];
         for (let category of categories) {
             let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category);
             if (result) {
                 feats.push(result[1])
             }
-            console.log(result)
         }
         return feats;
     }

@@ -293,9 +293,18 @@
       "templates": ["common"],
       "biography": "",
       "attributes": {
-        "level": {
-          "value": 1
-        }
+      }
+    },
+    "npc": {
+      "templates": ["common"],
+      "biography": "",
+      "attributes": {
+      }
+    },
+    "vehicle": {
+      "templates": [],
+      "biography": "",
+      "attributes": {
       }
     }
   },
