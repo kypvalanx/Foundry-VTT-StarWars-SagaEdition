@@ -14,8 +14,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
-
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -109,7 +107,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
         html.find("#assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
         html.find("#assignManual").on("click", async event => this._selectAttributesManually(event, this));
-        html.find(".leveledAttributeBonus").each((i, button) =>{
+        html.find(".leveledAttributeBonus").each((i, button) => {
             button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
         })
 
@@ -467,6 +465,7 @@ export class SWSEActorSheet extends ActorSheet {
         //console.log("Item Dropped: ",item);
 
         let additionalEntitiesToAdd = [];
+        let context = {};
 
         //only one species allowed
         if (item.data.type === "species") {
@@ -516,13 +515,14 @@ export class SWSEActorSheet extends ActorSheet {
                 }).render(true);
             }
             if (!item.data.data.prerequisites.isPrestige) {
-                if(item.data.data.feats.feats.length > 0) {
+                if (item.data.data.feats.feats.length > 0) {
                     await this.addClassFeats(item, additionalEntitiesToAdd);
                 }
                 item.data.data.attributes.first = this.actor.data.classes.length === 0;
 
-                if(item.data.data.attributes.first){
+                if (item.data.data.attributes.first) {
                     item.data.data.health.rolledHp = item.data.data.health.firstLevel;
+                    context.isFirstLevel = true;
                 }
 
             }
@@ -679,7 +679,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         }
-        await this.activateChoices(item, additionalEntitiesToAdd);
+        await this.activateChoices(item, additionalEntitiesToAdd, context);
         //await this._addItemsFromItems(actorData);
         additionalEntitiesToAdd.push(item)
         console.log(additionalEntitiesToAdd)
@@ -719,59 +719,78 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async activateChoices(item, additionalEntitiesToAdd) {
+    async activateChoices(item, additionalEntitiesToAdd, context) {
         let choices = item.data.data.choices;
-        if (choices && choices.length > 0) {
-            for (let choice of choices) {
-                let options = await this._explodeOptions(choice.options);
-                console.log(choice.options, options)
+        for (let choice of choices ? choices : []) {
+            if (choice.isFirstLevel && !context.isFirstLevel) {
+                continue;
+            }
 
-                let optionString = "";
+            let options = await this._explodeOptions(choice.options);
+
+            let greetingString;
+            let optionString = "";
+            if (Object.keys(options).length === 0){
+                greetingString = choice.noOptions;
+            } else if (Object.keys(options).length === 1){
+                greetingString = choice.oneOption;
+                let optionLabel = Object.keys(options)[0];
+                optionString = `<div id="choice" value="${optionLabel}">${optionLabel}</div>`
+            } else {
+                greetingString = choice.description;
+
                 for (let optionLabel of Object.keys(options)) {
                     optionString += `<option value="${optionLabel}">${optionLabel}</option>`
                 }
 
-                if(optionString !== "") {
+                if (optionString !== "") {
                     optionString = `<div><select id='choice'>${optionString}</select> 
                         </div>`
                 }
-
-
-                let greetingString = optionString !== "" ? choice.description : choice.noOptions;
-                let content = `<p>${greetingString}</p>${optionString}`;
-
-                await Dialog.prompt({
-                    title: greetingString,
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0]?.value;
-                        let selectedChoice = options[key];
-                        console.log(selectedChoice)
-                        if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {
-                            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, selectedChoice.abilities);
-                        }
-                        if (selectedChoice.items && selectedChoice.items.length > 0) {
-                            await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
-                        }
-                        if (selectedChoice.feats && selectedChoice.feats.length > 0) {
-                            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, selectedChoice.feats);
-                        }
-                        if (selectedChoice.payload && selectedChoice.payload !== "") {
-                            item.setPayload(selectedChoice.payload);
-
-                        }
-                    }
-                });
             }
+
+
+
+            let content = `<p>${greetingString}</p>${optionString}`;
+
+            await Dialog.prompt({
+                title: greetingString,
+                content: content,
+                callback: async (html) => {
+                    debugger
+                    let choice = html.find("#choice")[0];
+                    let key = choice?.value;
+
+                    if(!key){
+                        key = choice?.innerText;
+                    }
+                    let selectedChoice = options[key];
+                    console.log(selectedChoice)
+                    if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {
+                        await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, selectedChoice.abilities);
+                    }
+                    if (selectedChoice.items && selectedChoice.items.length > 0) {
+                        await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
+                    }
+                    if (selectedChoice.feats && selectedChoice.feats.length > 0) {
+                        await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, selectedChoice.feats);
+                    }
+                    if (selectedChoice.payload && selectedChoice.payload !== "") {
+                        item.setPayload(selectedChoice.payload);
+
+                    }
+                }
+            });
         }
+
     }
 
     async addClassFeats(item, additionalEntitiesToAdd) {
         let feats = item.data.data.feats.feats;
         let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
         if (nonPrestigeClasses.length === 0) {
-             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
-            let newVar =await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanItemName(feat)))
+            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
+            let newVar = await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanItemName(feat)))
 
             let featString = newVar.notificationMessage;
 
@@ -1164,10 +1183,10 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _selectAttributeScores(event, sheet, scores, canReRoll) {
-        if(Object.keys(scores).length === 0){
+        if (Object.keys(scores).length === 0) {
             let existingValues = sheet.actor.getAttributes();
 
-            scores = {str: 8, dex: 8, con:8, int:8, wis:8, cha:8};
+            scores = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
             for (let val in existingValues) {
                 scores[val] = existingValues[val];
             }
@@ -1188,14 +1207,14 @@ export class SWSEActorSheet extends ActorSheet {
             title: "Assign Ability Scores",
             content: content,
             yes: async (html) => {
-                let response = {str: 8, dex: 8, con:8, int:8, wis:8, cha:8};
+                let response = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
                 html.find(".container").each((i, item) => {
                     let ability = $(item).data("ability");
                     let value = 8;
-                    if(item.innerText) {
+                    if (item.innerText) {
                         value = parseInt(item.innerText);
                     }
-                    if(ability) {
+                    if (ability) {
                         response[ability] = value;
                     }
                 })
@@ -1214,23 +1233,23 @@ export class SWSEActorSheet extends ActorSheet {
                     item.addEventListener("drop", (ev) => this._onDragEndMovable(ev), false);
                 });
 
-                if(canReRoll){
+                if (canReRoll) {
                     html.find("#reRoll").each((i, button) => {
                         button.addEventListener("click", (event) => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
                                 let roll = new Roll(rollFormula).roll();
                                 let title = "";
-                                for(let term of roll.terms){
-                                    for(let result of term.results){
-                                        if(title !== "") {
+                                for (let term of roll.terms) {
+                                    for (let result of term.results) {
+                                        if (title !== "") {
                                             title += ", "
                                         }
-                                            if(result.discarded){
-                                                title += `(Ignored: ${result.result})`
-                                            } else {
-                                                title += result.result
-                                            }
+                                        if (result.discarded) {
+                                            title += `(Ignored: ${result.result})`
+                                        } else {
+                                            title += result.result
+                                        }
 
                                     }
                                 }
@@ -1242,10 +1261,11 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         });
-        if(response) {
+        if (response) {
             sheet.actor.setAttributes(response);
         }
     }
+
     async _selectAttributesManually(event, sheet) {
         let existingValues = sheet.actor.getAttributes();
         let combined = {};
@@ -1274,7 +1294,7 @@ export class SWSEActorSheet extends ActorSheet {
                 return response;
             }
         });
-        if(response) {
+        if (response) {
             sheet.actor.setAttributes(response);
         }
 
@@ -1290,7 +1310,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         let availableBonuses = [false, false];
-        for(let i = 0; i < 2-Object.values(bonus).filter(b => b !== null).length; i++){
+        for (let i = 0; i < 2 - Object.values(bonus).filter(b => b !== null).length; i++) {
             availableBonuses[i] = true;
         }
 
@@ -1312,10 +1332,10 @@ export class SWSEActorSheet extends ActorSheet {
                 html.find(".container").each((i, item) => {
                     let ability = $(item).data("ability");
                     let value = null;
-                    if(item.innerText) {
+                    if (item.innerText) {
                         value = parseInt(item.innerText);
                     }
-                    if(ability) {
+                    if (ability) {
                         response[ability] = value;
                     }
                 })
@@ -1332,7 +1352,7 @@ export class SWSEActorSheet extends ActorSheet {
                 });
             }
         });
-        if(response) {
+        if (response) {
             sheet.actor.setAttributeLevelBonus(level, response);
         }
     }
@@ -1391,7 +1411,7 @@ export class SWSEActorSheet extends ActorSheet {
                 });
             }
         });
-        if(response) {
+        if (response) {
             sheet.actor.setAttributes(response);
         }
     }
@@ -1417,16 +1437,16 @@ export class SWSEActorSheet extends ActorSheet {
 
         //console.log(ev, ev.target, typeof ev.target)
         console.log(ev.target.classList)
-        if(ev.target.children.length === 0 && ev.target.classList.contains("container")) {
+        if (ev.target.children.length === 0 && ev.target.classList.contains("container")) {
             ev.target.appendChild(document.getElementById(data));
         }
     }
 
     getFeatsFromCategories(categories = []) {
         let feats = [];
-        for(let category of categories) {
+        for (let category of categories) {
             let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category);
-            if(result){
+            if (result) {
                 feats.push(result[1])
             }
             console.log(result)

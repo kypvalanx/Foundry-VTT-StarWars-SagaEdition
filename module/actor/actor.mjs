@@ -1065,6 +1065,7 @@ export class SWSEActor extends Actor {
             }
             filtered.push(ability)
         }
+
         return filtered;
     }
 
