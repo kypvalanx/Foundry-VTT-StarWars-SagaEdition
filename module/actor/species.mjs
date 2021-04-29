@@ -40,6 +40,9 @@ export class SpeciesHandler {
         }
 
         actorData.data.isDroid = this._isDroid(actorData);
+        let prerequisites = actorData.prerequisites;
+        prerequisites.species = actorData.species?.name.toLowerCase();
+        prerequisites.isDroid = actorData.data.isDroid;
         if (actorData.data.isDroid) {
             actorData.data.abilities.con.skip = true;
             let abilities = filterItemsByType("ability", actorData.items);

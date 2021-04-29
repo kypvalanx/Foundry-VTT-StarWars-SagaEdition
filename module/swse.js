@@ -71,8 +71,6 @@ Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
 });
 
 Hooks.on("ready", async function() {
-
-
   await generateCompendiums();
 
   game.generated = {};
@@ -91,6 +89,15 @@ Hooks.on("ready", async function() {
     }});
   }})
 });
+
+if(!Map.prototype.computeIfAbsent){
+  Map.prototype.computeIfAbsent = function (key, mappingFunction) {
+    if(!this.has(key)){
+      this.set(key, mappingFunction.call(key))
+    }
+    return this.get(key);
+  };
+}
 
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {
