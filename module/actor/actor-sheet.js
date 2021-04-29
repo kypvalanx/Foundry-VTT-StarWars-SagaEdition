@@ -4,6 +4,18 @@
  */
 
 export class SWSEActorSheet extends ActorSheet {
+
+    /**
+     * A convenience reference to the Actor entity
+     * @type {SWSEActor}
+     */
+    get actor() {
+        return this.object;
+    }
+
+
+
+
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -667,7 +679,6 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         }
-
         await this.activateChoices(item, additionalEntitiesToAdd);
         //await this._addItemsFromItems(actorData);
         additionalEntitiesToAdd.push(item)
@@ -743,11 +754,11 @@ export class SWSEActorSheet extends ActorSheet {
                             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
                         }
                         if (selectedChoice.feats && selectedChoice.feats.length > 0) {
-                            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, selectedChoice.feats, false);
+                            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, selectedChoice.feats);
                         }
                         if (selectedChoice.payload && selectedChoice.payload !== "") {
-                            item.data.data.payload = selectedChoice.payload;
-                            console.log(item)
+                            item.setPayload(selectedChoice.payload);
+
                         }
                     }
                 });
@@ -759,8 +770,8 @@ export class SWSEActorSheet extends ActorSheet {
         let feats = item.data.data.feats.feats;
         let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
         if (nonPrestigeClasses.length === 0) {
-             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanFeatName(feat)})`));
-            let newVar =await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanFeatName(feat)), false)
+             await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
+            let newVar =await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanItemName(feat)))
 
             let featString = newVar.notificationMessage;
 
@@ -787,7 +798,7 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanFeatName(feat)})`)
+                    await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
                 }
             });
         }

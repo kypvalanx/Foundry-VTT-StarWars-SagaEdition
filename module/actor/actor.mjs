@@ -2,7 +2,6 @@ import {resolveHealth} from "./health.mjs";
 import {AttackHandler} from "./attacks.mjs";
 import {OffenseHandler} from "./offense.mjs";
 import {SpeciesHandler} from "./species.mjs";
-import {PrerequisitesHandler} from "./prerequisites.mjs";
 import {filterItemsByType, resolveValueArray} from "../util.mjs";
 import {resolveDefenses} from "./defense.mjs";
 
@@ -14,17 +13,11 @@ import {resolveDefenses} from "./defense.mjs";
 export class SWSEActor extends Actor {
     resolvedVariables = new Map();
     resolvedLabels = new Map();
-    count = 0;
 
     /**
      * Augment the basic actor data with additional dynamic data.
      */
     async prepareData() {
-        await this._prepareData();
-    }
-
-
-    async _prepareData() {
         super.prepareData();
         const actorData = this.data;
         // Make separate methods for each Actor type (character, npc, etc.) to keep
@@ -44,21 +37,21 @@ export class SWSEActor extends Actor {
         await this._handleCondition(actorData);
 
         actorData.generalAbilities = filterItemsByType("ability", actorData.items);
-        actorData.talents = filterItemsByType("talent", actorData.items);
-        actorData.powers = filterItemsByType("forcePower", actorData.items);
-        actorData.secrets = filterItemsByType("forceSecret", actorData.items);
-        actorData.techniques = filterItemsByType("forceTechnique", actorData.items);
+        actorData.talents = this.getTalents(actorData);
+        actorData.powers = this.getPowers(actorData);
+        actorData.secrets = this.getSecrets(actorData);
+        actorData.techniques = this.getTechniques(actorData);
         actorData.traditions = filterItemsByType("forceTradition", actorData.items);
         actorData.regimens = filterItemsByType("forceRegimen", actorData.items);
-        actorData.equipped = this._getEquippedItems(actorData, this._getEquipable(actorData.items, actorData.data.isDroid));
+        actorData.equipped = this.getEquipped(actorData);
         actorData.unequipped = this._getUnequippedItems(actorData);
         actorData.inventory = this._getInventory(actorData);
 
-        this._generateAbilityData(this);
+        this._generateAttributes(this);
         await this._generateSkillData(actorData);
 
-        await new PrerequisitesHandler().resolvePrerequisites(this);
-        actorData.feats = this.getActiveFeats(actorData);
+        let feats = this._getActiveFeats(actorData);
+        actorData.feats = feats.activeFeats;
 
         this.generateProvidedItemsFromItems(actorData);
         this._reduceProvidedItemsByExistingItems(actorData);
@@ -68,9 +61,8 @@ export class SWSEActor extends Actor {
         actorData.data.offense = await new OffenseHandler().resolveOffense(this);
 
 
-
         await new AttackHandler().generateAttacks(this);
-        await this._manageAutomaticItems(actorData);
+        await this._manageAutomaticItems(actorData, feats.removeFeats);
         actorData.visibleAbilities = await this.filterOutInvisibleAbilities(actorData);
 
         try {
@@ -84,8 +76,71 @@ export class SWSEActor extends Actor {
         }
     }
 
-    getActiveFeats(actorData) {
+    getEquipped(actorData) {
+        let getEquippedItems = this._getEquippedItems(actorData, this._getEquipable(actorData.items, actorData.data.isDroid));
+        let prerequisites = actorData.prerequisites;
+        prerequisites.equippedItems = [];
+        for (let item of getEquippedItems) {
+            prerequisites.equippedItems.push(item.name.toLowerCase());
+        }
+        return getEquippedItems;
+    }
 
+    getPowers(actorData) {
+        let filterItemsByType1 = filterItemsByType("forcePower", actorData.items);
+        let prerequisites = actorData.prerequisites;
+        prerequisites.powers = [];
+        for (let power of filterItemsByType1) {
+            prerequisites.powers.push(power.name.toLowerCase());
+        }
+        return filterItemsByType1;
+    }
+
+    getSecrets(actorData) {
+        let filterItemsByType1 = filterItemsByType("forceSecret", actorData.items);
+        let prerequisites = actorData.prerequisites;
+        prerequisites.secrets = [];
+        for (let secret of filterItemsByType1) {
+            prerequisites.secrets.push(secret.name.toLowerCase());
+        }
+        return filterItemsByType1;
+    }
+
+    getTechniques(actorData) {
+        let filterItemsByType1 = filterItemsByType("forceTechnique", actorData.items);
+        let prerequisites = actorData.prerequisites;
+        prerequisites.techniques = [];
+        for (let technique of filterItemsByType1) {
+            prerequisites.techniques.push(technique.name.toLowerCase());
+        }
+
+        return filterItemsByType1;
+    }
+
+    getTalents(actorData) {
+        let filterItemsByType1 = filterItemsByType("talent", actorData.items);
+        let prerequisites = actorData.prerequisites;
+
+        prerequisites.talentTrees = {}
+        prerequisites.talents = [];
+        prerequisites.forceTalentTreesCount = 0;
+        for (let talent of filterItemsByType1) {
+            prerequisites.talents.push(talent.name.split(" - ")[1].toLowerCase());
+            if (prerequisites.talentTrees[talent.talentTree.toLowerCase()]) {
+                prerequisites.talentTrees[talent.talentTree.toLowerCase()] = prerequisites.talentTrees[talent.talentTree.toLowerCase()] + 1;
+            } else {
+                prerequisites.talentTrees[talent.talentTree.toLowerCase()] = 1;
+            }
+
+            if (talent.talentTrees.includes("Force Talent Trees")) {
+                prerequisites.forceTalentTreesCount++;
+            }
+        }
+
+        return filterItemsByType1;
+    }
+
+    _getActiveFeats(actorData) {
 
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
@@ -98,9 +153,10 @@ export class SWSEActor extends Actor {
         prerequisites.isForceTrained = false;
         let feats = filterItemsByType("feat", actorData.items);
         let activeFeats = [];
-        for(let feat of feats)
-        {
-            if(!this.meetsFeatPrerequisites(feat.data.prerequisites, false).doesFail) {
+        let removeFeats = [];
+        for (let feat of feats) {
+            let doesFail = this.meetsFeatPrerequisites(feat.data.prerequisites, false).doesFail;
+            if (!doesFail) {
                 activeFeats.push(feat)
 
                 prerequisites.feats.push(feat.name.toLowerCase());
@@ -108,10 +164,12 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
+            } else if(doesFail && !feat.data.isSupplied){
+                removeFeats.push(feat);
             }
         }
 
-        return activeFeats;
+        return {activeFeats, removeFeats};
     }
 
     checkForForceTraining(feat, prerequisites) {
@@ -171,9 +229,19 @@ export class SWSEActor extends Actor {
         actorData.data.condition[5] = condition === 5;
     }
 
-    _generateAbilityData(actor) {
+    _generateAttributes(actor) {
         let actorData = actor.data;
+
+
+        let prerequisites = actorData.prerequisites;
+        prerequisites.attributes = {};
         for (let [key, ability] of Object.entries(actorData.data.abilities)) {
+            prerequisites.attributes[key] = {};
+            prerequisites.attributes[key].value = ability.total;
+            let longKey = this._getLongKey(key);
+            prerequisites.attributes[longKey] = {};
+            prerequisites.attributes[longKey].value = ability.total;
+
             let bonuses = [];
             bonuses.push(ability.classLevelBonus);
             bonuses.push(ability.speciesBonus);
@@ -319,31 +387,27 @@ export class SWSEActor extends Actor {
      * Extracts important stats from the class
      */
     async _generateClassData(actorData) {
-        if (actorData.classes) {
-            return;
-        }
         actorData.classes = await filterItemsByType("class", actorData.items);
-        actorData.classLevels = await new Map();
+        let classLevels = await new Map();
         let classFeatures = [];
 
-        for (let charClass of actorData.classes) {
-            if (!actorData.classLevels.has(charClass.name)) {
-                actorData.classLevels.set(charClass.name, []);
-            }
-            actorData.classLevels.get(charClass.name).push(charClass);
-        }
-        for (let [key, value] of actorData.classLevels.entries()) {
-            for (let i = 0; i < value.length; i++) {
-                classFeatures.push(...(this._getClassFeatures(key, value, i)))
-            }
-        }
+        let prerequisites = actorData.prerequisites;
 
-        await this.resolveClassFeatures(actorData, classFeatures);
+        prerequisites.charLevel = this.getCharacterLevel(actorData);
+        for (let charClass of actorData.classes) {
+            let name = charClass.name;
+            classLevels.computeIfAbsent(name, () => []).push(charClass);
+        }
+        this.handleClassFeatures(classLevels, classFeatures, actorData);
+
         let classCount = actorData.classes.length;
-        if(classCount > 0) {
+        if (classCount > 0) {
             actorData.classes[classCount - 1].isLatest = true;
         }
+        return this.extracted(classCount, actorData);
+    }
 
+    extracted(classCount, actorData) {
         let hasUpdate = false;
         let numOfAttributeBonuses = Math.floor(classCount / 4);
         if (!actorData.data.levelAttributeBonus) {
@@ -354,7 +418,6 @@ export class SWSEActor extends Actor {
         for (let [level, value] of Object.entries(actorData.data.levelAttributeBonus)) {
             if (level > numOfAttributeBonuses * 4 && value !== null) {
                 actorData.data.levelAttributeBonus[level] = null;
-                console.log("delete", level, actorData.data.levelAttributeBonus)
                 hasUpdate = true;
             }
         }
@@ -362,38 +425,51 @@ export class SWSEActor extends Actor {
             let level = i * 4;
             if (!actorData.data.levelAttributeBonus[level]) {
                 actorData.data.levelAttributeBonus[level] = {};
-                console.log("add", level, actorData.data.levelAttributeBonus)
                 hasUpdate = true;
             }
         }
+
         if (hasUpdate) {
             return this.update({'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
         }
+        return undefined;
     }
 
-    _getClassFeatures(className, classObjects, i) {
-        let classFeatures = classObjects[i].data.levels[i + 1]['CLASS FEATURES'];
-        let features = [];
-        if (classFeatures) {
-            let split = classFeatures.split(', ');
-            for (let feature of split) {
-                if (feature === 'Defense Bonuses' || feature === 'Starting Feats') {
-                    continue;
-                } else if (feature === 'Talent') {
-                    features.push({
-                        className: className,
-                        feature: `Talent (${className})`,
-                        supplier: {id: classObjects[i]._id, name: classObjects[i].name}
-                    });
-                    continue;
-                }
-                features.push({
-                    className: className,
-                    feature: feature,
-                    supplier: {id: classObjects[i]._id, name: classObjects[i].name}
-                });
+    handleClassFeatures(classLevels, classFeatures, actorData) {
+        for (let [name, classItems] of classLevels.entries()) {
+            for (let i = 0; i < classItems.length; i++) {
+                classFeatures.push(...(this._getClassFeatures(name, classItems[i], i)))
             }
         }
+
+        this.resolveClassFeatures(actorData, classFeatures);
+    }
+
+    _getClassFeatures(className, classObject, i) {
+        let classFeatures = classObject.data.levels[i + 1]['CLASS FEATURES'];
+        let features = [];
+        if (!classFeatures) {
+            return features;
+        }
+        let split = classFeatures.split(', ');
+        for (let feature of split) {
+            if (feature === 'Defense Bonuses' || feature === 'Starting Feats') {
+                continue;
+            } else if (feature === 'Talent') {
+                features.push({
+                    className: className,
+                    feature: `Talent (${className})`,
+                    supplier: {id: classObject._id, name: classObject.name}
+                });
+                continue;
+            }
+            features.push({
+                className: className,
+                feature: feature,
+                supplier: {id: classObject._id, name: classObject.name}
+            });
+        }
+
         return features;
     }
 
@@ -486,6 +562,7 @@ export class SWSEActor extends Actor {
         }
         return undefined;
     }
+
     static getConditionBonus(condition) {
         switch (condition) {
             case 0:
@@ -504,10 +581,11 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    async _manageAutomaticItems(actorData) {
+    async _manageAutomaticItems(actorData, removeFeats) {
         let itemIds = actorData.items.flatMap(i => [i._id, i.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
 
         let removal = [];
+        removeFeats.forEach(f =>removal.push(f._id))
         for (let item of actorData.items) {
             let itemData = item.data;
             if (itemData.isSupplied) {
@@ -553,24 +631,6 @@ export class SWSEActor extends Actor {
     }
 
 
-    async _addItemsFromItems(actorData) {
-        let entities = [];
-        for (let feature of this._getClassFeatures()) {
-            let existingAbilities = await filterItemsByType("ability", actorData.items);
-            let shouldAdd = undefined === await existingAbilities.find(ability => ability.name === feature.feature)
-            if (shouldAdd) {
-                let parentItem = {data: {type: 'feature'}, name: feature.feature, id: feature.supplier.id}
-                await this.addItemsFromCompendium('ability', parentItem, entities, feature.feature, false, true);
-            }
-        }
-        await this.conditionalBonusFeats(actorData, entities);
-        await this.optionalRules(actorData, entities);
-        // if (entities.length > 0) {
-        //     await this._createItems(entities);
-        // }
-        return entities;
-    }
-
     async optionalRules(actorData, entities) {
         for (let feat of actorData.feats) {
             if (feat.name === 'Point-Blank Shot') {
@@ -581,32 +641,14 @@ export class SWSEActor extends Actor {
                             name: feat.name,
                             data: {type: 'feat'},
                             id: feat._id
-                        }, entities, 'Precise Shot', false, true);
+                        }, entities, 'Precise Shot');
                     }
                 }
             }
         }
     }
 
-    async conditionalBonusFeats(actorData, entities) {
-        let regExp = /^(?:Conditional )?Bonus Feat \(([\s\w()*]*)\)$/;
-        let abilities = await this._getMatchingAbilities(actorData, regExp);
-        for (let ability of abilities) {
-            let bonusFeat = await this.cleanFeatName(ability.data.payload);
-            let feats = await filterItemsByType("feat", actorData.items);
-            let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
-            if (featDoesntExist) {
-                let parentItem = ability.data.isSupplied ? {
-                    data: {type: ability.data.supplier.type},
-                    name: ability.data.supplier.name,
-                    id: ability.data.supplier.id
-                } : undefined;
-                await this.addItemsFromCompendium('feat', parentItem, entities, bonusFeat, false, true)
-            }
-        }
-    }
-
-    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, itemNames, notifyOnFailure = true) {
+    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, itemNames) {
         if (!Array.isArray(itemNames)) {
             itemNames = [itemNames];
         }
@@ -614,50 +656,44 @@ export class SWSEActor extends Actor {
         let notificationMessage = "";
         let pack = this.getCompendium(compendium);
         let index = await pack.getIndex();
-        for (let itemName of itemNames) {
-            if (itemName) {
-                let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
-                let payload = "";
-                if (result) {
-                    itemName = result[1];
-                    payload = result[2];
-                }
-                let entry = await index.find(f => f.name === this.cleanFeatName(itemName));
-                if (!entry) {
-                    entry = await index.find(f => f.name === this.cleanFeatName(itemName + " (" + payload + ")"));
-                }
-
-                if (entry) {
-                    let entity = await pack.getEntity(entry._id);
-                    let data = entity.data.data;
-                    if (compendium === 'feat') {
-                        let exploded = [];
-                        for(let prerequisite of data.prerequisites){
-                            exploded.push(prerequisite.replace("#payload#", payload));
-                        }
-                        data.prerequisites = exploded;
-                        let meetsPrereqs = this.meetsFeatPrerequisites(data.prerequisites, notifyOnFailure);
-                        if (meetsPrereqs.doesFail) {
-                            entity.data.data.attributes.disable = true;
-                            //if we don't meet prerequisites, disable.
-                        }
-                    }
-
-                    if (parentItem) {
-                        data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
-                        data.isSupplied = true;
-                        data.categories = data.categories.filter(category => !category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
-                    }
-
-                    if (payload !== "") {
-                        data.payload = payload;
-                    }
-                    notificationMessage = notificationMessage + `<li>${entry.name.titleCase() + (payload !== "" ? ` (${payload})` : "")}</li>`
-                    entities.push(entity);
-                } else {
-                    console.log(itemName)
-                }
+        for (let itemName of itemNames.filter(itemName => itemName !== null)) {
+            let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
+            let payload = "";
+            if (result) {
+                itemName = result[1];
+                payload = result[2];
             }
+            let entry = await index.find(f => f.name === this.cleanItemName(itemName));
+            if (!entry) {
+                entry = await index.find(f => f.name === this.cleanItemName(itemName + " (" + payload + ")"));
+            }
+
+            if (!entry) {
+                console.warn(`attempted to add ${itemName}`, arguments)
+                continue;
+            }
+
+            let entity = await pack.getEntity(entry._id);
+            let data = entity.data.data;
+            if (compendium === 'feat') {
+                let exploded = [];
+                for (let prerequisite of data.prerequisites) {
+                    exploded.push(prerequisite.replace("#payload#", payload));
+                }
+                data.prerequisites = exploded;
+            }
+
+            if (parentItem) {
+                data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
+                data.isSupplied = true;
+                data.categories = data.categories.filter(category => !category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
+            }
+
+            if (payload !== "") {
+                data.payload = payload;
+            }
+            notificationMessage = notificationMessage + `<li>${entry.name.titleCase() + (payload !== "" ? ` (${payload})` : "")}</li>`
+            entities.push(entity);
         }
         additionalEntitiesToAdd.push(...entities);
         return {addedEntities: entities, notificationMessage: notificationMessage};
@@ -694,7 +730,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    cleanFeatName(feat) {
+    cleanItemName(feat) {
         return feat.replace("*", "").trim();
     }
 
@@ -896,10 +932,19 @@ export class SWSEActor extends Actor {
                 }
                 continue;
             }
-            if (prereq.includes("proficient with chosen weapon")) {
+            if (prereq.includes("proficient with #payload#")) {
 
                 continue;
             }
+            result = /proficient with ([\w\s]*)/.exec(prereq)
+            if(result!==null){
+                if(!this.data.proficiency.weapon.includes(result[1]) && !this.data.proficiency.armor.includes(result[1])){
+                    failureList.push({fail: true, message: prereq});
+                }
+                continue;
+            }
+
+
             result = /([\w\s]*) \(chosen weapon\)/.exec(prereq);
             if (result !== null) {
                 let hasItem = false;
@@ -1005,19 +1050,19 @@ export class SWSEActor extends Actor {
     async filterOutInvisibleAbilities(actorData) {
         let filtered = [];
         for (let ability of actorData.generalAbilities) {
-            // if (ability.name === 'Species' || ability.name === 'Homebrew Content' || ability.name === 'Web Enhancements' || ability.name === 'Natural Armor'
-            //     || ability.name.startsWith('Bonus Class Skill') || ability.name.startsWith('Bonus Trained Skill') || ability.name.includes('Creations')) {
-            //
-            //     continue;
-            // } else if (ability.name.startsWith("Bonus Feat") || ability.name.startsWith("Conditional Bonus Feat")) {
-            //     let bonusFeat = await this.cleanFeatName(ability.data.payload);
-            //     let feats = await filterItemsByType("feat", actorData.items);
-            //     let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
-            //     if (!featDoesntExist) {
-            //         continue;
-            //     }
-            //     //TODO add prerequisites here?  or even better on ability creation
-            // }
+            if (ability.name === 'Species' || ability.name === 'Homebrew Content' || ability.name === 'Web Enhancements' || ability.name === 'Natural Armor'
+                || ability.name.startsWith('Bonus Class Skill') || ability.name.startsWith('Bonus Trained Skill') || ability.name.includes('Creations')) {
+
+                continue;
+            } else if (ability.name.startsWith("Bonus Feat") || ability.name.startsWith("Conditional Bonus Feat")) {
+                let bonusFeat = await this.cleanItemName(ability.data.payload);
+                let feats = await filterItemsByType("feat", actorData.items);
+                let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
+                if (!featDoesntExist) {
+                    continue;
+                }
+                //TODO add prerequisites here?  or even better on ability creation
+            }
             filtered.push(ability)
         }
         return filtered;
@@ -1039,22 +1084,16 @@ export class SWSEActor extends Actor {
             }
             this.reduceAvailableItem(actorData, type);
         }
-        for (let secret of actorData.secrets) {
-            this.reduceAvailableItem(actorData, "Force Secrets");
-        }
-        for (let technique of actorData.techniques) {
-            this.reduceAvailableItem(actorData, "Force Techniques");
-        }
-        for (let power of actorData.powers) {
-            this.reduceAvailableItem(actorData, "Force Powers");
-        }
+        this.reduceAvailableItem(actorData, "Force Secrets", actorData.secrets.length);
+        this.reduceAvailableItem(actorData, "Force Techniques", actorData.techniques.length);
+        this.reduceAvailableItem(actorData, "Force Powers", actorData.powers.length);
     }
 
-    reduceAvailableItem(actorData, type) {
+    reduceAvailableItem(actorData, type, reduceBy = 1) {
         if (actorData.availableItems[type]) {
-            actorData.availableItems[type] = actorData.availableItems[type] - 1;
+            actorData.availableItems[type] = actorData.availableItems[type] - reduceBy;
         } else {
-            actorData.availableItems[type] = -1;
+            actorData.availableItems[type] = -1 * reduceBy;
         }
 
         if (actorData.availableItems[type] === 0) {
@@ -1129,24 +1168,6 @@ export class SWSEActor extends Actor {
                 });
             }
         }).render(true);
-
-        // let attack = this.resolvedAttacks.get(variable);
-        // console.log(typeof variable, variable, this.resolvedAttacks, attack);
-        //
-        //
-        //console.log(this.resolvedVariables)
-
-        // let rollStr = this.resolvedVariables.get(variable);
-        // let label = this.resolvedLabels.get(variable);
-
-        //console.log(rollStr, label)
-
-        // let roll = new Roll(rollStr);
-        //
-        // roll.toMessage({
-        //     speaker: ChatMessage.getSpeaker({actor: this.actor}),
-        //     flavor: label
-        // });
     }
 
     async rollAttack(variable) {
@@ -1185,24 +1206,6 @@ export class SWSEActor extends Actor {
             speaker: ChatMessage.getSpeaker({actor: this.actor}),
             flavor: name
         });
-
-        // let data = {
-        //     actor:this,
-        //     roll,
-        //     modifications,
-        //     notes,
-        //     name
-        // };
-        // let content = await renderTemplate(template, data);//`<p>${roll.total}!</p><p>${roll.result}</p>`;
-        // console.log(content)
-        // await ChatMessage.create({
-        //     content: content,
-        //     speaker: ChatMessage.getSpeaker({
-        //         actor: this
-        //     }),
-        //     roll: roll,
-        //     sound: "sounds/dice.wav"
-        // });
     }
 
     async _onCreate(data, options, userId, context) {
@@ -1233,5 +1236,23 @@ export class SWSEActor extends Actor {
         let data = {};
         data[`data.levelAttributeBonus.${level}`] = attributeLevelBonus;
         this.update(data)
+    }
+
+    _getLongKey(key) {
+        switch (key) {
+            case 'str':
+                return 'strength';
+            case 'dex':
+                return 'dexterity';
+            case 'con':
+                return 'constitution';
+            case 'int':
+                return 'intelligence';
+            case 'wis':
+                return 'wisdom';
+            case 'cha':
+                return 'charisma';
+        }
+        return undefined;
     }
 }

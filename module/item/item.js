@@ -182,6 +182,11 @@ export class SWSEItem extends Item {
         }
     }
 
+    setPayload(payload){
+        this.data.data.payload = payload;
+        this.data.data.prerequisites = this.data.data.prerequisites.map(prereq => prereq.replace("#payload#", payload))
+    }
+
     stripHTML(str) {
         let parser = new DOMParser();
         let doc = parser.parseFromString(str, 'text/html');
