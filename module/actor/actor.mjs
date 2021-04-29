@@ -1083,7 +1083,7 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            if (feat.bonusFeatCategories.length > 0) {
+            if (feat.bonusFeatCategories && feat.bonusFeatCategories.length > 0) {
                 type = feat.bonusFeatCategories[0]
             }
             this.reduceAvailableItem(actorData, type);
