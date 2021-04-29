@@ -664,11 +664,9 @@ export class SWSEActor extends Actor {
                 itemName = result[1];
                 payload = result[2];
             }
-            let cleanItemName = this.cleanItemName(itemName);
-            let entry = await index.find(f => f.name === cleanItemName);
+            let entry = await index.find(f => f.name === this.cleanItemName(itemName));
             if (!entry) {
-                cleanItemName = this.cleanItemName(itemName + " (" + payload + ")");
-                entry = await index.find(f => f.name === cleanItemName);
+                entry = await index.find(f => f.name === this.cleanItemName(itemName + " (" + payload + ")"));
             }
 
             if (!entry) {
@@ -1068,7 +1066,6 @@ export class SWSEActor extends Actor {
             }
             filtered.push(ability)
         }
-
         return filtered;
     }
 

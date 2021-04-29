@@ -741,7 +741,6 @@ export class SWSEActorSheet extends ActorSheet {
                 title: greetingString,
                 content: content,
                 callback: async (html) => {
-                    debugger
                     let choice = html.find("#choice")[0];
                     let key = choice?.value;
 
@@ -749,7 +748,6 @@ export class SWSEActorSheet extends ActorSheet {
                         key = choice?.innerText;
                     }
                     let selectedChoice = options[key];
-                    console.log(selectedChoice)
                     if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {
                         await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, selectedChoice.abilities);
                     }
