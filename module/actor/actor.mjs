@@ -37,7 +37,7 @@ export class SWSEActor extends Actor {
         }
         await this._handleCondition(actorData);
 
-        actorData.generalAbilities = filterItemsByType("ability", actorData.items);
+        actorData.generalAbilities = this.getAbilities(actorData);
         actorData.talents = this.getTalents(actorData);
         actorData.powers = this.getPowers(actorData);
         actorData.secrets = this.getSecrets(actorData);
@@ -64,7 +64,6 @@ export class SWSEActor extends Actor {
 
         await new AttackHandler().generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
-        actorData.visibleAbilities = await this.filterOutInvisibleAbilities(actorData);
 
         try {
             if (this.sheet?.rendered) {
@@ -75,6 +74,11 @@ export class SWSEActor extends Actor {
         } catch (e) {
             console.log("couldn't find charactersheet.  probably fine")
         }
+    }
+
+    getAbilities(actorData) {
+        let filterItemsByType1 = filterItemsByType("ability", actorData.items);
+        return filterItemsByType1;
     }
 
     getEquipped(actorData) {
@@ -686,6 +690,7 @@ export class SWSEActor extends Actor {
                 data.prerequisites = exploded;
             }
 
+            console.log(parentItem)
             if (parentItem) {
                 data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
                 data.isSupplied = true;

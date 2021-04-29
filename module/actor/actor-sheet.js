@@ -153,7 +153,7 @@ export class SWSEActorSheet extends ActorSheet {
         // Rollable abilities.
         html.find('.rollable').click(this._onRoll.bind(this));
 
-        html.find('a[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
     }
 
 
@@ -667,7 +667,8 @@ export class SWSEActorSheet extends ActorSheet {
         //await this._addItemsFromItems(actorData);
         additionalEntitiesToAdd.push(item)
         console.log(additionalEntitiesToAdd)
-        await super._onDropItemCreate(additionalEntitiesToAdd);
+       // debugger
+        await super._onDropItemCreate(additionalEntitiesToAdd.map(entity => entity.data));
     }
 
 
@@ -741,7 +742,7 @@ export class SWSEActorSheet extends ActorSheet {
                 title: greetingString,
                 content: content,
                 callback: async (html) => {
-                    debugger
+
                     let choice = html.find("#choice")[0];
                     let key = choice?.value;
 

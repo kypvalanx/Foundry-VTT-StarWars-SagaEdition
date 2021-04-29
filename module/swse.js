@@ -41,6 +41,7 @@ Hooks.once('init', async function() {
   Items.unregisterSheet("core", ItemSheet);
   Items.registerSheet("swse", SWSEItemSheet, { makeDefault: true });
 
+  console.log("DEV")
   // If you need to add Handlebars helpers, here are a few useful examples:
   Handlebars.registerHelper('concat', function() {
     let outStr = '';

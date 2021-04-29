@@ -37,26 +37,40 @@
                 <h3><input name="ecl" type="text" value="{{actor.ecl}}" placeholder="Ecl" title="Ecl"/></h3>
               </div>
               <div class="flexrow">
-                <div class="species-container item flexrow" {{#if actor.species}}data-item-id="{{actor.species._id}}"{{/if}} title="Species">
+                <div class="species-container item" {{#if actor.species}}data-item-id="{{actor.species._id}}"{{/if}} title="Species">
 
-                    {{#if actor.species}}<div class="species rollable" title="{{actor.species.name}}"><img class="species-image" alt="{{actor.species.name}}" src="{{actor.species.img}}"/></div>{{/if}}
-                    {{#unless actor.species}}<div class="species rollable" title="Species">Add Species</div>{{/unless}}
+                    {{#if actor.species}}<div class="species" title="{{actor.species.name}}">
+
+                        <div style="width:64px"><img class="species-image" alt="{{actor.species.name}}" src="{{actor.species.img}}"/></div>
+                        <div class="species-control edit rollable">{{actor.species.name}}</div>
+                        <div class="species-controls flexcol">
+                            <a class="species-control edit" title="{{localize "PF1.EditItem"}}"><i class="fas fa-edit"></i></a>
+                            <a class="species-control delete" title="{{localize "PF1.DeleteItem"}}"><i class="fas fa-trash"></i></a>
+                        </div>
+                    </div>{{/if}}
+                    {{#unless actor.species}}<div class="species" title="Add Species">
+                        <div class="rollable" data-action="compendium" data-action-target="world.swse-species" title="{{localize "Open Compendium"}}">Add Species</div>
+                        <div class="species-controls flexcol">
+                            <a class="species-control add" title="{{localize "Create Species"}}"><i class="fas fa-plus"></i></a>
+                            <a data-action="compendium" data-action-target="world.swse-species" title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                        </div>
+                    </div>{{/unless}}
                     {{!--#if actor.species}}<div>{{actor.species.name}}</div>{{/if--}}
 
 
-                  <div class="species-controls flexcol">
-                    {{#if owner}}
-                      {{#unless actor.species}}
-                        <a class="species-control add" title="{{localize "Create Species"}}"><i class="fas fa-plus"></i></a>
-                        <a data-action="compendium" data-action-target="world.swse-species" title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                      {{/unless}}
-                      {{#if actor.species}}
-                        <a class="species-control edit" title="{{localize "PF1.EditItem"}}"><i class="fas fa-edit"></i></a>
-                        <a class="species-control delete" title="{{localize "PF1.DeleteItem"}}"><i class="fas fa-trash"></i></a>
-                      {{/if}}
-                    {{/if}}
-                  </div>
-                  <div></div>
+<!--                  <div class="species-controls flexcol">-->
+<!--                    {{#if owner}}-->
+<!--                      {{#unless actor.species}}-->
+<!--                        <a class="species-control add" title="{{localize "Create Species"}}"><i class="fas fa-plus"></i></a>-->
+<!--                        <a data-action="compendium" data-action-target="world.swse-species" title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>-->
+<!--                      {{/unless}}-->
+<!--                      {{#if actor.species}}-->
+<!--                        <a class="species-control edit" title="{{localize "PF1.EditItem"}}"><i class="fas fa-edit"></i></a>-->
+<!--                        <a class="species-control delete" title="{{localize "PF1.DeleteItem"}}"><i class="fas fa-trash"></i></a>-->
+<!--                      {{/if}}-->
+<!--                    {{/if}}-->
+<!--                  </div>-->
+<!--                  <div></div>-->
                 </div>
               </div>
             </div>
@@ -200,7 +214,7 @@
 
                           </thead>
                           <tbody>
-                          {{#each actor.visibleAbilities as |ability id|}}
+                          {{#each actor.generalAbilities as |ability id|}}
                               {{#unless ability.hide}}
                                   <tr>
                                       <td title="{{ability.data.textDescription}}">{{ability.name}}</td>
