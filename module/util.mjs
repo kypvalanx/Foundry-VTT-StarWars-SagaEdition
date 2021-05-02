@@ -28,6 +28,12 @@ export function resolveValueArray(values, actor) {
     return total;
 }
 
+/**
+ *
+ * @param type
+ * @param items
+ * @returns {[SWSEItem]}
+ */
 export function filterItemsByType(type, items) {
     let types = [];
     types[0] = type;
@@ -37,9 +43,9 @@ export function filterItemsByType(type, items) {
         }
     }
     let filtered = [];
-    for (let i = 0; i < items.length; i++) {
-        if (types.includes(items[i].type)) {
-            filtered.push(items[i]);
+    for (let item of items) {
+        if (types.includes(item.type) || types.includes(item.data.type)) {
+            filtered.push(item);
         }
     }
     return filtered;

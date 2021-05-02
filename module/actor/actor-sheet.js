@@ -119,7 +119,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.item-edit').click(ev => {
             const li = $(ev.currentTarget).parents(".item");
             const item = this.actor.getOwnedItem(li.data("itemId"));
-            console.log(item)
             item.sheet.render(true);
         });
 
@@ -468,7 +467,7 @@ export class SWSEActorSheet extends ActorSheet {
                 return;
             }
 
-            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, item.data.data.categories);
+            await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, item.data.data.categories);
             await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this._getFeatsFromCategories(item.data.data.categories));
             await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, item.data.data.attributes.items);
 
@@ -514,7 +513,7 @@ export class SWSEActorSheet extends ActorSheet {
             let possibleFeatTypes = [];
 
             let optionString = "";
-            for (let category of item.data.bonusFeatCategories) {
+            for (let category of item.data.data.bonusFeatCategories) {
                 if (this.actor.data.availableItems[category] > 0) {
                     possibleFeatTypes.push(category);
                     optionString += `<option value="${category}">${category}</option>`;
@@ -595,11 +594,10 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         } else if (item.data.type === "talent") {
-            let pattern = /([\w\s\d-]*) Talent Trees?/;
             let possibleTalentTrees = [];
             let optionString = "";
 
-            if (item.data.talentTree === this.actor.data.data.bonusTalentTree) {
+            if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
                 for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                     if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                         optionString += `<option value="${id}">${id}</option>`
@@ -607,6 +605,7 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             } else {
+                let pattern = /([\w\s\d-]*) Talent Tree(?:s)?/;
                 for (let talentTree of item.data.data.categories) {
                     let type = pattern.exec(talentTree);
                     if (type) {
@@ -645,19 +644,19 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 });
             }
-            let filteredCategories = [];
-            for (let category of item.data.data.categories) {
-                if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
-                    filteredCategories.push(category);
-                }
-            }
-            filteredCategories.push(...possibleTalentTrees);
+            // let filteredCategories = [];
+            // for (let category of item.data.data.categories) {
+            //     if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
+            //         filteredCategories.push(category);
+            //     }
+            // }
+            //ilteredCategories.push(...possibleTalentTrees);
 
 
-            item.data.data.categories = filteredCategories;
+            item.data.data.talentTreeSource = possibleTalentTrees[0];
 
-            if (item.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.prerequisites);
+            if (item.data.data.prerequisites) {
+                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites);
                 if (meetsPrereqs.doesFail) {
                     return;
                 }
@@ -749,7 +748,7 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                     let selectedChoice = options[key];
                     if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {
-                        await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, selectedChoice.abilities);
+                        await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, selectedChoice.abilities);
                     }
                     if (selectedChoice.items && selectedChoice.items.length > 0) {
                         await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
@@ -771,7 +770,7 @@ export class SWSEActorSheet extends ActorSheet {
         let feats = item.data.data.feats.feats;
         let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
         if (nonPrestigeClasses.length === 0) {
-            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
+            await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
             let newVar = await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanItemName(feat)))
 
             let featString = newVar.notificationMessage;
@@ -799,7 +798,7 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
+                    await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
                 }
             });
         }

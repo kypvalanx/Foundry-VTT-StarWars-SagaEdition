@@ -37,11 +37,11 @@ export class OffenseHandler {
 
     async _resolveMab(actor, bab) {
         let actorData = actor.data;
-        return bab + actorData.data.abilities.str.mod + SWSEActor.getConditionBonus(actor);
+        return bab + actorData.data.attributes.str.mod + SWSEActor.getConditionBonus(actor);
     }
 
     async _resolveRab(actor, bab) {
         let actorData = actor.data;
-        return bab + actorData.data.abilities.dex.mod + SWSEActor.getConditionBonus(actor);
+        return bab + actorData.data.attributes.dex.mod + SWSEActor.getConditionBonus(actor);
     }
 }

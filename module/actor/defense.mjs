@@ -70,19 +70,19 @@ export function _getHeroicLevel(actorData) {
 }
 
 export function _getDexMod(actorData) {
-    return actorData.data.abilities.dex.mod;
+    return actorData.data.attributes.dex.mod;
 }
 
 export function _getWisMod(actorData) {
-    return actorData.data.abilities.wis.mod;
+    return actorData.data.attributes.wis.mod;
 }
 
 export function _getFortStatMod(actor) {
     let actorData = actor.data;
     if (!actor.ignoreCon(actorData)) {
-        return actorData.data.abilities.con.mod;
+        return actorData.data.attributes.con.mod;
     } else {
-        return actorData.data.abilities.str.mod;
+        return actorData.data.attributes.str.mod;
     }
 }
 

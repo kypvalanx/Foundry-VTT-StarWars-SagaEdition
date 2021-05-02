@@ -170,8 +170,8 @@ export class SpeciesHandler {
         }
 
         for (let [key, bonus] of Object.entries(matrix)) {
-            actorData.data.abilities[key.substr(0, 3)].speciesBonus = parseInt(bonus)
-                + actorData.data.abilities[key.substr(0, 3)].speciesBonus;
+            actorData.data.attributes[key.substr(0, 3)].speciesBonus = parseInt(bonus)
+                + actorData.data.attributes[key.substr(0, 3)].speciesBonus;
         }
     }
 }

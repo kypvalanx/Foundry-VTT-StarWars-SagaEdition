@@ -26,7 +26,7 @@ function resolveCharClass(actorData, ignoreCon) {
     if(ignoreCon){
         return null;
     }
-    return actorData.data.abilities.con.mod;
+    return actorData.data.attributes.con.mod;
 }
 
 function resolveRolledHp(charClass) {
