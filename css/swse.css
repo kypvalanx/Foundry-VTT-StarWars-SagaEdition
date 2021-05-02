@@ -323,10 +323,9 @@
 }
 
 .swse .species-container .species {
-  height: 30px;
-  line-height: 24px;
-  padding: 3px 0;
-  border-bottom: 1px solid #BBB;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 .swse .species-container .species .species-image {
@@ -334,55 +333,12 @@
 }
 
 .swse .species-container .species img {
-  height: 30px;
-  width: 30px;
+  height: 32px;
+  width: 32px;
 }
 
-.hideable {
-
-}
-
-.hide {
-  display: none;
-}
-
-.show {
-
-}
-
-.toggle-hide{
-
-}
-
-.plus,.minus {
-  width: 30px
-}
-
-.attribute-label{
-  width: 200px;
-}
-
-.align-right{
-  -webkit-box-pack: end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
-  text-align: right;
-}
-
-.movable, .container{
-  width: 50px;
-  height: 50px;
-}
-.container{
-  border: 1px dotted dimgray;
-}
-.movable{
-  padding: 17px;
-  text-align: center;
-  border: 1px solid;
-  cursor: move;
-}
-
-tr.skill, tr.ability, div.attack{
-  cursor:move;
+.swse .species-container .species div {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }

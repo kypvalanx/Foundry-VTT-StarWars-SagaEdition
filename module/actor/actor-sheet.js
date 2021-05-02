@@ -644,13 +644,13 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 });
             }
-            // let filteredCategories = [];
-            // for (let category of item.data.data.categories) {
-            //     if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
-            //         filteredCategories.push(category);
-            //     }
-            // }
-            //ilteredCategories.push(...possibleTalentTrees);
+            let filteredCategories = [];
+            for (let category of item.data.data.categories) {
+                if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
+                    filteredCategories.push(category);
+                }
+            }
+            filteredCategories.push(...possibleTalentTrees);
 
 
             item.data.data.talentTreeSource = possibleTalentTrees[0];
