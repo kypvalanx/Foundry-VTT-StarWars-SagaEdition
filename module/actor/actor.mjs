@@ -68,7 +68,6 @@ export class SWSEActor extends Actor {
 
         await new AttackHandler().generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
-        actorData.visibleAbilities = await this.filterOutInvisibleAbilities(actorData);
 
         try {
             if (this.sheet?.rendered) {
@@ -246,7 +245,7 @@ export class SWSEActor extends Actor {
 
         let prerequisites = actorData.prerequisites;
         prerequisites.attributes = {};
-        for (let [key, ability] of Object.entries(actorData.data.abilities)) {
+        for (let [key, ability] of Object.entries(actorData.data.attributes)) {
             prerequisites.attributes[key] = {};
             prerequisites.attributes[key].value = ability.total;
             let longKey = this._getLongKey(key);
@@ -389,7 +388,7 @@ export class SWSEActor extends Actor {
     }
 
     getNonPrestigeClasses() {
-        return this.data.classes.filter(charClass => {
+        return this.classes.filter(charClass => {
             return !charClass.data.prerequisites.isPrestige;
         });
     }
@@ -515,7 +514,7 @@ export class SWSEActor extends Actor {
     }
 
     _getInventory(actorData) {
-        return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner);
+        return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner);
     }
 
     _uppercaseFirstLetters(s) {
@@ -1051,21 +1050,21 @@ export class SWSEActor extends Actor {
 
     async filterOutInvisibleAbilities(actorData) {
         let filtered = [];
-        for (let ability of actorData.generalAbilities) {
-            if (ability.name === 'Species' || ability.name === 'Homebrew Content' || ability.name === 'Web Enhancements' || ability.name === 'Natural Armor'
-                || ability.name.startsWith('Bonus Class Skill') || ability.name.startsWith('Bonus Trained Skill') || ability.name.includes('Creations')) {
-
-                continue;
-            } else if (ability.name.startsWith("Bonus Feat") || ability.name.startsWith("Conditional Bonus Feat")) {
-                let bonusFeat = await this.cleanItemName(ability.data.payload);
-                let feats = await filterItemsByType("feat", actorData.items);
-                let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
-                if (!featDoesntExist) {
-                    continue;
-                }
-                //TODO add prerequisites here?  or even better on ability creation
-            }
-            filtered.push(ability)
+        for (let trait of actorData.traits) {
+            // if (trait.name === 'Species' || trait.name === 'Homebrew Content' || trait.name === 'Web Enhancements' || trait.name === 'Natural Armor'
+            //     || trait.name.startsWith('Bonus Class Skill') || trait.name.startsWith('Bonus Trained Skill') || trait.name.includes('Creations')) {
+            //
+            //     continue;
+            // } else if (trait.name.startsWith("Bonus Feat") || trait.name.startsWith("Conditional Bonus Feat")) {
+            //     let bonusFeat = await this.cleanItemName(trait.data.data.payload);
+            //     let feats = await filterItemsByType("feat", actorData.items);
+            //     let featDoesntExist = undefined === await feats.find(feat => feat.name === bonusFeat);
+            //     if (!featDoesntExist) {
+            //         continue;
+            //     }
+            //     //TODO add prerequisites here?  or even better on trait creation
+            // }
+            filtered.push(trait)
         }
         return filtered;
     }

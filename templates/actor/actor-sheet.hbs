@@ -198,8 +198,8 @@
 
                           </thead>
                           <tbody>
-                          {{#each actor.generalAbilities as |ability id|}}
-                              {{#unless ability.hide}}
+                          {{#each actor.traits as |trait id|}}
+                              {{#unless trait.hide}}
                                   <tr>
                                       <td title="{{trait.data.textDescription}}">{{trait.data.finalName}}</td>
                                   </tr>

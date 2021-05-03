@@ -666,7 +666,7 @@ export class SWSEActorSheet extends ActorSheet {
         //await this._addItemsFromItems(actorData);
         additionalEntitiesToAdd.push(item)
         console.log(additionalEntitiesToAdd)
-        await super._onDropItemCreate(additionalEntitiesToAdd);
+        await super._onDropItemCreate(additionalEntitiesToAdd.map(entity => entity.data));
     }
 
 
