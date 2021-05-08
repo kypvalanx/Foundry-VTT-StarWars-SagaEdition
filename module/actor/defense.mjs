@@ -97,6 +97,7 @@ export function _getClassDefBonus(stat, actorData) {
 export function _getNaturalArmorBonus(actorData) {
     if (actorData.species) {
         actorData.species.data.categories.forEach(category => {
+            category = category instanceof String ? category : category.category
             let results = /natural armor \(\+(\d*)\)/.exec(category.toLowerCase());
             if (results) {
                 return results[1]

@@ -18,6 +18,14 @@ export class SWSEActor extends Actor {
         return this.data.classes;
     }
 
+    get age(){
+        return this.data.data.age;
+    }
+
+    get species(){
+        return this.data.species;
+    }
+
     /**
      * Augment the basic actor data with additional dynamic data.
      */
@@ -82,7 +90,37 @@ export class SWSEActor extends Actor {
 
     async getTraits() {
         let traits = filterItemsByType("trait", this.items.values());
-        return traits;
+        this.data.traits = [];
+        let activeTraits = this.data.traits;
+        let possibleTraits = []
+        for(let trait of traits){
+            if(!trait.data.data.prerequisites || trait.data.data.prerequisites.length === 0){
+                activeTraits.push(trait);
+            } else {
+                possibleTraits.push(trait);
+            }
+        }
+
+        let shouldRetry = possibleTraits.length > 0;
+        while(shouldRetry){
+            shouldRetry = false;
+            for(let possible of possibleTraits){
+                if(this._meetsPrereqs(possible.data.data.prerequisites)){
+                    activeTraits.push(possible);
+                    shouldRetry = true;
+                }
+            }
+            possibleTraits = possibleTraits.filter(possible => !activeTraits.includes(possible));
+        }
+
+        console.log(activeTraits)
+        return activeTraits.sort((a,b) => {
+            let x = a.data.data.finalName.toLowerCase();
+            let y = b.data.data.finalName.toLowerCase();
+            if (x < y) {return -1;}
+            if (x > y) {return 1;}
+            return 0;
+        });
     }
 
     getEquipped(actorData) {
@@ -243,35 +281,51 @@ export class SWSEActor extends Actor {
     _generateAttributes(actor) {
         let actorData = actor.data;
 
+        actorData.data.lockAttributes = this.shouldLockAttributes()
+        let attributeTraits = actorData.traits.filter(trait => {
+            let result = /([+-])\d* (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name);
+            return !!result;
+        })
         let prerequisites = actorData.prerequisites;
         prerequisites.attributes = {};
-        for (let [key, ability] of Object.entries(actorData.data.attributes)) {
-            prerequisites.attributes[key] = {};
-            prerequisites.attributes[key].value = ability.total;
+        for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
             let longKey = this._getLongKey(key);
-            prerequisites.attributes[longKey] = {};
-            prerequisites.attributes[longKey].value = ability.total;
-
+            if(actorData.data.lockAttributes){
+                attribute.base = 10;
+            }
             let bonuses = [];
-            bonuses.push(ability.classLevelBonus);
-            bonuses.push(ability.speciesBonus);
-            bonuses.push(ability.ageBonus);
-            bonuses.push(ability.equipmentBonus);
-            bonuses.push(ability.buffBonus);
-            bonuses.push(ability.customBonus);
+            for(let trait of attributeTraits){
+                let result = /([+-\\d]*) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name)
+                if(result[2].toLowerCase() === longKey){
+                    //TODO add them to correct variables for tooltip
+                    bonuses.push(result[1])
+                }
+            }
+
+            bonuses.push(attribute.classLevelBonus);
+            bonuses.push(attribute.speciesBonus);
+            bonuses.push(attribute.ageBonus);
+            bonuses.push(attribute.equipmentBonus);
+            bonuses.push(attribute.buffBonus);
+            bonuses.push(attribute.customBonus);
 
             for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
                 bonuses.push(levelAttributeBonus[key])
             }
 
             // Calculate the modifier using d20 rules.
-            ability.bonus = resolveValueArray(bonuses, this)
-            ability.total = ability.base + ability.bonus;
-            ability.mod = Math.floor((ability.total - 10) / 2);
-            ability.roll = ability.mod + SWSEActor.getConditionBonus(actorData.condition)
-            ability.label = key.toUpperCase();
-            this.resolvedVariables.set("@" + ability.label, "1d20 + " + ability.roll);
-            this.resolvedLabels.set("@" + ability.label, ability.label);
+            attribute.bonus = resolveValueArray(bonuses, this)
+            attribute.total = attribute.base + attribute.bonus;
+            attribute.mod = Math.floor((attribute.total - 10) / 2);
+            attribute.roll = attribute.mod + SWSEActor.getConditionBonus(actorData.condition)
+            attribute.label = key.toUpperCase();
+            this.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
+            this.resolvedLabels.set("@" + attribute.label, attribute.label);
+
+            prerequisites.attributes[key] = {};
+            prerequisites.attributes[key].value = attribute.total;
+            prerequisites.attributes[longKey] = {};
+            prerequisites.attributes[longKey].value = attribute.total;
         }
     }
 
@@ -286,8 +340,8 @@ export class SWSEActor extends Actor {
 
     getAttributes() {
         let response = {};
-        for (let [key, ability] of Object.entries(this.data.data.abilities)) {
-            response[key] = ability.base;
+        for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
+            response[key] = attribute.base;
         }
         return response;
     }
@@ -610,8 +664,12 @@ export class SWSEActor extends Actor {
             }
         }
         if (removal.length > 0) {
-            console.log("deleting:", removal)
-            await this.deleteEmbeddedEntity("OwnedItem", removal, {});
+            try {
+                await this.deleteEmbeddedEntity("OwnedItem", removal, {});
+            } catch (e) {
+                console.log(e);
+                //this will be run in to if multiple sessions try to delete teh same item
+            }
         } else {
             //await this._addItemsFromItems(actorData);
         }
@@ -658,15 +716,22 @@ export class SWSEActor extends Actor {
         }
     }
 
-    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, itemNames) {
-        if (!Array.isArray(itemNames)) {
-            itemNames = [itemNames];
+    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items) {
+        if (!Array.isArray(items)) {
+            items = [items];
         }
         let entities = [];
         let notificationMessage = "";
         let pack = this.getCompendium(compendium);
         let index = await pack.getIndex();
-        for (let itemName of itemNames.filter(itemName => itemName)) {
+        for (let item of items.filter(item => item)) {
+            let itemName = item;
+            let prerequisite;
+            if (item.category)
+            {
+                itemName = item.category;
+            }
+
             let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
             let payload = "";
             if (result) {
@@ -691,6 +756,17 @@ export class SWSEActor extends Actor {
                     exploded.push(prerequisite.replace("#payload#", payload));
                 }
                 data.prerequisites = exploded;
+            }
+
+            if(!data.prerequisites){
+                data.prerequisites = [];
+            }
+
+            if(item.prerequisite){
+                data.prerequisites.push(item.prerequisite);
+            }
+            if(item.prerequisites){
+                data.prerequisites.push(...item.prerequisites);
             }
 
             if (parentItem) {
@@ -1044,7 +1120,7 @@ export class SWSEActor extends Actor {
             }
         }
         let classLevel = actorData.classes.length;
-        actorData.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + ((actorData.species && actorData.species.data.categories.includes('Bonus Feat')) ? 1 : 0); //TODO find species that have this category that shouldn't
+        actorData.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3);
         actorData.activeFeatures.push(...tempFeatures)
     }
 
@@ -1109,6 +1185,17 @@ export class SWSEActor extends Actor {
                     actorData.availableItems[type] += Math.max(1, 1 + actorData.data.abilities.wis.mod);
                 } else {
                     actorData.availableItems[type] = Math.max(1, 1 + actorData.data.abilities.wis.mod);
+                }
+            }
+        }
+        for (let trait of actorData.traits) {
+            if (trait.name === 'Bonus Feat') {
+                //TODO find species that have this category that shouldn't
+                let type = 'General Feats'
+                if (actorData.availableItems[type]) {
+                    actorData.availableItems[type] += 1;
+                } else {
+                    actorData.availableItems[type] = 1;
                 }
             }
         }
@@ -1225,6 +1312,9 @@ export class SWSEActor extends Actor {
     setAttributeGenerationType(attributeGenerationType) {
         this.update({'data.attributeGenerationType': attributeGenerationType})
     }
+    setAge(age) {
+        this.update({'data.age': age})
+    }
 
     getAttributeLevelBonus(level) {
         console.log(this.data)
@@ -1253,5 +1343,44 @@ export class SWSEActor extends Actor {
                 return 'charisma';
         }
         return undefined;
+    }
+
+    shouldLockAttributes() {
+        return !!this.data.traits.find(trait => trait.name === 'Disable Attribute Modification');
+    }
+
+    _meetsPrereqs(prerequisites) {
+        let meetsPrereqs = true;
+        for(let prerequisite of prerequisites){
+            meetsPrereqs = meetsPrereqs && this._meetsPrereq(prerequisite);
+        }
+
+        return meetsPrereqs;
+    }
+
+    _meetsPrereq(prerequisite) {
+        if(prerequisite.startsWith("ABILITY") || prerequisite.startsWith("TRAIT")){
+            let abilityName = prerequisite.split(":")[1];
+            let ts = this.data.traits.filter(trait => trait.data.data.finalName === abilityName);
+            return ts && ts.length > 0;
+        } else if (prerequisite.startsWith("AGE")){
+            let ageRange = prerequisite.split(":")[1];
+            return this._isAgeInRange(this.data.data.age, ageRange);
+        }
+        return false;
+    }
+
+    _isAgeInRange(age, ageRange) {
+        if(!age){
+            return false;
+        }
+        if(ageRange.includes("-")){
+            let tok = ageRange.split("-");
+            return parseInt(tok[0]) <= age && parseInt(tok[1]) >= age;
+        }else if(ageRange.includes("+")){
+            let tok = ageRange.split("+");
+            return parseInt(tok[0])<= age;
+        }
+        return false;
     }
 }

@@ -32,22 +32,14 @@ export class SWSEItem extends Item {
         
         this.resolveItemName(itemData);
 
+        //TODO add text Description
+        ///console.log(this)
+        this.resolveTextDescription(itemData);
+        this.resolveSourceString(itemData);
 
-        //let textDescription = this.stripHTML(data.description);
-        //data.textDescription = textDescription;
-        // if(data.textDescription !== textDescription){
-        //
-        //     this._pendingUpdate['data.textDescription'] = textDescription;
-        //     //return this.update({'data.textDescription': textDescription});
-        // }
-
-        
-        
         if (this.type === "weapon" || this.type === "armor") this.prepareWeaponOrArmor(itemData);
 
-        if (this.type === "feat") {
-            this.prepareFeatData(itemData);
-        }
+        if (this.type === "feat") this.prepareFeatData(itemData);
 
         if(Object.keys(this._pendingUpdate).length>0){
             return this.update(this._pendingUpdate);
@@ -186,8 +178,6 @@ export class SWSEItem extends Item {
         } catch (e) {
             console.log("mods may not be initialized", e)
         }
-
-        //TODO
     }
 
     resolveItemName(itemData) {
@@ -202,6 +192,20 @@ export class SWSEItem extends Item {
         }
         if(finalName !== itemData.data.finalName) {
             this._pendingUpdate['data.finalName'] = finalName;
+        }
+    }
+    resolveTextDescription(itemData) {
+        let textDescription = this.stripHTML(itemData.data.description);
+
+        if(textDescription !== itemData.data.textDescription) {
+            this._pendingUpdate['data.textDescription'] = textDescription;
+        }
+    }
+    resolveSourceString(itemData) {
+        let sourceString = 'unknown';
+
+        if(sourceString !== itemData.data.sourceString) {
+            this._pendingUpdate['data.sourceString'] = sourceString;
         }
     }
 

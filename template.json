@@ -378,7 +378,8 @@
       "templates": [
         "base",
         "categories",
-        "source"
+        "source",
+        "prerequisites"
       ]
     },
     "weapon": {

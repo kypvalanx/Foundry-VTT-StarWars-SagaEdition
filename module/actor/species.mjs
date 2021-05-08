@@ -156,12 +156,12 @@ export class SpeciesHandler {
             return;
         }
         let bonuses = actorData.species.data.statBonuses;
-        if (actorData.isRuurian) {
-            this._applySpeciesBonuses(actorData, bonuses[actorData.ruurian]);
-        }
-        if (actorData.isMelodie) {
-            this._applySpeciesBonuses(actorData, bonuses[actorData.melodie]);
-        }
+        // if (actorData.isRuurian) {
+        //     this._applySpeciesBonuses(actorData, bonuses[actorData.ruurian]);
+        // }
+        // if (actorData.isMelodie) {
+        //     this._applySpeciesBonuses(actorData, bonuses[actorData.melodie]);
+        // }
     }
 
     _applySpeciesBonuses(actorData, matrix) {

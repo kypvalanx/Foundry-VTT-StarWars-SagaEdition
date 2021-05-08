@@ -1,3 +1,5 @@
+import {filterItemsByType} from "../util.mjs";
+
 /**
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
@@ -102,6 +104,11 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
         });
 
+        html.find("#selectAge").on("click", event => this._selectAge(event, this));
+        html.find("#selectHeight").on("click", event => this._unavailable());
+        html.find("#selectWeight").on("click", event => this._unavailable());
+        html.find("#selectGender").on("click", event => this._unavailable());
+
         html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
         html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
@@ -152,9 +159,79 @@ export class SWSEActorSheet extends ActorSheet {
         // Rollable abilities.
         html.find('.rollable').click(this._onRoll.bind(this));
 
-        html.find('a[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
     }
 
+    async _selectAge(event, sheet) {
+        let options = this.buildAgeDialog(sheet);
+        await Dialog.prompt(options);
+    }
+
+
+    buildAgeDialog(sheet) {
+        let age = sheet.actor.age ? parseInt(sheet.actor.age) : 0;
+        let searchString = "AGE";
+        let ageEffects = filterItemsByType("trait", sheet.actor.items.values())
+            .filter(trait => trait.data.data.prerequisites
+                .reduce((a, b) => {
+                    return a || b.startsWith(searchString)
+                }, false)).map(trait => {return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}})
+        ageEffects.sort(
+            (a, b) =>
+                parseInt(a.range.split("-")[0].replace("+", "")) -
+                parseInt(b.range.split("-")[0].replace("+", "")));
+
+        let traits='';
+        for (let effect of ageEffects) {
+            let {low, high} = this.parseRange(effect.range);
+            let current = age >=low && (age <= high || high === -1) ? ' current':'';
+            traits += `<div class="flex-grow ageRange${current}" low="${low}" high="${high}">${effect.name}: ${effect.range}</div>`;
+        }
+        let content = `<input class="range" id="age" type="text" value="${age}"><div>${traits}</div>`
+
+        return {
+            title: "Select an Attribute Generation Type",
+            content: content,
+            callback: async (html) => {
+                let key = html.find("#age")[0].value;
+                sheet.actor.setAge(key);
+            },
+            render: async (html) => {
+                let ageInput = html.find("#age");
+                this.moveAgeCursor(html);
+                ageInput.on("change", event => {
+                    this.moveAgeCursor(html);
+                })
+            }
+        };
+    }
+
+    moveAgeCursor(html) {
+        let age = parseInt(html.find("#age")[0].value);
+        let rangeDivs = html.find(".ageRange")
+        for (let div of rangeDivs) {
+            let low = parseInt($(div).attr("low"));
+            let high = parseInt($(div).attr("high"));
+
+            if (div.classList.contains("cursor")) {
+                div.classList.remove("cursor")
+            }
+            if (age >= low && (age <= high || high === -1)) {
+                div.classList.add("cursor")
+            }
+        }
+    }
+
+    parseRange(range) {
+        if (range.includes("-")) {
+            let tok = range.split("-");
+            return {low: parseInt(tok[0]), high: parseInt(tok[1])};
+        }
+        return {low: parseInt(range.replace("+", "")), high: -1};
+    }
+    getPrerequisiteByName(trait, searchString ) {
+        return trait.data.data.prerequisites.filter(prepreq => prepreq.startsWith(searchString))[0];
+    }
 
     async _selectAttributeGeneration(event, sheet) {
         let genType = sheet.actor.getAttributeGenerationType();
@@ -713,9 +790,9 @@ export class SWSEActorSheet extends ActorSheet {
 
             let greetingString;
             let optionString = "";
-            if (Object.keys(options).length === 0){
+            if (Object.keys(options).length === 0) {
                 greetingString = choice.noOptions;
-            } else if (Object.keys(options).length === 1){
+            } else if (Object.keys(options).length === 1) {
                 greetingString = choice.oneOption;
                 let optionLabel = Object.keys(options)[0];
                 optionString = `<div id="choice" value="${optionLabel}">${optionLabel}</div>`
@@ -733,7 +810,6 @@ export class SWSEActorSheet extends ActorSheet {
             }
 
 
-
             let content = `<p>${greetingString}</p>${optionString}`;
 
             await Dialog.prompt({
@@ -743,7 +819,7 @@ export class SWSEActorSheet extends ActorSheet {
                     let choice = html.find("#choice")[0];
                     let key = choice?.value;
 
-                    if(!key){
+                    if (!key) {
                         key = choice?.innerText;
                     }
                     let selectedChoice = options[key];
@@ -1425,5 +1501,12 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
         return feats;
+    }
+
+    _unavailable() {
+        Dialog.confirm({
+            title: "Sorry this content isn't finished.",
+            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know."
+        })
     }
 }
