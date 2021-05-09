@@ -204,7 +204,7 @@ export class SWSEActor extends Actor {
         let activeFeats = [];
         let removeFeats = [];
         for (let feat of feats) {
-            let doesFail = this.meetsFeatPrerequisites(feat.data.data.prerequisites, false).doesFail;
+            let doesFail = this.meetsPrerequisites(feat.data.data.prerequisites, false).doesFail;
             if (!doesFail) {
                 activeFeats.push(feat)
                 prerequisites.feats.push(feat.name.toLowerCase());
@@ -846,7 +846,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    meetsFeatPrerequisites(prereqs, notifyOnFailure = true) {
+    meetsPrerequisites(prereqs, notifyOnFailure = true) {
         let failureList = []; //TODO return this with text failures
         for (let prereq of prereqs) {
             prereq = prereq.toLowerCase().replace(" species trait", "").replace(" feat", "").trim();
@@ -854,7 +854,7 @@ export class SWSEActor extends Actor {
             let result = /^\(([\w\s()]*)\) or \(([\w\s()]*)\)$/.exec(prereq);
             if (result !== null) {
 
-                if (this.meetsFeatPrerequisites([result[1]], false).doesFail && this.meetsFeatPrerequisites([result[2]], false).doesFail) {
+                if (this.meetsPrerequisites([result[1]], false).doesFail && this.meetsPrerequisites([result[2]], false).doesFail) {
 
                     failureList.push({fail: true, message: prereq});
                 }
@@ -939,7 +939,7 @@ export class SWSEActor extends Actor {
                 let toks = prereq.split(" or ");
                 let isOr = false;
                 for (let tok of toks) {
-                    isOr = isOr || this.meetsFeatPrerequisites([tok], false).doesFail;
+                    isOr = isOr || this.meetsPrerequisites([tok], false).doesFail;
                 }
                 if (!(isOr)) {
                     failureList.push({fail: true, message: prereq});
@@ -1110,6 +1110,174 @@ export class SWSEActor extends Actor {
         }
 
         return meetsPrereqs;
+    }
+
+    _fromOrdinal(numberWord) {
+        let num = numberWord.toLowerCase();
+        if (num === 'zero') {
+            return 0;
+        } else if (num === 'one') {
+            return 1;
+        } else if (num === 'two') {
+            return 2;
+        } else if (num === 'three') {
+            return 3;
+        } else if (num === 'four') {
+            return 4;
+        } else {
+            console.error(`${numberWord} is unrecognized`);
+        }
+        return undefined;
+    }
+
+    //TODO clean this shit up move to actor and merge
+    meetsClassPrereqs(prerequisites) {
+        let failureList = [];
+        for (let [key, value] of Object.entries(prerequisites.prerequisites)) {
+            value = value.trim();
+            key = key.trim();
+            if (key.toLowerCase() === 'trained skills') {
+                this.checkTrainedSkills(value, failureList, key);
+            } else if (key.toLowerCase() === 'minimum level') {
+                if (this.data.prerequisites.charLevel < parseInt(value)) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (key.toLowerCase() === 'base attack bonus') {
+                if (this.data.prerequisites.bab < parseInt(value)) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (key.toLowerCase() === 'species') {
+                if (this.data.prerequisites.species === value.toLowerCase) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (key.toLowerCase() === 'force techniques') {
+                let result = /at least (\w*)/.exec(value.toLowerCase());
+                if (result != null) {
+                    if (this.data.prerequisites.techniques.length < this._fromOrdinal(result[1])) {
+                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                    }
+                }
+            } else if (key.toLowerCase() === 'force powers') {
+                if (!this.data.prerequisites.powers.includes(value.trim().toLowerCase())) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (key.toLowerCase() === 'droid systems') {
+                if (!this.data.prerequisites.equippedItems.includes(value.trim().toLowerCase())) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (key.toLowerCase() === 'feats') {
+                this.checkFeats(value, failureList, key);
+            } else if (key.toLowerCase() === 'talents' || key.toLowerCase() === 'talent') {
+                this.checkTalents(value, failureList, key);
+            } else if (key.toLowerCase() === 'special') {
+                if (value.toLowerCase() === 'must be a droid.' || value.toLowerCase() === 'must be a droid') {
+                    if (!this.data.prerequisites.isDroid) {
+                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                    }
+                } else {
+                    failureList.push({fail: false, message: `<b>${key}:</b> ${value}`});
+                }
+
+            } else {
+                console.error("UNIDENTIFIED PREREQ", "[" + key + "]", value);
+                failureList.push({fail: true, message: `<b>${key}:</b> ${value} [UNIDENTIFIED]`});
+            }
+        }
+        let doesFail = false;
+        for (let fail of failureList) {
+            if (fail.fail === true) {
+                doesFail = true;
+                break;
+            }
+        }
+
+        return {doesFail: doesFail, failureList: failureList};
+    }
+
+    checkTrainedSkills(value, failureList, key) {
+        let toks = [];
+        if (value.includes(', ')) {
+            toks = value.split(", ");
+        } else if (value.includes(" and ")) {
+            toks = value.split(" and ");
+        } else {
+            toks[0] = value;
+        }
+
+        for (let tok of toks) {
+            tok = /([\w\s()]*)/.exec(tok)[1].trim();
+            if (!this.data.prerequisites.trainedSkills.includes(tok.toLowerCase())) {
+                failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
+            }
+        }
+    }
+
+
+    checkTalents(value, failureList, key) {
+        let result = /(?:at least|any) (\w*) talent(?:s)? from ([\s\w,]*)(?:\.)?/.exec(value.toLowerCase());
+        if (result != null) {
+            let talentReq = false;
+            let toks = [];
+            if (result[2].includes(',')) {
+                if (result[2].includes(' or ')) {
+                    toks = result[2].split(",");
+                } else {
+                    console.log(toks);
+                }
+            } else if (result[2].includes(' or ')) {
+                toks = result[2].split(" or ");
+            } else {
+                toks[0] = result[2];
+            }
+
+            for (let tok of toks) {
+                tok = /(?: )?(?:or )?(?:either )?(?:the )?([\s\w]*)/.exec(tok)[1];
+                if (this.data.prerequisites.talentTrees[tok] >= this._fromOrdinal(result[1])) {
+                    talentReq = true;
+                }
+            }
+            if (!talentReq) {
+                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+            }
+
+        } else {
+            let result = /at least (\w*) force talents/.exec(value.toLowerCase());
+
+            if (result != null) {
+                if (this.data.prerequisites.forceTalentTreesCount < this._fromOrdinal(result[1])) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+                }
+            } else if (!this.data.prerequisites.talents.includes(value.toLowerCase())) {
+                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+            }
+        }
+    }
+
+    checkFeats(value, failureList, key) {
+        if (value.includes(',')) {
+            let toks = value.split(",");
+            for (let tok of toks) {
+                if (!this._hasFeat(tok)) {
+                    failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
+                }
+            }
+
+        } else if (!this.data.prerequisites.feats.includes(value.toLowerCase())) {
+            failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
+        }
+    }
+
+    _hasFeat(value) {
+        if (value.includes(" or ")) {
+            let toks = value.split(" or ");
+            let hasFeat = false;
+            for (let tok of toks) {
+                hasFeat = hasFeat || this.data.prerequisites.feats.includes(tok.trim().toLowerCase());
+            }
+            return hasFeat;
+        } else {
+            return this.data.prerequisites.feats.includes(value.trim().toLowerCase());
+        }
     }
 
     resolveClassFeatures(actorData, classFeatures) {

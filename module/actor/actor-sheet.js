@@ -175,16 +175,18 @@ export class SWSEActorSheet extends ActorSheet {
             .filter(trait => trait.data.data.prerequisites
                 .reduce((a, b) => {
                     return a || b.startsWith(searchString)
-                }, false)).map(trait => {return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}})
+                }, false)).map(trait => {
+                return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}
+            })
         ageEffects.sort(
             (a, b) =>
                 parseInt(a.range.split("-")[0].replace("+", "")) -
                 parseInt(b.range.split("-")[0].replace("+", "")));
 
-        let traits='';
+        let traits = '';
         for (let effect of ageEffects) {
             let {low, high} = this.parseRange(effect.range);
-            let current = age >=low && (age <= high || high === -1) ? ' current':'';
+            let current = age >= low && (age <= high || high === -1) ? ' current' : '';
             traits += `<div class="flex-grow ageRange${current}" low="${low}" high="${high}">${effect.name}: ${effect.range}</div>`;
         }
         let content = `<input class="range" id="age" type="text" value="${age}"><div>${traits}</div>`
@@ -229,7 +231,8 @@ export class SWSEActorSheet extends ActorSheet {
         }
         return {low: parseInt(range.replace("+", "")), high: -1};
     }
-    getPrerequisiteByName(trait, searchString ) {
+
+    getPrerequisiteByName(trait, searchString) {
         return trait.data.data.prerequisites.filter(prepreq => prepreq.startsWith(searchString))[0];
     }
 
@@ -522,230 +525,223 @@ export class SWSEActorSheet extends ActorSheet {
         }
         const item = await Item.fromDropData(data);
 
-        //console.log("Item Dropped: ",item);
-
-        let additionalEntitiesToAdd = [];
+        let entitiesToAdd = [];
         let context = {};
 
         //only one species allowed
         if (item.data.type === "species") {
-            //TODO apply species items
-            if (this.actor.data.species != null) {
-                new Dialog({
-                    title: "Species Selection",
-                    content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                return;
-            }
-
-            await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, item.data.data.categories);
-            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this._getFeatsFromCategories(item.data.data.categories));
-            await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, item.data.data.attributes.items);
-
+            entitiesToAdd.push(...await this.addSpecies(item));
         } else if (item.data.type === "class") {
-            let meetsPrereqs = this._meetsClassPrereqs(item.data.data.prerequisites);
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                return;
-            } else if (!meetsPrereqs.doesFail && meetsPrereqs.failureList.length > 0) {
-                new Dialog({
-                    title: "You MAY Meet the Prerequisites!",
-                    content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-            }
-            if (!item.data.data.prerequisites.isPrestige) {
-                if (item.data.data.feats.feats.length > 0) {
-                    await this.addClassFeats(item, additionalEntitiesToAdd);
-                }
-                item.data.data.attributes.first = this.actor.data.classes.length === 0;
-
-                if (item.data.data.attributes.first) {
-                    item.data.data.health.rolledHp = item.data.data.health.firstLevel;
-                    context.isFirstLevel = true;
-                }
-
-            }
+            entitiesToAdd.push(...await this.addClass(item, context));
         } else if (item.data.type === "feat") {
-            let possibleFeatTypes = [];
-
-            let optionString = "";
-            for (let category of item.data.data.bonusFeatCategories) {
-                if (this.actor.data.availableItems[category] > 0) {
-                    possibleFeatTypes.push(category);
-                    optionString += `<option value="${category}">${category}</option>`;
-                }
-            }
-
-            if (possibleFeatTypes.length > 1) {
-                let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused feat source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleFeatTypes = [key];
-                    }
-                });
-            }
-            let filteredCategories = [];
-            for (let category of item.data.data.categories) {
-                if (!category.endsWith(" Bonus Feats")) {
-                    possibleFeatTypes.push(category);
-                }
-            }
-            filteredCategories.push(...possibleFeatTypes);
-
-
-            item.data.data.categories = filteredCategories;
-
-
-            if (item.data.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if (meetsPrereqs.doesFail) {
-                    return;
-                }
-            }
-        } else if (item.data.type === "forcePower" || item.data.type === "forceTechnique" || item.data.type === "forceSecret") {
-
-            if (item.data.type === "forceSecret") {
-                if (!this.actor.data.availableItems["Force Secrets"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Secrets",
-                        content: "You can't take any more Force Secrets",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            } else if (item.data.type === "forceTechnique") {
-                if (!this.actor.data.availableItems["Force Techniques"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Techniques",
-                        content: "You can't take any more Force Techniques",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            } else if (item.data.type === "forcePower") {
-                if (!this.actor.data.availableItems["Force Powers"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Powers",
-                        content: "You can't take any more Force Powers",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            }
-
-
-            if (item.data.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if (meetsPrereqs.doesFail) {
-                    return;
-                }
-            }
+            entitiesToAdd.push(...await this.addFeat(item));
+        } else if (item.data.type === "forceSecret") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Secrets"));
+        } else if (item.data.type === "forceTechnique") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
+        } else if (item.data.type === "forcePower") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
         } else if (item.data.type === "talent") {
-            let possibleTalentTrees = [];
-            let optionString = "";
+            entitiesToAdd.push(...await this.addTalent(item));
+        }
+        //await this.activateChoices(item, entitiesToAdd, context);
+        await super._onDropItemCreate(entitiesToAdd.map(entity => entity.data));
+    }
 
-            if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
-                for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
-                    if (id.includes("Talent") && !id.includes("Force") && item > 0) {
-                        optionString += `<option value="${id}">${id}</option>`
-                        possibleTalentTrees.push(id);
-                    }
-                }
-            } else {
-                let pattern = /([\w\s\d-]*) Talent Tree(?:s)?/;
-                for (let talentTree of item.data.data.categories) {
-                    let type = pattern.exec(talentTree);
-                    if (type) {
-                        talentTree = type[1] + " Talents";
-                        let count = this.actor.data.availableItems[talentTree];
-                        if (count && count > 0) {
-                            optionString += `<option value="${talentTree}">${talentTree}</option>`
-                            possibleTalentTrees.push(talentTree);
-                        }
-                    }
+
+    async addTalent(item) {
+        let entitiesToAdd = [];
+        let possibleTalentTrees = [];
+        let optionString = "";
+
+        if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
+            for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
+                if (id.includes("Talent") && !id.includes("Force") && item > 0) {
+                    optionString += `<option value="${id}">${id}</option>`
+                    possibleTalentTrees.push(id);
                 }
             }
-            // if(!isForce && this.actor.data.data.bonusTalentTree && this.actor.data.data.bonusTalentTree.length > 0){
-            //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
-            // }
-
-            if (possibleTalentTrees.length === 0) {
-                await Dialog.prompt({
-                    title: "You can't take any more talents of that type",
-                    content: "You can't take any more talents of that type",
-                    callback: () => {
+        } else {
+            let pattern = /([\w\s\d-]*) Talent Tree(?:s)?/;
+            for (let talentTree of item.data.data.categories) {
+                let type = pattern.exec(talentTree);
+                if (type) {
+                    talentTree = type[1] + " Talents";
+                    let count = this.actor.data.availableItems[talentTree];
+                    if (count && count > 0) {
+                        optionString += `<option value="${talentTree}">${talentTree}</option>`
+                        possibleTalentTrees.push(talentTree);
                     }
-                });
-                return;
-            } else if (possibleTalentTrees.length > 1) {
-                let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused talent source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleTalentTrees = [key];
-                    }
-                });
-            }
-            let filteredCategories = [];
-            for (let category of item.data.data.categories) {
-                if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
-                    filteredCategories.push(category);
-                }
-            }
-            filteredCategories.push(...possibleTalentTrees);
-
-
-            item.data.data.talentTreeSource = possibleTalentTrees[0];
-
-            if (item.data.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites);
-                if (meetsPrereqs.doesFail) {
-                    return;
                 }
             }
         }
-        await this.activateChoices(item, additionalEntitiesToAdd, context);
-        //await this._addItemsFromItems(actorData);
-        additionalEntitiesToAdd.push(item)
-        console.log(additionalEntitiesToAdd)
-        await super._onDropItemCreate(additionalEntitiesToAdd.map(entity => entity.data));
+        // if(!isForce && this.actor.data.data.bonusTalentTree && this.actor.data.data.bonusTalentTree.length > 0){
+        //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
+        // }
+
+        if (possibleTalentTrees.length === 0) {
+            await Dialog.prompt({
+                title: "You can't take any more talents of that type",
+                content: "You can't take any more talents of that type",
+                callback: () => {
+                }
+            });
+            return [];
+        } else if (possibleTalentTrees.length > 1) {
+            let content = `<p>Select an unused talent source.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+            await Dialog.prompt({
+                title: "Select an unused talent source.",
+                content: content,
+                callback: async (html) => {
+                    let key = html.find("#choice")[0].value;
+                    possibleTalentTrees = [key];
+                }
+            });
+        }
+
+        item.data.data.talentTreeSource = possibleTalentTrees[0];
+
+        return await this.checkPrerequisitesAndResolveOptions(item);
     }
 
+    async addForceItem(item, itemType) {
+        if (!this.actor.data.availableItems[itemType]) {
+            await Dialog.prompt({
+                title: `You can't take any more ${itemType}`,
+                content: `You can't take any more ${itemType}`,
+                callback: () => {
+                }
+            });
+            return [];
+        }
+        return await this.checkPrerequisitesAndResolveOptions(item);
+    }
+
+    async checkPrerequisitesAndResolveOptions(item) {
+        if (item.data.data.prerequisites) {
+            let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisites, true);
+            if (meetsPrereqs.doesFail) {
+                return [];
+            }
+        }
+        let entitiesToAdd = [item];
+        await this.activateChoices(item, entitiesToAdd, {});
+        return entitiesToAdd
+    }
+
+    async addFeat(item) {
+        let possibleFeatTypes = [];
+
+        let optionString = "";
+        for (let category of item.data.data.bonusFeatCategories) {
+            if (this.actor.data.availableItems[category] > 0) {
+                possibleFeatTypes.push(category);
+                optionString += `<option value="${category}">${category}</option>`;
+            }
+        }
+
+        if (possibleFeatTypes.length > 1) {
+            let content = `<p>Select an unused feat type.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+            await Dialog.prompt({
+                title: "Select an unused feat source.",
+                content: content,
+                callback: async (html) => {
+                    let key = html.find("#choice")[0].value;
+                    possibleFeatTypes = [key];
+                }
+            });
+        }
+
+        for (let category of item.data.data.categories) {
+            if (!category.endsWith(" Bonus Feats")) {
+                possibleFeatTypes.push(category);
+            }
+        }
+
+        item.data.data.categories = possibleFeatTypes;
+
+        return await this.checkPrerequisitesAndResolveOptions(item);
+    }
+
+    async addClass(item) {
+
+        let meetsPrereqs = this.actor.meetsClassPrereqs(item.data.data.prerequisites);
+        if (meetsPrereqs.doesFail) {
+            new Dialog({
+                title: "You Don't Meet the Prerequisites!",
+                content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
+        if (meetsPrereqs.failureList.length > 0) {
+            new Dialog({
+                title: "You MAY Meet the Prerequisites!",
+                content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+        }
+        let entities = [];
+        entities.push(item)
+        if (item.data.data.prerequisites.isPrestige) {
+            return [];
+        }
+        if (item.data.data.feats.feats.length > 0) {
+            entities.push(...await this.addClassFeats(item));
+        }
+        item.data.data.attributes.first = this.actor.data.classes.length === 0;
+
+        let context = {};
+        if (item.data.data.attributes.first) {
+            item.data.data.health.rolledHp = item.data.data.health.firstLevel;
+            context.isFirstLevel = true;
+        }
+
+        await this.activateChoices(item, entities, context);
+        return entities;
+    }
+
+    async addSpecies(item) {
+
+        if (this.actor.data.species != null) {
+            new Dialog({
+                title: "Species Selection",
+                content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
+
+        let entities = []
+        entities.push(item);
+        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.categories);
+        await this.actor.addItemsFromCompendium('feat', item, entities, this._getFeatsFromCategories(item.data.data.categories));
+        await this.actor.addItemsFromCompendium('item', item, entities, item.data.data.attributes.items);
+        await this.activateChoices(item, entities, {});
+        return entities;
+
+    }
 
     async moveExistingItem(data, ev) {
         if (data.itemId) {
@@ -842,7 +838,8 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
-    async addClassFeats(item, additionalEntitiesToAdd) {
+    async addClassFeats(item) {
+        let additionalEntitiesToAdd = [];
         let feats = item.data.data.feats.feats;
         let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
         if (nonPrestigeClasses.length === 0) {
@@ -878,6 +875,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             });
         }
+        return additionalEntitiesToAdd;
     }
 
     /* -------------------------------------------- */
@@ -1041,173 +1039,8 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-    //TODO clean this shit up
-    _meetsClassPrereqs(prerequisites) {
-        let failureList = [];
-        for (let [key, value] of Object.entries(prerequisites.prerequisites)) {
-            value = value.trim();
-            key = key.trim();
-            if (key.toLowerCase() === 'trained skills') {
-                this.checkTrainedSkills(value, failureList, key);
-            } else if (key.toLowerCase() === 'minimum level') {
-                if (this.actor.data.prerequisites.charLevel < parseInt(value)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'base attack bonus') {
-                if (this.actor.data.prerequisites.bab < parseInt(value)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'species') {
-                if (this.actor.data.prerequisites.species === value.toLowerCase) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'force techniques') {
-                let result = /at least (\w*)/.exec(value.toLowerCase());
-                if (result != null) {
-                    if (this.actor.data.prerequisites.techniques.length < this._fromOrdinal(result[1])) {
-                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                    }
-                }
-            } else if (key.toLowerCase() === 'force powers') {
-                if (!this.actor.data.prerequisites.powers.includes(value.trim().toLowerCase())) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'droid systems') {
-                if (!this.actor.data.prerequisites.equippedItems.includes(value.trim().toLowerCase())) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'feats') {
-                this.checkFeats(value, failureList, key);
-            } else if (key.toLowerCase() === 'talents' || key.toLowerCase() === 'talent') {
-                this.checkTalents(value, failureList, key);
-            } else if (key.toLowerCase() === 'special') {
-                if (value.toLowerCase() === 'must be a droid.' || value.toLowerCase() === 'must be a droid') {
-                    if (!this.actor.data.prerequisites.isDroid) {
-                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                    }
-                } else {
-                    failureList.push({fail: false, message: `<b>${key}:</b> ${value}`});
-                }
-
-            } else {
-                console.error("UNIDENTIFIED PREREQ", "[" + key + "]", value);
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value} [UNIDENTIFIED]`});
-            }
-        }
-        let doesFail = false;
-        for (let fail of failureList) {
-            if (fail.fail === true) {
-                doesFail = true;
-                break;
-            }
-        }
-
-        return {doesFail: doesFail, failureList: failureList};
-    }
-
-    checkTalents(value, failureList, key) {
-        let result = /(?:at least|any) (\w*) talent(?:s)? from ([\s\w,]*)(?:\.)?/.exec(value.toLowerCase());
-        if (result != null) {
-            let talentReq = false;
-            let toks = [];
-            if (result[2].includes(',')) {
-                if (result[2].includes(' or ')) {
-                    toks = result[2].split(",");
-                } else {
-                    console.log(toks);
-                }
-            } else if (result[2].includes(' or ')) {
-                toks = result[2].split(" or ");
-            } else {
-                toks[0] = result[2];
-            }
-
-            for (let tok of toks) {
-                tok = /(?: )?(?:or )?(?:either )?(?:the )?([\s\w]*)/.exec(tok)[1];
-                if (this.actor.data.prerequisites.talentTrees[tok] >= this._fromOrdinal(result[1])) {
-                    talentReq = true;
-                }
-            }
-            if (!talentReq) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-            }
-
-        } else {
-            let result = /at least (\w*) force talents/.exec(value.toLowerCase());
-
-            if (result != null) {
-                if (this.actor.data.prerequisites.forceTalentTreesCount < this._fromOrdinal(result[1])) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (!this.actor.data.prerequisites.talents.includes(value.toLowerCase())) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-            }
-        }
-    }
-
-    checkFeats(value, failureList, key) {
-        if (value.includes(',')) {
-            let toks = value.split(",");
-            for (let tok of toks) {
-                if (!this._hasFeat(tok)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
-                }
-            }
-
-        } else if (!this.actor.data.prerequisites.feats.includes(value.toLowerCase())) {
-            failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-        }
-    }
-
-    checkTrainedSkills(value, failureList, key) {
-        let toks = [];
-        if (value.includes(', ')) {
-            toks = value.split(", ");
-        } else if (value.includes(" and ")) {
-            toks = value.split(" and ");
-        } else {
-            toks[0] = value;
-        }
-
-        for (let tok of toks) {
-            tok = /([\w\s()]*)/.exec(tok)[1].trim();
-            if (!this.actor.data.prerequisites.trainedSkills.includes(tok.toLowerCase())) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
-            }
-        }
-    }
 
 
-    _fromOrdinal(numberWord) {
-        let num = numberWord.toLowerCase();
-        if (num === 'zero') {
-            return 0;
-        } else if (num === 'one') {
-            return 1;
-        } else if (num === 'two') {
-            return 2;
-        } else if (num === 'three') {
-            return 3;
-        } else if (num === 'four') {
-            return 4;
-        } else {
-            console.error(`${numberWord} is unrecognized`);
-        }
-        return undefined;
-    }
-
-    _hasFeat(value) {
-        if (value.includes(" or ")) {
-            let toks = value.split(" or ");
-            let hasFeat = false;
-            for (let tok of toks) {
-                hasFeat = hasFeat || this.actor.data.prerequisites.feats.includes(tok.trim().toLowerCase());
-            }
-            return hasFeat;
-        } else {
-            return this.actor.data.prerequisites.feats.includes(value.trim().toLowerCase());
-        }
-    }
 
     async _explodeOptions(options) {
         let resolvedOptions = {};
