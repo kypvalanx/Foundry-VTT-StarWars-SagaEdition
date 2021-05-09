@@ -799,8 +799,9 @@ export class SWSEActor extends Actor {
             }
 
             if (payload !== "") {
-                data.payload = payload;
+                entity.setPayload(payload);
             }
+            entity.setSourceString();
             notificationMessage = notificationMessage + `<li>${entry.name.titleCase() + (payload !== "" ? ` (${payload})` : "")}</li>`
             entities.push(entity);
         }

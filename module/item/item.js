@@ -35,7 +35,6 @@ export class SWSEItem extends Item {
         //TODO add text Description
         ///console.log(this)
         this.resolveTextDescription(itemData);
-        this.resolveSourceString(itemData);
 
         if (this.type === "weapon" || this.type === "armor") this.prepareWeaponOrArmor(itemData);
 
@@ -201,10 +200,10 @@ export class SWSEItem extends Item {
             this._pendingUpdate['data.textDescription'] = textDescription;
         }
     }
-    resolveSourceString(itemData) {
-        //console.log(itemData.data, itemData.data)
+    setSourceString() {
         let sourceString='';
 
+        let itemData = this.data;
         if(itemData.data.supplier) {
             sourceString = `${itemData.data.supplier.type}, ${itemData.data.supplier.name}`;
         }
@@ -217,10 +216,7 @@ export class SWSEItem extends Item {
             //console.log(itemData.data.prerequisites)
         }
 
-        if(sourceString !== itemData.data.sourceString) {
-            console.log(sourceString, itemData.data.sourceString)
-            this._pendingUpdate['data.sourceString'] = sourceString;
-        }
+            this.data.data.sourceString = sourceString;
     }
 
     setPayload(payload) {
