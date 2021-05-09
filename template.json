@@ -341,6 +341,7 @@
         "finalName": "",
         "description": "",
         "textDescription": "",
+        "sourceString": "",
         "attributes": {},
         "choices": [],
         "payload": ""

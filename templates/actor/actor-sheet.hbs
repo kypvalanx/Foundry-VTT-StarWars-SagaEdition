@@ -80,8 +80,8 @@
                                              title="{{localize "Open Compendium"}}">Add Species
                                         </div>
                                         <div class="species-controls flexcol">
-                                            <a class="species-control add" title="{{localize "Create Species"}}"><i
-                                                    class="fas fa-plus"></i></a>
+<!--                                            <a class="species-control add" title="{{localize "Create Species"}}"><i-->
+<!--                                                    class="fas fa-plus"></i></a>-->
                                             <a data-action="compendium" data-action-target="world.swse-species"
                                                title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
                                         </div>
@@ -257,7 +257,7 @@
                                 {{#each actor.traits as |trait id|}}
                                     {{#unless trait.hide}}
                                         <tr>
-                                            <td title="{{trait.data.textDescription}}">{{trait.data.finalName}}</td>
+                                            <td title="{{trait.data.textDescription}}, Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
                                         </tr>
                                     {{/unless}}
                                 {{/each}}

@@ -113,7 +113,6 @@ export class SWSEActor extends Actor {
             possibleTraits = possibleTraits.filter(possible => !activeTraits.includes(possible));
         }
 
-        console.log(activeTraits)
         return activeTraits.sort((a,b) => {
             let x = a.data.data.finalName.toLowerCase();
             let y = b.data.data.finalName.toLowerCase();
@@ -294,13 +293,37 @@ export class SWSEActor extends Actor {
                 attribute.base = 10;
             }
             let bonuses = [];
+            let classLevelBonuses = []; //TODO WIRE ME UP
+            let speciesBonuses = [];
+            let ageBonuses = [];
+            let equipmentBonuses = []; //TODO WIRE ME UP
+            let buffBonuses = []; //TODO WIRE ME UP
+            let customBonuses = []; //TODO WIRE ME UP
             for(let trait of attributeTraits){
                 let result = /([+-\\d]*) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name)
                 if(result[2].toLowerCase() === longKey){
                     //TODO add them to correct variables for tooltip
+                    if(trait.data.data.prerequisites && trait.data.data.prerequisites.length > 0){
+                        let prerequisite = trait.data.data.prerequisites[0];
+                        if(/ABILITY:(?:Child|Young adult|Adult|Middle age|Old|Venerable)/.exec(prerequisite)){
+                            ageBonuses.push(result[1]);
+                            continue;
+                        }
+                    }
+                    if(trait.data.data.supplier?.type === 'species'){
+                        speciesBonuses.push(result[1]);
+                        continue;
+                    }
+                    console.log(attributeTraits.length, trait)
                     bonuses.push(result[1])
                 }
             }
+            attribute.classLevelBonus = resolveValueArray(classLevelBonuses, this);
+            attribute.speciesBonus = resolveValueArray(speciesBonuses, this);
+            attribute.ageBonus = resolveValueArray(ageBonuses, this);
+            attribute.equipmentBonus = resolveValueArray(equipmentBonuses, this);
+            attribute.buffBonus = resolveValueArray(buffBonuses, this);
+            attribute.customBonus = resolveValueArray(customBonuses, this);
 
             bonuses.push(attribute.classLevelBonus);
             bonuses.push(attribute.speciesBonus);

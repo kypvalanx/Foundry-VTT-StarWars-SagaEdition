@@ -202,9 +202,23 @@ export class SWSEItem extends Item {
         }
     }
     resolveSourceString(itemData) {
-        let sourceString = 'unknown';
+        //console.log(itemData.data, itemData.data)
+        let sourceString='';
+
+        if(itemData.data.supplier) {
+            sourceString = `${itemData.data.supplier.type}, ${itemData.data.supplier.name}`;
+        }
+
+        if(itemData.data.prerequisites && itemData.data.prerequisites.length > 0){
+            for(let prereq of itemData.data.prerequisites){
+                let toks = prereq.split(":");
+                sourceString = `${toks[0].toLowerCase()}, ${toks[1]}`;
+            }
+            //console.log(itemData.data.prerequisites)
+        }
 
         if(sourceString !== itemData.data.sourceString) {
+            console.log(sourceString, itemData.data.sourceString)
             this._pendingUpdate['data.sourceString'] = sourceString;
         }
     }
