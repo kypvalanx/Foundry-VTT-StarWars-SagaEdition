@@ -32,10 +32,6 @@ export class SWSEItem extends Item {
         
         this.resolveItemName(itemData);
 
-        //TODO add text Description
-        ///console.log(this)
-        this.resolveTextDescription(itemData);
-
         if (this.type === "weapon" || this.type === "armor") this.prepareWeaponOrArmor(itemData);
 
         if (this.type === "feat") this.prepareFeatData(itemData);
@@ -193,7 +189,8 @@ export class SWSEItem extends Item {
             this._pendingUpdate['data.finalName'] = finalName;
         }
     }
-    resolveTextDescription(itemData) {
+    setTextDescription() {
+        let itemData = this.data;
         let textDescription = this.stripHTML(itemData.data.description);
 
         if(textDescription !== itemData.data.textDescription) {
@@ -213,7 +210,6 @@ export class SWSEItem extends Item {
                 let toks = prereq.split(":");
                 sourceString = `${toks[0].toLowerCase()}, ${toks[1]}`;
             }
-            //console.log(itemData.data.prerequisites)
         }
 
             this.data.data.sourceString = sourceString;

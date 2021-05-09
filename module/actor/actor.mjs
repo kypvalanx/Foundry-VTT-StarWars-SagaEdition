@@ -802,6 +802,7 @@ export class SWSEActor extends Actor {
                 entity.setPayload(payload);
             }
             entity.setSourceString();
+            entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entry.name.titleCase() + (payload !== "" ? ` (${payload})` : "")}</li>`
             entities.push(entity);
         }
