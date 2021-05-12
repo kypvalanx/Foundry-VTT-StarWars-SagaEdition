@@ -1543,6 +1543,9 @@ export class SWSEActor extends Actor {
         } else if (prerequisite.startsWith("AGE")){
             let ageRange = prerequisite.split(":")[1];
             return this._isAgeInRange(this.data.data.age, ageRange);
+        }else if (prerequisite.startsWith("GENDER")){
+            let sex = prerequisite.split(":")[1];
+            return this.data.data.sex.toLowerCase() === sex.toLowerCase();
         }
         return false;
     }

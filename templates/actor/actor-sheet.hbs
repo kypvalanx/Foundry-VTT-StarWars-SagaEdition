@@ -257,7 +257,7 @@
                                 {{#each actor.traits as |trait id|}}
                                     {{#unless trait.hide}}
                                         <tr>
-                                            <td title="{{trait.data.textDescription}}, Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
+                                            <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
                                         </tr>
                                     {{/unless}}
                                 {{/each}}

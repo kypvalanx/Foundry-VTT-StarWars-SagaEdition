@@ -196,7 +196,7 @@ export class SWSEActorSheet extends ActorSheet {
         if(traits === ''){
             traits = `<div>This species has no traits related to age.</div>`;
         }
-        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" type="number" value="${age}"><div>${traits}</div>`
+        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"><div>${traits}</div>`
 
         return {
             title: "Age Selection",
@@ -215,7 +215,6 @@ export class SWSEActorSheet extends ActorSheet {
         };
     }
     buildGenderDialog(sheet) {
-        console.log(sheet.actor.data.data)
         let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
         let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
         let searchString = "GENDER";
@@ -242,9 +241,9 @@ export class SWSEActorSheet extends ActorSheet {
             traits = `<div>This species has no traits related to sex.</div>`;
         }
 
-        let content = `<p>Enter your sex, some species have traits tied to sex.  Optionally, enter your gender, this will be displayed throughout your sheet.</p>
-<input class="range" id="sex" type="text" value="${sex}">
-<input class="range" id="gender" type="text" value="${gender}">
+        let content = `<p>Enter your sex, some species have traits tied to sex.  Optionally, enter your gender. If included it will be displayed throughout your sheet instead of sex.</p>
+<input class="range" id="sex" type="text" placeholder="Sex" value="${sex}">
+<input class="range" id="gender" type="text" placeholder="Gender" value="${gender}">
 <div>${traits}</div>`
 
         return {
