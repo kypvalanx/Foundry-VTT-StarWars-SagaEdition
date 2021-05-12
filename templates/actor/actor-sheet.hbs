@@ -40,8 +40,8 @@
                             <button class="flex-grow" name="gender" id="selectGender" {{#if
                                     actor.species}}title="Select gender." {{/if}} {{#unless actor.species}}disabled
                                     title="Select species before selecting gender."{{/unless}}>{{#if
-                                    actor.gender}}{{actor.gender}}{{/if}}{{#unless actor.gender}}
-                                Select Gender{{/unless}}</button>
+                                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless actor.data.gender}}{{#if actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
+                                Select Gender{{/unless}}{{/unless}}</button>
                             <button class="flex-grow" name="height" id="selectWeight" {{#if
                                     actor.species}}title="Select weight." {{/if}} {{#unless actor.species}}disabled
                                     title="Select species before selecting weight."{{/unless}}>{{#if

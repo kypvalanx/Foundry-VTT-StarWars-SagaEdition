@@ -291,7 +291,10 @@
           }
         },
         "classes": [],
-        "traits": []
+        "traits": [],
+        "age": 0,
+        "gender": "",
+        "genderDisplay": ""
       }
     },
     "character": {

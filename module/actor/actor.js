@@ -1488,6 +1488,11 @@ export class SWSEActor extends Actor {
         this.update({'data.age': age})
     }
 
+    setGender(sex, gender) {
+        this.update({'data.sex': sex, 'data.gender': gender})
+    }
+
+
     getAttributeLevelBonus(level) {
         console.log(this.data)
         return this.data.data.levelAttributeBonus[level];

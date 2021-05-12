@@ -104,9 +104,9 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
-        html.find("#selectHeight").on("click", () => this._unavailable());
+        html.find("#selectGender").on("click", event => this._selectGender(event, this));
         html.find("#selectWeight").on("click", () => this._unavailable());
-        html.find("#selectGender").on("click", () => this._unavailable());
+        html.find("#selectHeight").on("click", () => this._unavailable());
 
         html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
@@ -166,9 +166,14 @@ export class SWSEActorSheet extends ActorSheet {
         await Dialog.prompt(options);
     }
 
+    async _selectGender(event, sheet) {
+        let options = this.buildGenderDialog(sheet);
+        await Dialog.prompt(options);
+    }
+
 
     buildAgeDialog(sheet) {
-        let age = sheet.actor.age ? parseInt(sheet.actor.age) : 0;
+        let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
         let searchString = "AGE";
         let ageEffects = filterItemsByType("trait", sheet.actor.items.values())
             .filter(trait => trait.data.data.prerequisites
@@ -188,10 +193,13 @@ export class SWSEActorSheet extends ActorSheet {
             let current = age >= low && (age <= high || high === -1) ? ' current' : '';
             traits += `<div class="flex-grow ageRange${current}" data-low="${low}" data-high="${high}">${effect.name}: ${effect.range}</div>`;
         }
-        let content = `<input class="range" id="age" type="text" value="${age}"><div>${traits}</div>`
+        if(traits === ''){
+            traits = `<div>This species has no traits related to age.</div>`;
+        }
+        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" type="number" value="${age}"><div>${traits}</div>`
 
         return {
-            title: "Select an Attribute Generation Type",
+            title: "Age Selection",
             content: content,
             callback: async (html) => {
                 let key = html.find("#age")[0].value;
@@ -200,8 +208,56 @@ export class SWSEActorSheet extends ActorSheet {
             render: async (html) => {
                 let ageInput = html.find("#age");
                 this.moveAgeCursor(html);
-                ageInput.on("change", () => {
+                ageInput.on("input", () => {
                     this.moveAgeCursor(html);
+                })
+            }
+        };
+    }
+    buildGenderDialog(sheet) {
+        console.log(sheet.actor.data.data)
+        let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
+        let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
+        let searchString = "GENDER";
+        let genderEffects = filterItemsByType("trait", sheet.actor.items.values())
+            .filter(trait => trait.data.data.prerequisites
+                .reduce((a, b) => {
+                    return a || b.startsWith(searchString)
+                }, false)).map(trait => {
+                return {gender: this.getPrerequisiteByName(trait, searchString).split(":")[1], name: trait.data.data.finalName}
+            })
+
+
+        genderEffects.sort(
+            (a, b) =>
+                a.gender <
+                b.gender? 1 : 0);
+
+        let traits = '';
+        for (let effect of genderEffects) {
+            let current = gender.toLowerCase() === effect.gender? ' current' : '';
+            traits += `<div class="flex-grow gender${current}" data-gender="${effect.gender}" >${effect.gender}: ${effect.name}</div>`;
+        }
+        if(traits === ''){
+            traits = `<div>This species has no traits related to sex.</div>`;
+        }
+
+        let content = `<p>Enter your sex, some species have traits tied to sex.  Optionally, enter your gender, this will be displayed throughout your sheet.</p>
+<input class="range" id="sex" type="text" value="${sex}">
+<input class="range" id="gender" type="text" value="${gender}">
+<div>${traits}</div>`
+
+        return {
+            title: "Gender Selection",
+            content: content,
+            callback: async (html) => {
+                sheet.actor.setGender(html.find("#sex")[0].value, html.find("#gender")[0].value);
+            },
+            render: async (html) => {
+                let genderInput = html.find("#sex");
+                this.moveGenderCursor(html);
+                genderInput.on("input", () => {
+                    this.moveGenderCursor(html);
                 })
             }
         };
@@ -211,13 +267,26 @@ export class SWSEActorSheet extends ActorSheet {
         let age = parseInt(html.find("#age")[0].value);
         let rangeDivs = html.find(".ageRange")
         for (let div of rangeDivs) {
-            let low = parseInt($(div).dataset("low"));
-            let high = parseInt($(div).dataset("high"));
+            let low = parseInt($(div).data("low"));
+            let high = parseInt($(div).data("high"));
 
             if (div.classList.contains("cursor")) {
                 div.classList.remove("cursor")
             }
             if (age >= low && (age <= high || high === -1)) {
+                div.classList.add("cursor")
+            }
+        }
+    }
+
+    moveGenderCursor(html) {
+        let gender = html.find("#sex")[0].value;
+        let rangeDivs = html.find(".gender")
+        for (let div of rangeDivs) {
+            if (div.classList.contains("cursor")) {
+                div.classList.remove("cursor")
+            }
+            if (gender.toLowerCase() === $(div).data('gender').toLowerCase()) {
                 div.classList.add("cursor")
             }
         }
