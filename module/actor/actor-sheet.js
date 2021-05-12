@@ -1,4 +1,4 @@
-import {filterItemsByType} from "../util.mjs";
+import {filterItemsByType} from "../util.js";
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -1328,7 +1328,7 @@ export class SWSEActorSheet extends ActorSheet {
     _getFeatsFromCategories(categories = []) {
         let feats = [];
         for (let category of categories) {
-            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category);
+            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category.category);
             if (result) {
                 feats.push(result[1])
             }

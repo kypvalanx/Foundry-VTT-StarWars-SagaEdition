@@ -185,9 +185,10 @@ export class SWSEItem extends Item {
             let suffix = mod.data.attributes.suffix ? " " + mod.data.attributes.suffix : "";
             finalName = `${prefix}${finalName}${suffix}`
         }
-        if(finalName !== itemData.data.finalName) {
-            this._pendingUpdate['data.finalName'] = finalName;
-        }
+        itemData.data.finalName=finalName;
+        // if(finalName !== itemData.data.finalName) {
+        //     this._pendingUpdate['data.finalName'] = finalName;
+        // }
     }
     setTextDescription() {
         let itemData = this.data;

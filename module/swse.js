@@ -1,6 +1,6 @@
 // Import Modules
 import { SWSE } from "./config.js";
-import {SWSEActor} from "./actor/actor.mjs";
+import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";

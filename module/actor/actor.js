@@ -1,11 +1,12 @@
-import {resolveHealth} from "./health.mjs";
-import {AttackHandler} from "./attacks.mjs";
-import {OffenseHandler} from "./offense.mjs";
-import {SpeciesHandler} from "./species.mjs";
-import {filterItemsByType, resolveValueArray} from "../util.mjs";
-import {resolveDefenses} from "./defense.mjs";
+import {resolveHealth} from "./health.js";
+import {AttackHandler} from "./attacks.js";
+import {OffenseHandler} from "./offense.js";
+import {SpeciesHandler} from "./species.js";
+import {filterItemsByType, resolveValueArray} from "../util.js";
+import {resolveDefenses} from "./defense.js";
 
 
+// noinspection JSClosureCompilerSyntax
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -56,9 +57,9 @@ export class SWSEActor extends Actor {
         actorData.techniques = this.getTechniques(actorData);
         actorData.traditions = filterItemsByType("forceTradition", actorData.items);
         actorData.regimens = filterItemsByType("forceRegimen", actorData.items);
-        actorData.equipped = this.getEquipped(actorData);
-        actorData.unequipped = this._getUnequippedItems(actorData);
-        actorData.inventory = this._getInventory(actorData);
+        actorData.equipped = this.getEquippedItems(actorData);
+        actorData.unequipped = this.getUnequippedItems(actorData);
+        actorData.inventory = this.getInventory(actorData);
 
         this._generateAttributes(this);
         await this._generateSkillData(actorData);
@@ -119,10 +120,10 @@ export class SWSEActor extends Actor {
             if (x < y) {return -1;}
             if (x > y) {return 1;}
             return 0;
-        });
+        }).map(trait => trait.toJSON());
     }
 
-    getEquipped(actorData) {
+    getEquippedItems(actorData) {
         let getEquippedItems = this._getEquippedItems(actorData, this._getEquipable(actorData.items, actorData.data.isDroid));
         let prerequisites = actorData.prerequisites;
         prerequisites.equippedItems = [];
@@ -139,7 +140,7 @@ export class SWSEActor extends Actor {
         for (let power of filterItemsByType1) {
             prerequisites.powers.push(power.name.toLowerCase());
         }
-        return filterItemsByType1;
+        return filterItemsByType1.map(power => power.toJSON());
     }
 
     getSecrets(actorData) {
@@ -149,7 +150,7 @@ export class SWSEActor extends Actor {
         for (let secret of filterItemsByType1) {
             prerequisites.secrets.push(secret.name.toLowerCase());
         }
-        return filterItemsByType1;
+        return filterItemsByType1.map(secret => secret.toJSON());
     }
 
     getTechniques(actorData) {
@@ -160,7 +161,7 @@ export class SWSEActor extends Actor {
             prerequisites.techniques.push(technique.name.toLowerCase());
         }
 
-        return filterItemsByType1;
+        return filterItemsByType1.map(technique => technique.toJSON());
     }
 
     getTalents(actorData) {
@@ -186,7 +187,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        return filterItemsByType1;
+        return filterItemsByType1.map(talent => talent.toJSON());
     }
 
     async _getActiveFeats(actorData) {
@@ -303,18 +304,17 @@ export class SWSEActor extends Actor {
                 let result = /([+-\\d]*) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name)
                 if(result[2].toLowerCase() === longKey){
                     //TODO add them to correct variables for tooltip
-                    if(trait.data.data.prerequisites && trait.data.data.prerequisites.length > 0){
-                        let prerequisite = trait.data.data.prerequisites[0];
+                    if(trait.data.prerequisites && trait.data.prerequisites.length > 0){
+                        let prerequisite = trait.data.prerequisites[0];
                         if(/ABILITY:(?:Child|Young adult|Adult|Middle age|Old|Venerable)/.exec(prerequisite)){
                             ageBonuses.push(result[1]);
                             continue;
                         }
                     }
-                    if(trait.data.data.supplier?.type === 'species'){
+                    if(trait.data.supplier?.type === 'species'){
                         speciesBonuses.push(result[1]);
                         continue;
                     }
-                    console.log(attributeTraits.length, trait)
                     bonuses.push(result[1])
                 }
             }
@@ -579,7 +579,7 @@ export class SWSEActor extends Actor {
         return equipped;
     }
 
-    _getUnequippedItems(actorData) {
+    getUnequippedItems(actorData) {
         let filterItemsByType = this._getEquipable(actorData.items, actorData.data.isDroid);
         let unequipped = [];
         for (let item of filterItemsByType) {
@@ -590,7 +590,7 @@ export class SWSEActor extends Actor {
         return unequipped;
     }
 
-    _getInventory(actorData) {
+    getInventory(actorData) {
         return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner);
     }
 
@@ -702,8 +702,8 @@ export class SWSEActor extends Actor {
     getAbilityAttribute(actorData, attribute) {
         let values = [];
         for (let ability of actorData.traits) {
-            if (ability.data.data.attributes[attribute]) {
-                values.push(ability.data.data.attributes[attribute])
+            if (ability.data.attributes[attribute]) {
+                values.push(ability.data.attributes[attribute])
             }
         }
         return values;
