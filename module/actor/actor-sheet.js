@@ -1,5 +1,6 @@
 import {filterItemsByType} from "../util.js";
 
+// noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
@@ -16,6 +17,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
+
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -24,9 +26,6 @@ export class SWSEActorSheet extends ActorSheet {
 
     /** @override */
     static get defaultOptions() {
-        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
-            return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
-        });
 
         return mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "actor"],
@@ -40,8 +39,8 @@ export class SWSEActorSheet extends ActorSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    getData() {
-        const data = super.getData();
+    getData(options) {
+        const data = super.getData(options);
         data.dtypes = ["String", "Number", "Boolean"];
         for (let attr of Object.values(data.data.attributes)) {
             attr.isCheckbox = attr.dtype === "Boolean";
@@ -65,10 +64,10 @@ export class SWSEActorSheet extends ActorSheet {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
 
-        html.find("input.skill").on("change", (event) => {
+        html.find("input.skill").on("change", async (event) => {
             let data = {};
             data["data.skills." + event.currentTarget.dataset.id + ".trained"] = event.currentTarget.checked;
-            this.actor.update(data);
+            await this.actor.update(data);
         })
 
         // Species controls
@@ -81,8 +80,8 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-        html.find('.condition-radio').on("change", event => {
-            this.actor.update({"data.health.condition": parseInt(event.currentTarget.value)});
+        html.find('.condition-radio').on("change", async event => {
+            await this.actor.update({"data.health.condition": parseInt(event.currentTarget.value)});
         })
 
         // html.find("div.item-container").each((i, div) => {
@@ -105,9 +104,9 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
-        html.find("#selectHeight").on("click", event => this._unavailable());
-        html.find("#selectWeight").on("click", event => this._unavailable());
-        html.find("#selectGender").on("click", event => this._unavailable());
+        html.find("#selectHeight").on("click", () => this._unavailable());
+        html.find("#selectWeight").on("click", () => this._unavailable());
+        html.find("#selectGender").on("click", () => this._unavailable());
 
         html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
@@ -130,10 +129,10 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         // Delete Inventory Item
-        html.find('.item-delete').click(ev => {
+        html.find('.item-delete').click(async ev => {
             const li = $(ev.currentTarget).parents(".item");
             let title = `Are you sure you want to delete ${li.data("itemName")}`;
-            Dialog.confirm({
+            await Dialog.confirm({
                 title: title,
                 content: title,
                 yes: async () => {
@@ -187,7 +186,7 @@ export class SWSEActorSheet extends ActorSheet {
         for (let effect of ageEffects) {
             let {low, high} = this.parseRange(effect.range);
             let current = age >= low && (age <= high || high === -1) ? ' current' : '';
-            traits += `<div class="flex-grow ageRange${current}" low="${low}" high="${high}">${effect.name}: ${effect.range}</div>`;
+            traits += `<div class="flex-grow ageRange${current}" data-low="${low}" data-high="${high}">${effect.name}: ${effect.range}</div>`;
         }
         let content = `<input class="range" id="age" type="text" value="${age}"><div>${traits}</div>`
 
@@ -201,7 +200,7 @@ export class SWSEActorSheet extends ActorSheet {
             render: async (html) => {
                 let ageInput = html.find("#age");
                 this.moveAgeCursor(html);
-                ageInput.on("change", event => {
+                ageInput.on("change", () => {
                     this.moveAgeCursor(html);
                 })
             }
@@ -212,8 +211,8 @@ export class SWSEActorSheet extends ActorSheet {
         let age = parseInt(html.find("#age")[0].value);
         let rangeDivs = html.find(".ageRange")
         for (let div of rangeDivs) {
-            let low = parseInt($(div).attr("low"));
-            let high = parseInt($(div).attr("high"));
+            let low = parseInt($(div).dataset("low"));
+            let high = parseInt($(div).dataset("high"));
 
             if (div.classList.contains("cursor")) {
                 div.classList.remove("cursor")
@@ -282,19 +281,6 @@ export class SWSEActorSheet extends ActorSheet {
             total += abilityCost[item.innerHTML];
         })
         return total;
-    }
-
-    _onDragMiscStart(event, type) {
-        const result = {
-            type: type,
-            actor: this.actor._id,
-        };
-        if (this.actor.isToken) {
-            result.sceneId = canvas.scene._id;
-            result.tokenId = this.actor.token._id;
-        }
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(result));
     }
 
     _onDragAbilityStart(event) {
@@ -488,7 +474,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             });
         }
-        newEl.addEventListener("focusout", (event) => {
+        newEl.addEventListener("focusout", () => {
             if (!changed) {
                 this._render();
             }
@@ -550,7 +536,6 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async addTalent(item) {
-        let entitiesToAdd = [];
         let possibleTalentTrees = [];
         let optionString = "";
 
@@ -562,7 +547,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         } else {
-            let pattern = /([\w\s\d-]*) Talent Tree(?:s)?/;
+            let pattern = /([\w\s\d-]*) Talent Trees?/;
             for (let talentTree of item.data.data.categories) {
                 let type = pattern.exec(talentTree);
                 if (type) {
@@ -666,7 +651,13 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.categories = possibleFeatTypes;
 
-        return await this.checkPrerequisitesAndResolveOptions(item);
+        let items = await this.checkPrerequisitesAndResolveOptions(item);
+
+        if(items.length>0){
+            items.push(...this.addOptionalRuleFeats(item));
+        }
+
+        return items;
     }
 
     async addClass(item) {
@@ -791,7 +782,7 @@ export class SWSEActorSheet extends ActorSheet {
             } else if (Object.keys(options).length === 1) {
                 greetingString = choice.oneOption;
                 let optionLabel = Object.keys(options)[0];
-                optionString = `<div id="choice" value="${optionLabel}">${optionLabel}</div>`
+                optionString = `<div id="choice">${optionLabel}</div>`
             } else {
                 greetingString = choice.description;
 
@@ -1077,7 +1068,7 @@ export class SWSEActorSheet extends ActorSheet {
             let existingValues = sheet.actor.getAttributes();
 
             scores = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
-            for (let val in existingValues) {
+            for (let val of Object.keys(existingValues)) {
                 scores[val] = existingValues[val];
             }
         }
@@ -1110,7 +1101,7 @@ export class SWSEActorSheet extends ActorSheet {
                 })
                 return response;
             },
-            no: async (html) => {
+            no: async () => {
 
             },
             render: (html) => {
@@ -1125,7 +1116,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 if (canReRoll) {
                     html.find("#reRoll").each((i, button) => {
-                        button.addEventListener("click", (event) => {
+                        button.addEventListener("click", () => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
                                 let roll = new Roll(rollFormula).roll();
@@ -1159,7 +1150,7 @@ export class SWSEActorSheet extends ActorSheet {
     async _selectAttributesManually(event, sheet) {
         let existingValues = sheet.actor.getAttributes();
         let combined = {};
-        for (let val in existingValues) {
+        for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
 
@@ -1250,7 +1241,7 @@ export class SWSEActorSheet extends ActorSheet {
     async _assignAttributePoints(event, sheet) {
         let existingValues = sheet.actor.getAttributes();
         let combined = {};
-        for (let val in existingValues) {
+        for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
 
@@ -1341,5 +1332,21 @@ export class SWSEActorSheet extends ActorSheet {
             title: "Sorry this content isn't finished.",
             content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know."
         })
+    }
+
+    async addOptionalRuleFeats(item) {
+        let items = [];
+
+        if (item.name === 'Point-Blank Shot') {
+            if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
+                    await this.addItemsFromCompendium('feat', {
+                        name: item.name,
+                        data: {type: 'feat'},
+                        id: item._id
+                    }, items, {category:'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
+            }
+        }
+
+        return items;
     }
 }

@@ -44,7 +44,7 @@ Hooks.once('init', async function() {
   // If you need to add Handlebars helpers, here are a few useful examples:
   Handlebars.registerHelper('concat', function() {
     let outStr = '';
-    for (const arg in arguments) {
+    for (const arg of Object.keys(arguments)) {
       if (typeof arguments[arg] != 'object') {
         outStr += arguments[arg];
       }
@@ -65,6 +65,7 @@ Hooks.once('init', async function() {
 Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
   return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
 });
+
 
 Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
   return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);

@@ -2,7 +2,7 @@ import {SWSEActor} from "./actor.js";
 
 export class OffenseHandler {
     async resolveOffense(actor) {
-        let bab = await this._resolveBab(actor) + SWSEActor.getConditionBonus(actor.data.condition);
+        let bab = await this._resolveBab(actor) + actor.getConditionBonus();
         let mab = await this._resolveMab(actor, bab);
         let rab = await this._resolveRab(actor, bab);
         let fab = await this._resolveRab(actor, bab);
@@ -37,11 +37,11 @@ export class OffenseHandler {
 
     async _resolveMab(actor, bab) {
         let actorData = actor.data;
-        return bab + actorData.data.attributes.str.mod + SWSEActor.getConditionBonus(actor);
+        return bab + actorData.data.attributes.str.mod;
     }
 
     async _resolveRab(actor, bab) {
         let actorData = actor.data;
-        return bab + actorData.data.attributes.dex.mod + SWSEActor.getConditionBonus(actor);
+        return bab + actorData.data.attributes.dex.mod;
     }
 }

@@ -1,3 +1,4 @@
+// noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
@@ -27,8 +28,6 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const itemData = this.data;
-        const actorData = this.actor ? this.actor.data : {};
-        const data = itemData.data;
         
         this.resolveItemName(itemData);
 
@@ -257,35 +256,6 @@ export class SWSEItem extends Item {
 
     isExotic() {
         return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.data.data.weapon.weaponType);
-    }
-
-
-    async removeAttack(index) {
-        let attacks = this.data.data.weapon.damage.attacks;
-        if (!Array.isArray(attacks)) {
-            let temp = [];
-            for (let attack of Object.values(attacks)) {
-                temp.push(attack);
-            }
-            attacks = temp;
-        }
-        console.log(attacks);
-        attacks.splice(index, 1);
-        await this.update({"data.weapon.damage.attacks": attacks});
-    }
-
-    async addAttack() {
-        let attacks = this.data.data.weapon.damage.attacks;
-        if (!Array.isArray(attacks)) {
-            let temp = [];
-            for (let attack of Object.values(attacks)) {
-                temp.push(attack);
-            }
-            attacks = temp;
-        }
-        console.log(attacks);
-        attacks.push({key: "", value: "", dtype: "String"});
-        await this.update({"data.weapon.damage.attacks": attacks});
     }
 
     async removeCategory(index) {

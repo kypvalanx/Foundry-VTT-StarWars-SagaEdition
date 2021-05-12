@@ -62,7 +62,7 @@ export class SWSEActor extends Actor {
         actorData.inventory = this.getInventory(actorData);
 
         this._generateAttributes(this);
-        await this._generateSkillData(actorData);
+        await this._generateSkillData(this);
 
         let feats = await this._getActiveFeats(actorData);
         actorData.feats = feats.activeFeats;
@@ -340,7 +340,7 @@ export class SWSEActor extends Actor {
             attribute.bonus = resolveValueArray(bonuses, this)
             attribute.total = attribute.base + attribute.bonus;
             attribute.mod = Math.floor((attribute.total - 10) / 2);
-            attribute.roll = attribute.mod + SWSEActor.getConditionBonus(actorData.condition)
+            attribute.roll = attribute.mod + actor.getConditionBonus()
             attribute.label = key.toUpperCase();
             this.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
             this.resolvedLabels.set("@" + attribute.label, attribute.label);
@@ -369,7 +369,8 @@ export class SWSEActor extends Actor {
         return response;
     }
 
-    async _generateSkillData(actorData) {
+    async _generateSkillData(actor) {
+        let actorData = actor.data;
         let firstClass = await this._getFirstClass(actorData);
         let intBonus = await this.getAttributeMod("int")
         let remainingSkills = 0;
@@ -384,13 +385,13 @@ export class SWSEActor extends Actor {
         for (let [key, skill] of Object.entries(actorData.data.skills)) {
             skill.isClass = classSkills.has(key);
             // Calculate the modifier using d20 rules.
-            skill.value = this.getHalfCharacterLevel(actorData) + this.getAttributeMod(skill.attribute) + (skill.trained === true ? 5 : 0) + SWSEActor.getConditionBonus(actorData.condition) + this._getAbilitySkillBonus(key, actorData);
+            skill.value = this.getHalfCharacterLevel(actorData) + this.getAttributeMod(skill.attribute) + (skill.trained === true ? 5 : 0) + actor.getConditionBonus() + this._getAbilitySkillBonus(key, actorData);
             skill.key = `@${this.cleanKey(key)}`;
             this.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
             skill.title = `Half character level: ${this.getHalfCharacterLevel(actorData)}
             Attribute Mod: ${this.getAttributeMod(skill.attribute)}
             Trained Skill Bonus: ${(skill.trained === true ? 5 : 0)}
-            Condition Bonus: ${SWSEActor.getConditionBonus(actorData)}
+            Condition Bonus: ${actor.getConditionBonus()}
             Ability Skill Bonus: ${this._getAbilitySkillBonus(key, actorData)}`;
             if (skill.trained) {
                 prerequisites.trainedSkills.push(key.toLowerCase());
@@ -650,7 +651,8 @@ export class SWSEActor extends Actor {
         return undefined;
     }
 
-    static getConditionBonus(condition) {
+    getConditionBonus() {
+        let condition = this.data.condition;
         switch (condition) {
             case 0:
                 break;
@@ -721,46 +723,18 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-
-    async optionalRules(actorData, entities) {
-        for (let feat of actorData.feats) {
-            if (feat.name === 'Point-Blank Shot') {
-                if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    if (undefined === actorData.feats.find(feat => feat.name === "Precise Shot")) {
-                        console.log(feat)
-                        await this.addItemsFromCompendium('feat', {
-                            name: feat.name,
-                            data: {type: 'feat'},
-                            id: feat._id
-                        }, entities, 'Precise Shot');
-                    }
-                }
-            }
-        }
-    }
-
-    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items) {
+    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items, ) {
         if (!Array.isArray(items)) {
             items = [items];
         }
+
         let entities = [];
         let notificationMessage = "";
         let pack = this.getCompendium(compendium);
         let index = await pack.getIndex();
         for (let item of items.filter(item => item)) {
-            let itemName = item;
-            let prerequisite;
-            if (item.category)
-            {
-                itemName = item.category;
-            }
+            let {itemName, prerequisite, prerequisites, payload} = this.resolveItemParts(item);
 
-            let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
-            let payload = "";
-            if (result) {
-                itemName = result[1];
-                payload = result[2];
-            }
             let entry = await index.find(f => f.name === this.cleanItemName(itemName));
             if (!entry) {
                 entry = await index.find(f => f.name === this.cleanItemName(itemName + " (" + payload + ")"));
@@ -785,11 +759,11 @@ export class SWSEActor extends Actor {
                 data.prerequisites = [];
             }
 
-            if(item.prerequisite){
-                data.prerequisites.push(item.prerequisite);
+            if(prerequisite){
+                data.prerequisites.push(prerequisite);
             }
-            if(item.prerequisites){
-                data.prerequisites.push(...item.prerequisites);
+            if(prerequisites){
+                data.prerequisites.push(...prerequisites);
             }
 
             if (parentItem) {
@@ -810,16 +784,21 @@ export class SWSEActor extends Actor {
         return {addedEntities: entities, notificationMessage: notificationMessage};
     }
 
-    async _createItems(itemData) {
-        if (!itemData) {
-            return;
+    resolveItemParts(item) {
+        let itemName = item;
+        let prerequisites = item.prerequisites;
+        let prerequisite = item.prerequisite;
+        if (item.category) {
+            itemName = item.category;
         }
-        if (!Array.isArray(itemData)) {
-            let temp = itemData;
-            itemData = [];
-            itemData.push(temp);
+        let result = /^([\w\s]*) \(([()\w\s*+]*)\)/.exec(itemName);
+        let payload = "";
+        if (result) {
+            itemName = result[1];
+            payload = result[2];
         }
-        await this.createEmbeddedEntity("OwnedItem", itemData, {renderSheet: false});
+
+        return {itemName, prerequisite, prerequisites, payload};
     }
 
     _formatPrerequisites(failureList) {
@@ -956,7 +935,7 @@ export class SWSEActor extends Actor {
                 }
                 continue;
             }
-            result = /(?:base attack bonus) \+(\d*)/.exec(prereq);
+            result = /base attack bonus \+(\d*)/.exec(prereq);
             if (result !== null) {
                 if (this.data.prerequisites.bab < parseInt(result[1])) {
                     failureList.push({fail: true, message: prereq});
@@ -1214,7 +1193,7 @@ export class SWSEActor extends Actor {
 
 
     checkTalents(value, failureList, key) {
-        let result = /(?:at least|any) (\w*) talent(?:s)? from ([\s\w,]*)(?:\.)?/.exec(value.toLowerCase());
+        let result = /(?:at least|any) (\w*) talents? from ([\s\w,]*)\.?/.exec(value.toLowerCase());
         if (result != null) {
             let talentReq = false;
             let toks = [];
@@ -1231,7 +1210,7 @@ export class SWSEActor extends Actor {
             }
 
             for (let tok of toks) {
-                tok = /(?: )?(?:or )?(?:either )?(?:the )?([\s\w]*)/.exec(tok)[1];
+                tok = / ?(?:or )?(?:either )?(?:the )?([\s\w]*)/.exec(tok)[1];
                 if (this.data.prerequisites.talentTrees[tok] >= this._fromOrdinal(result[1])) {
                     talentReq = true;
                 }
@@ -1281,7 +1260,7 @@ export class SWSEActor extends Actor {
     }
 
     resolveClassFeatures(actorData, classFeatures) {
-        let pattern = /^([\D\s]*?)(?: )?(?:\+)?(?:\()?([\d,]*)?(?:\/Encounter)?(?:\))?$/;  ///needs a space whn no other grammer
+        let pattern = /^([\D\s]*?) ?\+?\(?([\d,]*)?(?:\/Encounter)?\)?$/;  ///needs a space whn no other grammer
         actorData.availableItems = {};
         actorData.activeFeatures = [];
         let tempFeatures = new Set();

@@ -62,9 +62,8 @@ export class SWSEItemSheet extends ItemSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  getData() {
-    const data = super.getData();
-    return data;
+  getData(options) {
+    return super.getData(options);
   }
 
   /* -------------------------------------------- */

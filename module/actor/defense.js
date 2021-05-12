@@ -18,7 +18,7 @@ export function _resolveFort(actor) {
     total.push(_getAbilityDefBonus('fortitude', actor));
     total.push(_getClassDefBonus('fortitude', actorData));
     total.push(_getEquipmentFortBonus(actorData));
-    total.push(SWSEActor.getConditionBonus(actor.data.condition));
+    total.push(actor.getConditionBonus());
     return resolveValueArray(total, actor)
 }
 
@@ -30,7 +30,7 @@ export function _resolveWill(actor) {
     total.push(_getWisMod(actorData));
     total.push(_getClassDefBonus('will', actorData));
     total.push(_getAbilityDefBonus('will', actor));
-    total.push(SWSEActor.getConditionBonus(actor.data.condition));
+    total.push(actor.getConditionBonus());
     return resolveValueArray(total, actor)
 }
 
@@ -44,7 +44,7 @@ export function _resolveRef(actor) {
     total.push(_getClassDefBonus('reflex', actorData));
     total.push(_getNaturalArmorBonus(actorData));
     total.push(_getAbilityRefMod(actor));
-    total.push(SWSEActor.getConditionBonus(actor.data.condition));
+    total.push(actor.getConditionBonus());
     return resolveValueArray(total, actor)
 
 }
@@ -59,14 +59,6 @@ export function _selectRefBonus(heroicLevel, armorBonus) {
         return armorBonus;
     }
     return heroicLevel;
-}
-
-export function _getHeroicLevel(actorData) {
-    if (actorData.classes) {
-        return actorData.classes.length;
-    }
-    return 0;
-    //TODO remove non-heroic levels
 }
 
 export function _getDexMod(actorData) {
