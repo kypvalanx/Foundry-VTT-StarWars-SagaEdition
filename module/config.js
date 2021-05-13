@@ -55,3 +55,4 @@ SWSE.Abilities.abilityCost = {
 
 SWSE.Abilities.defaultAbilityRoll = "4d6kh3";
 SWSE.Abilities.defaultPointBuyTotal = 28;
+SWSE.Abilities.droidPointBuyTotal = 21;

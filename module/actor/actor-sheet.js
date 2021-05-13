@@ -331,6 +331,9 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     getPointBuyTotal() {
+        if(this.actor.data.data.isDroid){
+            return CONFIG.SWSE.Abilities.droidPointBuyTotal;
+        }
         return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
     }
 
