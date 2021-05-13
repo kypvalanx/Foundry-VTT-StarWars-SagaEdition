@@ -1323,7 +1323,7 @@ export class SWSEActor extends Actor {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
         }
         for (let feat of actorData.feats) {
-            if (feat.data.data.isSupplied) {
+            if (feat.data.isSupplied) {
                 continue;
             }
             let type = 'General Feats';
