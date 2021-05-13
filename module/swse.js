@@ -71,6 +71,10 @@ Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
   return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
 });
 
+Handlebars.registerHelper('sum', function(arg1, arg2, options) {
+  return parseInt(arg1) + parseInt(arg2)
+});
+
 Hooks.on("ready", async function() {
   await generateCompendiums();
 

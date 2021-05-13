@@ -11,15 +11,18 @@ export function resolveHealth(actor) {
         health.push(resolveRolledHp(charClass))
         health.push(resolveCharClass(actorData, ignoreCon));
     }
+    let other = [];
     for (let item of actorData.items ? actorData.items : []) {
         let itemHpEq = item.data.attributes?.hitPointEq?.value;
         if (itemHpEq) {
+            other.push(itemHpEq);
             health.push(itemHpEq);
         }
     }
+    let otherBonuses = resolveValueArray(other, actor);
 
     //TODO add traits and stuff that boost HP
-    return {max: resolveValueArray(health, actor)};
+    return {other: otherBonuses,max: resolveValueArray(health, actor)};
 }
 
 function resolveCharClass(actorData, ignoreCon) {

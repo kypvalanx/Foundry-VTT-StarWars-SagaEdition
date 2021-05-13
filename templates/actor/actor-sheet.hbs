@@ -378,7 +378,10 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                     <tr>
                         <th></th>
                         <th>Class</th>
-                        <th>Hitpoints</th>
+                        <th>Class HP</th>
+                        <th>Re-roll HP</th>
+                        <th>Attribute Bonus HP</th>
+                        <th>Total HP</th>
                         <!--                  <th>First Level Class</th> -->
                         <th>
                             <a data-action="compendium" data-action-target="world.swse-classes"
@@ -396,11 +399,15 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                                     class.data.attributes.first}}direct short{{/unless}} center"
                                       data-item="{{class._id}}" data-name="data.health.rolledHp"
                                       data-dtype="Number">{{class.data.health.rolledHp}}</span>
+                            </td>
+                        <td>
                                 {{#unless class.data.attributes.first}}
                                     <a class="rollable" title="Re-roll {{class.data.health.levelUp}}"
                                        data-item="{{class._id}}" data-name="data.health.rolledHp"
                                        data-roll="{{class.data.health.levelUp}}"><i class="fas fa-dice"></i>
                                     </a>{{/unless}}</td>
+                            <td>{{../data.attributes.con.mod}}</td>
+                            <td>{{sum class.data.health.rolledHp ../data.attributes.con.mod}}</td>
                             <td class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                                 {{#if class.isLatest}}
@@ -409,6 +416,8 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                             </td>
                         </tr>
                     {{/each}}
+                    {{log data}}
+                    <tr><td></td><td></td><td></td><td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other Bonuses: {{data.health.other}}</td><td>{{data.health.max}}</td><td></td></tr>
                     <!-- </ol> -->
                     </tbody>
                 </table>
