@@ -67,6 +67,29 @@ table.skill {
 .rollEquation{
   word-wrap: break-word;
 }
-.container{
+//.container{
+//  height:32px;
+//  width:32px;
+//  border-style: dashed;
+//}
+//.movable{
+//  height:32px;
+//  width:32px;
+//  border-style: solid;
+//  cursor: grab;
+//}
 
+.movable, .container{
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+}
+.container{
+  border: 1px dotted dimgray;
+}
+.movable{
+  padding: 17px;
+  text-align: center;
+  border: 1px solid;
 }

@@ -1,5 +1,4 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{log actor}}
     {{#unless actor.species}}<span class="warning">PLEASE SELECT A SPECIES!!</span><br/>{{/unless}}
     {{#if data.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{data.remainingSkills}}</span><br/>{{/if}}
@@ -508,7 +507,6 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </div>
                 <ol class="items-list">
                     {{#each actor.feats as |feat id|}}
-                        {{log feat}}
                         <li class="item feat flexrow" data-item-name="{{feat.data.finalName}}"
                             data-item-id="{{feat._id}}">
                             <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->

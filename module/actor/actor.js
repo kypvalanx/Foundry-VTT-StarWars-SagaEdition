@@ -360,7 +360,7 @@ export class SWSEActor extends Actor {
     setAttributes(attributes) {
         let update = {};
         for (let [key, ability] of Object.entries(attributes)) {
-            update[`data.abilities.${key}.base`] = ability;
+            update[`data.attributes.${key}.base`] = ability;
         }
         this.update(update);
     }
