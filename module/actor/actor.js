@@ -50,6 +50,9 @@ export class SWSEActor extends Actor {
         }
         await this._handleCondition(actorData);
 
+        actorData.equipped = this.getEquippedItems(actorData);
+        actorData.unequipped = this.getUnequippedItems(actorData);
+        actorData.inventory = this.getInventory(actorData);
         actorData.traits = await this.getTraits();
         actorData.talents = this.getTalents(actorData);
         actorData.powers = this.getPowers(actorData);
@@ -57,9 +60,7 @@ export class SWSEActor extends Actor {
         actorData.techniques = this.getTechniques(actorData);
         actorData.traditions = filterItemsByType("forceTradition", actorData.items);
         actorData.regimens = filterItemsByType("forceRegimen", actorData.items);
-        actorData.equipped = this.getEquippedItems(actorData);
-        actorData.unequipped = this.getUnequippedItems(actorData);
-        actorData.inventory = this.getInventory(actorData);
+        actorData.speed = this.getSpeed();
 
         this._generateAttributes(this);
         await this._generateSkillData(this);
@@ -120,17 +121,17 @@ export class SWSEActor extends Actor {
             if (x < y) {return -1;}
             if (x > y) {return 1;}
             return 0;
-        }).map(trait => trait.toJSON());
+        }).map(trait => trait.data);
     }
 
     getEquippedItems(actorData) {
-        let getEquippedItems = this._getEquippedItems(actorData, this._getEquipable(actorData.items, actorData.data.isDroid));
+        let getEquippedItems = this._getEquippedItems(actorData, this._getEquipable(this.items.values(), actorData.data.isDroid));
         let prerequisites = actorData.prerequisites;
         prerequisites.equippedItems = [];
         for (let item of getEquippedItems) {
             prerequisites.equippedItems.push(item.name.toLowerCase());
         }
-        return getEquippedItems;
+        return getEquippedItems.map(item => item.data);
     }
 
     getPowers(actorData) {
@@ -140,7 +141,7 @@ export class SWSEActor extends Actor {
         for (let power of filterItemsByType1) {
             prerequisites.powers.push(power.name.toLowerCase());
         }
-        return filterItemsByType1.map(power => power.toJSON());
+        return filterItemsByType1.map(power => power.data);
     }
 
     getSecrets(actorData) {
@@ -150,7 +151,7 @@ export class SWSEActor extends Actor {
         for (let secret of filterItemsByType1) {
             prerequisites.secrets.push(secret.name.toLowerCase());
         }
-        return filterItemsByType1.map(secret => secret.toJSON());
+        return filterItemsByType1.map(secret => secret.data);
     }
 
     getTechniques(actorData) {
@@ -161,7 +162,7 @@ export class SWSEActor extends Actor {
             prerequisites.techniques.push(technique.name.toLowerCase());
         }
 
-        return filterItemsByType1.map(technique => technique.toJSON());
+        return filterItemsByType1.map(technique => technique.data);
     }
 
     getTalents(actorData) {
@@ -187,7 +188,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        return filterItemsByType1.map(talent => talent.toJSON());
+        return filterItemsByType1.map(talent => talent.data);
     }
 
     async _getActiveFeats(actorData) {
@@ -207,7 +208,7 @@ export class SWSEActor extends Actor {
         for (let feat of feats) {
             let doesFail = this.meetsPrerequisites(feat.data.data.prerequisites, false).doesFail;
             if (!doesFail) {
-                activeFeats.push(feat)
+                activeFeats.push(feat.data)
                 prerequisites.feats.push(feat.name.toLowerCase());
                 this.checkForForceTraining(feat, prerequisites);
                 this.checkIsSkillFocus(feat, prerequisites);
@@ -444,11 +445,11 @@ export class SWSEActor extends Actor {
 
     _getEquipable(items, isDroid) {
         let filtered = [];
-        for (let i = 0; i < items.length; i++) {
-            if (items[i].data.equipable
-                && ((isDroid && items[i].data.droidPart) || (!items[i].data.droidPart))
-                && ((!isDroid && items[i].data.bioPart) || (!items[i].data.bioPart))) {
-                filtered.push(items[i]);
+        for (let item of items) {
+            if (item.data.data.equipable
+                && ((isDroid && item.data.data.droidPart) || (!item.data.data.droidPart))
+                && ((!isDroid && item.data.data.bioPart) || (!item.data.data.bioPart))) {
+                filtered.push(item);
             }
         }
         return filtered;
@@ -573,7 +574,7 @@ export class SWSEActor extends Actor {
                 actorData.data.equippedIds = [];
             }
 
-            if (actorData.data.equippedIds.includes(item._id)) {
+            if (actorData.data.equippedIds.includes(item.data._id)) {
                 equipped.push(item);
             }
         }
@@ -581,18 +582,18 @@ export class SWSEActor extends Actor {
     }
 
     getUnequippedItems(actorData) {
-        let filterItemsByType = this._getEquipable(actorData.items, actorData.data.isDroid);
+        let filterItemsByType = this._getEquipable(this.items.values(), actorData.data.isDroid);
         let unequipped = [];
         for (let item of filterItemsByType) {
-            if (!actorData.data.equippedIds.includes(item._id)) {
+            if (!actorData.data.equippedIds.includes(item.data._id)) {
                 unequipped.push(item);
             }
         }
-        return unequipped;
+        return unequipped.map(item => item.data);
     }
 
     getInventory(actorData) {
-        return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner);
+        return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner).map(item => item.data);
     }
 
     _uppercaseFirstLetters(s) {
@@ -723,7 +724,7 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items, ) {
+    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items) {
         if (!Array.isArray(items)) {
             items = [items];
         }
@@ -1546,6 +1547,10 @@ export class SWSEActor extends Actor {
         }else if (prerequisite.startsWith("GENDER")){
             let sex = prerequisite.split(":")[1];
             return this.data.data.sex.toLowerCase() === sex.toLowerCase();
+        }else if (prerequisite.startsWith("EQUIPPED")){
+            let item = prerequisite.split(":")[1];
+            let es = this.data.equipped.filter(trait => trait.data.finalName === item);
+            return es && es.length>0
         }
         return false;
     }
@@ -1562,5 +1567,14 @@ export class SWSEActor extends Actor {
             return parseInt(tok[0])<= age;
         }
         return false;
+    }
+
+    getSpeed() {
+        let actorData = this.data;
+        let attributeTraits = actorData.traits.filter(trait => {
+            let result = /\w* Speed \d*/.exec(trait.name);
+            return !!result;
+        })
+        return attributeTraits.map(trait => trait.name).join("; ");
     }
 }

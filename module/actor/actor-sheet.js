@@ -597,6 +597,8 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
+        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
+            entitiesToAdd.push(item)
         }
         //await this.activateChoices(item, entitiesToAdd, context);
         await super._onDropItemCreate(entitiesToAdd.map(entity => entity.data));
@@ -722,7 +724,7 @@ export class SWSEActorSheet extends ActorSheet {
         let items = await this.checkPrerequisitesAndResolveOptions(item);
 
         if(items.length>0){
-            items.push(...this.addOptionalRuleFeats(item));
+            items.push(...await this.addOptionalRuleFeats(item));
         }
 
         return items;

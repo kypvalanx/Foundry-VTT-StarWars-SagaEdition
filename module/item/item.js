@@ -35,9 +35,9 @@ export class SWSEItem extends Item {
 
         if (this.type === "feat") this.prepareFeatData(itemData);
 
-        if(Object.keys(this._pendingUpdate).length>0){
-            return this.update(this._pendingUpdate);
-        }
+        // if(Object.keys(this._pendingUpdate).length>0){
+        //     return this.update(this._pendingUpdate);
+        // }
     }
 
     prepareFeatData(itemData) {

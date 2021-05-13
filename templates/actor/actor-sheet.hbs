@@ -52,12 +52,12 @@
                                     title="Select species before selecting height."{{/unless}}>{{#if
                                     actor.height}}{{actor.height}}{{/if}}{{#unless actor.height}}
                                 Select Height{{/unless}}</button>
-                            <button class="flex-grow" name="destiny" id="selectDestiny" disabled
-                                    title="Sorry currently unsupported.">Select Destiny</button>
+<!--                            <button class="flex-grow" name="destiny" id="selectDestiny" disabled-->
+<!--                                    title="Sorry currently unsupported.">Select Destiny</button>-->
                             <!--                  <h3><input name="ecl" type="text" value="{{actor.ecl}}" placeholder="Ecl" title="Ecl"/></h3>-->
                         </div>
                         <div class="flexrow">
-                            <div class="species-container item"
+                            <div class="flex-group-center species-container item"
                                  {{#if actor.species}}data-item-id="{{actor.species._id}}"{{/if}} title="Species">
 
                                 {{#if actor.species}}
@@ -87,6 +87,8 @@
                                         </div>
                                     </div>{{/unless}}
                             </div>
+
+                            <div class="flex-group-center">{{actor.speed}}</div>
                         </div>
                     </div>
                 </div>
@@ -504,6 +506,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </div>
                 <ol class="items-list">
                     {{#each actor.feats as |feat id|}}
+                        {{log feat}}
                         <li class="item feat flexrow" data-item-name="{{feat.data.finalName}}"
                             data-item-id="{{feat._id}}">
                             <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->
