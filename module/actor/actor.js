@@ -31,7 +31,7 @@ export class SWSEActor extends Actor {
      * Augment the basic actor data with additional dynamic data.
      */
     async prepareData() {
-        super.prepareData();
+        await super.prepareData();
         const actorData = this.data;
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
@@ -65,7 +65,7 @@ export class SWSEActor extends Actor {
         this._generateAttributes(this);
         await this._generateSkillData(this);
 
-        let feats = await this.getFeats(actorData);
+        let feats = await this._getFeats(actorData);
         actorData.feats = feats.activeFeats;
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats;
 
@@ -192,7 +192,7 @@ export class SWSEActor extends Actor {
         return filterItemsByType1.map(talent => talent.data);
     }
 
-    async getFeats(actorData) {
+    async _getFeats(actorData) {
 
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
@@ -389,6 +389,9 @@ export class SWSEActor extends Actor {
         let classSkills = await this._getClassSkills(actorData);
         for (let [key, skill] of Object.entries(actorData.data.skills)) {
             skill.isClass = classSkills.has(key);
+            if(key === 'use the force'){
+                skill.isClass = this.isForceSensitive()
+            }
             // Calculate the modifier using d20 rules.
             skill.value = this.getHalfCharacterLevel(actorData) + this.getAttributeMod(skill.attribute) + (skill.trained === true ? 5 : 0) + actor.getConditionBonus() + this._getAbilitySkillBonus(key, actorData);
             skill.key = `@${this.cleanKey(key)}`;
@@ -1251,16 +1254,22 @@ export class SWSEActor extends Actor {
         }
     }
 
+    /**
+     *
+     * @param value
+     * @returns {boolean}
+     * @private
+     */
     _hasFeat(value) {
         if (value.includes(" or ")) {
             let toks = value.split(" or ");
             let hasFeat = false;
             for (let tok of toks) {
-                hasFeat = hasFeat || this.data.prerequisites.feats.includes(tok.trim().toLowerCase());
+                hasFeat = hasFeat || this._hasFeat(tok);
             }
             return hasFeat;
         } else {
-            return this.data.prerequisites.feats.includes(value.trim().toLowerCase());
+            return this.data.prerequisites.feats.includes(value.trim().toLowerCase())
         }
     }
 
@@ -1582,4 +1591,15 @@ export class SWSEActor extends Actor {
         })
         return attributeTraits.map(trait => trait.name).join("; ");
     }
+
+    isForceSensitive() {
+        let hasForceSensativity = false;
+        for(let item of this.items.values()){
+            if(item.data.data.finalName === 'Force Sensitivity') {
+                hasForceSensativity = true;
+            }
+        }
+        return hasForceSensativity && !this.data.data.isDroid;
+    }
+
 }

@@ -284,7 +284,7 @@
           "use the force": {
             "value": 0,
             "attribute": "cha",
-            "uut": true,
+            "uut": false,
             "trained": false,
             "acp": false,
             "link": "https://swse.fandom.com/wiki/use_the_force"
