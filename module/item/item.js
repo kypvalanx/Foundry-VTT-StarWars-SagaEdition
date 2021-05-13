@@ -191,11 +191,7 @@ export class SWSEItem extends Item {
     }
     setTextDescription() {
         let itemData = this.data;
-        let textDescription = this.stripHTML(itemData.data.description);
-
-        if(textDescription !== itemData.data.textDescription) {
-            this._pendingUpdate['data.textDescription'] = textDescription;
-        }
+        itemData.data.textDescription = this.stripHTML(itemData.data.description);
     }
     setSourceString() {
         let sourceString='';

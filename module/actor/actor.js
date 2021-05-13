@@ -65,8 +65,9 @@ export class SWSEActor extends Actor {
         this._generateAttributes(this);
         await this._generateSkillData(this);
 
-        let feats = await this._getActiveFeats(actorData);
+        let feats = await this.getFeats(actorData);
         actorData.feats = feats.activeFeats;
+        actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats;
 
         this.generateProvidedItemsFromItems(actorData);
         this._reduceProvidedItemsByExistingItems(actorData);
@@ -191,7 +192,7 @@ export class SWSEActor extends Actor {
         return filterItemsByType1.map(talent => talent.data);
     }
 
-    async _getActiveFeats(actorData) {
+    async getFeats(actorData) {
 
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
@@ -205,6 +206,7 @@ export class SWSEActor extends Actor {
         let feats = await filterItemsByType("feat", this.items.values());
         let activeFeats = [];
         let removeFeats = [];
+        let inactiveProvidedFeats = [];
         for (let feat of feats) {
             let doesFail = this.meetsPrerequisites(feat.data.data.prerequisites, false).doesFail;
             if (!doesFail) {
@@ -214,12 +216,14 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
-            } else if(doesFail && !feat.data.isSupplied){
-                removeFeats.push(feat);
+            } else if(doesFail && !feat.data.data.isSupplied){
+                removeFeats.push(feat.data);
+            } else {
+                inactiveProvidedFeats.push(feat.data);
             }
         }
 
-        return {activeFeats, removeFeats};
+        return {activeFeats, removeFeats, inactiveProvidedFeats};
     }
 
     checkForForceTraining(feat, prerequisites) {
@@ -1354,15 +1358,16 @@ export class SWSEActor extends Actor {
         for (let feat of actorData.feats) {
             if (feat.name === 'Force Training') {
                 let type = 'Force Powers';
+                let forcePowers = Math.max(1, 1 + actorData.data.abilities.wis.mod);
                 if (actorData.availableItems[type]) {
-                    actorData.availableItems[type] += Math.max(1, 1 + actorData.data.abilities.wis.mod);
+                    actorData.availableItems[type] += forcePowers;
                 } else {
-                    actorData.availableItems[type] = Math.max(1, 1 + actorData.data.abilities.wis.mod);
+                    actorData.availableItems[type] = forcePowers;
                 }
             }
         }
         for (let trait of actorData.traits) {
-            if (trait.name === 'Bonus Feat') {
+            if (trait.data.finalName === 'Bonus Feat') {
                 //TODO find species that have this category that shouldn't
                 let type = 'General Feats'
                 if (actorData.availableItems[type]) {

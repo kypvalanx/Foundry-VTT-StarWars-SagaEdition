@@ -1,9 +1,11 @@
 <form class="{{cssClass}}" autocomplete="off">
+    {{log actor}}
     {{#unless actor.species}}<span class="warning">PLEASE SELECT A SPECIES!!</span><br/>{{/unless}}
     {{#if data.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{data.remainingSkills}}</span><br/>{{/if}}
     {{#if data.tooManySkills}}<span class="warning">Too Many Skills Selected: {{data.tooManySkills}}</span><br/>{{/if}}
     {{#each actor.availableItems as |item id|}}<span class="warning">{{id}} remaining: {{item}}</span><br/>{{/each}}
+    {{#each actor.inactiveProvidedFeats as |feat id|}}<span class="warning">The {{feat.data.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisites}}</span><br/>{{/each}}
     <div>
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
