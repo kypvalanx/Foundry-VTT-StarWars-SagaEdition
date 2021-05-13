@@ -378,6 +378,10 @@
   text-align: right;
 }
 
+.swse td {
+  text-align: center;
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;
