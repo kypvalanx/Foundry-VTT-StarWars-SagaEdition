@@ -7,3 +7,24 @@
 .flex-between {
   justify-content: space-between;
 }
+
+.flex-col{
+  flex-direction: column;
+}
+
+.flex-row{
+  flex-direction: row;
+}
+
+.flex-grow .flex-grow1{
+  flex-grow: 1;
+}
+
+.flex-grow2{
+  flex-grow: 2;
+}
+
+.flex{
+  align-content: stretch;
+  display: flex;
+}

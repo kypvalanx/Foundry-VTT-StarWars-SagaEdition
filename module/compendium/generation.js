@@ -29,19 +29,29 @@ async function importCompendium(jsonImport, compendiumName, entity) {
         return;
     }
 
-    console.log(`Generating ${compendiumName}`);
+    console.log(`Generating ${compendiumName}... ${content.entries.length} entries`);
     ui.notifications.info(`Updating ${compendiumName}... ${content.entries.length} entries`);
-    for (let i of content.entries) {
-        let entity = await pack.createEntity(i);
-        entity.update({});
-        console.log(`${entity.name} added to ${pack.metadata.label}`);
-    }
+    let promises = [];
+    // for (let i of content.entries) {
+    //     await pack.createEntity(i);
+    // }
+         await pack.createEntity(content.entries);
+//     Promise.all(promises).then(values => {
+        console.log(`Done Generating ${compendiumName}... ${content.entries.length} entries`);
+    ui.notifications.info(`Done Updating ${compendiumName}... ${content.entries.length} entries`);
+// });
 }
 
 export const generateCompendiums = async function () {
     console.log("Generating Compendiums...")
 
-    await importCompendium("systems/swse/raw_export/Abilities.json", 'SWSE Abilities', "Item");
+    let pack = await game.packs.find(p => p.metadata.label === 'SWSE Abilities');
+    if(pack){
+        pack.delete();
+    }
+
+
+    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item");
 
     await importCompendium("systems/swse/raw_export/Classes.json", 'SWSE Classes', "Item");
 

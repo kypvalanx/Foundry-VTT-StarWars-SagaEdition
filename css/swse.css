@@ -10,6 +10,11 @@
   cursor: pointer;
 }
 
+.cursor {
+  color: #000;
+  text-shadow: 0 0 10px red;
+}
+
 .grid,
 .grid-2col {
   display: grid;
@@ -112,6 +117,40 @@
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
   justify-content: space-between;
+}
+
+.flex-col {
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.flex-row {
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.flex-grow .flex-grow1 {
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.flex-grow2 {
+  -webkit-box-flex: 2;
+  -ms-flex-positive: 2;
+  flex-grow: 2;
+}
+
+.flex {
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 /* Styles limited to swse sheets */
@@ -259,6 +298,23 @@
   word-wrap: break-word;
 }
 
+.swse .movable, .swse .container {
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+}
+
+.swse .container {
+  border: 1px dotted dimgray;
+}
+
+.swse .movable {
+  padding: 17px;
+  text-align: center;
+  border: 1px solid;
+}
+
 .swse .tabs {
   height: 40px;
   border-top: 1px solid #AAA;
@@ -323,10 +379,9 @@
 }
 
 .swse .species-container .species {
-  height: 30px;
-  line-height: 24px;
-  padding: 3px 0;
-  border-bottom: 1px solid #BBB;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
 }
 
 .swse .species-container .species .species-image {
@@ -334,55 +389,12 @@
 }
 
 .swse .species-container .species img {
-  height: 30px;
-  width: 30px;
+  height: 32px;
+  width: 32px;
 }
 
-.hideable {
-
-}
-
-.hide {
-  display: none;
-}
-
-.show {
-
-}
-
-.toggle-hide{
-
-}
-
-.plus,.minus {
-  width: 30px
-}
-
-.attribute-label{
-  width: 200px;
-}
-
-.align-right{
-  -webkit-box-pack: end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
-  text-align: right;
-}
-
-.movable, .container{
-  width: 50px;
-  height: 50px;
-}
-.container{
-  border: 1px dotted dimgray;
-}
-.movable{
-  padding: 17px;
-  text-align: center;
-  border: 1px solid;
-  cursor: move;
-}
-
-tr.skill, tr.ability, div.attack{
-  cursor:move;
+.swse .species-container .species div {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }

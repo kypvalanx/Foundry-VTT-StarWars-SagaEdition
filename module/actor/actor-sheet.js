@@ -1,3 +1,6 @@
+import {filterItemsByType} from "../util.js";
+
+// noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
@@ -14,6 +17,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
+
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -22,9 +26,6 @@ export class SWSEActorSheet extends ActorSheet {
 
     /** @override */
     static get defaultOptions() {
-        Handlebars.registerHelper('ifEquals', function (arg1, arg2, options) {
-            return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
-        });
 
         return mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "actor"],
@@ -38,8 +39,8 @@ export class SWSEActorSheet extends ActorSheet {
     /* -------------------------------------------- */
 
     /** @override */
-    getData() {
-        const data = super.getData();
+    getData(options) {
+        const data = super.getData(options);
         data.dtypes = ["String", "Number", "Boolean"];
         for (let attr of Object.values(data.data.attributes)) {
             attr.isCheckbox = attr.dtype === "Boolean";
@@ -63,10 +64,10 @@ export class SWSEActorSheet extends ActorSheet {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
 
-        html.find("input.skill").on("change", (event) => {
+        html.find("input.skill").on("change", async (event) => {
             let data = {};
             data["data.skills." + event.currentTarget.dataset.id + ".trained"] = event.currentTarget.checked;
-            this.actor.update(data);
+            await this.actor.update(data);
         })
 
         // Species controls
@@ -79,8 +80,8 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-        html.find('.condition-radio').on("change", event => {
-            this.actor.update({"data.health.condition": parseInt(event.currentTarget.value)});
+        html.find('.condition-radio').on("change", async event => {
+            await this.actor.update({"data.health.condition": parseInt(event.currentTarget.value)});
         })
 
         // html.find("div.item-container").each((i, div) => {
@@ -102,6 +103,11 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
         });
 
+        html.find("#selectAge").on("click", event => this._selectAge(event, this));
+        html.find("#selectGender").on("click", event => this._selectGender(event, this));
+        html.find("#selectWeight").on("click", () => this._unavailable());
+        html.find("#selectHeight").on("click", () => this._unavailable());
+
         html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
         html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
@@ -119,15 +125,14 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.item-edit').click(ev => {
             const li = $(ev.currentTarget).parents(".item");
             const item = this.actor.getOwnedItem(li.data("itemId"));
-            console.log(item)
             item.sheet.render(true);
         });
 
         // Delete Inventory Item
-        html.find('.item-delete').click(ev => {
+        html.find('.item-delete').click(async ev => {
             const li = $(ev.currentTarget).parents(".item");
             let title = `Are you sure you want to delete ${li.data("itemName")}`;
-            Dialog.confirm({
+            await Dialog.confirm({
                 title: title,
                 content: title,
                 yes: async () => {
@@ -153,9 +158,150 @@ export class SWSEActorSheet extends ActorSheet {
         // Rollable abilities.
         html.find('.rollable').click(this._onRoll.bind(this));
 
-        html.find('a[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
     }
 
+    async _selectAge(event, sheet) {
+        let options = this.buildAgeDialog(sheet);
+        await Dialog.prompt(options);
+    }
+
+    async _selectGender(event, sheet) {
+        let options = this.buildGenderDialog(sheet);
+        await Dialog.prompt(options);
+    }
+
+
+    buildAgeDialog(sheet) {
+        let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
+        let searchString = "AGE";
+        let ageEffects = filterItemsByType("trait", sheet.actor.items.values())
+            .filter(trait => trait.data.data.prerequisites
+                .reduce((a, b) => {
+                    return a || b.startsWith(searchString)
+                }, false)).map(trait => {
+                return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}
+            })
+        ageEffects.sort(
+            (a, b) =>
+                parseInt(a.range.split("-")[0].replace("+", "")) -
+                parseInt(b.range.split("-")[0].replace("+", "")));
+
+        let traits = '';
+        for (let effect of ageEffects) {
+            let {low, high} = this.parseRange(effect.range);
+            let current = age >= low && (age <= high || high === -1) ? ' current' : '';
+            traits += `<div class="flex-grow ageRange${current}" data-low="${low}" data-high="${high}">${effect.name}: ${effect.range}</div>`;
+        }
+        if(traits === ''){
+            traits = `<div>This species has no traits related to age.</div>`;
+        }
+        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"><div>${traits}</div>`
+
+        return {
+            title: "Age Selection",
+            content: content,
+            callback: async (html) => {
+                let key = html.find("#age")[0].value;
+                sheet.actor.setAge(key);
+            },
+            render: async (html) => {
+                let ageInput = html.find("#age");
+                this.moveAgeCursor(html);
+                ageInput.on("input", () => {
+                    this.moveAgeCursor(html);
+                })
+            }
+        };
+    }
+    buildGenderDialog(sheet) {
+        let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
+        let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
+        let searchString = "GENDER";
+        let genderEffects = filterItemsByType("trait", sheet.actor.items.values())
+            .filter(trait => trait.data.data.prerequisites
+                .reduce((a, b) => {
+                    return a || b.startsWith(searchString)
+                }, false)).map(trait => {
+                return {gender: this.getPrerequisiteByName(trait, searchString).split(":")[1], name: trait.data.data.finalName}
+            })
+
+
+        genderEffects.sort(
+            (a, b) =>
+                a.gender <
+                b.gender? 1 : 0);
+
+        let traits = '';
+        for (let effect of genderEffects) {
+            let current = gender.toLowerCase() === effect.gender? ' current' : '';
+            traits += `<div class="flex-grow gender${current}" data-gender="${effect.gender}" >${effect.gender}: ${effect.name}</div>`;
+        }
+        if(traits === ''){
+            traits = `<div>This species has no traits related to sex.</div>`;
+        }
+
+        let content = `<p>Enter your sex, some species have traits tied to sex.  Optionally, enter your gender. If included it will be displayed throughout your sheet instead of sex.</p>
+<input class="range" id="sex" type="text" placeholder="Sex" value="${sex}">
+<input class="range" id="gender" type="text" placeholder="Gender" value="${gender}">
+<div>${traits}</div>`
+
+        return {
+            title: "Gender Selection",
+            content: content,
+            callback: async (html) => {
+                sheet.actor.setGender(html.find("#sex")[0].value, html.find("#gender")[0].value);
+            },
+            render: async (html) => {
+                let genderInput = html.find("#sex");
+                this.moveGenderCursor(html);
+                genderInput.on("input", () => {
+                    this.moveGenderCursor(html);
+                })
+            }
+        };
+    }
+
+    moveAgeCursor(html) {
+        let age = parseInt(html.find("#age")[0].value);
+        let rangeDivs = html.find(".ageRange")
+        for (let div of rangeDivs) {
+            let low = parseInt($(div).data("low"));
+            let high = parseInt($(div).data("high"));
+
+            if (div.classList.contains("cursor")) {
+                div.classList.remove("cursor")
+            }
+            if (age >= low && (age <= high || high === -1)) {
+                div.classList.add("cursor")
+            }
+        }
+    }
+
+    moveGenderCursor(html) {
+        let gender = html.find("#sex")[0].value;
+        let rangeDivs = html.find(".gender")
+        for (let div of rangeDivs) {
+            if (div.classList.contains("cursor")) {
+                div.classList.remove("cursor")
+            }
+            if (gender.toLowerCase() === $(div).data('gender').toLowerCase()) {
+                div.classList.add("cursor")
+            }
+        }
+    }
+
+    parseRange(range) {
+        if (range.includes("-")) {
+            let tok = range.split("-");
+            return {low: parseInt(tok[0]), high: parseInt(tok[1])};
+        }
+        return {low: parseInt(range.replace("+", "")), high: -1};
+    }
+
+    getPrerequisiteByName(trait, searchString) {
+        return trait.data.data.prerequisites.filter(prepreq => prepreq.startsWith(searchString))[0];
+    }
 
     async _selectAttributeGeneration(event, sheet) {
         let genType = sheet.actor.getAttributeGenerationType();
@@ -203,19 +349,6 @@ export class SWSEActorSheet extends ActorSheet {
             total += abilityCost[item.innerHTML];
         })
         return total;
-    }
-
-    _onDragMiscStart(event, type) {
-        const result = {
-            type: type,
-            actor: this.actor._id,
-        };
-        if (this.actor.isToken) {
-            result.sceneId = canvas.scene._id;
-            result.tokenId = this.actor.token._id;
-        }
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(result));
     }
 
     _onDragAbilityStart(event) {
@@ -409,7 +542,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             });
         }
-        newEl.addEventListener("focusout", (event) => {
+        newEl.addEventListener("focusout", () => {
             if (!changed) {
                 this._render();
             }
@@ -446,230 +579,230 @@ export class SWSEActorSheet extends ActorSheet {
         }
         const item = await Item.fromDropData(data);
 
-        //console.log("Item Dropped: ",item);
-
-        let additionalEntitiesToAdd = [];
+        let entitiesToAdd = [];
         let context = {};
 
         //only one species allowed
         if (item.data.type === "species") {
-            //TODO apply species items
-            if (this.actor.data.species != null) {
-                new Dialog({
-                    title: "Species Selection",
-                    content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                return;
-            }
-
-            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, item.data.data.categories);
-            await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this._getFeatsFromCategories(item.data.data.categories));
-            await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, item.data.data.attributes.items);
-
+            entitiesToAdd.push(...await this.addSpecies(item));
         } else if (item.data.type === "class") {
-            let meetsPrereqs = this._meetsClassPrereqs(item.data.data.prerequisites);
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                return;
-            } else if (!meetsPrereqs.doesFail && meetsPrereqs.failureList.length > 0) {
-                new Dialog({
-                    title: "You MAY Meet the Prerequisites!",
-                    content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-            }
-            if (!item.data.data.prerequisites.isPrestige) {
-                if (item.data.data.feats.feats.length > 0) {
-                    await this.addClassFeats(item, additionalEntitiesToAdd);
-                }
-                item.data.data.attributes.first = this.actor.data.classes.length === 0;
-
-                if (item.data.data.attributes.first) {
-                    item.data.data.health.rolledHp = item.data.data.health.firstLevel;
-                    context.isFirstLevel = true;
-                }
-
-            }
+            entitiesToAdd.push(...await this.addClass(item, context));
         } else if (item.data.type === "feat") {
-            let possibleFeatTypes = [];
-
-            let optionString = "";
-            for (let category of item.data.bonusFeatCategories) {
-                if (this.actor.data.availableItems[category] > 0) {
-                    possibleFeatTypes.push(category);
-                    optionString += `<option value="${category}">${category}</option>`;
-                }
-            }
-
-            if (possibleFeatTypes.length > 1) {
-                let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused feat source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleFeatTypes = [key];
-                    }
-                });
-            }
-            let filteredCategories = [];
-            for (let category of item.data.data.categories) {
-                if (!category.endsWith(" Bonus Feats")) {
-                    possibleFeatTypes.push(category);
-                }
-            }
-            filteredCategories.push(...possibleFeatTypes);
-
-
-            item.data.data.categories = filteredCategories;
-
-
-            if (item.data.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if (meetsPrereqs.doesFail) {
-                    return;
-                }
-            }
-        } else if (item.data.type === "forcePower" || item.data.type === "forceTechnique" || item.data.type === "forceSecret") {
-
-            if (item.data.type === "forceSecret") {
-                if (!this.actor.data.availableItems["Force Secrets"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Secrets",
-                        content: "You can't take any more Force Secrets",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            } else if (item.data.type === "forceTechnique") {
-                if (!this.actor.data.availableItems["Force Techniques"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Techniques",
-                        content: "You can't take any more Force Techniques",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            } else if (item.data.type === "forcePower") {
-                if (!this.actor.data.availableItems["Force Powers"]) {
-                    await Dialog.prompt({
-                        title: "You can't take any more Force Powers",
-                        content: "You can't take any more Force Powers",
-                        callback: () => {
-                        }
-                    });
-                    return;
-                }
-            }
-
-
-            if (item.data.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.data.prerequisites, true);
-                if (meetsPrereqs.doesFail) {
-                    return;
-                }
-            }
+            entitiesToAdd.push(...await this.addFeat(item));
+        } else if (item.data.type === "forceSecret") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Secrets"));
+        } else if (item.data.type === "forceTechnique") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
+        } else if (item.data.type === "forcePower") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
         } else if (item.data.type === "talent") {
+            entitiesToAdd.push(...await this.addTalent(item));
+        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
+            entitiesToAdd.push(item)
+        }
+        //await this.activateChoices(item, entitiesToAdd, context);
+        await super._onDropItemCreate(entitiesToAdd.map(entity => entity.data));
+    }
+
+
+    async addTalent(item) {
+        let possibleTalentTrees = [];
+        let optionString = "";
+
+        if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
+            for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
+                if (id.includes("Talent") && !id.includes("Force") && item > 0) {
+                    optionString += `<option value="${id}">${id}</option>`
+                    possibleTalentTrees.push(id);
+                }
+            }
+        } else {
             let pattern = /([\w\s\d-]*) Talent Trees?/;
-            let possibleTalentTrees = [];
-            let optionString = "";
-
-            if (item.data.talentTree === this.actor.data.data.bonusTalentTree) {
-                for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
-                    if (id.includes("Talent") && !id.includes("Force") && item > 0) {
-                        optionString += `<option value="${id}">${id}</option>`
-                        possibleTalentTrees.push(id);
+            for (let talentTree of item.data.data.categories) {
+                let type = pattern.exec(talentTree);
+                if (type) {
+                    talentTree = type[1] + " Talents";
+                    let count = this.actor.data.availableItems[talentTree];
+                    if (count && count > 0) {
+                        optionString += `<option value="${talentTree}">${talentTree}</option>`
+                        possibleTalentTrees.push(talentTree);
                     }
-                }
-            } else {
-                for (let talentTree of item.data.data.categories) {
-                    let type = pattern.exec(talentTree);
-                    if (type) {
-                        talentTree = type[1] + " Talents";
-                        let count = this.actor.data.availableItems[talentTree];
-                        if (count && count > 0) {
-                            optionString += `<option value="${talentTree}">${talentTree}</option>`
-                            possibleTalentTrees.push(talentTree);
-                        }
-                    }
-                }
-            }
-            // if(!isForce && this.actor.data.data.bonusTalentTree && this.actor.data.data.bonusTalentTree.length > 0){
-            //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
-            // }
-
-            if (possibleTalentTrees.length === 0) {
-                await Dialog.prompt({
-                    title: "You can't take any more talents of that type",
-                    content: "You can't take any more talents of that type",
-                    callback: () => {
-                    }
-                });
-                return;
-            } else if (possibleTalentTrees.length > 1) {
-                let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused talent source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleTalentTrees = [key];
-                    }
-                });
-            }
-            let filteredCategories = [];
-            for (let category of item.data.data.categories) {
-                if (!category.endsWith(" Talent Trees") && !category.endsWith(" Talent Tree")) {
-                    filteredCategories.push(category);
-                }
-            }
-            filteredCategories.push(...possibleTalentTrees);
-
-
-            item.data.data.categories = filteredCategories;
-
-            if (item.data.prerequisites) {
-                let meetsPrereqs = this.actor.meetsFeatPrerequisites(item.data.prerequisites);
-                if (meetsPrereqs.doesFail) {
-                    return;
                 }
             }
         }
-        await this.activateChoices(item, additionalEntitiesToAdd, context);
-        //await this._addItemsFromItems(actorData);
-        additionalEntitiesToAdd.push(item)
-        console.log(additionalEntitiesToAdd)
-        await super._onDropItemCreate(additionalEntitiesToAdd);
+        // if(!isForce && this.actor.data.data.bonusTalentTree && this.actor.data.data.bonusTalentTree.length > 0){
+        //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
+        // }
+
+        if (possibleTalentTrees.length === 0) {
+            await Dialog.prompt({
+                title: "You can't take any more talents of that type",
+                content: "You can't take any more talents of that type",
+                callback: () => {
+                }
+            });
+            return [];
+        } else if (possibleTalentTrees.length > 1) {
+            let content = `<p>Select an unused talent source.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+            await Dialog.prompt({
+                title: "Select an unused talent source.",
+                content: content,
+                callback: async (html) => {
+                    let key = html.find("#choice")[0].value;
+                    possibleTalentTrees = [key];
+                }
+            });
+        }
+
+        item.data.data.talentTreeSource = possibleTalentTrees[0];
+
+        return await this.checkPrerequisitesAndResolveOptions(item);
     }
 
+    async addForceItem(item, itemType) {
+        if (!this.actor.data.availableItems[itemType]) {
+            await Dialog.prompt({
+                title: `You can't take any more ${itemType}`,
+                content: `You can't take any more ${itemType}`,
+                callback: () => {
+                }
+            });
+            return [];
+        }
+        return await this.checkPrerequisitesAndResolveOptions(item);
+    }
+
+    async checkPrerequisitesAndResolveOptions(item) {
+        if (item.data.data.prerequisites) {
+            let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisites, true);
+            if (meetsPrereqs.doesFail) {
+                return [];
+            }
+        }
+        let entitiesToAdd = [item];
+        await this.activateChoices(item, entitiesToAdd, {});
+        return entitiesToAdd
+    }
+
+    async addFeat(item) {
+        let possibleFeatTypes = [];
+
+        let optionString = "";
+        for (let category of item.data.data.bonusFeatCategories) {
+            if (this.actor.data.availableItems[category] > 0) {
+                possibleFeatTypes.push(category);
+                optionString += `<option value="${category}">${category}</option>`;
+            }
+        }
+
+        if (possibleFeatTypes.length > 1) {
+            let content = `<p>Select an unused feat type.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+            await Dialog.prompt({
+                title: "Select an unused feat source.",
+                content: content,
+                callback: async (html) => {
+                    let key = html.find("#choice")[0].value;
+                    possibleFeatTypes = [key];
+                }
+            });
+        }
+
+        for (let category of item.data.data.categories) {
+            if (!category.endsWith(" Bonus Feats")) {
+                possibleFeatTypes.push(category);
+            }
+        }
+
+        item.data.data.categories = possibleFeatTypes;
+
+        let items = await this.checkPrerequisitesAndResolveOptions(item);
+
+        if(items.length>0){
+            items.push(...await this.addOptionalRuleFeats(item));
+        }
+
+        return items;
+    }
+
+    async addClass(item) {
+
+        let meetsPrereqs = this.actor.meetsClassPrereqs(item.data.data.prerequisites);
+        if (meetsPrereqs.doesFail) {
+            new Dialog({
+                title: "You Don't Meet the Prerequisites!",
+                content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
+        if (meetsPrereqs.failureList.length > 0) {
+            new Dialog({
+                title: "You MAY Meet the Prerequisites!",
+                content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+        }
+        let entities = [];
+        entities.push(item)
+        if (item.data.data.prerequisites.isPrestige) {
+            return [];
+        }
+        if (item.data.data.feats.feats.length > 0) {
+            entities.push(...await this.addClassFeats(item));
+        }
+        item.data.data.attributes.first = this.actor.data.classes.length === 0;
+
+        let context = {};
+        if (item.data.data.attributes.first) {
+            item.data.data.health.rolledHp = item.data.data.health.firstLevel;
+            context.isFirstLevel = true;
+        }
+
+        await this.activateChoices(item, entities, context);
+        return entities;
+    }
+
+    async addSpecies(item) {
+
+        if (this.actor.data.species != null) {
+            new Dialog({
+                title: "Species Selection",
+                content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
+
+        let entities = []
+        entities.push(item);
+        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.categories);
+        await this.actor.addItemsFromCompendium('feat', item, entities, this._getFeatsFromCategories(item.data.data.categories));
+        await this.actor.addItemsFromCompendium('item', item, entities, item.data.data.attributes.items);
+        await this.activateChoices(item, entities, {});
+        return entities;
+
+    }
 
     async moveExistingItem(data, ev) {
         if (data.itemId) {
@@ -714,12 +847,12 @@ export class SWSEActorSheet extends ActorSheet {
 
             let greetingString;
             let optionString = "";
-            if (Object.keys(options).length === 0){
+            if (Object.keys(options).length === 0) {
                 greetingString = choice.noOptions;
-            } else if (Object.keys(options).length === 1){
+            } else if (Object.keys(options).length === 1) {
                 greetingString = choice.oneOption;
                 let optionLabel = Object.keys(options)[0];
-                optionString = `<div id="choice" value="${optionLabel}">${optionLabel}</div>`
+                optionString = `<div id="choice">${optionLabel}</div>`
             } else {
                 greetingString = choice.description;
 
@@ -734,24 +867,21 @@ export class SWSEActorSheet extends ActorSheet {
             }
 
 
-
             let content = `<p>${greetingString}</p>${optionString}`;
 
             await Dialog.prompt({
                 title: greetingString,
                 content: content,
                 callback: async (html) => {
-                    debugger
                     let choice = html.find("#choice")[0];
                     let key = choice?.value;
 
-                    if(!key){
+                    if (!key) {
                         key = choice?.innerText;
                     }
                     let selectedChoice = options[key];
-                    console.log(selectedChoice)
                     if (selectedChoice.abilities && selectedChoice.abilities.length > 0) {
-                        await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, selectedChoice.abilities);
+                        await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, selectedChoice.abilities);
                     }
                     if (selectedChoice.items && selectedChoice.items.length > 0) {
                         await this.actor.addItemsFromCompendium('item', item, additionalEntitiesToAdd, selectedChoice.items);
@@ -769,11 +899,12 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
-    async addClassFeats(item, additionalEntitiesToAdd) {
+    async addClassFeats(item) {
+        let additionalEntitiesToAdd = [];
         let feats = item.data.data.feats.feats;
         let nonPrestigeClasses = this.actor.getNonPrestigeClasses();
         if (nonPrestigeClasses.length === 0) {
-            await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
+            await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${this.actor.cleanItemName(feat)})`));
             let newVar = await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, await feats.map(feat => this.actor.cleanItemName(feat)))
 
             let featString = newVar.notificationMessage;
@@ -801,10 +932,11 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    await this.actor.addItemsFromCompendium('ability', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
+                    await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
                 }
             });
         }
+        return additionalEntitiesToAdd;
     }
 
     /* -------------------------------------------- */
@@ -968,173 +1100,8 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-    //TODO clean this shit up
-    _meetsClassPrereqs(prerequisites) {
-        let failureList = [];
-        for (let [key, value] of Object.entries(prerequisites.prerequisites)) {
-            value = value.trim();
-            key = key.trim();
-            if (key.toLowerCase() === 'trained skills') {
-                this.checkTrainedSkills(value, failureList, key);
-            } else if (key.toLowerCase() === 'minimum level') {
-                if (this.actor.data.prerequisites.charLevel < parseInt(value)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'base attack bonus') {
-                if (this.actor.data.prerequisites.bab < parseInt(value)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'species') {
-                if (this.actor.data.prerequisites.species === value.toLowerCase) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'force techniques') {
-                let result = /at least (\w*)/.exec(value.toLowerCase());
-                if (result != null) {
-                    if (this.actor.data.prerequisites.techniques.length < this._fromOrdinal(result[1])) {
-                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                    }
-                }
-            } else if (key.toLowerCase() === 'force powers') {
-                if (!this.actor.data.prerequisites.powers.includes(value.trim().toLowerCase())) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'droid systems') {
-                if (!this.actor.data.prerequisites.equippedItems.includes(value.trim().toLowerCase())) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (key.toLowerCase() === 'feats') {
-                this.checkFeats(value, failureList, key);
-            } else if (key.toLowerCase() === 'talents' || key.toLowerCase() === 'talent') {
-                this.checkTalents(value, failureList, key);
-            } else if (key.toLowerCase() === 'special') {
-                if (value.toLowerCase() === 'must be a droid.' || value.toLowerCase() === 'must be a droid') {
-                    if (!this.actor.data.prerequisites.isDroid) {
-                        failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                    }
-                } else {
-                    failureList.push({fail: false, message: `<b>${key}:</b> ${value}`});
-                }
-
-            } else {
-                console.error("UNIDENTIFIED PREREQ", "[" + key + "]", value);
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value} [UNIDENTIFIED]`});
-            }
-        }
-        let doesFail = false;
-        for (let fail of failureList) {
-            if (fail.fail === true) {
-                doesFail = true;
-                break;
-            }
-        }
-
-        return {doesFail: doesFail, failureList: failureList};
-    }
-
-    checkTalents(value, failureList, key) {
-        let result = /(?:at least|any) (\w*) talent(?:s)? from ([\s\w,]*)(?:\.)?/.exec(value.toLowerCase());
-        if (result != null) {
-            let talentReq = false;
-            let toks = [];
-            if (result[2].includes(',')) {
-                if (result[2].includes(' or ')) {
-                    toks = result[2].split(",");
-                } else {
-                    console.log(toks);
-                }
-            } else if (result[2].includes(' or ')) {
-                toks = result[2].split(" or ");
-            } else {
-                toks[0] = result[2];
-            }
-
-            for (let tok of toks) {
-                tok = /(?: )?(?:or )?(?:either )?(?:the )?([\s\w]*)/.exec(tok)[1];
-                if (this.actor.data.prerequisites.talentTrees[tok] >= this._fromOrdinal(result[1])) {
-                    talentReq = true;
-                }
-            }
-            if (!talentReq) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-            }
-
-        } else {
-            let result = /at least (\w*) force talents/.exec(value.toLowerCase());
-
-            if (result != null) {
-                if (this.actor.data.prerequisites.forceTalentTreesCount < this._fromOrdinal(result[1])) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-                }
-            } else if (!this.actor.data.prerequisites.talents.includes(value.toLowerCase())) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-            }
-        }
-    }
-
-    checkFeats(value, failureList, key) {
-        if (value.includes(',')) {
-            let toks = value.split(",");
-            for (let tok of toks) {
-                if (!this._hasFeat(tok)) {
-                    failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
-                }
-            }
-
-        } else if (!this.actor.data.prerequisites.feats.includes(value.toLowerCase())) {
-            failureList.push({fail: true, message: `<b>${key}:</b> ${value}`});
-        }
-    }
-
-    checkTrainedSkills(value, failureList, key) {
-        let toks = [];
-        if (value.includes(', ')) {
-            toks = value.split(", ");
-        } else if (value.includes(" and ")) {
-            toks = value.split(" and ");
-        } else {
-            toks[0] = value;
-        }
-
-        for (let tok of toks) {
-            tok = /([\w\s()]*)/.exec(tok)[1].trim();
-            if (!this.actor.data.prerequisites.trainedSkills.includes(tok.toLowerCase())) {
-                failureList.push({fail: true, message: `<b>${key}:</b> ${tok}`});
-            }
-        }
-    }
 
 
-    _fromOrdinal(numberWord) {
-        let num = numberWord.toLowerCase();
-        if (num === 'zero') {
-            return 0;
-        } else if (num === 'one') {
-            return 1;
-        } else if (num === 'two') {
-            return 2;
-        } else if (num === 'three') {
-            return 3;
-        } else if (num === 'four') {
-            return 4;
-        } else {
-            console.error(`${numberWord} is unrecognized`);
-        }
-        return undefined;
-    }
-
-    _hasFeat(value) {
-        if (value.includes(" or ")) {
-            let toks = value.split(" or ");
-            let hasFeat = false;
-            for (let tok of toks) {
-                hasFeat = hasFeat || this.actor.data.prerequisites.feats.includes(tok.trim().toLowerCase());
-            }
-            return hasFeat;
-        } else {
-            return this.actor.data.prerequisites.feats.includes(value.trim().toLowerCase());
-        }
-    }
 
     async _explodeOptions(options) {
         let resolvedOptions = {};
@@ -1171,7 +1138,7 @@ export class SWSEActorSheet extends ActorSheet {
             let existingValues = sheet.actor.getAttributes();
 
             scores = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
-            for (let val in existingValues) {
+            for (let val of Object.keys(existingValues)) {
                 scores[val] = existingValues[val];
             }
         }
@@ -1204,7 +1171,7 @@ export class SWSEActorSheet extends ActorSheet {
                 })
                 return response;
             },
-            no: async (html) => {
+            no: async () => {
 
             },
             render: (html) => {
@@ -1219,7 +1186,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 if (canReRoll) {
                     html.find("#reRoll").each((i, button) => {
-                        button.addEventListener("click", (event) => {
+                        button.addEventListener("click", () => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
                                 let roll = new Roll(rollFormula).roll();
@@ -1253,7 +1220,7 @@ export class SWSEActorSheet extends ActorSheet {
     async _selectAttributesManually(event, sheet) {
         let existingValues = sheet.actor.getAttributes();
         let combined = {};
-        for (let val in existingValues) {
+        for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
 
@@ -1344,7 +1311,7 @@ export class SWSEActorSheet extends ActorSheet {
     async _assignAttributePoints(event, sheet) {
         let existingValues = sheet.actor.getAttributes();
         let combined = {};
-        for (let val in existingValues) {
+        for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
 
@@ -1422,11 +1389,34 @@ export class SWSEActorSheet extends ActorSheet {
     _getFeatsFromCategories(categories = []) {
         let feats = [];
         for (let category of categories) {
-            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category);
+            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category.category);
             if (result) {
                 feats.push(result[1])
             }
         }
         return feats;
+    }
+
+    _unavailable() {
+        Dialog.confirm({
+            title: "Sorry this content isn't finished.",
+            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know."
+        })
+    }
+
+    async addOptionalRuleFeats(item) {
+        let items = [];
+
+        if (item.name === 'Point-Blank Shot') {
+            if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
+                    await this.addItemsFromCompendium('feat', {
+                        name: item.name,
+                        data: {type: 'feat'},
+                        id: item._id
+                    }, items, {category:'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
+            }
+        }
+
+        return items;
     }
 }

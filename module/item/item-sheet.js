@@ -6,6 +6,14 @@ import {SWSEItem} from "./item.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
+  /**
+   * A convenience reference to the Item entity
+   * @type {SWSEItem}
+   */
+  get item() {
+    return this.object;
+  }
+
   /** @override */
   static get defaultOptions() {
     return mergeObject(super.defaultOptions, {
@@ -23,8 +31,6 @@ export class SWSEItemSheet extends ItemSheet {
     //return `${path}/item-sheet.hbs`;
     // Alternatively, you could use the following return statement to do a
     // unique item sheet by type, like `weapon-sheet.html`.
-
-    console.log(this.item)
 
     let type = this.item.data.type;
     if(type === 'species'){
@@ -56,9 +62,8 @@ export class SWSEItemSheet extends ItemSheet {
   /* -------------------------------------------- */
 
   /** @override */
-  getData() {
-    const data = super.getData();
-    return data;
+  getData(options) {
+    return super.getData(options);
   }
 
   /* -------------------------------------------- */
@@ -106,7 +111,6 @@ export class SWSEItemSheet extends ItemSheet {
       const li = $(ev.currentTarget).parents(".item");
       let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
       let ownedItem = this.item.actor.getOwnedItem(itemToDelete._id);
-      console.log(ownedItem)
       this.item.revokeOwnership(ownedItem);
     });
 
@@ -200,28 +204,131 @@ export class SWSEItemSheet extends ItemSheet {
   /* -------------------------------------------- */
   /** @override */
   async _onDrop(event) {
-    // Try to extract the data
+    // Try to extract the droppedItem
     //console.log(event)
-    let data;
+    let droppedItem;
     try {
-      data = JSON.parse(event.dataTransfer.getData("text/plain"));
+      droppedItem = JSON.parse(event.dataTransfer.getData("text/plain"));
 
-      //console.log(data)
+      //console.log(droppedItem)
     } catch (err) {
       return false;
     }
-    if(data.data.type ==='upgrade'){
-      let itemType = this.item.type;
-      console.log(data)
-      if((itemType === 'armor' && data.data.data.upgrade.type.includes("Armor Upgrade")) ||
-          (itemType === 'weapon' && data.data.data.upgrade.type.includes("Weapon Upgrade"))){
+    let itemType = this.item.type;
+    if(droppedItem.data.type ==='upgrade'){
+      if((itemType === 'armor' && droppedItem.data.data.upgrade.type.includes("Armor Upgrade")) ||
+          (itemType === 'weapon' && droppedItem.data.data.upgrade.type.includes("Weapon Upgrade"))){
         let actor = this.actor;
-        let ownedItem = actor.getOwnedItem(data.data._id);
+        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
         await this.item.takeOwnership(ownedItem);
+      }
+
+    }else if(droppedItem.data.type ==='template'){
+
+      if(this._canAttach(droppedItem.data.data.attributes.application)){
+        let actor = this.actor;
+        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
+        await this.item.takeOwnership(ownedItem);
+      } else{
+        //debugger
       }
 
     }else{
       console.log("can't add this to an item");
     }
+  }
+
+  _canAttach(application) {
+    if(!application){
+      return true;
+    }
+    application = (application + "").trim();
+
+    let hasParens = this.hasParens(application);
+    if(hasParens){
+      return this._canAttach(hasParens[1]);
+    }
+
+    let ors = this._findZeroDepth(application, " OR ");
+    if(ors.length > 0){
+      for(let or of ors){
+        for(let i = or.start; i < or.end; i++){
+          application = application.substring(0, i)+ 'X' + application.substring(i+1)
+        }
+      }
+
+      let toks = application.split("XXXX");
+      let isTruthy = false;
+      for(let tok of toks){
+        isTruthy = isTruthy || this._canAttach(tok)
+      }
+      return isTruthy;
+    }
+
+    let ands = this._findZeroDepth(application, " AND ");
+    if(ands.length>0){      for(let or of ors){
+      for(let i = ands.start; i < ands.end; i++){
+        application = application.substring(0, i)+ 'X' + application.substring(i+1)
+      }
+    }
+
+      let toks = application.split("XXXXX");
+      let isTruthy = true;
+      for(let tok of toks){
+        isTruthy = isTruthy && this._canAttach(tok)
+      }
+      return isTruthy;
+    }
+
+    if(application === 'WEAPON'){
+      return this.object.data.type === 'weapon';
+    }
+    if(application === 'ARMOR'){
+      return this.object.data.type === 'armor';
+    }
+    if(application === 'ION'){
+      return this.object.data.data.weapon.type === 'Energy (Ion)';
+    }
+    if(application === 'STUN'){
+      return this.object.data.data.weapon.stun?.isAvailable;
+    }
+    return false;
+  }
+
+  hasParens(application) {
+    if(!application.startsWith("(")){
+      return false;
+    }
+    let depth = 0;
+    for(let i = 0; i < application.length; i++){
+      let char = application.charAt(i);
+      if(char === '('){
+        depth++;
+      }else if (char === ')'){
+        depth--;
+      }
+      if(depth === 0){
+        return application.length-1 === i;
+      }
+
+    }
+
+    return false;
+  }
+
+  _findZeroDepth(term , search) {
+    let found = [];
+    let depth = 0;
+    for(let i = 0; i < term.length; i++){
+      let char = term.charAt(i);
+      if(char === '('){
+        depth++;
+      } else if(char === ')'){
+        depth--;
+      }else if(term.substring(i).startsWith(search) && depth === 0){
+        found.push({start:i, end:i+search.length})
+      }
+    }
+    return found;
   }
 }

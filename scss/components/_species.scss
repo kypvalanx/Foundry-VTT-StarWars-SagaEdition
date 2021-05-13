@@ -1,17 +1,17 @@
 .species-container {
   .species{
-    height: 30px;
-    line-height: 24px;
-    padding: 3px 0;
-    border-bottom: 1px solid #BBB;
+    display: flex;
 
     .species-image{
       display: block;
     }
     img{
-      height: 30px;
-      width: 30px;
+      height: 32px;
+      width: 32px;
 
+    }
+    div{
+      flex:1;
     }
   }
 }

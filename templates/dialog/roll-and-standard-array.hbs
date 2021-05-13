@@ -1,4 +1,4 @@
-<div>
+<div class="swse">
     {{#if canReRoll}}
         <button id="reRoll">Roll New Attributes (roll formula: {{formula}})</button>{{/if}}
     <div class="grid">
@@ -10,9 +10,9 @@
                 {{#each abilities as |ability key|}}
                     {{#unlessBoth ability ../isDroid}}
                         <tr>
-                            <th>{{key}}</th>
+                            <th style="width:50%">{{key}}</th>
                             <td>
-                                <div class="container" data-ability="{{key}}"></div>
+                                <div class="swse container" data-ability="{{key}}"></div>
                             </td>
                         </tr>
                     {{/unlessBoth}}
@@ -27,8 +27,8 @@
                 {{#each scores as |score id|}}
                     <tr>
                         <td>
-                            <div class="container">
-                                <div class="movable" id="movable-{{id}}">{{score}}</div>
+                            <div class="swse container">
+                                <div class="swse movable" id="movable-{{id}}">{{score}}</div>
                             </div>
                         </td>
                     </tr>

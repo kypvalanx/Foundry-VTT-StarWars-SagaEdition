@@ -1,6 +1,9 @@
 {
   "Actor": {
-    "types": ["character", "npc"],
+    "types": [
+      "character",
+      "npc"
+    ],
     "templates": {
       "common": {
         "health": {
@@ -11,7 +14,7 @@
         },
         "equippedIds": [],
         "classesfirst": "",
-        "abilities": {
+        "attributes": {
           "str": {
             "total": 10,
             "mod": 0,
@@ -20,8 +23,8 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           },
           "dex": {
@@ -32,8 +35,8 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           },
           "con": {
@@ -44,8 +47,8 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           },
           "int": {
@@ -56,8 +59,8 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           },
           "wis": {
@@ -68,8 +71,8 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           },
           "cha": {
@@ -80,15 +83,15 @@
             "ageBonus": 0,
             "equipmentBonus": 0,
             "buffBonus": 0,
-            "customBonus":0,
-            "bonus":0,
+            "customBonus": 0,
+            "bonus": 0,
             "base": 10
           }
         },
         "skills": {
           "acrobatics": {
             "value": 0,
-            "ability": "dex",
+            "attribute": "dex",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -96,7 +99,7 @@
           },
           "climb": {
             "value": 0,
-            "ability": "str",
+            "attribute": "str",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -104,7 +107,7 @@
           },
           "deception": {
             "value": 0,
-            "ability": "cha",
+            "attribute": "cha",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -112,7 +115,7 @@
           },
           "endurance": {
             "value": 0,
-            "ability": "con",
+            "attribute": "con",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -120,7 +123,7 @@
           },
           "gather information": {
             "value": 0,
-            "ability": "cha",
+            "attribute": "cha",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -128,7 +131,7 @@
           },
           "initiative": {
             "value": 0,
-            "ability": "dex",
+            "attribute": "dex",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -136,7 +139,7 @@
           },
           "jump": {
             "value": 0,
-            "ability": "str",
+            "attribute": "str",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -144,7 +147,7 @@
           },
           "knowledge (bureaucracy)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -152,7 +155,7 @@
           },
           "knowledge (galactic lore)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -160,7 +163,7 @@
           },
           "knowledge (life sciences)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -168,7 +171,7 @@
           },
           "knowledge (physical sciences)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -176,7 +179,7 @@
           },
           "knowledge (social sciences)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -184,7 +187,7 @@
           },
           "knowledge (tactics)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -192,7 +195,7 @@
           },
           "knowledge (technology)": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -200,7 +203,7 @@
           },
           "mechanics": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": false,
             "trained": false,
             "acp": false,
@@ -208,7 +211,7 @@
           },
           "perception": {
             "value": 0,
-            "ability": "wis",
+            "attribute": "wis",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -216,7 +219,7 @@
           },
           "persuasion": {
             "value": 0,
-            "ability": "cha",
+            "attribute": "cha",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -224,7 +227,7 @@
           },
           "pilot": {
             "value": 0,
-            "ability": "dex",
+            "attribute": "dex",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -232,7 +235,7 @@
           },
           "ride": {
             "value": 0,
-            "ability": "dex",
+            "attribute": "dex",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -240,7 +243,7 @@
           },
           "stealth": {
             "value": 0,
-            "ability": "dex",
+            "attribute": "dex",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -248,7 +251,7 @@
           },
           "survival": {
             "value": 0,
-            "ability": "wis",
+            "attribute": "wis",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -256,7 +259,7 @@
           },
           "swim": {
             "value": 0,
-            "ability": "str",
+            "attribute": "str",
             "uut": true,
             "trained": false,
             "acp": true,
@@ -264,7 +267,7 @@
           },
           "treat injury": {
             "value": 0,
-            "ability": "wis",
+            "attribute": "wis",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -272,7 +275,7 @@
           },
           "use computer": {
             "value": 0,
-            "ability": "int",
+            "attribute": "int",
             "uut": true,
             "trained": false,
             "acp": false,
@@ -280,23 +283,32 @@
           },
           "use the force": {
             "value": 0,
-            "ability": "cha",
+            "attribute": "cha",
             "uut": true,
             "trained": false,
             "acp": false,
             "link": "https://swse.fandom.com/wiki/use_the_force"
           }
-        }
+        },
+        "classes": [],
+        "traits": [],
+        "age": 0,
+        "gender": "",
+        "genderDisplay": ""
       }
     },
     "character": {
-      "templates": ["common"],
+      "templates": [
+        "common"
+      ],
       "biography": "",
       "attributes": {
       }
     },
     "npc": {
-      "templates": ["common"],
+      "templates": [
+        "common"
+      ],
       "biography": "",
       "attributes": {
       }
@@ -309,10 +321,30 @@
     }
   },
   "Item": {
-    "types": ["weapon", "armor", "equipment", "feat", "talent", "species", "class", "upgrade", "forcePower", "forceTradition","forceTechnique","forceSecret","forceRegimen","classFeature", "ability", "template"],
+    "types": [
+      "weapon",
+      "armor",
+      "equipment",
+      "feat",
+      "talent",
+      "species",
+      "class",
+      "upgrade",
+      "forcePower",
+      "forceTradition",
+      "forceTechnique",
+      "forceSecret",
+      "forceRegimen",
+      "classFeature",
+      "trait",
+      "template"
+    ],
     "templates": {
       "base": {
+        "finalName": "",
         "description": "",
+        "textDescription": "",
+        "sourceString": "",
         "attributes": {},
         "choices": [],
         "payload": ""
@@ -340,70 +372,137 @@
         "categories": []
       },
       "health": {
-
       },
       "source": {
-        "supplyingClass": "",
-        "supplyingSpecies": "",
-        "supplyingFeature": "",
-        "supplyingFeat": "",
-        "supplier": "",
+        "supplier": {},
         "isSupplied": false
       }
     },
-    "ability":{
-      "templates":["base", "categories", "source"]
+    "trait": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
     },
-    "weapon":{
-      "templates":["base", "item", "categories", "modifiable", "source"],
+    "weapon": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source"
+      ],
       "weapon": {}
     },
-    "armor":{
-      "templates":["base", "item", "categories", "modifiable", "source"],
+    "armor": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source"
+      ],
       "armor": {}
     },
-    "equipment":{
-      "templates":["base", "item", "categories", "modifiable", "source"],
+    "equipment": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source"
+      ],
       "equipment": {}
     },
-    "template":{
-      "templates":["base", "mod"]
+    "template": {
+      "templates": [
+        "base",
+        "mod"
+      ]
     },
-    "upgrade":{
-      "templates":["base", "item", "mod"],
+    "upgrade": {
+      "templates": [
+        "base",
+        "item",
+        "mod"
+      ],
       "upgrade": {}
     },
-    "feat":{
-      "templates":["base", "prerequisites", "categories", "source"]
+    "feat": {
+      "templates": [
+        "base",
+        "prerequisites",
+        "categories",
+        "source"
+      ]
     },
-    "talent":{
-      "templates":["base", "prerequisites", "categories", "source"],
-      "talentTree": ""
+    "talent": {
+      "templates": [
+        "base",
+        "prerequisites",
+        "categories",
+        "source"
+      ],
+      "talentTree": "",
+      "talentTreeSource": "",
+      "talentTreeUrl": ""
     },
-    "species":{
-      "templates":["base", "categories"],
-      "ages":{}
+    "species": {
+      "templates": [
+        "base",
+        "categories"
+      ],
+      "ages": {}
     },
-    "forcePower":{
-      "templates":["base", "categories", "source"]
+    "forcePower": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
     },
-    "forceTradition":{
-      "templates":["base", "categories", "source"]
+    "forceTradition": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
     },
-    "forceTechnique":{
-      "templates":["base", "categories", "source"]
+    "forceTechnique": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
     },
-    "forceSecret":{
-      "templates":["base", "categories", "source"]
+    "forceSecret": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
     },
-    "forceRegimen":{
-      "templates":["base", "categories", "source"]
+    "forceRegimen": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
     },
-    "class":{
-      "templates":["base", "prerequisites", "health"]
+    "class": {
+      "templates": [
+        "base",
+        "prerequisites",
+        "health"
+      ]
     },
-    "classFeature":{
-      "templates":["base", "source"]
+    "classFeature": {
+      "templates": [
+        "base",
+        "source"
+      ]
     }
   }
 }
