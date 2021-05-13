@@ -1324,7 +1324,7 @@ export class SWSEActor extends Actor {
 
     _reduceProvidedItemsByExistingItems(actorData) {
         for (let talent of actorData.talents) {
-            this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
+            this.reduceAvailableItem(actorData, talent.talentTreeSource);
         }
         for (let feat of actorData.feats) {
             if (feat.data.isSupplied) {

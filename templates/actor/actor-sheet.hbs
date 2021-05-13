@@ -536,12 +536,13 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </div>
                 <ol class="items-list">
                     {{#each actor.talents as |talent id|}}
+                        {{log talent}}
                         <li class="item flexrow" data-item-id="{{talent._id}}">
-                            <h4 class="item-name"><b>{{talent.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
                             <h4 class="item-name"><a
-                                    href="{{talent.data.talentTreeUrl}}"><b>{{talent.data.talentTree}}</b></a></h4>
-                            <h4 class="item-name">{{#if talent.data.prerequisites}}
-                                <b>Prerequisites:</b> {{talent.data.prerequisites}}{{/if}}</h4>
+                                    href="{{talent.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
+                            <h4 class="item-name">{{#if talent.prerequisites}}
+                                <b>Prerequisites:</b> {{talent.prerequisites}}{{/if}}</h4>
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                                 <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
