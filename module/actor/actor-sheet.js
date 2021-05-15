@@ -1412,7 +1412,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (item.name === 'Point-Blank Shot') {
             if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    await this.addItemsFromCompendium('feat', {
+                    await this.actor.addItemsFromCompendium('feat', {
                         name: item.name,
                         data: {type: 'feat'},
                         id: item._id
