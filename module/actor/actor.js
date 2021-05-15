@@ -330,7 +330,7 @@ export class SWSEActor extends Actor {
             attribute.ageBonus = resolveValueArray(ageBonuses, this);
             attribute.equipmentBonus = resolveValueArray(equipmentBonuses, this);
             attribute.buffBonus = resolveValueArray(buffBonuses, this);
-            attribute.customBonus = resolveValueArray(customBonuses, this);
+            // attribute.customBonus = resolveValueArray(customBonuses, this);
 
             bonuses.push(attribute.classLevelBonus);
             bonuses.push(attribute.speciesBonus);
@@ -344,8 +344,8 @@ export class SWSEActor extends Actor {
             }
 
             // Calculate the modifier using d20 rules.
-            attribute.bonus = resolveValueArray(bonuses, this)
-            attribute.total = attribute.base + attribute.bonus;
+            attribute.bonus = resolveValueArray(bonuses, this);
+            attribute.total = attribute.skip ? 10: attribute.base + attribute.bonus;
             attribute.mod = Math.floor((attribute.total - 10) / 2);
             attribute.roll = attribute.mod + actor.getConditionBonus()
             attribute.label = key.toUpperCase();

@@ -775,6 +775,8 @@ export class SWSEActorSheet extends ActorSheet {
         if (item.data.data.attributes.first) {
             item.data.data.health.rolledHp = item.data.data.health.firstLevel;
             context.isFirstLevel = true;
+        } else {
+            item.data.data.health.rolledHp = 1;
         }
 
         await this.activateChoices(item, entities, context);
