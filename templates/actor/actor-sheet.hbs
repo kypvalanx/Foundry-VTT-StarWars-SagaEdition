@@ -227,7 +227,7 @@
                                                 <div class="resource flex-group-center attack"
                                                      data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
                                                      data-label="{{attack.name}}" data-img="{{attack.img}}">
-                                                    <div>{{attack.data.name}}</div>
+                                                    <div>{{attack.name}}</div>
                                                     <div class="grid grid-2col">
                                                         <div class="rollEquation"><a class="rollable"
                                                                                      data-label="{{attack.name}} attack"
@@ -339,7 +339,7 @@ ageBonus: {{attribute.ageBonus}}
 equipmentBonus: {{attribute.equipmentBonus}}
 buffBonus: {{attribute.buffBonus}}
 customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
-                                <td><span class="center text-box direct" name="data.abilities.{{id}}.customBonus"
+                                <td><span class="center text-box direct" name="data.attributes.{{id}}.customBonus"
                                           data-dtype="Number">{{attribute.customBonus}}</span></td>
                                 <td><span class="center">{{attribute.roll}}</span></td>
                             </tr>

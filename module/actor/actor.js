@@ -208,7 +208,8 @@ export class SWSEActor extends Actor {
         let removeFeats = [];
         let inactiveProvidedFeats = [];
         for (let feat of feats) {
-            let doesFail = this.meetsPrerequisites(feat.data.data.prerequisites, false).doesFail;
+            let prereqResponse = this.meetsPrerequisites(feat.data.data.prerequisites, false);
+            let doesFail = prereqResponse.doesFail;
             if (!doesFail) {
                 activeFeats.push(feat.data)
                 prerequisites.feats.push(feat.name.toLowerCase());
@@ -218,7 +219,8 @@ export class SWSEActor extends Actor {
                 this.checkForProficiencies(feat, actorData);
             } else if(doesFail && !feat.data.data.isSupplied){
                 removeFeats.push(feat.data);
-            } else {
+            } else if(prereqResponse.failureList.length > 0){
+
                 inactiveProvidedFeats.push(feat.data);
             }
         }
@@ -328,7 +330,7 @@ export class SWSEActor extends Actor {
             attribute.ageBonus = resolveValueArray(ageBonuses, this);
             attribute.equipmentBonus = resolveValueArray(equipmentBonuses, this);
             attribute.buffBonus = resolveValueArray(buffBonuses, this);
-            attribute.customBonus = resolveValueArray(customBonuses, this);
+            // attribute.customBonus = resolveValueArray(customBonuses, this);
 
             bonuses.push(attribute.classLevelBonus);
             bonuses.push(attribute.speciesBonus);
@@ -342,8 +344,8 @@ export class SWSEActor extends Actor {
             }
 
             // Calculate the modifier using d20 rules.
-            attribute.bonus = resolveValueArray(bonuses, this)
-            attribute.total = attribute.base + attribute.bonus;
+            attribute.bonus = resolveValueArray(bonuses, this);
+            attribute.total = attribute.skip ? 10: attribute.base + attribute.bonus;
             attribute.mod = Math.floor((attribute.total - 10) / 2);
             attribute.roll = attribute.mod + actor.getConditionBonus()
             attribute.label = key.toUpperCase();
@@ -835,8 +837,21 @@ export class SWSEActor extends Actor {
 
     meetsPrerequisites(prereqs, notifyOnFailure = true) {
         let failureList = []; //TODO return this with text failures
+        let silentFailList = [];
         for (let prereq of prereqs) {
-            prereq = prereq.toLowerCase().replace(" species trait", "").replace(" feat", "").trim();
+            let prereqStandardCase = prereq
+            prereq = prereqStandardCase.toLowerCase().replace(/ species trait/, "").replace(/ feat/, "").trim();;
+
+
+            //NEW CHECKS
+            if(prereqStandardCase.startsWith('SETTING')){
+                let settingName = prereqStandardCase.split(":")[1]
+                if(!game.settings.get('swse', settingName)){
+                    silentFailList.push({fail: true, message: `The ${settingName} setting is not active`})
+                }
+                continue;
+            }
+            //OLD CHECKS to be verified
 
             let result = /^\(([\w\s()]*)\) or \(([\w\s()]*)\)$/.exec(prereq);
             if (result !== null) {
@@ -1069,31 +1084,40 @@ export class SWSEActor extends Actor {
             }
         }
 
-        let meetsPrereqs = {doesFail: doesFail, failureList: failureList};
+        for (let fail of silentFailList) {
+            if (fail.fail === true) {
+                doesFail = true;
+                break;
+            }
+        }
 
-        if (meetsPrereqs.doesFail && notifyOnFailure) {
-            new Dialog({
-                title: "You Don't Meet the Prerequisites!",
-                content: "You do not meet the prerequisites for this feat:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
+        let meetsPrereqs = {doesFail, failureList, silentFail: silentFailList};
 
-        } else if (!meetsPrereqs.doesFail && meetsPrereqs.failureList.length > 0 && notifyOnFailure) {
-            new Dialog({
-                title: "You MAY Meet the Prerequisites!",
-                content: "You MAY meet the prerequisites for this feat. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
+        if(notifyOnFailure && meetsPrereqs.failureList.length > 0) {
+            if (meetsPrereqs.doesFail) {
+                new Dialog({
+                    title: "You Don't Meet the Prerequisites!",
+                    content: "You do not meet the prerequisites for this feat:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
                     }
-                }
-            }).render(true);
+                }).render(true);
+
+            } else {
+                new Dialog({
+                    title: "You MAY Meet the Prerequisites!",
+                    content: "You MAY meet the prerequisites for this feat. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+            }
         }
 
         return meetsPrereqs;
@@ -1602,4 +1626,7 @@ export class SWSEActor extends Actor {
         return hasForceSensativity && !this.data.data.isDroid;
     }
 
+    failureIsDisabledSetting(failureList) {
+        return false
+    }
 }

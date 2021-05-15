@@ -15,7 +15,8 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    rollAttack
+    rollAttack,
+    generateCompendiums
   };
 
   /**

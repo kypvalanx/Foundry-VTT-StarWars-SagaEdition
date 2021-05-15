@@ -775,6 +775,8 @@ export class SWSEActorSheet extends ActorSheet {
         if (item.data.data.attributes.first) {
             item.data.data.health.rolledHp = item.data.data.health.firstLevel;
             context.isFirstLevel = true;
+        } else {
+            item.data.data.health.rolledHp = 1;
         }
 
         await this.activateChoices(item, entities, context);
@@ -1412,7 +1414,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (item.name === 'Point-Blank Shot') {
             if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    await this.addItemsFromCompendium('feat', {
+                    await this.actor.addItemsFromCompendium('feat', {
                         name: item.name,
                         data: {type: 'feat'},
                         id: item._id
