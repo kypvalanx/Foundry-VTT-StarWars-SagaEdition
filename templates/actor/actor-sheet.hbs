@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Condition</label>
+                            <label class="resource-label">Condition</label>
                             <table>
                                 <thead>
                                 <tr>
@@ -150,22 +150,22 @@
                                 <tbody>
                                 <tr>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="0"
-                                                      {{#if actor.data.condition.[0]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 0}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="1"
-                                                      {{#if actor.data.condition.[1]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 1}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="2"
-                                                      {{#if actor.data.condition.[2]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 2}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="3"
-                                                      {{#if actor.data.condition.[3]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 3}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="4"
-                                                      {{#if actor.data.condition.[4]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 4}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="5"
-                                                      {{#if actor.data.condition.[5]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 5}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                 </tr>
                                 </tbody>

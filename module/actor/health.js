@@ -5,7 +5,7 @@ export function resolveHealth(actor) {
         return;
     }
     let actorData = actor.data;
-    let ignoreCon = actor.ignoreCon(actorData);
+    let ignoreCon = actor.ignoreCon();
     let health = [];
     for (let charClass of actorData.classes ? actorData.classes : []) {
         health.push(resolveRolledHp(charClass))

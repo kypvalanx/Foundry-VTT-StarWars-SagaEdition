@@ -1,84 +1,108 @@
 import {SWSEActor} from "./actor.js";
 import {resolveValueArray} from "../util.js";
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @returns {{dt: number, ref: number, will: number, fort: number}}
+ */
 export function resolveDefenses(actor) {
-    let fort = _resolveFort(actor);
-    let will = _resolveWill(actor);
-    let ref = _resolveRef(actor);
-    let dt = _resolveDt(actor);
+    let defenseBonuses = actor.getTraitAttributesByKey('defenseBonuses');
+    let conditionBonus = actor.getConditionBonus();
+    let fort = _resolveFort(actor, defenseBonuses, conditionBonus);
+    let will = _resolveWill(actor, defenseBonuses, conditionBonus);
+    let ref = _resolveRef(actor, defenseBonuses, conditionBonus);
+    let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
     return {fort: fort, will: will, ref: ref, dt: dt};
 }
 
-export function _resolveFort(actor) {
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param defenseBonuses {[]}
+ * @param conditionBonus {number}
+ * @returns {number}
+ * @private
+ */
+function _resolveFort(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel(actorData));
+    total.push(actor.getCharacterLevel());
     total.push(_getFortStatMod(actor));
-    total.push(_getAbilityDefBonus('fortitude', actor));
+    total.push(_getTraitDefBonus('fortitude', defenseBonuses));
     total.push(_getClassDefBonus('fortitude', actorData));
-    total.push(_getEquipmentFortBonus(actorData));
-    total.push(actor.getConditionBonus());
+    total.push(_getEquipmentFortBonus(actor));
+    total.push(conditionBonus);
     return resolveValueArray(total, actor)
 }
 
-export function _resolveWill(actor) {
+function _resolveWill(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel(actorData));
+    total.push(actor.getCharacterLevel());
     total.push(_getWisMod(actorData));
     total.push(_getClassDefBonus('will', actorData));
-    total.push(_getAbilityDefBonus('will', actor));
-    total.push(actor.getConditionBonus());
+    total.push(_getTraitDefBonus('will', defenseBonuses));
+    total.push(conditionBonus);
     return resolveValueArray(total, actor)
 }
 
-export function _resolveRef(actor) {
+function _resolveRef(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(_selectRefBonus(actor.getCharacterLevel(actorData), _getEquipmentRefBonus(actorData)));
+    total.push(_selectRefBonus(actor.getCharacterLevel(), _getEquipmentRefBonus(actor)));
     total.push(_getDexMod(actorData));
-    total.push(_getAbilityDefBonus('reflex', actor));
+    total.push(_getTraitDefBonus('reflex', defenseBonuses));
     total.push(_getClassDefBonus('reflex', actorData));
-    total.push(_getNaturalArmorBonus(actorData));
-    total.push(_getAbilityRefMod(actor));
-    total.push(actor.getConditionBonus());
+    total.push(_getTraitRefMod(actor));
+    total.push(conditionBonus);
     return resolveValueArray(total, actor)
 
 }
 
-export function _resolveDt(actor) {
-    return _resolveFort(actor);
+function _getDamageThresholdSizeMod(actor) {
+    let attributes = actor.getTraitAttributesByKey('damageThresholdSizeModifier')
+
+    let total = [];
+    for(let attribute of attributes){
+        total.push(attribute)
+    }
+
+    return resolveValueArray(total, actor)
+}
+
+function _resolveDt(actor, defenseBonuses, conditionBonus) {
+    let total = [];
+    total.push(_resolveFort(actor, defenseBonuses, conditionBonus));
+    total.push(_getDamageThresholdSizeMod(actor))
+    return resolveValueArray(total, actor)
 }
 
 
-export function _selectRefBonus(heroicLevel, armorBonus) {
+function _selectRefBonus(heroicLevel, armorBonus) {
     if (armorBonus > -1) {
         return armorBonus;
     }
     return heroicLevel;
 }
 
-export function _getDexMod(actorData) {
+function _getDexMod(actorData) {
     return actorData.data.attributes.dex.mod;
 }
 
-export function _getWisMod(actorData) {
+function _getWisMod(actorData) {
     return actorData.data.attributes.wis.mod;
 }
 
-export function _getFortStatMod(actor) {
-    let actorData = actor.data;
-    if (!actor.ignoreCon(actorData)) {
-        return actorData.data.attributes.con.mod;
-    } else {
-        return actorData.data.attributes.str.mod;
-    }
+function _getFortStatMod(actor) {
+    let attributes = actor.data.data.attributes;
+    return actor.ignoreCon() ? attributes.str.mod : attributes.con.mod;
 }
 
-export function _getClassDefBonus(stat, actorData) {
+function _getClassDefBonus(stat, actorData) {
     let bonus = 0;
     for (let charclass of actorData.classes) {
         bonus = Math.max(bonus, charclass.data.defense[stat]);
@@ -86,23 +110,14 @@ export function _getClassDefBonus(stat, actorData) {
     return bonus;
 }
 
-export function _getNaturalArmorBonus(actorData) {
-    if (actorData.species) {
-        actorData.species.data.categories.forEach(category => {
-            category = category instanceof String ? category : category.category
-            let results = /natural armor \(\+(\d*)\)/.exec(category.toLowerCase());
-            if (results) {
-                return results[1]
-            }
-        });
-    }
-    return 0;
-}
-
-
-export function _getAbilityDefBonus(defenseType, actor) {
-    let actorData = actor.data
-    let defenseBonuses = actor.getAbilityAttribute(actorData, 'defenseBonus');
+/**
+ *
+ * @param defenseType {string}
+ * @param defenseBonuses {[]}
+ * @returns {number}
+ * @private
+ */
+function _getTraitDefBonus(defenseType, defenseBonuses) {
     let bonus = 0;
     for (let defenseBonus of defenseBonuses) {
         if (defenseBonus.defense === 'all' || defenseBonus.defense === defenseType) {
@@ -112,9 +127,8 @@ export function _getAbilityDefBonus(defenseType, actor) {
     return bonus;
 }
 
-export function _getAbilityRefMod(actor) {
-    let actorData = actor.data
-    let sizeBonuses = actor.getAbilityAttribute(actorData, 'sizeModifier');
+function _getTraitRefMod(actor) {
+    let sizeBonuses = actor.getTraitAttributesByKey('sizeModifier');
     let total = 0;
     for (let sizeBonus of sizeBonuses) {
         total = total + sizeBonus;
@@ -122,23 +136,31 @@ export function _getAbilityRefMod(actor) {
     return total;
 }
 
-export function _getEquipmentFortBonus(actorData) {
-    let equipped = actorData.equipped;
+/**
+ *
+ * @param actor {SWSEActor}
+ * @returns {number}
+ * @private
+ */
+function _getEquipmentFortBonus(actor) {
+    let equipped = actor.getEquippedItems();
     let bonus = 0;
     for (let item of equipped) {
-        if (item.data.attributes.BonustoFortitudeDefense) {
-            bonus = Math.max(bonus, parseInt(item.data.attributes.BonustoFortitudeDefense.value));
+        if(actor.isProficientWith(item)) {
+            if (item.data.data.armor.fortitudeBonus) {
+                bonus = Math.max(bonus, parseInt(item.data.data.armor.fortitudeBonus));
+            }
         }
     }
     return bonus;
 }
 
-export function _getEquipmentRefBonus(actorData) {
-    let equipped = actorData.equipped;
+function _getEquipmentRefBonus(actor) {
+    let equipped = actor.getEquippedItems();
     let bonus = -1;
     for (let item of equipped) {
-        if (item.data.attributes.BonustoReflexDefense) {
-            bonus = Math.max(bonus, parseInt(item.data.attributes.BonustoReflexDefense.value));
+        if (item.data.data.armor?.reflexBonus) {
+            bonus = Math.max(bonus, parseInt(item.data.data.armor.reflexBonus));
         }
     }
     return bonus;

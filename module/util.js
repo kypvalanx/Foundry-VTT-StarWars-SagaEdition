@@ -33,7 +33,7 @@ export function resolveValueArray(values, actor) {
  * @param items
  * @returns {[SWSEItem]}
  */
-export function filterItemsByType(type, items) {
+export function filterItemsByType(items, type) {
     let types = [];
     types[0] = type;
     if (arguments.length > 2) {
@@ -44,6 +44,28 @@ export function filterItemsByType(type, items) {
     let filtered = [];
     for (let item of items) {
         if (types.includes(item.type) || types.includes(item.data.type)) {
+            filtered.push(item);
+        }
+    }
+    return filtered;
+}
+/**
+ *
+ * @param type
+ * @param items
+ * @returns {[SWSEItem]}
+ */
+export function excludeItemsByType(items, type) {
+    let types = [];
+    types[0] = type;
+    if (arguments.length > 2) {
+        for (let i = 2; i < arguments.length; i++) {
+            types[i - 1] = arguments[i];
+        }
+    }
+    let filtered = [];
+    for (let item of items) {
+        if (!types.includes(item.type)) {
             filtered.push(item);
         }
     }

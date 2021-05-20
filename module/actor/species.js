@@ -3,7 +3,7 @@ import {filterItemsByType} from "../util.js";
 export class SpeciesHandler {
     generateSpeciesData(actor) {
         let actorData = actor.data;
-        let speciesList = filterItemsByType("species", actorData.items);
+        let speciesList = filterItemsByType(actorData.items, "species");
         actorData.species = (speciesList.length > 0 ? speciesList[0] : null);
 
         if (!actorData.species) {

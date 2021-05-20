@@ -20,6 +20,20 @@ export class SWSEItem extends Item {
         });
     }
 
+    get finalName() {
+        return this.data?.data?.finalName;
+    }
+
+    get armorType(){
+        if(this.data.data.armor.type === 'Heavy Armor' || this.data.data.armor.stripping.makeHeavy){
+            return 'Heavy';
+        }
+        if(this.data.data.armor.type === 'Medium Armor' || this.data.data.armor.stripping.makeMedium){
+            return 'Medium';
+        }
+            return 'Light';
+    }
+
     /**
      * Augment the basic Item data model with additional dynamic data.
      */

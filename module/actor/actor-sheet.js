@@ -80,8 +80,8 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-        html.find('.condition-radio').on("change", async event => {
-            await this.actor.update({"data.health.condition": parseInt(event.currentTarget.value)});
+        html.find('.condition-radio').on("click", async event => {
+            await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
 
         // html.find("div.item-container").each((i, div) => {
@@ -175,7 +175,7 @@ export class SWSEActorSheet extends ActorSheet {
     buildAgeDialog(sheet) {
         let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
         let searchString = "AGE";
-        let ageEffects = filterItemsByType("trait", sheet.actor.items.values())
+        let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
             .filter(trait => trait.data.data.prerequisites
                 .reduce((a, b) => {
                     return a || b.startsWith(searchString)
@@ -218,7 +218,7 @@ export class SWSEActorSheet extends ActorSheet {
         let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
         let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
         let searchString = "GENDER";
-        let genderEffects = filterItemsByType("trait", sheet.actor.items.values())
+        let genderEffects = filterItemsByType(sheet.actor.items.values(), "trait")
             .filter(trait => trait.data.data.prerequisites
                 .reduce((a, b) => {
                     return a || b.startsWith(searchString)
