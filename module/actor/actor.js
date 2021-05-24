@@ -7,7 +7,6 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills} from "./skill-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
-import {SWSEItem} from "../item/item.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -724,7 +723,7 @@ export class SWSEActor extends Actor {
         let silentFailList = [];
         for (let prereq of prereqs) {
             let prereqStandardCase = prereq
-            prereq = prereqStandardCase.toLowerCase().replace(/ species trait/, "").replace(/ feat/, "").trim();;
+            prereq = prereqStandardCase.toLowerCase().replace(/ species trait/, "").replace(/ feat/, "").trim();
 
 
             //NEW CHECKS
@@ -735,6 +734,11 @@ export class SWSEActor extends Actor {
                 }
                 continue;
             }
+
+            if(prereq === 'trained in #payload#'){
+                continue;
+            }
+
             //OLD CHECKS to be verified
 
             let result = /^\(([\w\s()]*)\) or \(([\w\s()]*)\)$/.exec(prereq);
@@ -1508,9 +1512,5 @@ export class SWSEActor extends Actor {
             }
         }
         return hasForceSensativity && !this.data.data.isDroid;
-    }
-
-    failureIsDisabledSetting(failureList) {
-        return false
     }
 }
