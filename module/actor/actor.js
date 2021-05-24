@@ -351,9 +351,9 @@ export class SWSEActor extends Actor {
 
     _getUnequipableItems(items, isDroid) {
         let filtered = [];
-        for (let i = 0; i < items.length; i++) {
-            if (!items[i].data.equipable || (!isDroid && items[i].data.droidPart) || (isDroid && items[i].data.bioPart)) {
-                filtered.push(items[i]);
+        for (let item of items) {
+            if (!item.data.data.equipable || (!isDroid && item.data.data.droidPart) || (isDroid && item.data.data.bioPart)) {
+                filtered.push(item);
             }
         }
         return filtered;

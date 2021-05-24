@@ -191,6 +191,10 @@
                                     <td>{{data.defense.will}}</td>
                                     <td>{{data.defense.dt}}</td>
                                 </tr>
+                                {{#each data.defense.situationalBonuses as |bonus id|}}
+                                    <tr><td colspan="4">{{bonus}}</td></tr>
+                                {{/each}}
+
                                 </tbody>
                             </table>
                         </div>

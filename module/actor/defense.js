@@ -1,6 +1,7 @@
 import {SWSEActor} from "./actor.js";
 import {resolveValueArray} from "../util.js";
 
+
 /**
  *
  * @param actor {SWSEActor}
@@ -13,7 +14,8 @@ export function resolveDefenses(actor) {
     let will = _resolveWill(actor, defenseBonuses, conditionBonus);
     let ref = _resolveRef(actor, defenseBonuses, conditionBonus);
     let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
-    return {fort: fort, will: will, ref: ref, dt: dt};
+    let situationalBonuses = _getSituationalBonuses(defenseBonuses);
+    return {fort,will, ref,dt, situationalBonuses};
 }
 
 /**
@@ -54,7 +56,7 @@ function _resolveRef(actor, defenseBonuses, conditionBonus) {
     let total = [];
     total.push(10);
     total.push(_selectRefBonus(actor.getCharacterLevel(), _getEquipmentRefBonus(actor)));
-    total.push(_getDexMod(actorData));
+    total.push(_selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor)));
     total.push(_getTraitDefBonus('reflex', defenseBonuses));
     total.push(_getClassDefBonus('reflex', actorData));
     total.push(_getTraitRefMod(actor));
@@ -81,12 +83,29 @@ function _resolveDt(actor, defenseBonuses, conditionBonus) {
     return resolveValueArray(total, actor)
 }
 
+function capFirst(word) {
+    return word.charAt(0).toUpperCase() + word.slice(1)
+}
+
+function _getSituationalBonuses(defenseBonuses) {
+    let situational = []
+    for (let defenseBonus of defenseBonuses) {
+        if (defenseBonus.modifier) {
+            situational.push(`${(defenseBonus.bonus>-1?"+":"")+ defenseBonus.bonus} ${defenseBonus.bonus < 0? "penalty":"bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
+        }
+    }
+    return situational;
+}
 
 function _selectRefBonus(heroicLevel, armorBonus) {
     if (armorBonus > -1) {
         return armorBonus;
     }
     return heroicLevel;
+}
+
+function _selectDexMod(dexterityModifier, maxDexterityBonus) {
+    return Math.min(dexterityModifier, maxDexterityBonus);
 }
 
 function _getDexMod(actorData) {
@@ -120,7 +139,7 @@ function _getClassDefBonus(stat, actorData) {
 function _getTraitDefBonus(defenseType, defenseBonuses) {
     let bonus = 0;
     for (let defenseBonus of defenseBonuses) {
-        if (defenseBonus.defense === 'all' || defenseBonus.defense === defenseType) {
+        if (!defenseBonus.modifier && (defenseBonus.defense === 'all' || defenseBonus.defense === defenseType)) {
             bonus = bonus + defenseBonus.bonus;
         }
     }
@@ -161,6 +180,17 @@ function _getEquipmentRefBonus(actor) {
     for (let item of equipped) {
         if (item.data.data.armor?.reflexBonus) {
             bonus = Math.max(bonus, parseInt(item.data.data.armor.reflexBonus));
+        }
+    }
+    return bonus;
+}
+
+function _getEquipmentMaxDexBonus(actor) {
+    let equipped = actor.getEquippedItems();
+    let bonus = 1000;
+    for (let item of equipped) {
+        if (item.data.data.armor?.maxDexterity) {
+            bonus = Math.min(bonus, parseInt(item.data.data.armor.reflexBonus));
         }
     }
     return bonus;
