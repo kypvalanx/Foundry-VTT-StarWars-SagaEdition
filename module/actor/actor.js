@@ -71,7 +71,7 @@ export class SWSEActor extends Actor {
 
         await generateSkills(this);
 
-        let feats = await this._getFeats(actorData);
+        let feats = this.getFeats();
         actorData.feats = feats.activeFeats;
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats;
 
@@ -199,8 +199,8 @@ export class SWSEActor extends Actor {
         return filterItemsByType1.map(talent => talent.data);
     }
 
-    async _getFeats(actorData) {
-
+    getFeats() {
+        let actorData = this.data;
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
         actorData.proficiency.armor = [];
@@ -210,7 +210,7 @@ export class SWSEActor extends Actor {
         prerequisites.focusSkills = [];
         prerequisites.masterSkills = [];
         prerequisites.isForceTrained = false;
-        let feats = await filterItemsByType(this.items.values(), "feat");
+        let feats = filterItemsByType(this.items.values(), "feat");
         let activeFeats = [];
         let removeFeats = [];
         let inactiveProvidedFeats = [];
@@ -1279,7 +1279,7 @@ export class SWSEActor extends Actor {
         for (let feat of actorData.feats) {
             if (feat.name === 'Force Training') {
                 let type = 'Force Powers';
-                let forcePowers = Math.max(1, 1 + actorData.data.abilities.wis.mod);
+                let forcePowers = Math.max(1, 1 + actorData.data.attributes.wis.mod);
                 if (actorData.availableItems[type]) {
                     actorData.availableItems[type] += forcePowers;
                 } else {

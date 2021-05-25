@@ -7,8 +7,6 @@ const d20 = "1d20";
 
 
 export async function generateAttacks(actor) {
-
-
     actor.data.data.attacks = [];
     actor.data.data.attacks.push(...generateUnarmedAttacks(actor.data.equipped, actor));
     for (const weapon of actor.data.equipped) {
@@ -247,9 +245,9 @@ function isProficient(proficiencies, categories) {
 }
 
 function getActorSize(actorData) {
-    for (let ability of actorData?.traits ? actorData.traits : []) {
-        if (sizeArray.includes(ability.name)) {
-            return ability;
+    for (let trait of actorData?.traits ? actorData.traits : []) {
+        if (sizeArray.includes(trait.name)) {
+            return trait;
         }
     }
     return undefined;
@@ -312,8 +310,7 @@ function generateUnarmedAttacks(equippedWeapons, actor) {
     let size = getActorSize(actorData);
     let feats = actorData.prerequisites?.feats;
     feats = feats ? feats : [];
-
-
+    
     let proficiencies = actorData.proficiency.weapon;
 
     let proficient = isProficient(proficiencies, ["simple melee weapon"]);
