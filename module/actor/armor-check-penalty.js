@@ -31,7 +31,6 @@ export function generateArmorCheckPenalties(actor) {
 
     for(let armor of filterItemsByType(actor.items.values(), "armor")){
         if(actor.data.data.equippedIds.includes(armor._id)) {
-            console.log('ARMOR', armor)
             if('Heavy Armor' === armor.data.data.armor.type || armor.data.data.armor.stripping.makeHeavy){
                 wearingHeavy = true;
             }

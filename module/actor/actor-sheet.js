@@ -129,20 +129,40 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         // Delete Inventory Item
-        html.find('.item-delete').click(async ev => {
+        html.find('.item-delete').click(async ev => await this.deleteItem(ev));
+
+        html.find('.item-duplicate').click(async ev =>{
             const li = $(ev.currentTarget).parents(".item");
-            let title = `Are you sure you want to delete ${li.data("itemName")}`;
+            let itemToDuplicate = this.actor.getOwnedItem(li.data("itemId"));
+            let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
+
+            await this._onDropItem(ev, {id, pack, 'type': 'item'})
+        })
+
+        // Rollable abilities.
+        html.find('.rollable').click(this._onRoll.bind(this));
+
+        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+    }
+
+    async deleteItem(ev) {
+        const li = $(ev.currentTarget).parents(".item");
+
+        if (keyboard.isDown("Shift")) {
+
+            let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
+            await this.removeChildItems(itemToDelete);
+            await this.actor.deleteOwnedItem(li.data("itemId"));
+        } else {
+
+            let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
+            let title = `Are you sure you want to delete ${itemToDelete.data.data.finalName}`;
             await Dialog.confirm({
                 title: title,
                 content: title,
                 yes: async () => {
                     let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
-                    if (itemToDelete.data.data.items) {
-                        for (let childItem of itemToDelete.data.data.items) {
-                            let ownedItem = this.actor.getOwnedItem(childItem._id);
-                            await itemToDelete.revokeOwnership(ownedItem);
-                        }
-                    }
+                    await this.removeChildItems(itemToDelete);
 
                     await this.actor.deleteOwnedItem(li.data("itemId"));
                     li.slideUp(200, () => this.render(false));
@@ -153,12 +173,16 @@ export class SWSEActorSheet extends ActorSheet {
                 no: () => {
                 },
             });
-        });
+        }
+    }
 
-        // Rollable abilities.
-        html.find('.rollable').click(this._onRoll.bind(this));
-
-        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+    async removeChildItems(itemToDelete) {
+        if (itemToDelete.data.data.items) {
+            for (let childItem of itemToDelete.data.data.items) {
+                let ownedItem = this.actor.getOwnedItem(childItem._id);
+                await itemToDelete.revokeOwnership(ownedItem);
+            }
+        }
     }
 
     async _selectAge(event, sheet) {
@@ -763,9 +787,6 @@ export class SWSEActorSheet extends ActorSheet {
         }
         let entities = [];
         entities.push(item)
-        if (item.data.data.prerequisites.isPrestige) {
-            return [];
-        }
         if (item.data.data.feats.feats.length > 0) {
             entities.push(...await this.addClassFeats(item));
         }
@@ -938,6 +959,7 @@ export class SWSEActorSheet extends ActorSheet {
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
                     await this.actor.addItemsFromCompendium('trait', item, additionalEntitiesToAdd, `Bonus Feat (${this.actor.cleanItemName(feat)})`)
+                    await this.actor.addItemsFromCompendium('feat', item, additionalEntitiesToAdd, this.actor.cleanItemName(feat))
                 }
             });
         }
@@ -1423,5 +1445,13 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         return items;
+    }
+
+    static parseSourceId(sourceId) {
+        let first = sourceId.indexOf(".");
+        let lastIndex = sourceId.lastIndexOf(".");
+        let pack = sourceId.substr(first+1, lastIndex - first-1);
+        let id = sourceId.substr(lastIndex+1);
+        return {id, pack};
     }
 }

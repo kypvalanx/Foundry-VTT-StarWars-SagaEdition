@@ -191,7 +191,7 @@ export class SWSEActor extends Actor {
             if (talent.talentTrees?.includes("Force Talent Trees")) {
                 prerequisites.forceTalentTreesCount++;
             }
-            if(!talent.data.talentTree){
+            if(!talentTree){
                 console.log(talent)
             }
         }
@@ -256,14 +256,14 @@ export class SWSEActor extends Actor {
     }
 
     checkIsSkillMastery(feat, prerequisites) {
-        let proficiency2 = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.name);
+        let proficiency2 = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
         if (proficiency2) {
             prerequisites.masterSkills.push(proficiency2[1].toLowerCase());
         }
     }
 
     checkIsSkillFocus(feat, prerequisites) {
-        let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.name);
+        let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
         if (proficiency) {
             prerequisites.focusSkills.push(proficiency[1].toLowerCase());
         }
@@ -1245,7 +1245,7 @@ export class SWSEActor extends Actor {
 
     _reduceProvidedItemsByExistingItems(actorData) {
         for (let talent of actorData.talents) {
-            this.reduceAvailableItem(actorData, talent.talentTreeSource);
+            this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
         }
         for (let feat of actorData.feats) {
             if (feat.data.isSupplied) {
