@@ -135,7 +135,7 @@
                             </div>
                         </div>
                         <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Condition</label>
+                            <label class="resource-label">Condition</label>
                             <table>
                                 <thead>
                                 <tr>
@@ -150,22 +150,22 @@
                                 <tbody>
                                 <tr>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="0"
-                                                      {{#if actor.data.condition.[0]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 0}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="1"
-                                                      {{#if actor.data.condition.[1]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 1}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="2"
-                                                      {{#if actor.data.condition.[2]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 2}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="3"
-                                                      {{#if actor.data.condition.[3]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 3}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="4"
-                                                      {{#if actor.data.condition.[4]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 4}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                     <td><label><input class="condition-radio" type="radio" name="condition" value="5"
-                                                      {{#if actor.data.condition.[5]}}checked{{/if}}
+                                                      {{#ifEquals actor.data.condition 5}}checked{{/ifEquals}}
                                                       data-dtype="Number"/></label></td>
                                 </tr>
                                 </tbody>
@@ -191,6 +191,10 @@
                                     <td>{{data.defense.will}}</td>
                                     <td>{{data.defense.dt}}</td>
                                 </tr>
+                                {{#each data.defense.situationalBonuses as |bonus id|}}
+                                    <tr><td colspan="4">{{bonus}}</td></tr>
+                                {{/each}}
+
                                 </tbody>
                             </table>
                         </div>
@@ -409,14 +413,13 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                             <td>{{../data.attributes.con.mod}}</td>
                             <td>{{sum class.data.health.rolledHp ../data.attributes.con.mod}}</td>
                             <td class="item-controls">
-                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                <a class="item-control item-edit" title="View Class Description"><i class="fas fa-edit"></i></a>
+                                <a class="item-control item-duplicate" title="Copy Class"><i class="fas fa-plus"></i></a>
                                 {{#if class.isLatest}}
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>{{/if}}
-                                <!--                    <a class="item-control item-plus" title="Duplicate Item"><i class="fas fa-plus"></i></a>-->
+                                    <a class="item-control item-delete" title="Delete Class"><i class="fas fa-trash"></i></a>{{/if}}
                             </td>
                         </tr>
                     {{/each}}
-                    {{log data}}
                     <tr><td></td><td></td><td></td><td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other Bonuses: {{data.health.other}}</td><td>{{data.health.max}}</td><td></td></tr>
                     <!-- </ol> -->
                     </tbody>
@@ -545,13 +548,12 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </div>
                 <ol class="items-list">
                     {{#each actor.talents as |talent id|}}
-                        {{log talent}}
                         <li class="item flexrow" data-item-id="{{talent._id}}">
-                            <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{talent.data.finalName}}</b></h4>
                             <h4 class="item-name"><a
-                                    href="{{talent.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
-                            <h4 class="item-name">{{#if talent.prerequisites}}
-                                <b>Prerequisites:</b> {{talent.prerequisites}}{{/if}}</h4>
+                                    href="{{talent.data.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
+                            <h4 class="item-name">{{#if talent.data.prerequisites}}
+                                <b>Prerequisites:</b> {{talent.data.prerequisites}}{{/if}}</h4>
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                                 <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>

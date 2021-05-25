@@ -1,9 +1,12 @@
 import {resolveHealth} from "./health.js";
-import {AttackHandler} from "./attacks.js";
+import {generateAttacks} from "./attack-handler.js";
 import {OffenseHandler} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
-import {filterItemsByType, resolveValueArray} from "../util.js";
+import {filterItemsByType, excludeItemsByType} from "../util.js";
 import {resolveDefenses} from "./defense.js";
+import {generateAttributes} from "./attribute-handler.js";
+import {generateSkills} from "./skill-handler.js";
+import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -50,20 +53,23 @@ export class SWSEActor extends Actor {
         }
         await this._handleCondition(actorData);
 
-        actorData.equipped = this.getEquippedItems(actorData);
-        actorData.unequipped = this.getUnequippedItems(actorData);
-        actorData.inventory = this.getInventory(actorData);
+        actorData.equipped = this.getEquippedItems().map(item => item.data);
+        actorData.unequipped = this.getUnequippedItems().map(item => item.data);
+        actorData.inventory = this.getNonequippableItems().map(item => item.data);
         actorData.traits = await this.getTraits();
-        actorData.talents = this.getTalents(actorData);
+        actorData.talents = this.getTalents();
         actorData.powers = this.getPowers(actorData);
         actorData.secrets = this.getSecrets(actorData);
         actorData.techniques = this.getTechniques(actorData);
-        actorData.traditions = filterItemsByType("forceTradition", actorData.items);
-        actorData.regimens = filterItemsByType("forceRegimen", actorData.items);
+        actorData.traditions = filterItemsByType(actorData.items, "forceTradition");
+        actorData.regimens = filterItemsByType(actorData.items, "forceRegimen");
         actorData.speed = this.getSpeed();
 
-        this._generateAttributes(this);
-        await this._generateSkillData(this);
+        generateAttributes(this);
+
+        actorData.acPenalty=await generateArmorCheckPenalties(this);
+
+        await generateSkills(this);
 
         let feats = await this._getFeats(actorData);
         actorData.feats = feats.activeFeats;
@@ -77,7 +83,7 @@ export class SWSEActor extends Actor {
         actorData.data.offense = await new OffenseHandler().resolveOffense(this);
 
 
-        await new AttackHandler().generateAttacks(this);
+        await generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
 
         try {
@@ -92,7 +98,7 @@ export class SWSEActor extends Actor {
     }
 
     async getTraits() {
-        let traits = filterItemsByType("trait", this.items.values());
+        let traits = filterItemsByType(this.items.values(), "trait");
         this.data.traits = [];
         let activeTraits = this.data.traits;
         let possibleTraits = []
@@ -125,18 +131,18 @@ export class SWSEActor extends Actor {
         }).map(trait => trait.data);
     }
 
-    getEquippedItems(actorData) {
-        let getEquippedItems = this._getEquippedItems(actorData, this._getEquipable(this.items.values(), actorData.data.isDroid));
-        let prerequisites = actorData.prerequisites;
+    getEquippedItems() {
+        let getEquippedItems = this._getEquippedItems(this._getEquipable(this.getInventoryItems(), this.data.data.isDroid));
+        let prerequisites = this.data.prerequisites;
         prerequisites.equippedItems = [];
         for (let item of getEquippedItems) {
             prerequisites.equippedItems.push(item.name.toLowerCase());
         }
-        return getEquippedItems.map(item => item.data);
+        return getEquippedItems;
     }
 
     getPowers(actorData) {
-        let filterItemsByType1 = filterItemsByType("forcePower", actorData.items);
+        let filterItemsByType1 = filterItemsByType(actorData.items, "forcePower");
         let prerequisites = actorData.prerequisites;
         prerequisites.powers = [];
         for (let power of filterItemsByType1) {
@@ -146,7 +152,7 @@ export class SWSEActor extends Actor {
     }
 
     getSecrets(actorData) {
-        let filterItemsByType1 = filterItemsByType("forceSecret", actorData.items);
+        let filterItemsByType1 = filterItemsByType(actorData.items, "forceSecret");
         let prerequisites = actorData.prerequisites;
         prerequisites.secrets = [];
         for (let secret of filterItemsByType1) {
@@ -156,7 +162,7 @@ export class SWSEActor extends Actor {
     }
 
     getTechniques(actorData) {
-        let filterItemsByType1 = filterItemsByType("forceTechnique", actorData.items);
+        let filterItemsByType1 = filterItemsByType(actorData.items, "forceTechnique");
         let prerequisites = actorData.prerequisites;
         prerequisites.techniques = [];
         for (let technique of filterItemsByType1) {
@@ -166,25 +172,26 @@ export class SWSEActor extends Actor {
         return filterItemsByType1.map(technique => technique.data);
     }
 
-    getTalents(actorData) {
-        let filterItemsByType1 = filterItemsByType("talent", actorData.items);
-        let prerequisites = actorData.prerequisites;
+    getTalents() {
+        let filterItemsByType1 = filterItemsByType(this.items.values(), "talent");
+        let prerequisites = this.data.prerequisites;
 
         prerequisites.talentTrees = {}
         prerequisites.talents = [];
         prerequisites.forceTalentTreesCount = 0;
         for (let talent of filterItemsByType1) {
             prerequisites.talents.push(talent.name.toLowerCase());
-            if (prerequisites.talentTrees[talent.data.talentTree.toLowerCase()]) {
-                prerequisites.talentTrees[talent.data.talentTree.toLowerCase()] = prerequisites.talentTrees[talent.data.talentTree.toLowerCase()] + 1;
+            let talentTree = talent.data.data.talentTree.toLowerCase();
+            if (prerequisites.talentTrees[talentTree]) {
+                prerequisites.talentTrees[talentTree]++;
             } else {
-                prerequisites.talentTrees[talent.data.talentTree.toLowerCase()] = 1;
+                prerequisites.talentTrees[talentTree] = 1;
             }
 
             if (talent.talentTrees?.includes("Force Talent Trees")) {
                 prerequisites.forceTalentTreesCount++;
             }
-            if(!talent.data.talentTree){
+            if(!talentTree){
                 console.log(talent)
             }
         }
@@ -203,7 +210,7 @@ export class SWSEActor extends Actor {
         prerequisites.focusSkills = [];
         prerequisites.masterSkills = [];
         prerequisites.isForceTrained = false;
-        let feats = await filterItemsByType("feat", this.items.values());
+        let feats = await filterItemsByType(this.items.values(), "feat");
         let activeFeats = [];
         let removeFeats = [];
         let inactiveProvidedFeats = [];
@@ -249,14 +256,14 @@ export class SWSEActor extends Actor {
     }
 
     checkIsSkillMastery(feat, prerequisites) {
-        let proficiency2 = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.name);
+        let proficiency2 = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
         if (proficiency2) {
             prerequisites.masterSkills.push(proficiency2[1].toLowerCase());
         }
     }
 
     checkIsSkillFocus(feat, prerequisites) {
-        let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.name);
+        let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
         if (proficiency) {
             prerequisites.focusSkills.push(proficiency[1].toLowerCase());
         }
@@ -270,93 +277,31 @@ export class SWSEActor extends Actor {
         return value;
     }
 
-    _handleCondition(actorData) {
-        let condition = actorData.data.health.condition;
-        if (condition == null) {
-            condition = 0;
+    _handleCondition() {
+        if (this.data.data.condition === null) {
+            this.data.data.condition = 0;
         }
-        actorData.data.health.condition = condition;
-        actorData.data.condition = [];
-        actorData.data.condition[0] = condition === 0;
-        actorData.data.condition[1] = condition === 1;
-        actorData.data.condition[2] = condition === 2;
-        actorData.data.condition[3] = condition === 3;
-        actorData.data.condition[4] = condition === 4;
-        actorData.data.condition[5] = condition === 5;
     }
 
-    _generateAttributes(actor) {
-        let actorData = actor.data;
 
-        actorData.data.lockAttributes = this.shouldLockAttributes()
-        let attributeTraits = actorData.traits.filter(trait => {
-            let result = /([+-])\d* (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name);
-            return !!result;
-        })
-        let prerequisites = actorData.prerequisites;
-        prerequisites.attributes = {};
-        for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
-            let longKey = this._getLongKey(key);
-            if(actorData.data.lockAttributes){
-                attribute.base = 10;
-            }
-            let bonuses = [];
-            let classLevelBonuses = []; //TODO WIRE ME UP
-            let speciesBonuses = [];
-            let ageBonuses = [];
-            let equipmentBonuses = []; //TODO WIRE ME UP
-            let buffBonuses = []; //TODO WIRE ME UP
-            let customBonuses = []; //TODO WIRE ME UP
-            for(let trait of attributeTraits){
-                let result = /([+-\\d]*) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name)
-                if(result[2].toLowerCase() === longKey){
-                    //TODO add them to correct variables for tooltip
-                    if(trait.data.prerequisites && trait.data.prerequisites.length > 0){
-                        let prerequisite = trait.data.prerequisites[0];
-                        if(/ABILITY:(?:Child|Young adult|Adult|Middle age|Old|Venerable)/.exec(prerequisite)){
-                            ageBonuses.push(result[1]);
-                            continue;
-                        }
-                    }
-                    if(trait.data.supplier?.type === 'species'){
-                        speciesBonuses.push(result[1]);
-                        continue;
-                    }
-                    bonuses.push(result[1])
-                }
-            }
-            attribute.classLevelBonus = resolveValueArray(classLevelBonuses, this);
-            attribute.speciesBonus = resolveValueArray(speciesBonuses, this);
-            attribute.ageBonus = resolveValueArray(ageBonuses, this);
-            attribute.equipmentBonus = resolveValueArray(equipmentBonuses, this);
-            attribute.buffBonus = resolveValueArray(buffBonuses, this);
-            // attribute.customBonus = resolveValueArray(customBonuses, this);
 
-            bonuses.push(attribute.classLevelBonus);
-            bonuses.push(attribute.speciesBonus);
-            bonuses.push(attribute.ageBonus);
-            bonuses.push(attribute.equipmentBonus);
-            bonuses.push(attribute.buffBonus);
-            bonuses.push(attribute.customBonus);
-
-            for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
-                bonuses.push(levelAttributeBonus[key])
-            }
-
-            // Calculate the modifier using d20 rules.
-            attribute.bonus = resolveValueArray(bonuses, this);
-            attribute.total = attribute.skip ? 10: attribute.base + attribute.bonus;
-            attribute.mod = Math.floor((attribute.total - 10) / 2);
-            attribute.roll = attribute.mod + actor.getConditionBonus()
-            attribute.label = key.toUpperCase();
-            this.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
-            this.resolvedLabels.set("@" + attribute.label, attribute.label);
-
-            prerequisites.attributes[key] = {};
-            prerequisites.attributes[key].value = attribute.total;
-            prerequisites.attributes[longKey] = {};
-            prerequisites.attributes[longKey].value = attribute.total;
+    getConditionBonus() {
+        let condition = this.data.data.condition;
+        switch (condition) {
+            case 0:
+                break;
+            case 1:
+                return -1;
+            case 2:
+                return -2;
+            case 3:
+                return -5;
+            case 4:
+                return -10;
+            case 5:
+                break;
         }
+        return 0;
     }
 
     setAttributes(attributes) {
@@ -376,81 +321,19 @@ export class SWSEActor extends Actor {
         return response;
     }
 
-    async _generateSkillData(actor) {
-        let actorData = actor.data;
-        let firstClass = await this._getFirstClass(actorData);
-        let intBonus = await this.getAttributeMod("int")
-        let remainingSkills = 0;
-        if (firstClass) {
-            remainingSkills = parseInt(firstClass.data.skills.perLevel) + parseInt(intBonus);
-        }
-
-
-        let prerequisites = actorData.prerequisites;
-        prerequisites.trainedSkills = [];
-        let classSkills = await this._getClassSkills(actorData);
-        for (let [key, skill] of Object.entries(actorData.data.skills)) {
-            skill.isClass = classSkills.has(key);
-            if(key === 'use the force'){
-                skill.isClass = this.isForceSensitive()
-            }
-            // Calculate the modifier using d20 rules.
-            skill.value = this.getHalfCharacterLevel(actorData) + this.getAttributeMod(skill.attribute) + (skill.trained === true ? 5 : 0) + actor.getConditionBonus() + this._getAbilitySkillBonus(key, actorData);
-            skill.key = `@${this.cleanKey(key)}`;
-            this.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
-            skill.title = `Half character level: ${this.getHalfCharacterLevel(actorData)}
-            Attribute Mod: ${this.getAttributeMod(skill.attribute)}
-            Trained Skill Bonus: ${(skill.trained === true ? 5 : 0)}
-            Condition Bonus: ${actor.getConditionBonus()}
-            Ability Skill Bonus: ${this._getAbilitySkillBonus(key, actorData)}`;
-            if (skill.trained) {
-                prerequisites.trainedSkills.push(key.toLowerCase());
-                if (classSkills.size === 0) {
-                    let data = {};
-                    data["data.skills." + key + ".trained"] = false;
-                    await this.update(data);
-                } else {
-                    remainingSkills = remainingSkills - 1;
-                }
-            }
-            skill.label = await this._uppercaseFirstLetters(key).replace("Knowledge", "K.");
-            this.resolvedLabels.set(skill.key, skill.label);
-        }
-        if (remainingSkills > 0) {
-            actorData.data.remainingSkills = remainingSkills;
-        } else if (remainingSkills < 0) {
-            actorData.data.tooManySkills = Math.abs(remainingSkills);
-        }
+    getHalfCharacterLevel() {
+        return Math.floor(this.getCharacterLevel() / 2);
     }
 
-    getHalfCharacterLevel(actorData = this.data) {
-        return Math.floor(this.getCharacterLevel(actorData) / 2);
-    }
-
-    getCharacterLevel(actorData = this.data) {
-        if (actorData.classes) {
-            this.resolvedVariables.set("@charLevel", actorData.classes.length);
-            return actorData.classes.length;
+    getCharacterLevel() {
+        if (this.data.classes) {
+            this.resolvedVariables.set("@charLevel", this.data.classes.length);
+            return this.data.classes.length;
         }
         return 0;
     }
 
-    _excludeItemsByType(items, type) {
-        let types = [];
-        types[0] = type;
-        if (arguments.length > 2) {
-            for (let i = 2; i < arguments.length; i++) {
-                types[i - 1] = arguments[i];
-            }
-        }
-        let filtered = [];
-        for (let i = 0; i < items.length; i++) {
-            if (!types.includes(items[i].type)) {
-                filtered.push(items[i]);
-            }
-        }
-        return filtered;
-    }
+
 
     _getEquipable(items, isDroid) {
         let filtered = [];
@@ -467,9 +350,9 @@ export class SWSEActor extends Actor {
 
     _getUnequipableItems(items, isDroid) {
         let filtered = [];
-        for (let i = 0; i < items.length; i++) {
-            if (!items[i].data.equipable || (!isDroid && items[i].data.droidPart) || (isDroid && items[i].data.bioPart)) {
-                filtered.push(items[i]);
+        for (let item of items) {
+            if (!item.data.data.equipable || (!isDroid && item.data.data.droidPart) || (isDroid && item.data.data.bioPart)) {
+                filtered.push(item);
             }
         }
         return filtered;
@@ -481,17 +364,26 @@ export class SWSEActor extends Actor {
         });
     }
 
+    isProficientWith(item){
+
+        if(item.type === 'armor'){
+            return this.data.proficiency.armor.includes(item.armorType.toLowerCase());
+        }
+
+        return false;
+    }
+
     /**
      * Extracts important stats from the class
      */
     async _generateClassData(actorData) {
-        actorData.classes = await filterItemsByType("class", actorData.items);
+        actorData.classes = await filterItemsByType( actorData.items,"class");
         let classLevels = await new Map();
         let classFeatures = [];
 
         let prerequisites = actorData.prerequisites;
 
-        prerequisites.charLevel = this.getCharacterLevel(actorData);
+        prerequisites.charLevel = this.getCharacterLevel();
         for (let charClass of actorData.classes) {
             let name = charClass.name;
             classLevels.computeIfAbsent(name, () => []).push(charClass);
@@ -571,38 +463,42 @@ export class SWSEActor extends Actor {
         return features;
     }
 
-    ignoreCon(actorData) {
-        return actorData.data.attributes.con.skip;
+    ignoreCon() {
+        return this.data.data.attributes.con.skip;
     }
 
 
-    _getEquippedItems(actorData, items) {
+    _getEquippedItems(items) {
         let equipped = [];
         for (let item of items) {
-            if (actorData.data.equippedIds === undefined) {
-                actorData.data.equippedIds = [];
+            if (this.data.data.equippedIds === undefined) {
+                this.data.data.equippedIds = [];
             }
 
-            if (actorData.data.equippedIds.includes(item.data._id)) {
+            if (this.data.data.equippedIds.includes(item.data._id)) {
                 equipped.push(item);
             }
         }
         return equipped;
     }
 
-    getUnequippedItems(actorData) {
-        let filterItemsByType = this._getEquipable(this.items.values(), actorData.data.isDroid);
+    getUnequippedItems() {
+        let filterItemsByType = this._getEquipable(this.getInventoryItems(), this.data.data.isDroid);
         let unequipped = [];
         for (let item of filterItemsByType) {
-            if (!actorData.data.equippedIds.includes(item.data._id)) {
+            if (!this.data.data.equippedIds.includes(item.data._id)) {
                 unequipped.push(item);
             }
         }
-        return unequipped.map(item => item.data);
+        return unequipped;
     }
 
-    getInventory(actorData) {
-        return this._getUnequipableItems(this._excludeItemsByType(actorData.items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait"), actorData.data.isDroid).filter(i => !i.data.hasItemOwner).map(item => item.data);
+    getNonequippableItems() {
+        return this._getUnequipableItems(this.getInventoryItems(), this.data.data.isDroid).filter(i => !i.data.hasItemOwner);
+    }
+
+    getInventoryItems() {
+        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait");
     }
 
     _uppercaseFirstLetters(s) {
@@ -640,7 +536,7 @@ export class SWSEActor extends Actor {
                 }
             }
         }
-        let abilityClassSkills = this.getAbilityAttribute(actorData, 'classSkill');
+        let abilityClassSkills = this.getTraitAttributesByKey('classSkill');
         for (let classSkill of abilityClassSkills) {
             classSkills.add(classSkill.toLowerCase());
         }
@@ -652,32 +548,14 @@ export class SWSEActor extends Actor {
         return this.data.data.attributes[ability].mod;
     }
 
-    _getFirstClass(actorData) {
+    getFirstClass() {
+        let actorData = this.data;
         for (let charClass of actorData?.classes ? actorData.classes : []) {
             if (charClass.data.attributes.first === true) {
                 return charClass;
             }
         }
         return undefined;
-    }
-
-    getConditionBonus() {
-        let condition = this.data.condition;
-        switch (condition) {
-            case 0:
-                break;
-            case 1:
-                return -1;
-            case 2:
-                return -2;
-            case 3:
-                return -5;
-            case 4:
-                return -10;
-            case 5:
-                break;
-        }
-        return 0;
     }
 
     async _manageAutomaticItems(actorData, removeFeats) {
@@ -711,19 +589,24 @@ export class SWSEActor extends Actor {
     }
 
 
-    getAbilityAttribute(actorData, attribute) {
+    getTraitAttributesByKey(attributeKey) {
         let values = [];
-        for (let ability of actorData.traits) {
-            if (ability.data.attributes[attribute]) {
-                values.push(ability.data.attributes[attribute])
+        for (let ability of this.data.traits) {
+            let attribute = ability.data.attributes[attributeKey];
+            if (attribute) {
+                if(Array.isArray(attribute)) {
+                    values.push(...attribute)
+                } else {
+                    values.push(attribute)
+                }
             }
         }
         return values;
     }
 
-    _getAbilitySkillBonus(skill, actorData) {
+    _getAbilitySkillBonus(skill) {
         if (skill.toLowerCase() === 'stealth') {
-            let stealthBonuses = this.getAbilityAttribute(actorData, 'sneakModifier');
+            let stealthBonuses = this.getTraitAttributesByKey('sneakModifier');
             let total = 0;
             for (let stealthBonus of stealthBonuses) {
                 total = total + stealthBonus;
@@ -840,7 +723,7 @@ export class SWSEActor extends Actor {
         let silentFailList = [];
         for (let prereq of prereqs) {
             let prereqStandardCase = prereq
-            prereq = prereqStandardCase.toLowerCase().replace(/ species trait/, "").replace(/ feat/, "").trim();;
+            prereq = prereqStandardCase.toLowerCase().replace(/ species trait/, "").replace(/ feat/, "").trim();
 
 
             //NEW CHECKS
@@ -851,6 +734,11 @@ export class SWSEActor extends Actor {
                 }
                 continue;
             }
+
+            if(prereq === 'trained in #payload#'){
+                continue;
+            }
+
             //OLD CHECKS to be verified
 
             let result = /^\(([\w\s()]*)\) or \(([\w\s()]*)\)$/.exec(prereq);
@@ -1357,7 +1245,7 @@ export class SWSEActor extends Actor {
 
     _reduceProvidedItemsByExistingItems(actorData) {
         for (let talent of actorData.talents) {
-            this.reduceAvailableItem(actorData, talent.talentTreeSource);
+            this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
         }
         for (let feat of actorData.feats) {
             if (feat.data.isSupplied) {
@@ -1624,9 +1512,5 @@ export class SWSEActor extends Actor {
             }
         }
         return hasForceSensativity && !this.data.data.isDroid;
-    }
-
-    failureIsDisabledSetting(failureList) {
-        return false
     }
 }
