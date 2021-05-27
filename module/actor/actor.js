@@ -679,7 +679,7 @@ export class SWSEActor extends Actor {
             if (parentItem) {
                 data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
                 data.isSupplied = true;
-                data.categories = data.categories.filter(category => !category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
+                data.categories = data.categories.filter(category => !category.category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
             }
 
             if (payload !== "") {
@@ -1269,8 +1269,8 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            if (feat.bonusFeatCategories && feat.bonusFeatCategories.length > 0) {
-                type = feat.bonusFeatCategories[0]
+            if (feat.data.bonusFeatCategories && feat.data.bonusFeatCategories.length > 0) {
+                type = feat.data.bonusFeatCategories[0].category
             }
             this.reduceAvailableItem(actorData, type);
         }
