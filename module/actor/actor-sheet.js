@@ -633,6 +633,8 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
         } else if (item.data.type === "forcePower") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
+        } else if (item.data.type === "forceTradition") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Traditions"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
@@ -647,7 +649,7 @@ export class SWSEActorSheet extends ActorSheet {
         let possibleTalentTrees = [];
         let optionString = "";
 
-        if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
+        if (item.data.data.bonusTalentTree === this.actor.data.data.bonusTalentTree) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
@@ -701,7 +703,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addForceItem(item, itemType) {
-        if (!this.actor.data.availableItems[itemType]) {
+        if (!this.actor.data.availableItems[itemType] && itemType !== 'Force Traditions') {
             await Dialog.prompt({
                 title: `You can't take any more ${itemType}`,
                 content: `You can't take any more ${itemType}`,

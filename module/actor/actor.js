@@ -230,6 +230,9 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
+                if(feat.data.data.finalName === 'Force Sensitivity'){
+                    actorData.data.bonusTalentTree = "Force Talent";
+                }
             } else if(doesFail && !feat.data.data.isSupplied){
                 removeFeats.push(feat.data);
             } else if(prereqResponse.failureList.length > 0){
@@ -753,6 +756,16 @@ export class SWSEActor extends Actor {
             }
 
             if(prereq === 'trained in #payload#'){
+                continue;
+            }
+
+            if(prereqStandardCase.startsWith('TRADITION')){
+                let traditionName = prereqStandardCase.split(":")[1]
+                if(this.data.traditions.filter(tradition => {
+                    return tradition.data.finalName === traditionName
+                }).length === 0){
+                    failureList.push({fail: true, message: `Character is not a member of the ${traditionName}`})
+                }
                 continue;
             }
 
