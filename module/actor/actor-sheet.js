@@ -575,9 +575,20 @@ export class SWSEActorSheet extends ActorSheet {
             }
         });
 
+
+        newEl.addEventListener("keypress", (event) => {
+            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+                event.stopPropagation();
+                if (!changed) {
+                    this._render();
+                }
+            }
+        });
+
         // Select text inside new element
         newEl.focus();
         newEl.select();
+        //newEl.click()
     }
 
     _mouseWheelAdd(event, el) {

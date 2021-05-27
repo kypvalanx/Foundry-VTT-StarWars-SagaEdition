@@ -17,7 +17,8 @@
             <a class="item" data-tab="feats">Feats</a>
             <a class="item" data-tab="talents">Talents</a>
             <a class="item" data-tab="traits">Traits</a>
-            {{#if actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}
+            {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
+<!--            {{#if actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}-->
             <!--        <a class="item" data-tab="description">Description</a>-->
         </nav>
 

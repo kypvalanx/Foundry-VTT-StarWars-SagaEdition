@@ -30,6 +30,7 @@ export class SWSEActor extends Actor {
         return this.data.species;
     }
 
+
     /**
      * Augment the basic actor data with additional dynamic data.
      */
@@ -56,13 +57,13 @@ export class SWSEActor extends Actor {
         actorData.equipped = this.getEquippedItems().map(item => item.data);
         actorData.unequipped = this.getUnequippedItems().map(item => item.data);
         actorData.inventory = this.getNonequippableItems().map(item => item.data);
-        actorData.traits = await this.getTraits();
-        actorData.talents = this.getTalents();
-        actorData.powers = this.getPowers(actorData);
-        actorData.secrets = this.getSecrets(actorData);
-        actorData.techniques = this.getTechniques(actorData);
-        actorData.traditions = filterItemsByType(actorData.items, "forceTradition");
-        actorData.regimens = filterItemsByType(actorData.items, "forceRegimen");
+        actorData.traits = await this.getTraits().map(trait => trait.data);
+        actorData.talents = this.getTalents().map(talent => talent.data);
+        actorData.powers = this.getPowers().map(item => item.data);
+        actorData.secrets = this.getSecrets().map(item => item.data);
+        actorData.techniques = this.getTechniques().map(item => item.data);
+        actorData.traditions = filterItemsByType(this.items.values(), "forceTradition").map(item => item.data);
+        actorData.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
         actorData.speed = this.getSpeed();
 
         generateAttributes(this);
@@ -73,6 +74,12 @@ export class SWSEActor extends Actor {
 
         let feats = this.getFeats();
         actorData.feats = feats.activeFeats;
+
+        actorData.hideForce = 0 === actorData.feats.filter(feat => {
+            console.log(feat.name, 'Force Training', feat.name === 'Force Training')
+            return feat.name === 'Force Training'
+        }).length
+
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats;
 
         this.generateProvidedItemsFromItems(actorData);
@@ -97,7 +104,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    async getTraits() {
+    getTraits() {
         let traits = filterItemsByType(this.items.values(), "trait");
         this.data.traits = [];
         let activeTraits = this.data.traits;
@@ -128,7 +135,7 @@ export class SWSEActor extends Actor {
             if (x < y) {return -1;}
             if (x > y) {return 1;}
             return 0;
-        }).map(trait => trait.data);
+        });
     }
 
     getEquippedItems() {
@@ -141,35 +148,35 @@ export class SWSEActor extends Actor {
         return getEquippedItems;
     }
 
-    getPowers(actorData) {
-        let filterItemsByType1 = filterItemsByType(actorData.items, "forcePower");
-        let prerequisites = actorData.prerequisites;
+    getPowers() {
+        let filterItemsByType1 = filterItemsByType(this.items.values(), "forcePower");
+        let prerequisites = this.data.prerequisites;
         prerequisites.powers = [];
         for (let power of filterItemsByType1) {
             prerequisites.powers.push(power.name.toLowerCase());
         }
-        return filterItemsByType1.map(power => power.data);
+        return filterItemsByType1;
     }
 
-    getSecrets(actorData) {
-        let filterItemsByType1 = filterItemsByType(actorData.items, "forceSecret");
-        let prerequisites = actorData.prerequisites;
+    getSecrets() {
+        let filterItemsByType1 = filterItemsByType(this.items.values(), "forceSecret");
+        let prerequisites = this.data.prerequisites;
         prerequisites.secrets = [];
         for (let secret of filterItemsByType1) {
             prerequisites.secrets.push(secret.name.toLowerCase());
         }
-        return filterItemsByType1.map(secret => secret.data);
+        return filterItemsByType1;
     }
 
-    getTechniques(actorData) {
-        let filterItemsByType1 = filterItemsByType(actorData.items, "forceTechnique");
-        let prerequisites = actorData.prerequisites;
+    getTechniques() {
+        let filterItemsByType1 = filterItemsByType(this.items.values(), "forceTechnique");
+        let prerequisites = this.data.prerequisites;
         prerequisites.techniques = [];
         for (let technique of filterItemsByType1) {
             prerequisites.techniques.push(technique.name.toLowerCase());
         }
 
-        return filterItemsByType1.map(technique => technique.data);
+        return filterItemsByType1;
     }
 
     getTalents() {
@@ -196,7 +203,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        return filterItemsByType1.map(talent => talent.data);
+        return filterItemsByType1;
     }
 
     getFeats() {
@@ -599,6 +606,17 @@ export class SWSEActor extends Actor {
                 } else {
                     values.push(attribute)
                 }
+            }
+        }
+        return values;
+    }
+
+    getTraitByKey(attributeKey) {
+        let values = [];
+        for (let trait of this.data.traits) {
+            let attribute = trait.data.attributes[attributeKey];
+            if (attribute) {
+                values.push(trait)
             }
         }
         return values;
