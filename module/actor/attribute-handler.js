@@ -8,10 +8,7 @@ export function generateAttributes(actor) {
     let actorData = actor.data;
 
     actorData.data.lockAttributes = actor.shouldLockAttributes()
-    let attributeTraits = actorData.traits.filter(trait => {
-        let result = /([+-])\d* (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name);
-        return !!result;
-    })
+    let attributeTraits = actor.getTraitByKey('attributeBonus')
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
@@ -25,22 +22,20 @@ export function generateAttributes(actor) {
         let ageBonuses = [];
         let equipmentBonuses = []; //TODO WIRE ME UP
         let buffBonuses = []; //TODO WIRE ME UP
-        let customBonuses = []; //TODO WIRE ME UP
         for (let trait of attributeTraits) {
-            let result = /([+-\\d]*) (Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)/.exec(trait.name)
-            if (result[2].toLowerCase() !== longKey) {
+            if (trait.data.attributes.attributeBonus.attribute.toLowerCase() !== longKey) {
                 continue;
             }
             //TODO add them to correct variables for tooltip
             if (trait.data.prerequisites && trait.data.prerequisites.length > 0) {
                 let prerequisite = trait.data.prerequisites[0];
                 if (/ABILITY:(?:Child|Young adult|Adult|Middle age|Old|Venerable)/.exec(prerequisite)) {
-                    ageBonuses.push(result[1]);
+                    ageBonuses.push(trait.data.attributes.attributeBonus.bonus);
                     continue;
                 }
             }
             if (trait.data.supplier?.type === 'species') {
-                speciesBonuses.push(result[1]);
+                speciesBonuses.push(trait.data.attributes.attributeBonus.bonus);
                 continue;
             }
             bonuses.push(result[1])
@@ -59,7 +54,7 @@ export function generateAttributes(actor) {
         bonuses.push(attribute.ageBonus);
         bonuses.push(attribute.equipmentBonus);
         bonuses.push(attribute.buffBonus);
-        bonuses.push(attribute.customBonus);
+        bonuses.push(attribute.customBonus );
 
         for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
             bonuses.push(levelAttributeBonus[key])
