@@ -60,6 +60,15 @@ export class SWSEActorSheet extends ActorSheet {
             this._onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
+        html.find("input.plain").on("keypress", (event) => {
+            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+                event.stopPropagation();
+                //if (!changed) {
+                    this._onSubmit(event);
+                //}
+            }
+        });
+
         html.find("input.direct").on("click", (event) => {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
@@ -633,6 +642,8 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
         } else if (item.data.type === "forcePower") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
+        } else if (item.data.type === "forceTradition") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Traditions"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
@@ -647,7 +658,7 @@ export class SWSEActorSheet extends ActorSheet {
         let possibleTalentTrees = [];
         let optionString = "";
 
-        if (item.data.data.talentTree === this.actor.data.data.bonusTalentTree) {
+        if (item.data.data.bonusTalentTree === this.actor.data.data.bonusTalentTree) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
@@ -701,7 +712,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addForceItem(item, itemType) {
-        if (!this.actor.data.availableItems[itemType]) {
+        if (!this.actor.data.availableItems[itemType] && itemType !== 'Force Traditions') {
             await Dialog.prompt({
                 title: `You can't take any more ${itemType}`,
                 content: `You can't take any more ${itemType}`,
@@ -730,9 +741,9 @@ export class SWSEActorSheet extends ActorSheet {
 
         let optionString = "";
         for (let category of item.data.data.bonusFeatCategories) {
-            if (this.actor.data.availableItems[category] > 0) {
+            if (this.actor.data.availableItems[category.category] > 0) {
                 possibleFeatTypes.push(category);
-                optionString += `<option value="${category}">${category}</option>`;
+                optionString += `<option value="${category}">${category.category}</option>`;
             }
         }
 
@@ -746,13 +757,13 @@ export class SWSEActorSheet extends ActorSheet {
                 content: content,
                 callback: async (html) => {
                     let key = html.find("#choice")[0].value;
-                    possibleFeatTypes = [key];
+                    possibleFeatTypes = [JSON.parse(key)];
                 }
             });
         }
 
         for (let category of item.data.data.categories) {
-            if (!category.endsWith(" Bonus Feats")) {
+            if (!category.category.endsWith(" Bonus Feats")) {
                 possibleFeatTypes.push(category);
             }
         }

@@ -230,6 +230,9 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
+                if(feat.data.data.finalName === 'Force Sensitivity'){
+                    actorData.data.bonusTalentTree = "Force Talent";
+                }
             } else if(doesFail && !feat.data.data.isSupplied){
                 removeFeats.push(feat.data);
             } else if(prereqResponse.failureList.length > 0){
@@ -679,7 +682,7 @@ export class SWSEActor extends Actor {
             if (parentItem) {
                 data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
                 data.isSupplied = true;
-                data.categories = data.categories.filter(category => !category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
+                data.categories = data.categories.filter(category => !category.category.includes('Bonus Feats')) //TODO anything else to filter?  is this the appropriate place?
             }
 
             if (payload !== "") {
@@ -753,6 +756,16 @@ export class SWSEActor extends Actor {
             }
 
             if(prereq === 'trained in #payload#'){
+                continue;
+            }
+
+            if(prereqStandardCase.startsWith('TRADITION')){
+                let traditionName = prereqStandardCase.split(":")[1]
+                if(this.data.traditions.filter(tradition => {
+                    return tradition.data.finalName === traditionName
+                }).length === 0){
+                    failureList.push({fail: true, message: `Character is not a member of the ${traditionName}`})
+                }
                 continue;
             }
 
@@ -1269,8 +1282,8 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            if (feat.bonusFeatCategories && feat.bonusFeatCategories.length > 0) {
-                type = feat.bonusFeatCategories[0]
+            if (feat.data.bonusFeatCategories && feat.data.bonusFeatCategories.length > 0) {
+                type = feat.data.bonusFeatCategories[0].category
             }
             this.reduceAvailableItem(actorData, type);
         }

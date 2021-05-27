@@ -447,7 +447,8 @@
       ],
       "talentTree": "",
       "talentTreeSource": "",
-      "talentTreeUrl": ""
+      "talentTreeUrl": "",
+      "bonusTalentTree": ""
     },
     "species": {
       "templates": [

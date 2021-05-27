@@ -56,7 +56,7 @@ export class SWSEItem extends Item {
 
     prepareFeatData(itemData) {
         if (itemData.data.categories) {
-            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.toLowerCase().includes("bonus feats"));
+            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.category.toLowerCase().includes("bonus feats"));
             itemData.data.hasBonusFeatCategories = itemData.data.bonusFeatCategories.length > 0;
         }
     }
@@ -251,7 +251,7 @@ export class SWSEItem extends Item {
 
     canReduceRange() {
         for (const category of this.data.data.categories) {
-            if (["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(category.toLowerCase())) {
+            if (["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(category.category.toLowerCase())) {
                 return true;
             }
         }

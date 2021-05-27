@@ -87,7 +87,7 @@ Hooks.on("ready", async function() {
     pack.getEntity(i._id).then(entity =>{
     if(entity.data.type === 'weapon'){
       for(let category of entity.data.data.categories){
-        if(category.toLowerCase().includes('exotic')){
+        if(category.category.toLowerCase().includes('exotic')){
           game.generated.exoticWeapons.push(entity.name);
           break;
         }
