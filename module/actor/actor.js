@@ -76,7 +76,6 @@ export class SWSEActor extends Actor {
         actorData.feats = feats.activeFeats;
 
         actorData.hideForce = 0 === actorData.feats.filter(feat => {
-            console.log(feat.name, 'Force Training', feat.name === 'Force Training')
             return feat.name === 'Force Training'
         }).length
 
