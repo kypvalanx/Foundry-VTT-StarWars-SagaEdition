@@ -60,6 +60,15 @@ export class SWSEActorSheet extends ActorSheet {
             this._onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
+        html.find("input.plain").on("keypress", (event) => {
+            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+                event.stopPropagation();
+                //if (!changed) {
+                    this._onSubmit(event);
+                //}
+            }
+        });
+
         html.find("input.direct").on("click", (event) => {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });

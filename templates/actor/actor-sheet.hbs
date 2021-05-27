@@ -31,7 +31,7 @@
                          title="{{actor.name}}"/>
                     <div class="flex-grow2 flex-col flex">
                         <h1 class="charname"><label>
-                            <input name="name" type="text" value="{{actor.name}}" placeholder="Name"/>
+                            <input class="plain" name="name" type="text" value="{{actor.name}}" placeholder="Name"/>
                         </label></h1>
                         <div class="flex flex-grow">
                             <button class="flex-grow" name="age" id="selectAge" {{#if
@@ -112,22 +112,22 @@
                                     <tbody>
                                     <tr>
                                         <td><label>
-                                            <input type="text" name="data.health.value" value="{{data.health.value}}"
+                                            <input class="plain" type="text" name="data.health.value" value="{{data.health.value}}"
                                                    data-dtype="Number"/>
                                         </label></td>
                                         <td>
                                             <label>{{data.health.max}}</label>
                                         </td>
                                         <td><label>
-                                            <input type="text" name="data.health.temp" value="{{data.health.temp}}"
+                                            <input class="plain" type="text" name="data.health.temp" value="{{data.health.temp}}"
                                                    data-dtype="Number"/>
                                         </label></td>
                                         <td><label>
-                                            <input type="text" name="data.health.dr" value="{{data.health.dr}}"
+                                            <input class="plain" type="text" name="data.health.dr" value="{{data.health.dr}}"
                                                    data-dtype="Number"/>
                                         </label></td>
                                         <td><label>
-                                            <input type="text" name="data.health.sr" value="{{data.health.sr}}"
+                                            <input class="plain" type="text" name="data.health.sr" value="{{data.health.sr}}"
                                                    data-dtype="Number"/>
                                         </label></td>
                                     </tr>

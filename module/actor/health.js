@@ -22,7 +22,7 @@ export function resolveHealth(actor) {
     let otherBonuses = resolveValueArray(other, actor);
 
     //TODO add traits and stuff that boost HP
-    return {other: otherBonuses,max: resolveValueArray(health, actor)};
+    return {value: actorData.data.health.value,temp: actorData.data.health.temp, other: otherBonuses,max: resolveValueArray(health, actor), dr: actorData.data.health.dr, sr: actorData.data.health.sr};
 }
 
 function resolveCharClass(actorData, ignoreCon) {
