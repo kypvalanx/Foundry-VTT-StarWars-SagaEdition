@@ -19,15 +19,15 @@ export class SWSEActor extends Actor {
 
     resolvedLabels = new Map();
 
-    get classes(){
+    get classes() {
         return this.data.classes;
     }
 
-    get age(){
+    get age() {
         return this.data.data.age;
     }
 
-    get species(){
+    get species() {
         return this.data.species;
     }
 
@@ -50,9 +50,7 @@ export class SWSEActor extends Actor {
     async _prepareCharacterData(actorData) {
         actorData.prerequisites = {};
         new SpeciesHandler().generateSpeciesData(this);
-        if (await this._generateClassData(actorData)) {
-            return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
-        }
+        let {bab, will, reflex, fortitude, level} = this._generateClassData(actorData);
         await this._handleCondition(actorData);
 
         actorData.equipped = this.getEquippedItems().map(item => item.data);
@@ -69,10 +67,11 @@ export class SWSEActor extends Actor {
 
         generateAttributes(this);
 
-        actorData.acPenalty=await generateArmorCheckPenalties(this);
+        actorData.acPenalty = await generateArmorCheckPenalties(this);
 
         await generateSkills(this);
 
+        actorData.data.offense = await new OffenseHandler().resolveOffense(this, bab);
         let feats = this.getFeats();
         actorData.feats = feats.activeFeats;
 
@@ -87,11 +86,13 @@ export class SWSEActor extends Actor {
 
         actorData.data.health = await resolveHealth(this);
         actorData.data.defense = await resolveDefenses(this);
-        actorData.data.offense = await new OffenseHandler().resolveOffense(this);
 
 
         await generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
+        if (await this.handleLeveBasedAttributeBonuses(actorData)) {
+            return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
+        }
 
         try {
             if (this.sheet?.rendered) {
@@ -109,8 +110,8 @@ export class SWSEActor extends Actor {
         this.data.traits = [];
         let activeTraits = this.data.traits;
         let possibleTraits = []
-        for(let trait of traits){
-            if(!trait.data.data.prerequisite || trait.data.data.prerequisite.length === 0){
+        for (let trait of traits) {
+            if (!trait.data.data.prerequisite || trait.data.data.prerequisite.length === 0) {
                 activeTraits.push(trait);
             } else {
                 possibleTraits.push(trait);
@@ -118,11 +119,11 @@ export class SWSEActor extends Actor {
         }
 
         let shouldRetry = possibleTraits.length > 0;
-        while(shouldRetry){
+        while (shouldRetry) {
             shouldRetry = false;
-            for(let possible of possibleTraits){
+            for (let possible of possibleTraits) {
                 let meetsPrerequisites1 = this.meetsPrerequisites(possible.data.data.prerequisite, false);
-                if(!meetsPrerequisites1.doesFail){
+                if (!meetsPrerequisites1.doesFail) {
                     activeTraits.push(possible);
                     shouldRetry = true;
                 }
@@ -130,11 +131,15 @@ export class SWSEActor extends Actor {
             possibleTraits = possibleTraits.filter(possible => !activeTraits.includes(possible));
         }
 
-        return activeTraits.sort((a,b) => {
+        return activeTraits.sort((a, b) => {
             let x = a.data.data.finalName.toLowerCase();
             let y = b.data.data.finalName.toLowerCase();
-            if (x < y) {return -1;}
-            if (x > y) {return 1;}
+            if (x < y) {
+                return -1;
+            }
+            if (x > y) {
+                return 1;
+            }
             return 0;
         });
     }
@@ -199,7 +204,7 @@ export class SWSEActor extends Actor {
             if (talent.talentTrees?.includes("Force Talent Trees")) {
                 prerequisites.forceTalentTreesCount++;
             }
-            if(!talentTree){
+            if (!talentTree) {
                 console.log(talent)
             }
         }
@@ -213,6 +218,15 @@ export class SWSEActor extends Actor {
         actorData.proficiency.weapon = [];
         actorData.proficiency.armor = [];
         actorData.proficiency.focus = [];
+        actorData.proficiency.doubleAttack = [];
+        actorData.proficiency.tripleAttack = [];
+        actorData.proficiency.savageAttack = [];
+        actorData.proficiency.relentlessAttack = [];
+        actorData.proficiency.autofireSweep = [];
+        actorData.proficiency.autofireAssault = [];
+        actorData.proficiency.halt = [];
+        actorData.proficiency.returnFire = [];
+        actorData.proficiency.criticalStrike = [];
         let prerequisites = actorData.prerequisites;
         prerequisites.feats = [];
         prerequisites.focusSkills = [];
@@ -232,12 +246,12 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
-                if(feat.data.data.finalName === 'Force Sensitivity'){
+                if (feat.data.data.finalName === 'Force Sensitivity') {
                     actorData.data.bonusTalentTree = "Force Talent";
                 }
-            } else if(doesFail && !feat.data.data.isSupplied){
+            } else if (doesFail && !feat.data.data.isSupplied) {
                 removeFeats.push(feat.data);
-            } else if(prereqResponse.failureList.length > 0){
+            } else if (prereqResponse.failureList.length > 0) {
 
                 inactiveProvidedFeats.push(feat.data);
             }
@@ -253,7 +267,7 @@ export class SWSEActor extends Actor {
     }
 
     checkForProficiencies(feat, actorData) {
-        let result = /(Weapon Proficiency|Armor Proficiency|Weapon Focus) \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
+        let result = /(Weapon Proficiency|Armor Proficiency|Weapon Focus|Double Attack|Triple Attack|Savage Attack|Relentless Attack|Autofire Sweep|Autofire Assault|Halt|Return Fire|Critical Strike) \(([\w\s]*)\)/g.exec(feat.data.data.finalName);
         if (result === null) {
             return;
         }
@@ -263,6 +277,24 @@ export class SWSEActor extends Actor {
             actorData.proficiency.armor.push(result[2].toLowerCase());
         } else if (result[1] === 'Weapon Focus') {
             actorData.proficiency.focus.push(result[2].toLowerCase());
+        } else if (result[1] === 'Double Attack') {
+            actorData.proficiency.doubleAttack.push(result[2].toLowerCase());
+        } else if (result[1] === 'Triple Attack') {
+            actorData.proficiency.tripleAttack.push(result[2].toLowerCase());
+        } else if (result[1] === 'Savage Attack') {
+            actorData.proficiency.savageAttack.push(result[2].toLowerCase());
+        } else if (result[1] === 'Relentless Attack') {
+            actorData.proficiency.relentlessAttack.push(result[2].toLowerCase());
+        } else if (result[1] === 'Autofire Sweep') {
+            actorData.proficiency.autofireSweep.push(result[2].toLowerCase());
+        } else if (result[1] === 'Autofire Assault') {
+            actorData.proficiency.autofireAssault.push(result[2].toLowerCase());
+        } else if (result[1] === 'Halt') {
+            actorData.proficiency.halt.push(result[2].toLowerCase());
+        } else if (result[1] === 'Return Fire') {
+            actorData.proficiency.returnFire.push(result[2].toLowerCase());
+        } else if (result[1] === 'Critical Strike') {
+            actorData.proficiency.criticalStrike.push(result[2].toLowerCase());
         }
     }
 
@@ -293,7 +325,6 @@ export class SWSEActor extends Actor {
             this.data.data.condition = 0;
         }
     }
-
 
 
     getConditionBonus() {
@@ -336,12 +367,12 @@ export class SWSEActor extends Actor {
      *
      * @param {string} attributeName
      */
-    getAttribute(attributeName){
+    getAttribute(attributeName) {
         for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
-            if(attributeName.toLowerCase() === key || this.toShortAttribute(attributeName).toLowerCase() === key){
+            if (attributeName.toLowerCase() === key || this.toShortAttribute(attributeName).toLowerCase() === key) {
                 return attribute.total;
             }
-    }
+        }
     }
 
     getHalfCharacterLevel() {
@@ -355,7 +386,6 @@ export class SWSEActor extends Actor {
         }
         return 0;
     }
-
 
 
     _getEquipable(items, isDroid) {
@@ -387,9 +417,9 @@ export class SWSEActor extends Actor {
         });
     }
 
-    isProficientWith(item){
+    isProficientWith(item) {
 
-        if(item.type === 'armor'){
+        if (item.type === 'armor') {
             return this.data.proficiency.armor.includes(item.armorType.toLowerCase());
         }
 
@@ -399,8 +429,8 @@ export class SWSEActor extends Actor {
     /**
      * Extracts important stats from the class
      */
-    async _generateClassData(actorData) {
-        actorData.classes = await filterItemsByType( actorData.items,"class");
+    _generateClassData(actorData) {
+        actorData.classes = filterItemsByType(actorData.items, "class");
 
         let classLevels = [];
         let classFeatures = [];
@@ -411,43 +441,24 @@ export class SWSEActor extends Actor {
         let level = 0;
         //skills here?
 
-        for(let characterClass of actorData.classes){
+        for (let characterClass of actorData.classes) {
             level++;
-            if(!classLevels[characterClass.name]){
+            if (!classLevels[characterClass.name]) {
                 classLevels[characterClass.name] = 0;
-                will = Math.max(will,characterClass.data.defense.will);
-                reflex = Math.max(reflex,characterClass.data.defense.reflex);
-                fortitude = Math.max(fortitude,characterClass.data.defense.fortitude);
+                will = Math.max(will, characterClass.data.defense.will);
+                reflex = Math.max(reflex, characterClass.data.defense.reflex);
+                fortitude = Math.max(fortitude, characterClass.data.defense.fortitude);
             }
             let levelOfClass = ++classLevels[characterClass.name]
 
             let levelData = characterClass.data.levels[levelOfClass]
-            bab+=levelData.bab;
+            bab += levelData.bab;
             classFeatures.push(...levelData.features)
-            console.log(characterClass, levelOfClass);
         }
 
 
         this.resolveClassFeatures(actorData, classFeatures);
-
-
-
-
-        //let classLevels = await new Map();
-        // let classFeatures = [];
-        //
-        // this.resolvedVariables.set("@charLevel", actorData.classes?actorData.classes.length:0);
-        //
-        // let prerequisites = actorData.prerequisites;
-        //
-        // prerequisites.charLevel = this.getCharacterLevel();
-        // for (let charClass of actorData.classes) {
-        //     let name = charClass.name;
-        //     classLevels.computeIfAbsent(name, () => []).push(charClass);
-        // }
-        //this.handleClassFeatures(classLevels, classFeatures, actorData);
-        //
-        return this.handleLeveBasedAttributeBonuses(actorData);
+        return {bab, will, reflex, fortitude, level};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -462,13 +473,13 @@ export class SWSEActor extends Actor {
             hasUpdate = true;
         }
 
-        for(let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel +=4){
-            if(bonusAttributeLevel > characterLevel){
-                if(actorData.data.levelAttributeBonus[bonusAttributeLevel]){
+        for (let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel += 4) {
+            if (bonusAttributeLevel > characterLevel) {
+                if (actorData.data.levelAttributeBonus[bonusAttributeLevel]) {
                     actorData.data.levelAttributeBonus[bonusAttributeLevel] = null;
                     hasUpdate = true;
                 }
-            }else{
+            } else {
                 if (!actorData.data.levelAttributeBonus[bonusAttributeLevel]) {
                     actorData.data.levelAttributeBonus[bonusAttributeLevel] = {};
                     hasUpdate = true;
@@ -635,7 +646,7 @@ export class SWSEActor extends Actor {
         let itemIds = actorData.items.flatMap(i => [i._id, i.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
 
         let removal = [];
-        removeFeats.forEach(f =>removal.push(f._id))
+        removeFeats.forEach(f => removal.push(f._id))
         for (let item of actorData.items) {
             let itemData = item.data;
             if (itemData.isSupplied) {
@@ -665,7 +676,7 @@ export class SWSEActor extends Actor {
         for (let ability of this.data.traits) {
             let attribute = ability.data.attributes[attributeKey];
             if (attribute) {
-                if(Array.isArray(attribute)) {
+                if (Array.isArray(attribute)) {
                     values.push(...attribute)
                 } else {
                     values.push(attribute)
@@ -730,7 +741,7 @@ export class SWSEActor extends Actor {
             // }
 
 
-            if(prerequisite){
+            if (prerequisite) {
                 data.prerequisite = prerequisite;
             }
 
@@ -810,72 +821,72 @@ export class SWSEActor extends Actor {
         let failureList = [];
         let silentFailList = [];
         let successList = [];
-        if(!prereqs){
+        if (!prereqs) {
             return {doesFail: false, failureList, silentFail: silentFailList, successList};
         }
 
-        if(!Array.isArray(prereqs)){
+        if (!Array.isArray(prereqs)) {
             prereqs = [prereqs];
         }
 
         for (let prereq of prereqs) {
-            switch(prereq.type){
+            switch (prereq.type) {
                 case undefined:
                     continue;
                 case 'AGE':
                     let age = this.age;
-                    if(parseInt(prereq.low)>age || (prereq.high && parseInt(prereq.high)<age)){
+                    if (parseInt(prereq.low) > age || (prereq.high && parseInt(prereq.high) < age)) {
                         failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                         continue;
                     }
-                    successList.push({prereq, count:1});
+                    successList.push({prereq, count: 1});
                     continue;
                 case 'CHARACTER LEVEL':
-                    if(!(this.getCharacterLevel()<parseInt(prereq.requirement))){
-                        successList.push({prereq, count:1});
+                    if (!(this.getCharacterLevel() < parseInt(prereq.requirement))) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 case 'BASE ATTACK BONUS':
-                    if(!this.getBaseAttackBonus()<parseInt(prereq.requirement)){
-                        successList.push({prereq, count:1});
+                    if (!(this.getBaseAttackBonus() < parseInt(prereq.requirement))) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 case 'DARK SIDE SCORE':
-                    if(!this.getDarkSideScore()<resolveValueArray([prereq.requirement], this)){
-                        successList.push({prereq, count:1});
+                    if (!this.getDarkSideScore() < resolveValueArray([prereq.requirement], this)) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 case 'ITEM':
                     let ownedItem = this.getInventoryItems();
                     let filteredItem = ownedItem.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredItem.length > 0){
-                            successList.push({prereq, count:1});
-                            continue;
+                    if (filteredItem.length > 0) {
+                        successList.push({prereq, count: 1});
+                        continue;
                     }
                     break;
                 case 'SPECIES':
                     let species = filterItemsByType(this.items.values(), "species");
                     let filteredSpecies = species.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredSpecies.length > 0){
-                            successList.push({prereq, count:1});
-                            continue;
+                    if (filteredSpecies.length > 0) {
+                        successList.push({prereq, count: 1});
+                        continue;
                     }
                     break;
                 case 'TRAINED SKILL':
-                    if(this.data.prerequisites.trainedSkills.filter(trainedSkill => trainedSkill.toLowerCase() ===prereq.requirement.toLowerCase()).length === 1){
-                        successList.push({prereq, count:1});
+                    if (this.data.prerequisites.trainedSkills.filter(trainedSkill => trainedSkill.toLowerCase() === prereq.requirement.toLowerCase()).length === 1) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 case 'FEAT':
                     let ownedFeats = filterItemsByType(this.items.values(), "feat");
                     let filteredFeats = ownedFeats.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredFeats.length > 0){
-                        if(this.meetsPrerequisites(filteredFeats[0].data.data.prerequisite, false)){
-                            successList.push({prereq, count:1});
+                    if (filteredFeats.length > 0) {
+                        if (this.meetsPrerequisites(filteredFeats[0].data.data.prerequisite, false)) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
@@ -883,59 +894,55 @@ export class SWSEActor extends Actor {
                 case 'CLASS':
                     let ownedClasses = filterItemsByType(this.items.values(), "class");
                     let filteredClasses = ownedClasses.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredClasses.length > 0){
-                        if(this.meetsPrerequisites(filteredClasses[0].data.data.prerequisite, false)){
-                            successList.push({prereq, count:1});
+                    if (filteredClasses.length > 0) {
+                        if (this.meetsPrerequisites(filteredClasses[0].data.data.prerequisite, false)) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
                     break;
                 case 'TRAIT':
-                    let ownedTraits = filterItemsByType(this.items.values(), "feat");
+                    let ownedTraits = filterItemsByType(this.items.values(), "trait");
                     let filteredTraits = ownedTraits.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredTraits.length > 0){
+                    if (filteredTraits.length > 0) {
                         let parentsMeetPrequisites = false;
-                        for(let filteredTrait of filteredTraits) {
+                        for (let filteredTrait of filteredTraits) {
                             if (this.meetsPrerequisites(filteredTrait.data.data.prerequisite, false)) {
                                 successList.push({prereq, count: 1});
                                 parentsMeetPrequisites = true;
                             }
                         }
-                        if(parentsMeetPrequisites){
+                        if (parentsMeetPrequisites) {
                             continue;
                         }
                     }
                     break;
                 case 'PROFICIENCY':
-                    console.log(this)
-                    //let ownedFeats = filterItemsByType(this.items.values(), "feat");
-                    //let filteredFeats = ownedFeats.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    // if(filteredFeats.length > 0){
-                    //     if(this.meetsPrerequisites(filteredFeats[0].data.data.prerequisites, false)){
-                    //         successList.push({prereq, count:1});
-                    //         continue;
-                    //     }
-                    // }
+                    if (this.data.proficiency.weapon.includes(prereq.requirement.toLowerCase())
+                        || this.data.proficiency.armor.includes(prereq.requirement.toLowerCase())) {
+                        successList.push({prereq, count: 1});
+                        continue;
+                    }
                     break;
                 case 'TALENT':
                     let ownedTalents = filterItemsByType(this.items.values(), "talent");
                     let filteredTalents = ownedTalents.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredTalents.length > 0){
-                        if(this.meetsPrerequisites(filteredTalents[0].data.data.prerequisite, false)){
-                            successList.push({prereq, count:1});
+                    if (filteredTalents.length > 0) {
+                        if (this.meetsPrerequisites(filteredTalents[0].data.data.prerequisite, false)) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
 
-                    let talentsByTreeFilter = ownedTalents.filter(talent =>talent.data.data.talentTree === prereq.requirement || talent.data.data.bonusTalentTree === prereq.requirement);
-                    if(talentsByTreeFilter.length > 0){
+                    let talentsByTreeFilter = ownedTalents.filter(talent => talent.data.data.talentTree === prereq.requirement || talent.data.data.bonusTalentTree === prereq.requirement);
+                    if (talentsByTreeFilter.length > 0) {
                         let count = 0;
-                        for(let talent of talentsByTreeFilter){
-                            if(this.meetsPrerequisites(talent.data.data.prerequisite, false)){
+                        for (let talent of talentsByTreeFilter) {
+                            if (this.meetsPrerequisites(talent.data.data.prerequisite, false)) {
                                 count++;
                             }
                         }
-                        if(count>0) {
+                        if (count > 0) {
                             successList.push({prereq, count})
                             continue;
                         }
@@ -945,35 +952,34 @@ export class SWSEActor extends Actor {
                 case 'TRADITION':
                     let ownedTraditions = filterItemsByType(this.items.values(), "forceTradition");
                     let filteredTraditions = ownedTraditions.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredTraditions.length > 0){
-                        if(this.meetsPrerequisites(filteredTraditions[0].data.data.prerequisite, false)){
-                            successList.push({prereq, count:1});
+                    if (filteredTraditions.length > 0) {
+                        if (this.meetsPrerequisites(filteredTraditions[0].data.data.prerequisite, false)) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
                     break;
                 case 'FORCE TECHNIQUE':
                     let ownedForceTechniques = filterItemsByType(this.items.values(), "forceTechnique");
-                    if(!isNaN(prereq.requirement))
-                    {
-                        if(!(ownedForceTechniques.length < parseInt(prereq.requirement))){
-                            successList.push({prereq, count:1});
+                    if (!isNaN(prereq.requirement)) {
+                        if (!(ownedForceTechniques.length < parseInt(prereq.requirement))) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
 
                     let filteredForceTechniques = ownedForceTechniques.filter(feat => feat.data.data.finalName === prereq.requirement);
-                    if(filteredForceTechniques.length > 0){
-                        if(this.meetsPrerequisites(filteredForceTechniques[0].data.data.prerequisite, false)){
-                            successList.push({prereq, count:1});
+                    if (filteredForceTechniques.length > 0) {
+                        if (this.meetsPrerequisites(filteredForceTechniques[0].data.data.prerequisite, false)) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                     }
                     break;
                 case 'ATTRIBUTE':
                     let toks = prereq.requirement.split(" ");
-                    if(!(this.getAttribute(toks[0])<parseInt(toks[1]))){
-                        successList.push({prereq, count:1});
+                    if (!(this.getAttribute(toks[0]) < parseInt(toks[1]))) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
@@ -1001,33 +1007,33 @@ export class SWSEActor extends Actor {
                     continue;
                 }
                 case 'SPECIAL':
-                    if(prereq.requirement.toLowerCase() === 'not a droid'){
-                        if(!this.data.data.isDroid) {
-                            successList.push({prereq, count:1});
+                    if (prereq.requirement.toLowerCase() === 'not a droid') {
+                        if (!this.data.data.isDroid) {
+                            successList.push({prereq, count: 1});
                             continue;
                         }
                         break;
-                    } else if(prereq.requirement.toLowerCase() === 'is a droid'){
-                    if(this.data.data.isDroid) {
-                        successList.push({prereq, count:1});
-                        continue;
-                    }
-                    break;
-                } else if(prereq.requirement === 'Has Built Lightsaber'){
+                    } else if (prereq.requirement.toLowerCase() === 'is a droid') {
+                        if (this.data.data.isDroid) {
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                        break;
+                    } else if (prereq.requirement === 'Has Built Lightsaber') {
                         failureList.push({fail: false, message: `${prereq.type}: ${prereq.text}`});
                         continue;
                     }
-                    console.log("this prereq is not supported",prereq)
+                    console.log("this prereq is not supported", prereq)
                     failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                     break;
                 case 'GENDER':
-                    if(this.data.data.sex.toLowerCase() === prereq.requirement.toLowerCase()){
-                        successList.push({prereq, count:1});
+                    if (this.data.data.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
+                        successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 default:
-                    console.log("this prereq is not supported",prereq)
+                    console.log("this prereq is not supported", prereq)
             }
 
             failureList.push({fail: true, message: `${prereq.text}`});
@@ -1050,7 +1056,7 @@ export class SWSEActor extends Actor {
 
         let meetsPrereqs = {doesFail, failureList, silentFail: silentFailList, successList};
 
-        if(notifyOnFailure && meetsPrereqs.failureList.length > 0) {
+        if (notifyOnFailure && meetsPrereqs.failureList.length > 0) {
             if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",
@@ -1199,11 +1205,11 @@ export class SWSEActor extends Actor {
         for (let feature of classFeatures) {
             let type = feature.key;
             let value = feature.value;
-            if(type ==='PROVIDES'){
+            if (type === 'PROVIDES') {
                 actorData.availableItems[value] = actorData.availableItems[value] ? actorData.availableItems[value] + 1 : 1;
-            } else if(type ==='BONUS'){
+            } else if (type === 'BONUS') {
                 actorData.bonuses[value] = actorData.bonuses[value] ? actorData.bonuses[value] + 1 : 1;
-            } else if(type ==='TRAIT'){
+            } else if (type === 'TRAIT') {
 
             }
 
@@ -1234,7 +1240,7 @@ export class SWSEActor extends Actor {
             // }
         }
         let classLevel = actorData.classes.length;
-        actorData.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (actorData.availableItems['General Feats']?actorData.availableItems['General Feats']:0);
+        actorData.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (actorData.availableItems['General Feats'] ? actorData.availableItems['General Feats'] : 0);
         actorData.activeFeatures.push(...tempFeatures)
     }
 
@@ -1429,6 +1435,7 @@ export class SWSEActor extends Actor {
     setAttributeGenerationType(attributeGenerationType) {
         this.update({'data.attributeGenerationType': attributeGenerationType})
     }
+
     setAge(age) {
         this.update({'data.age': age})
     }
@@ -1474,7 +1481,7 @@ export class SWSEActor extends Actor {
     //TODO can this be combined?
     _meetsPrereqs(prerequisites) {
         let meetsPrereqs = true;
-        for(let prerequisite of prerequisites){
+        for (let prerequisite of prerequisites) {
             meetsPrereqs = meetsPrereqs && this._meetsPrereq(prerequisite);
         }
 
@@ -1482,34 +1489,34 @@ export class SWSEActor extends Actor {
     }
 
     _meetsPrereq(prerequisite) {
-        if(prerequisite.startsWith("ABILITY") || prerequisite.startsWith("TRAIT")){
+        if (prerequisite.startsWith("ABILITY") || prerequisite.startsWith("TRAIT")) {
             let abilityName = prerequisite.split(":")[1];
             let ts = this.data.traits.filter(trait => trait.data.data.finalName === abilityName);
             return ts && ts.length > 0;
-        } else if (prerequisite.startsWith("AGE")){
+        } else if (prerequisite.startsWith("AGE")) {
             let ageRange = prerequisite.split(":")[1];
             return this._isAgeInRange(this.data.data.age, ageRange);
-        }else if (prerequisite.startsWith("GENDER")){
+        } else if (prerequisite.startsWith("GENDER")) {
             let sex = prerequisite.split(":")[1];
             return this.data.data.sex.toLowerCase() === sex.toLowerCase();
-        }else if (prerequisite.startsWith("EQUIPPED")){
+        } else if (prerequisite.startsWith("EQUIPPED")) {
             let item = prerequisite.split(":")[1];
             let es = this.data.equipped.filter(trait => trait.data.finalName === item);
-            return es && es.length>0
+            return es && es.length > 0
         }
         return false;
     }
 
     _isAgeInRange(age, ageRange) {
-        if(!age){
+        if (!age) {
             return false;
         }
-        if(ageRange.includes("-")){
+        if (ageRange.includes("-")) {
             let tok = ageRange.split("-");
             return parseInt(tok[0]) <= age && parseInt(tok[1]) >= age;
-        }else if(ageRange.includes("+")){
+        } else if (ageRange.includes("+")) {
             let tok = ageRange.split("+");
-            return parseInt(tok[0])<= age;
+            return parseInt(tok[0]) <= age;
         }
         return false;
     }
@@ -1525,8 +1532,8 @@ export class SWSEActor extends Actor {
 
     isForceSensitive() {
         let hasForceSensativity = false;
-        for(let item of this.items.values()){
-            if(item.data.data.finalName === 'Force Sensitivity') {
+        for (let item of this.items.values()) {
+            if (item.data.data.finalName === 'Force Sensitivity') {
                 hasForceSensativity = true;
             }
         }
@@ -1536,6 +1543,7 @@ export class SWSEActor extends Actor {
     getBaseAttackBonus() {
         return this.data.data.offense.bab;
     }
+
     getDarkSideScore() {
         return 0;//TODO implement Darkside Score System
     }
@@ -1545,7 +1553,7 @@ export class SWSEActor extends Actor {
      * @param {string} attributeName
      */
     toShortAttribute(attributeName) {
-        switch (attributeName.toLowerCase()){
+        switch (attributeName.toLowerCase()) {
             case 'strength':
                 return 'STR';
             case 'dexterity':

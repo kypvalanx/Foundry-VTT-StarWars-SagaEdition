@@ -1,4 +1,5 @@
 import {filterItemsByType} from "../util.js";
+import {SWSE} from "../config.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -729,12 +730,23 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async checkPrerequisitesAndResolveOptions(item) {
+        let entitiesToAdd = [item];
+        await this.activateChoices(item, entitiesToAdd, {});
+
         let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisite, true);
         if (meetsPrereqs.doesFail) {
             return [];
         }
-        let entitiesToAdd = [item];
-        await this.activateChoices(item, entitiesToAdd, {});
+
+        if (this.actor.data.feats.map(i => i.data.finalName).includes(item.data.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.data.finalName)) {
+            await Dialog.prompt({
+                title: "You already have this feat",
+                content: `You have already taken the ${item.data.data.finalName} feat`,
+                callback: () => {
+                }
+            })
+            return [];
+        }
         return entitiesToAdd
     }
 
@@ -765,7 +777,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         for (let category of item.data.data.categories) {
-            if (!category.category.endsWith(" Bonus Feats")) {
+            if (!category.value.endsWith(" Bonus Feats")) {
                 possibleFeatTypes.push(category);
             }
         }
@@ -1154,27 +1166,119 @@ export class SWSEActorSheet extends ActorSheet {
     async _explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
-            if (key === 'EXOTIC_WEAPON') {
+            // if (key === 'EXOTIC_WEAPON') {
+            //     for (let weapon of game.generated.exoticWeapons) {
+            //         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+            //     }
+            // } else
+            if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
                 for (let weapon of game.generated.exoticWeapons) {
-                    resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+                    }
                 }
-            } else if (key === 'PROFICIENT_WEAPON') {
+            }
+                //     else if (key === 'PROFICIENT_WEAPON') {
+                //     for (let weapon of this.actor.data.proficiency.weapon) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else if (key === 'AVAILABLE_WEAPON_FOCUS') {
                 for (let weapon of this.actor.data.proficiency.weapon) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'FOCUS_WEAPON') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+            } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
+                for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
+                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'TRAINED_SKILL') {
+            }
+                // else if (key === 'FOCUS_WEAPON') {
+                //     for (let weapon of this.actor.data.proficiency.focus) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+                // }
+                // else if (key === 'TRAINED_SKILL') {
+                //     for (let weapon of this.actor.data.prerequisites.trainedSkills) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else if (key === 'AVAILABLE_SKILL_FOCUS') {
                 for (let weapon of this.actor.data.prerequisites.trainedSkills) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'FOCUS_SKILL') {
+            } else if (key === 'AVAILABLE_SKILL_MASTERY') {
                 for (let weapon of this.actor.data.prerequisites.focusSkills) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.prerequisites.masterSkills.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else {
+            } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.weapon) {
+                    if (!this.actor.data.proficiency.doubleAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.tripleAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.savageAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.relentlessAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.autofireSweep.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.autofireAssault.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_HALT') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.halt.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_RETURN_FIRE') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.returnFire.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.criticalStrike.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }
+                // else if (key === 'FOCUS_SKILL') {
+                //     for (let weapon of this.actor.data.prerequisites.focusSkills) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else {
                 resolvedOptions[key] = value;
             }
         }
@@ -1454,7 +1558,8 @@ export class SWSEActorSheet extends ActorSheet {
         Dialog.prompt({
             title: "Sorry this content isn't finished.",
             content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know.",
-            callback: () => {}
+            callback: () => {
+            }
         })
     }
 
@@ -1483,16 +1588,16 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _prerequisiteHasTypeInStructure(prereq, type) {
-        if(!prereq){
+        if (!prereq) {
             return false;
         }
-        if(prereq.type === type){
+        if (prereq.type === type) {
             return prereq;
         }
-        if(prereq.children){
-            for(let child of prereq.children){
-                let prerequisiteHasTypeInStructure = this._prerequisiteHasTypeInStructure(child,type);
-                if(prerequisiteHasTypeInStructure){
+        if (prereq.children) {
+            for (let child of prereq.children) {
+                let prerequisiteHasTypeInStructure = this._prerequisiteHasTypeInStructure(child, type);
+                if (prerequisiteHasTypeInStructure) {
                     return prerequisiteHasTypeInStructure;
                 }
             }

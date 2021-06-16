@@ -1,3 +1,5 @@
+import {filterItemsByType} from "../util.js";
+
 async function getAvailableTrainedSkillCount(actor) {
     let firstClass = await actor.getFirstClass();
     let remainingSkills = 0;
@@ -5,6 +7,7 @@ async function getAvailableTrainedSkillCount(actor) {
         let intBonus = await actor.getAttributeMod("int")
         remainingSkills = parseInt(firstClass.data.skills.perLevel) + parseInt(intBonus);
     }
+    remainingSkills += filterItemsByType(actor.items.values(), "feat").filter(item => item.data.name === 'Skill Training').length;
     return remainingSkills;
 }
 
