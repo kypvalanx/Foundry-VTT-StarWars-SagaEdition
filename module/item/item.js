@@ -43,7 +43,7 @@ export class SWSEItem extends Item {
         // Get the Item's data
         const itemData = this.data;
         
-        this.resolveItemName(itemData);
+        this.resolveItemName();
 
         if (this.type === "weapon" || this.type === "armor") this.prepareWeaponOrArmor(itemData);
 
@@ -56,7 +56,7 @@ export class SWSEItem extends Item {
 
     prepareFeatData(itemData) {
         if (itemData.data.categories) {
-            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.category.toLowerCase().includes("bonus feats"));
+            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.value.toLowerCase().includes("bonus feats"));
             itemData.data.hasBonusFeatCategories = itemData.data.bonusFeatCategories.length > 0;
         }
     }
@@ -188,7 +188,8 @@ export class SWSEItem extends Item {
         }
     }
 
-    resolveItemName(itemData) {
+    resolveItemName() {
+        let itemData = this.data;
         let finalName = itemData.name;
         if (itemData.data.payload && itemData.data.payload !== "" && !itemData.name.includes("(")) {
             finalName = `${finalName} (${itemData.data.payload})`
@@ -214,20 +215,40 @@ export class SWSEItem extends Item {
         if(itemData.data.supplier) {
             sourceString = `${itemData.data.supplier.type}, ${itemData.data.supplier.name}`;
         }
-
-        if(itemData.data.prerequisites && itemData.data.prerequisites.length > 0){
-            for(let prereq of itemData.data.prerequisites){
-                let toks = prereq.split(":");
-                sourceString = `${toks[0].toLowerCase()}, ${toks[1]}`;
-            }
-        }
-
-            this.data.data.sourceString = sourceString;
+        this.data.data.sourceString = sourceString;
     }
 
     setPayload(payload) {
         this.data.data.payload = payload;
-        this.data.data.prerequisites = this.data.data.prerequisites.map(prereq => prereq.replace("#payload#", payload))
+        this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) =>{
+            if(prerequisite.requirement) {
+                prerequisite.requirement = prerequisite.requirement.replace("#payload#", payload);
+            }
+            if(prerequisite.text) {
+                prerequisite.text = prerequisite.text.replace("#payload#", payload);
+            }
+        })
+        this.resolveItemName();
+    }
+
+    /**
+     *
+     * @param prerequisite
+     * @param {function} funct
+     */
+    crawlPrerequisiteTree(prerequisite, funct) {
+        if(!prerequisite){
+            return;
+        }
+        funct(prerequisite);
+        for(let child of prerequisite.children ? prerequisite.children: []){
+            this.crawlPrerequisiteTree(child, funct);
+        }
+    }
+
+    setParentItem(parentItem){
+        this.data.data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
+        this.data.data.isSupplied = true;
     }
 
     stripHTML(str) {
@@ -251,7 +272,7 @@ export class SWSEItem extends Item {
 
     canReduceRange() {
         for (const category of this.data.data.categories) {
-            if (["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(category.category.toLowerCase())) {
+            if (["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(category.value.toLowerCase())) {
                 return true;
             }
         }

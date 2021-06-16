@@ -1,10 +1,13 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{#unless actor.species}}<span class="warning">PLEASE SELECT A SPECIES!!</span><br/>{{/unless}}
+    {{#unless actor.species}}<span class="warning">Please Select a Species</span><br/>{{/unless}}
+    {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
     {{#if data.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{data.remainingSkills}}</span><br/>{{/if}}
     {{#if data.tooManySkills}}<span class="warning">Too Many Skills Selected: {{data.tooManySkills}}</span><br/>{{/if}}
-    {{#each actor.availableItems as |item id|}}<span class="warning">{{id}} remaining: {{item}}</span><br/>{{/each}}
-    {{#each actor.inactiveProvidedFeats as |feat id|}}<span class="warning">The {{feat.data.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisites}}</span><br/>{{/each}}
+    {{#each actor.availableItems as |item id|}}<span class="warning">Items from {{id}} remaining: {{item}}</span><br/>{{/each}}
+    {{#each actor.inactiveProvidedFeats as |feat id|}}
+        <span class="warning">The {{feat.data.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
+    {{/each}}
     <div>
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
@@ -256,7 +259,7 @@
                             </table>
                         </div>
                         <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Abilities</label>
+                            <label for="data.health.value" class="resource-label">Traits</label>
                             <table>
                                 <thead>
 
@@ -524,10 +527,9 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                             data-item-id="{{feat._id}}">
                             <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->
                             <h4 class="item-name"><b>{{feat.data.finalName}}</b></h4>
-                            {{#if feat.data.prerequisites }}
-                                <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisites}}</h4>{{/if}}
-                            {{#if feat.hasBonusFeatCategories }}<h4 class="item-name">
-                                <span><b>Bonus Feat Groups:</b> {{feat.bonusFeatCategories}}</span></h4>{{/if}}
+                            {{#if feat.data.prerequisite }}
+                                <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisite.text}}</h4>{{/if}}
+                            <!-- TODO maybe put the description here-->
 
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>

@@ -17,7 +17,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -61,10 +60,10 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find("input.plain").on("keypress", (event) => {
-            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 event.stopPropagation();
                 //if (!changed) {
-                    this._onSubmit(event);
+                this._onSubmit(event);
                 //}
             }
         });
@@ -140,7 +139,7 @@ export class SWSEActorSheet extends ActorSheet {
         // Delete Inventory Item
         html.find('.item-delete').click(async ev => await this.deleteItem(ev));
 
-        html.find('.item-duplicate').click(async ev =>{
+        html.find('.item-duplicate').click(async ev => {
             const li = $(ev.currentTarget).parents(".item");
             let itemToDuplicate = this.actor.getOwnedItem(li.data("itemId"));
             let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
@@ -207,26 +206,30 @@ export class SWSEActorSheet extends ActorSheet {
 
     buildAgeDialog(sheet) {
         let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
-        let searchString = "AGE";
         let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
-            .filter(trait => trait.data.data.prerequisites
-                .reduce((a, b) => {
-                    return a || b.startsWith(searchString)
-                }, false)).map(trait => {
-                return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}
-            })
+            .map(trait => {
+                //let prereqs = trait.data.data.prerequisite.filter(prereq => );
+                let prereq = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, 'AGE')
+                if (prereq) {
+                    return {
+                        name: trait.data.data.finalName,
+                        low: parseInt(prereq.low),
+                        high: prereq.high ? parseInt(prereq.high) : -1,
+                        text: prereq.text
+                    }
+                }
+                return undefined;
+            }).filter(trait => !!trait)
+
         ageEffects.sort(
-            (a, b) =>
-                parseInt(a.range.split("-")[0].replace("+", "")) -
-                parseInt(b.range.split("-")[0].replace("+", "")));
+            (a, b) => a.low - b.low);
 
         let traits = '';
         for (let effect of ageEffects) {
-            let {low, high} = this.parseRange(effect.range);
-            let current = age >= low && (age <= high || high === -1) ? ' current' : '';
-            traits += `<div class="flex-grow ageRange${current}" data-low="${low}" data-high="${high}">${effect.name}: ${effect.range}</div>`;
+            let current = age >= effect.low && (age <= effect.high || effect.high === -1) ? ' current' : '';
+            traits += `<div class="flex-grow ageRange${current}" data-low="${effect.low}" data-high="${effect.high}">${effect.name}: ${effect.text}</div>`;
         }
-        if(traits === ''){
+        if (traits === '') {
             traits = `<div>This species has no traits related to age.</div>`;
         }
         let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"><div>${traits}</div>`
@@ -247,30 +250,32 @@ export class SWSEActorSheet extends ActorSheet {
             }
         };
     }
+
     buildGenderDialog(sheet) {
         let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
         let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
         let searchString = "GENDER";
         let genderEffects = filterItemsByType(sheet.actor.items.values(), "trait")
-            .filter(trait => trait.data.data.prerequisites
-                .reduce((a, b) => {
-                    return a || b.startsWith(searchString)
-                }, false)).map(trait => {
-                return {gender: this.getPrerequisiteByName(trait, searchString).split(":")[1], name: trait.data.data.finalName}
-            })
+            .filter(trait => this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)).map(trait => {
+                let prerequisite = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)
 
+                return {
+                    gender: prerequisite.text,
+                    name: trait.data.data.finalName
+                }
+            })
 
         genderEffects.sort(
             (a, b) =>
                 a.gender <
-                b.gender? 1 : 0);
+                b.gender ? 1 : -1);
 
         let traits = '';
         for (let effect of genderEffects) {
-            let current = gender.toLowerCase() === effect.gender? ' current' : '';
+            let current = gender.toLowerCase() === effect.gender ? ' current' : '';
             traits += `<div class="flex-grow gender${current}" data-gender="${effect.gender}" >${effect.gender}: ${effect.name}</div>`;
         }
-        if(traits === ''){
+        if (traits === '') {
             traits = `<div>This species has no traits related to sex.</div>`;
         }
 
@@ -364,7 +369,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     getPointBuyTotal() {
-        if(this.actor.data.data.isDroid){
+        if (this.actor.data.data.isDroid) {
             return CONFIG.SWSE.Abilities.droidPointBuyTotal;
         }
         return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
@@ -586,7 +591,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
         newEl.addEventListener("keypress", (event) => {
-            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 event.stopPropagation();
                 if (!changed) {
                     this._render();
@@ -646,7 +651,7 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Traditions"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
-        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
+        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
             entitiesToAdd.push(item)
         }
         //await this.activateChoices(item, entitiesToAdd, context);
@@ -655,27 +660,25 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async addTalent(item) {
-        let possibleTalentTrees = [];
+        //TODO this should be a tighter system with less regex
+        let possibleTalentTrees = new Set();
+        let allTreesOnTalent = new Set();
         let optionString = "";
 
         if (item.data.data.bonusTalentTree === this.actor.data.data.bonusTalentTree) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
-                    possibleTalentTrees.push(id);
+                    possibleTalentTrees.add(id);
                 }
             }
         } else {
-            let pattern = /([\w\s\d-]*) Talent Trees?/;
-            for (let talentTree of item.data.data.categories) {
-                let type = pattern.exec(talentTree);
-                if (type) {
-                    talentTree = type[1] + " Talents";
-                    let count = this.actor.data.availableItems[talentTree];
-                    if (count && count > 0) {
-                        optionString += `<option value="${talentTree}">${talentTree}</option>`
-                        possibleTalentTrees.push(talentTree);
-                    }
+            for (let talentTree of item.data.data.possibleProviders) {
+                allTreesOnTalent.add(talentTree);
+                let count = this.actor.data.availableItems[talentTree];
+                if (count && count > 0) {
+                    optionString += `<option value="${talentTree}">${talentTree}</option>`
+                    possibleTalentTrees.add(talentTree);
                 }
             }
         }
@@ -683,15 +686,15 @@ export class SWSEActorSheet extends ActorSheet {
         //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
         // }
 
-        if (possibleTalentTrees.length === 0) {
+        if (possibleTalentTrees.size === 0) {
             await Dialog.prompt({
-                title: "You can't take any more talents of that type",
-                content: "You can't take any more talents of that type",
+                title: "You don't have more talents available of these types",
+                content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
                 callback: () => {
                 }
             });
             return [];
-        } else if (possibleTalentTrees.length > 1) {
+        } else if (possibleTalentTrees.size > 1) {
             let content = `<p>Select an unused talent source.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
@@ -701,12 +704,13 @@ export class SWSEActorSheet extends ActorSheet {
                 content: content,
                 callback: async (html) => {
                     let key = html.find("#choice")[0].value;
-                    possibleTalentTrees = [key];
+                    possibleTalentTrees = new Set();
+                    possibleTalentTrees.add(key);
                 }
             });
         }
 
-        item.data.data.talentTreeSource = possibleTalentTrees[0];
+        item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
         return await this.checkPrerequisitesAndResolveOptions(item);
     }
@@ -725,11 +729,9 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async checkPrerequisitesAndResolveOptions(item) {
-        if (item.data.data.prerequisites) {
-            let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisites, true);
-            if (meetsPrereqs.doesFail) {
-                return [];
-            }
+        let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisite, true);
+        if (meetsPrereqs.doesFail) {
+            return [];
         }
         let entitiesToAdd = [item];
         await this.activateChoices(item, entitiesToAdd, {});
@@ -772,7 +774,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         let items = await this.checkPrerequisitesAndResolveOptions(item);
 
-        if(items.length>0){
+        if (items.length > 0) {
             items.push(...await this.addOptionalRuleFeats(item));
         }
 
@@ -781,11 +783,11 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClass(item) {
 
-        let meetsPrereqs = this.actor.meetsClassPrereqs(item.data.data.prerequisites);
+        let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisite, false);
         if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",
-                content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                content: `You do not meet the prerequisites for the ${item.data.data.finalName} class:<br/> ${this._formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',
@@ -844,8 +846,8 @@ export class SWSEActorSheet extends ActorSheet {
 
         let entities = []
         entities.push(item);
-        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.categories);
-        await this.actor.addItemsFromCompendium('feat', item, entities, this._getFeatsFromCategories(item.data.data.categories));
+        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.traits);
+        await this.actor.addItemsFromCompendium('feat', item, entities, this.getFeatsFromProvidingTraits(item.data.data.traits));
         await this.actor.addItemsFromCompendium('item', item, entities, item.data.data.attributes.items);
         await this.activateChoices(item, entities, {});
         return entities;
@@ -1149,9 +1151,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
-
-
     async _explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
@@ -1435,10 +1434,15 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    _getFeatsFromCategories(categories = []) {
+    /**
+     *
+     * @param {[Trait]} traits
+     * @returns {[string]}
+     */
+    getFeatsFromProvidingTraits(traits = []) {
         let feats = [];
-        for (let category of categories) {
-            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category.category);
+        for (let trait of traits) {
+            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(trait.trait);
             if (result) {
                 feats.push(result[1])
             }
@@ -1447,9 +1451,10 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _unavailable() {
-        Dialog.confirm({
+        Dialog.prompt({
             title: "Sorry this content isn't finished.",
-            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know."
+            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know.",
+            callback: () => {}
         })
     }
 
@@ -1458,11 +1463,11 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (item.name === 'Point-Blank Shot') {
             if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    await this.actor.addItemsFromCompendium('feat', {
-                        name: item.name,
-                        data: {type: 'feat'},
-                        id: item._id
-                    }, items, {category:'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
+                await this.actor.addItemsFromCompendium('feat', {
+                    name: item.name,
+                    data: {type: 'feat'},
+                    id: item._id
+                }, items, {category: 'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
             }
         }
 
@@ -1472,8 +1477,26 @@ export class SWSEActorSheet extends ActorSheet {
     static parseSourceId(sourceId) {
         let first = sourceId.indexOf(".");
         let lastIndex = sourceId.lastIndexOf(".");
-        let pack = sourceId.substr(first+1, lastIndex - first-1);
-        let id = sourceId.substr(lastIndex+1);
+        let pack = sourceId.substr(first + 1, lastIndex - first - 1);
+        let id = sourceId.substr(lastIndex + 1);
         return {id, pack};
+    }
+
+    _prerequisiteHasTypeInStructure(prereq, type) {
+        if(!prereq){
+            return false;
+        }
+        if(prereq.type === type){
+            return prereq;
+        }
+        if(prereq.children){
+            for(let child of prereq.children){
+                let prerequisiteHasTypeInStructure = this._prerequisiteHasTypeInStructure(child,type);
+                if(prerequisiteHasTypeInStructure){
+                    return prerequisiteHasTypeInStructure;
+                }
+            }
+        }
+        return false;
     }
 }

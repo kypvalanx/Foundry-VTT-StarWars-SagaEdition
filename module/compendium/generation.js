@@ -49,6 +49,10 @@ export const generateCompendiums = async function (forceRefresh = false) {
     if(pack){
         pack.delete();
     }
+    pack = await game.packs.find(p => p.metadata.label === 'SWSE Force Traditions');
+    if(pack){
+        pack.delete();
+    }
 
 
     await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
@@ -65,7 +69,7 @@ export const generateCompendiums = async function (forceRefresh = false) {
 
     await importCompendium("systems/swse/raw_export/Force Techniques.json", 'SWSE Force Techniques', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Force Traditions.json", 'SWSE Force Traditions', "Item", forceRefresh);
+    await importCompendium("systems/swse/raw_export/Affiliations.json", 'SWSE Affiliations', "Item", forceRefresh);
 
     await importCompendium("systems/swse/raw_export/Items.json", 'SWSE Items', "Item", forceRefresh);
 

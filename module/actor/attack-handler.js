@@ -201,14 +201,14 @@ function getToHit(rate, atkBonus, itemData) {
 }
 
 function getWeaponCategories(weapon) {
-    let weaponCategories = [weapon.name];
+    let weaponCategories = [{value: weapon.name}];
     weaponCategories.push(...weapon.data.categories);
     return weaponCategories;
 }
 
 function isRanged(weapon) {
     for (const category of weapon.data.categories) {
-        if (["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons"].includes(category.toLowerCase())) {
+        if (["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons"].includes(category.value.toLowerCase())) {
             return true;
         }
     }
@@ -217,7 +217,7 @@ function isRanged(weapon) {
 
 function isLightsaber(weapon) {
     for (const category of weapon.data.categories) {
-        if (["lightsabers", "lightsaber"].includes(category.toLowerCase())) {
+        if (["lightsabers", "lightsaber"].includes(category.value.toLowerCase())) {
             return true;
         }
     }
@@ -227,7 +227,7 @@ function isLightsaber(weapon) {
 function isFocus(focuses, categories) {
     focuses = explodeProficiencies(focuses);
     for (const focus of focuses) {
-        if (categories.map(cat => cat.toLowerCase()).includes(focus.toLowerCase())) {
+        if (categories.map(cat => cat.value.toLowerCase()).includes(focus.toLowerCase())) {
             return true;
         }
     }
@@ -237,7 +237,7 @@ function isFocus(focuses, categories) {
 function isProficient(proficiencies, categories) {
     proficiencies = explodeProficiencies(proficiencies);
     for (let proficiency of proficiencies) {
-        if (categories.map(cat => cat.toLowerCase()).includes(proficiency.toLowerCase())) {
+        if (categories.map(cat => cat.value.toLowerCase()).includes(proficiency.toLowerCase())) {
             return true;
         }
     }
@@ -313,9 +313,9 @@ function generateUnarmedAttacks(equippedWeapons, actor) {
     
     let proficiencies = actorData.proficiency.weapon;
 
-    let proficient = isProficient(proficiencies, ["simple melee weapon"]);
+    let proficient = isProficient(proficiencies, [{value: "simple melee weapon"}]);
     let proficiencyBonus = proficient ? 0 : -5;
-    let focus = isFocus(actorData.proficiency?.focus, ["simple melee weapon"]);
+    let focus = isFocus(actorData.proficiency?.focus, [{value: "simple melee weapon"}]);
     let hasWeaponFinesse = feats.includes("weapon finesse");
     let offense = actorData?.data?.offense;
 

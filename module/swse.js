@@ -87,7 +87,7 @@ Hooks.on("ready", async function() {
     pack.getEntity(i._id).then(entity =>{
     if(entity.data.type === 'weapon'){
       for(let category of entity.data.data.categories){
-        if(category.category.toLowerCase().includes('exotic')){
+        if(category.value.toLowerCase().includes('exotic')){
           game.generated.exoticWeapons.push(entity.name);
           break;
         }
@@ -104,6 +104,16 @@ if(!Map.prototype.computeIfAbsent){
     return this.get(key);
   };
 }
+
+
+String.prototype.titleCase = function() {
+  if (!this.length) return this;
+  return this.toLowerCase().split(' ').map(function (word) {
+    return word.replace(word[0], word[0].toUpperCase());
+  }).join(' ').split('(').map(function (word) {
+    return word.replace(word[0], word[0].toUpperCase());
+  }).join('(');
+};
 
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {

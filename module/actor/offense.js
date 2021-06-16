@@ -1,11 +1,9 @@
-import {SWSEActor} from "./actor.js";
-
 export class OffenseHandler {
     async resolveOffense(actor) {
         let bab = await this._resolveBab(actor) + actor.getConditionBonus();
-        let mab = await this._resolveMab(actor, bab);
-        let rab = await this._resolveRab(actor, bab);
-        let fab = await this._resolveRab(actor, bab);
+        let mab = await this._resolveMab(bab, actor.data.data.attributes.str.mod);
+        let rab = await this._resolveRab(bab, actor.data.data.attributes.dex.mod);
+        let fab = await this._resolveRab(bab, actor.data.data.attributes.dex.mod);
         return {bab: bab, mab: mab, rab: rab, fab: fab};
     }
 
@@ -35,13 +33,11 @@ export class OffenseHandler {
         return bab;
     }
 
-    async _resolveMab(actor, bab) {
-        let actorData = actor.data;
-        return bab + actorData.data.attributes.str.mod;
+    async _resolveMab(bab, mod) {
+        return bab + mod;
     }
 
-    async _resolveRab(actor, bab) {
-        let actorData = actor.data;
-        return bab + actorData.data.attributes.dex.mod;
+    async _resolveRab(bab, mod) {
+        return bab + mod;
     }
 }

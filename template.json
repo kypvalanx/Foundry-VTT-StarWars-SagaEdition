@@ -331,7 +331,7 @@
       "class",
       "upgrade",
       "forcePower",
-      "forceTradition",
+      "affiliation",
       "forceTechnique",
       "forceSecret",
       "forceRegimen",
@@ -366,7 +366,7 @@
         "hasItemOwner": false
       },
       "prerequisites": {
-        "prerequisites": []
+        "prerequisite": null
       },
       "categories": {
         "categories": []
@@ -375,6 +375,7 @@
       },
       "source": {
         "supplier": {},
+        "possibleProviders": [],
         "isSupplied": false
       }
     },
@@ -455,7 +456,7 @@
         "base",
         "categories"
       ],
-      "ages": {}
+      "traits": []
     },
     "forcePower": {
       "templates": [
@@ -464,7 +465,7 @@
         "source"
       ]
     },
-    "forceTradition": {
+    "affiliation": {
       "templates": [
         "base",
         "categories",
