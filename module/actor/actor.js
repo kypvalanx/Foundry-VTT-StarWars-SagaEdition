@@ -885,7 +885,7 @@ export class SWSEActor extends Actor {
                     let ownedFeats = filterItemsByType(this.items.values(), "feat");
                     let filteredFeats = ownedFeats.filter(feat => feat.data.data.finalName === prereq.requirement);
                     if (filteredFeats.length > 0) {
-                        if (this.meetsPrerequisites(filteredFeats[0].data.data.prerequisite, false)) {
+                        if (!this.meetsPrerequisites(filteredFeats[0].data.data.prerequisite, false).doesFail) {
                             successList.push({prereq, count: 1});
                             continue;
                         }
@@ -895,7 +895,7 @@ export class SWSEActor extends Actor {
                     let ownedClasses = filterItemsByType(this.items.values(), "class");
                     let filteredClasses = ownedClasses.filter(feat => feat.data.data.finalName === prereq.requirement);
                     if (filteredClasses.length > 0) {
-                        if (this.meetsPrerequisites(filteredClasses[0].data.data.prerequisite, false)) {
+                        if (!this.meetsPrerequisites(filteredClasses[0].data.data.prerequisite, false).doesFail) {
                             successList.push({prereq, count: 1});
                             continue;
                         }
@@ -907,7 +907,7 @@ export class SWSEActor extends Actor {
                     if (filteredTraits.length > 0) {
                         let parentsMeetPrequisites = false;
                         for (let filteredTrait of filteredTraits) {
-                            if (this.meetsPrerequisites(filteredTrait.data.data.prerequisite, false)) {
+                            if (!this.meetsPrerequisites(filteredTrait.data.data.prerequisite, false).doesFail) {
                                 successList.push({prereq, count: 1});
                                 parentsMeetPrequisites = true;
                             }
@@ -928,7 +928,7 @@ export class SWSEActor extends Actor {
                     let ownedTalents = filterItemsByType(this.items.values(), "talent");
                     let filteredTalents = ownedTalents.filter(feat => feat.data.data.finalName === prereq.requirement);
                     if (filteredTalents.length > 0) {
-                        if (this.meetsPrerequisites(filteredTalents[0].data.data.prerequisite, false)) {
+                        if (!this.meetsPrerequisites(filteredTalents[0].data.data.prerequisite, false).doesFail) {
                             successList.push({prereq, count: 1});
                             continue;
                         }
@@ -938,7 +938,7 @@ export class SWSEActor extends Actor {
                     if (talentsByTreeFilter.length > 0) {
                         let count = 0;
                         for (let talent of talentsByTreeFilter) {
-                            if (this.meetsPrerequisites(talent.data.data.prerequisite, false)) {
+                            if (!this.meetsPrerequisites(talent.data.data.prerequisite, false).doesFail) {
                                 count++;
                             }
                         }
@@ -953,7 +953,7 @@ export class SWSEActor extends Actor {
                     let ownedTraditions = filterItemsByType(this.items.values(), "forceTradition");
                     let filteredTraditions = ownedTraditions.filter(feat => feat.data.data.finalName === prereq.requirement);
                     if (filteredTraditions.length > 0) {
-                        if (this.meetsPrerequisites(filteredTraditions[0].data.data.prerequisite, false)) {
+                        if (!this.meetsPrerequisites(filteredTraditions[0].data.data.prerequisite, false).doesFail) {
                             successList.push({prereq, count: 1});
                             continue;
                         }
@@ -970,7 +970,7 @@ export class SWSEActor extends Actor {
 
                     let filteredForceTechniques = ownedForceTechniques.filter(feat => feat.data.data.finalName === prereq.requirement);
                     if (filteredForceTechniques.length > 0) {
-                        if (this.meetsPrerequisites(filteredForceTechniques[0].data.data.prerequisite, false)) {
+                        if (!this.meetsPrerequisites(filteredForceTechniques[0].data.data.prerequisite, false).doesFail) {
                             successList.push({prereq, count: 1});
                             continue;
                         }
