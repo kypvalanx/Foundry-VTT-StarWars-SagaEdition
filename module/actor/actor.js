@@ -1040,6 +1040,14 @@ export class SWSEActor extends Actor {
                         continue;
                     }
                     break;
+                case 'EQUIPPED':
+                    let equippedItems = this.getEquippedItems();
+                    let filteredEquippedItems = equippedItems.filter(item => item.data.data.finalName === prereq.requirement);
+                    if (filteredEquippedItems.length > 0) {
+                        successList.push({prereq, count: 1});
+                        continue;
+                    }
+                    break;
                 default:
                     console.log("this prereq is not supported", prereq)
             }
