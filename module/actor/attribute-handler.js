@@ -56,7 +56,8 @@ export function generateAttributes(actor) {
         bonuses.push(attribute.buffBonus);
         bonuses.push(attribute.customBonus );
 
-        for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
+        let attributeBonus = actorData.data.levelAttributeBonus;
+        for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {
             bonuses.push(levelAttributeBonus[key])
         }
 

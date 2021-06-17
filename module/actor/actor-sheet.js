@@ -377,20 +377,27 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     updateTotal(html) {
-        let total = this.getTotal(html);
+        let values = this.getTotal(html);
 
         html.find(".adjustable-total").each((i, item) => {
-            item.innerHTML = total
+            item.innerHTML = values.total
+        })
+        html.find(".attribute-total").each((i, item) => {
+            let att = item.dataset.attribute
+            item.innerHTML = parseInt(values[att]) + parseInt(item.dataset.bonus);
         })
     }
 
     getTotal(html) {
         let abilityCost = CONFIG.SWSE.Abilities.abilityCost;
+        let response = {};
         let total = 0;
         html.find(".adjustable-value").each((i, item) => {
             total += abilityCost[item.innerHTML];
+            response[item.dataset["label"]] = item.innerHTML;
         })
-        return total;
+        response.total = total;
+        return response;
     }
 
     _onDragAbilityStart(event) {
@@ -1460,11 +1467,12 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async _assignAttributePoints(event, sheet) {
-        let existingValues = sheet.actor.getAttributes();
+    async  _assignAttributePoints(event, sheet) {
+        let existingValues = sheet.actor.getAttributeBases();
+        let bonuses = sheet.actor.getAttributeBonuses();
         let combined = {};
         for (let val of Object.keys(existingValues)) {
-            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
+            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val], bonus:bonuses[val]};
         }
 
         let data = {
@@ -1495,7 +1503,7 @@ export class SWSEActorSheet extends ActorSheet {
                     const valueContainer = parent.children(".adjustable-value");
                     valueContainer.each((i, item) => {
                         item.innerHTML = parseInt(item.innerHTML) + 1;
-                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html) > sheet.getPointBuyTotal()) {
+                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html).total > sheet.getPointBuyTotal()) {
                             item.innerHTML = parseInt(item.innerHTML) - 1;
                         }
                     });

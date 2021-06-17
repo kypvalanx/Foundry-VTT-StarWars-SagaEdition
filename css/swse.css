@@ -315,6 +315,10 @@
   border: 1px solid;
 }
 
+.swse .text-center {
+  text-align: center;
+}
+
 .swse .tabs {
   height: 40px;
   border-top: 1px solid #AAA;

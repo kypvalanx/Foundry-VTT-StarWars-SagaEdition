@@ -355,10 +355,18 @@ export class SWSEActor extends Actor {
     }
 
 
-    getAttributes() {
+    getAttributeBases() {
         let response = {};
         for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
             response[key] = attribute.base;
+        }
+        return response;
+    }
+
+    getAttributeBonuses(){
+        let response = {};
+        for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
+            response[key] = attribute.bonus;
         }
         return response;
     }
