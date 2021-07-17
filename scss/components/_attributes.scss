@@ -1,0 +1,12 @@
+.ability-score {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+
+  .name { grid-area: 1 / 1 / 2 / 3; }
+  .score { grid-area: 1 / 3 / 2 / 4; }
+  .temp { grid-area: 1 / 4 / 2 / 5; }
+  .mod { grid-area: 1 / 5 / 2 / 6; }
+}

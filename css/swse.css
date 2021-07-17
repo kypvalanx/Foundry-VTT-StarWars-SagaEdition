@@ -344,6 +344,19 @@
   text-align: center;
 }
 
+.swse .text-box.small {
+  width: 15px;
+}
+
+.swse .min-width-15 {
+  min-width: 15px;
+}
+
+.swse .fas {
+  horiz-align: center;
+  min-width: 16px;
+}
+
 .swse .tabs {
   height: 40px;
   border-top: 1px solid #AAA;
@@ -492,30 +505,54 @@
   grid-row-gap: 1px;
 }
 
-.swse .name {
+.swse .attack .name {
   grid-area: 1 / 1 / 2 / 4;
 }
 
-.swse .to-hit {
+.swse .attack .to-hit {
   grid-area: 2 / 1 / 3 / 3;
 }
 
-.swse .damage {
+.swse .attack .damage {
   grid-area: 2 / 3 / 3 / 5;
 }
 
-.swse .attack-notes {
+.swse .attack .attack-notes {
   grid-area: 3 / 1 / 4 / 4;
 }
 
-.swse .range {
+.swse .attack .range {
   grid-area: 1 / 4 / 2 / 6;
 }
 
-.swse .critical {
+.swse .attack .critical {
   grid-area: 2 / 5 / 3 / 6;
 }
 
-.swse .type {
+.swse .attack .type {
   grid-area: 3 / 4 / 4 / 6;
+}
+
+.swse .ability-score {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+}
+
+.swse .ability-score .name {
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.swse .ability-score .score {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .ability-score .temp {
+  grid-area: 1 / 4 / 2 / 5;
+}
+
+.swse .ability-score .mod {
+  grid-area: 1 / 5 / 2 / 6;
 }

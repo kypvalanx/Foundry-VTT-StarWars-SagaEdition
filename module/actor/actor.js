@@ -1,5 +1,5 @@
 import {resolveHealth} from "./health.js";
-import {generateAttacks, generateAttackFromWeapon, generateUnarmedAttacks} from "./attack-handler.js";
+import {generateAttacks, generateUnarmedAttacks} from "./attack-handler.js";
 import {OffenseHandler} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
 import {filterItemsByType, excludeItemsByType, resolveValueArray} from "../util.js";
@@ -499,22 +499,30 @@ export class SWSEActor extends Actor {
                 if (!actorData.data.levelAttributeBonus[bonusAttributeLevel]) {
                     actorData.data.levelAttributeBonus[bonusAttributeLevel] = {};
                     hasUpdate = true;
+                } else {
+                    let total = actorData.data.levelAttributeBonus[bonusAttributeLevel].str
+                    + actorData.data.levelAttributeBonus[bonusAttributeLevel].dex
+                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].con
+                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].int
+                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].wis
+                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].cha
+                    actorData.data.levelAttributeBonus[bonusAttributeLevel].warn = total !== 2;
                 }
             }
         }
 
         // let numOfAttributeBonuses = Math.floor(characterLevel / 4);
         //
-        // // for (let [level, value] of Object.entries(actorData.data.levelAttributeBonus)) {
+        // // for (let [level, value] of Object.entries(actorData.data.levelAttributeBonuses)) {
         // //     if (level > numOfAttributeBonuses * 4 && value !== null) {
-        // //         actorData.data.levelAttributeBonus[level] = null;
+        // //         actorData.data.levelAttributeBonuses[level] = null;
         // //         hasUpdate = true;
         // //     }
         // // }
         // for (let i = 1; i <= numOfAttributeBonuses; i++) {
         //     let level = i * 4;
-        //     if (!actorData.data.levelAttributeBonus[level]) {
-        //         actorData.data.levelAttributeBonus[level] = {};
+        //     if (!actorData.data.levelAttributeBonuses[level]) {
+        //         actorData.data.levelAttributeBonuses[level] = {};
         //         hasUpdate = true;
         //     }
         // }

@@ -13,7 +13,6 @@
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
             <a class="item" data-tab="summary">Summary</a>
-            <a class="item" data-tab="attributes">Attributes</a>
             <a class="item" data-tab="charClass">Class</a>
             <a class="item" data-tab="equipment">Equipment</a>
             <!--        {{#if
@@ -35,7 +34,9 @@
                     {{> 'systems/swse/templates/actor/parts/actor-summary.hbs'}}
                 </div>
                 <div class="flex flex-row">
-                    <div><!--attributes--></div>
+                    <div><!--attributes-->
+                        {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
+                    </div>
                     <div><!--health--></div>
                     <div class="flex flex-col">
                         <div><!--portrait--></div>
@@ -200,58 +201,7 @@
 
             {{!-- Attributes Tab --}}
             <div class="tab attributes" data-group="primary" data-tab="attributes">
-                <table class="fixed">
-                    <thead>
-                    <tr>
-                        <th>Attribute</th>
-                        <th>Score</th>
-                        <th>Temporary Bonus</th>
-                        <th>Modifier</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{#each data.attributes as |attribute id|}}
-                        {{#unless attribute.skip}}
-                            <tr class="attribute" data-label="{{attribute.label}}">
-                                <th><a class="rollable" title="Roll 1d20 + {{attribute.roll}}"
-                                       data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><i
-                                        class="fas fa-dice"></i>
-                                </a>{{attribute.label}}</th>
-                                <td><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}
-speciesBonus: {{attribute.speciesBonus}}
-ageBonus: {{attribute.ageBonus}}
-equipmentBonus: {{attribute.equipmentBonus}}
-buffBonus: {{attribute.buffBonus}}
-customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
-                                <td><span class="center text-box direct" name="data.attributes.{{id}}.customBonus"
-                                          data-dtype="Number">{{attribute.customBonus}}</span></td>
-                                <td><span class="center">{{attribute.roll}}</span></td>
-                            </tr>
-                        {{/unless}}
-                    {{/each}}
-                    </tbody>
-                </table>
-                {{#unless data.lockAttributes}}
-                    <button id="generationType">Select Attribute Generation Type</button>
-                    {{#ifEquals data.attributeGenerationType "Roll"}}
-                        <button id="rollAbilities">Roll Abilities</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Standard Array"}}
-                        <button id="assignStandardArray">Assign Standard Array</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Point Buy"}}
-                        <button id="assignAttributePoints">Assign Attribute Points</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Manual"}}
-                        <button id="assignManual">Assign Attributes Manually</button>
-                    {{/ifEquals}}
-                    {{#each data.levelAttributeBonus as |bonus key|}}
-                        {{#if bonus}}
-                            <button class="leveledAttributeBonus" data-level="{{key}}">Select Level {{key}} Attribute
-                                Bonuses
-                            </button>{{/if}}
-                    {{/each}}
-                {{/unless}}
+                {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
             </div>
 
 
