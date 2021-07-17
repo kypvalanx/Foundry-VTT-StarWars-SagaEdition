@@ -1,5 +1,5 @@
 import {resolveHealth} from "./health.js";
-import {generateAttacks} from "./attack-handler.js";
+import {generateAttacks, generateAttackFromWeapon, generateUnarmedAttacks} from "./attack-handler.js";
 import {OffenseHandler} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
 import {filterItemsByType, excludeItemsByType, resolveValueArray} from "../util.js";
@@ -7,6 +7,7 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills} from "./skill-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
+import {SWSEItem} from "../item/item.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -50,8 +51,11 @@ export class SWSEActor extends Actor {
     async _prepareCharacterData(actorData) {
         actorData.prerequisites = {};
         new SpeciesHandler().generateSpeciesData(this);
-        let {bab, will, reflex, fortitude, level} = this._generateClassData(actorData);
+        let {bab, will, reflex, fortitude, level, classSummary} = this._generateClassData(actorData);
         await this._handleCondition(actorData);
+
+        actorData.levelSummary = level;
+        actorData.classSummary = classSummary;
 
         actorData.equipped = this.getEquippedItems().map(item => item.data);
         actorData.unequipped = this.getUnequippedItems().map(item => item.data);
@@ -61,7 +65,7 @@ export class SWSEActor extends Actor {
         actorData.powers = this.getPowers().map(item => item.data);
         actorData.secrets = this.getSecrets().map(item => item.data);
         actorData.techniques = this.getTechniques().map(item => item.data);
-        actorData.traditions = filterItemsByType(this.items.values(), "forceTradition").map(item => item.data);
+        actorData.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         actorData.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
         actorData.speed = this.getSpeed();
 
@@ -399,9 +403,9 @@ export class SWSEActor extends Actor {
     _getEquipable(items, isDroid) {
         let filtered = [];
         for (let item of items) {
-            if (item.data.data.equipable
-                && ((isDroid && item.data.data.droidPart) || (!item.data.data.droidPart))
-                && ((!isDroid && item.data.data.bioPart) || (!item.data.data.bioPart))) {
+            if (item.data.data.isEquipable
+                && ((isDroid && item.data.data.isDroidPart) || (!item.data.data.isDroidPart))
+                && ((!isDroid && item.data.data.isBioPart) || (!item.data.data.isBioPart))) {
                 filtered.push(item);
             }
         }
@@ -412,7 +416,7 @@ export class SWSEActor extends Actor {
     _getUnequipableItems(items, isDroid) {
         let filtered = [];
         for (let item of items) {
-            if (!item.data.data.equipable || (!isDroid && item.data.data.droidPart) || (isDroid && item.data.data.bioPart)) {
+            if (!item.data.data.isEquipable || (!isDroid && item.data.data.isDroidPart) || (isDroid && item.data.data.isBioPart)) {
                 filtered.push(item);
             }
         }
@@ -440,7 +444,7 @@ export class SWSEActor extends Actor {
     _generateClassData(actorData) {
         actorData.classes = filterItemsByType(actorData.items, "class");
 
-        let classLevels = [];
+        let classLevels = {};
         let classFeatures = [];
         let bab = 0;
         let will = 0;
@@ -465,8 +469,12 @@ export class SWSEActor extends Actor {
         }
 
 
+
+        let classSummary = Object.entries(classLevels).map((entity) => `${entity[0]} ${entity[1]}`).join(' / ');
+
+
         this.resolveClassFeatures(actorData, classFeatures);
-        return {bab, will, reflex, fortitude, level};
+        return {bab, will, reflex, fortitude, level, classSummary};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -590,7 +598,7 @@ export class SWSEActor extends Actor {
     }
 
     getInventoryItems() {
-        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait");
+        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation");
     }
 
     _uppercaseFirstLetters(s) {
@@ -1355,74 +1363,17 @@ export class SWSEActor extends Actor {
         });
     }
 
-    rollItem(itemId) {
-
+    rollOwnedItem(itemId) {
+        if(itemId === "unarmed"){
+            let attacks = generateUnarmedAttacks(this)
+            SWSEItem.getItemDialogue(attacks, this).render(true);
+            return;
+        }
         let item = this.getOwnedItem(itemId);
 
-        let attacks = new AttackHandler().generateAttacksFromWeapon(item.data, this);
 
-        let templateType = "attack";
-        const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
+        item.rollItem(this).render(true);
 
-        let content = '';
-        for (let attack of attacks) {
-            content += `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
-                       <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
-        }
-        let actor = this;
-
-        new Dialog({
-            title: 'Attacks',
-            content: content,
-            buttons: {
-                close: {
-                    icon: '<i class="fas fa-check"></i>',
-                    label: 'Close'
-                }
-            },
-            render: html => {
-                html.find("button.roll").on("click", (event) => {
-                    let target = $(event.currentTarget);
-                    let formula = target.data("roll");
-                    let name = target.data("name");
-                    let modifications = target.data("modifications");
-                    let notes = target.data("notes");
-
-                    this.sendRollToChat(template, formula, modifications, notes, name, actor);
-                });
-            }
-        }).render(true);
-    }
-
-    async rollAttack(variable) {
-        let attack = this.resolvedAttacks.get(variable);
-
-        let templateType = "attack";
-        const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
-
-        let content = `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">Roll Attack</button></p>
-                       <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">Roll Damage</button></p>`
-        let actor = this;
-
-        new Dialog({
-            title: attack.name,
-            content: content,
-            buttons: {
-                close: {
-                    icon: '<i class="fas fa-check"></i>',
-                    label: 'Close'
-                }
-            },
-            render: html => {
-                html.find("button.roll").on("click", (event) => {
-                    let target = $(event.currentTarget);
-                    let formula = target.data("roll");
-                    let name = target.data("name");
-
-                    this.sendRollToChat(template, formula, attack.modifications, attack.notes, name, actor);
-                });
-            }
-        }).render(true);
     }
 
     async sendRollToChat(template, formula, modifications, notes, name, actor) {

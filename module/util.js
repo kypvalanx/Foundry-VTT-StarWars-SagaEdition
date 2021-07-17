@@ -71,3 +71,7 @@ export function excludeItemsByType(items, type) {
     }
     return filtered;
 }
+
+export function getBonusString(atkBonus) {
+    return (atkBonus > 0 ? `+${atkBonus}` : (atkBonus < 0 ? `${atkBonus}` : ""));
+}

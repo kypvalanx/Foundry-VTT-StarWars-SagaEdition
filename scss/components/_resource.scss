@@ -4,6 +4,7 @@
 }
 .center{
   text-align: center;
+  margin: auto;
 }
 table.fixed{
   table-layout: fixed;
@@ -34,6 +35,9 @@ table.fixed{
       }
     }
   }
+}
+.padding-3{
+  padding: 3px;
 }
 .direct{
   cursor: text;

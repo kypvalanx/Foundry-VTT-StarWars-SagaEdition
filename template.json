@@ -350,14 +350,12 @@
         "payload": ""
       },
       "item": {
-        "equipable": false,
-        "droidPart": false,
-        "bioPart": false,
-        "isMod": false,
         "cost": "",
         "weight": "",
         "availability": "",
-        "size": ""
+        "size": "",
+        "type": "",
+        "subtype": ""
       },
       "modifiable": {
         "items": []
@@ -503,6 +501,13 @@
     "classFeature": {
       "templates": [
         "base",
+        "source"
+      ]
+    },
+    "starshipManeuver": {
+      "templates": [
+        "base",
+        "categories",
         "source"
       ]
     }

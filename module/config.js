@@ -6,7 +6,7 @@ SWSE.Combat.range = {
     "Heavy Weapons":	{"point-blank": "0-50 squares",	"short": "51-100 squares",  "medium": "101-250 squares",	"long": "251-500 squares"},
     "Pistols":	        {"point-blank": "0-20 squares",	"short": "21-40 squares",	"medium": "41-60 squares",	    "long": "61-80 squares"},
     "Rifles":	        {"point-blank": "0-30 squares",	"short": "31-60 squares",	"medium": "61-150 squares",	    "long": "151-300 squares"},
-    "Simple Weapons":	{"point-blank": "0-20 squares",	"short": "21-40 squares",	"medium": "41-60 squares",	    "long": "61-80 squares"},
+    "Simple Ranged Weapons":	{"point-blank": "0-20 squares",	"short": "21-40 squares",	"medium": "41-60 squares",	    "long": "61-80 squares"},
     "Thrown Weapons":	{"point-blank": "0-6 squares",	"short": "7-8 squares",	    "medium": "9-10 squares",	    "long": "11-12 squares"}
 };
 

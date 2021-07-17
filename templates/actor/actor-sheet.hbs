@@ -22,6 +22,7 @@
             <a class="item" data-tab="talents">Talents</a>
             <a class="item" data-tab="traits">Traits</a>
             {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
+            <a class="item" data-tab="affiliations">Affiliations</a>
 <!--            {{#if actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}-->
             <!--        <a class="item" data-tab="description">Description</a>-->
         </nav>
@@ -29,75 +30,27 @@
         {{!-- Sheet Body --}}
         <section class="sheet-body">
             {{!-- Summary Page --}}
-            <div class="tab summary" data-group="primary" data-tab="summary">
-                <div class="summary-header sheet-header flex">
-                    <img class="profile-img flex-grow" src="{{actor.img}}" alt="{{actor.name}}" data-edit="img"
-                         title="{{actor.name}}"/>
-                    <div class="flex-grow2 flex-col flex">
-                        <h1 class="charname"><label>
-                            <input class="plain" name="name" type="text" value="{{actor.name}}" placeholder="Name"/>
-                        </label></h1>
-                        <div class="flex flex-grow">
-                            <button class="flex-grow" name="age" id="selectAge" {{#if
-                                    actor.species}}title="Select age." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting age."{{/unless}}>{{#if
-                                    actor.data.age}}{{actor.data.age}} years{{/if}}{{#unless actor.data.age}}
-                                Select Age{{/unless}}</button>
-                            <button class="flex-grow" name="gender" id="selectGender" {{#if
-                                    actor.species}}title="Select gender." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting gender."{{/unless}}>{{#if
-                                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless actor.data.gender}}{{#if actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
-                                Select Gender{{/unless}}{{/unless}}</button>
-                            <button class="flex-grow" name="height" id="selectWeight" {{#if
-                                    actor.species}}title="Select weight." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting weight."{{/unless}}>{{#if
-                                    actor.weight}}{{actor.weight}}{{/if}}{{#unless actor.weight}}
-                                Select Weight{{/unless}}</button>
-                            <button class="flex-grow" name="weight" id="selectHeight" {{#if
-                                    actor.species}}title="Select height." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting height."{{/unless}}>{{#if
-                                    actor.height}}{{actor.height}}{{/if}}{{#unless actor.height}}
-                                Select Height{{/unless}}</button>
-<!--                            <button class="flex-grow" name="destiny" id="selectDestiny" disabled-->
-<!--                                    title="Sorry currently unsupported.">Select Destiny</button>-->
-                            <!--                  <h3><input name="ecl" type="text" value="{{actor.ecl}}" placeholder="Ecl" title="Ecl"/></h3>-->
-                        </div>
-                        <div class="flexrow">
-                            <div class="flex-group-center species-container item"
-                                 {{#if actor.species}}data-item-id="{{actor.species._id}}"{{/if}} title="Species">
-
-                                {{#if actor.species}}
-                                    <div class="species" title="{{actor.species.name}}">
-
-                                        <div style="width:64px"><img class="species-image" alt="{{actor.species.name}}"
-                                                                     src="{{actor.species.img}}"/></div>
-                                        <div class="species-control edit rollable">{{actor.species.name}}</div>
-                                        <div class="species-controls flexcol">
-                                            <a class="species-control edit" title="{{localize "PF1.EditItem"}}"><i
-                                                    class="fas fa-edit"></i></a>
-                                            <a class="species-control delete" title="{{localize "PF1.DeleteItem"}}"><i
-                                                    class="fas fa-trash"></i></a>
-                                        </div>
-                                    </div>{{/if}}
-                                {{#unless actor.species}}
-                                    <div class="species" title="Add Species">
-                                        <div class="rollable" data-action="compendium"
-                                             data-action-target="world.swse-species"
-                                             title="{{localize "Open Compendium"}}">Add Species
-                                        </div>
-                                        <div class="species-controls flexcol">
-<!--                                            <a class="species-control add" title="{{localize "Create Species"}}"><i-->
-<!--                                                    class="fas fa-plus"></i></a>-->
-                                            <a data-action="compendium" data-action-target="world.swse-species"
-                                               title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                                        </div>
-                                    </div>{{/unless}}
-                            </div>
-
-                            <div class="flex-group-center">{{actor.speed}}</div>
-                        </div>
+            <div class="tab summary flex-col" data-group="primary" data-tab="summary">
+                <div>
+                    {{> 'systems/swse/templates/actor/parts/actor-summary.hbs'}}
+                </div>
+                <div class="flex flex-row">
+                    <div><!--attributes--></div>
+                    <div><!--health--></div>
+                    <div class="flex flex-col">
+                        <div><!--portrait--></div>
+                        <div><!--condition--></div>
                     </div>
                 </div>
+                <div class="flex flex-row">
+                    <div class="flex-grow"><!--defenses--></div>
+                    <div class="flex-grow"><!--darkside--></div>
+                </div>
+                <div class="flex flex-row">
+                    <div class="flex-grow">{{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}</div>
+                    <div class="flex-grow">{{> 'systems/swse/templates/actor/parts/actor-skills.hbs'}}</div>
+                </div>
+
                 <div class="resources grid grid-2col"> <!--class="resources grid grid-3col">-->
                     <div class="">
                         <div class="resource flex-group-center">
@@ -222,43 +175,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Attacks</label>
-                            <table>
-                                <thead>
 
-                                </thead>
-                                <tbody>
-                                {{#each data.attacks as |attack id|}}
-                                    {{#unless attack.hide}}
-                                        <tr>
-                                            <td>
-                                                <div class="resource flex-group-center attack"
-                                                     data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
-                                                     data-label="{{attack.name}}" data-img="{{attack.img}}">
-                                                    <div>{{attack.name}}</div>
-                                                    <div class="grid grid-2col">
-                                                        <div class="rollEquation"><a class="rollable"
-                                                                                     data-label="{{attack.name}} attack"
-                                                                                     title="Roll {{attack.th}}"
-                                                                                     data-roll="{{attack.th}}"><i
-                                                                class="fas fa-dice-d20"></i>
-                                                        </a> Atk: {{attack.th}}</div>
-                                                        <div class="rollEquation"><a class="rollable"
-                                                                                     data-label="{{attack.name}} damage"
-                                                                                     title="Roll {{attack.dam}}"
-                                                                                     data-roll="{{attack.dam}}"><i
-                                                                class="fas fa-dice"></i>
-                                                        </a> Dmg: {{attack.dam}}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {{/unless}}
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
                         <div class="resource flex-group-center">
                             <label for="data.health.value" class="resource-label">Traits</label>
                             <table>
@@ -270,48 +187,6 @@
                                     {{#unless trait.hide}}
                                         <tr>
                                             <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
-                                        </tr>
-                                    {{/unless}}
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="">
-                        <div class="resource flex-group-center">
-
-                            <label class="resource-label">Skills</label>
-
-                            <table class="skill">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Bonus</th>
-                                    <th>Attribute</th>
-                                    <th>Can Use<br/>Untrained</th>
-                                    <!--                                  <th>Class Skill</th>-->
-                                    <th>Trained</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {{#each data.skills as |skill id|}}
-                                    {{#unless skill.hide}}
-                                        <tr class="skill" data-skill="{{skill.key}}" data-label="{{skill.label}}">
-                                            <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
-                                                   data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
-                                                    class="fas fa-dice-d20"></i>
-                                            </a><a href="{{skill.link}}">{{skill.label}}</a></th>
-                                            <td title="{{skill.title}}">{{skill.value}}</td>
-                                            <td>{{skill.attribute}}</td>
-                                            <td>{{#if skill.uut}}Y{{/if}}{{#unless skill.uut}}N{{/unless}}</td>
-                                            <!--                                  <td>{{#if
-                                                    skill.isClass}}Y{{/if}}{{#unless skill.isClass}}N{{/unless}}</td>-->
-                                            <td>{{#if skill.isClass}}
-                                                <label title="trained skills get an additional +5"><input class="skill"
-                                                                                                          type="checkbox"
-                                                                                                          data-id="{{id}}"
-                                                                                                          {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
-                                            </td>
                                         </tr>
                                     {{/unless}}
                                 {{/each}}
@@ -653,25 +528,6 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </ol>
                 <br/>
                 <div>
-                    <h2><label class="resource-label">Force Traditions <a data-action="compendium"
-                                                                          data-action-target="world.swse-force-traditions"
-                                                                          title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
-                <ol class="items-list">
-                    {{#each actor.traditions as |item id|}}
-                        <li class="item flexrow" data-item-id="{{item._id}}">
-                            <h4 class="item-name"><b>{{item.name}}</b></h4>
-                            <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
-                            <div class="item-controls">
-                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </li>
-                    {{/each}}
-                </ol>
-                <br/>
-                <div>
                     <h2><label class="resource-label">Force Regimens <a data-action="compendium"
                                                                         data-action-target="world.swse-force-regimens"
                                                                         title="{{localize "Open Compendium"}}"><i
@@ -689,6 +545,10 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                         </li>
                     {{/each}}
                 </ol>
+            </div>
+
+            <div class="tab affiliations" data-group="primary" data-tab="affiliations">
+                {{> 'systems/swse/templates/actor/parts/actor-affiliations.hbs'}}
             </div>
         </section>
     </div>

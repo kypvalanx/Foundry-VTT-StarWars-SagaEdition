@@ -15,7 +15,7 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    rollAttack,
+    // rollAttack,
     generateCompendiums
   };
 
@@ -61,20 +61,29 @@ Hooks.once('init', async function() {
     console.log(array, options)
     return (array && array.length > 0)? options.fn():"";
   })
+
+  Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+    return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+
+  Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
+    return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+  Handlebars.registerHelper('sum', function(arg1, arg2, options) {
+    return parseInt(arg1) + parseInt(arg2)
+  });
+
+
+  await loadTemplates([
+      'systems/swse/templates/actor/parts/actor-affiliations.hbs',
+    'systems/swse/templates/actor/parts/actor-summary.hbs',
+    'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
+    'systems/swse/templates/actor/parts/actor-skills.hbs']);
+
 });
 
-Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
-  return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
-});
-
-
-Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
-  return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
-});
-
-Handlebars.registerHelper('sum', function(arg1, arg2, options) {
-  return parseInt(arg1) + parseInt(arg2)
-});
 
 Hooks.on("ready", async function() {
   await generateCompendiums();
@@ -131,16 +140,16 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {
 
-  if (data.type.toLowerCase() !== "attack") return true;
-  createAttackMacro(data, slot);
-  return false;
-});
-
-Hooks.on("hotbarDrop", (bar, data, slot) => {
-  if (data.type.toLowerCase() !== "item") return true;
+  if (data.type.toLowerCase() !== "attack" && data.type.toLowerCase() !== "item") return true;
   createItemMacro(data, slot);
   return false;
 });
+
+// Hooks.on("hotbarDrop", (bar, data, slot) => {
+//   if (data.type.toLowerCase() !== "item") return true;
+//   createItemMacro(data, slot);
+//   return false;
+// });
 
 
 async function createSkillMacro(data, slot) {
@@ -288,20 +297,8 @@ function rollItem(actorId, itemId) {
     return ui.notifications.error(msg);
   }
 
-  return actor.rollItem(itemId);
+  return actor.rollOwnedItem(itemId);
 }
-
-function rollAttack(actorId, attackId) {
-  const actor = getActorFromId(actorId);
-  if (!actor) {
-    const msg = `${actorId} not found`;
-    console.warn(msg);
-    return ui.notifications.error(msg);
-  }
-
-  return actor.rollAttack(attackId);
-}
-
 Hooks.on('renderChatMessage', (chatItem, html) => {
   html.find(".toggle-hide").on("click", (ev) => {
     let nodes = $(ev.currentTarget)[0].parentElement.childNodes;

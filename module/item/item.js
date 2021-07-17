@@ -1,3 +1,50 @@
+import {SWSE} from "../config.js";
+import {generateAttackFromWeapon} from "../actor/attack-handler.js";
+import {getBonusString} from "../util.js";
+
+function getRangeModifier(range) {
+    if(range === 'Grenades'){
+        range = 'Thrown Weapons'
+    }
+
+    let firstHeader = "";
+    let secondHeader = "";
+    let radioButtons = "";
+    let rangeArray = SWSE.Combat.range[range];
+    if(rangeArray){
+        for(let [rangeName, rangeIncrement] of Object.entries(rangeArray)){
+            firstHeader += `<th><div class="swse padding-3 center">${rangeName.titleCase()} (${SWSE.Combat.rangePenalty[rangeName]})</div></th>`;
+            secondHeader += `<th><div class="swse padding-3 center">${rangeIncrement.titleCase()}</div></th>`;
+            radioButtons += `<td><div class="center swse"><label for="range${rangeName}"></label><input class="modifier center swse attack-modifier" type="radio" id="range_${rangeName}" name="range_selection" value="${SWSE.Combat.rangePenalty[rangeName]}"></div></td>`;
+           // console.log(rangeName, rangeIncrement, SWSE.Combat.rangePenalty[rangeName])
+        }
+
+    }
+
+    return `<table><thead><tr>${firstHeader}</tr><tr>${secondHeader}</tr></thead><tbody><tr>${radioButtons}</tr></tbody></table>`;
+}
+
+function getRateOfFireModifier(ratesOfFire) {
+    if(ratesOfFire && ratesOfFire.length > 1) {
+        let firstHeader = "";
+        let radioButtons = "";
+        for (let rateOfFire of ratesOfFire) {
+            firstHeader += `<th><div class="swse padding-3 center">${rateOfFire}</div></th>`;
+            radioButtons += `<td><div class="center swse"><label for="rof_${rateOfFire}"></label><input class="modifier center swse attack-modifier" type="radio" id="rof_${rateOfFire}" name="rof_selection" value="${"Autofire" === rateOfFire ? -5 : 0}"></div></td>`;
+
+        }
+        return `<br/><table><thead><tr>${firstHeader}</tr></thead><tbody><tr>${radioButtons}</tr></tbody></table>`;
+    }
+    return "";
+}
+
+function getStun(hasStun) {
+    if(hasStun) {
+        return `<br/><label for="stun_selection">Stun:</label><input class="modifier center swse attack-modifier" type="checkbox" id="stun_selection" name="stun_selection" value="0">`;
+    }
+    return "";
+}
+
 // noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic Item with some very simple modifications.
@@ -34,6 +81,10 @@ export class SWSEItem extends Item {
             return 'Light';
     }
 
+    get subType(){
+        return this.data.data.subType;
+    }
+
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
@@ -45,7 +96,17 @@ export class SWSEItem extends Item {
         
         this.resolveItemName();
 
-        if (this.type === "weapon" || this.type === "armor") this.prepareWeaponOrArmor(itemData);
+        itemData.data.isEquipable = this.type === "weapon" || this.type === "armor";
+        itemData.data.isModification = this.type === "upgrade" || this.subType === "weapons and armor accessories";
+        itemData.data.isBioPart = this.subType === "Implants" || this.subType === "Bio-Implants" || this.subType === "Cybernetic Devices" || this.subType === "Advanced Cybernetics";
+        itemData.data.isDroidPart = this.subType ===  "Locomotion Systems" || this.subType === "Processor Systems"
+            || this.subType === "Appendages" || this.subType === "Droid Accessories (Sensor Systems)"
+            || this.subType === "Droid Accessories (Translator Units)" || this.subType === "Droid Accessories (Miscellaneous Systems)"
+            || this.subType === "Droid Accessories (Communications Systems)" || this.subType === "Droid Accessories (Droid Stations)"
+            || this.subType === "Droid Accessories (Shield Generator Systems)";
+
+        if (this.type === "weapon" ) this.prepareWeapon(itemData);
+        if (this.type === "armor") this.prepareArmor(itemData);
 
         if (this.type === "feat") this.prepareFeatData(itemData);
 
@@ -61,97 +122,95 @@ export class SWSEItem extends Item {
         }
     }
 
-    prepareWeaponOrArmor(itemData) {
+    prepareWeapon(itemData) {
         itemData.data.upgradePoints = this.getBaseUpgradePoints(itemData.name);
-        if (this.type === "weapon") {
-            if (!itemData.data.weapon.stripping) {
-                itemData.data.weapon.stripping = {};
-            }
-            let weapon = itemData.data.weapon;
-            let stripping = itemData.data.weapon.stripping;
-            stripping.canReduceRange = this.canReduceRange();
-            stripping.canStripAutofire = this.canStripAutoFire();
-            stripping.canStripStun = weapon.stun && weapon.stun.isAvailable && !weapon.stun.isOnly;
-            itemData.data.weapon.isBaseExotic = this.isExotic();
-            stripping.canStripDesign = !itemData.data.weapon.isBaseExotic;
 
-            let finalWeaponRange = weapon.weaponType;
-            if (weapon.treatedAsForRange) {
-                finalWeaponRange = weapon.treatedAsForRange;
-            }
-            if (stripping.range) {
-                finalWeaponRange = this.reduceRange(finalWeaponRange);
-            }
-            weapon.finalWeaponRange = finalWeaponRange;
+        itemData.data.stripping = itemData.data.stripping ||{};
 
-            if (weapon.damage && weapon.damage.attacks && weapon.damage.attacks.length > 0) {
-                weapon.damage.finalDamage = weapon.damage.attacks[0].value;
-            }
-            if (weapon.stun && weapon.stun.isAvailable && !weapon.stripping.stun) {
-                weapon.finalStun = weapon.damage?.finalDamage;
-                if (weapon.stun.dieEquation) {
-                    weapon.finalStun = weapon.stun.dieEquation;
+
+        let stripping = itemData.data.stripping;
+
+
+        let reduceRange = this.setStripping('reduceRange', "Reduce Range", this.canReduceRange());
+        this.data.data.resolvedSubtype = this.data.data.subtype;
+        if (this.data.data.treatedAsForRange) {
+            this.data.data.resolvedSubtype = this.data.data.treatedAsForRange;
+        }
+        if (reduceRange) {
+            this.data.data.resolvedSubtype = this.reduceRange(this.data.data.resolvedSubtype);
+        }
+
+
+        this.setStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire());
+
+        this.setStripping('stripStun', "Strip Stun", this.canStripStun());
+        itemData.data.isBaseExotic = this.isExotic();
+        this.setStripping('stripDesign', "Make Exotic", !itemData.data.isBaseExotic);
+
+
+        // if (weapon.damage && weapon.damage.attacks && weapon.damage.attacks.length > 0) {
+        //     weapon.damage.finalDamage = weapon.damage.attacks[0].value;
+        // }
+        // if (weapon.stun && weapon.stun.isAvailable && !weapon.stripping.stun) {
+        //     weapon.finalStun = weapon.damage?.finalDamage;
+        //     if (weapon.stun.dieEquation) {
+        //         weapon.finalStun = weapon.stun.dieEquation;
+        //     }
+        // }
+        // if (stripping.damage) {
+        //     if (weapon.damage.finalDamage) {
+        //         weapon.damage.finalDamage = this.reduceDamage(weapon.damage.finalDamage);
+        //     }
+        //     if (weapon.finalStun) {
+        //         weapon.finalStun = this.reduceDamage(weapon.finalStun);
+        //     }
+        // }
+        // let ratesOfFire = weapon.ratesOfFire;
+        // if (ratesOfFire) {
+        //     if (weapon.stripping.autofire) {
+        //         ratesOfFire = ratesOfFire.filter(rate => rate !== 'Autofire');
+        //     }
+        //
+        //     weapon.finalRatesOfFire = ratesOfFire.join(", ");
+        // }
+        let size = itemData.data.size;
+
+        itemData.data.resolvedSize = itemData.data.size;
+
+        let makeTiny = this.setStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
+        let makeSmall = this.setStripping('makeSmall', "Make Weapon Small", size === 'Tiny' || makeTiny);
+        let makeMedium = this.setStripping('makeMedium', "Make Weapon Medium", size === 'Small' || makeSmall);
+        let makeLarge = this.setStripping('makeLarge', "Make Weapon Large", size === 'Medium' || makeMedium);
+        let makeHuge = this.setStripping('makeHuge', "Make Weapon Huge", size === 'Large' || makeLarge);
+        let makeGargantuan = this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge' || makeHuge);
+        let makeColossal = this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan' || makeGargantuan);
+
+        for(let stripped of Object.values(stripping)){
+            itemData.data.upgradePoints += stripped.value ? 1 : 0;
+        }
+
+        if (itemData.data.items && itemData.data.items.length > 0) {
+            for (let mod of itemData.data.items ? itemData.data.items : []) {
+                if (mod.data.upgrade?.pointCost !== undefined) {
+                    itemData.data.upgradePoints -= mod.data.upgrade.pointCost;
                 }
             }
-            if (stripping.damage) {
-                if (weapon.damage.finalDamage) {
-                    weapon.damage.finalDamage = this.reduceDamage(weapon.damage.finalDamage);
-                }
-                if (weapon.finalStun) {
-                    weapon.finalStun = this.reduceDamage(weapon.finalStun);
-                }
-            }
+        }
+    }
 
-            let ratesOfFire = weapon.ratesOfFire;
-            if (ratesOfFire) {
-                if (weapon.stripping.autofire) {
-                    ratesOfFire = ratesOfFire.filter(rate => rate !== 'Autofire');
-                }
+    setStripping(key, label, enabled) {
+        this.data.data.stripping[key] = this.data.data.stripping[key] || {};
+        this.data.data.stripping[key].label = label;
+        this.data.data.stripping[key].enabled = enabled;
+        this.data.data.stripping[key].value = enabled ? this.data.data.stripping[key].value || false : false;
+        return this.data.data.stripping[key].value;
+    }
 
-                weapon.finalRatesOfFire = ratesOfFire.join(", ");
-            }
-
-            let size = itemData.data.size;
-            let finalSize = size;
-
-            //TODO i'd like this to deactivate checkboxes that are invisible, when they become visible again they maintain state.  number of points are correct
-            stripping.canMakeTiny = size === 'Diminutive';// || stripping.makeDiminutive;
-            stripping.makeTiny = stripping.canMakeTiny ? stripping.makeTiny : false;
-            finalSize = stripping.makeTiny ? 'Tiny' : finalSize;
-            stripping.canMakeSmall = size === 'Tiny' || stripping.makeTiny;
-            stripping.makeSmall = stripping.canMakeSmall ? stripping.makeSmall : false;
-            finalSize = stripping.makeSmall ? 'Small' : finalSize;
-            stripping.canMakeMedium = size === 'Small' || stripping.makeSmall;
-            stripping.makeMedium = stripping.canMakeMedium ? stripping.makeMedium : false;
-            finalSize = stripping.makeMedium ? 'Medium' : finalSize;
-            stripping.canMakeLarge = size === 'Medium' || stripping.makeMedium;
-            stripping.makeLarge = stripping.canMakeLarge ? stripping.makeLarge : false;
-            finalSize = stripping.makeLarge ? 'Large' : finalSize;
-            stripping.canMakeHuge = size === 'Large' || stripping.makeLarge;
-            stripping.makeHuge = stripping.canMakeHuge ? stripping.makeHuge : false;
-            finalSize = stripping.makeHuge ? 'Huge' : finalSize;
-            stripping.canMakeGargantuan = size === 'Huge' || stripping.makeHuge;
-            stripping.makeGargantuan = stripping.canMakeGargantuan ? stripping.makeGargantuan : false;
-            finalSize = stripping.makeGargantuan ? 'Gargantuan' : finalSize;
-            stripping.canMakeColossal = size === 'Gargantuan' || stripping.makeGargantuan;
-            stripping.makeColossal = stripping.canMakeColossal ? stripping.makeColossal : false;
-            finalSize = stripping.makeGargantuan ? 'Colossal' : finalSize;
+    prepareArmor(itemData) {
+        itemData.data.upgradePoints = this.getBaseUpgradePoints(itemData.name);
 
 
-            itemData.data.finalSize = finalSize;
-
-            itemData.data.upgradePoints += stripping.damage ? 1 : 0;
-            itemData.data.upgradePoints += stripping.range ? 1 : 0;
-            itemData.data.upgradePoints += stripping.design ? 1 : 0;
-            itemData.data.upgradePoints += stripping.stun ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeTiny ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeSmall ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeMedium ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeLarge ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeHuge ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeGargantuan ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeColossal ? 1 : 0;
-        } else if (this.type === "armor") {
+        if (this.type === "armor") {
             if (!itemData.data.armor.stripping) {
                 itemData.data.armor.stripping = {};
             }
@@ -271,22 +330,20 @@ export class SWSEItem extends Item {
     }
 
     canReduceRange() {
-        for (const category of this.data.data.categories) {
-            if (["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(category.value.toLowerCase())) {
-                return true;
-            }
-        }
-        //console.log(this.data.data.weapon.treatedAsForRange)
-        return ["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"].includes(this.data.data.weapon.treatedAsForRange?.toLowerCase())
+        let subtypes = ["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"];
+        return subtypes.includes(this.data.data.subtype?.toLowerCase()) || subtypes.includes(this.data.data.attributes?.treatedAsForRange?.toLowerCase())
     }
 
 
     canStripAutoFire() {
-        return this.data.data.weapon.ratesOfFire && this.data.data.weapon.ratesOfFire.includes("Single-Shot") && this.data.data.weapon.ratesOfFire.includes("Autofire");
+        return this.data.data.attributes.ratesOfFire && this.data.data.attributes.ratesOfFire.value.includes("Single-Shot") && this.data.data.attributes.ratesOfFire.value.includes("Autofire");
+    }
+    canStripStun() {
+        return this.data.data.attributes.stunDamageDie && this.data.data.attributes.damageDie;
     }
 
     isExotic() {
-        return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.data.data.weapon.weaponType);
+        return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.subType);
     }
 
     async removeCategory(index) {
@@ -338,5 +395,102 @@ export class SWSEItem extends Item {
         }
         toks[1] = dieSize[index - 1];
         return toks[0] + "d" + toks[1];
+    }
+
+    /**
+     *
+     * @param {SWSEActor} actor
+     * @returns {Dialog}
+     */
+    rollItem(actor){
+
+        if(this.type === "weapon"){
+            let attack = generateAttackFromWeapon(this, actor);
+            console.log(attack);
+            let modifiers = "";
+            modifiers += getRangeModifier(this.data.data.resolvedSubtype)  //add innacurate and accurate
+            modifiers += getRateOfFireModifier(attack.ratesOfFire);
+            modifiers += getStun(attack.hasStun)
+            let templateType = "attack";
+            const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
+
+            let content = `<div class="dialog">${modifiers}<div class="flex flex-row"><button class="roll" id="attack" data-roll="${attack.th}">Attack Roll</button><button class="roll" id="damage" data-roll="${attack.dam}">Damage Roll</button></div></div>`;
+            return new Dialog({
+                title: 'Attacks',
+                content: content,
+                buttons: {
+                    close: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Close'
+                    }
+                },
+                render: html => {
+                    html.find("button.roll").on("click", (event) => {
+                        let target = $(event.currentTarget);
+
+                        console.log(event.currentTarget.id)
+                        let formula = target.data("roll");
+                        let parent = target.parents(".dialog")
+                        if(event.currentTarget.id === "attack"){
+                            let attackMods = parent.find(".attack-modifier")
+                            for(let attackMod of attackMods){
+                                if(attackMod.checked){
+                                    formula += getBonusString(attackMod.value);
+                                }
+                            }
+
+                        } else if(event.currentTarget.id === "damage"){
+                            let damageMods = parent.find(".damage-modifier")
+
+                            for(let damageMod of damageMods){
+                                if(damageMod.checked){
+                                    formula += getBonusString(damageMod.value);
+                                }
+                            }
+                        }
+                        //target.
+                        let name = target.data("name");
+                        let modifications = target.data("modifications");
+                        let notes = target.data("notes");
+
+                        actor.sendRollToChat(template, formula, modifications, notes, name, actor);
+                    });
+                }
+            })
+        }
+    }
+
+    static getItemDialogue(attacks, actor) {
+        let templateType = "attack";
+        const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
+
+        let content = '';
+        for (let attack of attacks) {
+            content += `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
+                       <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
+        }
+        //let actor = this;
+
+        return new Dialog({
+            title: 'Attacks',
+            content: content,
+            buttons: {
+                close: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: 'Close'
+                }
+            },
+            render: html => {
+                html.find("button.roll").on("click", (event) => {
+                    let target = $(event.currentTarget);
+                    let formula = target.data("roll");
+                    let name = target.data("name");
+                    let modifications = target.data("modifications");
+                    let notes = target.data("notes");
+
+                    actor.sendRollToChat(template, formula, modifications, notes, name, actor);
+                });
+            }
+        })
     }
 }

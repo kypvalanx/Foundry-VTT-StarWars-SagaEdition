@@ -80,7 +80,7 @@ export class SWSEActorSheet extends ActorSheet {
         })
 
         // Species controls
-        html.find(".species-container .species-control").click(this._onSpeciesControl.bind(this));
+        html.find(".species-control").click(this._onSpeciesControl.bind(this));
 
         // Item Dragging
         html.find("li.draggable").each((i, li) => {
@@ -92,6 +92,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.condition-radio').on("click", async event => {
             await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
+
 
         // html.find("div.item-container").each((i, div) => {
         //   div.addEventListener("dragend", (ev) => this._onDragEnd(ev), false);
@@ -107,9 +108,10 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragAbilityStart(ev), false);
         });
 
-        html.find("div.attack").each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
+        html.find("div.attack").each((i, div) => {
+            div.setAttribute("draggable", true);
+            div.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
+            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
@@ -152,6 +154,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.rollable').click(this._onRoll.bind(this));
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="view"]').click(event => this._onItemEdit(event));
     }
 
     async deleteItem(ev) {
@@ -655,8 +658,8 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
         } else if (item.data.type === "forcePower") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
-        } else if (item.data.type === "forceTradition") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Traditions"));
+        } else if (item.data.type === "affiliation") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Affiliations"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
@@ -724,7 +727,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addForceItem(item, itemType) {
-        if (!this.actor.data.availableItems[itemType] && itemType !== 'Force Traditions') {
+        if (!this.actor.data.availableItems[itemType] && itemType !== 'Affiliations') {
             await Dialog.prompt({
                 title: `You can't take any more ${itemType}`,
                 content: `You can't take any more ${itemType}`,
@@ -1611,5 +1614,14 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
         return false;
+    }
+
+    _onActivateItem(ev) {
+        //const div = $(ev.currentTarget).parents(".attack");
+        let elem = ev.currentTarget;
+        let itemId = elem.dataset.itemId;
+        //let itemId = div.data("itemId");
+        this.actor.rollOwnedItem(itemId);
+        return undefined;
     }
 }

@@ -1,8 +1,72 @@
-<!-- <div class="resources grid grid-2col"> -->
-<div class="flexrow summary-header">
+<!--<img class="profile-img flex-grow" src="{{actor.img}}" alt="{{actor.name}}" data-edit="img" title="{{actor.name}}"/>-->
+<!--TODO find a spot for the portrait -->
+<div class="summary-header swse">
+    <div class="name"><label for="name">Name</label><input class="plain" name="name" type="text" value="{{actor.name}}"
+                                                           placeholder=""/></div>
+    <div class="player"><label for="player">Player</label><input class="plain" name="player" type="text"
+                                                                 value="{{actor.player}}" placeholder=""/></div>
+
+    <div class="classes"><label for="classes">Classes</label><div class="plain input static">{{actor.classSummary}}</div></div>
+    <div class="level"><label for="level">Level</label><div class="plain input static">{{actor.levelSummary}}</div></div>
+
+    <div class="species">
+
+        <label for="species">Species</label>
+        <div class="flex item" id="view-species" data-item-id="{{actor.species._id}}">
+            <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species._id}}">{{#if actor.species}}{{actor.species.name}}{{/if}}{{#unless
+                    actor.species}}Add Species{{/unless}}</div>
+            {{#if actor.species}}
+                <div class="species-controls flex-col">
+                    <a class="species-control edit" title="view item"><i
+                            class="fas fa-eye"></i></a>
+                </div>
+                <div class="species-controls flex-col">
+                    <a class="species-control delete" title="delete item"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            {{/if}}
+            {{#unless actor.species}}
+                <div class="species-controls flex-col">
+                    <a data-action="compendium" data-action-target="world.swse-species"
+                       title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                </div>
+            {{/unless}}
+        </div>
+
+    </div>
+    <div class="sex">
+        <label for="gender">Gender</label>
+        <div id="selectGender">
+            <div class="plain input rollable">{{#if
+                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless
+                    actor.data.gender}}{{#if
+                    actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
+                Select Gender{{/unless}}{{/unless}}</div>
+        </div>
+
+    </div>
+    <div class="age">
+        <label for="age">Age</label>
+        <div id="selectAge">
+            <div class="plain input rollable">{{#if
+                    actor.data.age}}{{actor.data.age}} years{{/if}}{{#unless actor.data.age}}
+                Select Age{{/unless}}</div>
+        </div>
+    </div>
+    <div class="height"><label for="height">Height</label><input class="plain" name="height" type="text"
+                                                                 value="{{actor.height}}" placeholder="Height"/></div>
+    <div class="weight"><label for="weight">Weight</label><input class="plain" name="weight" type="text"
+                                                                 value="{{actor.weight}}" placeholder="Weight"/></div>
+    <div class="destiny"><label for="destiny">Destiny</label><input class="plain" name="destiny" type="text"
+                                                                    value="{{actor.destiny}}" placeholder="Destiny"/>
+    </div>
+    <div class="experience"><label for="experience">XP</label><input class="plain" name="experience" type="text"
+                                                                     value="{{actor.experience}}" placeholder="0"/>
+    </div>
+
+    <div class="flexrow">
 
 
-<!-- </div> -->
-
-
+        <div class="flex-group-center">{{actor.speed}}</div>
+    </div>
 </div>
