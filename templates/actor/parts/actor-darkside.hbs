@@ -1,0 +1,7 @@
+{{!-- Darkside Block --}}
+<div class="darkside-block panel flex flex-row flex-wrap">
+    {{log data}}
+{{#each data.darkSideArray as | value|}}
+<div class="darkside-button{{#if value.active}} active{{/if}}">{{value.value}}</div>
+{{/each}}
+</div>

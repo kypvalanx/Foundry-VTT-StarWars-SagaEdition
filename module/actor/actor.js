@@ -70,6 +70,15 @@ export class SWSEActor extends Actor {
         actorData.speed = this.getSpeed();
 
         generateAttributes(this);
+        console.log(actorData.data)
+        for(let i = 1; i <= actorData.data.attributes.wis.total; i++){
+            if(actorData.data.darkSideScore < i){
+                actorData.data.darkSideArray.push({value: i, active: false})
+            } else{
+
+                actorData.data.darkSideArray.push({value: i, active: true})
+            }
+        }
 
         actorData.acPenalty = await generateArmorCheckPenalties(this);
 

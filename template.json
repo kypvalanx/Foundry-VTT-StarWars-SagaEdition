@@ -12,6 +12,8 @@
           "max": 10,
           "condition": 0
         },
+        "darkSideScore": 0,
+        "darkSideArray": [],
         "equippedIds": [],
         "classesfirst": "",
         "attributes": {

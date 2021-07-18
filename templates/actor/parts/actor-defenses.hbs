@@ -1,0 +1,41 @@
+{{!-- Defenses Block --}}
+<div class="defenses-block panel flex flex-col">
+    <div class="defense">
+        <div class="defense-level-armor"><h3>Level/<br/>Armor</h3></div>
+        <div class="defense-ability"><h3>Ability</h3></div>
+        <div class="defense-class"><h3>Class</h3></div>
+        <div class="defense-misc"><h3>Misc</h3></div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Fort</div>
+        <h2><div class="defense-total plain input static">{{data.defense.fort}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static"></div>
+        <div class="defense-ability plain input static">{{data.attributes.con.roll}}</div>
+        <div class="defense-class plain input static"></div>
+        <div class="defense-misc plain input static"></div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Ref</div>
+        <h2><div class="defense-total plain input static">{{data.defense.ref}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static"></div>
+        <div class="defense-ability plain input static">{{data.attributes.dex.roll}}</div>
+        <div class="defense-class plain input static"></div>
+        <div class="defense-misc plain input static"></div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Will</div>
+        <h2><div class="defense-total plain input static">{{data.defense.will}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static"></div>
+        <div class="defense-ability plain input static">{{data.attributes.wis.roll}}</div>
+        <div class="defense-class plain input static"></div>
+        <div class="defense-misc plain input static"></div>
+    </div>
+
+
+    {{#each data.defense.situationalBonuses as |bonus id|}}
+        <div class="panel">{{bonus}}</div>
+    {{/each}}
+</div>

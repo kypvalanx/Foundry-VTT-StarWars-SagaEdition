@@ -75,13 +75,25 @@ Hooks.once('init', async function() {
     return parseInt(arg1) + parseInt(arg2)
   });
 
+  Handlebars.registerHelper('times', function(n, block) {
+    let accum = '';
+    for(let i = 0; i < n; ++i)
+      accum += block.fn(i);
+    return accum;
+  });
+
 
   await loadTemplates([
       'systems/swse/templates/actor/parts/actor-affiliations.hbs',
     'systems/swse/templates/actor/parts/actor-summary.hbs',
     'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
     'systems/swse/templates/actor/parts/actor-skills.hbs',
-    'systems/swse/templates/actor/parts/actor-attributes.hbs']);
+    'systems/swse/templates/actor/parts/actor-attributes.hbs',
+    'systems/swse/templates/actor/parts/actor-health.hbs',
+    'systems/swse/templates/actor/parts/actor-condition.hbs',
+    'systems/swse/templates/actor/parts/actor-portrait.hbs',
+    'systems/swse/templates/actor/parts/actor-darkside.hbs',
+    'systems/swse/templates/actor/parts/actor-defenses.hbs']);
 
 });
 

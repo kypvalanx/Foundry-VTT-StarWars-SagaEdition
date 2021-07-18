@@ -92,6 +92,23 @@ table.skill {
 .container{
   border: 1px dotted dimgray;
 }
+.darkside-button{
+  width: 50px;
+  height: 50px;
+  min-width: 50px;
+  min-height: 50px;
+  padding: 17px;
+  text-align: center;
+  border: 1px solid;
+}
+.darkside-block{
+   width: 550px;
+  max-width: 550px;
+ }
+.darkside-button.active{
+  background-color: aqua;
+}
+
 .movable{
   padding: 17px;
   text-align: center;
@@ -101,8 +118,15 @@ table.skill {
    text-align: center;
 }
 
-.text-box.small{
-  width: 15px
+.tiny{
+  width: 20px
+}
+.small{
+  width: 90px
+}
+
+.top{
+  display: block;
 }
 
 .min-width-15{
@@ -113,4 +137,9 @@ table.skill {
 .fas{
   horiz-align: center;
   min-width: 16px;
+}
+
+.portrait-container{
+  width: 200px;
+  height: 200px;
 }

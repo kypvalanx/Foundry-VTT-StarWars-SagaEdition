@@ -1,0 +1,15 @@
+.defense {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+
+  .defense-label { grid-area: 1 / 1 / 2 / 2; }
+  .defense-total { grid-area: 1 / 2 / 2 / 3; }
+  .defense-10 { grid-area: 1 / 3 / 2 / 4; }
+  .defense-level-armor { grid-area: 1 / 4 / 2 / 5; }
+  .defense-ability { grid-area: 1 / 5 / 2 / 6; }
+  .defense-class { grid-area: 1 / 6 / 2 / 7; }
+  .defense-misc { grid-area: 1 / 7 / 2 / 8; }
+}
