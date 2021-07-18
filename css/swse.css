@@ -343,23 +343,24 @@
   border: 1px dotted dimgray;
 }
 
-.swse .darkside-button {
-  width: 50px;
+.swse .dark-side-button {
+  width: 30px;
   height: 50px;
-  min-width: 50px;
+  min-width: 30px;
   min-height: 50px;
-  padding: 17px;
+  padding-top: 17px;
+  padding-left: 5px;
   text-align: center;
   border: 1px solid;
 }
 
-.swse .darkside-block {
-  width: 550px;
-  max-width: 550px;
+.swse .dark-side-block {
+  width: 380px;
+  max-width: 380px;
 }
 
-.swse .darkside-button.active {
-  background-color: aqua;
+.swse .dark-side-button.active {
+  background-color: red;
 }
 
 .swse .movable {

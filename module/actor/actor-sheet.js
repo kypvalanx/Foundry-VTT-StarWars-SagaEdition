@@ -155,6 +155,11 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="view"]').click(event => this._onItemEdit(event));
+
+        html.find('.dark-side-button').click(ev=> {
+            let dss = $(ev.currentTarget).data("value");
+            this.actor.setDarkSideScore(dss);
+        });
     }
 
     async deleteItem(ev) {

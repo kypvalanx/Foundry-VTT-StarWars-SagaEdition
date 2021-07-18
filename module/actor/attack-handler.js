@@ -9,12 +9,12 @@ const d20 = "1d20";
 export async function generateAttacks(actor) {
     actor.data.data.attacks = [];
     actor.data.data.attacks.push(generateUnarmedAttacks(actor));
-    for (const weapon of actor.getEquippedItems()) {
+    for (const weapon of actor.getEquippedItems().filter(item => item.type === 'weapon')) {
         actor.data.data.attacks.push(generateAttackFromWeapon(weapon, actor));
     }
     actor.resolvedAttacks = new Map();
     let i = 0;
-    for (let attack of actor.data.data.attacks) {
+    for (let attack of actor.data.data.attacks.filter(attack => !!attack)) {
         attack.id = i++;
         actor.resolvedAttacks.set(`${actor.data._id} ${attack.name}`, attack);
     }

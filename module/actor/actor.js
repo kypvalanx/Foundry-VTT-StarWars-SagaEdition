@@ -1529,7 +1529,12 @@ export class SWSEActor extends Actor {
     }
 
     getDarkSideScore() {
-        return 0;//TODO implement Darkside Score System
+        return this.data.data.darkSideScore;
+    }
+
+    setDarkSideScore(score){
+
+        this.update({'data.darkSideScore': score})
     }
 
     /**
