@@ -25,7 +25,8 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></div>
     {{/each}}
     {{#unless data.lockAttributes}}
         <div class="flex flex-row">
-            <div id="generationType" title="Select Ability Generation Type"><a><i class="fas fa-cog"></i></a></div>
+            <div id="generationType" title="Select Ability Generation Type"><a><i
+                    class="fas fa-cog{{#unless data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
             {{#ifEquals data.attributeGenerationType "Roll"}}
                 <div id="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}

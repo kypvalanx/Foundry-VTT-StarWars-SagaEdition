@@ -13,9 +13,9 @@
 
         <label for="species">Species</label>
         <div class="flex item" id="view-species" data-item-id="{{actor.species._id}}">
-            <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species._id}}">{{#if actor.species}}{{actor.species.name}}{{/if}}{{#unless
-                    actor.species}}Add Species{{/unless}}</div>
+
             {{#if actor.species}}
+                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species._id}}">{{actor.species.name}}</div>
                 <div class="species-controls flex-col">
                     <a class="species-control edit" title="view item"><i
                             class="fas fa-eye"></i></a>
@@ -26,6 +26,7 @@
                 </div>
             {{/if}}
             {{#unless actor.species}}
+                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="world.swse-species">Add Species</div>
                 <div class="species-controls flex-col">
                     <a data-action="compendium" data-action-target="world.swse-species"
                        title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>

@@ -2,10 +2,28 @@ import {SWSEActor} from "./actor.js";
 import {resolveValueArray} from "../util.js";
 
 
+function reduceSpeedForArmorType(speed, armorType) {
+    if("Light" === armorType){
+        return speed;
+    }
+    console.log(speed, armorType);
+    return speed.replace("4","3").replace("6", "4");
+}
+
+function generateArmorBlock(actor, armor) {
+    let attributes = armor.data.data.attributes;
+    let speed = reduceSpeedForArmorType(actor.getSpeed(),armor.armorType);
+
+
+    return {name: armor.data.data.finalName, speed: speed, refDefense: attributes.reflexDefenseBonus ? attributes.reflexDefenseBonus?.value: 0,
+        fortDefense: attributes.fortitudeDefenseBonus ? attributes.fortitudeDefenseBonus?.value:0,
+        maxDex: attributes.maximumDexterityBonus ? attributes.maximumDexterityBonus?.value :0, notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", "): ""};
+}
+
 /**
  *
  * @param actor {SWSEActor}
- * @returns {{dt: number, ref: number, will: number, fort: number}}
+ * @returns
  */
 export function resolveDefenses(actor) {
     let defenseBonuses = actor.getTraitAttributesByKey('defenseBonuses');
@@ -15,7 +33,15 @@ export function resolveDefenses(actor) {
     let ref = _resolveRef(actor, defenseBonuses, conditionBonus);
     let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(defenseBonuses);
-    return {fort,will, ref,dt, situationalBonuses};
+
+    let armors = []
+
+    for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+        armors.push(generateArmorBlock(actor, armor));
+    }
+
+
+    return {defense: {fort,will, ref,dt, situationalBonuses}, armors};
 }
 
 /**

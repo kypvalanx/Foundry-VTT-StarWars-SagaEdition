@@ -575,6 +575,38 @@
   grid-area: 3 / 4 / 4 / 6;
 }
 
+.swse .armor {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 1px;
+}
+
+.swse .armor .name {
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.swse .armor .speed {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .armor .reflex-defense {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.swse .armor .fortitude-defense {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.swse .armor .max-dexterity {
+  grid-area: 2 / 3 / 3 / 4;
+}
+
+.swse .armor .armor-notes {
+  grid-area: 3 / 1 / 4 / 4;
+}
+
 .swse .ability-score {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

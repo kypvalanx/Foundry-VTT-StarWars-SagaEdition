@@ -1,7 +1,18 @@
 <div class="weapon-summary-header swse">
     <div class="resource">
-<!--        <label for="data.health.value" class="resource-label">Attacks</label>-->
         <div class="flex flex-col">
+            {{#data.armors as |armor id|}}
+                {{#unless armor.hide}}
+                    <div class="resource armor panel">
+                        <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}}</div></div>
+                        <div class="speed"><label for="name">Speed</label><div class="plain input">{{armor.speed}}</div></div>
+                        <div class="reflex-defense"><label for="name">Reflex Defense</label><div class="plain input">{{armor.refDefense}}</div></div>
+                        <div class="fortitude-defense"><label for="name">Fortitude Defense</label><div class="plain input">{{armor.fortDefense}}</div></div>
+                        <div class="max-dexterity"><label for="name">Max Dexterity</label><div class="plain input">{{armor.maxDex}}</div></div>
+                        <div class="armor-notes"><label for="name">Notes</label><div class="plain input">{{armor.notes}}</div></div>
+                    </div>
+                {{/unless}}
+            {{/data.armors}}
             {{#each data.attacks as |attack id|}}
                 {{#unless attack.hide}}
                 <div class="resource attack panel"

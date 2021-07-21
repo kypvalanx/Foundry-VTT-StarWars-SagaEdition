@@ -70,7 +70,6 @@ export class SWSEActor extends Actor {
         actorData.speed = this.getSpeed();
 
         generateAttributes(this);
-        console.log(actorData.data)
         for(let i = 1; i <= actorData.data.attributes.wis.total; i++){
             if(actorData.data.darkSideScore < i){
                 actorData.data.darkSideArray.push({value: i, active: false})
@@ -98,8 +97,9 @@ export class SWSEActor extends Actor {
         this._reduceProvidedItemsByExistingItems(actorData);
 
         actorData.data.health = await resolveHealth(this);
-        actorData.data.defense = await resolveDefenses(this);
-
+        let {defense, armors} = await resolveDefenses(this);
+        actorData.data.defense = defense;
+        actorData.data.armors = armors;
 
         await generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);

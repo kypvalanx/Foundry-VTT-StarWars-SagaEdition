@@ -1,7 +1,6 @@
 {{!-- Darkside Block --}}
 <h1 class="resource-label">Dark Side</h1>
 <div class="dark-side-block panel flex flex-row flex-wrap">
-    {{log data}}
 {{#each data.darkSideArray as | value|}}
 <div class="dark-side-button{{#if value.active}} active{{/if}}" data-value="{{value.value}}">{{value.value}}</div>
 {{/each}}

@@ -72,17 +72,17 @@ export class SWSEItem extends Item {
     }
 
     get armorType(){
-        if(this.data.data.armor.type === 'Heavy Armor' || this.data.data.armor.stripping.makeHeavy){
+        if(this.data.data.subtype === 'Heavy Armor' || this.data.data.armor.makeHeavy?.value){
             return 'Heavy';
         }
-        if(this.data.data.armor.type === 'Medium Armor' || this.data.data.armor.stripping.makeMedium){
+        if(this.data.data.subtype === 'Medium Armor' || this.data.data.armor.makeMedium?.value){
             return 'Medium';
         }
             return 'Light';
     }
 
     get subType(){
-        return this.data.data.subType;
+        return this.data.data.subtype;
     }
 
     /**
@@ -209,30 +209,33 @@ export class SWSEItem extends Item {
     prepareArmor(itemData) {
         itemData.data.upgradePoints = this.getBaseUpgradePoints(itemData.name);
 
+        itemData.data.stripping = itemData.data.stripping ||{};
 
-        if (this.type === "armor") {
-            if (!itemData.data.armor.stripping) {
-                itemData.data.armor.stripping = {};
-            }
-            let stripping = itemData.data.armor.stripping;
-            //itemData.data.armor.reflexBonus, itemData.data.armor.fortitudeBonus
 
-            stripping.canMakeMedium = itemData.data.armor.type === 'Light Armor'; //if is light
-            stripping.canMakeHeavy = itemData.data.armor.type === 'Medium Armor' || stripping.makeMedium; //if is medium or made medium
-            stripping.defensiveMaterial = Math.min(itemData.data.armor.reflexBonus ? itemData.data.armor.reflexBonus : 0,
-                itemData.data.armor.fortitudeBonus ? itemData.data.armor.fortitudeBonus : 0); //min(fort/reflex)
-            stripping.canReduceDefensiveMaterial = stripping.defensiveMaterial > 0;
-            stripping.reduceDefensiveMaterial = Math.max(Math.min(stripping.reduceDefensiveMaterial || 0, stripping.defensiveMaterial), 0);
-            stripping.jointProtection = itemData.data.armor.maxDexterity ? itemData.data.armor.maxDexterity : 0
-            stripping.canReduceJointProtection = stripping.jointProtection > 0;
-            stripping.reduceJointProtection = Math.max(stripping.reduceJointProtection || 0, 0);
+        let stripping = itemData.data.stripping;
 
-            itemData.data.upgradePoints += stripping.makeMedium ? 1 : 0;
-            itemData.data.upgradePoints += stripping.makeHeavy ? 1 : 0;
-            itemData.data.upgradePoints += stripping.reduceJointProtection;
-            itemData.data.upgradePoints += stripping.reduceDefensiveMaterial;
 
-        }
+        let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", itemData.data.subtype === 'Light Armor');
+        let makeHeavy = this.setStripping('makeHeavy', "Make Armor Heavy", itemData.data.subtype === 'Medium Armor' || makeMedium);
+
+
+        //stripping.canMakeMedium = itemData.data.armor.type === 'Light Armor';
+        //stripping.canMakeHeavy = itemData.data.armor.type === 'Medium Armor' || stripping.makeMedium;
+        let defensiveMaterial = Math.min(itemData.data.armor.reflexBonus ? itemData.data.armor.reflexBonus : 0,
+            itemData.data.armor.fortitudeBonus ? itemData.data.armor.fortitudeBonus : 0);
+        stripping.canReduceDefensiveMaterial = defensiveMaterial > 0;
+        stripping.reduceDefensiveMaterial = Math.max(Math.min(stripping.reduceDefensiveMaterial || 0, defensiveMaterial), 0);
+
+        let stripDefensiveMaterial = this.setStripping('makeMedium', "Make Armor Medium", defensiveMaterial > 0);
+
+
+        stripping.jointProtection = itemData.data.armor.maxDexterity ? itemData.data.armor.maxDexterity : 0
+        stripping.canReduceJointProtection = stripping.jointProtection > 0;
+        stripping.reduceJointProtection = Math.max(stripping.reduceJointProtection || 0, 0);
+        itemData.data.upgradePoints += stripping.makeMedium ? 1 : 0;
+        itemData.data.upgradePoints += stripping.makeHeavy ? 1 : 0;
+        itemData.data.upgradePoints += stripping.reduceJointProtection;
+        itemData.data.upgradePoints += stripping.reduceDefensiveMaterial;
 
         try {
             if (itemData.data.items && itemData.data.items.length > 0) {
@@ -460,16 +463,12 @@ export class SWSEItem extends Item {
         }
     }
 
-    static getItemDialogue(attacks, actor) {
+    static getItemDialogue(attack, actor) {
         let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
 
-        let content = '';
-        for (let attack of attacks) {
-            content += `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
+        let content = `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
                        <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
-        }
-        //let actor = this;
 
         return new Dialog({
             title: 'Attacks',
