@@ -1,52 +1,29 @@
-<div class="weapon-summary-header swse">
-    <div class="resource">
-        <div class="flex flex-col">
-            {{#data.armors as |armor id|}}
-                {{#unless armor.hide}}
-                    <div class="resource armor panel">
-                        <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}}</div></div>
-                        <div class="speed"><label for="name">Speed</label><div class="plain input">{{armor.speed}}</div></div>
-                        <div class="reflex-defense"><label for="name">Reflex Defense</label><div class="plain input">{{armor.refDefense}}</div></div>
-                        <div class="fortitude-defense"><label for="name">Fortitude Defense</label><div class="plain input">{{armor.fortDefense}}</div></div>
-                        <div class="max-dexterity"><label for="name">Max Dexterity</label><div class="plain input">{{armor.maxDex}}</div></div>
-                        <div class="armor-notes"><label for="name">Notes</label><div class="plain input">{{armor.notes}}</div></div>
-                    </div>
-                {{/unless}}
-            {{/data.armors}}
-            {{#each data.attacks as |attack id|}}
-                {{#unless attack.hide}}
-                <div class="resource attack panel"
-                     data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
-                     data-label="{{attack.name}}" data-img="{{attack.img}}"> <!--TODO add onclick event to add a dialog box to roll for this.  add ability to shift roll the default.-->
-                    <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
-                    <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
-                    <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
-                    <div class="attack-notes"><label for="notes">Notes</label><div class="plain input">{{attack.notes}}</div></div>
-                    <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
-                    <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
-                    <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
-                </div>
-<!--                            <div class="resource flex-group-center attack"-->
-<!--                                 data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"-->
-<!--                                 data-label="{{attack.name}}" data-img="{{attack.img}}">-->
-<!--                                <div>{{attack.name}}</div>-->
-<!--                                <div class="grid grid-2col">-->
-<!--                                    <div class="rollEquation"><a class="rollable"-->
-<!--                                                                 data-label="{{attack.name}} attack"-->
-<!--                                                                 title="Roll {{attack.th}}"-->
-<!--                                                                 data-roll="{{attack.th}}"><i-->
-<!--                                            class="fas fa-dice-d20"></i>-->
-<!--                                    </a> Atk: {{attack.th}}</div>-->
-<!--                                    <div class="rollEquation"><a class="rollable"-->
-<!--                                                                 data-label="{{attack.name}} damage"-->
-<!--                                                                 title="Roll {{attack.dam}}"-->
-<!--                                                                 data-roll="{{attack.dam}}"><i-->
-<!--                                            class="fas fa-dice"></i>-->
-<!--                                    </a> Dmg: {{attack.dam}}</div>-->
-<!--                                </div>-->
-<!--                            </div>-->
-                {{/unless}}
-            {{/each}}
+<div class="flex flex-col weapon-summary-header swse flex-grow">
+    {{#data.armors as |armor id|}}
+        {{#unless armor.hide}}
+            <div class="resource armor panel">
+                <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}}</div></div>
+                <div class="speed"><label for="name">Speed</label><div class="plain input">{{armor.speed}}</div></div>
+                <div class="reflex-defense"><label for="name">Reflex Defense</label><div class="plain input">{{armor.refDefense}}</div></div>
+                <div class="fortitude-defense"><label for="name">Fortitude Defense</label><div class="plain input">{{armor.fortDefense}}</div></div>
+                <div class="max-dexterity"><label for="name">Max Dexterity</label><div class="plain input">{{armor.maxDex}}</div></div>
+                <div class="armor-notes"><label for="name">Notes</label><div class="plain input">{{armor.notes}}</div></div>
+            </div>
+        {{/unless}}
+    {{/data.armors}}
+    {{#each data.attacks as |attack id|}}
+        {{#unless attack.hide}}
+        <div class="resource attack panel"
+             data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
+             data-label="{{attack.name}}" data-img="{{attack.img}}"> <!--TODO add onclick event to add a dialog box to roll for this.  add ability to shift roll the default.-->
+            <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
+            <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
+            <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
+            <div class="attack-notes"><label for="notes">Notes</label><div class="plain input">{{attack.notes}}</div></div>
+            <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
+            <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
+            <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
         </div>
-    </div>
+        {{/unless}}
+    {{/each}}
 </div>

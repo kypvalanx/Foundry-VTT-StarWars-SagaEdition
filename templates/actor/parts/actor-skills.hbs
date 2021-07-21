@@ -1,42 +1,39 @@
-<div class="skills-header swse">
-    <div class="resource flex-group-center">
+<div class="skills-header swse flex-grow resource flex-group-center">
+    <label class="resource-label">Skills</label>
 
-        <label class="resource-label">Skills</label>
-
-        <table class="skill">
-            <thead>
-            <tr>
-                <th></th>
-                <th>Bonus</th>
-                <th>Attribute</th>
-                <th>Can Use<br/>Untrained</th>
-                <!--                                  <th>Class Skill</th>-->
-                <th>Trained</th>
-            </tr>
-            </thead>
-            <tbody>
-            {{#each data.skills as |skill id|}}
-                {{#unless skill.hide}}
-                    <tr class="skill" data-skill="{{skill.key}}" data-label="{{skill.label}}">
-                        <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
-                               data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
-                                class="fas fa-dice-d20"></i>
-                        </a><a href="{{skill.link}}">{{skill.label}}</a></th>
-                        <td title="{{skill.title}}">{{skill.value}}</td>
-                        <td>{{skill.attribute}}</td>
-                        <td>{{#if skill.uut}}Y{{/if}}{{#unless skill.uut}}N{{/unless}}</td>
-                        <!--                                  <td>{{#if
-                                skill.isClass}}Y{{/if}}{{#unless skill.isClass}}N{{/unless}}</td>-->
-                        <td>{{#if skill.isClass}}
-                            <label title="trained skills get an additional +5"><input class="skill"
-                                                                                      type="checkbox"
-                                                                                      data-id="{{id}}"
-                                                                                      {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
-                        </td>
-                    </tr>
-                {{/unless}}
-            {{/each}}
-            </tbody>
-        </table>
-    </div>
+    <table class="skill">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Bonus</th>
+            <th>Attribute</th>
+            <th>Can Use<br/>Untrained</th>
+            <!--                                  <th>Class Skill</th>-->
+            <th>Trained</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each data.skills as |skill id|}}
+            {{#unless skill.hide}}
+                <tr class="skill" data-skill="{{skill.key}}" data-label="{{skill.label}}">
+                    <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
+                           data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
+                            class="fas fa-dice-d20"></i>
+                    </a><a href="{{skill.link}}">{{skill.label}}</a></th>
+                    <td title="{{skill.title}}">{{skill.value}}</td>
+                    <td>{{skill.attribute}}</td>
+                    <td>{{#if skill.uut}}Y{{/if}}{{#unless skill.uut}}N{{/unless}}</td>
+                    <!--                                  <td>{{#if
+                            skill.isClass}}Y{{/if}}{{#unless skill.isClass}}N{{/unless}}</td>-->
+                    <td>{{#if skill.isClass}}
+                        <label title="trained skills get an additional +5"><input class="skill"
+                                                                                  type="checkbox"
+                                                                                  data-id="{{id}}"
+                                                                                  {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
+                    </td>
+                </tr>
+            {{/unless}}
+        {{/each}}
+        </tbody>
+    </table>
 </div>

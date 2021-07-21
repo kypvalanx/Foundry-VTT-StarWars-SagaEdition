@@ -306,6 +306,10 @@
   cursor: text;
 }
 
+.swse .button {
+  cursor: pointer;
+}
+
 .swse .border {
   border: 1px solid black;
 }
@@ -637,6 +641,10 @@
   grid-template-rows: 1fr;
   grid-column-gap: 3px;
   grid-row-gap: 3px;
+}
+
+.swse .defense .defense-header {
+  grid-area: 1 / 1 / 2 / 4;
 }
 
 .swse .defense .defense-label {
