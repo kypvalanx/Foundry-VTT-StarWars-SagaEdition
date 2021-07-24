@@ -408,6 +408,10 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
+    getHeroicLevel(){
+        return this.getCharacterLevel();
+    }
+
 
     _getEquipable(items, isDroid) {
         let filtered = [];

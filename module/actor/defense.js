@@ -56,13 +56,20 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel());
-    total.push(_getFortStatMod(actor));
-    total.push(_getTraitDefBonus('fortitude', defenseBonuses));
-    total.push(_getClassDefBonus('fortitude', actorData));
-    total.push(_getEquipmentFortBonus(actor));
+    let heroicLevel = actor.getHeroicLevel();
+    total.push(heroicLevel);
+    let abilityBonus = _getFortStatMod(actor);
+    total.push(abilityBonus);
+    let traitBonus = _getTraitDefBonus('fortitude', defenseBonuses);
+    total.push(traitBonus);
+    let classBonus = _getClassDefBonus('fortitude', actorData);
+    total.push(classBonus);
+    let equipmentBonus = _getEquipmentFortBonus(actor);
+    total.push(equipmentBonus);
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
+    let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveWill(actor, defenseBonuses, conditionBonus) {
@@ -70,25 +77,34 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     let total = [];
     total.push(10);
     total.push(actor.getCharacterLevel());
-    total.push(_getWisMod(actorData));
-    total.push(_getClassDefBonus('will', actorData));
-    total.push(_getTraitDefBonus('will', defenseBonuses));
+    let abilityBonus = _getWisMod(actorData);
+    total.push(abilityBonus);
+    let classBonus = _getClassDefBonus('will', actorData);
+    total.push(classBonus);
+    let traitBonus = _getTraitDefBonus('will', defenseBonuses);
+    total.push(traitBonus);
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    let armorBonus = 0;
+    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveRef(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(_selectRefBonus(actor.getCharacterLevel(), _getEquipmentRefBonus(actor)));
-    total.push(_selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor)));
-    total.push(_getTraitDefBonus('reflex', defenseBonuses));
-    total.push(_getClassDefBonus('reflex', actorData));
+    let armorBonus = _selectRefBonus(actor.getHeroicLevel(), _getEquipmentRefBonus(actor));
+    total.push(armorBonus);
+    let abilityBonus = _selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    total.push(abilityBonus);
+    let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
+    total.push(traitBonus);
+    let classBonus = _getClassDefBonus('reflex', actorData);
+    total.push(classBonus);
     total.push(_getTraitRefMod(actor));
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
-
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _getDamageThresholdSizeMod(actor) {
@@ -191,11 +207,11 @@ function _getEquipmentFortBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 0;
     for (let item of equipped) {
-        if(actor.isProficientWith(item)) {
-            if (item.data.data.armor.fortitudeBonus) {
-                bonus = Math.max(bonus, parseInt(item.data.data.armor.fortitudeBonus));
+        //if(actor.isProficientWith(item)) {
+            if (item.data.data.attributes.fortitudeDefenseBonus) {
+                bonus = Math.max(bonus, parseInt(item.data.data.attributes.fortitudeDefenseBonus.value));
             }
-        }
+        //}
     }
     return bonus;
 }
@@ -204,8 +220,8 @@ function _getEquipmentRefBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = -1;
     for (let item of equipped) {
-        if (item.data.data.armor?.reflexBonus) {
-            bonus = Math.max(bonus, parseInt(item.data.data.armor.reflexBonus));
+        if (item.data.data.attributes.reflexDefenseBonus) {
+            bonus = Math.max(bonus, parseInt(item.data.data.attributes.reflexDefenseBonus.value));
         }
     }
     return bonus;
@@ -215,8 +231,8 @@ function _getEquipmentMaxDexBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 1000;
     for (let item of equipped) {
-        if (item.data.data.armor?.maxDexterity) {
-            bonus = Math.min(bonus, parseInt(item.data.data.armor.reflexBonus));
+        if (item.data.data.attributes.maximumDexterityBonus) {
+            bonus = Math.min(bonus, parseInt(item.data.data.attributes.maximumDexterityBonus.value));
         }
     }
     return bonus;

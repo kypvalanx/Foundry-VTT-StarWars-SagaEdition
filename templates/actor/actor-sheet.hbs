@@ -68,26 +68,25 @@
                     {{> 'systems/swse/templates/actor/parts/actor-skills.hbs'}}
                 </div>
 
-                <div class="resources"> <!--class="resources grid grid-3col">-->
-                    <div class="resource flex-group-center">
-                        <label for="data.health.value" class="resource-label">Traits</label>
-                        <table>
-                            <thead>
+<!--                <div class="resources"> &lt;!&ndash;class="resources grid grid-3col">&ndash;&gt;-->
+<!--                    <div class="resource flex-group-center">-->
+<!--                        <label for="data.health.value" class="resource-label">Traits</label>-->
+<!--                        <table>-->
+<!--                            <thead>-->
 
-                            </thead>
-                            <tbody>
-                            {{#each actor.traits as |trait id|}}
-                                {{#unless trait.hide}}
-                                    <tr>
-                                        <td title="{{#if
-                                                trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
-                                    </tr>
-                                {{/unless}}
-                            {{/each}}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<!--                            </thead>-->
+<!--                            <tbody>-->
+<!--                            {{#each actor.traits as |trait id|}}-->
+<!--                                {{#unless trait.hide}}-->
+<!--                                    <tr>-->
+<!--                                        <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>-->
+<!--                                    </tr>-->
+<!--                                {{/unless}}-->
+<!--                            {{/each}}-->
+<!--                            </tbody>-->
+<!--                        </table>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
 
 
