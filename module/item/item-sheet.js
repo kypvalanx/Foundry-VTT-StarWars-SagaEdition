@@ -115,6 +115,7 @@ export class SWSEItemSheet extends ItemSheet {
     });
 
     html.find('.value-plus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -123,10 +124,14 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor+1;
+      if(typeof target.data("high") === "number"){
+        update[name] = Math.min(update[name], target.data("high"));
+      }
       this.object.update(update);
     });
 
     html.find('.value-minus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -135,6 +140,9 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor-1;
+      if(typeof target.data("low") === "number"){
+        update[name] = Math.max(update[name], target.data("low"));
+      }
       this.object.update(update);
     });
 

@@ -6,7 +6,6 @@ function reduceSpeedForArmorType(speed, armorType) {
     if("Light" === armorType){
         return speed;
     }
-    console.log(speed, armorType);
     return speed.replace("4","3").replace("6", "4");
 }
 
@@ -15,9 +14,9 @@ function generateArmorBlock(actor, armor) {
     let speed = reduceSpeedForArmorType(actor.getSpeed(),armor.armorType);
 
 
-    return {name: armor.data.data.finalName, speed: speed, refDefense: attributes.reflexDefenseBonus ? attributes.reflexDefenseBonus?.value: 0,
-        fortDefense: attributes.fortitudeDefenseBonus ? attributes.fortitudeDefenseBonus?.value:0,
-        maxDex: attributes.maximumDexterityBonus ? attributes.maximumDexterityBonus?.value :0, notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", "): ""};
+    return {name: armor.data.data.finalName, speed: speed, refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus: 0,
+        fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus:0,
+        maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus :0, notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", "): ""};
 }
 
 /**
@@ -120,9 +119,9 @@ function _getDamageThresholdSizeMod(actor) {
 
 function _resolveDt(actor, defenseBonuses, conditionBonus) {
     let total = [];
-    total.push(_resolveFort(actor, defenseBonuses, conditionBonus));
+    total.push(_resolveFort(actor, defenseBonuses, conditionBonus).total);
     total.push(_getDamageThresholdSizeMod(actor))
-    return resolveValueArray(total, actor)
+    return {total:resolveValueArray(total, actor)}
 }
 
 function capFirst(word) {
@@ -208,8 +207,9 @@ function _getEquipmentFortBonus(actor) {
     let bonus = 0;
     for (let item of equipped) {
         //if(actor.isProficientWith(item)) {
-            if (item.data.data.attributes.fortitudeDefenseBonus) {
-                bonus = Math.max(bonus, parseInt(item.data.data.attributes.fortitudeDefenseBonus.value));
+        console.log(item)
+            if (item.fortitudeDefenseBonus) {
+                bonus = Math.max(bonus, item.fortitudeDefenseBonus);
             }
         //}
     }
@@ -220,8 +220,8 @@ function _getEquipmentRefBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = -1;
     for (let item of equipped) {
-        if (item.data.data.attributes.reflexDefenseBonus) {
-            bonus = Math.max(bonus, parseInt(item.data.data.attributes.reflexDefenseBonus.value));
+        if (item.reflexDefenseBonus) {
+            bonus = Math.max(bonus, item.reflexDefenseBonus);
         }
     }
     return bonus;
@@ -231,8 +231,8 @@ function _getEquipmentMaxDexBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 1000;
     for (let item of equipped) {
-        if (item.data.data.attributes.maximumDexterityBonus) {
-            bonus = Math.min(bonus, parseInt(item.data.data.attributes.maximumDexterityBonus.value));
+        if (!isNaN(item.maximumDexterityBonus)) {
+            bonus = Math.min(bonus, item.maximumDexterityBonus);
         }
     }
     return bonus;

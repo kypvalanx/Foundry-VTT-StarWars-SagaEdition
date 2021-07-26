@@ -35,18 +35,6 @@
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
             <p>{{{data.description}}}</p>
-            {{#if data.weapon}}
-                <p><b>Weapon Type: </b>{{data.weapon.weaponType}}</p>
-                <p><b>Weapon Range: </b>{{data.weapon.finalWeaponRange}}</p>
-                <p><b>Size: </b>{{data.finalSize}}</p>
-                <p><b>Cost: </b>{{data.cost}}</p>
-                {{#if data.weapon.finalDamage}}<p><b>Damage: </b>{{data.weapon.finalDamage}}</p>{{/if}}
-                {{#if data.weapon.finalStun}}<p><b>Stun Setting: </b>{{data.weapon.finalStun}}</p>{{/if}}
-                {{#if data.weapon.finalRatesOfFire}}<p><b>Rate Of Fire: </b>{{data.weapon.finalRatesOfFire}}</p>{{/if}}
-                <p><b>Weight: </b>{{data.weight}}</p>
-                <p><b>Type: </b>{{data.weapon.type}}</p>
-                <p><b>Availability: </b>{{data.availability}}</p>
-            {{/if}}
             <!--            {{editor content=data.description target="data.description" button=true owner=owner
                                      editable=editable}}-->
         </div>
@@ -61,9 +49,31 @@
                     {{#if stripping.enabled}}
                     <tr>
                         <th><label>{{stripping.label}}</label></th>
+                        {{#ifEquals stripping.type "boolean"}}
                         <td><label class="attribute-value checkbox">
                             <input type="checkbox" name="data.stripping.{{id}}.value" {{checked stripping.value}}/></label>
                         </td>
+                        {{/ifEquals}}
+                        {{#ifEquals stripping.type "number"}}
+                            <td>
+                                <div class="value grid grid-3col">
+                                    <div><a class="item-control value-minus"
+                                            name="data.stripping.{{id}}.value" data-low="{{stripping.low}}"><i
+                                            class="fas fa-minus"></i></a></div>
+
+                                    <div><label class="attribute-value checkbox">
+                                        <input class="value" type="number"
+                                               name="data.stripping.{{id}}.value"
+                                               value="{{stripping.value}}">
+                                    </label></div>
+
+                                    <div><a class="item-control value-plus"
+                                            name="data.stripping.{{id}}.value" data-high="{{stripping.high}}"><i
+                                            class="fas fa-plus"></i></a>
+                                    </div>
+                                </div>
+                            </td>
+                        {{/ifEquals}}
                     </tr>
                     {{/if}}
                 {{/each}}

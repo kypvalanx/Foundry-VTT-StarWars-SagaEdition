@@ -22,12 +22,12 @@ export async function generateAttacks(actor) {
 
 export function generateAttackFromWeapon(item, actor) {
     let actorData = actor.data;
-    let itemData = item.data;
-    if (!actorData || !itemData) {
+    //let itemData = item.data;
+    if (!actorData || !item) {
         return undefined;
     }
     let size = getActorSize(actorData);
-    if (isOversized(size, itemData) || item.type !== 'weapon') {
+    if (isOversized(size, item.size) || item.type !== 'weapon') {
         return undefined;
     }
 
@@ -38,16 +38,16 @@ export function generateAttackFromWeapon(item, actor) {
     let ranged = isRanged(item);
     let hasWeaponFinesse = actorData.prerequisites.feats.includes("weapon finesse");
     let focus = isFocus(actorData.proficiency.focus, weaponTypes);
-    let isOneHanded = compareSizes(size, itemData.finalSize) === 0;
-    let isLight = (compareSizes(size, itemData.finalSize) < 0) || (isOneHanded && focus) || (isLightsaber(item));
-    let isTwoHanded = compareSizes(size, itemData.finalSize) === 1;
+    let isOneHanded = compareSizes(size, item.size) === 0;
+    let isLight = (compareSizes(size, item.size) < 0) || (isOneHanded && focus) || (isLightsaber(item));
+    let isTwoHanded = compareSizes(size, item.size) === 1;
 
     let offense = actorData.data.offense;
     let meleeToHit = (hasWeaponFinesse && isLight) ? Math.max(offense.mab, offense.fab) : offense.mab;
     let strMod = parseInt(actor.getAttributeMod("str"));
     let strBonus = isTwoHanded ? strMod * 2 : strMod;
     let notes = [];
-    let rof = item.data.data.attributes.ratesOfFire.value;
+    let rof = item.ratesOfFire;
     if(rof.length>0){
         notes.push(`(ROF: ${rof.join(", ")})`)
     }
@@ -61,101 +61,48 @@ export function generateAttackFromWeapon(item, actor) {
     let damageDie ="";
     let damage;
 
-    if(item.data.data.attributes.damageDie) {
-        damageDie = item.data.data.attributes.damageDie.value;
+    if(item.damageDie) {
+        damageDie = item.damageDie;
         damage = damageDie + getBonusString(damageBonus);
     }
     let stunDamageDie = "";
     let stunDamage;
     let hasStun = false;
-    if(item.data.data.attributes.stunDamageDie) {
-        stunDamageDie = item.data.data.attributes.stunDamageDie.value;
+    if(item.stunDamageDie) {
+        stunDamageDie = item.stunDamageDie;
         stunDamage = `(Stun: ${stunDamageDie + getBonusString(damageBonus)})`
         notes.push("(Stun Setting)")
         hasStun = true;
     }
 
-    let range = item.data.data.resolvedSubtype;
+    let range = item.subType;
         let critical = "x2"
-        let type = item.data.data.attributes.damageType?.value
+        let type = item.damageType
 
 
         let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
 
     let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.data.name,  attackRoll, [damage, stunDamage].filter(t=> !!t).join(", "), notes.join(", "), range, critical, type, item._id, actor._id, rof, hasStun)
+    return createAttack(item.name,  attackRoll, [damage, stunDamage].filter(t=> !!t).join(", "), notes.join(", "), range, critical, type, item._id, actor._id, rof, hasStun)
 }
-
-function resolveStunAttack(item, actor, isRanged, offense, meleeToHit, isFocus, proficiencyBonus, isAutofireOnly, strBonus) {
-    let isStunOnly = false;
-    let attacks = [];
-
-    let weapon = item?.data?.weapon;
-
-    if (weapon?.stun?.isAvailable) {
-        if (weapon.stun.isOnly) {
-            isStunOnly = true;
-        }
-        let dieEquation = weapon.stun.dieEquation ? weapon.stun.dieEquation : weapon.damage.finalDamage;
-
-        let atkBonuses = [];
-        atkBonuses.push(isRanged ? offense.rab : meleeToHit);
-        atkBonuses.push(isFocus ? 1 : 0)
-        atkBonuses.push(proficiencyBonus)
-        atkBonuses.push(isAutofireOnly ? -5 : 0)
-        atkBonuses.push(actor.data.acPenalty)
-
-        let th = d20 + getBonusString(resolveValueArray(atkBonuses));
-        let halfCharacterLevel = actor.getHalfCharacterLevel();
-
-        let dmgBonuses = [];
-        dmgBonuses.push(halfCharacterLevel)
-        dmgBonuses.push(isRanged ? 0 : strBonus)
-
-        let dam = dieEquation + getBonusString(resolveValueArray(dmgBonuses));
-        attacks.push({
-            name: `${item.name} [STUN${isAutofireOnly ? ", AUTOFIRE" : ""}]`,
-            th,
-            dam,
-            sound: "",
-            itemId: item._id,
-            actorId: actor.data._id,
-            img: item.img
-        });
-    }
-
-    return {isStunOnly, attacks};
+function isOversized(actorSize, itemSize) {
+    return compareSizes(actorSize, itemSize) > 1;
 }
-
-function isOversized(actorSize, itemData) {
-    return compareSizes(actorSize, itemData.data.resolvedSize) > 1;
-}
-
-function getToHit(rate, atkBonus, itemData) {
-    if (rate.toLowerCase() === 'single-shot') {
-        return d20 + getBonusString(atkBonus);
-    } else if (rate.toLowerCase() === 'autofire') {
-        return d20 + getBonusString(atkBonus - 5);
-    } else {
-        console.error("UNRECOGNIZED ROF", itemData);
-    }
-}
-
 function getPossibleProficiencies(weapon) {
-    let descriptors = [weapon.name, weapon.data.data.resolvedSubtype];
+    let descriptors = [weapon.name, weapon.subType];
     if(weapon.data.data.treatedAsForRange){
         descriptors.push(weapon.data.data.treatedAsForRange);
     }
-    return descriptors;
+    return descriptors.filter(descriptor => !!descriptor);
 }
 
 function isRanged(weapon) {
     return ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
-        "heavy weapons", "simple ranged weapons"].includes(weapon.data.data.resolvedSubtype);
+        "heavy weapons", "simple ranged weapons"].includes(weapon.subType);
 }
 
 function isLightsaber(weapon) {
-    return ["lightsabers", "lightsaber"].includes(weapon.data.data.resolvedSubtype);
+    return ["lightsabers", "lightsaber"].includes(weapon.subType);
 }
 
 function isFocus(focuses, categories) {
