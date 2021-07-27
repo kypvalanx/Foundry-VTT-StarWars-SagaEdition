@@ -3,20 +3,26 @@ import {resolveValueArray} from "../util.js";
 
 
 function reduceSpeedForArmorType(speed, armorType) {
-    if("Light" === armorType){
+    if ("Light" === armorType) {
         return speed;
     }
-    return speed.replace("4","3").replace("6", "4");
+    return speed.replace("4", "3").replace("6", "4");
 }
 
 function generateArmorBlock(actor, armor) {
     let attributes = armor.data.data.attributes;
-    let speed = reduceSpeedForArmorType(actor.getSpeed(),armor.armorType);
+    let speed = actor.speed
 
 
-    return {name: armor.data.data.finalName, speed: speed, refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus: 0,
-        fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus:0,
-        maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus :0, notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", "): ""};
+    return {
+        name: armor.data.data.finalName,
+        speed: speed,
+        refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
+        fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
+        maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
+        notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", ") : "",
+        type: armor.armorType
+    };
 }
 
 /**
@@ -39,8 +45,7 @@ export function resolveDefenses(actor) {
         armors.push(generateArmorBlock(actor, armor));
     }
 
-
-    return {defense: {fort,will, ref,dt, situationalBonuses}, armors};
+    return {defense: {fort, will, ref, dt, situationalBonuses}, armors};
 }
 
 /**
@@ -68,7 +73,7 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     total.push(conditionBonus);
     let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
     let miscBonus = resolveValueArray([traitBonus, conditionBonus])
-    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveWill(actor, defenseBonuses, conditionBonus) {
@@ -85,7 +90,7 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([traitBonus, conditionBonus])
     let armorBonus = 0;
-    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveRef(actor, defenseBonuses, conditionBonus) {
@@ -103,14 +108,14 @@ function _resolveRef(actor, defenseBonuses, conditionBonus) {
     total.push(_getTraitRefMod(actor));
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([traitBonus, conditionBonus])
-    return {total:resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _getDamageThresholdSizeMod(actor) {
     let attributes = actor.getTraitAttributesByKey('damageThresholdSizeModifier')
 
     let total = [];
-    for(let attribute of attributes){
+    for (let attribute of attributes) {
         total.push(attribute)
     }
 
@@ -121,7 +126,7 @@ function _resolveDt(actor, defenseBonuses, conditionBonus) {
     let total = [];
     total.push(_resolveFort(actor, defenseBonuses, conditionBonus).total);
     total.push(_getDamageThresholdSizeMod(actor))
-    return {total:resolveValueArray(total, actor)}
+    return {total: resolveValueArray(total, actor)}
 }
 
 function capFirst(word) {
@@ -132,7 +137,7 @@ function _getSituationalBonuses(defenseBonuses) {
     let situational = []
     for (let defenseBonus of defenseBonuses) {
         if (defenseBonus.modifier) {
-            situational.push(`${(defenseBonus.bonus>-1?"+":"")+ defenseBonus.bonus} ${defenseBonus.bonus < 0? "penalty":"bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
+            situational.push(`${(defenseBonus.bonus > -1 ? "+" : "") + defenseBonus.bonus} ${defenseBonus.bonus < 0 ? "penalty" : "bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
         }
     }
     return situational;
@@ -208,9 +213,9 @@ function _getEquipmentFortBonus(actor) {
     for (let item of equipped) {
         //if(actor.isProficientWith(item)) {
         console.log(item)
-            if (item.fortitudeDefenseBonus) {
-                bonus = Math.max(bonus, item.fortitudeDefenseBonus);
-            }
+        if (item.fortitudeDefenseBonus) {
+            bonus = Math.max(bonus, item.fortitudeDefenseBonus);
+        }
         //}
     }
     return bonus;

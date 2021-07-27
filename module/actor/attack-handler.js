@@ -48,7 +48,7 @@ export function generateAttackFromWeapon(item, actor) {
     let strBonus = isTwoHanded ? strMod * 2 : strMod;
     let notes = [];
     let rof = item.ratesOfFire;
-    if(rof.length>0){
+    if (rof.length > 0) {
         notes.push(`(ROF: ${rof.join(", ")})`)
     }
     let isAutofireOnly = rof ? rof.size === 1 && rof[0].toLowerCase === 'autofire' : false;
@@ -58,39 +58,43 @@ export function generateAttackFromWeapon(item, actor) {
     damageBonuses.push(ranged ? 0 : strBonus)
 
     let damageBonus = resolveValueArray(damageBonuses);
-    let damageDie ="";
+    let damageDie = "";
     let damage;
 
-    if(item.damageDie) {
+    if (item.damageDie) {
         damageDie = item.damageDie;
         damage = damageDie + getBonusString(damageBonus);
     }
     let stunDamageDie = "";
     let stunDamage;
     let hasStun = false;
-    if(item.stunDamageDie) {
+    if (item.stunDamageDie) {
         stunDamageDie = item.stunDamageDie;
         stunDamage = `(Stun: ${stunDamageDie + getBonusString(damageBonus)})`
         notes.push("(Stun Setting)")
         hasStun = true;
     }
 
-    let range = item.subType;
-        let critical = "x2"
-        let type = item.damageType
+    notes.push(...item.data.data.attributes.special?.value);
+
+    let range = item.effectiveRange;
+    let critical = "x2"
+    let type = item.damageType
 
 
-        let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
+    let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
 
     let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.name,  attackRoll, [damage, stunDamage].filter(t=> !!t).join(", "), notes.join(", "), range, critical, type, item._id, actor._id, rof, hasStun)
+    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item._id, actor._id, rof, hasStun)
 }
+
 function isOversized(actorSize, itemSize) {
     return compareSizes(actorSize, itemSize) > 1;
 }
+
 function getPossibleProficiencies(weapon) {
     let descriptors = [weapon.name, weapon.subType];
-    if(weapon.data.data.treatedAsForRange){
+    if (weapon.data.data.treatedAsForRange) {
         descriptors.push(weapon.data.data.treatedAsForRange);
     }
     return descriptors.filter(descriptor => !!descriptor);
@@ -195,7 +199,7 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
         sound: "",
         itemId: itemId,
         actorId: actorId,
-        ratesOfFire:rof,
+        ratesOfFire: rof,
         hasStun
     };
 }
@@ -209,7 +213,7 @@ export function generateUnarmedAttacks(actor) {
     let size = getActorSize(actorData);
     let feats = actorData.prerequisites?.feats;
     feats = feats ? feats : [];
-    
+
     let proficiencies = actorData.proficiency.weapon;
 
     let proficient = isProficient(proficiencies, ["simple melee weapon"]);
@@ -229,8 +233,8 @@ export function generateUnarmedAttacks(actor) {
     let name = "Unarmed Attack";
     for (let equippedWeapon of equippedWeapons ? equippedWeapons : []) {
         equippedWeapon = equippedWeapon.data;
-        if(equippedWeapon.data.attributes.unarmedDamage || equippedWeapon.data.attributes.unarmedModifier){
-            name += " ("+equippedWeapon.name+")"
+        if (equippedWeapon.data.attributes.unarmedDamage || equippedWeapon.data.attributes.unarmedModifier) {
+            name += " (" + equippedWeapon.name + ")"
         }
         if (equippedWeapon.data.attributes.unarmedDamage) {
             damageBonuses.push(equippedWeapon.data.attributes.unarmedDamage);

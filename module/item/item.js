@@ -2,7 +2,7 @@ import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
 import {getBonusString} from "../util.js";
 
-function getRangeModifier(range) {
+function getRangeModifier(range, accurate, innacurate) {
     if (range === 'Grenades') {
         range = 'Thrown Weapons'
     }
@@ -13,9 +13,16 @@ function getRangeModifier(range) {
     let rangeArray = SWSE.Combat.range[range];
     if (rangeArray) {
         for (let [rangeName, rangeIncrement] of Object.entries(rangeArray)) {
-            firstHeader += `<th><div class="swse padding-3 center">${rangeName.titleCase()} (${SWSE.Combat.rangePenalty[rangeName]})</div></th>`;
+            let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
+            if(accurate && rangeName === 'short'){
+                rangePenaltyElement = 0;
+            }
+            if(innacurate && rangeName === 'long'){
+                continue;
+            }
+            firstHeader += `<th><div class="swse padding-3 center">${rangeName.titleCase()} (${rangePenaltyElement})</div></th>`;
             secondHeader += `<th><div class="swse padding-3 center">${rangeIncrement.titleCase()}</div></th>`;
-            radioButtons += `<td><div class="center swse"><label for="range${rangeName}"></label><input class="modifier center swse attack-modifier" type="radio" id="range_${rangeName}" name="range_selection" value="${SWSE.Combat.rangePenalty[rangeName]}"></div></td>`;
+            radioButtons += `<td><div class="center swse"><label for="range${rangeName}"></label><input class="modifier center swse attack-modifier" type="radio" id="range_${rangeName}" name="range_selection" value="${rangePenaltyElement}"></div></td>`;
             // console.log(rangeName, rangeIncrement, SWSE.Combat.rangePenalty[rangeName])
         }
 
@@ -29,8 +36,9 @@ function getRateOfFireModifier(ratesOfFire) {
         let firstHeader = "";
         let radioButtons = "";
         for (let rateOfFire of ratesOfFire) {
-            firstHeader += `<th><div class="swse padding-3 center">${rateOfFire}</div></th>`;
-            radioButtons += `<td><div class="center swse"><label for="rof_${rateOfFire}"></label><input class="modifier center swse attack-modifier" type="radio" id="rof_${rateOfFire}" name="rof_selection" value="${"Autofire" === rateOfFire ? -5 : 0}"></div></td>`;
+            let modifier = "Autofire" === rateOfFire ? -5 : 0;
+            firstHeader += `<th><div class="swse padding-3 center">${rateOfFire} (${modifier})</div></th>`;
+            radioButtons += `<td><div class="center swse"><label for="rof_${rateOfFire}"></label><input class="modifier center swse attack-modifier" type="radio" id="rof_${rateOfFire}" name="rof_selection" value="${modifier}"></div></td>`;
 
         }
         return `<br/><table><thead><tr>${firstHeader}</tr></thead><tbody><tr>${radioButtons}</tr></tbody></table>`;
@@ -153,13 +161,7 @@ export class SWSEItem extends Item {
     }
 
     get subType() {
-        let resolvedSubtype= this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
-
-        if (this.getStripping("reduceRange")?.value) {
-            resolvedSubtype = this.reduceRange(resolvedSubtype);
-        }
-
-        return resolvedSubtype;
+        return this.data.data.treatedAsSubtype ? this.data.data.treatedAsSubtype : this.data.data.subtype;
     }
     get effectiveRange() {
         let resolvedSubtype= this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
@@ -169,6 +171,26 @@ export class SWSEItem extends Item {
         }
 
         return resolvedSubtype;
+    }
+
+    get accurate(){
+        let specials = this.data.data.attributes.special?.value;
+        for(let special of specials? specials:[]){
+            if(special.toLowerCase().startsWith('accurate')){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    get inaccurate(){        let specials = this.data.data.attributes.special?.value;
+        for(let special of specials? specials:[]){
+            if(special.toLowerCase().startsWith('inaccurate')){
+                return true;
+            }
+        }
+        return false;
     }
 
     get ratesOfFire(){
@@ -205,8 +227,6 @@ export class SWSEItem extends Item {
         // Get the Item's data
         const itemData = this.data;
 
-        this.resolveItemName();
-
         itemData.data.isEquipable = this.type === "weapon" || this.type === "armor";
         itemData.data.isModification = this.type === "upgrade" || this.subType === "weapons and armor accessories";
         itemData.data.isBioPart = this.subType === "Implants" || this.subType === "Bio-Implants" || this.subType === "Cybernetic Devices" || this.subType === "Advanced Cybernetics";
@@ -238,9 +258,7 @@ export class SWSEItem extends Item {
 
         itemData.data.stripping = itemData.data.stripping || {};
 
-        let reduceRange = this.setStripping('reduceRange', "Reduce Range", this.canReduceRange());
-
-
+        this.setStripping('reduceRange', "Reduce Range", this.canReduceRange());
 
         this.setStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire());
 
@@ -248,32 +266,6 @@ export class SWSEItem extends Item {
         itemData.data.isBaseExotic = this.isExotic();
         this.setStripping('stripDesign', "Make Exotic", !itemData.data.isBaseExotic);
 
-
-        // if (weapon.damage && weapon.damage.attacks && weapon.damage.attacks.length > 0) {
-        //     weapon.damage.finalDamage = weapon.damage.attacks[0].value;
-        // }
-        // if (weapon.stun && weapon.stun.isAvailable && !weapon.stripping.stun) {
-        //     weapon.finalStun = weapon.damage?.finalDamage;
-        //     if (weapon.stun.dieEquation) {
-        //         weapon.finalStun = weapon.stun.dieEquation;
-        //     }
-        // }
-        // if (stripping.damage) {
-        //     if (weapon.damage.finalDamage) {
-        //         weapon.damage.finalDamage = this.reduceDamage(weapon.damage.finalDamage);
-        //     }
-        //     if (weapon.finalStun) {
-        //         weapon.finalStun = this.reduceDamage(weapon.finalStun);
-        //     }
-        // }
-        // let ratesOfFire = weapon.ratesOfFire;
-        // if (ratesOfFire) {
-        //     if (weapon.stripping.autofire) {
-        //         ratesOfFire = ratesOfFire.filter(rate => rate !== 'Autofire');
-        //     }
-        //
-        //     weapon.finalRatesOfFire = ratesOfFire.join(", ");
-        // }
         let size = itemData.data.size;
 
         itemData.data.resolvedSize = itemData.data.size;
@@ -284,7 +276,7 @@ export class SWSEItem extends Item {
         let makeLarge = this.setStripping('makeLarge', "Make Weapon Large", size === 'Medium' || makeMedium);
         let makeHuge = this.setStripping('makeHuge', "Make Weapon Huge", size === 'Large' || makeLarge);
         let makeGargantuan = this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge' || makeHuge);
-        let makeColossal = this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan' || makeGargantuan);
+        this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan' || makeGargantuan);
 
         for (let stripped of Object.values(itemData.data.stripping)) {
             itemData.data.upgradePoints += stripped.value ? 1 : 0;
@@ -323,15 +315,15 @@ export class SWSEItem extends Item {
         itemData.data.stripping = itemData.data.stripping || {};
 
         let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", itemData.data.subtype === 'Light Armor');
-        let makeHeavy = this.setStripping('makeHeavy', "Make Armor Heavy", itemData.data.subtype === 'Medium Armor' || makeMedium);
+        this.setStripping('makeHeavy', "Make Armor Heavy", itemData.data.subtype === 'Medium Armor' || makeMedium);
 
         let defensiveMaterial = Math.min(itemData.data.attributes.reflexDefenseBonus?.value ? itemData.data.attributes.reflexDefenseBonus?.value : 0,
             itemData.data.attributes.fortitudeDefenseBonus?.value ? itemData.data.attributes.fortitudeDefenseBonus?.value : 0);
 
         let jointProtection = itemData.data.attributes.maximumDexterityBonus ? parseInt(itemData.data.attributes.maximumDexterityBonus.value) : 0;
 
-        let reduceDefensiveMaterial = this.setStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
-        let reduceJointProtection = this.setStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
+        this.setStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
+        this.setStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
 
 
         for (let stripped of Object.values(itemData.data.stripping)) {
@@ -348,13 +340,6 @@ export class SWSEItem extends Item {
         } catch (e) {
             console.log("mods may not be initialized", e)
         }
-    }
-
-    resolveItemName() {
-
-        // if(finalName !== itemData.data.finalName) {
-        //     this._pendingUpdate['data.finalName'] = finalName;
-        // }
     }
 
     setTextDescription() {
@@ -382,7 +367,6 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace("#payload#", payload);
             }
         })
-        this.resolveItemName();
     }
 
     /**
@@ -504,7 +488,7 @@ export class SWSEItem extends Item {
             let attack = generateAttackFromWeapon(this, actor);
             console.log(attack);
             let modifiers = "";
-            modifiers += getRangeModifier(this.data.data.resolvedSubtype)  //add innacurate and accurate
+            modifiers += getRangeModifier(this.effectiveRange, this.accurate, this.inaccurate)  //add innacurate and accurate
             modifiers += getRateOfFireModifier(attack.ratesOfFire);
             modifiers += getStun(attack.hasStun)
             let templateType = "attack";

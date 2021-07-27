@@ -2,7 +2,7 @@
     {{#data.armors as |armor id|}}
         {{#unless armor.hide}}
             <div class="resource armor panel">
-                <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}}</div></div>
+                <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}} ({{armor.type}})</div></div>
                 <div class="speed"><label for="name">Speed</label><div class="plain input">{{armor.speed}}</div></div>
                 <div class="reflex-defense"><label for="name">Reflex Defense</label><div class="plain input">+{{armor.refDefense}}</div></div>
                 <div class="fortitude-defense"><label for="name">Fortitude Defense</label><div class="plain input">+{{armor.fortDefense}}</div></div>
@@ -13,19 +13,19 @@
     {{/data.armors}}
     {{#each data.attacks as |attack id|}}
         {{#if attack}}
-        {{#unless attack.hide}}
-        <div class="resource attack panel"
-             data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
-             data-label="{{attack.name}}" data-img="{{attack.img}}"> <!--TODO add onclick event to add a dialog box to roll for this.  add ability to shift roll the default.-->
-            <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
-            <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
-            <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
-            <div class="attack-notes"><label for="notes">Notes</label><div class="plain input">{{attack.notes}}</div></div>
-            <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
-            <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
-            <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
-        </div>
-        {{/unless}}
+            {{#unless attack.hide}}
+                <div class="resource attack panel"
+                     data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
+                     data-label="{{attack.name}}" data-img="{{attack.img}}"> <!--TODO add onclick event to add a dialog box to roll for this.  add ability to shift roll the default.-->
+                    <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
+                    <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
+                    <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
+                    <div class="attack-notes"><label for="notes">Notes</label><div class="plain input">{{attack.notes}}</div></div>
+                    <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
+                    <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
+                    <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
+                </div>
+            {{/unless}}
         {{/if}}
     {{/each}}
 </div>

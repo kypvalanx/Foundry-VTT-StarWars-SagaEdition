@@ -32,6 +32,34 @@ export class SWSEActor extends Actor {
         return this.data.species;
     }
 
+    get speed() {
+        let actorData = this.data;
+        let attributeTraits = actorData.traits.filter(trait => {
+            let result = /\w* Speed \d*/.exec(trait.name);
+            return !!result;
+        })
+        let armorType = "";
+        for(let armor of this.getEquippedItems().filter(item => item.type === "armor")){
+            if(armor.armorType === "Heavy"){
+                armorType = "Heavy";
+                break;
+            }
+            if(armor.armorType === "Medium"){
+                armorType = "Medium";
+            }
+            if(armor.armorType === "Light" && !armorType){
+                armorType = "Light";
+            }
+        }
+        return attributeTraits.map(trait => trait.name).map(name => this.reduceSpeedForArmorType(name,armorType)).join("; ");
+    }
+
+    reduceSpeedForArmorType(speed, armorType) {
+        if (!armorType || "Light" === armorType) {
+            return speed;
+        }
+        return speed.replace("4", "3").replace("6", "4");
+    }
 
     /**
      * Augment the basic actor data with additional dynamic data.
@@ -67,7 +95,6 @@ export class SWSEActor extends Actor {
         actorData.techniques = this.getTechniques().map(item => item.data);
         actorData.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         actorData.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
-        actorData.speed = this.getSpeed();
 
         generateAttributes(this);
         for(let i = 1; i <= actorData.data.attributes.wis.total; i++){
@@ -100,6 +127,7 @@ export class SWSEActor extends Actor {
         let {defense, armors} = await resolveDefenses(this);
         actorData.data.defense = defense;
         actorData.data.armors = armors;
+        actorData.speed = this.speed;
 
         await generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
@@ -1509,14 +1537,6 @@ export class SWSEActor extends Actor {
         return false;
     }
 
-    getSpeed() {
-        let actorData = this.data;
-        let attributeTraits = actorData.traits.filter(trait => {
-            let result = /\w* Speed \d*/.exec(trait.name);
-            return !!result;
-        })
-        return attributeTraits.map(trait => trait.name).join("; ");
-    }
 
     isForceSensitive() {
         let hasForceSensativity = false;
