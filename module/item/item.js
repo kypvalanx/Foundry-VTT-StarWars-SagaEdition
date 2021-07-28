@@ -99,22 +99,22 @@ export class SWSEItem extends Item {
         });
     }
 
-    get finalName() {
+    get name() {
         let itemData = this.data;
         let finalName = itemData.name;
         if (itemData.data.payload && itemData.data.payload !== "" && !itemData.name.includes("(")) {
             finalName = `${finalName} (${itemData.data.payload})`
         }
-        for (let mod of this.data.data.items ? this.data.data.items : []) {
-            let prefix = mod.data.attributes.prefix ? mod.data.attributes.prefix + " " : "";
-            let suffix = mod.data.attributes.suffix ? " " + mod.data.attributes.suffix : "";
+        for (let mod of this.mods) {
+            let prefix = mod.prefix ? mod.prefix + " " : "";
+            let suffix = mod.suffix ? " " + mod.suffix : "";
             finalName = `${prefix}${finalName}${suffix}`
         }
         return finalName;
     }
-    get name() {
-        return this.finalName;
-    }
+    // get name() {
+    //     return this.finalName;
+    // }
     get fortitudeDefenseBonus(){
         return toNumber(this.data.data.attributes.fortitudeDefenseBonus?.value) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
@@ -123,6 +123,25 @@ export class SWSEItem extends Item {
     }
     get maximumDexterityBonus(){
         return toNumber(this.data.data.attributes.maximumDexterityBonus?.value) - toNumber(this.getStripping("reduceJointProtection"));
+    }
+    get mods(){
+        let actor = this.actor;
+        if(!actor || !actor.items){
+            return [];
+        }
+
+        return this.data.data.items?.map(item => actor.getOwnedItem(item._id)) || [];
+    }
+
+    get prefix(){
+        return this.data.data.attributes.prefix
+    }
+
+    get suffix(){
+        if(this.mods?.filter(item => item.name === 'Bayonet Ring').length > 0){
+            return `with ${this.name}`
+        }
+        return this.data.data.attributes.suffix
     }
 
     get size(){
@@ -163,6 +182,15 @@ export class SWSEItem extends Item {
     get subType() {
         return this.data.data.treatedAsSubtype ? this.data.data.treatedAsSubtype : this.data.data.subtype;
     }
+
+    get modSubType() {
+        if(this.data.data.items?.filter(item => item.name === 'Bayonet Ring').length > 0){
+            return 'Weapons Upgrade'
+        }
+
+        return this.subType;
+    }
+
     get effectiveRange() {
         let resolvedSubtype= this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
 
@@ -395,10 +423,26 @@ export class SWSEItem extends Item {
         return doc.body.innerText;
     };
 
+    /**
+     *
+     * @param {SWSEItem} item
+     * @returns {Promise<void>}
+     */
     async takeOwnership(item) {
         let items = this.data.data.items;
         items.push(item)
-        await this.update({"data.items": [...new Set(items)]});
+        let filteredItems = [];
+        let foundIds = [];
+
+        for(let item of items){
+            if(!foundIds.includes(item._id)){
+                foundIds.push(item._id)
+                filteredItems.push(item);
+            }
+        }
+
+
+        await this.update({"data.items": [...filteredItems]});
         await item.update({"data.hasItemOwner": true});
     }
 

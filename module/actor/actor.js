@@ -647,7 +647,8 @@ export class SWSEActor extends Actor {
     }
 
     getInventoryItems() {
-        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation");
+        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
+            .filter(item => !item.data.data.hasItemOwner);
     }
 
     _uppercaseFirstLetters(s) {

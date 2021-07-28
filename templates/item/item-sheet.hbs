@@ -80,72 +80,6 @@
                 </table>
             </div>
 
-            {{#if data.armor}}
-                <div class="resource flex-group-center">
-                    <label for="data.health.value" class="resource-label">Armor Stripping</label>
-                    <table>
-                        {{#if data.armor.stripping.canMakeMedium}}
-                            <tr>
-                                <th><label>Make Medium Armor</label></th>
-                                <td><label class="attribute-value checkbox"><input type="checkbox"
-                                                                                   name="data.armor.stripping.makeMedium" {{checked
-                                            data.armor.stripping.makeMedium}}/></label></td>
-                            </tr>
-                        {{/if}}
-                        {{#if data.armor.stripping.canMakeHeavy}}
-                            <tr>
-                                <th><label>Make Heavy Armor</label></th>
-                                <td><label class="attribute-value checkbox"><input type="checkbox"
-                                                                                   name="data.armor.stripping.makeHeavy" {{checked
-                                            data.armor.stripping.makeHeavy}}/></label></td>
-                            </tr>
-                        {{/if}}
-                        {{#if data.armor.stripping.canReduceDefensiveMaterial}}
-                            <tr>
-                                <th><label>Reduce Defensive Material By: </label></th>
-                                <td>
-                                    <div class="value grid grid-3col">
-                                        <div><a class="item-control value-plus" title="Edit Item"
-                                                name="data.armor.stripping.reduceDefensiveMaterial"><i
-                                                class="fas fa-plus"></i></a>
-                                        </div>
-                                        <div><label class="attribute-value checkbox">
-                                            <input class="value" type="number"
-                                                   name="data.armor.stripping.reduceDefensiveMaterial"
-                                                   value="{{data.armor.stripping.reduceDefensiveMaterial}}">
-                                        </label></div>
-                                        <div><a class="item-control value-minus" title="Edit Item"
-                                                name="data.armor.stripping.reduceDefensiveMaterial"><i
-                                                class="fas fa-minus"></i></a></div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {{/if}}
-                        {{#if data.armor.stripping.canReduceJointProtection}}
-                            <tr>
-                                <th><label>Reduce Joint Protection By: </label></th>
-                                <td>
-                                    <div class="value grid grid-3col">
-                                        <div><a class="item-control value-plus" title="Edit Item"
-                                                name="data.armor.stripping.reduceJointProtection"><i
-                                                class="fas fa-plus"></i></a>
-                                        </div>
-                                        <div><label class="attribute-value checkbox">
-                                            <input class="value" type="number"
-                                                   name="data.armor.stripping.reduceJointProtection"
-                                                   value="{{data.armor.stripping.reduceJointProtection}}">
-                                        </label></div>
-                                        <div><a class="item-control value-minus" title="Edit Item"
-                                                name="data.armor.stripping.reduceJointProtection"><i
-                                                class="fas fa-minus"></i></a></div>
-                                    </div>
-                                </td>
-                            </tr>
-                        {{/if}}
-                    </table>
-                </div>
-            {{/if}}
-
             {{!-- As you add new fields, add them in here! --}}
 <!--            <ol class="attributes-list">-->
 <!--                {{#each data.attributes as |attr key|}}-->
@@ -167,7 +101,7 @@
                 <label class="attribute-value">{{data.upgradePoints}}</label>
             </div>
             <ol class="items-list">
-                {{#each item.mods as |item id|}}
+                {{#each data.items as |item id|}}
                     <li class="item flexrow draggable" data-item-id="{{item._id}}">
                         <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
                         </div>
