@@ -1302,7 +1302,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _selectAttributeScores(event, sheet, scores, canReRoll) {
         if (Object.keys(scores).length === 0) {
-            let existingValues = sheet.actor.getAttributes();
+            let existingValues = sheet.actor.getAttributeBases();
 
             scores = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
             for (let val of Object.keys(existingValues)) {
@@ -1385,7 +1385,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _selectAttributesManually(event, sheet) {
-        let existingValues = sheet.actor.getAttributes();
+        let existingValues = sheet.actor.getAttributeBases();
         let combined = {};
         for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};

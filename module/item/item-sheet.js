@@ -181,7 +181,7 @@ export class SWSEItemSheet extends ItemSheet {
 
     // Owned Items
     if ( li.dataset.itemId ) {
-      const item = this.item.data.mods.find(i => {return i._id ===li.dataset.itemId});
+      const item = this.item.mods.find(i => {return i._id ===li.dataset.itemId});
       dragData.type = "Item";
       dragData.data = item;
     }
