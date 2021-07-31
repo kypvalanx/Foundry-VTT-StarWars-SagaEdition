@@ -9,7 +9,7 @@
     {{#each actor.availableItems as |item id|}}
         <span class="warning">Items from {{id}} remaining: {{item}}</span><br/>{{/each}}
     {{#each actor.inactiveProvidedFeats as |feat id|}}
-        <span class="warning">The {{feat.data.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
+        <span class="warning">The {{feat.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
     {{/each}}
     <div>
         {{!-- Sheet Tab Navigation --}}
@@ -79,7 +79,7 @@
 <!--                            {{#each actor.traits as |trait id|}}-->
 <!--                                {{#unless trait.hide}}-->
 <!--                                    <tr>-->
-<!--                                        <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>-->
+<!--                                        <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.finalName}}</td>-->
 <!--                                    </tr>-->
 <!--                                {{/unless}}-->
 <!--                            {{/each}}-->
@@ -251,10 +251,11 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.feats as |feat id|}}
-                        <li class="item feat flexrow" data-item-name="{{feat.data.finalName}}"
+                        {{log feat}}
+                        <li class="item feat flexrow" data-item-name="{{feat.finalName}}"
                             data-item-id="{{feat._id}}">
                             <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->
-                            <h4 class="item-name"><b>{{feat.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{feat.finalName}}</b></h4>
                             {{#if feat.data.prerequisite }}
                                 <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisite.text}}</h4>{{/if}}
                             <!-- TODO maybe put the description here-->
@@ -280,7 +281,7 @@
                 <ol class="items-list">
                     {{#each actor.talents as |talent id|}}
                         <li class="item flexrow" data-item-id="{{talent._id}}">
-                            <h4 class="item-name"><b>{{talent.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
                             <h4 class="item-name"><a
                                     href="{{talent.data.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
                             <h4 class="item-name">{{#if talent.data.prerequisites}}
@@ -298,7 +299,7 @@
             {{!-- Owned Traits Tab --}}
             <div class="tab items" data-group="primary" data-tab="traits">
                 <div>
-                    <h2><label class="resource-label">Talents <a data-action="compendium"
+                    <h2><label class="resource-label">Traits <a data-action="compendium"
                                                                  data-action-target="world.swse-talents"
                                                                  title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
@@ -306,11 +307,11 @@
                 <ol class="items-list">
                     {{#each actor.traits as |trait id|}}
                         <li class="item flexrow" data-item-id="{{trait._id}}">
-                            <h4 class="item-name"><b>{{trait.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
                             <h4 class="item-name">Source: {{trait.data.supplier.type}}
                                 , {{trait.data.supplier.name}}</h4>
-                            <h4 class="item-name">{{#if trait.data.prerequisites}}
-                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>
+<!--                            <h4 class="item-name">{{#if trait.data.prerequisites}}-->
+<!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                             </div>

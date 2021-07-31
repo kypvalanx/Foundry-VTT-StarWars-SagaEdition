@@ -173,7 +173,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else {
 
             let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
-            let title = `Are you sure you want to delete ${itemToDelete.data.data.finalName}`;
+            let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
             await Dialog.confirm({
                 title: title,
                 content: title,
@@ -221,7 +221,7 @@ export class SWSEActorSheet extends ActorSheet {
                 let prereq = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, 'AGE')
                 if (prereq) {
                     return {
-                        name: trait.data.data.finalName,
+                        name: trait.data.finalName,
                         low: parseInt(prereq.low),
                         high: prereq.high ? parseInt(prereq.high) : -1,
                         text: prereq.text
@@ -270,7 +270,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 return {
                     gender: prerequisite.text,
-                    name: trait.data.data.finalName
+                    name: trait.data.finalName
                 }
             })
 
@@ -753,10 +753,12 @@ export class SWSEActorSheet extends ActorSheet {
             return [];
         }
 
-        if (this.actor.data.feats.map(i => i.data.finalName).includes(item.data.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.data.finalName)) {
+        console.log(item)
+        if (Array.from(this.actor.items.values()).map(i => i.data.finalName).includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName)) {
+            let itemType = item.data.type;
             await Dialog.prompt({
-                title: "You already have this feat",
-                content: `You have already taken the ${item.data.data.finalName} feat`,
+                title: `You already have this ${itemType}`,
+                content: `You have already taken the ${item.data.finalName} ${itemType}`,
                 callback: () => {
                 }
             })
@@ -814,7 +816,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",
-                content: `You do not meet the prerequisites for the ${item.data.data.finalName} class:<br/> ${this._formatPrerequisites(meetsPrereqs.failureList)}`,
+                content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${this._formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',

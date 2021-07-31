@@ -254,6 +254,7 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const itemData = this.data;
+        itemData.finalName = this.name;
 
         itemData.data.isEquipable = this.type === "weapon" || this.type === "armor";
         itemData.data.isModification = this.type === "upgrade" || this.subType === "weapons and armor accessories";
