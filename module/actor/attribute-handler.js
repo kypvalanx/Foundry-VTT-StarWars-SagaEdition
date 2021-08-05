@@ -7,7 +7,7 @@ import {getLongKey, resolveValueArray} from "../util.js";
 export function generateAttributes(actor) {
     let actorData = actor.data;
 
-    actorData.data.lockAttributes = actor.shouldLockAttributes()
+    actorData.data.lockAttributes = actor.shouldLockAttributes
     let attributeTraits = actor.getTraitByKey('attributeBonus')
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};

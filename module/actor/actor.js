@@ -102,7 +102,7 @@ export class SWSEActor extends Actor {
 
         //separated for now.  this part handles the darkside score widget.  it's clever i swear
         {
-            for (let i = 1; i <= actorData.data.attributes.wis.total; i++) {
+            for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
                 if (actorData.data.darkSideScore < i) {
                     actorData.data.darkSideArray.push({value: i, active: false})
                 } else {
@@ -167,7 +167,7 @@ export class SWSEActor extends Actor {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleTraits) {
-                let meetsPrerequisites1 = meetsPrerequisites(this, possible.data.data.prerequisite, false);
+                let meetsPrerequisites1 = meetsPrerequisites(this, possible.data.data.prerequisite);
                 if (!meetsPrerequisites1.doesFail) {
                     activeTraits.push(possible);
                     shouldRetry = true;
@@ -282,7 +282,7 @@ export class SWSEActor extends Actor {
         let removeFeats = [];
         let inactiveProvidedFeats = [];
         for (let feat of feats) {
-            let prereqResponse = meetsPrerequisites(this, feat.data.data.prerequisite, false);
+            let prereqResponse = meetsPrerequisites(this, feat.data.data.prerequisite);
             let doesFail = prereqResponse.doesFail;
             if (!doesFail) {
                 activeFeats.push(feat.data)
@@ -420,10 +420,10 @@ export class SWSEActor extends Actor {
     }
 
     getHalfCharacterLevel() {
-        return Math.floor(this.getCharacterLevel() / 2);
+        return Math.floor(this.characterLevel / 2);
     }
 
-    getCharacterLevel() {
+    get characterLevel() {
         if (this.classes) {
             this.resolvedVariables.set("@charLevel", this.classes.length);
             return this.classes.length;
@@ -432,7 +432,7 @@ export class SWSEActor extends Actor {
     }
 
     getHeroicLevel(){
-        return this.getCharacterLevel();
+        return this.characterLevel;
     }
 
 
@@ -645,7 +645,7 @@ export class SWSEActor extends Actor {
         return words.join(" ");
     }
 
-    _getClassSkills(actorData) {
+    _getClassSkills() {
         let classSkills = new Set()
         if (!this.classes) {
             return classSkills;
@@ -680,7 +680,6 @@ export class SWSEActor extends Actor {
     }
 
     getFirstClass() {
-        let actorData = this.data;
         for (let charClass of this.classes || []) {
             if (charClass.data.attributes.first === true) {
                 return charClass;
@@ -828,13 +827,6 @@ export class SWSEActor extends Actor {
         return {itemName, prerequisite, payload};
     }
 
-    _formatPrerequisites(failureList) {
-        let format = "<ul>";
-        for (let fail of failureList) {
-            format = format + "<li>" + fail.message + "</li>";
-        }
-        return format + "</ul>";
-    }
 
     getCompendium(type) {
         switch (type) {
@@ -940,7 +932,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    cleanKey(key) {
+    cleanSkillName(key) {
         return this._uppercaseFirstLetters(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
     }
 
@@ -1017,10 +1009,11 @@ export class SWSEActor extends Actor {
         this.update(data)
     }
 
-    shouldLockAttributes() {
+    get shouldLockAttributes() {
         return !!this.data.traits.find(trait => trait.name === 'Disable Attribute Modification');
     }
-    isForceSensitive() {
+
+    get isForceSensitive() {
         let hasForceSensativity = false;
         for (let item of this.items.values()) {
             if (item.data.finalName === 'Force Sensitivity') {
@@ -1030,16 +1023,15 @@ export class SWSEActor extends Actor {
         return hasForceSensativity && !this.data.data.isDroid;
     }
 
-    getBaseAttackBonus() {
+    get baseAttackBonus() {
         return this.data.data.offense.bab;
     }
 
-    getDarkSideScore() {
+    get darkSideScore() {
         return this.data.data.darkSideScore;
     }
 
-    setDarkSideScore(score){
-
+    set darkSideScore(score){
         this.update({'data.darkSideScore': score})
     }
 }

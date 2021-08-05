@@ -86,7 +86,7 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel());
+    total.push(actor.characterLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
     let classBonus = _getClassDefBonus('will', actorData);
@@ -217,12 +217,9 @@ function _getEquipmentFortBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 0;
     for (let item of equipped) {
-        //if(actor.isProficientWith(item)) {
-        console.log(item)
         if (item.fortitudeDefenseBonus) {
             bonus = Math.max(bonus, item.fortitudeDefenseBonus);
         }
-        //}
     }
     return bonus;
 }

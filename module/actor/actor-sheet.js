@@ -1,5 +1,6 @@
 import {filterItemsByType} from "../util.js";
 import {SWSE} from "../config.js";
+import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -158,7 +159,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('.dark-side-button').click(ev=> {
             let dss = $(ev.currentTarget).data("value");
-            this.actor.setDarkSideScore(dss);
+            this.actor.darkSideScore = dss;
         });
     }
 
@@ -748,12 +749,37 @@ export class SWSEActorSheet extends ActorSheet {
         let entitiesToAdd = [item];
         await this.activateChoices(item, entitiesToAdd, {});
 
-        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite, true);
-        if (meetsPrereqs.doesFail) {
-            return [];
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
+
+        if (meetsPrereqs.failureList.length > 0) {
+            if (meetsPrereqs.doesFail) {
+                new Dialog({
+                    title: "You Don't Meet the Prerequisites!",
+                    content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+
+                return [];
+
+            } else {
+                new Dialog({
+                    title: "You MAY Meet the Prerequisites!",
+                    content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+            }
         }
 
-        console.log(item)
         if (Array.from(this.actor.items.values()).map(i => i.data.finalName).includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName)) {
             let itemType = item.data.type;
             await Dialog.prompt({
@@ -812,11 +838,11 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClass(item) {
 
-        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite, false);
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
         if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",
-                content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${this._formatPrerequisites(meetsPrereqs.failureList)}`,
+                content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',
@@ -829,7 +855,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (meetsPrereqs.failureList.length > 0) {
             new Dialog({
                 title: "You MAY Meet the Prerequisites!",
-                content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',
