@@ -75,3 +75,42 @@ export function excludeItemsByType(items, type) {
 export function getBonusString(atkBonus) {
     return (atkBonus > 0 ? `+${atkBonus}` : (atkBonus < 0 ? `${atkBonus}` : ""));
 }
+
+export function getLongKey(key) {
+    switch (key) {
+        case 'str':
+            return 'strength';
+        case 'dex':
+            return 'dexterity';
+        case 'con':
+            return 'constitution';
+        case 'int':
+            return 'intelligence';
+        case 'wis':
+            return 'wisdom';
+        case 'cha':
+            return 'charisma';
+    }
+    return undefined;
+}
+
+/**
+ *
+ * @param {string} attributeName
+ */
+export function toShortAttribute(attributeName) {
+    switch (attributeName.toLowerCase()) {
+        case 'strength':
+            return 'STR';
+        case 'dexterity':
+            return 'DEX';
+        case 'constitution':
+            return 'CON';
+        case 'wisdom':
+            return 'WIS';
+        case 'intelligence':
+            return 'INT';
+        case 'charisma':
+            return 'CHA';
+    }
+}

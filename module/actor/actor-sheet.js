@@ -748,7 +748,7 @@ export class SWSEActorSheet extends ActorSheet {
         let entitiesToAdd = [item];
         await this.activateChoices(item, entitiesToAdd, {});
 
-        let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisite, true);
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite, true);
         if (meetsPrereqs.doesFail) {
             return [];
         }
@@ -812,7 +812,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClass(item) {
 
-        let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisite, false);
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite, false);
         if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",

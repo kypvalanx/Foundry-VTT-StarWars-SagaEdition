@@ -1,4 +1,4 @@
-import {resolveValueArray} from "../util.js";
+import {getLongKey, resolveValueArray} from "../util.js";
 
 /**
  *
@@ -12,7 +12,7 @@ export function generateAttributes(actor) {
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
-        let longKey = actor._getLongKey(key);
+        let longKey = getLongKey(key);
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
