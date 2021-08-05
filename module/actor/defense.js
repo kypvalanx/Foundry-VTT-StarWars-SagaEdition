@@ -9,6 +9,12 @@ function reduceSpeedForArmorType(speed, armorType) {
     return speed.replace("4", "3").replace("6", "4");
 }
 
+/**
+ *
+ * @param {SWSEActor} actor
+ * @param {SWSEItem} armor
+ * @returns {{fortDefense: (*|number), notes: (*|string), refDefense: (*|number), name, type: string, maxDex: (*|number), speed}}
+ */
 function generateArmorBlock(actor, armor) {
     let attributes = armor.data.data.attributes;
     let speed = actor.speed
@@ -32,7 +38,7 @@ function generateArmorBlock(actor, armor) {
  */
 export function resolveDefenses(actor) {
     let defenseBonuses = actor.getTraitAttributesByKey('defenseBonuses');
-    let conditionBonus = actor.getConditionBonus();
+    let conditionBonus = actor.conditionBonus;
     let fort = _resolveFort(actor, defenseBonuses, conditionBonus);
     let will = _resolveWill(actor, defenseBonuses, conditionBonus);
     let ref = _resolveRef(actor, defenseBonuses, conditionBonus);

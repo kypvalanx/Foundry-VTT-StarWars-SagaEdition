@@ -1,6 +1,6 @@
 export class OffenseHandler {
     async resolveOffense(actor, resolvedBab) {
-        let bab = resolvedBab + actor.getConditionBonus();
+        let bab = resolvedBab + actor.conditionBonus;
         let mab = await this._resolveMab(bab, actor.data.data.attributes.str.mod);
         let rab = await this._resolveRab(bab, actor.data.data.attributes.dex.mod);
         let fab = await this._resolveRab(bab, actor.data.data.attributes.dex.mod);

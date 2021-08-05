@@ -24,7 +24,7 @@ export async function generateSkills(actor) {
     prerequisites.trainedSkills = [];
     let classSkills = await actor._getClassSkills(actorData);
     let halfCharacterLevel = actor.getHalfCharacterLevel();
-    let conditionBonus = actor.getConditionBonus();
+    let conditionBonus = actor.conditionBonus;
     for (let [key, skill] of Object.entries(actorData.data.skills)) {
         skill.isClass = key === 'use the force' ? actor.isForceSensitive() : classSkills.has(key);
 

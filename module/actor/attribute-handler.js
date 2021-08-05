@@ -65,7 +65,7 @@ export function generateAttributes(actor) {
         attribute.bonus = resolveValueArray(bonuses, actor);
         attribute.total = attribute.skip ? 10 : attribute.base + attribute.bonus;
         attribute.mod = Math.floor((attribute.total - 10) / 2);
-        attribute.roll = attribute.mod + actor.getConditionBonus()
+        attribute.roll = attribute.mod + actor.conditionBonus;
         attribute.label = key.toUpperCase();
         actor.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
         actor.resolvedLabels.set("@" + attribute.label, attribute.label);

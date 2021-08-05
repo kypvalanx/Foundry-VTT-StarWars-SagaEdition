@@ -1,5 +1,10 @@
 import {resolveValueArray} from "../util.js";
 
+/**
+ *
+ * @param {SWSEActor} actor
+ * @returns {{temp, other: number, max: number, value: *, dr, sr}}
+ */
 export function resolveHealth(actor) {
     if (!actor || !actor.data) {
         return;
@@ -7,9 +12,9 @@ export function resolveHealth(actor) {
     let actorData = actor.data;
     let ignoreCon = actor.ignoreCon();
     let health = [];
-    for (let charClass of actorData.classes ? actorData.classes : []) {
+    for (let charClass of actor.classes || []) {
         health.push(resolveRolledHp(charClass))
-        health.push(resolveCharClass(actorData, ignoreCon));
+        health.push(resolveCharClass(actor, ignoreCon));
     }
     let other = [];
     for (let item of actorData.items ? actorData.items : []) {
@@ -25,11 +30,11 @@ export function resolveHealth(actor) {
     return {value: Array.isArray(actorData.data.health.value)? actorData.data.health.value[0]: actorData.data.health.value,temp: actorData.data.health.temp, other: otherBonuses,max: resolveValueArray(health, actor), dr: actorData.data.health.dr, sr: actorData.data.health.sr};
 }
 
-function resolveCharClass(actorData, ignoreCon) {
+function resolveCharClass(actor, ignoreCon) {
     if(ignoreCon){
         return null;
     }
-    return actorData.data.attributes.con.mod;
+    return actor.data.data.attributes.con.mod;
 }
 
 function resolveRolledHp(charClass) {
