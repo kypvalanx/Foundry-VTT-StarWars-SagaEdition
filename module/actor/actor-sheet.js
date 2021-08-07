@@ -158,8 +158,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="view"]').click(event => this._onItemEdit(event));
 
         html.find('.dark-side-button').click(ev=> {
-            let dss = $(ev.currentTarget).data("value");
-            this.actor.darkSideScore = dss;
+            this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
 
@@ -346,11 +345,6 @@ export class SWSEActorSheet extends ActorSheet {
         }
         return {low: parseInt(range.replace("+", "")), high: -1};
     }
-
-    getPrerequisiteByName(trait, searchString) {
-        return trait.data.data.prerequisites.filter(prepreq => prepreq.startsWith(searchString))[0];
-    }
-
     async _selectAttributeGeneration(event, sheet) {
         let genType = sheet.actor.getAttributeGenerationType();
         let rollSelected = genType === 'Roll' ? 'selected' : '';
@@ -1196,15 +1190,6 @@ export class SWSEActorSheet extends ActorSheet {
         let item = this.actor.items.find(i => i.name === name);
         return item === null;
     }
-
-    _formatPrerequisites(failureList) {
-        let format = "<ul>";
-        for (let fail of failureList) {
-            format = format + "<li>" + fail.message + "</li>";
-        }
-        return format + "</ul>";
-    }
-
 
     async _explodeOptions(options) {
         let resolvedOptions = {};

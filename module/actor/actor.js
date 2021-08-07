@@ -76,7 +76,7 @@ export class SWSEActor extends Actor {
      * Prepare Character type specific data
      */
     async _prepareCharacterData(actorData) {
-        actorData.prerequisites = {};
+        this.data.prerequisites = {};
 
         new SpeciesHandler().generateSpeciesData(this);
         let {bab, level, classSummary} = this._generateClassData(actorData);
@@ -103,6 +103,8 @@ export class SWSEActor extends Actor {
         //separated for now.  this part handles the darkside score widget.  it's clever i swear
         {
             for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
+                actorData.data.darkSideArray = actorData.data.darkSideArray || [];
+
                 if (actorData.data.darkSideScore < i) {
                     actorData.data.darkSideArray.push({value: i, active: false})
                 } else {
@@ -272,7 +274,7 @@ export class SWSEActor extends Actor {
         actorData.proficiency.halt = [];
         actorData.proficiency.returnFire = [];
         actorData.proficiency.criticalStrike = [];
-        let prerequisites = actorData.prerequisites;
+        let prerequisites = this.data.prerequisites;
         prerequisites.feats = [];
         prerequisites.focusSkills = [];
         prerequisites.masterSkills = [];
@@ -462,16 +464,6 @@ export class SWSEActor extends Actor {
             return !charClass.data.prerequisite?.isPrestige;
         });
     }
-
-    isProficientWith(item) {
-
-        if (item.type === 'armor') {
-            return this.data.proficiency.armor.includes(item.armorType.toLowerCase());
-        }
-
-        return false;
-    }
-
     /**
      * Extracts important stats from the class
      */
