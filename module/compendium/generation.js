@@ -1,3 +1,5 @@
+import {SWSEItem} from "../item/item.js";
+
 async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
     let response;
     try {
@@ -6,24 +8,24 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
         return;
     }
     const content = await response.json();
-    let importPack = false;
 
     let pack = await game.packs.find(p => p.metadata.label === compendiumName);
-    if (!pack || (pack.metadata.version? pack.metadata.version : 0) < content.version || forceRefresh) {
-        importPack = true;
-        if (pack) {
-            await pack.delete()
-        }
-    }
 
-    if (!importPack) {
+    let toks = pack.metadata.name.split("-");
+    let version = toks[toks.length - 1];
+    if (!pack || (!isNaN(version)? parseInt(version) : 0) < content.version || forceRefresh) {
+        if (pack) {
+            await pack.deleteCompendium()
+        }
+    } else {
         return;
     }
 
+    let collection = await CompendiumCollection.createCompendium({label: compendiumName, name: compendiumName.toLowerCase().replace(" ", "-")+`-${content.version}`,entity: entity, version: content.version});
 
-    await Compendium.create({label: compendiumName, entity: entity, version: content.version})
+   // await new Compendium(collection, {label: compendiumName, entity: entity, version: content.version})
     pack = await game.packs.find(p => p.metadata.label === compendiumName);
-    pack.metadata.version = content.version;
+    //pack.metadata.version = content.version;
 
     if (!pack) {
         return;
@@ -35,11 +37,18 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
     // for (let i of content.entries) {
     //     await pack.createEntity(i);
     // }
-         await pack.createEntity(content.entries);
-//     Promise.all(promises).then(values => {
+
+    let items;
+    items = await SWSEItem.create(content.entries);
+    for(let item of items) {
+        promises.push(collection.importDocument(item));
+    }
+    console.log(pack)
+        // await pack.createEntity(content.entries);
+    Promise.all(promises).then(() => {
         console.log(`Done Generating ${compendiumName}... ${content.entries.length} entries`);
     ui.notifications.info(`Done Updating ${compendiumName}... ${content.entries.length} entries`);
-// });
+});
 }
 
 export const generateCompendiums = async function (forceRefresh = false) {
@@ -55,7 +64,7 @@ export const generateCompendiums = async function (forceRefresh = false) {
     }
 
 
-    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
+    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", true);
 
     await importCompendium("systems/swse/raw_export/Classes.json", 'SWSE Classes', "Item", forceRefresh);
 

@@ -19,6 +19,7 @@ Hooks.once('init', async function() {
     generateCompendiums
   };
 
+
   /**
    * Set an initiative formula for the system
    * @type {String}
@@ -30,8 +31,8 @@ Hooks.once('init', async function() {
 
   // Define custom Entity classes
   CONFIG.SWSE = SWSE;
-  CONFIG.Actor.entityClass = SWSEActor;
-  CONFIG.Item.entityClass = SWSEItem;
+  CONFIG.Actor.documentClass = SWSEActor;
+  CONFIG.Item.documentClass = SWSEItem;
 
   registerSystemSettings();
 
@@ -106,7 +107,7 @@ Hooks.on("ready", async function() {
   let pack = game.packs.get('world.swse-items');
   pack.getIndex().then( index => {
   for(let i of index){
-    pack.getEntity(i._id).then(entity =>{
+    pack.getDocument(i._id).then(entity =>{
     if(entity.data.type === 'weapon'){
       for(let category of entity.data.data.categories){
         if(category.value.toLowerCase().includes('exotic')){

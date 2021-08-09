@@ -479,7 +479,7 @@ export class SWSEActor extends Actor {
                 classLevels[characterClass.name] = 0;
             }
             let levelOfClass = ++classLevels[characterClass.name]
-            let levelData = characterClass.data.levels[levelOfClass]
+            let levelData = characterClass.data.data.levels[levelOfClass]
             bab += levelData.bab;
             classFeatures.push(...levelData.features)
         }
@@ -769,7 +769,7 @@ export class SWSEActor extends Actor {
                 continue;
             }
 
-            let entity = await pack.getEntity(entry._id);
+            let entity = await pack.getDocument(entry._id);
             let data = entity.data.data;
 
             // for (let prerequisite of data.prerequisites) {
