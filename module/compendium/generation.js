@@ -64,7 +64,7 @@ export const generateCompendiums = async function (forceRefresh = false) {
     }
 
 
-    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", true);
+    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
 
     await importCompendium("systems/swse/raw_export/Classes.json", 'SWSE Classes', "Item", forceRefresh);
 
