@@ -16,7 +16,8 @@
   flex-direction: row;
 }
 
-.flex-grow .flex-grow1{
+.flex-grow,
+.flex-grow1{
   flex-grow: 1;
 }
 
@@ -27,4 +28,11 @@
 .flex{
   align-content: stretch;
   display: flex;
+  div{
+    padding:3px;
+  }
+}
+.flex-wrap    {
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
 }

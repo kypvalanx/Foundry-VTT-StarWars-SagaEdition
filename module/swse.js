@@ -15,9 +15,10 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    rollAttack,
+    // rollAttack,
     generateCompendiums
   };
+
 
   /**
    * Set an initiative formula for the system
@@ -30,8 +31,8 @@ Hooks.once('init', async function() {
 
   // Define custom Entity classes
   CONFIG.SWSE = SWSE;
-  CONFIG.Actor.entityClass = SWSEActor;
-  CONFIG.Item.entityClass = SWSEItem;
+  CONFIG.Actor.documentClass = SWSEActor;
+  CONFIG.Item.documentClass = SWSEItem;
 
   registerSystemSettings();
 
@@ -61,20 +62,42 @@ Hooks.once('init', async function() {
     console.log(array, options)
     return (array && array.length > 0)? options.fn():"";
   })
+
+  Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
+    return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+
+  Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
+    return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+  Handlebars.registerHelper('sum', function(arg1, arg2, options) {
+    return parseInt(arg1) + parseInt(arg2)
+  });
+
+  Handlebars.registerHelper('times', function(n, block) {
+    let accum = '';
+    for(let i = 0; i < n; ++i)
+      accum += block.fn(i);
+    return accum;
+  });
+
+
+  await loadTemplates([
+      'systems/swse/templates/actor/parts/actor-affiliations.hbs',
+    'systems/swse/templates/actor/parts/actor-summary.hbs',
+    'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
+    'systems/swse/templates/actor/parts/actor-skills.hbs',
+    'systems/swse/templates/actor/parts/actor-attributes.hbs',
+    'systems/swse/templates/actor/parts/actor-health.hbs',
+    'systems/swse/templates/actor/parts/actor-condition.hbs',
+    'systems/swse/templates/actor/parts/actor-portrait.hbs',
+    'systems/swse/templates/actor/parts/actor-darkside.hbs',
+    'systems/swse/templates/actor/parts/actor-defenses.hbs']);
+
 });
 
-Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
-  return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
-});
-
-
-Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
-  return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
-});
-
-Handlebars.registerHelper('sum', function(arg1, arg2, options) {
-  return parseInt(arg1) + parseInt(arg2)
-});
 
 Hooks.on("ready", async function() {
   await generateCompendiums();
@@ -84,10 +107,10 @@ Hooks.on("ready", async function() {
   let pack = game.packs.get('world.swse-items');
   pack.getIndex().then( index => {
   for(let i of index){
-    pack.getEntity(i._id).then(entity =>{
+    pack.getDocument(i._id).then(entity =>{
     if(entity.data.type === 'weapon'){
       for(let category of entity.data.data.categories){
-        if(category.category.toLowerCase().includes('exotic')){
+        if(category.value.toLowerCase().includes('exotic')){
           game.generated.exoticWeapons.push(entity.name);
           break;
         }
@@ -106,6 +129,16 @@ if(!Map.prototype.computeIfAbsent){
 }
 
 
+String.prototype.titleCase = function() {
+  if (!this.length) return this;
+  return this.toLowerCase().split(' ').map(function (word) {
+    return word.replace(word[0], word[0].toUpperCase());
+  }).join(' ').split('(').map(function (word) {
+    return word.replace(word[0], word[0].toUpperCase());
+  }).join('(');
+};
+
+
 Hooks.on("hotbarDrop", (bar, data, slot) => {
 
   if (data.type.toLowerCase() !== "skill") return true;
@@ -121,16 +154,16 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {
 
-  if (data.type.toLowerCase() !== "attack") return true;
-  createAttackMacro(data, slot);
-  return false;
-});
-
-Hooks.on("hotbarDrop", (bar, data, slot) => {
-  if (data.type.toLowerCase() !== "item") return true;
+  if (data.type.toLowerCase() !== "attack" && data.type.toLowerCase() !== "item") return true;
   createItemMacro(data, slot);
   return false;
 });
+
+// Hooks.on("hotbarDrop", (bar, data, slot) => {
+//   if (data.type.toLowerCase() !== "item") return true;
+//   createItemMacro(data, slot);
+//   return false;
+// });
 
 
 async function createSkillMacro(data, slot) {
@@ -278,20 +311,8 @@ function rollItem(actorId, itemId) {
     return ui.notifications.error(msg);
   }
 
-  return actor.rollItem(itemId);
+  return actor.rollOwnedItem(itemId);
 }
-
-function rollAttack(actorId, attackId) {
-  const actor = getActorFromId(actorId);
-  if (!actor) {
-    const msg = `${actorId} not found`;
-    console.warn(msg);
-    return ui.notifications.error(msg);
-  }
-
-  return actor.rollAttack(attackId);
-}
-
 Hooks.on('renderChatMessage', (chatItem, html) => {
   html.find(".toggle-hide").on("click", (ev) => {
     let nodes = $(ev.currentTarget)[0].parentElement.childNodes;

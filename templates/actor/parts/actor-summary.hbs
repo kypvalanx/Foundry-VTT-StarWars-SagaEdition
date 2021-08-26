@@ -1,8 +1,67 @@
-<!-- <div class="resources grid grid-2col"> -->
-<div class="flexrow summary-header">
 
+<!--TODO find a spot for the portrait -->
+<div class="summary-header swse">
+    <div class="name"><label for="name">Name</label><h2><input class="plain" name="name" type="text" value="{{actor.name}}"
+                                                           placeholder=""/></h2></div>
+    <div class="player"><label for="player">Player</label><h2><input class="plain" name="player" type="text"
+                                                                     value="{{actor.player}}" placeholder=""/></h2></div>
 
-<!-- </div> -->
+    <div class="classes"><label for="classes">Classes</label><div class="plain input static">{{actor.classSummary}}</div></div>
+    <div class="level"><label for="level">Level</label><div class="plain input static">{{actor.levelSummary}}</div></div>
 
+    <div class="species">
 
+        <label for="species">Species</label>
+        <div class="flex item" id="view-species" data-item-id="{{actor.species._id}}">
+
+            {{#if actor.species}}
+                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species._id}}">{{actor.species.name}}</div>
+                <div class="species-controls flex-col">
+                    <a class="species-control edit" title="view item"><i
+                            class="fas fa-eye"></i></a>
+                </div>
+                <div class="species-controls flex-col">
+                    <a class="species-control delete" title="delete item"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            {{/if}}
+            {{#unless actor.species}}
+                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="world.swse-species">Add Species</div>
+                <div class="species-controls flex-col">
+                    <a data-action="compendium" data-action-target="world.swse-species"
+                       title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                </div>
+            {{/unless}}
+        </div>
+
+    </div>
+    <div class="sex">
+        <label for="gender">Gender</label>
+        <div id="selectGender">
+            <div class="plain input rollable">{{#if
+                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless
+                    actor.data.gender}}{{#if
+                    actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
+                Select Gender{{/unless}}{{/unless}}</div>
+        </div>
+
+    </div>
+    <div class="age">
+        <label for="age">Age</label>
+        <div id="selectAge">
+            <div class="plain input rollable">{{#if
+                    actor.data.age}}{{actor.data.age}} years{{/if}}{{#unless actor.data.age}}
+                Select Age{{/unless}}</div>
+        </div>
+    </div>
+    <div class="height"><label for="height">Height</label><h2><input class="plain" name="height" type="text"
+                                                                     value="{{actor.height}}" placeholder="Height"/></h2></div>
+    <div class="weight"><label for="weight">Weight</label><h2><input class="plain" name="weight" type="text"
+                                                                 value="{{actor.weight}}" placeholder="Weight"/></h2></div>
+    <div class="destiny"><label for="destiny">Destiny</label><h2><input class="plain" name="destiny" type="text"
+                                                                    value="{{actor.destiny}}" placeholder="Destiny"/></h2>
+    </div>
+    <div class="experience"><label for="experience">XP</label><h2><input class="plain" name="experience" type="text"
+                                                                     value="{{actor.experience}}" placeholder="0"/></h2>
+    </div>
 </div>

@@ -2,20 +2,56 @@ import {SWSEActor} from "./actor.js";
 import {resolveValueArray} from "../util.js";
 
 
+function reduceSpeedForArmorType(speed, armorType) {
+    if ("Light" === armorType) {
+        return speed;
+    }
+    return speed.replace("4", "3").replace("6", "4");
+}
+
+/**
+ *
+ * @param {SWSEActor} actor
+ * @param {SWSEItem} armor
+ * @returns {{fortDefense: (*|number), notes: (*|string), refDefense: (*|number), name, type: string, maxDex: (*|number), speed}}
+ */
+function generateArmorBlock(actor, armor) {
+    let attributes = armor.data.data.attributes;
+    let speed = actor.speed
+
+
+    return {
+        name: armor.data.data.finalName,
+        speed: speed,
+        refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
+        fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
+        maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
+        notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", ") : "",
+        type: armor.armorType
+    };
+}
+
 /**
  *
  * @param actor {SWSEActor}
- * @returns {{dt: number, ref: number, will: number, fort: number}}
+ * @returns
  */
 export function resolveDefenses(actor) {
     let defenseBonuses = actor.getTraitAttributesByKey('defenseBonuses');
-    let conditionBonus = actor.getConditionBonus();
+    let conditionBonus = actor.conditionBonus;
     let fort = _resolveFort(actor, defenseBonuses, conditionBonus);
     let will = _resolveWill(actor, defenseBonuses, conditionBonus);
     let ref = _resolveRef(actor, defenseBonuses, conditionBonus);
     let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(defenseBonuses);
-    return {fort,will, ref,dt, situationalBonuses};
+
+    let armors = []
+
+    for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+        armors.push(generateArmorBlock(actor, armor));
+    }
+
+    return {defense: {fort, will, ref, dt, situationalBonuses}, armors};
 }
 
 /**
@@ -30,46 +66,62 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel());
-    total.push(_getFortStatMod(actor));
-    total.push(_getTraitDefBonus('fortitude', defenseBonuses));
-    total.push(_getClassDefBonus('fortitude', actorData));
-    total.push(_getEquipmentFortBonus(actor));
+    let heroicLevel = actor.getHeroicLevel();
+    total.push(heroicLevel);
+    let abilityBonus = _getFortStatMod(actor);
+    total.push(abilityBonus);
+    let traitBonus = _getTraitDefBonus('fortitude', defenseBonuses);
+    total.push(traitBonus);
+    let classBonus = _getClassDefBonus('fortitude', actorData);
+    total.push(classBonus);
+    let equipmentBonus = _getEquipmentFortBonus(actor);
+    total.push(equipmentBonus);
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
+    let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveWill(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(actor.getCharacterLevel());
-    total.push(_getWisMod(actorData));
-    total.push(_getClassDefBonus('will', actorData));
-    total.push(_getTraitDefBonus('will', defenseBonuses));
+    total.push(actor.characterLevel);
+    let abilityBonus = _getWisMod(actorData);
+    total.push(abilityBonus);
+    let classBonus = _getClassDefBonus('will', actorData);
+    total.push(classBonus);
+    let traitBonus = _getTraitDefBonus('will', defenseBonuses);
+    total.push(traitBonus);
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    let armorBonus = 0;
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _resolveRef(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    total.push(_selectRefBonus(actor.getCharacterLevel(), _getEquipmentRefBonus(actor)));
-    total.push(_selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor)));
-    total.push(_getTraitDefBonus('reflex', defenseBonuses));
-    total.push(_getClassDefBonus('reflex', actorData));
+    let armorBonus = _selectRefBonus(actor.getHeroicLevel(), _getEquipmentRefBonus(actor));
+    total.push(armorBonus);
+    let abilityBonus = _selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    total.push(abilityBonus);
+    let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
+    total.push(traitBonus);
+    let classBonus = _getClassDefBonus('reflex', actorData);
+    total.push(classBonus);
     total.push(_getTraitRefMod(actor));
     total.push(conditionBonus);
-    return resolveValueArray(total, actor)
-
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
 function _getDamageThresholdSizeMod(actor) {
     let attributes = actor.getTraitAttributesByKey('damageThresholdSizeModifier')
 
     let total = [];
-    for(let attribute of attributes){
+    for (let attribute of attributes) {
         total.push(attribute)
     }
 
@@ -78,9 +130,9 @@ function _getDamageThresholdSizeMod(actor) {
 
 function _resolveDt(actor, defenseBonuses, conditionBonus) {
     let total = [];
-    total.push(_resolveFort(actor, defenseBonuses, conditionBonus));
+    total.push(_resolveFort(actor, defenseBonuses, conditionBonus).total);
     total.push(_getDamageThresholdSizeMod(actor))
-    return resolveValueArray(total, actor)
+    return {total: resolveValueArray(total, actor)}
 }
 
 function capFirst(word) {
@@ -91,7 +143,7 @@ function _getSituationalBonuses(defenseBonuses) {
     let situational = []
     for (let defenseBonus of defenseBonuses) {
         if (defenseBonus.modifier) {
-            situational.push(`${(defenseBonus.bonus>-1?"+":"")+ defenseBonus.bonus} ${defenseBonus.bonus < 0? "penalty":"bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
+            situational.push(`${(defenseBonus.bonus > -1 ? "+" : "") + defenseBonus.bonus} ${defenseBonus.bonus < 0 ? "penalty" : "bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
         }
     }
     return situational;
@@ -165,10 +217,8 @@ function _getEquipmentFortBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 0;
     for (let item of equipped) {
-        if(actor.isProficientWith(item)) {
-            if (item.data.data.armor.fortitudeBonus) {
-                bonus = Math.max(bonus, parseInt(item.data.data.armor.fortitudeBonus));
-            }
+        if (item.fortitudeDefenseBonus) {
+            bonus = Math.max(bonus, item.fortitudeDefenseBonus);
         }
     }
     return bonus;
@@ -178,8 +228,8 @@ function _getEquipmentRefBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = -1;
     for (let item of equipped) {
-        if (item.data.data.armor?.reflexBonus) {
-            bonus = Math.max(bonus, parseInt(item.data.data.armor.reflexBonus));
+        if (item.reflexDefenseBonus) {
+            bonus = Math.max(bonus, item.reflexDefenseBonus);
         }
     }
     return bonus;
@@ -189,8 +239,8 @@ function _getEquipmentMaxDexBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 1000;
     for (let item of equipped) {
-        if (item.data.data.armor?.maxDexterity) {
-            bonus = Math.min(bonus, parseInt(item.data.data.armor.reflexBonus));
+        if (!isNaN(item.maximumDexterityBonus)) {
+            bonus = Math.min(bonus, item.maximumDexterityBonus);
         }
     }
     return bonus;

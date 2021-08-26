@@ -12,6 +12,8 @@
           "max": 10,
           "condition": 0
         },
+        "darkSideScore": 0,
+        "darkSideArray": [],
         "equippedIds": [],
         "classesfirst": "",
         "attributes": {
@@ -331,7 +333,7 @@
       "class",
       "upgrade",
       "forcePower",
-      "forceTradition",
+      "affiliation",
       "forceTechnique",
       "forceSecret",
       "forceRegimen",
@@ -350,14 +352,12 @@
         "payload": ""
       },
       "item": {
-        "equipable": false,
-        "droidPart": false,
-        "bioPart": false,
-        "isMod": false,
         "cost": "",
         "weight": "",
         "availability": "",
-        "size": ""
+        "size": "",
+        "type": "",
+        "subtype": ""
       },
       "modifiable": {
         "items": []
@@ -366,7 +366,7 @@
         "hasItemOwner": false
       },
       "prerequisites": {
-        "prerequisites": []
+        "prerequisite": null
       },
       "categories": {
         "categories": []
@@ -375,6 +375,7 @@
       },
       "source": {
         "supplier": {},
+        "possibleProviders": [],
         "isSupplied": false
       }
     },
@@ -455,7 +456,7 @@
         "base",
         "categories"
       ],
-      "ages": {}
+      "traits": []
     },
     "forcePower": {
       "templates": [
@@ -464,7 +465,7 @@
         "source"
       ]
     },
-    "forceTradition": {
+    "affiliation": {
       "templates": [
         "base",
         "categories",
@@ -502,6 +503,13 @@
     "classFeature": {
       "templates": [
         "base",
+        "source"
+      ]
+    },
+    "starshipManeuver": {
+      "templates": [
+        "base",
+        "categories",
         "source"
       ]
     }

@@ -1,4 +1,6 @@
 import {filterItemsByType} from "../util.js";
+import {SWSE} from "../config.js";
+import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -15,7 +17,6 @@ export class SWSEActorSheet extends ActorSheet {
     get actor() {
         return this.object;
     }
-
 
 
     constructor(...args) {
@@ -61,10 +62,10 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find("input.plain").on("keypress", (event) => {
-            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 event.stopPropagation();
                 //if (!changed) {
-                    this._onSubmit(event);
+                this._onSubmit(event);
                 //}
             }
         });
@@ -80,7 +81,7 @@ export class SWSEActorSheet extends ActorSheet {
         })
 
         // Species controls
-        html.find(".species-container .species-control").click(this._onSpeciesControl.bind(this));
+        html.find(".species-control").click(this._onSpeciesControl.bind(this));
 
         // Item Dragging
         html.find("li.draggable").each((i, li) => {
@@ -92,6 +93,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.condition-radio').on("click", async event => {
             await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
+
 
         // html.find("div.item-container").each((i, div) => {
         //   div.addEventListener("dragend", (ev) => this._onDragEnd(ev), false);
@@ -107,9 +109,10 @@ export class SWSEActorSheet extends ActorSheet {
             li.addEventListener("dragstart", (ev) => this._onDragAbilityStart(ev), false);
         });
 
-        html.find("div.attack").each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
+        html.find("div.attack").each((i, div) => {
+            div.setAttribute("draggable", true);
+            div.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
+            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
@@ -140,7 +143,7 @@ export class SWSEActorSheet extends ActorSheet {
         // Delete Inventory Item
         html.find('.item-delete').click(async ev => await this.deleteItem(ev));
 
-        html.find('.item-duplicate').click(async ev =>{
+        html.find('.item-duplicate').click(async ev => {
             const li = $(ev.currentTarget).parents(".item");
             let itemToDuplicate = this.actor.getOwnedItem(li.data("itemId"));
             let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
@@ -152,6 +155,11 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.rollable').click(this._onRoll.bind(this));
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="view"]').click(event => this._onItemEdit(event));
+
+        html.find('.dark-side-button').click(ev=> {
+            this.actor.darkSideScore = $(ev.currentTarget).data("value");
+        });
     }
 
     async deleteItem(ev) {
@@ -165,7 +173,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else {
 
             let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
-            let title = `Are you sure you want to delete ${itemToDelete.data.data.finalName}`;
+            let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
             await Dialog.confirm({
                 title: title,
                 content: title,
@@ -207,26 +215,30 @@ export class SWSEActorSheet extends ActorSheet {
 
     buildAgeDialog(sheet) {
         let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
-        let searchString = "AGE";
         let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
-            .filter(trait => trait.data.data.prerequisites
-                .reduce((a, b) => {
-                    return a || b.startsWith(searchString)
-                }, false)).map(trait => {
-                return {range: this.getPrerequisiteByName(trait, "AGE").split(":")[1], name: trait.data.data.finalName}
-            })
+            .map(trait => {
+                //let prereqs = trait.data.data.prerequisite.filter(prereq => );
+                let prereq = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, 'AGE')
+                if (prereq) {
+                    return {
+                        name: trait.data.finalName,
+                        low: parseInt(prereq.low),
+                        high: prereq.high ? parseInt(prereq.high) : -1,
+                        text: prereq.text
+                    }
+                }
+                return undefined;
+            }).filter(trait => !!trait)
+
         ageEffects.sort(
-            (a, b) =>
-                parseInt(a.range.split("-")[0].replace("+", "")) -
-                parseInt(b.range.split("-")[0].replace("+", "")));
+            (a, b) => a.low - b.low);
 
         let traits = '';
         for (let effect of ageEffects) {
-            let {low, high} = this.parseRange(effect.range);
-            let current = age >= low && (age <= high || high === -1) ? ' current' : '';
-            traits += `<div class="flex-grow ageRange${current}" data-low="${low}" data-high="${high}">${effect.name}: ${effect.range}</div>`;
+            let current = age >= effect.low && (age <= effect.high || effect.high === -1) ? ' current' : '';
+            traits += `<div class="flex-grow ageRange${current}" data-low="${effect.low}" data-high="${effect.high}">${effect.name}: ${effect.text}</div>`;
         }
-        if(traits === ''){
+        if (traits === '') {
             traits = `<div>This species has no traits related to age.</div>`;
         }
         let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"><div>${traits}</div>`
@@ -247,30 +259,32 @@ export class SWSEActorSheet extends ActorSheet {
             }
         };
     }
+
     buildGenderDialog(sheet) {
         let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
         let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
         let searchString = "GENDER";
         let genderEffects = filterItemsByType(sheet.actor.items.values(), "trait")
-            .filter(trait => trait.data.data.prerequisites
-                .reduce((a, b) => {
-                    return a || b.startsWith(searchString)
-                }, false)).map(trait => {
-                return {gender: this.getPrerequisiteByName(trait, searchString).split(":")[1], name: trait.data.data.finalName}
-            })
+            .filter(trait => this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)).map(trait => {
+                let prerequisite = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)
 
+                return {
+                    gender: prerequisite.text,
+                    name: trait.data.finalName
+                }
+            })
 
         genderEffects.sort(
             (a, b) =>
                 a.gender <
-                b.gender? 1 : 0);
+                b.gender ? 1 : -1);
 
         let traits = '';
         for (let effect of genderEffects) {
-            let current = gender.toLowerCase() === effect.gender? ' current' : '';
+            let current = gender.toLowerCase() === effect.gender ? ' current' : '';
             traits += `<div class="flex-grow gender${current}" data-gender="${effect.gender}" >${effect.gender}: ${effect.name}</div>`;
         }
-        if(traits === ''){
+        if (traits === '') {
             traits = `<div>This species has no traits related to sex.</div>`;
         }
 
@@ -331,11 +345,6 @@ export class SWSEActorSheet extends ActorSheet {
         }
         return {low: parseInt(range.replace("+", "")), high: -1};
     }
-
-    getPrerequisiteByName(trait, searchString) {
-        return trait.data.data.prerequisites.filter(prepreq => prepreq.startsWith(searchString))[0];
-    }
-
     async _selectAttributeGeneration(event, sheet) {
         let genType = sheet.actor.getAttributeGenerationType();
         let rollSelected = genType === 'Roll' ? 'selected' : '';
@@ -364,27 +373,34 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     getPointBuyTotal() {
-        if(this.actor.data.data.isDroid){
+        if (this.actor.data.data.isDroid) {
             return CONFIG.SWSE.Abilities.droidPointBuyTotal;
         }
         return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
     }
 
     updateTotal(html) {
-        let total = this.getTotal(html);
+        let values = this.getTotal(html);
 
         html.find(".adjustable-total").each((i, item) => {
-            item.innerHTML = total
+            item.innerHTML = values.total
+        })
+        html.find(".attribute-total").each((i, item) => {
+            let att = item.dataset.attribute
+            item.innerHTML = parseInt(values[att]) + parseInt(item.dataset.bonus);
         })
     }
 
     getTotal(html) {
         let abilityCost = CONFIG.SWSE.Abilities.abilityCost;
+        let response = {};
         let total = 0;
         html.find(".adjustable-value").each((i, item) => {
             total += abilityCost[item.innerHTML];
+            response[item.dataset["label"]] = item.innerHTML;
         })
-        return total;
+        response.total = total;
+        return response;
     }
 
     _onDragAbilityStart(event) {
@@ -586,7 +602,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
         newEl.addEventListener("keypress", (event) => {
-            if(event.code === 'Enter' || event.code === 'NumpadEnter') {
+            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
                 event.stopPropagation();
                 if (!changed) {
                     this._render();
@@ -642,11 +658,11 @@ export class SWSEActorSheet extends ActorSheet {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
         } else if (item.data.type === "forcePower") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
-        } else if (item.data.type === "forceTradition") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Traditions"));
+        } else if (item.data.type === "affiliation") {
+            entitiesToAdd.push(...await this.addForceItem(item, "Affiliations"));
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
-        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade"){
+        } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
             entitiesToAdd.push(item)
         }
         //await this.activateChoices(item, entitiesToAdd, context);
@@ -655,27 +671,25 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async addTalent(item) {
-        let possibleTalentTrees = [];
+        //TODO this should be a tighter system with less regex
+        let possibleTalentTrees = new Set();
+        let allTreesOnTalent = new Set();
         let optionString = "";
 
         if (item.data.data.bonusTalentTree === this.actor.data.data.bonusTalentTree) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
-                    possibleTalentTrees.push(id);
+                    possibleTalentTrees.add(id);
                 }
             }
         } else {
-            let pattern = /([\w\s\d-]*) Talent Trees?/;
-            for (let talentTree of item.data.data.categories) {
-                let type = pattern.exec(talentTree);
-                if (type) {
-                    talentTree = type[1] + " Talents";
-                    let count = this.actor.data.availableItems[talentTree];
-                    if (count && count > 0) {
-                        optionString += `<option value="${talentTree}">${talentTree}</option>`
-                        possibleTalentTrees.push(talentTree);
-                    }
+            for (let talentTree of item.data.data.possibleProviders) {
+                allTreesOnTalent.add(talentTree);
+                let count = this.actor.data.availableItems[talentTree];
+                if (count && count > 0) {
+                    optionString += `<option value="${talentTree}">${talentTree}</option>`
+                    possibleTalentTrees.add(talentTree);
                 }
             }
         }
@@ -683,15 +697,15 @@ export class SWSEActorSheet extends ActorSheet {
         //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
         // }
 
-        if (possibleTalentTrees.length === 0) {
+        if (possibleTalentTrees.size === 0) {
             await Dialog.prompt({
-                title: "You can't take any more talents of that type",
-                content: "You can't take any more talents of that type",
+                title: "You don't have more talents available of these types",
+                content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
                 callback: () => {
                 }
             });
             return [];
-        } else if (possibleTalentTrees.length > 1) {
+        } else if (possibleTalentTrees.size > 1) {
             let content = `<p>Select an unused talent source.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
@@ -701,18 +715,19 @@ export class SWSEActorSheet extends ActorSheet {
                 content: content,
                 callback: async (html) => {
                     let key = html.find("#choice")[0].value;
-                    possibleTalentTrees = [key];
+                    possibleTalentTrees = new Set();
+                    possibleTalentTrees.add(key);
                 }
             });
         }
 
-        item.data.data.talentTreeSource = possibleTalentTrees[0];
+        item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
         return await this.checkPrerequisitesAndResolveOptions(item);
     }
 
     async addForceItem(item, itemType) {
-        if (!this.actor.data.availableItems[itemType] && itemType !== 'Force Traditions') {
+        if (!this.actor.data.availableItems[itemType] && itemType !== 'Affiliations') {
             await Dialog.prompt({
                 title: `You can't take any more ${itemType}`,
                 content: `You can't take any more ${itemType}`,
@@ -725,14 +740,50 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async checkPrerequisitesAndResolveOptions(item) {
-        if (item.data.data.prerequisites) {
-            let meetsPrereqs = this.actor.meetsPrerequisites(item.data.data.prerequisites, true);
-            if (meetsPrereqs.doesFail) {
-                return [];
-            }
-        }
         let entitiesToAdd = [item];
         await this.activateChoices(item, entitiesToAdd, {});
+
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
+
+        if (meetsPrereqs.failureList.length > 0) {
+            if (meetsPrereqs.doesFail) {
+                new Dialog({
+                    title: "You Don't Meet the Prerequisites!",
+                    content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+
+                return [];
+
+            } else {
+                new Dialog({
+                    title: "You MAY Meet the Prerequisites!",
+                    content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+            }
+        }
+
+        if (Array.from(this.actor.items.values()).map(i => i.data.finalName).includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName)) {
+            let itemType = item.data.type;
+            await Dialog.prompt({
+                title: `You already have this ${itemType}`,
+                content: `You have already taken the ${item.data.finalName} ${itemType}`,
+                callback: () => {
+                }
+            })
+            return [];
+        }
         return entitiesToAdd
     }
 
@@ -763,7 +814,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         for (let category of item.data.data.categories) {
-            if (!category.category.endsWith(" Bonus Feats")) {
+            if (!category.value.endsWith(" Bonus Feats")) {
                 possibleFeatTypes.push(category);
             }
         }
@@ -772,7 +823,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         let items = await this.checkPrerequisitesAndResolveOptions(item);
 
-        if(items.length>0){
+        if (items.length > 0) {
             items.push(...await this.addOptionalRuleFeats(item));
         }
 
@@ -781,11 +832,11 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClass(item) {
 
-        let meetsPrereqs = this.actor.meetsClassPrereqs(item.data.data.prerequisites);
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
         if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",
-                content: "You do not meet the prerequisites for this class:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',
@@ -798,7 +849,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (meetsPrereqs.failureList.length > 0) {
             new Dialog({
                 title: "You MAY Meet the Prerequisites!",
-                content: "You MAY meet the prerequisites for this class. Check the remaining reqs:<br/>" + this._formatPrerequisites(meetsPrereqs.failureList),
+                content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                 buttons: {
                     ok: {
                         icon: '<i class="fas fa-check"></i>',
@@ -844,8 +895,8 @@ export class SWSEActorSheet extends ActorSheet {
 
         let entities = []
         entities.push(item);
-        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.categories);
-        await this.actor.addItemsFromCompendium('feat', item, entities, this._getFeatsFromCategories(item.data.data.categories));
+        await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.traits);
+        await this.actor.addItemsFromCompendium('feat', item, entities, this.getFeatsFromProvidingTraits(item.data.data.traits));
         await this.actor.addItemsFromCompendium('item', item, entities, item.data.data.attributes.items);
         await this.activateChoices(item, entities, {});
         return entities;
@@ -1140,42 +1191,122 @@ export class SWSEActorSheet extends ActorSheet {
         return item === null;
     }
 
-    _formatPrerequisites(failureList) {
-        let format = "<ul>";
-        for (let fail of failureList) {
-            format = format + "<li>" + fail.message + "</li>";
-        }
-        return format + "</ul>";
-    }
-
-
-
-
-
     async _explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
-            if (key === 'EXOTIC_WEAPON') {
+            // if (key === 'EXOTIC_WEAPON') {
+            //     for (let weapon of game.generated.exoticWeapons) {
+            //         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+            //     }
+            // } else
+            if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
                 for (let weapon of game.generated.exoticWeapons) {
-                    resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+                    }
                 }
-            } else if (key === 'PROFICIENT_WEAPON') {
+            }
+                //     else if (key === 'PROFICIENT_WEAPON') {
+                //     for (let weapon of this.actor.data.proficiency.weapon) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else if (key === 'AVAILABLE_WEAPON_FOCUS') {
                 for (let weapon of this.actor.data.proficiency.weapon) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'FOCUS_WEAPON') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+            } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
+                for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
+                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'TRAINED_SKILL') {
+            }
+                // else if (key === 'FOCUS_WEAPON') {
+                //     for (let weapon of this.actor.data.proficiency.focus) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+                // }
+                // else if (key === 'TRAINED_SKILL') {
+                //     for (let weapon of this.actor.data.prerequisites.trainedSkills) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else if (key === 'AVAILABLE_SKILL_FOCUS') {
                 for (let weapon of this.actor.data.prerequisites.trainedSkills) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else if (key === 'FOCUS_SKILL') {
+            } else if (key === 'AVAILABLE_SKILL_MASTERY') {
                 for (let weapon of this.actor.data.prerequisites.focusSkills) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    if (!this.actor.data.prerequisites.masterSkills.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
                 }
-            } else {
+            } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.weapon) {
+                    if (!this.actor.data.proficiency.doubleAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.tripleAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.savageAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
+                for (let weapon of this.actor.data.proficiency.doubleAttack) {
+                    if (!this.actor.data.proficiency.relentlessAttack.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.autofireSweep.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.autofireAssault.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_HALT') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.halt.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_RETURN_FIRE') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.returnFire.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
+                for (let weapon of this.actor.data.proficiency.focus) {
+                    if (!this.actor.data.proficiency.criticalStrike.includes(weapon.toLowerCase())) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            }
+                // else if (key === 'FOCUS_SKILL') {
+                //     for (let weapon of this.actor.data.prerequisites.focusSkills) {
+                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                //     }
+            // }
+            else {
                 resolvedOptions[key] = value;
             }
         }
@@ -1184,7 +1315,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _selectAttributeScores(event, sheet, scores, canReRoll) {
         if (Object.keys(scores).length === 0) {
-            let existingValues = sheet.actor.getAttributes();
+            let existingValues = sheet.actor.getAttributeBases();
 
             scores = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
             for (let val of Object.keys(existingValues)) {
@@ -1267,7 +1398,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _selectAttributesManually(event, sheet) {
-        let existingValues = sheet.actor.getAttributes();
+        let existingValues = sheet.actor.getAttributeBases();
         let combined = {};
         for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
@@ -1357,11 +1488,12 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async _assignAttributePoints(event, sheet) {
-        let existingValues = sheet.actor.getAttributes();
+    async  _assignAttributePoints(event, sheet) {
+        let existingValues = sheet.actor.getAttributeBases();
+        let bonuses = sheet.actor.getAttributeBonuses();
         let combined = {};
         for (let val of Object.keys(existingValues)) {
-            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
+            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val], bonus:bonuses[val]};
         }
 
         let data = {
@@ -1392,7 +1524,7 @@ export class SWSEActorSheet extends ActorSheet {
                     const valueContainer = parent.children(".adjustable-value");
                     valueContainer.each((i, item) => {
                         item.innerHTML = parseInt(item.innerHTML) + 1;
-                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html) > sheet.getPointBuyTotal()) {
+                        if (parseInt(item.innerHTML) > 18 || sheet.getTotal(html).total > sheet.getPointBuyTotal()) {
                             item.innerHTML = parseInt(item.innerHTML) - 1;
                         }
                     });
@@ -1435,10 +1567,15 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    _getFeatsFromCategories(categories = []) {
+    /**
+     *
+     * @param {[Trait]} traits
+     * @returns {[string]}
+     */
+    getFeatsFromProvidingTraits(traits = []) {
         let feats = [];
-        for (let category of categories) {
-            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(category.category);
+        for (let trait of traits) {
+            let result = /Bonus Feat \(([\w\s()]*)\)/.exec(trait.trait);
             if (result) {
                 feats.push(result[1])
             }
@@ -1447,9 +1584,11 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _unavailable() {
-        Dialog.confirm({
+        Dialog.prompt({
             title: "Sorry this content isn't finished.",
-            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know."
+            content: "Sorry, this content isn't finished.  if you have an idea of how you think it should work please let me know.",
+            callback: () => {
+            }
         })
     }
 
@@ -1458,11 +1597,11 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (item.name === 'Point-Blank Shot') {
             if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    await this.actor.addItemsFromCompendium('feat', {
-                        name: item.name,
-                        data: {type: 'feat'},
-                        id: item._id
-                    }, items, {category:'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
+                await this.actor.addItemsFromCompendium('feat', {
+                    name: item.name,
+                    data: {type: 'feat'},
+                    id: item._id
+                }, items, {category: 'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
             }
         }
 
@@ -1472,8 +1611,35 @@ export class SWSEActorSheet extends ActorSheet {
     static parseSourceId(sourceId) {
         let first = sourceId.indexOf(".");
         let lastIndex = sourceId.lastIndexOf(".");
-        let pack = sourceId.substr(first+1, lastIndex - first-1);
-        let id = sourceId.substr(lastIndex+1);
+        let pack = sourceId.substr(first + 1, lastIndex - first - 1);
+        let id = sourceId.substr(lastIndex + 1);
         return {id, pack};
+    }
+
+    _prerequisiteHasTypeInStructure(prereq, type) {
+        if (!prereq) {
+            return false;
+        }
+        if (prereq.type === type) {
+            return prereq;
+        }
+        if (prereq.children) {
+            for (let child of prereq.children) {
+                let prerequisiteHasTypeInStructure = this._prerequisiteHasTypeInStructure(child, type);
+                if (prerequisiteHasTypeInStructure) {
+                    return prerequisiteHasTypeInStructure;
+                }
+            }
+        }
+        return false;
+    }
+
+    _onActivateItem(ev) {
+        //const div = $(ev.currentTarget).parents(".attack");
+        let elem = ev.currentTarget;
+        let itemId = elem.dataset.itemId;
+        //let itemId = div.data("itemId");
+        this.actor.rollOwnedItem(itemId);
+        return undefined;
     }
 }

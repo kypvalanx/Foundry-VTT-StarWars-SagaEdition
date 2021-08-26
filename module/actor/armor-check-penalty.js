@@ -29,17 +29,15 @@ export function generateArmorCheckPenalties(actor) {
     let wearingMedium = false;
     let wearingHeavy = false;
 
-    for(let armor of filterItemsByType(actor.items.values(), "armor")){
-        if(actor.data.data.equippedIds.includes(armor._id)) {
-            if('Heavy Armor' === armor.data.data.armor.type || armor.data.data.armor.stripping.makeHeavy){
-                wearingHeavy = true;
-            }
-            if('Medium Armor' === armor.data.data.armor.type || (armor.data.data.armor.stripping.makeMedium && !armor.data.data.armor.stripping.makeHeavy)){
-                wearingMedium = true;
-            }
-            if('Light Armor' === armor.data.data.armor.type){
-                wearingLight = true;
-            }
+    for(let armor of filterItemsByType(actor.getEquippedItems(), "armor")){
+        if('Heavy' === armor.armorType){
+            wearingHeavy = true;
+        }
+        if('Medium' === armor.armorType){
+            wearingMedium = true;
+        }
+        if('Light' === armor.armorType){
+            wearingLight = true;
         }
     }
 

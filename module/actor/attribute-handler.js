@@ -1,4 +1,4 @@
-import {resolveValueArray} from "../util.js";
+import {getLongKey, resolveValueArray} from "../util.js";
 
 /**
  *
@@ -7,12 +7,12 @@ import {resolveValueArray} from "../util.js";
 export function generateAttributes(actor) {
     let actorData = actor.data;
 
-    actorData.data.lockAttributes = actor.shouldLockAttributes()
+    actorData.data.lockAttributes = actor.shouldLockAttributes
     let attributeTraits = actor.getTraitByKey('attributeBonus')
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
-        let longKey = actor._getLongKey(key);
+        let longKey = getLongKey(key);
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
@@ -56,7 +56,8 @@ export function generateAttributes(actor) {
         bonuses.push(attribute.buffBonus);
         bonuses.push(attribute.customBonus );
 
-        for (let levelAttributeBonus of Object.values(actorData.data.levelAttributeBonus).filter(b => b != null)) {
+        let attributeBonus = actorData.data.levelAttributeBonus;
+        for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {
             bonuses.push(levelAttributeBonus[key])
         }
 
@@ -64,7 +65,7 @@ export function generateAttributes(actor) {
         attribute.bonus = resolveValueArray(bonuses, actor);
         attribute.total = attribute.skip ? 10 : attribute.base + attribute.bonus;
         attribute.mod = Math.floor((attribute.total - 10) / 2);
-        attribute.roll = attribute.mod + actor.getConditionBonus()
+        attribute.roll = attribute.mod + actor.conditionBonus;
         attribute.label = key.toUpperCase();
         actor.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
         actor.resolvedLabels.set("@" + attribute.label, attribute.label);

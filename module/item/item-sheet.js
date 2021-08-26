@@ -115,6 +115,7 @@ export class SWSEItemSheet extends ItemSheet {
     });
 
     html.find('.value-plus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -123,10 +124,14 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor+1;
+      if(typeof target.data("high") === "number"){
+        update[name] = Math.min(update[name], target.data("high"));
+      }
       this.object.update(update);
     });
 
     html.find('.value-minus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -135,33 +140,16 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor-1;
+      if(typeof target.data("low") === "number"){
+        update[name] = Math.max(update[name], target.data("low"));
+      }
       this.object.update(update);
     });
 
-    // html.find('.add-attack').click(ev => {
-    //   this.object.addAttack().then(this.render(true));
-    // });
-    //
-    // html.find('.remove-attack').click(ev => {
-    //   const li = $(ev.currentTarget).parents(".attribute");
-    //   this.object.removeAttack(li.data("attribute")).then(this.render(true));
-    // });
-    //
-    // html.find('.add-category').click(ev => {
-    //   this.object.addCategory().then(this.render(true));
-    //   console.log(this.object)
-    // });
-    //
-    // html.find('.remove-category').click(ev => {
-    //   const li = $(ev.currentTarget).parents(".attribute");
-    //   this.object.removeCategory(li.data("attribute")).then(this.render(true));
-    //   console.log(this.object)
-    // });
-
-
-    // html.find('form').each((i, li) => {
-    //       li.addEventListener("drop", (ev) => this._onDrop(ev));
-    //     });
+    // Add general text box (span) handler
+    html.find("span.text-box.direct").on("click", (event) => {
+      this._onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+    });
 
 
     // Roll handlers, click handlers, etc. would go here.
@@ -193,7 +181,7 @@ export class SWSEItemSheet extends ItemSheet {
 
     // Owned Items
     if ( li.dataset.itemId ) {
-      const item = this.item.data.mods.find(i => {return i._id ===li.dataset.itemId});
+      const item = this.item.mods.find(i => {return i._id ===li.dataset.itemId});
       dragData.type = "Item";
       dragData.data = item;
     }
@@ -214,26 +202,31 @@ export class SWSEItemSheet extends ItemSheet {
     } catch (err) {
       return false;
     }
-    let itemType = this.item.type;
-    if(droppedItem.data.type ==='upgrade'){
-      if((itemType === 'armor' && droppedItem.data.data.upgrade.type.includes("Armor Upgrade")) ||
-          (itemType === 'weapon' && droppedItem.data.data.upgrade.type.includes("Weapon Upgrade"))){
-        let actor = this.actor;
-        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
-        await this.item.takeOwnership(ownedItem);
-      }
 
-    }else if(droppedItem.data.type ==='template'){
+    let actor = this.actor;
+    let ownedItem = actor.getOwnedItem(droppedItem.data._id);
+
+    let itemType = this.item.type;
+    // if(droppedItem.data.type ==='upgrade'){
+    //   if((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
+    //       (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
+    //     await this.item.takeOwnership(ownedItem);
+    //   }
+    //
+    // }else
+      if(droppedItem.data.type ==='template'){
 
       if(this._canAttach(droppedItem.data.data.attributes.application)){
-        let actor = this.actor;
-        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
         await this.item.takeOwnership(ownedItem);
       } else{
         //debugger
       }
 
     }else{
+      if((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
+          (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
+        await this.item.takeOwnership(ownedItem);
+      }
       console.log("can't add this to an item");
     }
   }

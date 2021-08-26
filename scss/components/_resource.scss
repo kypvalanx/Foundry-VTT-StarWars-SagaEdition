@@ -4,6 +4,7 @@
 }
 .center{
   text-align: center;
+  margin: auto;
 }
 table.fixed{
   table-layout: fixed;
@@ -35,9 +36,16 @@ table.fixed{
     }
   }
 }
+.padding-3{
+  padding: 3px;
+}
 .direct{
   cursor: text;
 }
+.button{
+  cursor: pointer;
+}
+
 .draggable{
 
 }
@@ -88,8 +96,55 @@ table.skill {
 .container{
   border: 1px dotted dimgray;
 }
+.dark-side-button{
+  width: 30px;
+  height: 50px;
+  min-width: 30px;
+  min-height: 50px;
+  padding-top: 17px;
+  padding-left: 5px;
+  text-align: center;
+  border: 1px solid;
+}
+.dark-side-block{
+   width: 380px;
+  max-width: 380px;
+ }
+.dark-side-button.active{
+  background-color: red;
+}
+
 .movable{
   padding: 17px;
   text-align: center;
   border: 1px solid;
+}
+.text-center{
+   text-align: center;
+}
+
+.tiny{
+  width: 20px
+}
+.small{
+  width: 90px
+}
+
+.top{
+  display: block;
+}
+
+.min-width-15{
+
+  min-width: 15px;
+}
+
+.fas{
+  horiz-align: center;
+  min-width: 16px;
+}
+
+.portrait-container{
+  width: 200px;
+  height: 200px;
 }
