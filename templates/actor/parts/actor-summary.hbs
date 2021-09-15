@@ -1,21 +1,20 @@
 
 <!--TODO find a spot for the portrait -->
 <div class="summary-header swse">
-    <div class="name"><label for="name">Name</label><h2><input class="plain" name="name" type="text" value="{{actor.name}}"
+    <div class="name"><label for="name">Name</label><h2><input class="plain" name="name" type="text" value="{{actor.data.name}}"
                                                            placeholder=""/></h2></div>
-    <div class="player"><label for="player">Player</label><h2><input class="plain" name="player" type="text"
-                                                                     value="{{actor.player}}" placeholder=""/></h2></div>
-
-    <div class="classes"><label for="classes">Classes</label><div class="plain input static">{{actor.classSummary}}</div></div>
-    <div class="level"><label for="level">Level</label><div class="plain input static">{{actor.levelSummary}}</div></div>
+    <div class="player"><label for="player">Player</label><h2><input class="plain" name="data.player" type="text"
+                                                                     value="{{actor.data.data.player}}" placeholder=""/></h2></div>
+    <div class="classes"><label for="classes">Classes</label><div class="plain input static">{{actor.data.classSummary}}</div></div>
+    <div class="level"><label for="level">Level</label><div class="plain input static">{{actor.data.levelSummary}}</div></div>
 
     <div class="species">
 
         <label for="species">Species</label>
-        <div class="flex item" id="view-species" data-item-id="{{actor.species._id}}">
+        <div class="flex item" id="view-species" data-item-id="{{actor.species.id}}">
 
             {{#if actor.species}}
-                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species._id}}">{{actor.species.name}}</div>
+                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species.id}}">{{actor.species.name}}</div>
                 <div class="species-controls flex-col">
                     <a class="species-control edit" title="view item"><i
                             class="fas fa-eye"></i></a>
@@ -39,9 +38,9 @@
         <label for="gender">Gender</label>
         <div id="selectGender">
             <div class="plain input rollable">{{#if
-                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless
-                    actor.data.gender}}{{#if
-                    actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
+                    actor.data.data.gender}}{{actor.data.data.gender}}{{/if}}{{#unless
+                    actor.data.data.gender}}{{#if
+                    actor.data.data.sex}}{{actor.data.data.sex}}{{/if}}{{#unless actor.data.data.sex}}
                 Select Gender{{/unless}}{{/unless}}</div>
         </div>
 
@@ -50,18 +49,18 @@
         <label for="age">Age</label>
         <div id="selectAge">
             <div class="plain input rollable">{{#if
-                    actor.data.age}}{{actor.data.age}} years{{/if}}{{#unless actor.data.age}}
+                    actor.data.data.age}}{{actor.data.data.age}} years{{/if}}{{#unless actor.data.data.age}}
                 Select Age{{/unless}}</div>
         </div>
     </div>
-    <div class="height"><label for="height">Height</label><h2><input class="plain" name="height" type="text"
-                                                                     value="{{actor.height}}" placeholder="Height"/></h2></div>
-    <div class="weight"><label for="weight">Weight</label><h2><input class="plain" name="weight" type="text"
-                                                                 value="{{actor.weight}}" placeholder="Weight"/></h2></div>
-    <div class="destiny"><label for="destiny">Destiny</label><h2><input class="plain" name="destiny" type="text"
-                                                                    value="{{actor.destiny}}" placeholder="Destiny"/></h2>
+    <div class="height"><label for="height">Height</label><h2><input class="plain" name="data.height" type="text"
+                                                                     value="{{actor.data.data.height}}" placeholder="Height"/></h2></div>
+    <div class="weight"><label for="weight">Weight</label><h2><input class="plain" name="data.weight" type="text"
+                                                                 value="{{actor.data.data.weight}}" placeholder="Weight"/></h2></div>
+    <div class="destiny"><label for="destiny">Destiny</label><h2><input class="plain" name="data.destiny" type="text"
+                                                                    value="{{actor.data.data.destiny}}" placeholder="Destiny"/></h2>
     </div>
-    <div class="experience"><label for="experience">XP</label><h2><input class="plain" name="experience" type="text"
-                                                                     value="{{actor.experience}}" placeholder="0"/></h2>
+    <div class="experience"><label for="experience">XP</label><h2><input class="plain" name="data.experience" type="text"
+                                                                     value="{{actor.data.data.experience}}" placeholder="0"/></h2>
     </div>
 </div>

@@ -38,7 +38,7 @@ export function generateAttributes(actor) {
                 speciesBonuses.push(trait.data.attributes.attributeBonus.bonus);
                 continue;
             }
-            bonuses.push(result[1])
+            bonuses.push(trait.data.attributes.attributeBonus.bonus)
 
         }
         attribute.classLevelBonus = resolveValueArray(classLevelBonuses, actor);

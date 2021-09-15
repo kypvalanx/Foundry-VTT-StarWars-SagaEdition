@@ -11,8 +11,8 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
 
     let pack = await game.packs.find(p => p.metadata.label === compendiumName);
 
-    let toks = pack.metadata.name.split("-");
-    let version = toks[toks.length - 1];
+    let toks = pack?.metadata.name.split("-");
+    let version = toks ? toks[toks?.length - 1] : 0;
     if (!pack || (!isNaN(version)? parseInt(version) : 0) < content.version || forceRefresh) {
         if (pack) {
             await pack.deleteCompendium()

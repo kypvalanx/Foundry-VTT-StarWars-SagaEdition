@@ -21,6 +21,99 @@ export class SWSEActor extends Actor {
 
     resolvedLabels = new Map();
 
+
+    /**
+     * Augment the basic actor data with additional dynamic data.
+     */
+    async prepareData() {
+        await super.prepareData();
+        const actorData = this.data;
+        // Make separate methods for each Actor type (character, npc, etc.) to keep
+        // things organized.
+        if (actorData.type === 'character') await this._prepareCharacterData(actorData);
+        if (actorData.type === 'npc') await this._prepareCharacterData(actorData);
+    }
+
+    /**
+     * Prepare Character type specific data
+     */
+    async _prepareCharacterData(actorData) {
+        this.data.prerequisites = {};
+
+        new SpeciesHandler().generateSpeciesData(this);
+        let {bab, level, classSummary} = this._generateClassData(actorData);
+        this.data.data.condition = this.data.data.condition || 0;
+
+        actorData.levelSummary = level;
+        actorData.classSummary = classSummary;
+
+        this.equipped = this.getEquippedItems().map(item => item.data);
+        this.unequipped = this.getUnequippedItems().map(item => item.data);
+        this.inventory = this.getNonequippableItems().map(item => item.data);
+        this.traits = await this.getTraits().map(trait => trait.data);
+        this.talents = this.getTalents().map(talent => talent.data);
+        this.powers = this.getPowers().map(item => item.data);
+        this.secrets = this.getSecrets().map(item => item.data);
+        this.techniques = this.getTechniques().map(item => item.data);
+        this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
+        this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
+
+        actorData.speed = this.speed;
+
+        generateAttributes(this);
+
+        //separated for now.  this part handles the darkside score widget.  it's clever i swear
+        {
+            for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
+                actorData.data.darkSideArray = actorData.data.darkSideArray || [];
+
+                if (actorData.data.darkSideScore < i) {
+                    actorData.data.darkSideArray.push({value: i, active: false})
+                } else {
+                    actorData.data.darkSideArray.push({value: i, active: true})
+                }
+            }
+        }
+
+        actorData.acPenalty = generateArmorCheckPenalties(this);
+
+        await generateSkills(this);
+
+        actorData.data.offense = await new OffenseHandler().resolveOffense(this, bab);
+        let feats = this.resolveFeats();
+        this.feats = feats.activeFeats;
+
+        actorData.hideForce = 0 === this.feats.filter(feat => {
+            return feat.name === 'Force Training'
+        }).length
+
+        actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
+
+        this.generateProvidedItemsFromItems(actorData);
+        this._reduceProvidedItemsByExistingItems(actorData);
+
+        actorData.data.health = resolveHealth(this);
+        let {defense, armors} = resolveDefenses(this);
+        actorData.data.defense = defense;
+        actorData.data.armors = armors;
+
+        await generateAttacks(this);
+        await this._manageAutomaticItems(actorData, feats.removeFeats);
+        if (await this.handleLeveBasedAttributeBonuses(actorData)) {
+            return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
+        }
+
+        try {
+            if (this.sheet?.rendered) {
+                this.sheet.render(true);
+            } else {
+                this.sheet.render(false)
+            }
+        } catch (e) {
+            console.log("couldn't find charactersheet.  probably fine")
+        }
+    }
+
     get classes() {
         return this.data.classes;
     }
@@ -58,98 +151,6 @@ export class SWSEActor extends Actor {
         let result = /([\w\s]*)\s(\d*)/.exec(speed);
 
         return `${result[1]} ${Math.floor(parseInt(result[2])*3/4)}`
-    }
-
-    /**
-     * Augment the basic actor data with additional dynamic data.
-     */
-    async prepareData() {
-        await super.prepareData();
-        const actorData = this.data;
-        // Make separate methods for each Actor type (character, npc, etc.) to keep
-        // things organized.
-        if (actorData.type === 'character') await this._prepareCharacterData(actorData);
-        if (actorData.type === 'npc') await this._prepareCharacterData(actorData);
-    }
-
-    /**
-     * Prepare Character type specific data
-     */
-    async _prepareCharacterData(actorData) {
-        this.data.prerequisites = {};
-
-        new SpeciesHandler().generateSpeciesData(this);
-        let {bab, level, classSummary} = this._generateClassData(actorData);
-        this.data.data.condition = this.data.data.condition || 0;
-
-        actorData.levelSummary = level;
-        actorData.classSummary = classSummary;
-
-        actorData.equipped = this.getEquippedItems().map(item => item.data);
-        actorData.unequipped = this.getUnequippedItems().map(item => item.data);
-        actorData.inventory = this.getNonequippableItems().map(item => item.data);
-        actorData.traits = await this.getTraits().map(trait => trait.data);
-        actorData.talents = this.getTalents().map(talent => talent.data);
-        actorData.powers = this.getPowers().map(item => item.data);
-        actorData.secrets = this.getSecrets().map(item => item.data);
-        actorData.techniques = this.getTechniques().map(item => item.data);
-        actorData.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
-        actorData.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
-
-        actorData.speed = this.speed;
-
-        generateAttributes(this);
-
-        //separated for now.  this part handles the darkside score widget.  it's clever i swear
-        {
-            for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
-                actorData.data.darkSideArray = actorData.data.darkSideArray || [];
-
-                if (actorData.data.darkSideScore < i) {
-                    actorData.data.darkSideArray.push({value: i, active: false})
-                } else {
-                    actorData.data.darkSideArray.push({value: i, active: true})
-                }
-            }
-        }
-
-        actorData.acPenalty = await generateArmorCheckPenalties(this);
-
-        await generateSkills(this);
-
-        actorData.data.offense = await new OffenseHandler().resolveOffense(this, bab);
-        let feats = this.feats;
-        actorData.feats = feats.activeFeats;
-
-        actorData.hideForce = 0 === actorData.feats.filter(feat => {
-            return feat.name === 'Force Training'
-        }).length
-
-        actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
-
-        this.generateProvidedItemsFromItems(actorData);
-        this._reduceProvidedItemsByExistingItems(actorData);
-
-        actorData.data.health = await resolveHealth(this);
-        let {defense, armors} = await resolveDefenses(this);
-        actorData.data.defense = defense;
-        actorData.data.armors = armors;
-
-        await generateAttacks(this);
-        await this._manageAutomaticItems(actorData, feats.removeFeats);
-        if (await this.handleLeveBasedAttributeBonuses(actorData)) {
-            return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
-        }
-
-        try {
-            if (this.sheet?.rendered) {
-                this.sheet.render(true);
-            } else {
-                this.sheet.render(false)
-            }
-        } catch (e) {
-            console.log("couldn't find charactersheet.  probably fine")
-        }
     }
 
     getTraits() {
@@ -259,7 +260,7 @@ export class SWSEActor extends Actor {
         return filterItemsByType1;
     }
 
-    get feats() {
+    resolveFeats() {
         let actorData = this.data;
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
@@ -468,7 +469,7 @@ export class SWSEActor extends Actor {
      * Extracts important stats from the class
      */
     _generateClassData(actorData) {
-        actorData.classes = filterItemsByType(actorData.items, "class");
+        actorData.classes = filterItemsByType(this.items, "class");
 
         let classLevels = {};
         let classFeatures = [];
@@ -494,7 +495,7 @@ export class SWSEActor extends Actor {
     handleLeveBasedAttributeBonuses(actorData) {
         let characterLevel = this.classes.length;
         if (characterLevel > 0) {
-            this.classes[characterLevel - 1].isLatest = true;
+            this.classes[characterLevel - 1].data.isLatest = true;
         }
 
         let hasUpdate = false;
@@ -541,8 +542,8 @@ export class SWSEActor extends Actor {
         //     }
         // }
 
-        if (hasUpdate) {
-            return this.update({'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
+        if (hasUpdate && this.id) {
+            return this.update({_id:this.id,'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
         }
         return undefined;
     }
@@ -643,8 +644,9 @@ export class SWSEActor extends Actor {
             return classSkills;
         }
         for (let charClass of this.classes) {
-            if (charClass.data.skills) {
-                for (let skill of charClass.data.skills.skills) {
+            let skills = charClass.data.data.skills;
+            if (skills) {
+                for (let skill of skills.skills) {
                     if (skill.toLowerCase() === "knowledge (all skills, taken individually)") {
                         classSkills.add("knowledge (galactic lore)");
                         classSkills.add("knowledge (bureaucracy)");
@@ -673,7 +675,7 @@ export class SWSEActor extends Actor {
 
     getFirstClass() {
         for (let charClass of this.classes || []) {
-            if (charClass.data.attributes.first === true) {
+            if (charClass.data.data.attributes.first === true) {
                 return charClass;
             }
         }
@@ -681,12 +683,12 @@ export class SWSEActor extends Actor {
     }
 
     async _manageAutomaticItems(actorData, removeFeats) {
-        let itemIds = actorData.items.flatMap(i => [i._id, i.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
+        let itemIds = Array.from(actorData.items.values()).flatMap(i => [i.id, i.data.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
 
         let removal = [];
         removeFeats.forEach(f => removal.push(f._id))
         for (let item of actorData.items) {
-            let itemData = item.data;
+            let itemData = item.data.data;
             if (itemData.isSupplied) {
                 //console.log(itemIds, itemData.supplier)
                 if (!itemIds.includes(itemData.supplier.id) || !itemData.supplier) {
@@ -700,7 +702,7 @@ export class SWSEActor extends Actor {
         }
         if (removal.length > 0) {
             try {
-                await this.deleteEmbeddedEntity("OwnedItem", removal, {});
+                await this.deleteEmbeddedDocuments("Item", removal);
             } catch (e) {
                 console.log(e);
                 //this will be run in to if multiple sessions try to delete teh same item
@@ -711,7 +713,7 @@ export class SWSEActor extends Actor {
 
     getTraitAttributesByKey(attributeKey) {
         let values = [];
-        for (let ability of this.data.traits) {
+        for (let ability of this.traits) {
             let attribute = ability.data.attributes[attributeKey];
             if (attribute) {
                 if (Array.isArray(attribute)) {
@@ -726,7 +728,7 @@ export class SWSEActor extends Actor {
 
     getTraitByKey(attributeKey) {
         let values = [];
-        for (let trait of this.data.traits) {
+        for (let trait of this.traits) {
             let attribute = trait.data.attributes[attributeKey];
             if (attribute) {
                 values.push(trait)
@@ -754,14 +756,16 @@ export class SWSEActor extends Actor {
 
         let entities = [];
         let notificationMessage = "";
-        let pack = this.getCompendium(compendium);
+        let pack = SWSEActor.getCompendium(compendium);
         let index = await pack.getIndex();
         for (let item of items.filter(item => item)) {
             let {itemName, prerequisite, payload} = this.resolveItemParts(item);
 
-            let entry = await index.find(f => f.name === this.cleanItemName(itemName));
+            let cleanItemName1 = this.cleanItemName(itemName);
+            let entry = await index.find(f => f.name === cleanItemName1);
             if (!entry) {
-                entry = await index.find(f => f.name === this.cleanItemName(itemName + " (" + payload + ")"));
+                let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
+                entry = await index.find(f => f.name === cleanItemName2);
             }
 
             if (!entry) {
@@ -770,7 +774,9 @@ export class SWSEActor extends Actor {
             }
 
             let entity = await pack.getDocument(entry._id);
-            let data = entity.data.data;
+            //entity.data.data = entity.data.data || {};
+
+            entity.prepareData();
 
             // for (let prerequisite of data.prerequisites) {
             //     if(prerequisite.requirement){
@@ -780,7 +786,7 @@ export class SWSEActor extends Actor {
 
 
             if (prerequisite) {
-                data.prerequisite = prerequisite;
+                entity.setPrerequisite(prerequisite);
             }
 
             if (parentItem) {
@@ -793,7 +799,7 @@ export class SWSEActor extends Actor {
             entity.setSourceString();
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
-            entities.push(entity);
+            entities.push(entity.data.toObject(false));
         }
         additionalEntitiesToAdd.push(...entities);
         return {addedEntities: entities, notificationMessage: notificationMessage};
@@ -820,14 +826,14 @@ export class SWSEActor extends Actor {
     }
 
 
-    getCompendium(type) {
+    static getCompendium(type) {
         switch (type) {
             case 'item':
-                return game.packs.get('world.swse-items');
+                return game.packs.find(p => p.metadata.label === "SWSE Items");
             case 'trait':
-                return game.packs.get('world.swse-traits');
+                return game.packs.find(p => p.metadata.label === "SWSE Traits");
             case 'feat':
-                return game.packs.get('world.swse-feats');
+                return game.packs.find(p => p.metadata.label === "SWSE Feats");
         }
     }
 
@@ -857,7 +863,7 @@ export class SWSEActor extends Actor {
 
     async filterOutInvisibleAbilities(actorData) {
         let filtered = [];
-        for (let trait of actorData.traits) {
+        for (let trait of this.traits) {
             if (trait.name === 'Species' || trait.name === 'Homebrew Content' || trait.name === 'Web Enhancements' || trait.name.includes('Creations')) {
 
                 continue;
@@ -868,10 +874,10 @@ export class SWSEActor extends Actor {
     }
 
     _reduceProvidedItemsByExistingItems(actorData) {
-        for (let talent of actorData.talents) {
+        for (let talent of this.talents) {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
         }
-        for (let feat of actorData.feats) {
+        for (let feat of this.feats) {
             if (feat.data.isSupplied) {
                 continue;
             }
@@ -881,9 +887,9 @@ export class SWSEActor extends Actor {
             }
             this.reduceAvailableItem(actorData, type);
         }
-        this.reduceAvailableItem(actorData, "Force Secrets", actorData.secrets.length);
-        this.reduceAvailableItem(actorData, "Force Techniques", actorData.techniques.length);
-        this.reduceAvailableItem(actorData, "Force Powers", actorData.powers.length);
+        this.reduceAvailableItem(actorData, "Force Secrets", this.secrets.length);
+        this.reduceAvailableItem(actorData, "Force Techniques", this.techniques.length);
+        this.reduceAvailableItem(actorData, "Force Powers", this.powers.length);
     }
 
     reduceAvailableItem(actorData, type, reduceBy = 1) {
@@ -900,7 +906,7 @@ export class SWSEActor extends Actor {
 
     //TODO this seems Force Training specific.  maybe move it.
     generateProvidedItemsFromItems(actorData) {
-        for (let feat of actorData.feats) {
+        for (let feat of this.feats) {
             if (feat.name === 'Force Training') {
                 let type = 'Force Powers';
                 let forcePowers = Math.max(1, 1 + actorData.data.attributes.wis.mod);
@@ -911,7 +917,7 @@ export class SWSEActor extends Actor {
                 }
             }
         }
-        for (let trait of actorData.traits) {
+        for (let trait of this.traits) {
             if (trait.data.finalName === 'Bonus Feat') {
                 //TODO find species that have this category that shouldn't
                 let type = 'General Feats'

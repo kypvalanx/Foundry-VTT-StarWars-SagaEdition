@@ -86,6 +86,8 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
+    let heroicLevel = actor.getHeroicLevel();
+    total.push(heroicLevel);
     total.push(actor.characterLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
@@ -95,7 +97,7 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(traitBonus);
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([traitBonus, conditionBonus])
-    let armorBonus = 0;
+    let armorBonus = resolveValueArray([heroicLevel]);
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
@@ -176,7 +178,7 @@ function _getFortStatMod(actor) {
 function _getClassDefBonus(stat, actorData) {
     let bonus = 0;
     for (let charclass of actorData.classes) {
-        bonus = Math.max(bonus, charclass.data.defense[stat]);
+        bonus = Math.max(bonus, charclass.data.data.defense[stat]);
     }
     return bonus;
 }

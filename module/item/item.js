@@ -85,6 +85,8 @@ function toNumber(value) {
 export class SWSEItem extends Item {
     constructor(...args) {
         super(...args);
+        let {data, parent} = args;
+        this.data.data = data;
         this.items = this.items || [];
         this.hasItemOwner = this.hasItemOwner || false;
     }
@@ -102,7 +104,7 @@ export class SWSEItem extends Item {
     get name() {
         let itemData = this.data;
         let finalName = itemData.name;
-        if (itemData.data.payload && itemData.data.payload !== "" && !itemData.name.includes("(")) {
+        if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
             finalName = `${finalName} (${itemData.data.payload})`
         }
         for (let mod of this.mods) {
@@ -126,7 +128,7 @@ export class SWSEItem extends Item {
     }
     get mods(){
         let actor = this.actor;
-        if(!actor || !actor.items){
+        if(!actor || !actor.data || !actor.items){
             return [];
         }
 
@@ -411,6 +413,9 @@ export class SWSEItem extends Item {
         for (let child of prerequisite.children ? prerequisite.children : []) {
             this.crawlPrerequisiteTree(child, funct);
         }
+    }
+    setPrerequisite(prerequisite) {
+        this.data.data.prerequisite = prerequisite;
     }
 
     setParentItem(parentItem) {

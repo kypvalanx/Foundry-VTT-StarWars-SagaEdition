@@ -2,7 +2,7 @@
 <div class="dark-side-block panel">
     <h1 class="resource-label">Dark Side</h1>
     <div class="flex flex-row flex-wrap">
-        {{#each data.darkSideArray as | value|}}
+        {{#each data.data.darkSideArray as | value|}}
         <div class="dark-side-button button{{#if value.active}} active{{/if}}" data-value="{{value.value}}">{{value.value}}</div>
         {{/each}}
     </div>

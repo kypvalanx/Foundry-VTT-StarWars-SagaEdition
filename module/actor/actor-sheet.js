@@ -42,10 +42,7 @@ export class SWSEActorSheet extends ActorSheet {
     /** @override */
     getData(options) {
         const data = super.getData(options);
-        data.dtypes = ["String", "Number", "Boolean"];
-        for (let attr of Object.values(data.data.attributes)) {
-            attr.isCheckbox = attr.dtype === "Boolean";
-        }
+
         return data;
     }
 
@@ -55,6 +52,9 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
+
+
+        html.find("input.plain").on("change", this._onChangeInput.bind(this));
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
@@ -95,9 +95,9 @@ export class SWSEActorSheet extends ActorSheet {
         })
 
 
-        // html.find("div.item-container").each((i, div) => {
-        //   div.addEventListener("dragend", (ev) => this._onDragEnd(ev), false);
-        // });
+        html.find("div.item-container").each((i, div) => {
+          div.addEventListener("drop", (ev) => this._onDrop(ev), false);
+        });
 
         html.find("tr.skill").each((i, li) => {
             li.setAttribute("draggable", true);
@@ -148,7 +148,7 @@ export class SWSEActorSheet extends ActorSheet {
             let itemToDuplicate = this.actor.getOwnedItem(li.data("itemId"));
             let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
 
-            await this._onDropItem(ev, {id, pack, 'type': 'item'})
+            await this._onDropItem(ev, {id, pack, 'type': 'Item'})
         })
 
         // Rollable abilities.
@@ -162,6 +162,17 @@ export class SWSEActorSheet extends ActorSheet {
         });
     }
 
+
+    /** @inheritdoc */
+    _onDragStart(event) {
+        super._onDragStart(event);
+        let dragData = JSON.parse(event.dataTransfer.getData("text/plain"));
+
+        dragData.sourceContainer = this.getTargetItemContainer(event);
+
+        event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+    }
+
     async deleteItem(ev) {
         const li = $(ev.currentTarget).parents(".item");
 
@@ -169,7 +180,7 @@ export class SWSEActorSheet extends ActorSheet {
 
             let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
             await this.removeChildItems(itemToDelete);
-            await this.actor.deleteOwnedItem(li.data("itemId"));
+            await this.actor.deleteEmbeddedDocuments("Item", [li.data("itemId")]);
         } else {
 
             let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
@@ -181,7 +192,7 @@ export class SWSEActorSheet extends ActorSheet {
                     let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
                     await this.removeChildItems(itemToDelete);
 
-                    await this.actor.deleteOwnedItem(li.data("itemId"));
+                    await this.actor.deleteEmbeddedDocuments("Item", [li.data("itemId")]);
                     li.slideUp(200, () => this.render(false));
                     this.actor.data.data.equippedIds = this.actor.data.data.equippedIds.filter((val) => {
                         return val !== li.data("itemId")
@@ -408,12 +419,12 @@ export class SWSEActorSheet extends ActorSheet {
 
         const result = {
             type: "ability",
-            actor: this.actor._id,
+            actor: this.actor.id,
             ability: elem.dataset.label
         };
         if (this.actor.isToken) {
-            result.sceneId = canvas.scene._id;
-            result.tokenId = this.actor.token._id;
+            result.sceneId = canvas.scene.id;
+            result.tokenId = this.actor.token.id;
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(result));
@@ -427,14 +438,14 @@ export class SWSEActorSheet extends ActorSheet {
 
         const result = {
             type: "skill",
-            actor: this.actor._id,
+            actor: this.actor.id,
             skill: skill,
             label: label
 
         };
         if (this.actor.isToken) {
-            result.sceneId = canvas.scene._id;
-            result.tokenId = this.actor.token._id;
+            result.sceneId = canvas.scene.id;
+            result.tokenId = this.actor.token.id;
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(result));
@@ -449,14 +460,14 @@ export class SWSEActorSheet extends ActorSheet {
 
         const result = {
             type: "attack",
-            actor: this.actor._id,
+            actor: this.actor.id,
             attackId,
             label,
             img
         };
         if (this.actor.isToken) {
-            result.sceneId = canvas.scene._id;
-            result.tokenId = this.actor.token._id;
+            result.sceneId = canvas.scene.id;
+            result.tokenId = this.actor.token.id;
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(result));
@@ -636,11 +647,14 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async _onDropItem(ev, data) {
-        if (data.data) {
-            await this.moveExistingItem(data, ev);
-            return;
+        if ( !this.actor.isOwner ) return false;
+        if (data.actorId) {
+            if(data.actorId === this.actor.id) {
+                await this.moveExistingItemWithinActor(data, ev);
+                return;
+            }
         }
-        const item = await Item.fromDropData(data);
+        const item = await Item.implementation.fromDropData(data);
 
         let entitiesToAdd = [];
         let context = {};
@@ -663,10 +677,10 @@ export class SWSEActorSheet extends ActorSheet {
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
-            entitiesToAdd.push(item)
+            entitiesToAdd.push(item.data.toObject(false))
         }
         //await this.activateChoices(item, entitiesToAdd, context);
-        await super._onDropItemCreate(entitiesToAdd.map(entity => entity.data));
+        await super._onDropItemCreate(entitiesToAdd.map(entity => entity));
     }
 
 
@@ -740,7 +754,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async checkPrerequisitesAndResolveOptions(item) {
-        let entitiesToAdd = [item];
+        let entitiesToAdd = [item.data.toObject(false)];
         await this.activateChoices(item, entitiesToAdd, {});
 
         let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
@@ -859,7 +873,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
         }
         let entities = [];
-        entities.push(item)
+        entities.push(item.data.toObject(false))
         if (item.data.data.feats.feats.length > 0) {
             entities.push(...await this.addClassFeats(item));
         }
@@ -894,7 +908,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         let entities = []
-        entities.push(item);
+        entities.push(item.data.toObject(false));
         await this.actor.addItemsFromCompendium('trait', item, entities, item.data.data.traits);
         await this.actor.addItemsFromCompendium('feat', item, entities, this.getFeatsFromProvidingTraits(item.data.data.traits));
         await this.actor.addItemsFromCompendium('item', item, entities, item.data.data.attributes.items);
@@ -903,7 +917,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
-    async moveExistingItem(data, ev) {
+    async moveExistingItemWithinActor(data, ev) {
         if (data.itemId) {
             console.log(data.data._id)
             let movedItem = this.actor.getOwnedItem(data.data._id);
@@ -912,27 +926,38 @@ export class SWSEActorSheet extends ActorSheet {
             await parentItem.revokeOwnership(movedItem);
         } else {
             //equip/unequip workflow
-            let cursor = ev.target;
-            while (cursor != null && !cursor.classList.contains("item-container")) {
-                cursor = cursor.parentElement;
+            let sourceItemContainer;
+            let targetItemContainer = this.getTargetItemContainer(ev);
+
+            if(targetItemContainer == null){
+                return;
             }
+            let itemId = data.data._id;
 
-            if (cursor != null) {
-                let ids = this.actor.data.data.equippedIds;
-                let itemId = data.data._id;
-
-                if (cursor.classList.contains("equipped")) {
-                    ids = [itemId].concat(this.actor.data.data.equippedIds);
-                } else if (cursor.classList.contains("unequipped")) {
-                    ids = this.actor.data.data.equippedIds.filter((value => {
-                        return value !== itemId
-                    }))
-                }
-
-                this._pendingUpdates['data.equippedIds'] = ids;
-                await this._onSubmit(ev);
+            if (targetItemContainer.classList.contains("equipped")) {
+                await this.equipItem(itemId, ev);
+            } else if (targetItemContainer.classList.contains("unequipped")) {
+                await this.unequipItem(itemId, ev);
             }
         }
+    }
+
+    async equipItem(itemId, ev) {
+        this._pendingUpdates['data.equippedIds'] = [itemId].concat(this.actor.data.data.equippedIds);
+        await this._onSubmit(ev);
+    }
+
+    async unequipItem(itemId, ev) {
+        this._pendingUpdates['data.equippedIds'] = this.actor.data.data.equippedIds.filter(value => value !== itemId);
+        await this._onSubmit(ev);
+    }
+
+    getTargetItemContainer(ev) {
+        let cursor = ev.target;
+        while (cursor != null && !cursor.classList.contains("item-container")) {
+            cursor = cursor.parentElement;
+        }
+        return cursor;
     }
 
     async activateChoices(item, additionalEntitiesToAdd, context) {
@@ -1137,7 +1162,7 @@ export class SWSEActorSheet extends ActorSheet {
         const a = event.currentTarget;
         const target = a.dataset.actionTarget;
 //TODO change this when compendiums are part of the game system
-        let newVar = game.packs.get(target);
+        let newVar = game.packs.filter(pack => pack.collection.startsWith(target))[0];
         //console.log(newVar)
         newVar.render(true);
     }
@@ -1167,17 +1192,17 @@ export class SWSEActorSheet extends ActorSheet {
 
         const li = event.currentTarget.closest(".item");
         if (keyboard.isDown("Shift")) {
-            this.actor.deleteOwnedItem(li.dataset.itemId);
+            this.actor.deleteEmbeddedDocuments("Item", [li.dataset.itemId]);
         } else {
             button.disabled = true;
 
-            const item = this.actor.items.find((o) => o._id === li.dataset.itemId);
+            const item = this.actor.items.find((o) => o.id === li.dataset.itemId);
             const msg = `Are you sure you want to delete ${item.name}`;
             Dialog.confirm({
                 title: `Are you sure you want to delete ${item.name}`,
                 content: msg,
                 yes: () => {
-                    this.actor.deleteOwnedItem(li.dataset.itemId);
+                    this.actor.deleteEmbeddedDocuments("Item", [li.dataset.itemId]);
                     button.disabled = false;
                 },
                 no: () => (button.disabled = false),

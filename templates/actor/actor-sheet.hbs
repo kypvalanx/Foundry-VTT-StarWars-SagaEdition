@@ -116,29 +116,29 @@
                     <tbody>
                     <!-- <ol class="items-list charclass-list"> -->
                     {{#each actor.classes as |class id|}}
-                        <tr class="charclass item" data-item-id="{{class._id}}">
+                        <tr class="charclass item" data-item-id="{{class.id}}">
                             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                                         height="24" alt="{{class.name}}"/></td>
                             <td><h4 class="item-name">{{class.name}}</h4></td>
                             <td><span class="text-box {{#unless
-                                    class.data.attributes.first}}direct short{{/unless}} center"
-                                      data-item="{{class._id}}" data-name="data.health.rolledHp"
-                                      data-dtype="Number">{{class.data.health.rolledHp}}</span>
+                                    class.data.data.attributes.first}}direct short{{/unless}} center"
+                                      data-item="{{class.id}}" data-name="data.health.rolledHp"
+                                      data-dtype="Number">{{class.data.data.health.rolledHp}}</span>
                             </td>
                             <td>
-                                {{#unless class.data.attributes.first}}
-                                    <a class="rollable" title="Re-roll {{class.data.health.levelUp}}"
-                                       data-item="{{class._id}}" data-name="data.health.rolledHp"
-                                       data-roll="{{class.data.health.levelUp}}"><i class="fas fa-dice"></i>
+                                {{#unless class.data.data.attributes.first}}
+                                    <a class="rollable" title="Re-roll {{class.data.data.health.levelUp}}"
+                                       data-item="{{class.id}}" data-name="data.health.rolledHp"
+                                       data-roll="{{class.data.data.health.levelUp}}"><i class="fas fa-dice"></i>
                                     </a>{{/unless}}</td>
-                            <td>{{../data.attributes.con.mod}}</td>
-                            <td>{{sum class.data.health.rolledHp ../data.attributes.con.mod}}</td>
+                            <td>{{../data.data.attributes.con.mod}}</td>
+                            <td>{{sum class.data.data.health.rolledHp ../data.data.attributes.con.mod}}</td>
                             <td class="item-controls">
                                 <a class="item-control item-edit" title="View Class Description"><i
                                         class="fas fa-edit"></i></a>
                                 <a class="item-control item-duplicate" title="Copy Class"><i
                                         class="fas fa-plus"></i></a>
-                                {{#if class.isLatest}}
+                                {{#if class.data.isLatest}}
                                     <a class="item-control item-delete" title="Delete Class"><i
                                             class="fas fa-trash"></i></a>{{/if}}
                             </td>
@@ -149,8 +149,8 @@
                         <td></td>
                         <td></td>
                         <td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other
-                            Bonuses: {{data.health.other}}</td>
-                        <td>{{data.health.max}}</td>
+                            Bonuses: {{data.data.health.other}}</td>
+                        <td>{{data.data.health.max}}</td>
                         <td></td>
                     </tr>
                     <!-- </ol> -->
@@ -220,7 +220,7 @@
                     </div>
                     <ol class="items-list">
                         {{#each actor.inventory as |item id|}}
-                            <li class="item flexrow draggable" data-item-id="{{item._id}}"
+                            <li class="item flexrow draggable" data-item-id="{{item.id}}"
                                 data-item-name="{{item.name}}">
                                 <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                                              height="24" alt=""/></div>
@@ -251,10 +251,9 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.feats as |feat id|}}
-                        {{log feat}}
                         <li class="item feat flexrow" data-item-name="{{feat.finalName}}"
-                            data-item-id="{{feat._id}}">
-                            <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->
+                            data-item-id="{{feat.id}}">
+                            <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.finalName}}" width="24" height="24"/></div>-->
                             <h4 class="item-name"><b>{{feat.finalName}}</b></h4>
                             {{#if feat.data.prerequisite }}
                                 <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisite.text}}</h4>{{/if}}
@@ -280,7 +279,8 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.talents as |talent id|}}
-                        <li class="item flexrow" data-item-id="{{talent._id}}">
+                        {{log talent}}
+                        <li class="item flexrow" data-item-id="{{talent.id}}">
                             <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
                             <h4 class="item-name"><a
                                     href="{{talent.data.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
@@ -306,7 +306,8 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.traits as |trait id|}}
-                        <li class="item flexrow" data-item-id="{{trait._id}}">
+                        {{log trait}}
+                        <li class="item flexrow" data-item-id="{{trait.id}}">
                             <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
                             <h4 class="item-name">Source: {{trait.data.supplier.type}}
                                 , {{trait.data.supplier.name}}</h4>
@@ -324,13 +325,13 @@
             <div class="tab items" data-group="primary" data-tab="force">
                 <div>
                     <h2><label class="resource-label">Force Powers <a data-action="compendium"
-                                                                      data-action-target="world.swse-force-powers"
+                                                                      data-action-target="world.swse-force powers"
                                                                       title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <ol class="items-list">
                     {{#each actor.powers as |power id|}}
-                        <li class="item flexrow" data-item-id="{{power._id}}">
+                        <li class="item flexrow" data-item-id="{{power.id}}">
                             <h4 class="item-name"><b>{{power.name}}</b></h4>
                             {{#if power.data.prerequisites}}
                                 <h4 class="item-name"><b>Prerequisites:</b> {{power.data.prerequisites}}</h4>{{/if}}
@@ -344,13 +345,13 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Secrets <a data-action="compendium"
-                                                                       data-action-target="world.swse-force-secrets"
+                                                                       data-action-target="world.swse-force secrets"
                                                                        title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <ol class="items-list">
                     {{#each actor.secrets as |item id|}}
-                        <li class="item flexrow" data-item-id="{{item._id}}">
+                        <li class="item flexrow" data-item-id="{{item.id}}">
                             <h4 class="item-name"><b>{{item.name}}</b></h4>
                             <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
                             <div class="item-controls">
@@ -363,13 +364,13 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Techniques <a data-action="compendium"
-                                                                          data-action-target="world.swse-force-techniques"
+                                                                          data-action-target="world.swse-force techniques"
                                                                           title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <ol class="items-list">
                     {{#each actor.techniques as |item id|}}
-                        <li class="item flexrow" data-item-id="{{item._id}}">
+                        <li class="item flexrow" data-item-id="{{item.id}}">
                             <h4 class="item-name"><b>{{item.name}}</b></h4>
                             <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
                             <div class="item-controls">
@@ -382,13 +383,13 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Regimens <a data-action="compendium"
-                                                                        data-action-target="world.swse-force-regimens"
+                                                                        data-action-target="world.swse-force regimens"
                                                                         title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <ol class="items-list">
                     {{#each actor.regimens as |item id|}}
-                        <li class="item flexrow" data-item-id="{{item._id}}">
+                        <li class="item flexrow" data-item-id="{{item.id}}">
                             <h4 class="item-name"><b>{{item.name}}</b></h4>
                             <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
                             <div class="item-controls">

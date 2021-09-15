@@ -296,7 +296,8 @@
         "traits": [],
         "age": 0,
         "gender": "",
-        "genderDisplay": ""
+        "genderDisplay": "",
+        "player": ""
       }
     },
     "character": {

@@ -5,7 +5,8 @@
         <div class="temp"><h3>Temp</h3></div>
         <div class="mod"><h3>Mod</h3></div>
     </div>
-    {{#each data.attributes as |attribute id|}}
+    {{log data}}
+    {{#each data.data.attributes as |attribute id|}}
         {{#unless attribute.skip}}
             <div class="ability-score">
                 <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
@@ -23,23 +24,23 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></div>
             </div>
         {{/unless}}
     {{/each}}
-    {{#unless data.lockAttributes}}
+    {{#unless data.data.lockAttributes}}
         <div class="flex flex-row">
             <div id="generationType" title="Select Ability Generation Type"><a><i
-                    class="fas fa-cog{{#unless data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
-            {{#ifEquals data.attributeGenerationType "Roll"}}
+                    class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
+            {{#ifEquals data.data.attributeGenerationType "Roll"}}
                 <div id="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.attributeGenerationType "Standard Array"}}
+            {{#ifEquals data.data.attributeGenerationType "Standard Array"}}
                 <div id="assignStandardArray" title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.attributeGenerationType "Point Buy"}}
+            {{#ifEquals data.data.attributeGenerationType "Point Buy"}}
                 <div id="assignAttributePoints" title="Assign Ability Points"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.attributeGenerationType "Manual"}}
+            {{#ifEquals data.data.attributeGenerationType "Manual"}}
                 <div id="assignManual"  title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#each data.levelAttributeBonus as |bonus key|}}
+            {{#each data.data.levelAttributeBonus as |bonus key|}}
                 {{#if bonus}}
                     <div class="leveledAttributeBonus  {{#if bonus.warn}}warning{{/if}}" data-level="{{key}}" title="Select Level Up Attribute Bonus for Level {{key}}"><a><i class="fas fa-exclamation"></i></a></div>
                 {{/if}}
