@@ -678,3 +678,27 @@
 .swse .defense .defense-misc {
   grid-area: 1 / 7 / 2 / 8;
 }
+
+.swse .attribute {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.swse .attribute-key {
+  grid-area: 1 / 1 / 2 / 5;
+}
+
+.swse .attribute-value {
+  grid-area: 1 / 5 / 2 / 9;
+}
+
+.swse .attribute-delete {
+  grid-area: 1 / 9 / 2 / 10;
+}
+
+.swse .attribute-button {
+  grid-area: 1 / 1 / 2 / 10;
+}

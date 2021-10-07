@@ -137,7 +137,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('.item-duplicate').click(async ev => {
             const li = $(ev.currentTarget).parents(".item");
-            let itemToDuplicate = this.actor.getOwnedItem(li.data("itemId"));
+            let itemToDuplicate = this.actor.items.get(li.data("itemId"));
             let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
 
             await this._onDropItem(ev, {id, pack, 'type': 'Item'})
@@ -198,18 +198,18 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (keyboard.isDown("Shift")) {
 
-            let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
+            let itemToDelete = this.actor.items.get(li.data("itemId"));
             await this.removeChildItems(itemToDelete);
             await this.actor.deleteEmbeddedDocuments("Item", [li.data("itemId")]);
         } else {
 
-            let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
+            let itemToDelete = this.actor.items.get(li.data("itemId"));
             let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
             await Dialog.confirm({
                 title: title,
                 content: title,
                 yes: async () => {
-                    let itemToDelete = this.actor.getOwnedItem(li.data("itemId"));
+                    let itemToDelete = this.actor.items.get(li.data("itemId"));
                     await this.removeChildItems(itemToDelete);
 
                     await this.actor.deleteEmbeddedDocuments("Item", [li.data("itemId")]);
@@ -227,7 +227,7 @@ export class SWSEActorSheet extends ActorSheet {
     async removeChildItems(itemToDelete) {
         if (itemToDelete.data.data.items) {
             for (let childItem of itemToDelete.data.data.items) {
-                let ownedItem = this.actor.getOwnedItem(childItem._id);
+                let ownedItem = this.actor.items.get(childItem._id);
                 await itemToDelete.revokeOwnership(ownedItem);
             }
         }
@@ -487,7 +487,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (name) {
             let updateTarget = this.actor;
             if (el.dataset.item) {
-                updateTarget = this.actor.getOwnedItem(el.dataset.item)
+                updateTarget = this.actor.items.get(el.dataset.item)
             }
             let data = {};
             data[name] = value;
@@ -529,7 +529,7 @@ export class SWSEActorSheet extends ActorSheet {
 
             let source = this.actor.data;
             if (item) {
-                source = this.actor.getOwnedItem(item);
+                source = this.actor.items.get(item);
                 name = "data." + name; //TODO make this less hacky
             }
             prevValue = getProperty(source, name);
@@ -609,12 +609,17 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onDropItem(ev, data) {
         if ( !this.actor.isOwner ) return false;
+        //the dropped item has an owner
         if (data.actorId) {
             if(data.actorId === this.actor.id) {
                 await this.moveExistingItemWithinActor(data, ev);
                 return;
+            } else {
+                //TODO implement logic for dragging to another character sheet
             }
         }
+
+        //the dropped item is from a compendium
         const item = await Item.implementation.fromDropData(data);
 
         let entitiesToAdd = [];
@@ -879,15 +884,12 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async moveExistingItemWithinActor(data, ev) {
-        if (data.itemId) {
-            console.log(data.data._id)
-            let movedItem = this.actor.getOwnedItem(data.data._id);
-            let parentItem = this.actor.getOwnedItem(data.itemId);
-
+        if (data.modId) {
+            let movedItem = this.actor.items.get(data.modId);
+            let parentItem = this.actor.items.get(data.itemId);
             await parentItem.revokeOwnership(movedItem);
         } else {
             //equip/unequip workflow
-            let sourceItemContainer;
             let targetItemContainer = this.getParentByHTMLClass(ev, "item-container");
 
             if(targetItemContainer == null){
@@ -1085,7 +1087,7 @@ export class SWSEActorSheet extends ActorSheet {
             if (dataset.name) {
                 let updateCandidate = this.actor;
                 if (dataset.item) {
-                    updateCandidate = this.actor.getOwnedItem(dataset.item);
+                    updateCandidate = this.actor.items.get(dataset.item);
                 }
 
                 let update = {};
@@ -1142,7 +1144,7 @@ export class SWSEActorSheet extends ActorSheet {
     _onItemEdit(event) {
         event.preventDefault();
         const li = event.currentTarget.closest(".item");
-        const item = this.actor.getOwnedItem(li.dataset.itemId);
+        const item = this.actor.items.get(li.dataset.itemId);
         item.sheet.render(true);
     }
 

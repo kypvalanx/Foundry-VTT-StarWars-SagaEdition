@@ -1,0 +1,13 @@
+.attribute {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.attribute-key { grid-area: 1 / 1 / 2 / 5; }
+.attribute-value { grid-area: 1 / 5 / 2 / 9; }
+.attribute-delete { grid-area: 1 / 9 / 2 / 10; }
+
+.attribute-button { grid-area: 1 / 1 / 2 / 10; }

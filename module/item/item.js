@@ -132,7 +132,7 @@ export class SWSEItem extends Item {
             return [];
         }
 
-        return this.data.data.items?.map(item => actor.getOwnedItem(item._id)) || [];
+        return this.data.data.items?.map(item => actor.items.get(item._id)) || [];
     }
 
     get prefix(){
@@ -453,7 +453,7 @@ export class SWSEItem extends Item {
     }
 
     async revokeOwnership(item) {
-        let items = this.data.data.items.filter(i => i._id !== item.data._id);
+        let items = this.data.data.items?.filter(i => i._id !== item.data._id);
         await this.update({"data.items": items});
         await item.update({"data.hasItemOwner": false});
     }

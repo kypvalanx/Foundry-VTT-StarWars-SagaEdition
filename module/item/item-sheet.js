@@ -101,7 +101,7 @@ export class SWSEItemSheet extends ItemSheet {
     html.find('.item-edit').click(ev => {
       const li = $(ev.currentTarget).parents(".item");
       console.log(li);
-      const item = new SWSEItem(this.item.getOwnedItem(li.data("itemId")));
+      const item = new SWSEItem(this.item.actor.items.get(li.data("itemId")));
       console.log(item);
       item.sheet.render(true);
     });
@@ -110,12 +110,12 @@ export class SWSEItemSheet extends ItemSheet {
     html.find('.item-delete').click(ev => {
       const li = $(ev.currentTarget).parents(".item");
       let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
-      let ownedItem = this.item.actor.getOwnedItem(itemToDelete._id);
+      let ownedItem = this.item.actor.items.get(itemToDelete._id);
       this.item.revokeOwnership(ownedItem);
     });
 
     //AddItemAttribute
-    html.find('.item-attribute-add').click(ev => {
+    html.find('.attribute-add').click(ev => {
       let attributes = this.item.data.data.attributes
       let cursor = 0;
       while (attributes[cursor]){
@@ -124,7 +124,7 @@ export class SWSEItemSheet extends ItemSheet {
       this.createItemAttribute(cursor)
     });
     //deleteItemAttribute
-    html.find('.item-attribute-delete').click(ev => {
+    html.find('.attribute-delete').click(ev => {
       let id = $(ev.currentTarget).data('attributeId')
       let changedAttributes = {};
       let cursor = 0;
@@ -195,22 +195,20 @@ export class SWSEItemSheet extends ItemSheet {
 
   /** @override */
   _onDragStart(event) {
+    let dragData = {};
     const li = event.currentTarget;
 
     // Create drag data
-    const dragData = {
-      itemId: this.item.id,
-      owner: this.item.actor,
-      sceneId: this.item.actor.isToken ? canvas.scene?.id : null,
-      tokenId: this.item.actor.isToken ? this.actor.token.id : null,
-      modId: li.dataset.itemId
-    };
+    dragData.itemId= this.item.id;
+    dragData.owner= this.item.actor;
+    dragData.actorId= this.item.actor.id;
+    dragData.sceneId= this.item.actor.isToken ? canvas.scene?.id : null;
+    dragData.tokenId= this.item.actor.isToken ? this.actor.token.id : null;
 
     // Owned Items
     if ( li.dataset.itemId ) {
-      const item = this.item.mods.find(i => {return i._id ===li.dataset.itemId});
+      dragData.modId= li.dataset.itemId;
       dragData.type = "Item";
-      dragData.data = item;
     }
 
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
@@ -231,7 +229,7 @@ export class SWSEItemSheet extends ItemSheet {
     }
 
     let actor = this.actor;
-    let ownedItem = actor.getOwnedItem(droppedItem.data._id);
+    let ownedItem = actor.items.get(droppedItem.data._id);
 
     let itemType = this.item.type;
     // if(droppedItem.data.type ==='upgrade'){

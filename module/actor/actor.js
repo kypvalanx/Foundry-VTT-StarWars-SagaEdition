@@ -952,7 +952,7 @@ export class SWSEActor extends Actor {
             SWSEItem.getItemDialogue(attacks, this).render(true);
             return;
         }
-        let item = this.getOwnedItem(itemId);
+        let item = this.items.get(itemId);
 
 
         item.rollItem(this).render(true);
