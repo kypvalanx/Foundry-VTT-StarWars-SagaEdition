@@ -419,6 +419,10 @@
   text-shadow: none;
 }
 
+.swse .tabs .item-edit {
+  cursor: pointer;
+}
+
 .swse .items-list {
   list-style: none;
   margin: 7px 0;

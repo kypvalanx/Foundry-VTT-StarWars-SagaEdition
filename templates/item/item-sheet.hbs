@@ -9,13 +9,13 @@
                 <div class="resource">
                     <label class="resource-label">Cost</label>
                     <label>
-                        <input type="text" name="data.cost" value="{{data.cost}}" data-dtype="String"/>
+                        <input type="text" name="data.cost" value="{{item.data.data.cost}}" data-dtype="String"/>
                     </label>
                 </div>
                 <div class="resource">
                     <label class="resource-label">Weight</label>
                     <label>
-                        <input type="text" name="data.weight" value="{{data.weight}}" data-dtype="String"/>
+                        <input type="text" name="data.weight" value="{{item.data.data.weight}}" data-dtype="String"/>
                     </label>
                 </div>
             </div>
@@ -25,6 +25,7 @@
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
         <a class="item" data-tab="description">Description</a>
+        <a class="item" data-tab="attributes">Attributes</a>
         <a class="item" data-tab="stripping">Stripping</a>
         <a class="item" data-tab="modifications">Modifications</a>
     </nav>
@@ -34,18 +35,18 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            <p>{{{data.description}}}</p>
-            <!--            {{editor content=data.description target="data.description" button=true owner=owner
+            <p>{{{data.data.description}}}</p>
+            <!--            {{editor content=data.data.description target="data.description" button=true owner=owner
                                      editable=editable}}-->
         </div>
 
-        {{!-- Attributes Tab --}}
+        {{!-- Stripping Tab --}}
         <div class="tab stripping" data-group="primary" data-tab="stripping">
             <div class="resource flex-group-center">
                 <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{data.upgradePoints}}</label>
+                <label class="attribute-value">{{data.data.upgradePoints}}</label>
                 <table>
-                {{#each data.stripping as |stripping id|}}
+                {{#each data.data.stripping as |stripping id|}}
                     {{#if stripping.enabled}}
                     <tr>
                         <th><label>{{stripping.label}}</label></th>
@@ -79,29 +80,16 @@
                 {{/each}}
                 </table>
             </div>
-
-            {{!-- As you add new fields, add them in here! --}}
-<!--            <ol class="attributes-list">-->
-<!--                {{#each data.attributes as |attr key|}}-->
-<!--                    <li class="attribute flexrow" data-attribute="{{key}}">-->
-<!--                        <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"-->
-<!--                               value="{{key}}">{{key}}</label>-->
-<!--                        <input name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder=""-->
-<!--                               title=""/>-->
-<!--                        &lt;!&ndash;                      //<label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.dtype}}">{{attr.value}}</label>&ndash;&gt;-->
-<!--                    </li>-->
-<!--                {{/each}}-->
-<!--            </ol>-->
         </div>
 
         {{!-- Modifications Tab --}}
         <div class="tab items" data-group="primary" data-tab="modifications">
             <div class="resource flex-group-center">
                 <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{data.upgradePoints}}</label>
+                <label class="attribute-value">{{data.data.upgradePoints}}</label>
             </div>
             <ol class="items-list">
-                {{#each data.items as |item id|}}
+                {{#each data.data.items as |item id|}}
                     <li class="item flexrow draggable" data-item-id="{{item._id}}">
                         <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
                         </div>
@@ -113,6 +101,12 @@
                     </li>
                 {{/each}}
             </ol>
+        </div>
+
+        {{!-- Attributes Tab --}}
+        <div class="tab attributes" data-group="primary" data-tab="attributes">
+            {{> 'systems/swse/templates/item/parts/attributes.hbs'}}
+
         </div>
     </section>
 </form>

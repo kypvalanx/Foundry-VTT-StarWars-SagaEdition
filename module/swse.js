@@ -25,7 +25,7 @@ Hooks.once('init', async function() {
    * @type {String}
    */
   CONFIG.Combat.initiative = {
-    formula: "1d20",
+    formula: "1d20 + @skills.initiative.value",
     decimals: 2
   };
 
@@ -57,6 +57,9 @@ Hooks.once('init', async function() {
   Handlebars.registerHelper('toLowerCase', function(str) {
     return str.toLowerCase();
   });
+  Handlebars.registerHelper('toTitleCase', function(str) {
+    return str.titleCase();
+  });
 
   Handlebars.registerHelper('notEmpty', function (array, options) {
     console.log(array, options)
@@ -65,6 +68,10 @@ Hooks.once('init', async function() {
 
   Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
     return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+  Handlebars.registerHelper('unlessEquals', function(arg1, arg2, options) {
+    return (arg1 !== arg2) ? options.fn(this) : options.inverse(this);
   });
 
 
@@ -94,7 +101,8 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-condition.hbs',
     'systems/swse/templates/actor/parts/actor-portrait.hbs',
     'systems/swse/templates/actor/parts/actor-darkside.hbs',
-    'systems/swse/templates/actor/parts/actor-defenses.hbs']);
+    'systems/swse/templates/actor/parts/actor-defenses.hbs',
+    'systems/swse/templates/item/parts/attributes.hbs']);
 
 });
 
@@ -141,39 +149,28 @@ String.prototype.titleCase = function() {
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {
 
-  if (data.type.toLowerCase() !== "skill") return true;
-  createSkillMacro(data, slot);
-  return false;
-});
-Hooks.on("hotbarDrop", (bar, data, slot) => {
+  let type = data.type.toLowerCase();
+  if (type === "skill" || type === "ability") {
+    createVariableMacro(data, slot).then(() => {});
+    return false;
 
-  if (data.type.toLowerCase() !== "ability") return true;
-  createAbilityMacro(data, slot);
-  return false;
-});
+  }
+  if (type === "attack" || type === "item") {
+    createItemMacro(data, slot).then(() => {});
+    return false;
 
-Hooks.on("hotbarDrop", (bar, data, slot) => {
-
-  if (data.type.toLowerCase() !== "attack" && data.type.toLowerCase() !== "item") return true;
-  createItemMacro(data, slot);
-  return false;
+  }
+  return true;
 });
 
-// Hooks.on("hotbarDrop", (bar, data, slot) => {
-//   if (data.type.toLowerCase() !== "item") return true;
-//   createItemMacro(data, slot);
-//   return false;
-// });
 
-
-async function createSkillMacro(data, slot) {
-  let actorId = data.actor;
-
+async function createVariableMacro(data, slot) {
+  let actorId = data.actorId;
   const actor = getActorFromId(actorId);
   if (!actor) return;
 
-  const command = `game.swse.rollVariable("${actorId}", "${(data.skill)}");`;
-  const name = `${actor.name}: ${(data.label)}`
+  const command = `game.swse.rollVariable("${actorId}", "${data.variable}");`;
+  const name = `${actor.name}: ${data.label}`
   let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
   if (!macro) {
     macro = await Macro.create(
@@ -183,63 +180,6 @@ async function createSkillMacro(data, slot) {
           img: "systems/swse/icon/skill/default.png",
           command: command,
           flags: { "swse.skillMacro": true },
-        },
-        { displaySheet: false }
-    );
-  }
-
-  await game.user.assignHotbarMacro(macro, slot);
-}
-
-async function createAbilityMacro(data, slot) {
-  let actorId = data.actor;
-console.log(data)
-  const actor = getActorFromId(actorId);
-  if (!actor) return;
-
-  const command = `game.swse.rollVariable("${actorId}", "@${data.ability}");`;
-  const name = `${actor.name}: ${(data.ability)}`
-  let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
-  if (!macro) {
-    macro = await Macro.create(
-        {
-          name: name,
-          type: "script",
-          img: "systems/swse/icon/skill/default.png",
-          command: command,
-          flags: { "swse.skillMacro": true },
-        },
-        { displaySheet: false }
-    );
-  }
-
-  await game.user.assignHotbarMacro(macro, slot);
-}
-
-async function createAttackMacro(data, slot) {
-  let actorId = data.actor;
-  let attackLabel = data.label;
-
-  const actor = getActorFromId(actorId);
-  if (!actor) return;
-  let img = "systems/swse/icon/skill/default.png";
-  console.log(data)
-  if(data.img){
-    img = data.img;
-  }
-
-  //const skillInfo = actor.getSkillInfo(skillId);
-  const command = `game.swse.rollAttack("${actorId}", "${actorId} ${attackLabel}");`;
-  const name = `${actor.name}: ${attackLabel}`
-  let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
-  if (!macro) {
-    macro = await Macro.create(
-        {
-          name: name,
-          type: "script",
-          img: img,
-          command: command,
-          flags: { "swse.attackMacro": true },
         },
         { displaySheet: false }
     );

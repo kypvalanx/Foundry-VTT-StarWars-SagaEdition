@@ -5,10 +5,9 @@
         <div class="temp"><h3>Temp</h3></div>
         <div class="mod"><h3>Mod</h3></div>
     </div>
-    {{log data}}
     {{#each data.data.attributes as |attribute id|}}
         {{#unless attribute.skip}}
-            <div class="ability-score">
+            <div class="ability-score draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}" data-type="ability">
                 <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
                      data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3></div>
                 <div class="score input"><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}
@@ -26,19 +25,19 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></div>
     {{/each}}
     {{#unless data.data.lockAttributes}}
         <div class="flex flex-row">
-            <div id="generationType" title="Select Ability Generation Type"><a><i
+            <div class="generationType" title="Select Ability Generation Type"><a><i
                     class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
             {{#ifEquals data.data.attributeGenerationType "Roll"}}
-                <div id="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
+                <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
             {{#ifEquals data.data.attributeGenerationType "Standard Array"}}
-                <div id="assignStandardArray" title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
+                <div class="assignStandardArray" title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
             {{#ifEquals data.data.attributeGenerationType "Point Buy"}}
-                <div id="assignAttributePoints" title="Assign Ability Points"><a><i class="fas fa-edit"></i></a></div>
+                <div class="assignAttributePoints" title="Assign Ability Points"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
             {{#ifEquals data.data.attributeGenerationType "Manual"}}
-                <div id="assignManual"  title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
+                <div class="assignManual"  title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
             {{#each data.data.levelAttributeBonus as |bonus key|}}
                 {{#if bonus}}

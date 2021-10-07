@@ -85,7 +85,7 @@ export function generateAttackFromWeapon(item, actor) {
     let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
 
     let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item._id, actor._id, rof, hasStun)
+    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, rof, hasStun)
 }
 
 function isOversized(actorSize, itemSize) {

@@ -114,6 +114,33 @@ export class SWSEItemSheet extends ItemSheet {
       this.item.revokeOwnership(ownedItem);
     });
 
+    //AddItemAttribute
+    html.find('.item-attribute-add').click(ev => {
+      let attributes = this.item.data.data.attributes
+      let cursor = 0;
+      while (attributes[cursor]){
+        cursor++;
+      }
+      this.createItemAttribute(cursor)
+    });
+    //deleteItemAttribute
+    html.find('.item-attribute-delete').click(ev => {
+      let id = $(ev.currentTarget).data('attributeId')
+      let changedAttributes = {};
+      let cursor = 0;
+      for(const [key, value] of Object.entries(this.item.data.data.attributes)){
+        if(key !== `${id}`){
+          changedAttributes[cursor] = value;
+        } else {
+          changedAttributes[cursor] = null;
+        }
+        cursor++;
+      }
+
+      this.item.setAttributes(changedAttributes);
+      this.render();
+    });
+
     html.find('.value-plus').click(ev => {
       let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
@@ -323,5 +350,33 @@ export class SWSEItemSheet extends ItemSheet {
       }
     }
     return found;
+  }
+
+  createItemAttribute(cursor) {
+    let content = `<label>Key:</label>
+            <input id="key"><br/>
+        <label>Type:</label>
+            <select name="type" id="type">
+                <option>String</option>
+                <option>Boolean</option>
+                <option>List</option>
+                <option>Object</option>
+            </select><br/>
+        <label>Value:</label>
+            <input id="value">
+        `;
+
+    let options = {
+      title: "New Attribute",
+          content,
+        callback: async (html) => {
+          let key = html.find("#key")[0].value;
+          let type = html.find("#type")[0].value;
+          let value = html.find("#value")[0].value;
+          this.item.setAttribute(cursor, {key, type, value});
+    }
+    }
+
+    Dialog.prompt(options);
   }
 }

@@ -619,4 +619,20 @@ export class SWSEItem extends Item {
             }
         })
     }
+
+    setAttribute(cursor, attr){
+        let update = {};
+        update.data={};
+        update.data.attributes={}
+        update.data.attributes[cursor] = attr;
+        this.update(update);
+    }
+
+
+    setAttributes(attributes){
+        let update = {};
+        update.data={};
+        update.data.attributes=attributes;
+        this.update(update);
+    }
 }

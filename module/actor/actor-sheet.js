@@ -84,59 +84,51 @@ export class SWSEActorSheet extends ActorSheet {
         html.find(".species-control").click(this._onSpeciesControl.bind(this));
 
         // Item Dragging
-        html.find("li.draggable").each((i, li) => {
+        html.find(".draggable").each((i, li) => {
             if (li.classList.contains("inventory-header")) return;
             li.setAttribute("draggable", true);
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
+        html.find("div.attack").each((i, div) => {
+            div.setAttribute("draggable", true);
+            div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
+            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
+        });
+
+        html.find("div.item-container").each((i, div) => {
+            div.addEventListener("drop", (ev) => this._onDrop(ev), false);
+        });
+        //end dragging
+
         html.find('.condition-radio').on("click", async event => {
             await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
-
-
-        html.find("div.item-container").each((i, div) => {
-          div.addEventListener("drop", (ev) => this._onDrop(ev), false);
-        });
-
-        html.find("tr.skill").each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", (ev) => this._onDragSkillStart(ev), false);
-        });
-
-        html.find("tr.ability").each((i, li) => {
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", (ev) => this._onDragAbilityStart(ev), false);
-        });
-
-        html.find("div.attack").each((i, div) => {
-            div.setAttribute("draggable", true);
-            div.addEventListener("dragstart", (ev) => this._onDragAttackStart(ev), false);
-            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
-        });
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
         html.find("#selectGender").on("click", event => this._selectGender(event, this));
         html.find("#selectWeight").on("click", () => this._unavailable());
         html.find("#selectHeight").on("click", () => this._unavailable());
 
-        html.find("#generationType").on("click", event => this._selectAttributeGeneration(event, this));
-        html.find("#rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
-        html.find("#assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
-        html.find("#assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
-        html.find("#assignManual").on("click", async event => this._selectAttributesManually(event, this));
+        html.find(".generationType").on("click", event => this._selectAttributeGeneration(event, this));
+        html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
+        html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
+        html.find(".assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
+        html.find(".assignManual").on("click", async event => this._selectAttributesManually(event, this));
         html.find(".leveledAttributeBonus").each((i, button) => {
             button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
         })
-
 
         // Add Inventory Item
         html.find('.item-create').click(this._onItemCreate.bind(this));
 
         // Update Inventory Item
         html.find('.item-edit').click(ev => {
-            const li = $(ev.currentTarget).parents(".item");
-            const item = this.actor.getOwnedItem(li.data("itemId"));
+            let li = $(ev.currentTarget);
+            if(!li.hasClass("item")) {
+                li = li.parents(".item");
+            }
+            const item = this.actor.items.get(li.data("itemId"));
             item.sheet.render(true);
         });
 
@@ -168,9 +160,37 @@ export class SWSEActorSheet extends ActorSheet {
         super._onDragStart(event);
         let dragData = JSON.parse(event.dataTransfer.getData("text/plain"));
 
-        dragData.sourceContainer = this.getTargetItemContainer(event);
+        const elem = event.currentTarget;
+
+        dragData.variable = elem.dataset.variable;
+        dragData.label = elem.dataset.label;
+
+        dragData.img = elem.dataset.img;
+        dragData.itemId = elem.dataset.itemId;
+        dragData.actorId = this.actor.id;
+        if (this.actor.isToken) {
+            dragData.sceneId = canvas.scene.id;
+            dragData.tokenId = this.actor.token.id;
+        }
+
+        dragData.sourceContainer = this.getParentByHTMLClass(event, "item-container");
+        dragData.draggableId = event.target.id;
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
+    }
+
+    _onDragOver(ev) {
+        ev.preventDefault();
+        ev.dataTransfer.dropEffect = "move";
+    }
+
+    _onDragEndMovable(ev) {
+        ev.preventDefault();
+        // Get the id of the target and add the moved element to the target's DOM
+        const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
+        if (ev.target.children.length === 0 && ev.target.classList.contains("container")) {
+            ev.target.appendChild(document.getElementById(data.draggableId));
+        }
     }
 
     async deleteItem(ev) {
@@ -412,65 +432,6 @@ export class SWSEActorSheet extends ActorSheet {
         })
         response.total = total;
         return response;
-    }
-
-    _onDragAbilityStart(event) {
-        const elem = event.currentTarget;
-
-        const result = {
-            type: "ability",
-            actor: this.actor.id,
-            ability: elem.dataset.label
-        };
-        if (this.actor.isToken) {
-            result.sceneId = canvas.scene.id;
-            result.tokenId = this.actor.token.id;
-        }
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(result));
-    }
-
-    _onDragSkillStart(event) {
-        const elem = event.currentTarget;
-
-        let skill = elem.dataset.skill;
-        let label = elem.dataset.label;
-
-        const result = {
-            type: "skill",
-            actor: this.actor.id,
-            skill: skill,
-            label: label
-
-        };
-        if (this.actor.isToken) {
-            result.sceneId = canvas.scene.id;
-            result.tokenId = this.actor.token.id;
-        }
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(result));
-    }
-
-    _onDragAttackStart(event) {
-        const elem = event.currentTarget;
-
-        let attackId = elem.dataset.attackId;
-        let label = elem.dataset.label;
-        let img = elem.dataset.img;
-
-        const result = {
-            type: "attack",
-            actor: this.actor.id,
-            attackId,
-            label,
-            img
-        };
-        if (this.actor.isToken) {
-            result.sceneId = canvas.scene.id;
-            result.tokenId = this.actor.token.id;
-        }
-
-        event.dataTransfer.setData("text/plain", JSON.stringify(result));
     }
 
 
@@ -927,7 +888,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else {
             //equip/unequip workflow
             let sourceItemContainer;
-            let targetItemContainer = this.getTargetItemContainer(ev);
+            let targetItemContainer = this.getParentByHTMLClass(ev, "item-container");
 
             if(targetItemContainer == null){
                 return;
@@ -952,9 +913,9 @@ export class SWSEActorSheet extends ActorSheet {
         await this._onSubmit(ev);
     }
 
-    getTargetItemContainer(ev) {
+    getParentByHTMLClass(ev, token) {
         let cursor = ev.target;
-        while (cursor != null && !cursor.classList.contains("item-container")) {
+        while (cursor != null && !cursor.classList.contains(token)) {
             cursor = cursor.parentElement;
         }
         return cursor;
@@ -1102,33 +1063,39 @@ export class SWSEActorSheet extends ActorSheet {
     _onRoll(event) {
         event.preventDefault();
         const element = event.currentTarget;
+
+        let draggable = this.getParentByHTMLClass(event, "draggable")
+        if(draggable){
+            this.actor.rollVariable(draggable.dataset.variable)
+            return;
+        }
+
         const dataset = element.dataset;
+        if (!dataset.roll) return;
 
-        if (dataset.roll) {
-            let rolls = [dataset.roll];
-            if (dataset.roll.includes(",")) {
-                rolls = dataset.roll.split(",");
-            }
-            for (let rollStr of rolls) {
-                let roll = new Roll(rollStr, this.actor.data.data);
-                let label = dataset.label ? `Rolling ${dataset.label}` : '';
-                roll = roll.roll();
+        let rolls = [dataset.roll];
+        if (dataset.roll.includes(",")) {
+            rolls = dataset.roll.split(",");
+        }
+        for (let rollStr of rolls) {
+            let roll = new Roll(rollStr, this.actor.data.data);
+            let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
+            roll = roll.roll();
 
-                if (dataset.name) {
-                    let updateCandidate = this.actor;
-                    if (dataset.item) {
-                        updateCandidate = this.actor.getOwnedItem(dataset.item);
-                    }
-
-                    let update = {};
-                    update[dataset.name] = roll.total;
-                    updateCandidate.update(update);
-                } else {
-                    roll.toMessage({
-                        speaker: ChatMessage.getSpeaker({actor: this.actor}),
-                        flavor: label
-                    });
+            if (dataset.name) {
+                let updateCandidate = this.actor;
+                if (dataset.item) {
+                    updateCandidate = this.actor.getOwnedItem(dataset.item);
                 }
+
+                let update = {};
+                update[dataset.name] = roll.total;
+                updateCandidate.update(update);
+            } else {
+                roll.toMessage({
+                    speaker: ChatMessage.getSpeaker({actor: this.actor}),
+                    flavor: label
+                });
             }
         }
     }
@@ -1219,11 +1186,6 @@ export class SWSEActorSheet extends ActorSheet {
     async _explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
-            // if (key === 'EXOTIC_WEAPON') {
-            //     for (let weapon of game.generated.exoticWeapons) {
-            //         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
-            //     }
-            // } else
             if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
                 for (let weapon of game.generated.exoticWeapons) {
                     if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
@@ -1231,11 +1193,6 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             }
-                //     else if (key === 'PROFICIENT_WEAPON') {
-                //     for (let weapon of this.actor.data.proficiency.weapon) {
-                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
-                //     }
-            // }
             else if (key === 'AVAILABLE_WEAPON_FOCUS') {
                 for (let weapon of this.actor.data.proficiency.weapon) {
                     if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
@@ -1249,16 +1206,6 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             }
-                // else if (key === 'FOCUS_WEAPON') {
-                //     for (let weapon of this.actor.data.proficiency.focus) {
-                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
-                //     }
-                // }
-                // else if (key === 'TRAINED_SKILL') {
-                //     for (let weapon of this.actor.data.prerequisites.trainedSkills) {
-                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
-                //     }
-            // }
             else if (key === 'AVAILABLE_SKILL_FOCUS') {
                 for (let weapon of this.actor.data.prerequisites.trainedSkills) {
                     if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
@@ -1326,11 +1273,6 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             }
-                // else if (key === 'FOCUS_SKILL') {
-                //     for (let weapon of this.actor.data.prerequisites.focusSkills) {
-                //         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
-                //     }
-            // }
             else {
                 resolvedOptions[key] = value;
             }
@@ -1382,7 +1324,7 @@ export class SWSEActorSheet extends ActorSheet {
             render: (html) => {
                 html.find(".movable").each((i, item) => {
                     item.setAttribute("draggable", true);
-                    item.addEventListener("dragstart", (ev) => this._onDragStartMovable(ev), false);
+                    item.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
                 });
 
                 html.find(".container").each((i, item) => {
@@ -1466,7 +1408,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         let availableBonuses = [false, false];
-        for (let i = 0; i < 2 - Object.values(bonus).filter(b => b !== null).length; i++) {
+        for (let i = 0; i < 2 - Object.values(bonus).filter(b => b === 1).length; i++) {
             availableBonuses[i] = true;
         }
 
@@ -1500,7 +1442,7 @@ export class SWSEActorSheet extends ActorSheet {
             render: (html) => {
                 html.find(".movable").each((i, item) => {
                     item.setAttribute("draggable", true);
-                    item.addEventListener("dragstart", (ev) => this._onDragStartMovable(ev), false);
+                    item.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
                 });
 
                 html.find(".container").each((i, item) => {
@@ -1570,25 +1512,6 @@ export class SWSEActorSheet extends ActorSheet {
         });
         if (response) {
             sheet.actor.setAttributes(response);
-        }
-    }
-
-    _onDragStartMovable(ev) {
-        //ev.dataTransfer.dropEffect = "move";
-        ev.dataTransfer.setData("text/plain", ev.target.id);
-    }
-
-    _onDragOver(ev) {
-        ev.preventDefault();
-        ev.dataTransfer.dropEffect = "move";
-    }
-
-    _onDragEndMovable(ev) {
-        ev.preventDefault();
-        // Get the id of the target and add the moved element to the target's DOM
-        const data = ev.dataTransfer.getData("text/plain");
-        if (ev.target.children.length === 0 && ev.target.classList.contains("container")) {
-            ev.target.appendChild(document.getElementById(data));
         }
     }
 

@@ -445,19 +445,12 @@ export class SWSEActor extends Actor {
 
     _getUnequipableItems(items, isDroid) {
         return items.filter(item => !this.isEquipable(item, isDroid))
-        // let filtered = [];
-        // for (let item of items) {
-        //     if (!this.isEquipable(item, isDroid)) {
-        //         filtered.push(item);
-        //     }
-        // }
-        // return filtered;
     }
 
     isEquipable(item, isDroid) {
         return item.data.data.isEquipable
-            || ((isDroid && item.data.data.isDroidPart) || (!item.data.data.isDroidPart))
-            || ((!isDroid && item.data.data.isBioPart) || (!item.data.data.isBioPart));
+            || (isDroid && item.data.data.isDroidPart)
+            || (!isDroid && item.data.data.isBioPart);
     }
 
     getNonPrestigeClasses() {
@@ -515,12 +508,12 @@ export class SWSEActor extends Actor {
                     actorData.data.levelAttributeBonus[bonusAttributeLevel] = {};
                     hasUpdate = true;
                 } else {
-                    let total = actorData.data.levelAttributeBonus[bonusAttributeLevel].str
-                    + actorData.data.levelAttributeBonus[bonusAttributeLevel].dex
-                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].con
-                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].int
-                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].wis
-                        + actorData.data.levelAttributeBonus[bonusAttributeLevel].cha
+                    let total = (actorData.data.levelAttributeBonus[bonusAttributeLevel].str || 0)
+                    + (actorData.data.levelAttributeBonus[bonusAttributeLevel].dex || 0)
+                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].con || 0)
+                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].int || 0)
+                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].wis || 0)
+                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].cha || 0)
                     actorData.data.levelAttributeBonus[bonusAttributeLevel].warn = total !== 2;
                 }
             }
@@ -938,11 +931,17 @@ export class SWSEActor extends Actor {
     rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
+        label = label ? `${this.name} rolls for ${label}!` : '';
+
+        if(variable === '@Initiative'){
+            this.rollInitiative({createCombatants: true, rerollInitiative: true})
+            return;
+        }
 
         let roll = new Roll(rollStr);
 
         roll.toMessage({
-            speaker: ChatMessage.getSpeaker({actor: this.actor}),
+            speaker: ChatMessage.getSpeaker({actor: this}),
             flavor: label
         });
     }
