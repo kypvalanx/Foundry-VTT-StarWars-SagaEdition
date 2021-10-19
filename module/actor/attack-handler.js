@@ -1,32 +1,39 @@
 import {getBonusString, resolveValueArray} from "../util.js";
-
-const dieSize = [2, 3, 4, 6, 8, 10, 12];
-const sizeArray = ["Colossal", "Gargantuan", "Huge", "Large", "Medium", "Small", "Tiny", "Diminutive", "Fine"];
-
-const d20 = "1d20";
+import {SWSEItem} from "../item/item.js";
+import {d20, dieSize, sizeArray} from "../swse.js";
 
 
+/**
+ *
+ * @param {SWSEActor} actor
+ * @returns {Promise<void>}
+ */
 export async function generateAttacks(actor) {
     actor.data.data.attacks = [];
-    actor.data.data.attacks.push(generateUnarmedAttacks(actor));
+    let unarmedAttack = generateUnarmedAttacks(actor);
+    //let i = 0;
+    //unarmedAttack.id = 0;
+    actor.data.data.attacks.push(unarmedAttack);
     for (const weapon of actor.getEquippedItems().filter(item => item.type === 'weapon')) {
-        actor.data.data.attacks.push(generateAttackFromWeapon(weapon, actor));
-    }
-    actor.resolvedAttacks = new Map();
-    let i = 0;
-    for (let attack of actor.data.data.attacks.filter(attack => !!attack)) {
-        attack.id = i++;
-        actor.resolvedAttacks.set(`${actor.data._id} ${attack.name}`, attack);
+        let attack = generateAttackFromWeapon(weapon, actor);
+        //attack.id = i++;
+        actor.data.data.attacks.push(attack);
     }
 }
 
+/**
+ *
+ * @param {SWSEItem} item
+ * @param {SWSEActor} actor
+ * @returns {{dam, itemId, notes, actorId, th, critical, sound: string, name, range, type, ratesOfFire, hasStun}|undefined}
+ */
 export function generateAttackFromWeapon(item, actor) {
     let actorData = actor.data;
     //let itemData = item.data;
     if (!actorData || !item) {
         return undefined;
     }
-    let size = getActorSize(actorData);
+    let size = actor.size;
     if (isOversized(size, item.size) || item.type !== 'weapon') {
         return undefined;
     }
@@ -75,7 +82,10 @@ export function generateAttackFromWeapon(item, actor) {
         hasStun = true;
     }
 
-    notes.push(...item.data.data.attributes.special?.value);
+    let specials = item.getAttribute('special');
+    for(let special of specials) {
+        notes.push(special?.value);
+    }
 
     let range = item.effectiveRange;
     let critical = "x2"
@@ -127,15 +137,6 @@ function isProficient(proficiencies, weaponDescriptors) {
         }
     }
     return false;
-}
-
-function getActorSize(actorData) {
-    for (let trait of actorData?.traits ? actorData.traits : []) {
-        if (sizeArray.includes(trait.name)) {
-            return trait;
-        }
-    }
-    return undefined;
 }
 
 /**
@@ -210,7 +211,7 @@ export function generateUnarmedAttacks(actor) {
     }
     let equippedWeapons = actor.getEquippedItems();
     let actorData = actor.data;
-    let size = getActorSize(actorData);
+    let size = actor.size;
     let feats = actorData.prerequisites?.feats;
     feats = feats ? feats : [];
 
@@ -252,12 +253,17 @@ export function generateUnarmedAttacks(actor) {
 
     let dam = resolveUnarmedDamageDie(size, feats) + getBonusString(resolveValueArray(damageBonuses));
 
-    let attacks = [];
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, "unarmed", actor.data._id);
+    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id);
 }
 
+/**
+ *
+ * @param {SWSEItem} size
+ * @param feats
+ * @returns {string}
+ */
 function resolveUnarmedDamageDie(size, feats) {
     //TODO make this a property of the feats
     let damageDie = getDamageDieSizeByCharacterSize(size);
@@ -273,11 +279,18 @@ function resolveUnarmedDamageDie(size, feats) {
     return `1d${damageDie}`;
 }
 
+/**
+ *
+ * @param {SWSEItem} size
+ * @returns {number}
+ */
 function getDamageDieSizeByCharacterSize(size) {
-    if (size?.data?.attributes?.unarmedDieSize) {
-        return size.data.attributes.unarmedDieSize;
+    let attributes = size?.getAttribute('unarmedDieSize');
+    let max = 0;
+    for(let attribute of attributes || []){
+        max = Math.max(max, attribute.value);
     }
-    return 0;
+    return max;
 }
 
 function increaseDamageDie(damageDieSize) {

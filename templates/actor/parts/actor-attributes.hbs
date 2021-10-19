@@ -10,12 +10,7 @@
             <div class="ability-score draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}" data-type="ability">
                 <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
                      data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3></div>
-                <div class="score input"><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}
-speciesBonus: {{attribute.speciesBonus}}
-ageBonus: {{attribute.ageBonus}}
-equipmentBonus: {{attribute.equipmentBonus}}
-buffBonus: {{attribute.buffBonus}}
-customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></div>
+                <div class="score input"><span class="center" title="">{{attribute.total}}</span></div>
                 <div class="temp input"><span class="center text-box direct tiny min-width-15"
                                               name="data.attributes.{{id}}.customBonus"
                                               data-dtype="Number">{{attribute.customBonus}}</span></div>

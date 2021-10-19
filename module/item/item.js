@@ -54,6 +54,9 @@ function getStun(hasStun) {
 }
 
 function toNumber(value) {
+    if(Array.isArray(value)){
+        return value.reduce((a,b) => toNumber(a)+toNumber(b), 0)
+    }
 
     if (typeof value === "undefined") {
         return 0;
@@ -118,13 +121,13 @@ export class SWSEItem extends Item {
     //     return this.finalName;
     // }
     get fortitudeDefenseBonus(){
-        return toNumber(this.data.data.attributes.fortitudeDefenseBonus?.value) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getAttribute('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
     get reflexDefenseBonus(){
-        return toNumber(this.data.data.attributes.reflexDefenseBonus?.value) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getAttribute('reflexDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
     get maximumDexterityBonus(){
-        return toNumber(this.data.data.attributes.maximumDexterityBonus?.value) - toNumber(this.getStripping("reduceJointProtection"));
+        return toNumber(this.getAttribute('maximumDexterityBonus')) - toNumber(this.getStripping("reduceJointProtection"));
     }
     get mods(){
         let actor = this.actor;
@@ -136,14 +139,14 @@ export class SWSEItem extends Item {
     }
 
     get prefix(){
-        return this.data.data.attributes.prefix
+        return this.getAttribute('prefix')?.value;
     }
 
     get suffix(){
         if(this.mods?.filter(item => item.name === 'Bayonet Ring').length > 0){
             return `with ${this.name}`
         }
-        return this.data.data.attributes.suffix
+        return this.getAttribute('suffix')?.value;
     }
 
     get size(){
@@ -204,7 +207,7 @@ export class SWSEItem extends Item {
     }
 
     get accurate(){
-        let specials = this.data.data.attributes.special?.value;
+        let specials = this.getAttribute('special')?.value;
         for(let special of specials? specials:[]){
             if(special.toLowerCase().startsWith('accurate')){
                 return true;
@@ -214,7 +217,7 @@ export class SWSEItem extends Item {
         return false;
     }
 
-    get inaccurate(){        let specials = this.data.data.attributes.special?.value;
+    get inaccurate(){        let specials = this.getAttribute('special')?.value;
         for(let special of specials? specials:[]){
             if(special.toLowerCase().startsWith('inaccurate')){
                 return true;
@@ -224,20 +227,26 @@ export class SWSEItem extends Item {
     }
 
     get ratesOfFire(){
-        let value = this.data.data.attributes.ratesOfFire?.value;
-        if(this.getStripping("stripAutofire")?.value){
-            return value.filter(rate => rate !== 'Autofire')
+        let ratesOfFire = this.getAttribute('ratesOfFire');
+        let filteredROF = [];
+        let strippedAutofire = this.getStripping("stripAutofire")?.value;
+        for(let rateOfFire of ratesOfFire) {
+            if (strippedAutofire) {
+                filteredROF.push(...rateOfFire.value.filter(rate => rate !== 'Autofire'))
+            }else{
+                filteredROF.push(...rateOfFire.value)
+            }
         }
 
-        return value
+        return filteredROF
     }
 
     get damageDie(){
-        return this.data.data.attributes.damageDie?.value
+        return this.getAttribute('damageDie')?.value
     }
 
     get stunDamageDie(){
-        let value = this.data.data.attributes.stunDamageDie?.value;
+        let value = this.getAttribute('stunDamageDie')?.value;
         if(this.getStripping("stripStun")?.value){
             return undefined
         }
@@ -245,7 +254,7 @@ export class SWSEItem extends Item {
     }
 
     get damageType(){
-        return this.data.data.attributes.damageType?.value
+        return this.getAttribute('damageType')?.value
     }
 
     /**
@@ -279,7 +288,7 @@ export class SWSEItem extends Item {
 
     prepareFeatData(itemData) {
         if (itemData.data.categories) {
-            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.value.toLowerCase().includes("bonus feats"));
+            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.value?.toLowerCase().includes("bonus feats"));
             itemData.data.hasBonusFeatCategories = itemData.data.bonusFeatCategories.length > 0;
         }
     }
@@ -465,11 +474,27 @@ export class SWSEItem extends Item {
 
 
     canStripAutoFire() {
-        return this.data.data.attributes.ratesOfFire && this.data.data.attributes.ratesOfFire.value.includes("Single-Shot") && this.data.data.attributes.ratesOfFire.value.includes("Autofire");
+        let ratesOfFire = this.getAttribute('ratesOfFire');
+        if(ratesOfFire.length === 0){
+            return false;
+        }
+        let ss = false;
+        let af = false;
+        for(let rof of ratesOfFire){
+            if(rof.value.includes("Single-Shot")){
+                ss = true;
+            }
+            if(rof.value.includes("Autofire")){
+                af = true;
+            }
+        }
+        return af && ss;
+        //return this.data.data.attributes.ratesOfFire && this.data.data.attributes.ratesOfFire.value.includes("Single-Shot") && this.data.data.attributes.ratesOfFire.value.includes("Autofire");
     }
 
     canStripStun() {
-        return this.data.data.attributes.stunDamageDie && this.data.data.attributes.damageDie;
+
+        return this.getAttribute('stunDamageDie').length > 0 && this.getAttribute('damageDie').length > 0;
     }
 
     isExotic() {
@@ -628,11 +653,31 @@ export class SWSEItem extends Item {
         this.update(update);
     }
 
-
     setAttributes(attributes){
         let update = {};
         update.data={};
         update.data.attributes=attributes;
         this.update(update);
+    }
+
+    /**
+     *
+     * @param attributeKey
+     * @returns {[]|*[]}
+     */
+    getAttribute(attributeKey){
+        let attributes = [];
+
+        if(!attributeKey){
+            return attributes;
+        }
+        if(this.data.data){
+            attributes = Object.values(this.data.data.attributes);
+            for(let item of this.data.data.items || []){
+                attributes.push(...Object.values(item.data.attributes))
+            }
+        }
+
+        return attributes.filter(attr => attr?.key?.toLowerCase() === attributeKey.toLowerCase());
     }
 }

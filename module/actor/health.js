@@ -12,16 +12,17 @@ export function resolveHealth(actor) {
     let actorData = actor.data;
     let ignoreCon = actor.ignoreCon();
     let health = [];
+    let level = 0;
     for (let charClass of actor.classes || []) {
-        health.push(resolveRolledHp(charClass))
+        health.push(resolveRolledHp(charClass, ++level))
         health.push(resolveCharClass(actor, ignoreCon));
     }
     let other = [];
-    for (let item of actorData.items ? actorData.items : []) {
-        let itemHpEq = item.data.attributes?.hitPointEq?.value;
-        if (itemHpEq) {
-            other.push(itemHpEq);
-            health.push(itemHpEq);
+    let traitAttributes = actor.getInheritableAttributesByKey('hitPointEq');
+    for (let item of traitAttributes || []) {
+        if (item) {
+            other.push(item.value);
+            health.push(item.value);
         }
     }
     let otherBonuses = resolveValueArray(other, actor);
@@ -37,10 +38,10 @@ function resolveCharClass(actor, ignoreCon) {
     return actor.data.data.attributes.con.mod;
 }
 
-function resolveRolledHp(charClass) {
+function resolveRolledHp(charClass, level) {
     let health = charClass.data.data.health;
-    if (charClass.data.data.attributes.first) {
-        return health.rolledHp;
+    if (level === 1) {
+        return health.firstLevel;
     }
     health.rolledHp = health.rolledHp ? health.rolledHp : 1;
 

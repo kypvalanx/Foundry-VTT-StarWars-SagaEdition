@@ -144,8 +144,8 @@ function capFirst(word) {
 function _getSituationalBonuses(defenseBonuses) {
     let situational = []
     for (let defenseBonus of defenseBonuses) {
-        if (defenseBonus.modifier) {
-            situational.push(`${(defenseBonus.bonus > -1 ? "+" : "") + defenseBonus.bonus} ${defenseBonus.bonus < 0 ? "penalty" : "bonus"} to their ${capFirst(defenseBonus.defense)} Defense to resist ${defenseBonus.modifier}`);
+        if (defenseBonus.value.modifier) {
+            situational.push(`${(defenseBonus.value.bonus > -1 ? "+" : "") + defenseBonus.value.bonus} ${defenseBonus.value.bonus < 0 ? "penalty" : "bonus"} to their ${capFirst(defenseBonus.value.defense)} Defense to resist ${defenseBonus.value.modifier}`);
         }
     }
     return situational;
@@ -193,8 +193,8 @@ function _getClassDefBonus(stat, actorData) {
 function _getTraitDefBonus(defenseType, defenseBonuses) {
     let bonus = 0;
     for (let defenseBonus of defenseBonuses) {
-        if (!defenseBonus.modifier && (defenseBonus.defense === 'all' || defenseBonus.defense === defenseType)) {
-            bonus = bonus + defenseBonus.bonus;
+        if (!defenseBonus.value.modifier && (defenseBonus.value.defense === 'all' || defenseBonus.value.defense === defenseType)) {
+            bonus = bonus + defenseBonus.value.bonus;
         }
     }
     return bonus;

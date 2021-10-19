@@ -165,6 +165,11 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
 
+        if(dragData.label === 'Unarmed Attack')
+        {
+            dragData.type='Item';
+        }
+
         dragData.img = elem.dataset.img;
         dragData.itemId = elem.dataset.itemId;
         dragData.actorId = this.actor.id;
@@ -843,15 +848,15 @@ export class SWSEActorSheet extends ActorSheet {
         if (item.data.data.feats.feats.length > 0) {
             entities.push(...await this.addClassFeats(item));
         }
-        item.data.data.attributes.first = this.actor.data.classes.length === 0;
+        //item.data.data.attributes.first = this.actor.data.classes.length === 0;
 
         let context = {};
-        if (item.data.data.attributes.first) {
-            item.data.data.health.rolledHp = item.data.data.health.firstLevel;
-            context.isFirstLevel = true;
-        } else {
-            item.data.data.health.rolledHp = 1;
-        }
+        context.isFirstLevel = this.actor.data.classes.length === 0;
+        // if (item.data.data.attributes.first) {
+        //     //item.data.data.health.rolledHp = item.data.data.health.firstLevel;
+        // } else {
+        //     //item.data.data.health.rolledHp = 1;
+        // }
 
         await this.activateChoices(item, entities, context);
         return entities;
@@ -1588,6 +1593,9 @@ export class SWSEActorSheet extends ActorSheet {
         //const div = $(ev.currentTarget).parents(".attack");
         let elem = ev.currentTarget;
         let itemId = elem.dataset.itemId;
+        if(!itemId){
+            itemId = elem.dataset.label;
+        }
         //let itemId = div.data("itemId");
         this.actor.rollOwnedItem(itemId);
         return undefined;

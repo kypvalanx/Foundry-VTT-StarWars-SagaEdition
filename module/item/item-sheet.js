@@ -99,10 +99,11 @@ export class SWSEItemSheet extends ItemSheet {
 
     // Update Inventory Item
     html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
-      console.log(li);
-      const item = new SWSEItem(this.item.actor.items.get(li.data("itemId")));
-      console.log(item);
+      let li = $(ev.currentTarget);
+      if(!li.hasClass("item")) {
+        li = li.parents(".item");
+      }
+      const item = this.actor.items.get(li.data("itemId"));
       item.sheet.render(true);
     });
 

@@ -1,5 +1,5 @@
 // Import Modules
-import { SWSE } from "./config.js";
+import {SWSE} from "./config.js";
 import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
@@ -68,6 +68,10 @@ Hooks.once('init', async function() {
 
   Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
     return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+  });
+
+  Handlebars.registerHelper('ifLast', function(arg1, arg2, options) {
+    return (arg1 + 1 === arg2.length) ? options.fn(this) : options.inverse(this);
   });
 
   Handlebars.registerHelper('unlessEquals', function(arg1, arg2, options) {
@@ -196,13 +200,18 @@ async function createItemMacro(data, slot) {
 
   let img = "systems/swse/icon/skill/default.png";
 
-  if(data.data.img){
-    img = data.data.img;
+  if(data.img){
+    img = data.img;
+  }
+  let id;
+  if(data.label === 'Unarmed Attack'){
+    id = 'Unarmed Attack';
+  } else {
+    id = data.data._id;
   }
 
-
-  const command = `game.swse.rollItem("${actorId}", "${(data.data._id)}");`;
-  const name = `${actor.name}: ${(data.data.name)}`
+  const command = `game.swse.rollItem("${actorId}", "${id}");`;
+  const name = `${actor.name}: ${data?.data?.name || data.label}`
   let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
   if (!macro) {
     macro = await Macro.create(
@@ -269,3 +278,6 @@ Hooks.on('renderChatMessage', (chatItem, html) => {
   });
 //add things you want to like to chat messages here
 });
+export const dieSize = [2, 3, 4, 6, 8, 10, 12];
+export const sizeArray = ["Colossal", "Gargantuan", "Huge", "Large", "Medium", "Small", "Tiny", "Diminutive", "Fine"];
+export const d20 = "1d20";

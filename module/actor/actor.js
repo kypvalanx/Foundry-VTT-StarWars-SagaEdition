@@ -9,6 +9,7 @@ import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills} from "./skill-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEItem} from "../item/item.js";
+import {sizeArray} from "../swse.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -58,6 +59,15 @@ export class SWSEActor extends Actor {
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
 
+        this.inheritableItems = [];
+        this.inheritableItems.push(...this.traits)
+        this.inheritableItems.push(...this.talents)
+        this.inheritableItems.push(...this.powers)
+        this.inheritableItems.push(...this.secrets)
+        this.inheritableItems.push(...this.techniques)
+        this.inheritableItems.push(...this.affiliations)
+        this.inheritableItems.push(...this.regimens)
+
         actorData.speed = this.speed;
 
         generateAttributes(this);
@@ -82,6 +92,7 @@ export class SWSEActor extends Actor {
         actorData.data.offense = await new OffenseHandler().resolveOffense(this, bab);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
+        this.inheritableItems.push(...this.feats)
 
         actorData.hideForce = 0 === this.feats.filter(feat => {
             return feat.name === 'Force Training'
@@ -475,7 +486,7 @@ export class SWSEActor extends Actor {
             let levelOfClass = ++classLevels[characterClass.name]
             let levelData = characterClass.data.data.levels[levelOfClass]
             bab += levelData.bab;
-            classFeatures.push(...levelData.features)
+            classFeatures.push(...levelData.features || [])
         }
 
         let classSummary = Object.entries(classLevels).map((entity) => `${entity[0]} ${entity[1]}`).join(' / ');
@@ -656,7 +667,7 @@ export class SWSEActor extends Actor {
         }
         let abilityClassSkills = this.getTraitAttributesByKey('classSkill');
         for (let classSkill of abilityClassSkills) {
-            classSkills.add(classSkill.toLowerCase());
+            classSkills.add(classSkill.value.toLowerCase());
         }
 
         return classSkills;
@@ -706,13 +717,34 @@ export class SWSEActor extends Actor {
 
     getTraitAttributesByKey(attributeKey) {
         let values = [];
-        for (let ability of this.traits) {
-            let attribute = ability.data.attributes[attributeKey];
-            if (attribute) {
-                if (Array.isArray(attribute)) {
-                    values.push(...attribute)
+        for (let trait of this.traits) {
+            values.push(...this.getAttributesFromItem(trait, attributeKey, values));
+        }
+        return values;
+    }
+
+    getInheritableAttributesByKey(attributeKey){
+        let values = [];
+        for (let item of this.inheritableItems) {
+            values.push(...this.getAttributesFromItem(item, attributeKey, values));
+        }
+        return values;
+    }
+
+    getAttributesFromItem(trait, attributeKey) {
+        let values = [];
+        let attributes = Object.values(trait.data.attributes).filter(attr => attr.key === attributeKey);
+        for (let attribute of attributes) {
+            let value = attribute.value;
+            if (value) {
+                if (Array.isArray(value)) {
+                    for(let v of value){
+                        values.push({source: trait._id,value: v})
+                    }
+                    //values.push(...value)
                 } else {
-                    values.push(attribute)
+                    // value.source = trait._id;
+                    values.push({source: trait._id,value})
                 }
             }
         }
@@ -721,21 +753,24 @@ export class SWSEActor extends Actor {
 
     getTraitByKey(attributeKey) {
         let values = [];
-        for (let trait of this.traits) {
-            let attribute = trait.data.attributes[attributeKey];
-            if (attribute) {
-                values.push(trait)
+        for (let trait of filterItemsByType(this.items.values(), "trait")) {
+            let attributes = Object.values(trait.data.data.attributes).filter(attr => attr.key === attributeKey);
+            for(let attribute of attributes) {
+                if (attribute.value) {
+                    values.push(trait)
+                }
             }
         }
         return values;
     }
+
 
     _getAbilitySkillBonus(skill) {
         if (skill.toLowerCase() === 'stealth') {
             let stealthBonuses = this.getTraitAttributesByKey('sneakModifier');
             let total = 0;
             for (let stealthBonus of stealthBonuses) {
-                total = total + stealthBonus;
+                total = total + stealthBonus.value;
             }
             return total;
         }
@@ -947,7 +982,7 @@ export class SWSEActor extends Actor {
     }
 
     rollOwnedItem(itemId) {
-        if(itemId === "unarmed"){
+        if(itemId === "Unarmed Attack"){
             let attacks = generateUnarmedAttacks(this)
             SWSEItem.getItemDialogue(attacks, this).render(true);
             return;
@@ -1030,5 +1065,19 @@ export class SWSEActor extends Actor {
 
     set darkSideScore(score){
         this.update({'data.darkSideScore': score})
+    }
+
+    /**
+     *
+     * @returns {undefined|SWSEItem}
+     */
+    get size(){
+        let actorData = this.data;
+        for (let trait of actorData?.traits ? actorData.traits : []) {
+            if (sizeArray.includes(trait.name)) {
+                return trait;
+            }
+        }
+        return undefined;
     }
 }

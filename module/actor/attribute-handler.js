@@ -1,4 +1,5 @@
 import {getLongKey, resolveValueArray} from "../util.js";
+import {SWSEItem} from "../item/item.js";
 
 /**
  *
@@ -8,7 +9,7 @@ export function generateAttributes(actor) {
     let actorData = actor.data;
 
     actorData.data.lockAttributes = actor.shouldLockAttributes
-    let attributeTraits = actor.getTraitByKey('attributeBonus')
+    let inheritableAttributes = actor.getInheritableAttributesByKey('attributeBonus')
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
@@ -17,44 +18,31 @@ export function generateAttributes(actor) {
             attribute.base = 10;
         }
         let bonuses = [];
-        let classLevelBonuses = []; //TODO WIRE ME UP
-        let speciesBonuses = [];
-        let ageBonuses = [];
-        let equipmentBonuses = []; //TODO WIRE ME UP
-        let buffBonuses = []; //TODO WIRE ME UP
-        for (let trait of attributeTraits) {
-            if (trait.data.attributes.attributeBonus.attribute.toLowerCase() !== longKey) {
-                continue;
-            }
-            //TODO add them to correct variables for tooltip
-            if (trait.data.prerequisites && trait.data.prerequisites.length > 0) {
-                let prerequisite = trait.data.prerequisites[0];
-                if (/ABILITY:(?:Child|Young adult|Adult|Middle age|Old|Venerable)/.exec(prerequisite)) {
-                    ageBonuses.push(trait.data.attributes.attributeBonus.bonus);
-                    continue;
+        // let classLevelBonuses = []; //TODO WIRE ME UP
+        // let speciesBonuses = [];
+        // let ageBonuses = [];
+        // let equipmentBonuses = []; //TODO WIRE ME UP
+        // let buffBonuses = []; //TODO WIRE ME UP
+        for (let bonusAttribute of inheritableAttributes) {
+                if (bonusAttribute.value.attribute.toLowerCase() === longKey) {
+                    bonuses.push(bonusAttribute.value.bonus)
                 }
-            }
-            if (trait.data.supplier?.type === 'species') {
-                speciesBonuses.push(trait.data.attributes.attributeBonus.bonus);
-                continue;
-            }
-            bonuses.push(trait.data.attributes.attributeBonus.bonus)
 
         }
-        attribute.classLevelBonus = resolveValueArray(classLevelBonuses, actor);
-        attribute.speciesBonus = resolveValueArray(speciesBonuses, actor);
-        attribute.ageBonus = resolveValueArray(ageBonuses, actor);
-        attribute.equipmentBonus = resolveValueArray(equipmentBonuses, actor);
-        attribute.buffBonus = resolveValueArray(buffBonuses, actor);
-        // attribute.customBonus = resolveValueArray(customBonuses, actor
-        //);
-
-        bonuses.push(attribute.classLevelBonus);
-        bonuses.push(attribute.speciesBonus);
-        bonuses.push(attribute.ageBonus);
-        bonuses.push(attribute.equipmentBonus);
-        bonuses.push(attribute.buffBonus);
-        bonuses.push(attribute.customBonus );
+        // attribute.classLevelBonus = resolveValueArray(classLevelBonuses, actor);
+        // attribute.speciesBonus = resolveValueArray(speciesBonuses, actor);
+        // attribute.ageBonus = resolveValueArray(ageBonuses, actor);
+        // attribute.equipmentBonus = resolveValueArray(equipmentBonuses, actor);
+        // attribute.buffBonus = resolveValueArray(buffBonuses, actor);
+        // // attribute.customBonus = resolveValueArray(customBonuses, actor
+        // //);
+        //
+        // bonuses.push(attribute.classLevelBonus);
+        // bonuses.push(attribute.speciesBonus);
+        // bonuses.push(attribute.ageBonus);
+        // bonuses.push(attribute.equipmentBonus);
+        // bonuses.push(attribute.buffBonus);
+        // bonuses.push(attribute.customBonus );
 
         let attributeBonus = actorData.data.levelAttributeBonus;
         for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {

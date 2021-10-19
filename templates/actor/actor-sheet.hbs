@@ -100,27 +100,28 @@
                             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                                         height="24" alt="{{class.name}}"/></td>
                             <td><h4 class="item-name">{{class.name}}</h4></td>
-                            <td><span class="text-box {{#unless
-                                    class.data.data.attributes.first}}direct short{{/unless}} center"
+                            <td><span class="text-box {{#if id}}direct short{{/if}} center"
                                       data-item="{{class.data._id}}" data-name="data.health.rolledHp"
-                                      data-dtype="Number">{{class.data.data.health.rolledHp}}</span>
+                                      data-dtype="Number">{{#if id}}{{class.data.data.health.rolledHp}}{{/if}}
+                                {{#unless id}}{{class.data.data.health.firstLevel}}{{/unless}}</span>
                             </td>
                             <td>
-                                {{#unless class.data.data.attributes.first}}
+                                {{#if id}}
                                     <a class="rollable" title="Re-roll {{class.data.data.health.levelUp}}"
                                        data-item="{{class.data._id}}" data-name="data.health.rolledHp"
                                        data-roll="{{class.data.data.health.levelUp}}"><i class="fas fa-dice"></i>
-                                    </a>{{/unless}}</td>
+                                    </a>{{/if}}</td>
                             <td>{{../data.data.attributes.con.mod}}</td>
-                            <td>{{sum class.data.data.health.rolledHp ../data.data.attributes.con.mod}}</td>
+                            <td>{{#if id}}{{sum class.data.data.health.rolledHp ../data.data.attributes.con.mod}}{{/if}}
+                                {{#unless id}}{{sum class.data.data.health.firstLevel ../data.data.attributes.con.mod}}{{/unless}}</td>
                             <td class="item-controls">
                                 <a class="item-control item-edit" title="View Class Description"><i
                                         class="fas fa-edit"></i></a>
                                 <a class="item-control item-duplicate" title="Copy Class"><i
                                         class="fas fa-plus"></i></a>
-                                {{#if class.data.isLatest}}
+                                {{#ifLast id actor.classes}}
                                     <a class="item-control item-delete" title="Delete Class"><i
-                                            class="fas fa-trash"></i></a>{{/if}}
+                                            class="fas fa-trash"></i></a>{{/ifLast}}
                             </td>
                         </tr>
                     {{/each}}
