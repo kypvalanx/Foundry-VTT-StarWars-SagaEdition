@@ -60,6 +60,7 @@ export class SWSEActor extends Actor {
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
 
         this.inheritableItems = [];
+        this.inheritableItems.push(...this.equipped)
         this.inheritableItems.push(...this.traits)
         this.inheritableItems.push(...this.talents)
         this.inheritableItems.push(...this.powers)
@@ -718,7 +719,7 @@ export class SWSEActor extends Actor {
     getTraitAttributesByKey(attributeKey) {
         let values = [];
         for (let trait of this.traits) {
-            values.push(...this.getAttributesFromItem(trait, attributeKey, values));
+            values.push(...this.getAttributesFromItem(trait, attributeKey));
         }
         return values;
     }
@@ -726,27 +727,29 @@ export class SWSEActor extends Actor {
     getInheritableAttributesByKey(attributeKey){
         let values = [];
         for (let item of this.inheritableItems) {
-            values.push(...this.getAttributesFromItem(item, attributeKey, values));
+            values.push(...this.getAttributesFromItem(item, attributeKey));
         }
         return values;
     }
 
-    getAttributesFromItem(trait, attributeKey) {
+    getAttributesFromItem(item, attributeKey) {
         let values = [];
-        let attributes = Object.values(trait.data.attributes).filter(attr => attr.key === attributeKey);
+        let attributes = Object.values(item.data.attributes).filter(attr => attr.key === attributeKey);
         for (let attribute of attributes) {
             let value = attribute.value;
             if (value) {
                 if (Array.isArray(value)) {
                     for(let v of value){
-                        values.push({source: trait._id,value: v})
+                        values.push({source: item._id,value: v})
                     }
-                    //values.push(...value)
                 } else {
-                    // value.source = trait._id;
-                    values.push({source: trait._id,value})
+                    values.push({source: item._id,value})
                 }
             }
+        }
+
+        for(let child of item.data.items || []){
+            values.push(...this.getAttributesFromItem(child, attributeKey))
         }
         return values;
     }

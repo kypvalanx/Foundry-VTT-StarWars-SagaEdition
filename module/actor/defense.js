@@ -78,7 +78,10 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     total.push(equipmentBonus);
     total.push(conditionBonus);
     let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
-    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    let miscBonuses = [];
+    miscBonuses.push(conditionBonus)
+    miscBonuses.push(traitBonus)
+    let miscBonus = resolveValueArray(miscBonuses)
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
@@ -112,10 +115,14 @@ function _resolveRef(actor, defenseBonuses, conditionBonus) {
     let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
     total.push(traitBonus);
     let classBonus = _getClassDefBonus('reflex', actorData);
+
+    let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense")
+        .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
     total.push(classBonus);
     total.push(_getTraitRefMod(actor));
     total.push(conditionBonus);
-    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    total.push(dodgeBonus);
+    let miscBonus = resolveValueArray([traitBonus, conditionBonus, dodgeBonus])
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 

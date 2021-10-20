@@ -1,3 +1,5 @@
+import {dieSize} from "./swse.js";
+
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
         values = [values];
@@ -22,6 +24,8 @@ export function resolveValueArray(values, actor) {
 
         } else if (typeof value === 'string') {
             total += parseInt(value);
+        } else if (typeof value === 'object') {
+            total += parseInt(value.value);
         }
     }
     return total;
@@ -113,4 +117,39 @@ export function toShortAttribute(attributeName) {
         case 'charisma':
             return 'CHA';
     }
+}
+
+export function increaseDamageDie(damageDieSize, bonus) {
+    let index = dieSize.indexOf(damageDieSize);
+    if (index === -1) {
+        return undefined;
+    }
+    return dieSize[index + bonus];
+}
+
+export function toNumber(value) {
+    if (Array.isArray(value)) {
+        return value.reduce((a, b) => toNumber(a) + toNumber(b), 0)
+    }
+
+    if (typeof value === "undefined") {
+        return 0;
+    }
+    if (value.value) {
+        return toNumber(value.value)
+    }
+    if (typeof value === "boolean") {
+        return value ? 1 : 0;
+    }
+
+    if (typeof value === "number") {
+        return value;
+    }
+
+    let number = parseInt(value);
+    if (isNaN(number)) {
+        return 0;
+    }
+
+    return number;
 }

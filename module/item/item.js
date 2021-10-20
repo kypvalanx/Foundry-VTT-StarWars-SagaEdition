@@ -1,6 +1,6 @@
 import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {getBonusString} from "../util.js";
+import {getBonusString, increaseDamageDie, toNumber} from "../util.js";
 
 function getRangeModifier(range, accurate, innacurate) {
     if (range === 'Grenades') {
@@ -51,33 +51,6 @@ function getStun(hasStun) {
         return `<br/><label for="stun_selection">Stun:</label><input class="modifier center swse attack-modifier" type="checkbox" id="stun_selection" name="stun_selection" value="0">`;
     }
     return "";
-}
-
-function toNumber(value) {
-    if(Array.isArray(value)){
-        return value.reduce((a,b) => toNumber(a)+toNumber(b), 0)
-    }
-
-    if (typeof value === "undefined") {
-        return 0;
-    }
-    if(value.value){
-        return toNumber(value.value)
-    }
-    if (typeof value === "boolean") {
-        return value ? 1 : 0;
-    }
-
-    if (typeof value === "number") {
-        return value;
-    }
-
-    let number = parseInt(value);
-    if (isNaN(number)) {
-        return 0;
-    }
-
-    return number;
 }
 
 // noinspection JSClosureCompilerSyntax
@@ -228,13 +201,18 @@ export class SWSEItem extends Item {
 
     get ratesOfFire(){
         let ratesOfFire = this.getAttribute('ratesOfFire');
+        if(!Array.isArray(ratesOfFire)){
+            ratesOfFire = [ratesOfFire]
+        }
         let filteredROF = [];
         let strippedAutofire = this.getStripping("stripAutofire")?.value;
         for(let rateOfFire of ratesOfFire) {
             if (strippedAutofire) {
-                filteredROF.push(...rateOfFire.value.filter(rate => rate !== 'Autofire'))
-            }else{
-                filteredROF.push(...rateOfFire.value)
+                if(rateOfFire.value !== 'Autofire') {
+                    filteredROF.push(rateOfFire.value)
+                }
+                }else{
+                filteredROF.push(rateOfFire.value)
             }
         }
 
@@ -242,19 +220,45 @@ export class SWSEItem extends Item {
     }
 
     get damageDie(){
-        return this.getAttribute('damageDie')?.value
+        let damageDie = this.getAttribute('damageDie')[0]?.value;
+
+        if(!damageDie){
+            return "";
+        }
+        let tok = damageDie.split('d');
+        let quantity = parseInt(tok[0]);
+        let size = parseInt(tok[1]);
+
+        for(let bonusDamageDie of this.getAttribute('bonusDamageDie')){
+            quantity = quantity + parseInt(bonusDamageDie.value);
+        }
+        for(let bonusDamageDie of this.getAttribute('bonusDamageDieSize')){
+            size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+        }
+        return quantity + "d" + size;
     }
 
     get stunDamageDie(){
-        let value = this.getAttribute('stunDamageDie')?.value;
-        if(this.getStripping("stripStun")?.value){
-            return undefined
+        let damageDie = this.getAttribute('stunDamageDie')[0]?.value;
+        if(!damageDie || this.getStripping("stripStun")?.value){
+            return ""
         }
-        return value
+        let tok = damageDie.split('d');
+        let quantity = parseInt(tok[0]);
+        let size = parseInt(tok[1]);
+
+        for(let bonusDamageDie of this.getAttribute('bonusStunDamageDie')){
+            quantity = quantity + parseInt(bonusDamageDie.value);
+        }
+        for(let bonusDamageDie of this.getAttribute('bonusStunDamageDieSize')){
+            size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+        }
+        return quantity + "d" + size;
     }
 
     get damageType(){
-        return this.getAttribute('damageType')?.value
+        let attributes = this.getAttribute('damageType');
+        return attributes.map(attribute => attribute.value).join(', ');
     }
 
     /**

@@ -140,6 +140,10 @@ if(!Map.prototype.computeIfAbsent){
   };
 }
 
+Array.prototype.distinct = function() {
+  return this.filter((value, index, self) => self.indexOf(value) === index)
+}
+
 
 String.prototype.titleCase = function() {
   if (!this.length) return this;
