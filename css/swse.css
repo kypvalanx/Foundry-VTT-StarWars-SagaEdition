@@ -10,9 +10,28 @@
   cursor: pointer;
 }
 
+.static {
+  cursor: not-allowed;
+}
+
 .cursor {
   color: #000;
   text-shadow: 0 0 10px red;
+}
+
+.input,
+.textarea {
+  border: 1px solid #7a7971;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 3px 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  height: 26px;
+}
+
+.panel {
+  padding: 5px;
+  border: 1px solid #999;
 }
 
 .grid,
@@ -133,7 +152,8 @@
   flex-direction: row;
 }
 
-.flex-grow .flex-grow1 {
+.flex-grow,
+.flex-grow1 {
   -webkit-box-flex: 1;
   -ms-flex-positive: 1;
   flex-grow: 1;
@@ -151,6 +171,15 @@
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+}
+
+.flex div {
+  padding: 3px;
+}
+
+.flex-wrap {
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
 }
 
 /* Styles limited to swse sheets */
@@ -232,6 +261,7 @@
 
 .swse .center {
   text-align: center;
+  margin: auto;
 }
 
 .swse table.fixed {
@@ -268,8 +298,16 @@
   width: 85%;
 }
 
+.swse .padding-3 {
+  padding: 3px;
+}
+
 .swse .direct {
   cursor: text;
+}
+
+.swse .button {
+  cursor: pointer;
 }
 
 .swse .border {
@@ -309,10 +347,60 @@
   border: 1px dotted dimgray;
 }
 
+.swse .dark-side-button {
+  width: 30px;
+  height: 50px;
+  min-width: 30px;
+  min-height: 50px;
+  padding-top: 17px;
+  padding-left: 5px;
+  text-align: center;
+  border: 1px solid;
+}
+
+.swse .dark-side-block {
+  width: 380px;
+  max-width: 380px;
+}
+
+.swse .dark-side-button.active {
+  background-color: red;
+}
+
 .swse .movable {
   padding: 17px;
   text-align: center;
   border: 1px solid;
+}
+
+.swse .text-center {
+  text-align: center;
+}
+
+.swse .tiny {
+  width: 20px;
+}
+
+.swse .small {
+  width: 90px;
+}
+
+.swse .top {
+  display: block;
+}
+
+.swse .min-width-15 {
+  min-width: 15px;
+}
+
+.swse .fas {
+  horiz-align: center;
+  min-width: 16px;
+}
+
+.swse .portrait-container {
+  width: 200px;
+  height: 200px;
 }
 
 .swse .tabs {
@@ -329,6 +417,10 @@
 .swse .tabs .item.active {
   text-decoration: underline;
   text-shadow: none;
+}
+
+.swse .tabs .item-edit {
+  cursor: pointer;
 }
 
 .swse .items-list {
@@ -401,4 +493,212 @@
   -webkit-box-flex: 1;
   -ms-flex: 1;
   flex: 1;
+}
+
+.swse .summary-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 3px;
+}
+
+.swse .summary-header .name {
+  grid-area: 1 / 1 / 2 / 5;
+}
+
+.swse .summary-header .player {
+  grid-area: 1 / 5 / 2 / 8;
+}
+
+.swse .summary-header .classes {
+  grid-area: 2 / 1 / 3 / 7;
+}
+
+.swse .summary-header .level {
+  grid-area: 2 / 7 / 3 / 8;
+}
+
+.swse .summary-header .destiny {
+  grid-area: 4 / 1 / 5 / 7;
+}
+
+.swse .summary-header .experience {
+  grid-area: 4 / 7 / 5 / 8;
+}
+
+.swse .summary-header .weight {
+  grid-area: 3 / 7 / 4 / 8;
+}
+
+.swse .summary-header .height {
+  grid-area: 3 / 6 / 4 / 7;
+}
+
+.swse .summary-header .age {
+  grid-area: 3 / 5 / 4 / 6;
+}
+
+.swse .summary-header .sex {
+  grid-area: 3 / 4 / 4 / 5;
+}
+
+.swse .summary-header .species {
+  grid-area: 3 / 1 / 4 / 4;
+}
+
+.swse .attack {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 1px;
+}
+
+.swse .attack .name {
+  grid-area: 1 / 1 / 2 / 4;
+}
+
+.swse .attack .to-hit {
+  grid-area: 2 / 1 / 3 / 3;
+}
+
+.swse .attack .damage {
+  grid-area: 2 / 3 / 3 / 5;
+}
+
+.swse .attack .attack-notes {
+  grid-area: 3 / 1 / 4 / 4;
+}
+
+.swse .attack .range {
+  grid-area: 1 / 4 / 2 / 6;
+}
+
+.swse .attack .critical {
+  grid-area: 2 / 5 / 3 / 6;
+}
+
+.swse .attack .type {
+  grid-area: 3 / 4 / 4 / 6;
+}
+
+.swse .armor {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 1px;
+}
+
+.swse .armor .name {
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.swse .armor .speed {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .armor .reflex-defense {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.swse .armor .fortitude-defense {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.swse .armor .max-dexterity {
+  grid-area: 2 / 3 / 3 / 4;
+}
+
+.swse .armor .armor-notes {
+  grid-area: 3 / 1 / 4 / 4;
+}
+
+.swse .ability-score {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+}
+
+.swse .ability-score .name {
+  grid-area: 1 / 1 / 2 / 3;
+}
+
+.swse .ability-score .score {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .ability-score .temp {
+  grid-area: 1 / 4 / 2 / 5;
+}
+
+.swse .ability-score .mod {
+  grid-area: 1 / 5 / 2 / 6;
+}
+
+.swse .defense {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 3px;
+  grid-row-gap: 3px;
+}
+
+.swse .defense .defense-header {
+  grid-area: 1 / 1 / 2 / 4;
+}
+
+.swse .defense .defense-label {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.swse .defense .defense-total {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.swse .defense .defense-10 {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .defense .defense-level-armor {
+  grid-area: 1 / 4 / 2 / 5;
+}
+
+.swse .defense .defense-ability {
+  grid-area: 1 / 5 / 2 / 6;
+}
+
+.swse .defense .defense-class {
+  grid-area: 1 / 6 / 2 / 7;
+}
+
+.swse .defense .defense-misc {
+  grid-area: 1 / 7 / 2 / 8;
+}
+
+.swse .attribute {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: 1fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.swse .attribute-key {
+  grid-area: 1 / 1 / 2 / 5;
+}
+
+.swse .attribute-value {
+  grid-area: 1 / 5 / 2 / 9;
+}
+
+.swse .attribute-delete {
+  grid-area: 1 / 9 / 2 / 10;
+}
+
+.swse .attribute-button {
+  grid-area: 1 / 1 / 2 / 10;
 }

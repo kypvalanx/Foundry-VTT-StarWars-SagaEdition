@@ -1,35 +1,76 @@
 {{!-- Ability Scores --}}
-<div class="ability-score">
-    <table class="fixed">
-        <thead>
-        <tr>
-            <th>Ability</th>
-            <th>Total</th>
-            <th>Modifier</th>
-            <th>Base</th>
-            <th>Bonus</th>
-            <th>Temporary Bonus</th>
-        </tr>
-        </thead>
-        <tbody>
-        {{#each data.abilities as |ability id|}}
-            {{#unless ability.skip}}
-                <tr>
-                    <th><a class="rollable" title="Re-roll 1d20 + {{ability.mod}}" data-roll="1d20 + {{ability.mod}}"><i class="fas fa-dice"></i>
-                    </a>{{id}}</th>
-                    <td><span class="center" name="data.abilities.{{id}}.value" data-dtype="Number">{{ability.total}}</span></td>
-                    <td><span class="center">{{ability.mod}}</span></td>
-                    <td><span class="center text-box direct" name="data.abilities.{{id}}.base" data-dtype="Number">{{ability.base}}</span></td>
-                    <td><span class="center" name="data.abilities.{{id}}.value" data-dtype="Number" title="classLevelBonus: {{ability.classLevelBonus}}
-speciesBonus: {{ability.speciesBonus}}
-ageBonus: {{ability.ageBonus}}
-equipmentBonus: {{ability.equipmentBonus}}
-buffBonus: {{ability.buffBonus}}
-customBonus: {{ability.customBonus}}">{{ability.bonus}}</span></td>
-                    <td><span class="center text-box direct" name="data.abilities.{{id}}.customBonus" data-dtype="Number">{{ability.customBonus}}</span></td>
-                </tr>
-            {{/unless}}
-        {{/each}}
-        </tbody>
-    </table>
+<div class="ability-scores panel">
+    <div class="ability-score">
+        <div class="score"><h3>Score</h3></div>
+        <div class="temp"><h3>Temp</h3></div>
+        <div class="mod"><h3>Mod</h3></div>
+    </div>
+    {{#each data.data.attributes as |attribute id|}}
+        {{#unless attribute.skip}}
+            <div class="ability-score draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}" data-type="ability">
+                <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
+                     data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3></div>
+                <div class="score input"><span class="center" title="">{{attribute.total}}</span></div>
+                <div class="temp input"><span class="center text-box direct tiny min-width-15"
+                                              name="data.attributes.{{id}}.customBonus"
+                                              data-dtype="Number">{{attribute.customBonus}}</span></div>
+                <div class="mod input"><span class="center">{{attribute.roll}}</span></div>
+            </div>
+        {{/unless}}
+    {{/each}}
+    {{#unless data.data.lockAttributes}}
+        <div class="flex flex-row">
+            <div class="generationType" title="Select Ability Generation Type"><a><i
+                    class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
+            {{#ifEquals data.data.attributeGenerationType "Roll"}}
+                <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
+            {{/ifEquals}}
+            {{#ifEquals data.data.attributeGenerationType "Standard Array"}}
+                <div class="assignStandardArray" title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
+            {{/ifEquals}}
+            {{#ifEquals data.data.attributeGenerationType "Point Buy"}}
+                <div class="assignAttributePoints" title="Assign Ability Points"><a><i class="fas fa-edit"></i></a></div>
+            {{/ifEquals}}
+            {{#ifEquals data.data.attributeGenerationType "Manual"}}
+                <div class="assignManual"  title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
+            {{/ifEquals}}
+            {{#each data.data.levelAttributeBonus as |bonus key|}}
+                {{#if bonus}}
+                    <div class="leveledAttributeBonus  {{#if bonus.warn}}warning{{/if}}" data-level="{{key}}" title="Select Level Up Attribute Bonus for Level {{key}}"><a><i class="fas fa-exclamation"></i></a></div>
+                {{/if}}
+            {{/each}}
+        </div>
+    {{/unless}}
 </div>
+<!--    -->
+<!--    <table class="fixed">-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--            <th>Attribute</th>-->
+<!--            <th>Score</th>-->
+<!--            <th>Temporary Bonus</th>-->
+<!--            <th>Modifier</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+        <!--        {{#each data.attributes as |attribute id|}}-->
+        <!--            {{#unless attribute.skip}}-->
+<!--                <tr class="attribute" data-label="{{attribute.label}}">-->
+<!--                    <th><a class="rollable" title="Roll 1d20 + {{attribute.roll}}"-->
+<!--                           data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><i-->
+<!--                            class="fas fa-dice"></i>-->
+<!--                    </a>{{attribute.label}}</th>-->
+<!--                    <td><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}-->
+<!--speciesBonus: {{attribute.speciesBonus}}-->
+<!--ageBonus: {{attribute.ageBonus}}-->
+<!--equipmentBonus: {{attribute.equipmentBonus}}-->
+<!--buffBonus: {{attribute.buffBonus}}-->
+<!--customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>-->
+<!--                    <td><span class="center text-box direct" name="data.attributes.{{id}}.customBonus"-->
+<!--                              data-dtype="Number">{{attribute.customBonus}}</span></td>-->
+<!--                    <td><span class="center">{{attribute.roll}}</span></td>-->
+<!--                </tr>-->
+        <!--            {{/unless}}-->
+        <!--        {{/each}}-->
+<!--        </tbody>-->
+<!--    </table>-->

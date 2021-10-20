@@ -1,0 +1,42 @@
+{{!-- Defenses Block --}}
+<div class="defenses-block panel flex flex-col">
+    <div class="defense">
+        <div class="defense-level-armor"><h3>Level/<br/>Armor</h3></div>
+        <div class="defense-ability"><h3>Ability</h3></div>
+        <div class="defense-class"><h3>Class</h3></div>
+        <div class="defense-misc"><h3>Misc</h3></div>
+        <div class="defense-header resource-label"><h1>Defenses</h1></div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Fort</div>
+        <h2><div class="defense-total plain input static">{{data.data.defense.fort.total}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static">{{data.data.defense.fort.armorBonus}}</div>
+        <div class="defense-ability plain input static">{{data.data.defense.fort.abilityBonus}}</div>
+        <div class="defense-class plain input static">{{data.data.defense.fort.classBonus}}</div>
+        <div class="defense-misc plain input static">{{data.data.defense.fort.miscBonus}}</div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Ref</div>
+        <h2><div class="defense-total plain input static">{{data.data.defense.ref.total}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static">{{data.data.defense.ref.armorBonus}}</div>
+        <div class="defense-ability plain input static">{{data.data.defense.ref.abilityBonus}}</div>
+        <div class="defense-class plain input static">{{data.data.defense.ref.classBonus}}</div>
+        <div class="defense-misc plain input static">{{data.data.defense.ref.miscBonus}}</div>
+    </div>
+    <div class="defense">
+        <div class="defense-label plain input static">Will</div>
+        <h2><div class="defense-total plain input static">{{data.data.defense.will.total}}</div></h2>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static">{{data.data.defense.will.armorBonus}}</div>
+        <div class="defense-ability plain input static">{{data.data.defense.will.abilityBonus}}</div>
+        <div class="defense-class plain input static">{{data.data.defense.will.classBonus}}</div>
+        <div class="defense-misc plain input static">{{data.data.defense.will.miscBonus}}</div>
+    </div>
+
+
+    {{#each data.data.defense.situationalBonuses as |bonus id|}}
+        <div class="panel">{{bonus}}</div>
+    {{/each}}
+</div>

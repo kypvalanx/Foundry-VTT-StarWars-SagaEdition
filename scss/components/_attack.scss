@@ -1,0 +1,30 @@
+.attack {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 1px;
+
+  .name { grid-area: 1 / 1 / 2 / 4; }
+  .to-hit { grid-area: 2 / 1 / 3 / 3; }
+  .damage { grid-area: 2 / 3 / 3 / 5; }
+  .attack-notes { grid-area: 3 / 1 / 4 / 4; }
+  .range { grid-area: 1 / 4 / 2 / 6; }
+  .critical { grid-area: 2 / 5 / 3 / 6; }
+  .type { grid-area: 3 / 4 / 4 / 6; }
+}
+
+.armor {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-column-gap: 9px;
+  grid-row-gap: 1px;
+
+  .name { grid-area: 1 / 1 / 2 / 3; }
+  .speed { grid-area: 1 / 3 / 2 / 4; }
+  .reflex-defense { grid-area: 2 / 1 / 3 / 2; }
+  .fortitude-defense { grid-area: 2 / 2 / 3 / 3; }
+  .max-dexterity { grid-area: 2 / 3 / 3 / 4; }
+  .armor-notes { grid-area: 3 / 1 / 4 / 4; }
+}

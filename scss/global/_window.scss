@@ -10,8 +10,25 @@
     cursor: pointer;
   }
 }
+.static {
+  cursor: not-allowed;
+}
 
 .cursor {
   color: #000;
   text-shadow: 0 0 10px red;
+}
+.input,
+.textarea {
+  border: 1px solid #7a7971;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 3px 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  height: 26px;
+}
+
+.panel {
+  padding: 5px;
+  border: 1px solid #999;
 }

@@ -1,0 +1,38 @@
+{{!-- Condition Block --}}
+<div class="condition-block panel flex flex-col">
+    <h1 class="resource-label">Condition</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>-</th>
+            <th>-1</th>
+            <th>-2</th>
+            <th>-5</th>
+            <th>-10</th>
+            <th>Out</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="0"
+                              {{#ifEquals actor.data.data.condition 0}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="1"
+                              {{#ifEquals actor.data.data.condition 1}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="2"
+                              {{#ifEquals actor.data.data.condition 2}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="3"
+                              {{#ifEquals actor.data.data.condition 3}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="4"
+                              {{#ifEquals actor.data.data.condition 4}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition" value="5"
+                              {{#ifEquals actor.data.data.condition 5}}checked{{/ifEquals}}
+                              data-dtype="Number"/></label></td>
+        </tr>
+        </tbody>
+    </table>
+</div>

@@ -99,10 +99,11 @@ export class SWSEItemSheet extends ItemSheet {
 
     // Update Inventory Item
     html.find('.item-edit').click(ev => {
-      const li = $(ev.currentTarget).parents(".item");
-      console.log(li);
-      const item = new SWSEItem(this.item.getOwnedItem(li.data("itemId")));
-      console.log(item);
+      let li = $(ev.currentTarget);
+      if(!li.hasClass("item")) {
+        li = li.parents(".item");
+      }
+      const item = this.actor.items.get(li.data("itemId"));
       item.sheet.render(true);
     });
 
@@ -110,11 +111,39 @@ export class SWSEItemSheet extends ItemSheet {
     html.find('.item-delete').click(ev => {
       const li = $(ev.currentTarget).parents(".item");
       let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
-      let ownedItem = this.item.actor.getOwnedItem(itemToDelete._id);
+      let ownedItem = this.item.actor.items.get(itemToDelete._id);
       this.item.revokeOwnership(ownedItem);
     });
 
+    //AddItemAttribute
+    html.find('.attribute-add').click(ev => {
+      let attributes = this.item.data.data.attributes
+      let cursor = 0;
+      while (attributes[cursor]){
+        cursor++;
+      }
+      this.createItemAttribute(cursor)
+    });
+    //deleteItemAttribute
+    html.find('.attribute-delete').click(ev => {
+      let id = $(ev.currentTarget).data('attributeId')
+      let changedAttributes = {};
+      let cursor = 0;
+      for(const [key, value] of Object.entries(this.item.data.data.attributes)){
+        if(key !== `${id}`){
+          changedAttributes[cursor] = value;
+        } else {
+          changedAttributes[cursor] = null;
+        }
+        cursor++;
+      }
+
+      this.item.setAttributes(changedAttributes);
+      this.render();
+    });
+
     html.find('.value-plus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -123,10 +152,14 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor+1;
+      if(typeof target.data("high") === "number"){
+        update[name] = Math.min(update[name], target.data("high"));
+      }
       this.object.update(update);
     });
 
     html.find('.value-minus').click(ev => {
+      let target = $(ev.currentTarget)
       let name = ev.currentTarget.name;
       let toks = name.split('.');
       let cursor = this.object.data;
@@ -135,33 +168,16 @@ export class SWSEItemSheet extends ItemSheet {
       }
       let update = {}
       update[name] = cursor-1;
+      if(typeof target.data("low") === "number"){
+        update[name] = Math.max(update[name], target.data("low"));
+      }
       this.object.update(update);
     });
 
-    // html.find('.add-attack').click(ev => {
-    //   this.object.addAttack().then(this.render(true));
-    // });
-    //
-    // html.find('.remove-attack').click(ev => {
-    //   const li = $(ev.currentTarget).parents(".attribute");
-    //   this.object.removeAttack(li.data("attribute")).then(this.render(true));
-    // });
-    //
-    // html.find('.add-category').click(ev => {
-    //   this.object.addCategory().then(this.render(true));
-    //   console.log(this.object)
-    // });
-    //
-    // html.find('.remove-category').click(ev => {
-    //   const li = $(ev.currentTarget).parents(".attribute");
-    //   this.object.removeCategory(li.data("attribute")).then(this.render(true));
-    //   console.log(this.object)
-    // });
-
-
-    // html.find('form').each((i, li) => {
-    //       li.addEventListener("drop", (ev) => this._onDrop(ev));
-    //     });
+    // Add general text box (span) handler
+    html.find("span.text-box.direct").on("click", (event) => {
+      this._onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+    });
 
 
     // Roll handlers, click handlers, etc. would go here.
@@ -180,22 +196,20 @@ export class SWSEItemSheet extends ItemSheet {
 
   /** @override */
   _onDragStart(event) {
+    let dragData = {};
     const li = event.currentTarget;
 
     // Create drag data
-    const dragData = {
-      itemId: this.item.id,
-      owner: this.item.actor,
-      sceneId: this.item.actor.isToken ? canvas.scene?.id : null,
-      tokenId: this.item.actor.isToken ? this.actor.token.id : null,
-      modId: li.dataset.itemId
-    };
+    dragData.itemId= this.item.id;
+    dragData.owner= this.item.actor;
+    dragData.actorId= this.item.actor.id;
+    dragData.sceneId= this.item.actor.isToken ? canvas.scene?.id : null;
+    dragData.tokenId= this.item.actor.isToken ? this.actor.token.id : null;
 
     // Owned Items
     if ( li.dataset.itemId ) {
-      const item = this.item.data.mods.find(i => {return i._id ===li.dataset.itemId});
+      dragData.modId= li.dataset.itemId;
       dragData.type = "Item";
-      dragData.data = item;
     }
 
     event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
@@ -214,26 +228,31 @@ export class SWSEItemSheet extends ItemSheet {
     } catch (err) {
       return false;
     }
-    let itemType = this.item.type;
-    if(droppedItem.data.type ==='upgrade'){
-      if((itemType === 'armor' && droppedItem.data.data.upgrade.type.includes("Armor Upgrade")) ||
-          (itemType === 'weapon' && droppedItem.data.data.upgrade.type.includes("Weapon Upgrade"))){
-        let actor = this.actor;
-        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
-        await this.item.takeOwnership(ownedItem);
-      }
 
-    }else if(droppedItem.data.type ==='template'){
+    let actor = this.actor;
+    let ownedItem = actor.items.get(droppedItem.data._id);
+
+    let itemType = this.item.type;
+    // if(droppedItem.data.type ==='upgrade'){
+    //   if((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
+    //       (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
+    //     await this.item.takeOwnership(ownedItem);
+    //   }
+    //
+    // }else
+      if(droppedItem.data.type ==='template'){
 
       if(this._canAttach(droppedItem.data.data.attributes.application)){
-        let actor = this.actor;
-        let ownedItem = actor.getOwnedItem(droppedItem.data._id);
         await this.item.takeOwnership(ownedItem);
       } else{
         //debugger
       }
 
     }else{
+      if((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
+          (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
+        await this.item.takeOwnership(ownedItem);
+      }
       console.log("can't add this to an item");
     }
   }
@@ -330,5 +349,33 @@ export class SWSEItemSheet extends ItemSheet {
       }
     }
     return found;
+  }
+
+  createItemAttribute(cursor) {
+    let content = `<label>Key:</label>
+            <input id="key"><br/>
+        <label>Type:</label>
+            <select name="type" id="type">
+                <option>String</option>
+                <option>Boolean</option>
+                <option>List</option>
+                <option>Object</option>
+            </select><br/>
+        <label>Value:</label>
+            <input id="value">
+        `;
+
+    let options = {
+      title: "New Attribute",
+          content,
+        callback: async (html) => {
+          let key = html.find("#key")[0].value;
+          let type = html.find("#type")[0].value;
+          let value = html.find("#value")[0].value;
+          this.item.setAttribute(cursor, {key, type, value});
+    }
+    }
+
+    Dialog.prompt(options);
   }
 }

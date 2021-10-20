@@ -1,15 +1,20 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{#unless actor.species}}<span class="warning">PLEASE SELECT A SPECIES!!</span><br/>{{/unless}}
+    {{#unless data.data.attributeGenerationType}}
+        <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
+    {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="world.swse-species">Please Select a Species</span></a><br/>{{/unless}}
+    {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
     {{#if data.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{data.remainingSkills}}</span><br/>{{/if}}
     {{#if data.tooManySkills}}<span class="warning">Too Many Skills Selected: {{data.tooManySkills}}</span><br/>{{/if}}
-    {{#each actor.availableItems as |item id|}}<span class="warning">{{id}} remaining: {{item}}</span><br/>{{/each}}
-    {{#each actor.inactiveProvidedFeats as |feat id|}}<span class="warning">The {{feat.data.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisites}}</span><br/>{{/each}}
+    {{#each actor.availableItems as |item id|}}
+        <span class="warning">Items from {{id}} remaining: {{item}}</span><br/>{{/each}}
+    {{#each actor.inactiveProvidedFeats as |feat id|}}
+        <span class="warning">The {{feat.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
+    {{/each}}
     <div>
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
             <a class="item" data-tab="summary">Summary</a>
-            <a class="item" data-tab="attributes">Attributes</a>
             <a class="item" data-tab="charClass">Class</a>
             <a class="item" data-tab="equipment">Equipment</a>
             <!--        {{#if
@@ -18,361 +23,56 @@
             <a class="item" data-tab="talents">Talents</a>
             <a class="item" data-tab="traits">Traits</a>
             {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
-<!--            {{#if actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}-->
+            <a class="item" data-tab="affiliations">Affiliations</a>
+            <!--            {{#if
+                    actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}-->
             <!--        <a class="item" data-tab="description">Description</a>-->
         </nav>
 
         {{!-- Sheet Body --}}
         <section class="sheet-body">
             {{!-- Summary Page --}}
-            <div class="tab summary" data-group="primary" data-tab="summary">
-                <div class="summary-header sheet-header flex">
-                    <img class="profile-img flex-grow" src="{{actor.img}}" alt="{{actor.name}}" data-edit="img"
-                         title="{{actor.name}}"/>
-                    <div class="flex-grow2 flex-col flex">
-                        <h1 class="charname"><label>
-                            <input class="plain" name="name" type="text" value="{{actor.name}}" placeholder="Name"/>
-                        </label></h1>
-                        <div class="flex flex-grow">
-                            <button class="flex-grow" name="age" id="selectAge" {{#if
-                                    actor.species}}title="Select age." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting age."{{/unless}}>{{#if
-                                    actor.data.age}}{{actor.data.age}} years{{/if}}{{#unless actor.data.age}}
-                                Select Age{{/unless}}</button>
-                            <button class="flex-grow" name="gender" id="selectGender" {{#if
-                                    actor.species}}title="Select gender." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting gender."{{/unless}}>{{#if
-                                    actor.data.gender}}{{actor.data.gender}}{{/if}}{{#unless actor.data.gender}}{{#if actor.data.sex}}{{actor.data.sex}}{{/if}}{{#unless actor.data.sex}}
-                                Select Gender{{/unless}}{{/unless}}</button>
-                            <button class="flex-grow" name="height" id="selectWeight" {{#if
-                                    actor.species}}title="Select weight." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting weight."{{/unless}}>{{#if
-                                    actor.weight}}{{actor.weight}}{{/if}}{{#unless actor.weight}}
-                                Select Weight{{/unless}}</button>
-                            <button class="flex-grow" name="weight" id="selectHeight" {{#if
-                                    actor.species}}title="Select height." {{/if}} {{#unless actor.species}}disabled
-                                    title="Select species before selecting height."{{/unless}}>{{#if
-                                    actor.height}}{{actor.height}}{{/if}}{{#unless actor.height}}
-                                Select Height{{/unless}}</button>
-<!--                            <button class="flex-grow" name="destiny" id="selectDestiny" disabled-->
-<!--                                    title="Sorry currently unsupported.">Select Destiny</button>-->
-                            <!--                  <h3><input name="ecl" type="text" value="{{actor.ecl}}" placeholder="Ecl" title="Ecl"/></h3>-->
-                        </div>
-                        <div class="flexrow">
-                            <div class="flex-group-center species-container item"
-                                 {{#if actor.species}}data-item-id="{{actor.species._id}}"{{/if}} title="Species">
-
-                                {{#if actor.species}}
-                                    <div class="species" title="{{actor.species.name}}">
-
-                                        <div style="width:64px"><img class="species-image" alt="{{actor.species.name}}"
-                                                                     src="{{actor.species.img}}"/></div>
-                                        <div class="species-control edit rollable">{{actor.species.name}}</div>
-                                        <div class="species-controls flexcol">
-                                            <a class="species-control edit" title="{{localize "PF1.EditItem"}}"><i
-                                                    class="fas fa-edit"></i></a>
-                                            <a class="species-control delete" title="{{localize "PF1.DeleteItem"}}"><i
-                                                    class="fas fa-trash"></i></a>
-                                        </div>
-                                    </div>{{/if}}
-                                {{#unless actor.species}}
-                                    <div class="species" title="Add Species">
-                                        <div class="rollable" data-action="compendium"
-                                             data-action-target="world.swse-species"
-                                             title="{{localize "Open Compendium"}}">Add Species
-                                        </div>
-                                        <div class="species-controls flexcol">
-<!--                                            <a class="species-control add" title="{{localize "Create Species"}}"><i-->
-<!--                                                    class="fas fa-plus"></i></a>-->
-                                            <a data-action="compendium" data-action-target="world.swse-species"
-                                               title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                                        </div>
-                                    </div>{{/unless}}
-                            </div>
-
-                            <div class="flex-group-center">{{actor.speed}}</div>
-                        </div>
+            <div class="tab summary flex-col" data-group="primary" data-tab="summary">
+                <div>
+                    <!--summary-->
+                    {{> 'systems/swse/templates/actor/parts/actor-summary.hbs'}}
+                </div>
+                <div class="flex flex-row">
+                    <div>
+                        <!--attributes-->
+                        {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
+                    </div>
+                    <div class="flex-grow">
+                        <!--health-->
+                        {{> 'systems/swse/templates/actor/parts/actor-health.hbs'}}
+                    </div>
+                    <div class="flex flex-col">
+                        <!--portrait-->
+                        {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
+                        <!--condition-->
+                        {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
                     </div>
                 </div>
-                <div class="resources grid grid-2col"> <!--class="resources grid grid-3col">-->
-                    <div class="">
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Health</label>
-                            <div class="resource-content flexrow flex-center flex-between">
-                                <table class="fixed">
-                                    <thead>
-                                    <tr>
-                                        <th>Current</th>
-                                        <th>Max</th>
-                                        <th>Temp.</th>
-                                        <th>DR</th>
-                                        <th>SR</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td><label>
-                                            <input class="plain" type="text" name="data.health.value" value="{{data.health.value}}"
-                                                   data-dtype="Number"/>
-                                        </label></td>
-                                        <td>
-                                            <label>{{data.health.max}}</label>
-                                        </td>
-                                        <td><label>
-                                            <input class="plain" type="text" name="data.health.temp" value="{{data.health.temp}}"
-                                                   data-dtype="Number"/>
-                                        </label></td>
-                                        <td><label>
-                                            <input class="plain" type="text" name="data.health.dr" value="{{data.health.dr}}"
-                                                   data-dtype="Number"/>
-                                        </label></td>
-                                        <td><label>
-                                            <input class="plain" type="text" name="data.health.sr" value="{{data.health.sr}}"
-                                                   data-dtype="Number"/>
-                                        </label></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <div class="resource flex-group-center">
-                            <label class="resource-label">Condition</label>
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Normal</th>
-                                    <th>-1</th>
-                                    <th>-2</th>
-                                    <th>-5</th>
-                                    <th>-10</th>
-                                    <th>Helpless</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="0"
-                                                      {{#ifEquals actor.data.condition 0}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="1"
-                                                      {{#ifEquals actor.data.condition 1}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="2"
-                                                      {{#ifEquals actor.data.condition 2}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="3"
-                                                      {{#ifEquals actor.data.condition 3}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="4"
-                                                      {{#ifEquals actor.data.condition 4}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                    <td><label><input class="condition-radio" type="radio" name="condition" value="5"
-                                                      {{#ifEquals actor.data.condition 5}}checked{{/ifEquals}}
-                                                      data-dtype="Number"/></label></td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <!-- <div class="resource-content flexrow flex-center flex-between">
-                            </div> -->
-                        </div>
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Defense</label>
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Reflex Defence</th>
-                                    <th>Fortitude Defence</th>
-                                    <th>Will Defence</th>
-                                    <th>Damage Threshold</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>{{data.defense.ref}}</td>
-                                    <td>{{data.defense.fort}}</td>
-                                    <td>{{data.defense.will}}</td>
-                                    <td>{{data.defense.dt}}</td>
-                                </tr>
-                                {{#each data.defense.situationalBonuses as |bonus id|}}
-                                    <tr><td colspan="4">{{bonus}}</td></tr>
-                                {{/each}}
-
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Offense</label>
-                            <table>
-                                <thead>
-                                <tr>
-                                    <th>Base Attack Bonus</th>
-                                    <th>Ranged Attack Bonus</th>
-                                    <th>Melee Attack Bonus</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr>
-                                    <td>{{data.offense.bab}}</td>
-                                    <td>{{data.offense.rab}}</td>
-                                    <td>{{data.offense.mab}}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Attacks</label>
-                            <table>
-                                <thead>
-
-                                </thead>
-                                <tbody>
-                                {{#each data.attacks as |attack id|}}
-                                    {{#unless attack.hide}}
-                                        <tr>
-                                            <td>
-                                                <div class="resource flex-group-center attack"
-                                                     data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
-                                                     data-label="{{attack.name}}" data-img="{{attack.img}}">
-                                                    <div>{{attack.name}}</div>
-                                                    <div class="grid grid-2col">
-                                                        <div class="rollEquation"><a class="rollable"
-                                                                                     data-label="{{attack.name}} attack"
-                                                                                     title="Roll {{attack.th}}"
-                                                                                     data-roll="{{attack.th}}"><i
-                                                                class="fas fa-dice-d20"></i>
-                                                        </a> Atk: {{attack.th}}</div>
-                                                        <div class="rollEquation"><a class="rollable"
-                                                                                     data-label="{{attack.name}} damage"
-                                                                                     title="Roll {{attack.dam}}"
-                                                                                     data-roll="{{attack.dam}}"><i
-                                                                class="fas fa-dice"></i>
-                                                        </a> Dmg: {{attack.dam}}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {{/unless}}
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="resource flex-group-center">
-                            <label for="data.health.value" class="resource-label">Abilities</label>
-                            <table>
-                                <thead>
-
-                                </thead>
-                                <tbody>
-                                {{#each actor.traits as |trait id|}}
-                                    {{#unless trait.hide}}
-                                        <tr>
-                                            <td title="{{#if trait.data.textDescription}}{{trait.data.textDescription}} {{/if}}Source: {{trait.data.sourceString}}">{{trait.data.finalName}}</td>
-                                        </tr>
-                                    {{/unless}}
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
+                <div class="flex flex-row">
+                    <div class="flex-grow">
+                        <!--defenses-->
+                        {{> 'systems/swse/templates/actor/parts/actor-defenses.hbs'}}
                     </div>
-                    <div class="">
-                        <div class="resource flex-group-center">
-
-                            <label class="resource-label">Skills</label>
-
-                            <table class="skill">
-                                <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Bonus</th>
-                                    <th>Attribute</th>
-                                    <th>Can Use<br/>Untrained</th>
-                                    <!--                                  <th>Class Skill</th>-->
-                                    <th>Trained</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {{#each data.skills as |skill id|}}
-                                    {{#unless skill.hide}}
-                                        <tr class="skill" data-skill="{{skill.key}}" data-label="{{skill.label}}">
-                                            <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
-                                                   data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
-                                                    class="fas fa-dice-d20"></i>
-                                            </a><a href="{{skill.link}}">{{skill.label}}</a></th>
-                                            <td title="{{skill.title}}">{{skill.value}}</td>
-                                            <td>{{skill.attribute}}</td>
-                                            <td>{{#if skill.uut}}Y{{/if}}{{#unless skill.uut}}N{{/unless}}</td>
-                                            <!--                                  <td>{{#if
-                                                    skill.isClass}}Y{{/if}}{{#unless skill.isClass}}N{{/unless}}</td>-->
-                                            <td>{{#if skill.isClass}}
-                                                <label title="trained skills get an additional +5"><input class="skill"
-                                                                                                          type="checkbox"
-                                                                                                          data-id="{{id}}"
-                                                                                                          {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
-                                            </td>
-                                        </tr>
-                                    {{/unless}}
-                                {{/each}}
-                                </tbody>
-                            </table>
-                        </div>
+                    <div>
+                        <!--darkside-->
+                        {{> 'systems/swse/templates/actor/parts/actor-darkside.hbs'}}
                     </div>
+                </div>
+                <div class="flex flex-row">
+                    {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
+                    {{> 'systems/swse/templates/actor/parts/actor-skills.hbs'}}
                 </div>
             </div>
 
 
             {{!-- Attributes Tab --}}
             <div class="tab attributes" data-group="primary" data-tab="attributes">
-                <table class="fixed">
-                    <thead>
-                    <tr>
-                        <th>Attribute</th>
-                        <th>Score</th>
-                        <th>Temporary Bonus</th>
-                        <th>Modifier</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {{#each data.attributes as |attribute id|}}
-                        {{#unless attribute.skip}}
-                            <tr class="attribute" data-label="{{attribute.label}}">
-                                <th><a class="rollable" title="Roll 1d20 + {{attribute.roll}}"
-                                       data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><i
-                                        class="fas fa-dice"></i>
-                                </a>{{attribute.label}}</th>
-                                <td><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}
-speciesBonus: {{attribute.speciesBonus}}
-ageBonus: {{attribute.ageBonus}}
-equipmentBonus: {{attribute.equipmentBonus}}
-buffBonus: {{attribute.buffBonus}}
-customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
-                                <td><span class="center text-box direct" name="data.attributes.{{id}}.customBonus"
-                                          data-dtype="Number">{{attribute.customBonus}}</span></td>
-                                <td><span class="center">{{attribute.roll}}</span></td>
-                            </tr>
-                        {{/unless}}
-                    {{/each}}
-                    </tbody>
-                </table>
-                {{#unless data.lockAttributes}}
-                    <button id="generationType">Select Attribute Generation Type</button>
-                    {{#ifEquals data.attributeGenerationType "Roll"}}
-                        <button id="rollAbilities">Roll Abilities</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Standard Array"}}
-                        <button id="assignStandardArray">Assign Standard Array</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Point Buy"}}
-                        <button id="assignAttributePoints">Assign Attribute Points</button>
-                    {{/ifEquals}}
-                    {{#ifEquals data.attributeGenerationType "Manual"}}
-                        <button id="assignManual">Assign Attributes Manually</button>
-                    {{/ifEquals}}
-                    {{#each data.levelAttributeBonus as |bonus key|}}
-                        {{#if bonus}}
-                            <button class="leveledAttributeBonus" data-level="{{key}}">Select Level {{key}} Attribute
-                                Bonuses
-                            </button>{{/if}}
-                    {{/each}}
-                {{/unless}}
+                {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
             </div>
 
 
@@ -396,32 +96,44 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                     <tbody>
                     <!-- <ol class="items-list charclass-list"> -->
                     {{#each actor.classes as |class id|}}
-                        <tr class="charclass item" data-item-id="{{class._id}}">
+                        <tr class="charclass item" data-item-id="{{class.data._id}}">
                             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                                         height="24" alt="{{class.name}}"/></td>
                             <td><h4 class="item-name">{{class.name}}</h4></td>
-                            <td><span class="text-box {{#unless
-                                    class.data.attributes.first}}direct short{{/unless}} center"
-                                      data-item="{{class._id}}" data-name="data.health.rolledHp"
-                                      data-dtype="Number">{{class.data.health.rolledHp}}</span>
+                            <td><span class="text-box {{#if id}}direct short{{/if}} center"
+                                      data-item="{{class.data._id}}" data-name="data.health.rolledHp"
+                                      data-dtype="Number">{{#if id}}{{class.data.data.health.rolledHp}}{{/if}}
+                                {{#unless id}}{{class.data.data.health.firstLevel}}{{/unless}}</span>
                             </td>
-                        <td>
-                                {{#unless class.data.attributes.first}}
-                                    <a class="rollable" title="Re-roll {{class.data.health.levelUp}}"
-                                       data-item="{{class._id}}" data-name="data.health.rolledHp"
-                                       data-roll="{{class.data.health.levelUp}}"><i class="fas fa-dice"></i>
-                                    </a>{{/unless}}</td>
-                            <td>{{../data.attributes.con.mod}}</td>
-                            <td>{{sum class.data.health.rolledHp ../data.attributes.con.mod}}</td>
+                            <td>
+                                {{#if id}}
+                                    <a class="rollable" title="Re-roll {{class.data.data.health.levelUp}}"
+                                       data-item="{{class.data._id}}" data-name="data.health.rolledHp"
+                                       data-roll="{{class.data.data.health.levelUp}}"><i class="fas fa-dice"></i>
+                                    </a>{{/if}}</td>
+                            <td>{{../data.data.attributes.con.mod}}</td>
+                            <td>{{#if id}}{{sum class.data.data.health.rolledHp ../data.data.attributes.con.mod}}{{/if}}
+                                {{#unless id}}{{sum class.data.data.health.firstLevel ../data.data.attributes.con.mod}}{{/unless}}</td>
                             <td class="item-controls">
-                                <a class="item-control item-edit" title="View Class Description"><i class="fas fa-edit"></i></a>
-                                <a class="item-control item-duplicate" title="Copy Class"><i class="fas fa-plus"></i></a>
-                                {{#if class.isLatest}}
-                                    <a class="item-control item-delete" title="Delete Class"><i class="fas fa-trash"></i></a>{{/if}}
+                                <a class="item-control item-edit" title="View Class Description"><i
+                                        class="fas fa-edit"></i></a>
+                                <a class="item-control item-duplicate" title="Copy Class"><i
+                                        class="fas fa-plus"></i></a>
+                                {{#ifLast id actor.classes}}
+                                    <a class="item-control item-delete" title="Delete Class"><i
+                                            class="fas fa-trash"></i></a>{{/ifLast}}
                             </td>
                         </tr>
                     {{/each}}
-                    <tr><td></td><td></td><td></td><td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other Bonuses: {{data.health.other}}</td><td>{{data.health.max}}</td><td></td></tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other
+                            Bonuses: {{data.data.health.other}}</td>
+                        <td>{{data.data.health.max}}</td>
+                        <td></td>
+                    </tr>
                     <!-- </ol> -->
                     </tbody>
                 </table>
@@ -520,19 +232,20 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </div>
                 <ol class="items-list">
                     {{#each actor.feats as |feat id|}}
-                        <li class="item feat flexrow" data-item-name="{{feat.data.finalName}}"
+                        <li class="item feat flexrow " data-item-name="{{feat.finalName}}"
                             data-item-id="{{feat._id}}">
-                            <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.name}}" width="24" height="24"/></div>-->
-                            <h4 class="item-name"><b>{{feat.data.finalName}}</b></h4>
-                            {{#if feat.data.prerequisites }}
-                                <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisites}}</h4>{{/if}}
-                            {{#if feat.hasBonusFeatCategories }}<h4 class="item-name">
-                                <span><b>Bonus Feat Groups:</b> {{feat.bonusFeatCategories}}</span></h4>{{/if}}
+                            <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.finalName}}" width="24" height="24"/></div>-->
+                            <h4 class="item-name"><b>{{feat.finalName}}</b></h4>
+                            {{#if feat.data.prerequisite }}
+                                <h4 class="item-name"><b>Prerequisites:</b> {{feat.data.prerequisite.text}}</h4>{{/if}}
+                            <!-- TODO maybe put the description here-->
 
                             <div class="item-controls">
-                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+<!--                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>-->
                                 {{#unless feat.data.isSupplied}}
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>{{/unless}}
+                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                {{/unless}}
+                                <a class="item-control item-edit" title="View Item"><i class="fas fa-eye"></i></a>
                             </div>
                         </li>
                     {{/each}}
@@ -550,7 +263,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 <ol class="items-list">
                     {{#each actor.talents as |talent id|}}
                         <li class="item flexrow" data-item-id="{{talent._id}}">
-                            <h4 class="item-name"><b>{{talent.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
                             <h4 class="item-name"><a
                                     href="{{talent.data.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
                             <h4 class="item-name">{{#if talent.data.prerequisites}}
@@ -568,7 +281,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
             {{!-- Owned Traits Tab --}}
             <div class="tab items" data-group="primary" data-tab="traits">
                 <div>
-                    <h2><label class="resource-label">Talents <a data-action="compendium"
+                    <h2><label class="resource-label">Traits <a data-action="compendium"
                                                                  data-action-target="world.swse-talents"
                                                                  title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
@@ -576,11 +289,11 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 <ol class="items-list">
                     {{#each actor.traits as |trait id|}}
                         <li class="item flexrow" data-item-id="{{trait._id}}">
-                            <h4 class="item-name"><b>{{trait.data.finalName}}</b></h4>
+                            <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
                             <h4 class="item-name">Source: {{trait.data.supplier.type}}
                                 , {{trait.data.supplier.name}}</h4>
-                            <h4 class="item-name">{{#if trait.data.prerequisites}}
-                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>
+<!--                            <h4 class="item-name">{{#if trait.data.prerequisites}}-->
+<!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
                             </div>
@@ -593,7 +306,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
             <div class="tab items" data-group="primary" data-tab="force">
                 <div>
                     <h2><label class="resource-label">Force Powers <a data-action="compendium"
-                                                                      data-action-target="world.swse-force-powers"
+                                                                      data-action-target="world.swse-force powers"
                                                                       title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -613,7 +326,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Secrets <a data-action="compendium"
-                                                                       data-action-target="world.swse-force-secrets"
+                                                                       data-action-target="world.swse-force secrets"
                                                                        title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -632,7 +345,7 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Techniques <a data-action="compendium"
-                                                                          data-action-target="world.swse-force-techniques"
+                                                                          data-action-target="world.swse-force techniques"
                                                                           title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -650,27 +363,8 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                 </ol>
                 <br/>
                 <div>
-                    <h2><label class="resource-label">Force Traditions <a data-action="compendium"
-                                                                          data-action-target="world.swse-force-traditions"
-                                                                          title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
-                <ol class="items-list">
-                    {{#each actor.traditions as |item id|}}
-                        <li class="item flexrow" data-item-id="{{item._id}}">
-                            <h4 class="item-name"><b>{{item.name}}</b></h4>
-                            <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
-                            <div class="item-controls">
-                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                            </div>
-                        </li>
-                    {{/each}}
-                </ol>
-                <br/>
-                <div>
                     <h2><label class="resource-label">Force Regimens <a data-action="compendium"
-                                                                        data-action-target="world.swse-force-regimens"
+                                                                        data-action-target="world.swse-force regimens"
                                                                         title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -686,6 +380,10 @@ customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>
                         </li>
                     {{/each}}
                 </ol>
+            </div>
+
+            <div class="tab affiliations" data-group="primary" data-tab="affiliations">
+                {{> 'systems/swse/templates/actor/parts/actor-affiliations.hbs'}}
             </div>
         </section>
     </div>
