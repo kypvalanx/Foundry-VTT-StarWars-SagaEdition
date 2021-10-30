@@ -10,12 +10,10 @@ import {d20, sizeArray} from "../swse.js";
  */
 export async function generateAttacks(actor) {
     actor.data.data.attacks = [];
-    let unarmedAttack = generateUnarmedAttacks(actor);
-    actor.data.data.attacks.push(unarmedAttack);
-    for (const weapon of actor.getEquippedItems().filter(item => item.type === 'weapon')) {
-        let attack = generateAttackFromWeapon(weapon, actor);
-        actor.data.data.attacks.push(attack);
-    }
+    actor.data.data.attacks.push(generateUnarmedAttacks(actor));
+    actor.data.data.attacks.push(...actor.getEquippedItems()
+        .filter(item => item.type === 'weapon')
+        .map(weapon => generateAttackFromWeapon(weapon, actor)));
 }
 
 /**
@@ -51,11 +49,9 @@ export function generateAttackFromWeapon(item, actor) {
     let strMod = parseInt(actor.getAttributeMod("str"));
     let strBonus = isTwoHanded ? strMod * 2 : strMod;
     let notes = [];
-    let rof = item.ratesOfFire;
-    if (rof.length > 0) {
-        notes.push(`(ROF: ${rof.join(", ")})`)
-    }
-    let isAutofireOnly = rof ? rof.size === 1 && rof[0].toLowerCase() === 'autofire' : false;
+    let modes = item.modes;
+
+    //let isAutofireOnly = rof ? rof.size === 1 && rof[0].toLowerCase() === 'autofire' : false;
 
     let damageBonuses = [];
     damageBonuses.push(actor.getHalfCharacterLevel())
@@ -88,11 +84,10 @@ export function generateAttackFromWeapon(item, actor) {
     let critical = "x2"
     let type = item.damageType
 
-
     let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
 
     let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, rof, hasStun)
+    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, modes, hasStun)
 }
 
 function isOversized(actorSize, itemSize) {
@@ -169,23 +164,7 @@ function explodeProficiencies(proficiencies) {
     }
     return result;
 }
-
-function multipleAttacks(atkBonus, proficient, feats) {
-    if (!proficient) {
-        return atkBonus - 10;
-    }
-    if (feats.includes("dual weapon mastery iii")) {
-        return atkBonus;
-    }
-    if (feats.includes("dual weapon mastery ii")) {
-        return atkBonus - 2;
-    }
-    if (feats.includes("dual weapon mastery i")) {
-        return atkBonus - 5;
-    }
-}
-
-function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, rof, hasStun) {
+function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, modes, hasStun) {
     return {
         name,
         th,
@@ -197,7 +176,7 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
         sound: "",
         itemId: itemId,
         actorId: actorId,
-        ratesOfFire: rof,
+        modes,
         hasStun
     };
 }
@@ -256,14 +235,14 @@ export function generateUnarmedAttacks(actor) {
 
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id);
+    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id, []);
 }
 
 /**
  *
  * @param {SWSEItem} size
- * @param actor
- * @returns {string}
+ * @param {SWSEActor} actor
+ * @returns {String}
  */
 function resolveUnarmedDamageDie(size, actor) {
     let damageDie = getDamageDieSizeByCharacterSize(size);

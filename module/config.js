@@ -38,6 +38,8 @@ SWSE.Abilities.droidSkip = {
     cha: false,
 };
 
+
+
 SWSE.Abilities.standardScorePackage = [15,14,13,12,10,8];
 
 SWSE.Abilities.abilityCost = {
@@ -57,3 +59,11 @@ SWSE.Abilities.abilityCost = {
 SWSE.Abilities.defaultAbilityRoll = "4d6kh3";
 SWSE.Abilities.defaultPointBuyTotal = 28;
 SWSE.Abilities.droidPointBuyTotal = 21;
+
+
+
+/**
+ * set the available attributes for an item attribute field
+ * @type {*[]}
+ */
+SWSE.RecognizedAttributes = [];

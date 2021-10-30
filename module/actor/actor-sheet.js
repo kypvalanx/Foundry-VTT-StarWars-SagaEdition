@@ -105,6 +105,19 @@ export class SWSEActorSheet extends ActorSheet {
             await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
 
+        html.find('.mode-selector').on("click", async event =>{
+            //event.preventDefault();
+            event.stopPropagation();
+            let isChecked = event.currentTarget.checked;
+            let mode = $(event.currentTarget).data("mode");
+            let item = this.actor.items.get($(event.currentTarget).data("itemId"));
+            if(isChecked){
+                item.activateMode(mode)
+            } else {
+                item.deactivateMode(mode)
+            }
+        })
+
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
         html.find("#selectGender").on("click", event => this._selectGender(event, this));
         html.find("#selectWeight").on("click", () => this._unavailable());

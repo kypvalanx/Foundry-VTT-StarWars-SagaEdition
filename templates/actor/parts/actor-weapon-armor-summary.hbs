@@ -24,6 +24,14 @@
                     <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
                     <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
                     <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
+                    <div class="modes">
+                        {{#each attack.modes as |mode id|}}
+                            <label for="{{mode.name}} {{attack.itemId}}">{{mode.name}}</label>
+                            <input class="mode-selector" type="checkbox" {{#if mode.isActive}}checked{{/if}}
+                                   data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}" id="{{mode.name}} {{attack.itemId}}"/>
+                            {{log attack}}
+                        {{/each}}
+                    </div>
                 </div>
             {{/unless}}
         {{/if}}

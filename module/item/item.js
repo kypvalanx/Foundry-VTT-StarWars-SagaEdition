@@ -1,6 +1,6 @@
 import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {getBonusString, increaseDamageDie, toNumber} from "../util.js";
+import {getBonusString, increaseDamageDie, toNumber, extractAttributeValues} from "../util.js";
 
 function getRangeModifier(range, accurate, innacurate) {
     if (range === 'Grenades') {
@@ -14,10 +14,10 @@ function getRangeModifier(range, accurate, innacurate) {
     if (rangeArray) {
         for (let [rangeName, rangeIncrement] of Object.entries(rangeArray)) {
             let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
-            if(accurate && rangeName === 'short'){
+            if (accurate && rangeName === 'short') {
                 rangePenaltyElement = 0;
             }
-            if(innacurate && rangeName === 'long'){
+            if (innacurate && rangeName === 'long') {
                 continue;
             }
             firstHeader += `<th><div class="swse padding-3 center">${rangeName.titleCase()} (${rangePenaltyElement})</div></th>`;
@@ -90,58 +90,62 @@ export class SWSEItem extends Item {
         }
         return finalName;
     }
+
     // get name() {
     //     return this.finalName;
     // }
-    get fortitudeDefenseBonus(){
+    get fortitudeDefenseBonus() {
         return toNumber(this.getAttribute('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
-    get reflexDefenseBonus(){
+
+    get reflexDefenseBonus() {
         return toNumber(this.getAttribute('reflexDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
-    get maximumDexterityBonus(){
+
+    get maximumDexterityBonus() {
         return toNumber(this.getAttribute('maximumDexterityBonus')) - toNumber(this.getStripping("reduceJointProtection"));
     }
-    get mods(){
+
+    get mods() {
         let actor = this.actor;
-        if(!actor || !actor.data || !actor.items){
+        if (!actor || !actor.data || !actor.items) {
             return [];
         }
 
         return this.data.data.items?.map(item => actor.items.get(item._id)) || [];
     }
 
-    get prefix(){
+    get prefix() {
         return this.getAttribute('prefix')?.value;
     }
 
-    get suffix(){
-        if(this.mods?.filter(item => item.name === 'Bayonet Ring').length > 0){
+    get suffix() {
+        if (this.mods?.filter(item => item.name === 'Bayonet Ring').length > 0) {
             return `with ${this.name}`
         }
         return this.getAttribute('suffix')?.value;
     }
 
-    get size(){
-        if(this.getStripping("makeColossal")?.value){
+    get size() {
+        if (this.getStripping("makeColossal")?.value) {
             return 'Colossal';
         }
-        if(this.getStripping("makeGargantuan")?.value){
+        if (this.getStripping("makeGargantuan")?.value) {
             return 'Gargantuan';
         }
-        if(this.getStripping("makeHuge")?.value){
+        if (this.getStripping("makeHuge")?.value) {
             return 'Huge';
         }
-        if(this.getStripping("makeLarge")?.value){
+        if (this.getStripping("makeLarge")?.value) {
             return 'Large';
         }
-        if(this.getStripping("makeMedium")?.value){
+        if (this.getStripping("makeMedium")?.value) {
             return 'Medium';
         }
-        if(this.getStripping("makeSmall")?.value){
+        if (this.getStripping("makeSmall")?.value) {
             return 'Small';
         }
-        if(this.getStripping("makeTiny")?.value){
+        if (this.getStripping("makeTiny")?.value) {
             return 'Tiny';
         }
         return this.data.data.size;
@@ -162,7 +166,7 @@ export class SWSEItem extends Item {
     }
 
     get modSubType() {
-        if(this.data.data.items?.filter(item => item.name === 'Bayonet Ring').length > 0){
+        if (this.data.data.items?.filter(item => item.name === 'Bayonet Ring').length > 0) {
             return 'Weapons Upgrade'
         }
 
@@ -170,7 +174,7 @@ export class SWSEItem extends Item {
     }
 
     get effectiveRange() {
-        let resolvedSubtype= this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
+        let resolvedSubtype = this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
 
         if (this.getStripping("reduceRange")?.value) {
             resolvedSubtype = this.reduceRange(resolvedSubtype);
@@ -179,10 +183,10 @@ export class SWSEItem extends Item {
         return resolvedSubtype;
     }
 
-    get accurate(){
+    get accurate() {
         let specials = this.getAttribute('special')?.value;
-        for(let special of specials? specials:[]){
-            if(special.toLowerCase().startsWith('accurate')){
+        for (let special of specials ? specials : []) {
+            if (special.toLowerCase().startsWith('accurate')) {
                 return true;
             }
         }
@@ -190,73 +194,74 @@ export class SWSEItem extends Item {
         return false;
     }
 
-    get inaccurate(){        let specials = this.getAttribute('special')?.value;
-        for(let special of specials? specials:[]){
-            if(special.toLowerCase().startsWith('inaccurate')){
+    get inaccurate() {
+        let specials = this.getAttribute('special')?.value;
+        for (let special of specials ? specials : []) {
+            if (special.toLowerCase().startsWith('inaccurate')) {
                 return true;
             }
         }
         return false;
     }
 
-    get ratesOfFire(){
-        let ratesOfFire = this.getAttribute('ratesOfFire');
-        if(!Array.isArray(ratesOfFire)){
-            ratesOfFire = [ratesOfFire]
-        }
-        let filteredROF = [];
-        let strippedAutofire = this.getStripping("stripAutofire")?.value;
-        for(let rateOfFire of ratesOfFire) {
-            if (strippedAutofire) {
-                if(rateOfFire.value !== 'Autofire') {
-                    filteredROF.push(rateOfFire.value)
-                }
-                }else{
-                filteredROF.push(rateOfFire.value)
-            }
-        }
+    // get modes(){
+    //     let ratesOfFire = this.modes();
+    //     if(!Array.isArray(ratesOfFire)){
+    //         ratesOfFire = [ratesOfFire]
+    //     }
+    //     let filteredROF = [];
+    //     let strippedAutofire = this.getStripping("stripAutofire")?.value;
+    //     for(let rateOfFire of ratesOfFire) {
+    //         if (strippedAutofire) {
+    //             if(rateOfFire.value !== 'Autofire') {
+    //                 filteredROF.push(rateOfFire.value)
+    //             }
+    //             }else{
+    //             filteredROF.push(rateOfFire.value)
+    //         }
+    //     }
+    //
+    //     return filteredROF
+    // }
 
-        return filteredROF
-    }
-
-    get damageDie(){
+    get damageDie() {
         let damageDie = this.getAttribute('damageDie')[0]?.value;
 
-        if(!damageDie){
+        if (!damageDie) {
             return "";
         }
         let tok = damageDie.split('d');
         let quantity = parseInt(tok[0]);
         let size = parseInt(tok[1]);
 
-        for(let bonusDamageDie of this.getAttribute('bonusDamageDie')){
+        for (let bonusDamageDie of this.getAttribute('bonusDamageDie')) {
             quantity = quantity + parseInt(bonusDamageDie.value);
         }
-        for(let bonusDamageDie of this.getAttribute('bonusDamageDieSize')){
+        for (let bonusDamageDie of this.getAttribute('bonusDamageDieSize')) {
             size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
         }
         return quantity + "d" + size;
     }
 
-    get stunDamageDie(){
+    get stunDamageDie() {
         let damageDie = this.getAttribute('stunDamageDie')[0]?.value;
-        if(!damageDie || this.getStripping("stripStun")?.value){
+        if (!damageDie || this.getStripping("stripStun")?.value) {
             return ""
         }
         let tok = damageDie.split('d');
         let quantity = parseInt(tok[0]);
         let size = parseInt(tok[1]);
 
-        for(let bonusDamageDie of this.getAttribute('bonusStunDamageDie')){
+        for (let bonusDamageDie of this.getAttribute('bonusStunDamageDie')) {
             quantity = quantity + parseInt(bonusDamageDie.value);
         }
-        for(let bonusDamageDie of this.getAttribute('bonusStunDamageDieSize')){
+        for (let bonusDamageDie of this.getAttribute('bonusStunDamageDieSize')) {
             size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
         }
         return quantity + "d" + size;
     }
 
-    get damageType(){
+    get damageType() {
         let attributes = this.getAttribute('damageType');
         return attributes.map(attribute => attribute.value).join(', ');
     }
@@ -314,13 +319,13 @@ export class SWSEItem extends Item {
 
         itemData.data.resolvedSize = itemData.data.size;
 
-        let makeTiny = this.setStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
-        let makeSmall = this.setStripping('makeSmall', "Make Weapon Small", size === 'Tiny' || makeTiny);
-        let makeMedium = this.setStripping('makeMedium', "Make Weapon Medium", size === 'Small' || makeSmall);
-        let makeLarge = this.setStripping('makeLarge', "Make Weapon Large", size === 'Medium' || makeMedium);
-        let makeHuge = this.setStripping('makeHuge', "Make Weapon Huge", size === 'Large' || makeLarge);
-        let makeGargantuan = this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge' || makeHuge);
-        this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan' || makeGargantuan);
+        this.setStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
+        this.setStripping('makeSmall', "Make Weapon Small", size === 'Tiny');
+        this.setStripping('makeMedium', "Make Weapon Medium", size === 'Small');
+        this.setStripping('makeLarge', "Make Weapon Large", size === 'Medium');
+        this.setStripping('makeHuge', "Make Weapon Huge", size === 'Large');
+        this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge');
+        this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan');
 
         for (let stripped of Object.values(itemData.data.stripping)) {
             itemData.data.upgradePoints += stripped.value ? 1 : 0;
@@ -346,8 +351,8 @@ export class SWSEItem extends Item {
         return this.data.data.stripping[key].value;
     }
 
-    getStripping(key){
-        if(this.data.data.stripping){
+    getStripping(key) {
+        if (this.data.data.stripping) {
             return this.data.data.stripping[key];
         }
         return undefined;
@@ -427,6 +432,7 @@ export class SWSEItem extends Item {
             this.crawlPrerequisiteTree(child, funct);
         }
     }
+
     setPrerequisite(prerequisite) {
         this.data.data.prerequisite = prerequisite;
     }
@@ -453,8 +459,8 @@ export class SWSEItem extends Item {
         let filteredItems = [];
         let foundIds = [];
 
-        for(let item of items){
-            if(!foundIds.includes(item._id)){
+        for (let item of items) {
+            if (!foundIds.includes(item._id)) {
                 foundIds.push(item._id)
                 filteredItems.push(item);
             }
@@ -479,16 +485,16 @@ export class SWSEItem extends Item {
 
     canStripAutoFire() {
         let ratesOfFire = this.getAttribute('ratesOfFire');
-        if(ratesOfFire.length === 0){
+        if (ratesOfFire.length === 0) {
             return false;
         }
         let ss = false;
         let af = false;
-        for(let rof of ratesOfFire){
-            if(rof.value.includes("Single-Shot")){
+        for (let rof of ratesOfFire) {
+            if (rof.value.includes("Single-Shot")) {
                 ss = true;
             }
-            if(rof.value.includes("Autofire")){
+            if (rof.value.includes("Autofire")) {
                 af = true;
             }
         }
@@ -649,39 +655,132 @@ export class SWSEItem extends Item {
         })
     }
 
-    setAttribute(cursor, attr){
+    setAttribute(attributeIndex, attr) {
         let update = {};
-        update.data={};
-        update.data.attributes={}
-        update.data.attributes[cursor] = attr;
+        update.data = {};
+        update.data.attributes = {}
+        update.data.attributes[attributeIndex] = attr;
+        this.update(update);
+    }
+    setMode(modeIndex, attr) {
+        let update = {};
+        update.data = {};
+        update.data.modes = {}
+        update.data.modes[modeIndex] = attr;
+        this.update(update);
+    }
+    setModeAttribute(modeIndex, attributeIndex, attr) {
+        let update = {};
+        update.data = {};
+        update.data.modes = {}
+        update.data.modes[modeIndex] = {};
+        update.data.modes[modeIndex].attributes = {};
+        update.data.modes[modeIndex].attributes[attributeIndex] = attr;
         this.update(update);
     }
 
-    setAttributes(attributes){
+    setAttributes(attributes) {
         let update = {};
-        update.data={};
-        update.data.attributes=attributes;
+        update.data = {};
+        update.data.attributes = attributes;
+        this.update(update);
+    }
+    setModeAttributes(modeIndex, attributes) {
+        let update = {};
+        update.data = {};
+        update.data.modes = {};
+        update.data.modes[modeIndex] = {};
+        update.data.modes[modeIndex].attributes = attributes;
+        this.update(update);
+    }
+    setModes(modes) {
+        let update = {};
+        update.data = {};
+        update.data.modes = modes;
         this.update(update);
     }
 
     /**
-     *
-     * @param attributeKey
+     * Checks item for any attributes matching the provided attributeKey.  this includes active modes.
+     * @param attributeKey {String}
      * @returns {[]|*[]}
      */
-    getAttribute(attributeKey){
-        let attributes = [];
-
-        if(!attributeKey){
-            return attributes;
+    getAttribute(attributeKey) {
+        if (!attributeKey) {
+            return [];
         }
-        if(this.data.data){
-            attributes = Object.values(this.data.data.attributes);
-            for(let item of this.data.data.items || []){
-                attributes.push(...Object.values(item.data.attributes))
+
+        let values = [];
+
+        for (let attribute of Object.values(this.data.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
+            values.push(...(extractAttributeValues(attribute, this.data._id)));
+        }
+
+        for(let mode of this.getActiveModes()){
+            let modeAttributes = Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || [];
+
+            let modeAttributeValues = [];
+            for (let attribute of modeAttributes) {
+                modeAttributeValues.push(... (extractAttributeValues(attribute, this.data._id)));
             }
+            values = this.mergeAttributes(attributeKey, values, modeAttributeValues)
         }
 
-        return attributes.filter(attr => attr?.key?.toLowerCase() === attributeKey.toLowerCase());
+        for(let child of this.data.data.items || []){
+            values.push(...this.getAttributesFromItem(child._id, attributeKey))
+        }
+
+        return values;
     }
+
+    getActiveModes() {
+        return Object.values(this.data.data.modes || [])?.filter(mode => mode && this.data.data.activeModes.includes(mode.name)) || [];
+    }
+
+    mergeAttributes(attributeKey, values, modeAttributeValues) {
+        //by default mode attributes should overwrite item attributes if they exist.  in the future we may want to modify that behavior based on the attribute key
+        if(modeAttributeValues.length > 0){
+            return modeAttributeValues;
+        }
+        return values;
+    }
+
+    get modes() {
+        if (this.data.data) {
+            let modes = Object.values(this.data.data.modes);
+            for(let mode of modes.filter(mode => !!mode)){
+                mode.isActive = this.data.data.activeModes.includes(mode.name);
+            }
+
+            return modes;
+        }
+
+        return [];
+    }
+
+    // get currentMode() {
+    //     return this.data.data.mode;
+    // }
+    //
+    // set currentMode(currentMode) {
+    //     let update = {};
+    //     update.data = {};
+    //     update.data.mode = currentMode;
+    //     this.update(update);
+    // }
+
+    activateMode(mode){
+        let update = {};
+        update.data = {};
+        update.data.activeModes = this.data.data.activeModes;
+        update.data.activeModes.push(mode)
+        this.update(update);
+    }
+    deactivateMode(mode){
+        let update = {};
+        update.data = {};
+        update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !==mode.toLowerCase());
+        this.update(update);
+    }
+
 }

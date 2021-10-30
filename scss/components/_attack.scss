@@ -1,7 +1,7 @@
 .attack {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   grid-column-gap: 9px;
   grid-row-gap: 1px;
 
@@ -12,6 +12,7 @@
   .range { grid-area: 1 / 4 / 2 / 6; }
   .critical { grid-area: 2 / 5 / 3 / 6; }
   .type { grid-area: 3 / 4 / 4 / 6; }
+  .modes { grid-area: 4 / 5 / 1 / 6; }
 }
 
 .armor {

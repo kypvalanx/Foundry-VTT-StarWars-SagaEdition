@@ -153,3 +153,25 @@ export function toNumber(value) {
 
     return number;
 }
+
+/**
+ * returns a list of attribute values from a given attribute
+ * @param attribute {Object}
+ * @param attribute.value {*}
+ * @param source {String}
+ * @returns {Array.<{source: String, value: String}>}
+ */
+export function extractAttributeValues(attribute, source) {
+    let values = [];
+    let value = attribute.value;
+    if (value) {
+        if (Array.isArray(value)) {
+            for (let v of value) {
+                values.push({source, value: v})
+            }
+        } else {
+            values.push({source, value})
+        }
+    }
+    return values
+}

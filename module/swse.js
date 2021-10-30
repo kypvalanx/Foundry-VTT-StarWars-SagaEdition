@@ -8,6 +8,7 @@ import {registerSystemSettings} from "./settings/system.js";
 import {generateCompendiums} from "./compendium/generation.js";
 
 
+
 Hooks.once('init', async function() {
 
   game.swse = {
@@ -28,6 +29,7 @@ Hooks.once('init', async function() {
     formula: "1d20 + @skills.initiative.value",
     decimals: 2
   };
+
 
   // Define custom Entity classes
   CONFIG.SWSE = SWSE;

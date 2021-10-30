@@ -719,54 +719,41 @@ export class SWSEActor extends Actor {
     getTraitAttributesByKey(attributeKey) {
         let values = [];
         for (let trait of this.traits) {
-            values.push(...this.getAttributesFromItem(trait, attributeKey));
+            values.push(...this.getAttributesFromItem(trait._id, attributeKey));
         }
         return values;
     }
 
+    /**
+     * Collects all attribute values from equipped items, class levels, regimes, affiliations, feats and talents.
+     * It also checks active modes.
+     * @param attributeKey
+     * @returns {[]}
+     */
     getInheritableAttributesByKey(attributeKey){
         let values = [];
         for (let item of this.inheritableItems) {
-            values.push(...this.getAttributesFromItem(item, attributeKey));
+            values.push(...this.getAttributesFromItem(item._id, attributeKey));
         }
         return values;
     }
 
-    getAttributesFromItem(item, attributeKey) {
-        let values = [];
-        let attributes = Object.values(item.data.attributes).filter(attr => attr.key === attributeKey);
-        for (let attribute of attributes) {
-            let value = attribute.value;
-            if (value) {
-                if (Array.isArray(value)) {
-                    for(let v of value){
-                        values.push({source: item._id,value: v})
-                    }
-                } else {
-                    values.push({source: item._id,value})
-                }
-            }
-        }
-
-        for(let child of item.data.items || []){
-            values.push(...this.getAttributesFromItem(child, attributeKey))
-        }
-        return values;
+    /**
+     * Checks a given item for any attributes matching the provided attributeKey.  this includes active modes.
+     * @param itemId {String}
+     * @param attributeKey {String}
+     * @returns {Array.<{source: String, value: *}>}
+     */
+    getAttributesFromItem(itemId, attributeKey) {
+        let item = this.items.get(itemId);
+        return item.getAttribute(attributeKey);
     }
 
-    getTraitByKey(attributeKey) {
-        let values = [];
-        for (let trait of filterItemsByType(this.items.values(), "trait")) {
-            let attributes = Object.values(trait.data.data.attributes).filter(attr => attr.key === attributeKey);
-            for(let attribute of attributes) {
-                if (attribute.value) {
-                    values.push(trait)
-                }
-            }
-        }
-        return values;
-    }
 
+    getActiveModes(itemId) {
+        let item = this.items.get(itemId);
+        return item.getActiveModes();
+    }
 
     _getAbilitySkillBonus(skill) {
         if (skill.toLowerCase() === 'stealth') {

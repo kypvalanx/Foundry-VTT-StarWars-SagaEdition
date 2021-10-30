@@ -117,28 +117,76 @@ export class SWSEItemSheet extends ItemSheet {
 
     //AddItemAttribute
     html.find('.attribute-add').click(ev => {
-      let attributes = this.item.data.data.attributes
+      let modeId = $(ev.currentTarget).data('modeId')
+      if(modeId){
+        let attributes = this.item.data.data.modes[modeId].attributes
+        let cursor = 0;
+        while (attributes[cursor]) {
+          cursor++;
+        }
+        this.createItemAttribute(cursor, modeId)
+      } else {
+        let attributes = this.item.data.data.attributes
+        let cursor = 0;
+        while (attributes[cursor]) {
+          cursor++;
+        }
+        this.createItemAttribute(cursor)
+      }
+    });
+    //AddItemAttribute
+    html.find('.mode-add').click(ev => {
+      let modes = this.item.data.data.modes
       let cursor = 0;
-      while (attributes[cursor]){
+      while (modes[cursor]) {
         cursor++;
       }
-      this.createItemAttribute(cursor)
+      this.createItemMode(cursor)
     });
+
     //deleteItemAttribute
     html.find('.attribute-delete').click(ev => {
-      let id = $(ev.currentTarget).data('attributeId')
-      let changedAttributes = {};
+      let li = $(ev.currentTarget);
+      let attributeId = li.data('attributeId')
+      let modeId = li.data('modeId')
+      let changed = {};
       let cursor = 0;
-      for(const [key, value] of Object.entries(this.item.data.data.attributes)){
-        if(key !== `${id}`){
-          changedAttributes[cursor] = value;
-        } else {
-          changedAttributes[cursor] = null;
-        }
-        cursor++;
-      }
+      if(modeId && attributeId){
 
-      this.item.setAttributes(changedAttributes);
+        for (const [key, value] of Object.entries(this.item.data.data.modes[modeId].attributes)) {
+          if (key !== `${attributeId}`) {
+            changed[cursor] = value;
+          } else {
+            changed[cursor] = null;
+          }
+          cursor++;
+        }
+
+        this.item.setModeAttributes(modeId, changed);
+      } else if(modeId){
+        for (const [key, value] of Object.entries(this.item.data.data.modes)) {
+          if (key !== `${modeId}`) {
+            changed[cursor] = value;
+          } else {
+            changed[cursor] = null;
+          }
+          cursor++;
+        }
+
+        this.item.setModes(changed);
+      } else {
+
+        for (const [key, value] of Object.entries(this.item.data.data.attributes)) {
+          if (key !== `${attributeId}`) {
+            changed[cursor] = value;
+          } else {
+            changed[cursor] = null;
+          }
+          cursor++;
+        }
+
+        this.item.setAttributes(changed);
+      }
       this.render();
     });
 
@@ -351,7 +399,7 @@ export class SWSEItemSheet extends ItemSheet {
     return found;
   }
 
-  createItemAttribute(cursor) {
+  createItemAttribute(attributeId, modeId) {
     let content = `<label>Key:</label>
             <input id="key"><br/>
         <label>Type:</label>
@@ -367,13 +415,36 @@ export class SWSEItemSheet extends ItemSheet {
 
     let options = {
       title: "New Attribute",
-          content,
-        callback: async (html) => {
-          let key = html.find("#key")[0].value;
-          let type = html.find("#type")[0].value;
-          let value = html.find("#value")[0].value;
-          this.item.setAttribute(cursor, {key, type, value});
+      content,
+      callback: async (html) => {
+        let key = html.find("#key")[0].value;
+        let type = html.find("#type")[0].value;
+        let value = html.find("#value")[0].value;
+        if(modeId){
+
+          this.item.setModeAttribute(modeId,attributeId, {key, type, value});
+        }else {
+          this.item.setAttribute(attributeId, {key, type, value});
+        }
+      }
     }
+
+    Dialog.prompt(options);
+  }
+  createItemMode(modeId) {
+    let content = `
+        <label>Value:</label>
+            <input id="value">
+        `;
+
+    let options = {
+      title: "New Mode",
+      content,
+      callback: async (html) => {
+        let value = html.find("#value")[0].value;
+
+        this.item.setMode(modeId, {name: value, attributes:{}})
+      }
     }
 
     Dialog.prompt(options);

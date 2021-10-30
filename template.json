@@ -378,6 +378,10 @@
         "supplier": {},
         "possibleProviders": [],
         "isSupplied": false
+      },
+      "mode": {
+        "modes": [],
+        "activeModes": []
       }
     },
     "trait": {
@@ -394,7 +398,8 @@
         "item",
         "categories",
         "modifiable",
-        "source"
+        "source",
+        "mode"
       ],
       "weapon": {}
     },

@@ -550,7 +550,7 @@
 .swse .attack {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   grid-column-gap: 9px;
   grid-row-gap: 1px;
 }
@@ -581,6 +581,10 @@
 
 .swse .attack .type {
   grid-area: 3 / 4 / 4 / 6;
+}
+
+.swse .attack .modes {
+  grid-area: 4 / 5 / 1 / 6;
 }
 
 .swse .armor {
@@ -685,6 +689,14 @@
   grid-template-rows: 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  height: 30px;
+}
+
+.swse .mode {
+  border-top: thin solid #7a7971;
+  border-bottom: thin solid #7a7971;
+  -webkit-box-shadow: #7a7971;
+  box-shadow: #7a7971;
 }
 
 .swse .attribute-key {
@@ -695,10 +707,42 @@
   grid-area: 1 / 5 / 2 / 9;
 }
 
+.swse .attribute-indent-graphic {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.swse .attribute-indent-key {
+  grid-area: 1 / 2 / 2 / 5;
+}
+
+.swse .attribute-indent-value {
+  grid-area: 1 / 5 / 2 / 9;
+}
+
 .swse .attribute-delete {
   grid-area: 1 / 9 / 2 / 10;
 }
 
-.swse .attribute-button {
+.swse .attribute-add {
   grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .mode-add {
+  grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .subtle {
+  color: #7a7971;
+}
+
+.swse .attribute-full {
+  grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .attribute-left-button {
+  grid-area: 1 / 1 / 2 / 5;
+}
+
+.swse .attribute-right-button {
+  grid-area: 1 / 5 / 2 / 10;
 }
