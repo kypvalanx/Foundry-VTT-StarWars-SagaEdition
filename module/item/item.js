@@ -1,6 +1,6 @@
 import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {getBonusString, increaseDamageDie, toNumber, extractAttributeValues} from "../util.js";
+import {extractAttributeValues, getBonusString, increaseDamageDie, toNumber} from "../util.js";
 
 function getRangeModifier(range, accurate, innacurate) {
     if (range === 'Grenades') {
@@ -712,19 +712,13 @@ export class SWSEItem extends Item {
 
         let values = [];
 
+        //add attributes from this item
         for (let attribute of Object.values(this.data.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
-            values.push(...(extractAttributeValues(attribute, this.data._id)));
+            values.push(...extractAttributeValues(attribute, this.data._id));
         }
 
-        for(let mode of this.getActiveModes()){
-            let modeAttributes = Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || [];
-
-            let modeAttributeValues = [];
-            for (let attribute of modeAttributes) {
-                modeAttributeValues.push(... (extractAttributeValues(attribute, this.data._id)));
-            }
-            values = this.mergeAttributes(attributeKey, values, modeAttributeValues)
-        }
+        //
+        values.push(...this.extractModeAttributes(this.getActiveModes(), attributeKey, values));
 
         for(let child of this.data.data.items || []){
             values.push(...this.getAttributesFromItem(child._id, attributeKey))
@@ -733,29 +727,31 @@ export class SWSEItem extends Item {
         return values;
     }
 
-    getActiveModes() {
-        return Object.values(this.data.data.modes || [])?.filter(mode => mode && this.data.data.activeModes.includes(mode.name)) || [];
-    }
-
-    mergeAttributes(attributeKey, values, modeAttributeValues) {
-        //by default mode attributes should overwrite item attributes if they exist.  in the future we may want to modify that behavior based on the attribute key
-        if(modeAttributeValues.length > 0){
-            return modeAttributeValues;
+    extractModeAttributes(activeModes, attributeKey) {
+        let values = [];
+        for (let mode of activeModes) {
+            for (let attribute of Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || []) {
+                values.push(...extractAttributeValues(attribute, this.data._id));
+            }
+            values.push(...this.extractModeAttributes(Object.values(mode.modes || []).filter(m => m.isActive), attributeKey) || []);
         }
         return values;
     }
 
-    get modes() {
-        if (this.data.data) {
-            let modes = Object.values(this.data.data.modes);
-            for(let mode of modes.filter(mode => !!mode)){
-                mode.isActive = this.data.data.activeModes.includes(mode.name);
-            }
+    getActiveModes() {
+        return Object.values(this.data.data?.modes || [])?.filter(mode => mode && mode.isActive) || [];
+    }
 
-            return modes;
+    get modes() {
+        let modes = Object.values(this.data.data.modes);
+
+        let activeModes = this.getActiveModes();
+
+        for(let activeMode of activeModes){
+            modes.push(...Object.values(activeMode.modes || []))
         }
 
-        return [];
+        return modes;
     }
 
     // get currentMode() {
@@ -770,12 +766,34 @@ export class SWSEItem extends Item {
     // }
 
     activateMode(mode){
+        let modes = this.data.data.modes;
         let update = {};
+
         update.data = {};
-        update.data.activeModes = this.data.data.activeModes;
-        update.data.activeModes.push(mode)
+        this.recursiveModeActivation(modes, mode, update.data);
+
         this.update(update);
     }
+
+    recursiveModeActivation(modes, mode, data) {
+        let groups = Object.values(modes || []).filter(m => m.name === mode).map(m => m.group)
+
+        data.modes = {};
+        groups.forEach(group => {
+            Object.entries(modes || []).filter(entity => entity[1].group === group).forEach((entity) => {
+
+                data.modes[parseInt(entity[0])] = {};
+                data.modes[parseInt(entity[0])].isActive = entity[1].name === mode;
+            })
+        })
+
+        Object.entries(modes || []).filter(entity=>entity[1].isActive).forEach(entity => {
+            data.modes = data.modes || {};
+            data.modes[parseInt(entity[0])] = data.modes[parseInt(entity[0])] || {};
+            this.recursiveModeActivation(entity[1].modes, mode, data.modes[parseInt(entity[0])])
+        })
+    }
+
     deactivateMode(mode){
         let update = {};
         update.data = {};

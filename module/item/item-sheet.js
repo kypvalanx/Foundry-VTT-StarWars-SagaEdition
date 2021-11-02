@@ -433,17 +433,20 @@ export class SWSEItemSheet extends ItemSheet {
   }
   createItemMode(modeId) {
     let content = `
-        <label>Value:</label>
-            <input id="value">
+        <label>Name:</label>
+            <input id="name">
+        <label>Group:</label>
+            <input id="group">
         `;
 
     let options = {
       title: "New Mode",
       content,
       callback: async (html) => {
-        let value = html.find("#value")[0].value;
+        let name = html.find("#name")[0].value;
+        let group = html.find("#group")[0].value;
 
-        this.item.setMode(modeId, {name: value, attributes:{}})
+        this.item.setMode(modeId, {name, group, attributes:{}})
       }
     }
 

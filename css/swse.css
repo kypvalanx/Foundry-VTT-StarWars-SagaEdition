@@ -34,6 +34,10 @@
   border: 1px solid #999;
 }
 
+.border-light {
+  border: 1px solid #7a7971;
+}
+
 .grid,
 .grid-2col {
   display: grid;
@@ -569,6 +573,10 @@
 
 .swse .attack .attack-notes {
   grid-area: 3 / 1 / 4 / 4;
+  white-space: nowrap;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 
 .swse .attack .range {
@@ -584,7 +592,33 @@
 }
 
 .swse .attack .modes {
-  grid-area: 4 / 5 / 1 / 6;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  grid-area: 4 / 1 / 5 / 6;
+}
+
+.swse .attack .modes .mode-group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  border: 1px solid #7a7971;
+}
+
+.swse .attack .modes .mode-group .mode-selector {
+  border: 1px solid #7a7971;
 }
 
 .swse .armor {

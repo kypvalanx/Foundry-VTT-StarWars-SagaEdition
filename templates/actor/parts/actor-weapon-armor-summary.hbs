@@ -20,16 +20,23 @@
                     <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
                     <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
                     <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
-                    <div class="attack-notes"><label for="notes">Notes</label><div class="plain input">{{attack.notes}}</div></div>
+                    <div class="attack-notes"><label for="notes">Notes</label><div class="plain input" title="{{attack.notes}}">{{attack.notes}}</div></div>
                     <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
                     <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
                     <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
                     <div class="modes">
-                        {{#each attack.modes as |mode id|}}
-                            <label for="{{mode.name}} {{attack.itemId}}">{{mode.name}}</label>
-                            <input class="mode-selector" type="checkbox" {{#if mode.isActive}}checked{{/if}}
-                                   data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}" id="{{mode.name}} {{attack.itemId}}"/>
-                            {{log attack}}
+                        {{#each attack.modes as |group groupId|}}
+                            <div class="mode-group">
+                            {{#each group as |mode id|}}
+                                {{#if mode}}
+                                    <div class="mode-selector" data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}">
+                                        <label for="{{mode.name}} {{attack.itemId}}">{{mode.name}}</label>
+                                        <input class="" type="{{#unless mode.group}}checkbox{{/unless}}{{#if mode.group}}radio{{/if}}" name="{{mode.group}} {{attack.itemId}}" {{#if mode.isActive}}checked{{/if}}
+                                               data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}" id="{{mode.name}} {{attack.itemId}}"/>
+                                    </div>
+                                {{/if}}
+                            {{/each}}
+                            </div>
                         {{/each}}
                     </div>
                 </div>

@@ -24,7 +24,7 @@ export function generateAttributes(actor) {
         // let equipmentBonuses = []; //TODO WIRE ME UP
         // let buffBonuses = []; //TODO WIRE ME UP
         for (let bonusAttribute of inheritableAttributes) {
-                if (bonusAttribute.value.attribute.toLowerCase() === longKey) {
+                if (bonusAttribute.value?.attribute.toLowerCase() === longKey) {
                     bonuses.push(bonusAttribute.value.bonus)
                 }
 

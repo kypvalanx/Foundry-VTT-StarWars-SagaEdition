@@ -108,14 +108,16 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.mode-selector').on("click", async event =>{
             //event.preventDefault();
             event.stopPropagation();
+
+            //TODO add handling for radio buttons
             let isChecked = event.currentTarget.checked;
             let mode = $(event.currentTarget).data("mode");
             let item = this.actor.items.get($(event.currentTarget).data("itemId"));
-            if(isChecked){
+            // if(isChecked){
                 item.activateMode(mode)
-            } else {
-                item.deactivateMode(mode)
-            }
+            // } else {
+            //     item.deactivateMode(mode)
+            // }
         })
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));

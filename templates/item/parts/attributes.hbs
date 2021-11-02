@@ -16,7 +16,6 @@
 
 {{#each data.data.attributes as |attr key|}}
     {{#if attr}}
-        {{log attr}}
         <li class="attribute flexrow" data-attribute="{{key}}">
           <label class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}">{{attr.key}}</label>
           <input class="attribute-value" name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
@@ -37,7 +36,7 @@
             {{#each mode.attributes as |attr akey|}}
                 {{#if attr}}
                     <li class="attribute flexrow" data-mode="{{mkey}}" data-attribute="{{akey}}">
-                        <div class="attribute-indent-graphic">\</div>
+                        <div class="attribute-indent-graphic">|</div>
                         <label class="attribute-indent-key" type="text" name="data.modes.{{mkey}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
                         <input class="attribute-indent-value" name="data.modes.{{mkey}}.attributes.{{akey}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
                         <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->

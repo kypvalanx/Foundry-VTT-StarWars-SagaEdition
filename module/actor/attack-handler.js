@@ -33,6 +33,7 @@ export function generateAttackFromWeapon(item, actor) {
         return undefined;
     }
 
+    let toHit = item.getAttribute("toHitModifier")
     let proficiencies = actorData.proficiency.weapon;
     let weaponTypes = getPossibleProficiencies(item);
     let proficient = isProficient(proficiencies, weaponTypes);
@@ -50,6 +51,13 @@ export function generateAttackFromWeapon(item, actor) {
     let strBonus = isTwoHanded ? strMod * 2 : strMod;
     let notes = [];
     let modes = item.modes;
+    let groupedModes = {}
+    for(let mode of modes){
+        if(!groupedModes[mode.group]){
+            groupedModes[mode.group] = [];
+        }
+        groupedModes[mode.group].push(mode);
+    }
 
     //let isAutofireOnly = rof ? rof.size === 1 && rof[0].toLowerCase() === 'autofire' : false;
 
@@ -84,10 +92,18 @@ export function generateAttackFromWeapon(item, actor) {
     let critical = "x2"
     let type = item.damageType
 
-    let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
+    let attackBonuses = []
+    attackBonuses.push(ranged ? offense.rab : meleeToHit);
+    attackBonuses.push(proficiencyBonus);
+    attackBonuses.push(focus ? 1 : 0)
+    attackBonuses.push(actor.data.acPenalty)
+    attackBonuses.push(...toHit)
+
+    let atkBonus = resolveValueArray(attackBonuses, actor)
+
 
     let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, modes, hasStun)
+    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, Object.values(groupedModes), hasStun)
 }
 
 function isOversized(actorSize, itemSize) {
