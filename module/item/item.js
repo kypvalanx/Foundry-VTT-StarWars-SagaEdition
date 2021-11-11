@@ -225,7 +225,8 @@ export class SWSEItem extends Item {
     // }
 
     get damageDie() {
-        let damageDie = this.getAttribute('damageDie')[0]?.value;
+        let damageDice = this.getAttribute('damageDie');
+        let damageDie = damageDice[damageDice.length-1].value;
 
         if (!damageDie) {
             return "";

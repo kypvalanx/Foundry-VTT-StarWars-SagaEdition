@@ -25,7 +25,6 @@
                 {{#unlessEquals depth 2}}
                     <li class="attribute flexrow subtle"><a class="mode-add attribute-indent-graphic" data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add a new mode to this mode.</a></li>
                     {{#each mode.modes as |subMode subMkey|}}
-                        {{log subMode}}
                         {{> 'systems/swse/templates/item/parts/mode.hbs' mode=subMode mkey=(concat ../mkey "." subMkey) depth=2 modePath=(concat ../modePath '.modes.' subMkey)}}
                     {{/each}}
                 {{/unlessEquals}}
