@@ -741,6 +741,22 @@
   grid-area: 1 / 5 / 2 / 9;
 }
 
+.swse .attribute-key-1 {
+  grid-area: 1 / 2 / 2 / 6;
+}
+
+.swse .attribute-value-1 {
+  grid-area: 1 / 6 / 2 / 9;
+}
+
+.swse .attribute-key-2 {
+  grid-area: 1 / 3 / 2 / 7;
+}
+
+.swse .attribute-value-2 {
+  grid-area: 1 / 7 / 2 / 9;
+}
+
 .swse .attribute-indent-graphic {
   grid-area: 1 / 1 / 2 / 2;
 }
@@ -751,6 +767,30 @@
 
 .swse .attribute-indent-value {
   grid-area: 1 / 5 / 2 / 9;
+}
+
+.swse .attribute-indent-graphic-1 {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.swse .attribute-indent-key-1 {
+  grid-area: 1 / 3 / 2 / 6;
+}
+
+.swse .attribute-indent-value-1 {
+  grid-area: 1 / 6 / 2 / 9;
+}
+
+.swse .attribute-indent-graphic-2 {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .attribute-indent-key-2 {
+  grid-area: 1 / 4 / 2 / 7;
+}
+
+.swse .attribute-indent-value-2 {
+  grid-area: 1 / 7 / 2 / 9;
 }
 
 .swse .attribute-delete {

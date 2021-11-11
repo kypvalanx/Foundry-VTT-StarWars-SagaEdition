@@ -52,7 +52,7 @@ export function generateAttackFromWeapon(item, actor) {
     let notes = [];
     let modes = item.modes;
     let groupedModes = {}
-    for(let mode of modes){
+    for(let mode of modes.filter(m => !!m)){
         if(!groupedModes[mode.group]){
             groupedModes[mode.group] = [];
         }

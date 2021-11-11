@@ -118,30 +118,50 @@ export class SWSEItemSheet extends ItemSheet {
     //AddItemAttribute
     html.find('.attribute-add').click(ev => {
       let modeId = $(ev.currentTarget).data('modeId')
-      if(modeId){
-        let attributes = this.item.data.data.modes[modeId].attributes
-        let cursor = 0;
-        while (attributes[cursor]) {
-          cursor++;
-        }
-        this.createItemAttribute(cursor, modeId)
-      } else {
+      if(modeId === undefined){
         let attributes = this.item.data.data.attributes
         let cursor = 0;
         while (attributes[cursor]) {
           cursor++;
         }
         this.createItemAttribute(cursor)
+      } else {
+        let toks = `${modeId}`.split(".");
+        let attributes = this.item.data.data
+        for(let tok of toks){
+          attributes = attributes.modes[tok];
+        }
+        attributes = attributes.attributes;
+        let cursor = 0;
+        while (attributes[cursor]) {
+          cursor++;
+        }
+        this.createItemAttribute(cursor, modeId)
       }
     });
     //AddItemAttribute
     html.find('.mode-add').click(ev => {
-      let modes = this.item.data.data.modes
-      let cursor = 0;
-      while (modes[cursor]) {
-        cursor++;
+      let modeId = $(ev.currentTarget).data('modeId')
+      if(modeId === undefined){
+        let modes = this.item.data.data.modes
+        let cursor = 0;
+        while (modes[cursor]) {
+          cursor++;
+        }
+        this.createItemMode(cursor)
+      } else {
+        let toks = `${modeId}`.split(".");
+        let modes = this.item.data.data
+        for (let tok of toks) {
+          modes = modes.modes[tok];
+        }
+        modes = modes.modes;
+        let cursor = 0;
+        while (modes[cursor]) {
+          cursor++;
+        }
+        this.createItemMode(cursor, modeId)
       }
-      this.createItemMode(cursor)
     });
 
     //deleteItemAttribute
@@ -420,18 +440,17 @@ export class SWSEItemSheet extends ItemSheet {
         let key = html.find("#key")[0].value;
         let type = html.find("#type")[0].value;
         let value = html.find("#value")[0].value;
-        if(modeId){
-
-          this.item.setModeAttribute(modeId,attributeId, {key, type, value});
-        }else {
+        if(modeId === undefined){
           this.item.setAttribute(attributeId, {key, type, value});
+        }else {
+          this.item.setModeAttribute(modeId,attributeId, {key, type, value});
         }
       }
     }
 
     Dialog.prompt(options);
   }
-  createItemMode(modeId) {
+  createItemMode(modeId, parentModeId) {
     let content = `
         <label>Name:</label>
             <input id="name">
@@ -445,8 +464,11 @@ export class SWSEItemSheet extends ItemSheet {
       callback: async (html) => {
         let name = html.find("#name")[0].value;
         let group = html.find("#group")[0].value;
-
-        this.item.setMode(modeId, {name, group, attributes:{}})
+        if(parentModeId === undefined){
+          this.item.setMode(modeId, {name, group, attributes:{}});
+        }else {
+          this.item.setModeMode(parentModeId, modeId, {name, group, attributes:{}});
+        }
       }
     }
 

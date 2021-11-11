@@ -25,28 +25,11 @@
     {{/if}}
 {{/each}}
     <li class="attribute flexrow subtle"><a class="attribute-add"><i class="fas fa-plus"></i> add a new attribute.</a></li>
-
-    {{#each data.data.modes as |mode mkey|}}
-        {{#if mode}}
-            <li class="attribute flexrow mode" data-mode="{{mkey}}">
-                <label class="attribute-key" type="text" name="data.modes.{{mkey}}.name" value="{{mode.name}}">{{mode.name}}</label>
-                <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-                <a class="attribute-delete" data-mode-id="{{mkey}}"><i class="fas fa-trash"></i></a>
-            </li>
-            {{#each mode.attributes as |attr akey|}}
-                {{#if attr}}
-                    <li class="attribute flexrow" data-mode="{{mkey}}" data-attribute="{{akey}}">
-                        <div class="attribute-indent-graphic">|</div>
-                        <label class="attribute-indent-key" type="text" name="data.modes.{{mkey}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
-                        <input class="attribute-indent-value" name="data.modes.{{mkey}}.attributes.{{akey}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
-                        <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-                        <a class="attribute-delete" data-mode-id="{{mkey}}" data-attribute-id="{{akey}}"><i class="fas fa-trash"></i></a>
-                    </li>
-                {{/if}}
-            {{/each}}
-            <li class="attribute flexrow subtle"><a class="attribute-add" data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add a new attribute to this mode.</a></li>
-        {{/if}}
-    {{/each}}
     <li class="attribute flexrow subtle"><a class="mode-add"><i class="fas fa-plus"></i> add a new mode.</a></li>
+    {{#each data.data.modes as |mode mkey|}}
+
+        {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey)}}
+
+    {{/each}}
 
 </ul>
