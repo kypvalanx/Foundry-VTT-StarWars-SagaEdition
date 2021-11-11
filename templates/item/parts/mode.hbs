@@ -12,12 +12,12 @@
             <ul>
                 {{#each mode.attributes as |attr akey|}}
                     {{#if attr}}
-                        <li class="attribute flexrow" data-mode="{{mkey}}" data-attribute="{{akey}}">
+                        <li class="attribute flexrow">
                             <div class="attribute-indent-graphic">|</div>
                             <label class="attribute-indent-key" type="text" name="{{../modePath}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
                             <input class="attribute-indent-value" name="{{../modePath}}.attributes.{{akey}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
                             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-                            <a class="attribute-delete" data-mode-id="{{mkey}}" data-attribute-id="{{akey}}"><i class="fas fa-trash"></i></a>
+                            <a class="attribute-delete" data-mode-id="{{../mkey}}" data-attribute-id="{{akey}}"><i class="fas fa-trash"></i></a>
                         </li>
                     {{/if}}
                 {{/each}}

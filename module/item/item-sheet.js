@@ -167,46 +167,42 @@ export class SWSEItemSheet extends ItemSheet {
     //deleteItemAttribute
     html.find('.attribute-delete').click(ev => {
       let li = $(ev.currentTarget);
-      let attributeId = li.data('attributeId')
-      let modeId = li.data('modeId')
-      let changed = {};
-      let cursor = 0;
-      if(modeId && attributeId){
+      let attributeId = li.data('attributeId');
+      let modeId = li.data('modeId');
+      let data = {};
 
-        for (const [key, value] of Object.entries(this.item.data.data.modes[modeId].attributes)) {
-          if (key !== `${attributeId}`) {
-            changed[cursor] = value;
-          } else {
-            changed[cursor] = null;
-          }
-          cursor++;
+      if((modeId || !isNaN(modeId)) && (attributeId || !isNaN(attributeId))){
+        let modes = `${modeId}`.split(".")
+
+        let cursor = data;
+        for(let mode of modes){
+          cursor.modes = {};
+          cursor.modes[mode] = {};
+          cursor = cursor.modes[mode];
         }
 
-        this.item.setModeAttributes(modeId, changed);
-      } else if(modeId){
-        for (const [key, value] of Object.entries(this.item.data.data.modes)) {
-          if (key !== `${modeId}`) {
-            changed[cursor] = value;
+        cursor.attributes = {};
+        cursor.attributes[attributeId] = null;
+      } else if(modeId || !isNaN(modeId)){
+        let modes = `${modeId}`.split(".")
+
+        let iterations = modes.length;
+        let cursor = data;
+        for(let mode of modes){
+          cursor.modes = {};
+          if(!--iterations){
+            cursor.modes[mode] = null;
           } else {
-            changed[cursor] = null;
+            cursor.modes[mode] = {};
+            cursor = cursor.modes[mode];
           }
-          cursor++;
         }
-
-        this.item.setModes(changed);
-      } else {
-
-        for (const [key, value] of Object.entries(this.item.data.data.attributes)) {
-          if (key !== `${attributeId}`) {
-            changed[cursor] = value;
-          } else {
-            changed[cursor] = null;
-          }
-          cursor++;
-        }
-
-        this.item.setAttributes(changed);
+      } else if(attributeId || !isNaN(attributeId)){
+        data.attributes = {};
+        data.attributes[attributeId]=null;
       }
+
+      this.item.updateData(data);
       this.render();
     });
 

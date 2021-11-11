@@ -718,10 +718,9 @@ export class SWSEItem extends Item {
         update.data.modes[modeIndex].attributes = attributes;
         this.update(update);
     }
-    setModes(modes) {
+    updateData(data) {
         let update = {};
-        update.data = {};
-        update.data.modes = modes;
+        update.data = data;
         this.update(update);
     }
 
@@ -758,7 +757,7 @@ export class SWSEItem extends Item {
             for (let attribute of Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || []) {
                 values.push(...extractAttributeValues(attribute, this.data._id));
             }
-            values.push(...this.extractModeAttributes(Object.values(mode.modes || []).filter(m => m.isActive), attributeKey) || []);
+            values.push(...this.extractModeAttributes(Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
         }
         return values;
     }
@@ -782,11 +781,11 @@ export class SWSEItem extends Item {
     getChildModes(activeModes, parentModePath) {
         let childModes = [];
         for (let activeMode of activeModes) {
-            let values = Object.values(activeMode.modes || []);
+            let values = Object.values(activeMode.modes || []).filter(mode => !!mode);
             let parentModePath1 = parentModePath+(!!parentModePath ? ".": "")+activeMode.name;
             values.forEach(val =>val.modePath = parentModePath1+(!!parentModePath1 ? ".": "")+val.name)
             childModes.push(...values)
-            childModes.push(...this.getChildModes(values.filter(m =>m.isActive), parentModePath1))
+            childModes.push(...this.getChildModes(values.filter(mode => !!mode && mode.isActive), parentModePath1))
         }
         return childModes;
     }
@@ -828,7 +827,7 @@ export class SWSEItem extends Item {
                 })
 
             } else {
-                Object.entries(modes || []).filter(entity => entity[1].name === mode).forEach((entity) => {
+                Object.entries(modes || []).filter(entity => !!entity[1] && entity[1].name === mode).forEach((entity) => {
                     data.modes[parseInt(entity[0])] = {};
                     data.modes[parseInt(entity[0])].isActive =  !entity[1].isActive;
                 })
