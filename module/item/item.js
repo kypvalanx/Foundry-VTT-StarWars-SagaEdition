@@ -654,56 +654,6 @@ export class SWSEItem extends Item {
             }
         })
     }
-
-    setAttribute(attributeIndex, attr) {
-        let update = {};
-        update.data = {};
-        update.data.attributes = {}
-        update.data.attributes[attributeIndex] = attr;
-        this.update(update);
-    }
-    setMode(modeIndex, attr) {
-        let update = {};
-        update.data = {};
-        update.data.modes = {}
-        update.data.modes[modeIndex] = attr;
-        this.update(update);
-    }
-
-    setModeMode(parentModeId, modeIndex, attr) {
-        let toks = `${parentModeId}`.split(".");
-
-        let update = {};
-        update.data = {};
-        let data = update.data;
-        for(let tok of toks){
-            data.modes = {};
-            data.modes[tok] = {};
-            data = data.modes[tok];
-        }
-
-        data.modes = {};
-        data.modes[modeIndex] = attr;
-        this.update(update);
-    }
-
-    setModeAttribute(modeIndex, attributeIndex, attr) {
-        let toks = `${modeIndex}`.split(".");
-
-        let update = {};
-        update.data = {};
-        let data = update.data;
-        for(let tok of toks){
-            data.modes = {};
-            data.modes[tok] = {};
-            data = data.modes[tok];
-        }
-
-        data.attributes = {};
-        data.attributes[attributeIndex] = attr;
-        this.update(update);
-    }
-
     setAttributes(attributes) {
         let update = {};
         update.data = {};
@@ -724,6 +674,13 @@ export class SWSEItem extends Item {
         this.update(update);
     }
 
+
+    // setAttribute(attributeIndex, attr) {
+    //     let data = {};
+    //     data.attributes = {}
+    //     data.attributes[attributeIndex] = attr;
+    //     this.updateData(data);
+    // }
     /**
      * Checks item for any attributes matching the provided attributeKey.  this includes active modes.
      * @param attributeKey {String}
@@ -790,17 +747,6 @@ export class SWSEItem extends Item {
         return childModes;
     }
 
-// get currentMode() {
-    //     return this.data.data.mode;
-    // }
-    //
-    // set currentMode(currentMode) {
-    //     let update = {};
-    //     update.data = {};
-    //     update.data.mode = currentMode;
-    //     this.update(update);
-    // }
-
     activateMode(mode){
         let modes = this.data.data.modes;
         let update = {};
@@ -832,10 +778,6 @@ export class SWSEItem extends Item {
                     data.modes[parseInt(entity[0])].isActive =  !entity[1].isActive;
                 })
             }
-            //
-            // Object.values(modes || []).filter(m => !!m && m.name === mode)
-
-
         } else {
             let first = modeTokens[0];
 
@@ -846,9 +788,6 @@ export class SWSEItem extends Item {
                 this.recursiveModeActivation(entity[1].modes, modeTokens.slice(1).join("."), data.modes[parseInt(entity[0])])
             })
         }
-
-
-
     }
 
     deactivateMode(mode){
