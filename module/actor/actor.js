@@ -33,6 +33,24 @@ export class SWSEActor extends Actor {
         // things organized.
         if (actorData.type === 'character') await this._prepareCharacterData(actorData);
         if (actorData.type === 'npc') await this._prepareCharacterData(actorData);
+        if (actorData.type === 'computer') await this._prepareComputerData(actorData);
+    }
+    /**
+     * Prepare Computer type specific data
+     */
+    async _prepareComputerData(actorData) {
+        let div = document.createElement("DIV");
+        div.innerHTML = actorData.data.content;
+        let rough = div.textContent || div.innerText || "";
+        let toks = rough.split("\n");
+        for(let tok of toks){
+
+        }
+        rough = toks.join("");
+        actorData.pages = JSON.parse(rough, (key, value) => {
+            console.log(key); // log the current property name, the last is "".
+            return value;     // return the unchanged property value.
+        });
     }
 
     /**
@@ -992,14 +1010,14 @@ export class SWSEActor extends Actor {
         });
     }
 
-    async _onCreate(data, options, userId, context) {
+    async _onCreate(data, options, userId) {
         if (data.type === "character") await this.update({"token.actorLink": true}, {updateChanges: false});
 
         // if (userId === game.user._id) {
         //     await updateChanges.call(this);
         // }
 
-        super._onCreate(data, options, userId, context);
+        super._onCreate(data, options, userId);
     }
 
 

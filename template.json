@@ -321,6 +321,13 @@
       "biography": "",
       "attributes": {
       }
+    },
+    "computer": {
+      "templates": [],
+      "content": "",
+      "cursor": "root",
+      "attributes": {
+      }
     }
   },
   "Item": {

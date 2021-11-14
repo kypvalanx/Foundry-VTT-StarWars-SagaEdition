@@ -30,11 +30,32 @@ export class SWSEActorSheet extends ActorSheet {
 
         return mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "actor"],
-            template: "systems/swse/templates/actor/actor-sheet.hbs",
             width: 1000,
             height: 900,
             tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}]
         });
+    }
+
+    get template() {
+        const path = "systems/swse/templates/actor";
+        // Return a single sheet for all item types.
+        //return `${path}/item-sheet.hbs`;
+        // Alternatively, you could use the following return statement to do a
+        // unique item sheet by type, like `weapon-sheet.html`.
+
+        let type = this.actor.data.type;
+        if (type === 'character') {
+            return `${path}/actor-sheet.hbs`;
+        }
+        if (type === 'npc') {
+            return `${path}/actor-sheet.hbs`;
+        }
+        if (type === 'computer') {
+            return `${path}/computer-sheet.hbs`;
+        }
+
+        return `${path}/actor-sheet.hbs`;
+        //return `${path}/${this.item.data.type}-sheet.html`; //TODO add sheets for each type
     }
 
     /* -------------------------------------------- */

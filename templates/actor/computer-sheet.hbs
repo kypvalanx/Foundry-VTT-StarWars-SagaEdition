@@ -1,0 +1,31 @@
+<form class="{{cssClass}}" autocomplete="off">
+    {{!-- Sheet Tab Navigation --}}
+    <nav class="sheet-tabs tabs" data-group="primary">
+        <a class="item" data-tab="summary">Summary</a>
+        <a class="item" data-tab="edit">Edit</a>
+    </nav>
+
+    {{!-- Sheet Body --}}
+    <section class="sheet-body">
+        {{!-- Summary Page --}}
+        <div class="tab" data-group="primary" data-tab="summary">
+            {{#each actor.data.pages as |page|}}
+                {{log page}}
+                {{#ifEquals actor.data.cursor page.id}}
+                    <h1>{{page.title}}</h1>
+                <p>{{page.message}}</p>
+                {{#each page.options as |option|}}
+                    <div class="terminal-selection" data-terminal-payload="{{option.payload}}">{{option.message}}</div>
+                {{/each}}
+                {{/ifEquals}}
+            {{/each}}
+
+        </div>
+
+        <div class="tab" data-group="primary" data-tab="edit">
+            {{log data}}
+            {{editor content=data.data.content target="data.content" button=true owner=owner editable=editable}}
+        </div>
+
+    </section>
+</form>
