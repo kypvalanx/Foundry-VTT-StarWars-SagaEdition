@@ -105,16 +105,22 @@ export function getLongKey(key) {
 export function toShortAttribute(attributeName) {
     switch (attributeName.toLowerCase()) {
         case 'strength':
+        case 'str':
             return 'STR';
         case 'dexterity':
+        case 'dex':
             return 'DEX';
         case 'constitution':
+        case 'con':
             return 'CON';
         case 'wisdom':
+        case 'wis':
             return 'WIS';
         case 'intelligence':
+        case 'int':
             return 'INT';
         case 'charisma':
+        case 'cha':
             return 'CHA';
     }
 }
@@ -122,7 +128,7 @@ export function toShortAttribute(attributeName) {
 export function increaseDamageDie(damageDieSize, bonus) {
     let index = dieSize.indexOf(damageDieSize);
     if (index === -1) {
-        return undefined;
+        return 0;
     }
     return dieSize[index + bonus];
 }

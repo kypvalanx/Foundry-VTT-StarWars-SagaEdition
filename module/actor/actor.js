@@ -291,6 +291,7 @@ export class SWSEActor extends Actor {
     }
 
     resolveFeats() {
+        //TODO remove unneeded proficiencies and prereqs
         let actorData = this.data;
         actorData.proficiency = {};
         actorData.proficiency.weapon = [];
@@ -324,9 +325,6 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
-                if (feat.data.finalName === 'Force Sensitivity') {
-                    actorData.data.bonusTalentTree = "Force Talent";
-                }
             } else if (doesFail && !feat.data.data.isSupplied) {
                 removeFeats.push(feat.data);
             } else if (prereqResponse.failureList.length > 0) {
@@ -446,10 +444,18 @@ export class SWSEActor extends Actor {
      */
     getAttribute(attributeName) {
         for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
-            if (attributeName.toLowerCase() === key || toShortAttribute(attributeName).toLowerCase() === key) {
+            if (toShortAttribute(attributeName).toLowerCase() === key.toLowerCase()) {
                 return attribute.total;
             }
         }
+    }
+
+    /**
+     *
+     * @param {string} attributeName
+     */
+    getCharacterAttribute(attributeName) {
+        return this.data.data.attributes[toShortAttribute(attributeName).toLowerCase()];
     }
 
     getHalfCharacterLevel() {

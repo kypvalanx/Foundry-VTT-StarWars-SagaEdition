@@ -218,6 +218,7 @@ export class SWSEActorSheet extends ActorSheet {
         ev.dataTransfer.dropEffect = "move";
     }
 
+
     _onDragEndMovable(ev) {
         ev.preventDefault();
         // Get the id of the target and add the moved element to the target's DOM
@@ -690,7 +691,7 @@ export class SWSEActorSheet extends ActorSheet {
         let allTreesOnTalent = new Set();
         let optionString = "";
 
-        if (item.data.data.bonusTalentTree === this.actor.data.data.bonusTalentTree) {
+        if (item.data.data.bonusTalentTree === this.actor.getInheritableAttributesByKey('bonusTalentTree')[0]) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
@@ -707,9 +708,6 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         }
-        // if(!isForce && this.actor.data.data.bonusTalentTree && this.actor.data.data.bonusTalentTree.length > 0){
-        //     possibleTalentTrees.push(this.actor.data.data.bonusTalentTree.replace("Talent Tree", "Talents"));
-        // }
 
         if (possibleTalentTrees.size === 0) {
             await Dialog.prompt({
@@ -968,22 +966,22 @@ export class SWSEActorSheet extends ActorSheet {
 
             let greetingString;
             let optionString = "";
-            if (Object.keys(options).length === 0) {
+            let keys = Object.keys(options);
+            if (keys.length === 0) {
                 greetingString = choice.noOptions;
-            } else if (Object.keys(options).length === 1) {
+            } else if (keys.length === 1) {
                 greetingString = choice.oneOption;
-                let optionLabel = Object.keys(options)[0];
+                let optionLabel = keys[0];
                 optionString = `<div id="choice">${optionLabel}</div>`
             } else {
                 greetingString = choice.description;
 
-                for (let optionLabel of Object.keys(options)) {
+                for (let optionLabel of keys) {
                     optionString += `<option value="${optionLabel}">${optionLabel}</option>`
                 }
 
                 if (optionString !== "") {
-                    optionString = `<div><select id='choice'>${optionString}</select> 
-                        </div>`
+                    optionString = `<div><select id='choice'>${optionString}</select></div>`
                 }
             }
 

@@ -416,7 +416,32 @@ export class SWSEItem extends Item {
             if (prerequisite.text) {
                 prerequisite.text = prerequisite.text.replace("#payload#", payload);
             }
-        })
+        });
+        this.crawlAttributes(this.data.data, (attribute) => {
+            if (attribute.value) {
+                if(typeof attribute.value === "string") {
+                    attribute.value = attribute.value.replace("#payload#", payload);
+                } else if(Array.isArray(attribute.value)){
+                    attribute.value = attribute.value.map(val => val.replace("#payload#", payload));
+                }
+            }
+        });
+    }
+
+
+
+    crawlAttributes(data, funct) {
+        if (!data) {
+            return;
+        }
+        for(let attribute of Object.values(data.attributes) || []){
+            funct(attribute)
+        }
+        //funct(data);
+        for(let mode of data.modes || []){
+            this.crawlAttributes(mode, funct)
+        }
+
     }
 
     /**
@@ -797,5 +822,4 @@ export class SWSEItem extends Item {
         update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !==mode.toLowerCase());
         this.update(update);
     }
-
 }

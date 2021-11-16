@@ -39,14 +39,20 @@ export function generateAttackFromWeapon(item, actor) {
     let proficient = isProficient(proficiencies, weaponTypes);
     let proficiencyBonus = proficient ? 0 : -5;
     let ranged = isRanged(item);
-    let hasWeaponFinesse = actorData.prerequisites.feats.includes("weapon finesse");
+
+    let finesseStats = actor.getInheritableAttributesByKey("finesseStat");
+    finesseStats.push({value:"STR"});
+    let finesseBonus = resolveFinesseBonus(actor, finesseStats);
+    let nonFinesseBonus = resolveFinesseBonus(actor, [{value:"STR"}]);
+
+
     let focus = isFocus(actorData.proficiency.focus, weaponTypes);
     let isOneHanded = compareSizes(size, item.size) < 1;
-    let isLight = compareSizes(size, item.size) < 0;// || (isOneHanded && focus && hasWeaponFinesse) || (isLightsaber(item));
+    let isLight = compareSizes(size, item.size) < 0;
     let isTwoHanded = compareSizes(size, item.size) === 1;
 
     let offense = actorData.data.offense;
-    let meleeToHit = (hasWeaponFinesse && (isLight || (isOneHanded && focus) || isLightsaber(item))) ? Math.max(offense.mab, offense.fab) : offense.mab;
+    let meleeToHit = offense.bab + (isLight || (isOneHanded && focus) || isLightsaber(item)) ? finesseBonus : nonFinesseBonus;
     let strMod = parseInt(actor.getAttributeMod("str"));
     let strBonus = isTwoHanded ? strMod * 2 : strMod;
     let notes = [];
@@ -197,6 +203,14 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
     };
 }
 
+export function resolveFinesseBonus(actor, finesseStats) {
+    let bonus = 0;
+    for(let stat of finesseStats){
+        bonus = Math.max(bonus, actor.getCharacterAttribute(stat.value).mod);
+    }
+    return bonus;
+}
+
 export function generateUnarmedAttacks(actor) {
     if (!actor) {
         return undefined;
@@ -205,18 +219,20 @@ export function generateUnarmedAttacks(actor) {
     let unarmedModifier = actor.getInheritableAttributesByKey('unarmedModifier');
     let actorData = actor.data;
     let size = actor.size;
-    let feats = actorData.prerequisites?.feats || [];
 
     let proficiencies = actorData.proficiency.weapon;
 
     let proficient = isProficient(proficiencies, ["simple melee weapon"]);
     let proficiencyBonus = proficient ? 0 : -5;
     let focus = isFocus(actorData.proficiency?.focus, ["simple melee weapon"]);
-    let hasWeaponFinesse = feats.includes("weapon finesse");
+    let finesseStats = actor.getInheritableAttributesByKey("finesseStat");
+    finesseStats.push({value:"STR"});
+    let finesseBonus = resolveFinesseBonus(actor, finesseStats);
     let offense = actorData.data?.offense;
 
     let atkBonuses = [];
-    atkBonuses.push(hasWeaponFinesse ? Math.max(offense?.mab, offense?.fab) : offense?.mab)
+    atkBonuses.push(offense?.bab)
+    atkBonuses.push(finesseBonus)
     atkBonuses.push(proficiencyBonus)
     atkBonuses.push(focus ? 1 : 0)
     atkBonuses.push(actor.data.acPenalty)
