@@ -478,6 +478,10 @@
   text-align: center;
 }
 
+.swse .item-attribute {
+  cursor: pointer;
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;

@@ -86,7 +86,8 @@ Hooks.once('init', async function() {
   });
 
   Handlebars.registerHelper('sum', function(arg1, arg2, options) {
-    return parseInt(arg1) + parseInt(arg2)
+    let number = parseInt(arg1|| 0) + parseInt(arg2||0);
+    return number
   });
 
   Handlebars.registerHelper('times', function(n, block) {

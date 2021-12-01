@@ -100,20 +100,17 @@
                             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                                         height="24" alt="{{class.name}}"/></td>
                             <td><h4 class="item-name">{{class.name}}</h4></td>
-                            <td><span class="text-box {{#if id}}direct short{{/if}} center"
-                                      data-item="{{class.data._id}}" data-name="data.health.rolledHp"
-                                      data-dtype="Number">{{#if id}}{{class.data.data.health.rolledHp}}{{/if}}
-                                {{#unless id}}{{class.data.data.health.firstLevel}}{{/unless}}</span>
+                            <td><span class="text-box {{#if id}}item-attribute short{{/if}} center"
+                                      data-item="{{class.data._id}}" data-item-attribute="rolledHp"
+                                      data-dtype="Number">{{class.classLevelHealth}}</span>
                             </td>
                             <td>
                                 {{#if id}}
-                                    <a class="rollable" title="Re-roll {{class.data.data.health.levelUp}}"
-                                       data-item="{{class.data._id}}" data-name="data.health.rolledHp"
-                                       data-roll="{{class.data.data.health.levelUp}}"><i class="fas fa-dice"></i>
+                                    <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}"
+                                       data-item="{{class.data._id}}" data-item-attribute="rolledHp" data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
                                     </a>{{/if}}</td>
                             <td>{{../data.data.attributes.con.mod}}</td>
-                            <td>{{#if id}}{{sum class.data.data.health.rolledHp ../data.data.attributes.con.mod}}{{/if}}
-                                {{#unless id}}{{sum class.data.data.health.firstLevel ../data.data.attributes.con.mod}}{{/unless}}</td>
+                            <td>{{sum class.classLevelHealth ../data.data.attributes.con.mod}}</td>
                             <td class="item-controls">
                                 <a class="item-control item-edit" title="View Class Description"><i
                                         class="fas fa-edit"></i></a>
@@ -129,8 +126,18 @@
                         <td></td>
                         <td></td>
                         <td></td>
-                        <td title="these bonuses come from feats, traits, and equipped items." colspan="2">Other
-                            Bonuses: {{data.data.health.other}}</td>
+                        <td></td>
+                        <td title="these bonuses come from feats, traits, and equipped items.">Other
+                            Bonuses:</td>
+                        <td> {{data.data.health.other}}</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
                         <td>{{data.data.health.max}}</td>
                         <td></td>
                     </tr>

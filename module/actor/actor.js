@@ -1,6 +1,6 @@
 import {resolveHealth} from "./health.js";
 import {generateAttacks, generateUnarmedAttacks} from "./attack-handler.js";
-import {OffenseHandler} from "./offense.js";
+import {resolveOffense} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
 import {excludeItemsByType, filterItemsByType, toShortAttribute} from "../util.js";
 import {meetsPrerequisites} from "../prerequisite.js";
@@ -60,7 +60,7 @@ export class SWSEActor extends Actor {
         this.data.prerequisites = {};
 
         new SpeciesHandler().generateSpeciesData(this);
-        let {bab, level, classSummary} = this._generateClassData(actorData);
+        let {level, classSummary} = this._generateClassData(actorData);
         this.data.data.condition = this.data.data.condition || 0;
 
         actorData.levelSummary = level;
@@ -78,6 +78,9 @@ export class SWSEActor extends Actor {
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
 
         this.inheritableItems = [];
+        if(this.species){
+            this.inheritableItems.push(this.species.data)
+        }
         this.inheritableItems.push(...this.equipped)
         this.inheritableItems.push(...this.traits)
         this.inheritableItems.push(...this.talents)
@@ -86,12 +89,19 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.techniques)
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
+        let uniqueClassNames = [];
+        for(let classObject of this.classes.map(item => item.data)) {
+            if(!uniqueClassNames.includes(classObject.name)) {
+                uniqueClassNames.push(classObject.name);
+                this.inheritableItems.push(classObject);
+            }
+        }
 
         actorData.speed = this.speed;
 
         generateAttributes(this);
 
-        //separated for now.  this part handles the darkside score widget.  it's clever i swear
+        //TODO separated for now.  this part handles the darkside score widget.  it's clever i swear
         {
             for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
                 actorData.data.darkSideArray = actorData.data.darkSideArray || [];
@@ -108,7 +118,7 @@ export class SWSEActor extends Actor {
 
         await generateSkills(this);
 
-        actorData.data.offense = await new OffenseHandler().resolveOffense(this, bab);
+        actorData.data.offense = resolveOffense(this);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
         this.inheritableItems.push(...this.feats)
@@ -144,20 +154,12 @@ export class SWSEActor extends Actor {
         }
     }
 
-    get classes() {
-        return this.data.classes;
-    }
-
     get age() {
         return this.data.data.age;
     }
 
     get sex() {
         return this.data.data.sex;
-    }
-
-    get species() {
-        return this.data.species;
     }
 
     get speed(){
@@ -391,7 +393,7 @@ export class SWSEActor extends Actor {
     getVariable(variableName) {
         let value = this.resolvedVariables.get(variableName);
         if (!value) {
-            console.error("could not find " + variableName, this.resolvedVariables);
+            console.warn("could not find " + variableName, this.resolvedVariables);
         }
         return value;
     }
@@ -464,14 +466,20 @@ export class SWSEActor extends Actor {
 
     get characterLevel() {
         if (this.classes) {
-            this.resolvedVariables.set("@charLevel", this.classes.length);
-            return this.classes.length;
+            let charLevel = this.classes.length;
+            this.resolvedVariables.set("@charLevel", charLevel);
+            return charLevel;
         }
         return 0;
     }
 
     getHeroicLevel(){
-        return this.characterLevel;
+        if (this.classes) {
+            let heroicLevel = this.classes.filter(c=>c.name !== 'NonHeroic' && c.name !== 'Beast').length;
+            this.resolvedVariables.set("@heroicLevel", heroicLevel);
+            return heroicLevel;
+        }
+        return 0;
     }
 
 
@@ -498,11 +506,10 @@ export class SWSEActor extends Actor {
      * Extracts important stats from the class
      */
     _generateClassData(actorData) {
-        actorData.classes = filterItemsByType(this.items, "class");
+        this.classes = filterItemsByType(this.items, "class");
 
         let classLevels = {};
         let classFeatures = [];
-        let bab = 0;
 
         for (let characterClass of this.classes) {
             if (!classLevels[characterClass.name]) {
@@ -510,7 +517,6 @@ export class SWSEActor extends Actor {
             }
             let levelOfClass = ++classLevels[characterClass.name]
             let levelData = characterClass.data.data.levels[levelOfClass]
-            bab += levelData.bab;
             classFeatures.push(...levelData.features || [])
         }
 
@@ -518,7 +524,7 @@ export class SWSEActor extends Actor {
 
         this.resolveClassFeatures(actorData, classFeatures);
         let level = this.classes.length;
-        return {bab, level, classSummary};
+        return {level, classSummary};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -672,27 +678,20 @@ export class SWSEActor extends Actor {
         if (!this.classes) {
             return classSkills;
         }
-        for (let charClass of this.classes) {
-            let skills = charClass.data.data.skills;
-            if (skills) {
-                for (let skill of skills.skills) {
-                    if (skill.toLowerCase() === "knowledge (all skills, taken individually)") {
-                        classSkills.add("knowledge (galactic lore)");
-                        classSkills.add("knowledge (bureaucracy)");
-                        classSkills.add("knowledge (life sciences)");
-                        classSkills.add("knowledge (physical sciences)");
-                        classSkills.add("knowledge (social sciences)");
-                        classSkills.add("knowledge (tactics)");
-                        classSkills.add("knowledge (technology)");
-                    } else {
-                        classSkills.add(skill.toLowerCase())
-                    }
-                }
+        let skills = this.getInheritableAttributesByKey("classSkill").map(attr => attr.value);
+
+        for (let skill of skills) {
+            if (skill.toLowerCase() === "knowledge (all skills, taken individually)") {
+                classSkills.add("knowledge (galactic lore)");
+                classSkills.add("knowledge (bureaucracy)");
+                classSkills.add("knowledge (life sciences)");
+                classSkills.add("knowledge (physical sciences)");
+                classSkills.add("knowledge (social sciences)");
+                classSkills.add("knowledge (tactics)");
+                classSkills.add("knowledge (technology)");
+            } else {
+                classSkills.add(skill.toLowerCase())
             }
-        }
-        let abilityClassSkills = this.getTraitAttributesByKey('classSkill');
-        for (let classSkill of abilityClassSkills) {
-            classSkills.add(classSkill.value.toLowerCase());
         }
 
         return classSkills;
@@ -703,10 +702,13 @@ export class SWSEActor extends Actor {
     }
 
     getFirstClass() {
-        for (let charClass of this.classes || []) {
-            if (charClass.data.data.attributes.first === true) {
-                return charClass;
-            }
+        let firstClasses = this.getItemContainingInheritableAttribute("isFirstLevel", true);
+
+        if(firstClasses.length > 1){
+            console.warn("more than one class item has been marked as first class on actor the first one found will be used as the first class and all others will be ignored "+this.id)
+        }
+        if(firstClasses.length > 0){
+            return firstClasses[0];
         }
         return undefined;
     }
@@ -741,25 +743,42 @@ export class SWSEActor extends Actor {
 
 
     getTraitAttributesByKey(attributeKey) {
-        let values = [];
-        for (let trait of this.traits) {
-            values.push(...this.getAttributesFromItem(trait._id, attributeKey));
-        }
-        return values;
+        // let values = [];
+        // for (let trait of this.traits) {
+        //     values.push(...this.getAttributesFromItem(trait._id, attributeKey));
+        // }
+        return this.getInheritableAttributesByKey(attributeKey, (item => item.type === "trait"));
     }
 
     /**
      * Collects all attribute values from equipped items, class levels, regimes, affiliations, feats and talents.
      * It also checks active modes.
      * @param attributeKey
+     * @param itemFilter
+     * @param reduce
      * @returns {[]}
      */
-    getInheritableAttributesByKey(attributeKey){
+    getInheritableAttributesByKey(attributeKey, itemFilter, reduce){
         let values = [];
-        for (let item of this.inheritableItems) {
+        if(!itemFilter){
+            itemFilter = (item => true);
+        }
+        for (let item of this.inheritableItems.filter(itemFilter)) {
             values.push(...this.getAttributesFromItem(item._id, attributeKey));
         }
-        return values;
+        if(!reduce) {
+            return values;
+        }
+        switch(reduce){
+            case "SUM":
+                return values.map(attr => attr.value).reduce((a,b)=> a+b, 0);
+            case "MAX":
+                return values.map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
+            case "MIN":
+                return values.map(attr => attr.value).reduce((a,b)=> Math.min(a,b), 0);
+            default:
+                return values.map(attr => attr.value).reduce(reduce);
+        }
     }
 
     /**
@@ -791,7 +810,7 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    async addItemsFromCompendium(compendium, parentItem, additionalEntitiesToAdd, items) {
+    async addItemsFromCompendium(compendium, additionalEntitiesToAdd, items) {
         if (!Array.isArray(items)) {
             items = [items];
         }
@@ -800,7 +819,7 @@ export class SWSEActor extends Actor {
         let notificationMessage = "";
         let pack = SWSEActor.getCompendium(compendium);
         let index = await pack.getIndex();
-        for (let item of items.filter(item => item)) {
+        for (let item of items.filter(item => item).map(item => item.value ? item.value : item)) {
             let {itemName, prerequisite, payload} = this.resolveItemParts(item);
 
             let cleanItemName1 = this.cleanItemName(itemName);
@@ -831,9 +850,6 @@ export class SWSEActor extends Actor {
                 entity.setPrerequisite(prerequisite);
             }
 
-            if (parentItem) {
-                entity.setParentItem(parentItem)
-            }
 
             if (payload !== "") {
                 entity.setPayload(payload);
@@ -843,12 +859,17 @@ export class SWSEActor extends Actor {
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
             entities.push(entity.data.toObject(false));
         }
-        additionalEntitiesToAdd.push(...entities);
+        if(additionalEntitiesToAdd) {
+            additionalEntitiesToAdd.push(...entities);
+        }
         return {addedEntities: entities, notificationMessage: notificationMessage};
     }
 
     resolveItemParts(item) {
         let itemName = item;
+        if(item.name){
+            itemName = item.name;
+        }
         let prerequisite = item.prerequisite;
         if (item.category) {
             console.error("deprecated", item);
@@ -857,7 +878,7 @@ export class SWSEActor extends Actor {
         if (item.trait) {
             itemName = item.trait;
         }
-        let result = /^([\w\s]*) \(([()\-\w\s*+]*)\)/.exec(itemName);
+        let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
         let payload = "";
         if (result) {
             itemName = result[1];
@@ -1093,5 +1114,14 @@ export class SWSEActor extends Actor {
             }
         }
         return undefined;
+    }
+
+    getItemContainingInheritableAttribute(key, value) {
+        let attributes = this.getInheritableAttributesByKey(key);
+        if(value !== undefined){
+            attributes = attributes.filter(item => item.value === value);
+        }
+        let sourceIds = attributes.map(item => item.source).distinct()
+        return sourceIds.map(sourceId => this.items.get(sourceId));
     }
 }

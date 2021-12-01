@@ -2,7 +2,8 @@
   "Actor": {
     "types": [
       "character",
-      "npc"
+      "npc",
+      "computer"
     ],
     "templates": {
       "common": {
@@ -358,6 +359,7 @@
         "attributes": {},
         "choices": [],
         "modes": [],
+        "providedItems": [],
         "payload": ""
       },
       "item": {

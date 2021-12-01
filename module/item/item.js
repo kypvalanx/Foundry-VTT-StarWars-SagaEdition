@@ -91,6 +91,30 @@ export class SWSEItem extends Item {
         return finalName;
     }
 
+    get levelUpHitPoints(){
+        return this.getAttribute("levelUpHitPoints").map(attr=>attr.value)[0];
+    }
+
+    get classLevelHealth(){
+        let isFirstLevel = this.getAttribute("isFirstLevel");
+        if(isFirstLevel.length > 0 && isFirstLevel.map(attr => attr.value)[0] !=='false' && isFirstLevel.map(attr => attr.value)[0] !==false){
+
+            return this.getAttribute("firstLevelHitPoints").map(attr=>parseInt(attr.value))[0];
+        }
+        let attrs = this.getAttribute("rolledHp");
+
+        if(attrs.length > 0){
+            let rolledHp = attrs.map(attr=>parseInt(attr.value))[0]
+
+            let max = this.getAttribute("levelUpHitPoints").map(attr=>parseInt(attr.value.split("d")[1]))[0]
+            return rolledHp > max ? max : rolledHp;
+        }
+
+        return 1;
+    }
+
+
+
     // get name() {
     //     return this.finalName;
     // }
@@ -174,7 +198,8 @@ export class SWSEItem extends Item {
     }
 
     get effectiveRange() {
-        let resolvedSubtype = this.data.data.treatedAsForRange ? this.data.data.treatedAsForRange : this.data.data.subtype;
+        let treatedAsForRange = this.getAttribute("treatedAs");
+        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
 
         if (this.getStripping("reduceRange")?.value) {
             resolvedSubtype = this.reduceRange(resolvedSubtype);
@@ -226,7 +251,7 @@ export class SWSEItem extends Item {
 
     get damageDie() {
         let damageDice = this.getAttribute('damageDie');
-        let damageDie = damageDice[damageDice.length-1].value;
+        let damageDie = damageDice[damageDice.length-1]?.value;
 
         if (!damageDie) {
             return "";
@@ -437,6 +462,15 @@ export class SWSEItem extends Item {
         for(let attribute of Object.values(data.attributes) || []){
             funct(attribute)
         }
+        if(data.levels){
+
+            for(let level of Object.values(data.levels) || []){
+
+                for(let attribute of Object.values(level.attributes) || []){
+                    funct(attribute)
+                }
+            }
+        }
         //funct(data);
         for(let mode of data.modes || []){
             this.crawlAttributes(mode, funct)
@@ -508,6 +542,18 @@ export class SWSEItem extends Item {
         return subtypes.includes(this.data.data.subtype?.toLowerCase()) || subtypes.includes(this.data.data.attributes?.treatedAsForRange?.toLowerCase())
     }
 
+    addAttribute(attribute){
+        let data = {};
+        let attributes = this.data.data.attributes
+        let attributeId = 0;
+        while (attributes[cursor]) {
+            attributeId++;
+        }
+
+        data.attributes = {};
+        data.attributes[attributeId] = attribute;
+        this.updateData(data);
+    }
 
     canStripAutoFire() {
         let ratesOfFire = this.getAttribute('ratesOfFire');
@@ -680,6 +726,34 @@ export class SWSEItem extends Item {
             }
         })
     }
+
+    setAttribute(attribute, value){
+        let attributesForUpdate= this.getAttributesForUpdate(attribute);
+        if(Object.keys(attributesForUpdate).length > 0){
+            for(let attribute of Object.values(attributesForUpdate)){
+                attribute.value = value;
+            }
+        } else {
+            let nullEntry = Object.entries(this.data.data.attributes).find(entry => entry[1] === null)
+            if(nullEntry){
+                attributesForUpdate[nullEntry[0]] = {value:value, key: attribute};
+            } else {
+                attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value:value, key: attribute};
+            }
+        }
+        this.setAttributes(attributesForUpdate)
+    }
+
+    getAttributesForUpdate(attribute){
+        let attributes = {};
+        for(let entry of Object.entries(this.data.data.attributes)){
+            if(entry[1]?.key === attribute){
+                attributes[entry[0]] = entry[1];
+            }
+        }
+        return attributes;
+    }
+
     setAttributes(attributes) {
         let update = {};
         update.data = {};
@@ -724,6 +798,17 @@ export class SWSEItem extends Item {
             values.push(...extractAttributeValues(attribute, this.data._id));
         }
 
+
+        if(this.data.type === 'class'){
+            let classLevel = this.getClassLevel();
+            for (let i = 1; i <=classLevel; i++){
+                let level = this.data.data.levels[i];
+                for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
+                    values.push(...extractAttributeValues(attribute, this.data._id));
+                }
+            }
+        }
+
         //
         values.push(...this.extractModeAttributes(this.getActiveModes(), attributeKey, values));
 
@@ -732,6 +817,14 @@ export class SWSEItem extends Item {
         }
 
         return values;
+    }
+
+    getProvidedItems(filter){
+        let items = this.data.data.providedItems;
+        if(!!filter){
+            return items.filter(filter);
+        }
+        return items;
     }
 
     extractModeAttributes(activeModes, attributeKey) {
@@ -821,5 +914,14 @@ export class SWSEItem extends Item {
         update.data = {};
         update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !==mode.toLowerCase());
         this.update(update);
+    }
+
+    getClassLevel() {
+        if(this.data.type !== 'class' || !this.parent){
+            return undefined;
+        }
+        let classLevels = this.parent.classes.filter(clazz => clazz.data.name === this.data.name)
+
+        return classLevels.length;
     }
 }
