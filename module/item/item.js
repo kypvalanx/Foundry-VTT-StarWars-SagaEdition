@@ -1,8 +1,8 @@
 import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {extractAttributeValues, getBonusString, increaseDamageDie, toNumber} from "../util.js";
+import {extractAttributeValues, getBonusString, increaseDamageDie, toNumber, getRangeAttackModifier} from "../util.js";
 
-function getRangeModifier(range, accurate, innacurate) {
+function getRangeModifierBlock(range, accurate, innacurate) {
     if (range === 'Grenades') {
         range = 'Thrown Weapons'
     }
@@ -198,7 +198,7 @@ export class SWSEItem extends Item {
     }
 
     get effectiveRange() {
-        let treatedAsForRange = this.getAttribute("treatedAs");
+        let treatedAsForRange = this.getAttribute("treatedAs")[0];
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
 
         if (this.getStripping("reduceRange")?.value) {
@@ -642,10 +642,35 @@ export class SWSEItem extends Item {
     rollItem(actor) {
 
         if (this.type === "weapon") {
+            let targets = Array.from(game.user.targets); //get targeted tokens
+
+            //Do we need this?  for range we do
+            let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === this.parent.id); //get selected tokens of this actor
+            if(sources.length === 0){
+                sources = canvas.tokens.objects.children.filter(token => token.data.actorId === this.parent.id);
+            }
+
+            let range = this.effectiveRange;
+            let isAccurate = this.accurate;
+            let isInaccurate = this.inaccurate;
+            let rangedAttackModifier;
+            if(sources.length > 0 && targets.length > 0){
+                if(sources.length > 1 || targets.length > 1){
+                    console.warn("found too many selected targets or resolved too many sources");
+                }
+                let source = sources[0];
+                let target = targets[0];
+                let distance = this.getTokenDistanceInSquares(source, target)
+
+               rangedAttackModifier = getRangeAttackModifier(range, distance, isAccurate, isInaccurate)
+            }
+
             let attack = generateAttackFromWeapon(this, actor);
             console.log(attack);
             let modifiers = "";
-            modifiers += getRangeModifier(this.effectiveRange, this.accurate, this.inaccurate)  //add innacurate and accurate
+            if(!rangedAttackModifier) {
+                modifiers += getRangeModifierBlock(range, isAccurate, isInaccurate)  //add innacurate and accurate
+            }
             modifiers += getRateOfFireModifier(attack.ratesOfFire);
             modifiers += getStun(attack.hasStun)
             let templateType = "attack";
@@ -923,5 +948,15 @@ export class SWSEItem extends Item {
         let classLevels = this.parent.classes.filter(clazz => clazz.data.name === this.data.name)
 
         return classLevels.length;
+    }
+
+    getTokenDistanceInSquares(source, target) {
+        let xDiff = Math.abs(source.x - target.x);
+        let yDiff = Math.abs(source.y - target.y);
+        let squareSize = source.scene.dimensions.size;
+
+        let effectiveDiff = Math.max(xDiff, yDiff) / squareSize;
+
+        return effectiveDiff;
     }
 }

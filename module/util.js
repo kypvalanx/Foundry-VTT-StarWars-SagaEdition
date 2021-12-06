@@ -1,4 +1,5 @@
 import {dieSize} from "./swse.js";
+import {SWSE} from "./config.js";
 
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
@@ -180,4 +181,23 @@ export function extractAttributeValues(attribute, source) {
         }
     }
     return values
+}
+
+export function getRangeAttackModifier(effectiveRange, distance, accurate, inaccurate){
+    let range = SWSE.Combat.range[effectiveRange];
+    if(!range){
+        return 0;
+    }
+
+    let resolvedRange = Object.entries(range).filter(entry => entry[1].low <=distance && entry[1].high >=distance)[0][0];
+
+    if(resolvedRange === 'short range' && accurate){
+        return 0;
+    }
+
+    if(resolvedRange === 'long range' && inaccurate){
+        return "out of range";
+    }
+
+    return SWSE.Combat.rangePenalty[resolvedRange];
 }
