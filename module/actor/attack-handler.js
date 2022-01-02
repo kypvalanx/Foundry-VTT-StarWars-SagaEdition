@@ -1,6 +1,7 @@
 import {getBonusString, increaseDamageDie, resolveValueArray} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {d20, sizeArray} from "../swse.js";
+import {Attack} from "./attack.js";
 
 
 /**
@@ -8,12 +9,13 @@ import {d20, sizeArray} from "../swse.js";
  * @param {SWSEActor} actor
  * @returns {Promise<void>}
  */
-export async function generateAttacks(actor) {
-    actor.data.data.attacks = [];
-    actor.data.data.attacks.push(generateUnarmedAttacks(actor));
-    actor.data.data.attacks.push(...actor.getEquippedItems()
+export function generateAttacks(actor) {
+    let attacks = [];
+    attacks.push(generateUnarmedAttack(actor));
+    attacks.push(...actor.getEquippedItems()
         .filter(item => item.type === 'weapon')
         .map(weapon => generateAttackFromWeapon(weapon, actor)));
+    return attacks;
 }
 
 function canFinesse(size, item, focus) {
@@ -38,7 +40,7 @@ function getGroupedModes(item) {
  *
  * @param {SWSEItem} item
  * @param {SWSEActor} actor
- * @returns {{dam, itemId, notes, actorId, th, critical, sound: string, name, range, type, ratesOfFire, hasStun}|undefined}
+ * @returns {Attack|undefined}
  */
 export function generateAttackFromWeapon(item, actor) {
     let actorData = actor.data;
@@ -96,12 +98,12 @@ export function generateAttackFromWeapon(item, actor) {
     let hasStun = false;
     if (item.stunDamageDie) {
         stunDamageDie = item.stunDamageDie;
-        stunDamage = `(Stun: ${stunDamageDie + getBonusString(damageBonus)})`
+        damage = stunDamageDie + getBonusString(damageBonus)
         notes.push("(Stun Setting)")
         hasStun = true;
     }
 
-    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, groupedModes, hasStun)
+    return createAttack(item.name, attackRoll, damage, notes.join(", "), range, critical, type, item.id, actor.id, groupedModes, hasStun, item)
 }
 
 function isOversized(actorSize, itemSize) {
@@ -203,8 +205,25 @@ function explodeProficiencies(proficiencies) {
     }
     return result;
 }
-function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, modes, hasStun) {
-    return {
+
+/**
+ *
+ * @param name
+ * @param th
+ * @param dam
+ * @param notes
+ * @param range
+ * @param critical
+ * @param type
+ * @param itemId
+ * @param actorId
+ * @param modes
+ * @param hasStun
+ * @param source
+ * @returns {Attack}
+ */
+function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, modes, hasStun, source) {
+    return new Attack(
         name,
         th,
         dam,
@@ -212,12 +231,12 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
         range,
         critical,
         type,
-        sound: "",
-        itemId: itemId,
-        actorId: actorId,
+        "",
+        itemId,
+        actorId,
         modes,
-        hasStun
-    };
+        hasStun,
+        source);
 }
 
 export function resolveFinesseBonus(actor, finesseStats) {
@@ -228,8 +247,13 @@ export function resolveFinesseBonus(actor, finesseStats) {
     return bonus;
 }
 
+/**
+ *
+ * @param actor
+ * @returns {Attack|undefined}
+ */
 
-export function generateUnarmedAttacks(actor) {
+export function generateUnarmedAttack(actor) {
     if (!actor) {
         return undefined;
     }
@@ -282,7 +306,7 @@ export function generateUnarmedAttacks(actor) {
 
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id, []);
+    return createAttack(name, th, dam, notes, range, critical, type, "Unarmed Attack", actor.data._id, []);
 }
 
 /**
@@ -292,13 +316,13 @@ export function generateUnarmedAttacks(actor) {
  * @returns {String}
  */
 function resolveUnarmedDamageDie(actor) {
-    let inheritableAttributesByKey = actor.getInheritableAttributesByKey("unarmedDieSize");
+    let inheritableAttributesByKey = actor.getInheritableAttributesByKey("unarmedDamageDie");
     if(inheritableAttributesByKey.length>1) {
         console.warn("found multiple unarmedDieSize attributes")
     } else if(inheritableAttributesByKey.length<1){
         inheritableAttributesByKey = [1];
     }
-    let damageDie = inheritableAttributesByKey[0];
+    let damageDie = inheritableAttributesByKey[0].value;
     let bonus = actor.getInheritableAttributesByKey("bonusUnarmedDamageDieSize")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
     damageDie = increaseDamageDie(damageDie, bonus);

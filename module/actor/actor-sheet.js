@@ -1,6 +1,8 @@
-import {filterItemsByType} from "../util.js";
+import {filterItemsByType, getBonusString, getOrdinal, getRangedAttackMod, handleAttackSelect} from "../util.js";
 import {SWSE} from "../config.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
+import {generateAttackFromWeapon, generateUnarmedAttack} from "./attack-handler.js";
+import {SWSEItem} from "../item/item.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -130,7 +132,7 @@ export class SWSEActorSheet extends ActorSheet {
             await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
         })
 
-        html.find('.mode-selector').on("click", async event =>{
+        html.find('.mode-selector').on("click", async event => {
             //event.preventDefault();
             event.stopPropagation();
             let modePath = $(event.currentTarget).data("modePath");
@@ -142,6 +144,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#selectGender").on("click", event => this._selectGender(event, this));
         html.find("#selectWeight").on("click", () => this._unavailable());
         html.find("#selectHeight").on("click", () => this._unavailable());
+        html.find("#fullAttack").on("click", () => this.attack(event, {type: "fullAttack"}));
 
         html.find(".generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
@@ -158,7 +161,7 @@ export class SWSEActorSheet extends ActorSheet {
         // Update Inventory Item
         html.find('.item-edit').click(ev => {
             let li = $(ev.currentTarget);
-            if(!li.hasClass("item")) {
+            if (!li.hasClass("item")) {
                 li = li.parents(".item");
             }
             const item = this.actor.items.get(li.data("itemId"));
@@ -182,7 +185,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="view"]').click(event => this._onItemEdit(event));
 
-        html.find('.dark-side-button').click(ev=> {
+        html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
@@ -198,9 +201,8 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
 
-        if(dragData.label === 'Unarmed Attack')
-        {
-            dragData.type='Item';
+        if (dragData.label === 'Unarmed Attack') {
+            dragData.type = 'Item';
         }
 
         dragData.img = elem.dataset.img;
@@ -279,6 +281,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
     }
+
     async removeSuppliedItems(itemToDelete) {
         return this.actor.items.filter(item => item.data.data.supplier?.id === itemToDelete.id).map(item => item.id) || []
     }
@@ -339,6 +342,289 @@ export class SWSEActorSheet extends ActorSheet {
                 })
             }
         };
+    }
+
+    buildAttackDialog(context) {
+        let availableAttacks = 1;
+        let title = "Single Attack";
+        let dualWeaponModifier = -10;
+        let doubleAttack = [];
+        let tripleAttack = [];
+        let hands = 2; //TODO resolve extra hands
+
+        if (context.type === "fullAttack") {
+            title = "Full Attack";
+            doubleAttack = this.actor.getInheritableAttributesByKey("doubleAttack", null, "VALUES");
+            tripleAttack = this.actor.getInheritableAttributesByKey("tripleAttack", null, "VALUES");
+
+            //availableAttacks = this.actor.fullAttackCount;
+            let equippedItems = this.actor.getEquippedItems()
+            availableAttacks = 0;
+            let doubleAttackBonus = 0;
+            let tripleAttackBonus = 0;
+            let availableWeapons = 0
+            for(let item of equippedItems){
+                availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
+                if(doubleAttack.includes(item.data.data.subtype)){
+                    doubleAttackBonus = 1;
+                }if(tripleAttack.includes(item.data.data.subtype)){
+                    tripleAttackBonus = 1;
+                }
+            }
+            availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
+
+
+            //how many attacks?
+            //
+            //how many provided attacks from weapons max 2
+            //+1 if has double attack and equipped item
+            //+1 if has triple attack and equipped item
+
+            let dualWeaponModifiers = this.actor.getInheritableAttributesByKey("dualWeaponModifier", null, "NUMERIC_VALUES");
+            dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
+            console.log(dualWeaponModifier, doubleAttack, tripleAttack)
+        }
+
+        let suppliedItems = context.items || [];
+
+        // if (suppliedItems.length > 0) {
+        //     availableAttacks = suppliedItems.length;
+        // }
+
+        let content = `<p>Select Attacks:</p>`;
+        let resolvedAttacks = [];
+        if (suppliedItems.length < availableAttacks) {
+            //CREATE OPTIONS
+            resolvedAttacks = this.getAttackOptions(doubleAttack, tripleAttack, hands);
+        }
+
+
+        let blockHeight = 225;
+
+
+        for (let i = 0; i < availableAttacks; i++) {
+            let item = suppliedItems.length > i ? suppliedItems[i] : undefined;
+            let select;
+            if (!!item) {
+                let attack = this.actor.data.data.attacks.find(o => o.itemId === item || o.name === item)
+                select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
+            } else {
+                select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
+            }
+
+
+            let attackBlock = `<div class="attack panel attack-block"><div class="attack-name">${select}</div><div class="attack-options"></div><div class="attack-total"></div></div>`
+
+
+            content += attackBlock;
+
+        }
+
+        let height = availableAttacks * blockHeight + 85
+
+
+        return {
+            title,
+            content,
+            buttons: {
+                attack: {
+                    label: "Attack",
+                    callback: (html) => {
+                        let attacks = [];
+                        let attackBlocks = html.find(".attack-block");
+                        for(let attackBlock of attackBlocks){
+                            let attackFromBlock = this.getAttackFromBlock(attackBlock);
+                            if(!!attackFromBlock) {
+                                attacks.push(attackFromBlock);
+                            }
+                        }
+
+                        this.rollAttacks(attacks);
+                    }
+                }
+            },
+            render: async (html) => {
+                let selects = html.find("select");
+                selects.on("change", e => handleAttackSelect(selects));
+                handleAttackSelect(selects)
+
+                let attackIds = html.find(".attack-id");
+                attackIds.each((i, div) => this.populateItemStats(div, context));
+
+                attackIds.on("change", e => {
+                    let attackIds = html.find(".attack-id");
+                    context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
+                    context.damageMods = this.getDamageMods(selects, dualWeaponModifier);
+                    attackIds.each((i, div) => this.populateItemStats(div, context));
+                    this._render();
+                })
+                this._render();
+            },
+            options: {
+                height
+            }
+        };
+    }
+
+    getDamageMods() {
+        return [];
+    }
+
+    getAttackMods(selects, dualWeaponModifier) {
+        let attackMods = []
+        let itemIds = [];
+        for (let select of selects) {
+            if (select.value === "--") {
+                continue;
+            }
+            let attack = JSON.parse(select.value);
+            let mods = attack.mods
+            if (mods === "doubleAttack") {
+                attackMods.push({value: -5, source: "Double Attack"});
+            }
+            if (mods === "tripleAttack") {
+                attackMods.push({value: -5, source: "Triple Attack"});
+            }
+            itemIds.push(attack.itemId)
+        }
+        itemIds = itemIds.filter((value, index, self) => self.indexOf(value) === index)
+
+        if (itemIds.length > 1) {
+            attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
+        }
+        return attackMods;
+    }
+
+    /**
+     *
+     * @param html
+     * @param context
+     */
+    populateItemStats(html, context) {
+        let value = html.value || $(html).data("value");
+        if (value === "--") {
+            return;
+        }
+        let attack;
+        if(typeof value === "string"){
+            attack = JSON.parse(value);
+        } else {
+            attack = value;
+        }
+        //let attack = JSON.parse(value);
+        let itemId = attack.itemId;
+
+        let parent = $(html).parents(".attack");
+        let options = parent.children(".attack-options")
+        options.empty();
+        if (itemId === "Unarmed Attack") {
+            let attack = generateUnarmedAttack(this.actor);
+            options.append(SWSEItem.getModifierHTML(0))
+
+            options.find(".attack-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+            options.find(".damage-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+
+            let total = parent.children(".attack-total");
+            this.setAttackTotal(attack, total, options, context);
+        } else {
+
+            let item = this.actor.items.get(itemId)
+
+
+            if (item) {
+                let rangedAttackModifier = getRangedAttackMod(item.effectiveRange, item.accurate, item.inaccurate, this.actor);
+
+                let attack = generateAttackFromWeapon(item, this.actor);
+                options.append(SWSEItem.getModifierHTML(rangedAttackModifier, item))
+
+                options.find(".attack-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+                options.find(".damage-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+
+                let total = parent.children(".attack-total");
+                this.setAttackTotal(attack, total, options, context);
+            }
+        }
+
+    }
+
+    setAttackTotal(attack, total, options, context) {
+        options.children()
+        total.empty();
+        let damageRoll = `<div>${attack.dam}</div>` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
+        let attackRoll = `<div>${attack.th}</div>` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
+        total.append(`<div class="flex flex-row"><div>Attack Roll: <div class="attack-roll">${attackRoll}</div></div> <div class="flex"><div>Damage Roll: <div class="damage-roll">${damageRoll}</div></div></div>`)
+    }
+
+    getModifiersFromContextAndInputs(options, modifiers, inputCriteria) {
+        let bonuses = [];
+        options.find(inputCriteria).each((i, modifier) => {
+                if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
+                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
+                }
+            }
+        )
+        for (let attackMod of modifiers || []) {
+            bonuses.push({source: attackMod.source, value: getBonusString(attackMod.value)});
+        }
+
+        let roll = ""
+        for(let bonus of bonuses){
+            roll += `<div title="${bonus.source}">${bonus.value}</div>`
+        }
+        return roll;
+    }
+
+    getAttackOptions(doubleAttack, tripleAttack, hands) {
+        let attacks = this.actor.data.data.attacks;
+
+        let resolvedAttacks = [];
+
+        //only 2 different weapons can be used
+        //double attacks can only be used once first attack is used
+        //triple attacks can only be used once doubel attack is used
+        let existingWeaponNames = [];
+        let id = 1;
+        for (let attack of attacks) {
+            let source = attack.source;
+            if (!source) {
+                continue;
+            }
+
+            let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
+
+            existingWeaponNames.push(attack.name)
+            if (duplicateCount > 0) {
+                attack.name = attack.name + ` #${duplicateCount + 1}`;
+            }
+
+            resolvedAttacks.push(this.createAttackOption(attack, id++))
+            let additionalDamageDice = source.additionalDamageDice
+            // if (additionalDamageDice.length === 0) {
+            //     continue;
+            // }
+            for (let i = 0; i < additionalDamageDice.length; i++) {
+                let additionalDamageDie = additionalDamageDice[i];
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.dam = additionalDamageDie;
+                clonedAttack.name = clonedAttack.name + ` (${getOrdinal(i + 2)} attack)`
+                clonedAttack.itemId = clonedAttack.itemId + `#${getOrdinal(i + 2)}`
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+
+            if (doubleAttack.includes(source.data.data.subtype)) {
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.name = clonedAttack.name + ` (Double attack)`
+                clonedAttack.mods = "doubleAttack";
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+            if (tripleAttack.includes(source.data.data.subtype)) {
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.name = clonedAttack.name + ` (Triple attack)`
+                clonedAttack.mods = "tripleAttack";
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+        }
+        return resolvedAttacks;
     }
 
     buildGenderDialog(sheet) {
@@ -426,6 +712,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
         return {low: parseInt(range.replace("+", "")), high: -1};
     }
+
     async _selectAttributeGeneration(event, sheet) {
         let genType = sheet.actor.getAttributeGenerationType();
         let rollSelected = genType === 'Roll' ? 'selected' : '';
@@ -553,6 +840,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         } else this._onSubmit(event);
     }
+
     _adjustItemAttributeBySpan(event) {
         event.preventDefault();
         const el = event.currentTarget;
@@ -693,10 +981,10 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async _onDropItem(ev, data) {
-        if ( !this.actor.isOwner ) return false;
+        if (!this.actor.isOwner) return false;
         //the dropped item has an owner
         if (data.actorId) {
-            if(data.actorId === this.actor.id) {
+            if (data.actorId === this.actor.id) {
                 await this.moveExistingItemWithinActor(data, ev);
                 return;
             } else {
@@ -838,8 +1126,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (Array.from(this.actor.items.values())
             .map(i => i.data.finalName)
-            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName))
-        {
+            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName)) {
             let itemType = item.data.type;
             await Dialog.prompt({
                 title: `You already have this ${itemType}`,
@@ -927,12 +1214,20 @@ export class SWSEActorSheet extends ActorSheet {
         let context = {};
         context.isFirstLevel = this.actor.classes.length === 0;
         await this.activateChoices(item, entities, context);
-        item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {type:"Boolean", value:context.isFirstLevel,key:"isFirstLevel"};
+        item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
+            type: "Boolean",
+            value: context.isFirstLevel,
+            key: "isFirstLevel"
+        };
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
         entities.push(...await this.addClassFeats(item, context));
 
-        entities.forEach(item => item.data.supplier = {id: mainItem[0].id, name: mainItem[0].name, type: mainItem[0].data.type})
+        entities.forEach(item => item.data.supplier = {
+            id: mainItem[0].id,
+            name: mainItem[0].name,
+            type: mainItem[0].data.type
+        })
 
         return entities;
     }
@@ -957,11 +1252,15 @@ export class SWSEActorSheet extends ActorSheet {
         await this.activateChoices(item, entities, {});
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        await this.actor.addItemsFromCompendium('trait', entities, item.getProvidedItems(i=>i.type === 'TRAIT'));
-        await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i=>i.type === 'FEAT'));
-        await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i=>i.type === 'ITEM'));
-        
-        entities.forEach(item => item.data.supplier = {id: mainItem[0].id, name: mainItem[0].name, type: mainItem[0].data.type})
+        await this.actor.addItemsFromCompendium('trait', entities, item.getProvidedItems(i => i.type === 'TRAIT'));
+        await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'));
+        await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'));
+
+        entities.forEach(item => item.data.supplier = {
+            id: mainItem[0].id,
+            name: mainItem[0].name,
+            type: mainItem[0].data.type
+        })
         return entities;
 
     }
@@ -975,7 +1274,7 @@ export class SWSEActorSheet extends ActorSheet {
             //equip/unequip workflow
             let targetItemContainer = this.getParentByHTMLClass(ev, "item-container");
 
-            if(targetItemContainer == null){
+            if (targetItemContainer == null) {
                 return;
             }
             let itemId = data.data._id;
@@ -1019,9 +1318,9 @@ export class SWSEActorSheet extends ActorSheet {
             let optionString = "";
             let keys = Object.keys(options);
             if (keys.length === 0) {
-                greetingString = choice.noOptions;
+                greetingString = choice.noOptions ? choice.noOptions : choice.description;
             } else if (keys.length === 1) {
-                greetingString = choice.oneOption;
+                greetingString = choice.oneOption ? choice.oneOption : choice.description;
                 let optionLabel = keys[0];
                 optionString = `<div id="choice">${optionLabel}</div>`
             } else {
@@ -1067,7 +1366,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClassFeats(item, context) {
         let feats = item.getAttribute("classFeat").map(attr => attr.value);
-        if(feats.length === 0){
+        if (feats.length === 0) {
             return;
         }
         let additionalEntitiesToAdd = [];
@@ -1093,7 +1392,7 @@ export class SWSEActorSheet extends ActorSheet {
             for (let feat of feats) {
                 let owned = "";
                 let ownedFeats = this.actor.feats.filter(f => f.finalName === feat);
-                if(ownedFeats.length>0){
+                if (ownedFeats.length > 0) {
                     owned = "<i>(you already have this feat)</i>"
                 }
 
@@ -1155,7 +1454,7 @@ export class SWSEActorSheet extends ActorSheet {
         const element = event.currentTarget;
 
         let draggable = this.getParentByHTMLClass(event, "draggable")
-        if(draggable){
+        if (draggable) {
             this.actor.rollVariable(draggable.dataset.variable)
             return;
         }
@@ -1172,7 +1471,7 @@ export class SWSEActorSheet extends ActorSheet {
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
             roll = roll.roll();
             let item = dataset.item;
-            if (dataset.itemAttribute){
+            if (dataset.itemAttribute) {
                 if (item) {
                     let updateTarget = this.actor.items.get(item);
                     updateTarget.setAttribute(dataset.itemAttribute, roll.total);
@@ -1256,8 +1555,7 @@ export class SWSEActorSheet extends ActorSheet {
                         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
                     }
                 }
-            }
-            else if (key === 'AVAILABLE_WEAPON_FOCUS') {
+            } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
                 for (let weapon of this.actor.data.proficiency.weapon) {
                     if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
@@ -1269,8 +1567,7 @@ export class SWSEActorSheet extends ActorSheet {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }
-            else if (key === 'AVAILABLE_SKILL_FOCUS') {
+            } else if (key === 'AVAILABLE_SKILL_FOCUS') {
                 for (let weapon of this.actor.data.prerequisites.trainedSkills) {
                     if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
@@ -1294,50 +1591,49 @@ export class SWSEActorSheet extends ActorSheet {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
+            } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
                 for (let weapon of this.actor.data.proficiency.doubleAttack) {
                     if (!this.actor.data.proficiency.savageAttack.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
+            } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
                 for (let weapon of this.actor.data.proficiency.doubleAttack) {
                     if (!this.actor.data.proficiency.relentlessAttack.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
+            } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
                 for (let weapon of this.actor.data.proficiency.focus) {
                     if (!this.actor.data.proficiency.autofireSweep.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
+            } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
                 for (let weapon of this.actor.data.proficiency.focus) {
                     if (!this.actor.data.proficiency.autofireAssault.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_HALT') {
+            } else if (key === 'AVAILABLE_HALT') {
                 for (let weapon of this.actor.data.proficiency.focus) {
                     if (!this.actor.data.proficiency.halt.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_RETURN_FIRE') {
+            } else if (key === 'AVAILABLE_RETURN_FIRE') {
                 for (let weapon of this.actor.data.proficiency.focus) {
                     if (!this.actor.data.proficiency.returnFire.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
+            } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
                 for (let weapon of this.actor.data.proficiency.focus) {
                     if (!this.actor.data.proficiency.criticalStrike.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            }
-            else {
+            } else {
                 resolvedOptions[key] = value;
             }
         }
@@ -1519,12 +1815,12 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async  _assignAttributePoints(event, sheet) {
+    async _assignAttributePoints(event, sheet) {
         let existingValues = sheet.actor.getAttributeBases();
         let bonuses = sheet.actor.getAttributeBonuses();
         let combined = {};
         for (let val of Object.keys(existingValues)) {
-            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val], bonus:bonuses[val]};
+            combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val], bonus: bonuses[val]};
         }
 
         let data = {
@@ -1593,7 +1889,10 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (item.name === 'Point-Blank Shot') {
             if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                await this.actor.addItemsFromCompendium('feat', items, {category: 'Precise Shot', prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'});
+                await this.actor.addItemsFromCompendium('feat', items, {
+                    category: 'Precise Shot',
+                    prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'
+                });
             }
         }
 
@@ -1627,14 +1926,79 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onActivateItem(ev) {
-        //const div = $(ev.currentTarget).parents(".attack");
         let elem = ev.currentTarget;
         let itemId = elem.dataset.itemId;
-        if(!itemId){
+        if (!itemId) {
             itemId = elem.dataset.label;
         }
         //let itemId = div.data("itemId");
-        this.actor.rollOwnedItem(itemId);
+        //this.actor.rollOwnedItem(itemId);
+        this.attack(ev, {type: "singleAttack", items: [itemId]});
         return undefined;
     }
+
+    async attack(event, context) {
+        let options = this.buildAttackDialog(context);
+        await new Dialog(options).render(true);
+    }
+
+    createAttackOption(attack, id) {
+        let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
+        return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
+    }
+
+    // methods revolving around attack blocks.  can make this more simplified with an attack object maybe.
+    getAttackFromBlock(attackBlock) {
+        let attackId = $(attackBlock).find(".attack-id")[0]
+        let attackValue = attackId.value || $(attackId).data("value");
+
+        if(attackValue !== "--"){
+            let attackJSON = attackValue;
+            if(typeof attackJSON === "string"){
+                attackJSON = JSON.parse(attackJSON);
+            }
+
+            let attack = {};
+            let attackRoll = $(attackBlock).find(".attack-roll")[0].innerText.replace(/\n/g, "");
+            let damageRoll = $(attackBlock).find(".damage-roll")[0].innerText.replace(/\n/g, "");
+            attack.name = attackJSON.name;
+            attack.toHit = attackRoll;
+            attack.damage = damageRoll;
+            return attack;
+        }
+        return undefined;
+    }
+
+    rollAttacks(attacks, rollMode) {
+        let cls = getDocumentClass("ChatMessage");
+
+        let attackRows = "";
+        let roll;
+
+        for(let attack of attacks){
+            let attackRoll = new Roll(attack.toHit).roll();
+            roll = attackRoll;
+            let damageRoll = new Roll(attack.damage).roll();
+            attackRows += `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRoll.result}">${attackRoll.total}</a></td><td><a class="inline-roll inline-result" title="${damageRoll.result}">${damageRoll.total}</a></td></tr>`
+        }
+
+        let content = `<table>
+<thead><th>Attack</th><th>To Hit</th><th>Damage</th></thead>
+<tbody>${attackRows}</tbody>
+</table>`;
+
+        let messageData = {
+            user: game.user.id,
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            content,
+            sound: CONFIG.sounds.dice,
+            roll
+        }
+
+        let msg = new cls(messageData);
+        if ( rollMode ) msg.applyRollMode(rollMode);
+
+        return cls.create(msg.data, { rollMode });
+    }
 }
+

@@ -1,8 +1,8 @@
 import {resolveHealth} from "./health.js";
-import {generateAttacks, generateUnarmedAttacks} from "./attack-handler.js";
+import {generateAttacks, generateUnarmedAttack} from "./attack-handler.js";
 import {resolveOffense} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
-import {excludeItemsByType, filterItemsByType, toShortAttribute} from "../util.js";
+import {excludeItemsByType, filterItemsByType, toNumber, toShortAttribute} from "../util.js";
 import {meetsPrerequisites} from "../prerequisite.js";
 import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
@@ -137,7 +137,7 @@ export class SWSEActor extends Actor {
         actorData.data.defense = defense;
         actorData.data.armors = armors;
 
-        await generateAttacks(this);
+        actorData.data.attacks = generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
         if (await this.handleLeveBasedAttributeBonuses(actorData)) {
             return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
@@ -771,14 +771,22 @@ export class SWSEActor extends Actor {
         }
         switch(reduce){
             case "SUM":
-                return values.map(attr => attr.value).reduce((a,b)=> a+b, 0);
+                return values.map(attr => toNumber(attr.value)).reduce((a,b)=> a+b, 0);
             case "MAX":
-                return values.map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
+                return values.map(attr => toNumber(attr.value)).reduce((a,b)=> Math.max(a,b), 0);
             case "MIN":
-                return values.map(attr => attr.value).reduce((a,b)=> Math.min(a,b), 0);
+                return values.map(attr => toNumber(attr.value)).reduce((a,b)=> Math.min(a,b), 0);
+            case "VALUES":
+                return values.map(attr => attr.value);
+            case "NUMERIC_VALUES":
+                return values.map(attr => toNumber(attr.value));
             default:
-                return values.map(attr => attr.value).reduce(reduce);
+                return values.map(attr => toNumber(attr.value)).reduce(reduce);
         }
+    }
+
+    get fullAttackCount(){
+        return 2
     }
 
     /**
@@ -1016,9 +1024,13 @@ export class SWSEActor extends Actor {
         });
     }
 
+    /**
+     *
+     * @param itemId
+     */
     rollOwnedItem(itemId) {
         if(itemId === "Unarmed Attack"){
-            let attacks = generateUnarmedAttacks(this)
+            let attacks = generateUnarmedAttack(this)
             SWSEItem.getItemDialogue(attacks, this).render(true);
             return;
         }

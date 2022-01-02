@@ -1,56 +1,63 @@
 import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {extractAttributeValues, getBonusString, increaseDamageDie, toNumber, getRangeAttackModifier} from "../util.js";
+import {extractAttributeValues, getBonusString, getRangedAttackMod, increaseDamageDie, toNumber} from "../util.js";
 
-function getRangeModifierBlock(range, accurate, innacurate) {
+function getRangeModifierBlock(range, accurate, innacurate, id) {
     if (range === 'Grenades') {
         range = 'Thrown Weapons'
     }
 
-    let firstHeader = "";
-    let secondHeader = "";
-    let radioButtons = "";
-    let rangeArray = SWSE.Combat.range[range];
-    if (rangeArray) {
-        for (let [rangeName, rangeIncrement] of Object.entries(rangeArray)) {
-            let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
-            if (accurate && rangeName === 'short') {
-                rangePenaltyElement = 0;
-            }
-            if (innacurate && rangeName === 'long') {
-                continue;
-            }
-            firstHeader += `<th><div class="swse padding-3 center">${rangeName.titleCase()} (${rangePenaltyElement})</div></th>`;
-            secondHeader += `<th><div class="swse padding-3 center">${rangeIncrement.titleCase()}</div></th>`;
-            radioButtons += `<td><div class="center swse"><label for="range${rangeName}"></label><input class="modifier center swse attack-modifier" type="radio" id="range_${rangeName}" name="range_selection" value="${rangePenaltyElement}"></div></td>`;
-            // console.log(rangeName, rangeIncrement, SWSE.Combat.rangePenalty[rangeName])
+    let table = document.createElement("table");
+    let thead = table.appendChild(document.createElement("thead"));
+    let tbody = table.appendChild(document.createElement("tbody"));
+
+    let firstHeader = thead.appendChild(document.createElement("tr"));
+    let secondHeader = thead.appendChild(document.createElement("tr"));
+    let radioButtons = tbody.appendChild(document.createElement("tr"));
+    let selected = true;
+
+    for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
+        let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
+        if (accurate && rangeName === 'short') {
+            rangePenaltyElement = 0;
         }
-
-    }
-
-    return `<table><thead><tr>${firstHeader}</tr><tr>${secondHeader}</tr></thead><tbody><tr>${radioButtons}</tr></tbody></table>`;
-}
-
-function getRateOfFireModifier(ratesOfFire) {
-    if (ratesOfFire && ratesOfFire.length > 1) {
-        let firstHeader = "";
-        let radioButtons = "";
-        for (let rateOfFire of ratesOfFire) {
-            let modifier = "Autofire" === rateOfFire ? -5 : 0;
-            firstHeader += `<th><div class="swse padding-3 center">${rateOfFire} (${modifier})</div></th>`;
-            radioButtons += `<td><div class="center swse"><label for="rof_${rateOfFire}"></label><input class="modifier center swse attack-modifier" type="radio" id="rof_${rateOfFire}" name="rof_selection" value="${modifier}"></div></td>`;
-
+        if (innacurate && rangeName === 'long') {
+            continue;
         }
-        return `<br/><table><thead><tr>${firstHeader}</tr></thead><tbody><tr>${radioButtons}</tr></tbody></table>`;
-    }
-    return "";
-}
+        let th1 = firstHeader.appendChild(document.createElement("th"));
 
-function getStun(hasStun) {
-    if (hasStun) {
-        return `<br/><label for="stun_selection">Stun:</label><input class="modifier center swse attack-modifier" type="checkbox" id="stun_selection" name="stun_selection" value="0">`;
+        let r1Div = th1.appendChild(document.createElement("div"));
+        r1Div.classList.add("swse", "padding-3", "center")
+        r1Div.innerText = `${rangeName.titleCase()} (${rangePenaltyElement})`;
+
+        let th2 = secondHeader.appendChild(document.createElement("th"));
+
+        let rangeValue = th2.appendChild(document.createElement("div"));
+        rangeValue.classList.add("swse", "padding-3", "center")
+        rangeValue.innerText = `${rangeIncrement.string.titleCase()}`;
+
+        let td = radioButtons.appendChild(document.createElement("td"));
+
+        let radioButtonDiv = td.appendChild(td.appendChild(document.createElement("div")));
+        radioButtonDiv.classList.add("swse", "center")
+
+        let label = radioButtonDiv.appendChild(document.createElement("label"));
+        label.setAttribute("for", `range-${rangeName}`);
+
+        let input = radioButtonDiv.appendChild(document.createElement("input"));
+        input.classList.add("modifier", "center", "swse", "attack-modifier");
+        input.setAttribute("type", "radio");
+        input.setAttribute("id", `range-${rangeName}`);
+        input.setAttribute("name", `range-selection-${id}`);
+        input.setAttribute("value", `${rangePenaltyElement}`);
+        input.dataset.source = "Range Modifier";
+        if(selected) {
+            input.setAttribute("checked", true);
+            selected = false;
+        }
     }
-    return "";
+
+    return table;
 }
 
 // noinspection JSClosureCompilerSyntax
@@ -91,33 +98,47 @@ export class SWSEItem extends Item {
         return finalName;
     }
 
-    get levelUpHitPoints(){
-        return this.getAttribute("levelUpHitPoints").map(attr=>attr.value)[0];
+    get levelUpHitPoints() {
+        return this.getAttribute("levelUpHitPoints").map(attr => attr.value)[0];
     }
 
-    get classLevelHealth(){
+    get classLevelHealth() {
+        if (this.type !== "class") {
+            return 0;
+        }
         let isFirstLevel = this.getAttribute("isFirstLevel");
-        if(isFirstLevel.length > 0 && isFirstLevel.map(attr => attr.value)[0] !=='false' && isFirstLevel.map(attr => attr.value)[0] !==false){
+        if (isFirstLevel.length > 0 && isFirstLevel.map(attr => attr.value)[0] !== 'false' && isFirstLevel.map(attr => attr.value)[0] !== false) {
 
-            return this.getAttribute("firstLevelHitPoints").map(attr=>parseInt(attr.value))[0];
+            return this.getAttribute("firstLevelHitPoints").map(attr => parseInt(attr.value))[0];
         }
         let attrs = this.getAttribute("rolledHp");
 
-        if(attrs.length > 0){
-            let rolledHp = attrs.map(attr=>parseInt(attr.value))[0]
+        if (attrs.length > 0) {
+            let rolledHp = attrs.map(attr => parseInt(attr.value))[0]
 
-            let max = this.getAttribute("levelUpHitPoints").map(attr=>parseInt(attr.value.split("d")[1]))[0]
+            let max = this.getAttribute("levelUpHitPoints").map(attr => parseInt(attr.value.split("d")[1]))[0]
             return rolledHp > max ? max : rolledHp;
         }
 
         return 1;
     }
 
+    get isDoubleWeapon() {
+        if (this.type !== 'weapon') {
+            return false;
+        }
+        let damageDie = this.getAttribute("damageDie");
+        return damageDie[0].value.includes("/");
+    }
 
+    get availableForFullAttack() {
 
-    // get name() {
-    //     return this.finalName;
-    // }
+        if (this.type !== 'weapon') {
+            return false;
+        }
+        return true;
+    }
+
     get fortitudeDefenseBonus() {
         return toNumber(this.getAttribute('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
@@ -229,32 +250,16 @@ export class SWSEItem extends Item {
         return false;
     }
 
-    // get modes(){
-    //     let ratesOfFire = this.modes();
-    //     if(!Array.isArray(ratesOfFire)){
-    //         ratesOfFire = [ratesOfFire]
-    //     }
-    //     let filteredROF = [];
-    //     let strippedAutofire = this.getStripping("stripAutofire")?.value;
-    //     for(let rateOfFire of ratesOfFire) {
-    //         if (strippedAutofire) {
-    //             if(rateOfFire.value !== 'Autofire') {
-    //                 filteredROF.push(rateOfFire.value)
-    //             }
-    //             }else{
-    //             filteredROF.push(rateOfFire.value)
-    //         }
-    //     }
-    //
-    //     return filteredROF
-    // }
 
     get damageDie() {
         let damageDice = this.getAttribute('damageDie');
-        let damageDie = damageDice[damageDice.length-1]?.value;
+        let damageDie = damageDice[damageDice.length - 1]?.value;
 
         if (!damageDie) {
             return "";
+        }
+        if (damageDie.includes("/")) {
+            damageDie = damageDie.split("/")[0]
         }
         let tok = damageDie.split('d');
         let quantity = parseInt(tok[0]);
@@ -267,6 +272,42 @@ export class SWSEItem extends Item {
             size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
         }
         return quantity + "d" + size;
+    }
+
+    get additionalDamageDice() {
+        let attribute = this.getAttribute('damageDie');
+        let damageDie = attribute[attribute.length - 1]?.value;
+
+        if (!damageDie) {
+            return "";
+        }
+
+        if (!damageDie.includes("/")) {
+            return [];
+        }
+        let damageDice = damageDie.split("/");
+
+        let bonusDice = this.getAttribute('bonusDamageDie');
+        let bonusSize = this.getAttribute('bonusDamageDieSize');
+        let atks = [];
+        for (let die of damageDice) {
+
+            let tok = die.split('d');
+            let quantity = parseInt(tok[0]);
+            let size = parseInt(tok[1]);
+
+            for (let bonusDamageDie of bonusDice) {
+                quantity = quantity + parseInt(bonusDamageDie.value);
+            }
+            for (let bonusDamageDie of bonusSize) {
+                size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+            }
+
+            atks.push(quantity + "d" + size);
+        }
+
+
+        return atks.slice(1);
     }
 
     get stunDamageDie() {
@@ -444,9 +485,9 @@ export class SWSEItem extends Item {
         });
         this.crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
-                if(typeof attribute.value === "string") {
+                if (typeof attribute.value === "string") {
                     attribute.value = attribute.value.replace("#payload#", payload);
-                } else if(Array.isArray(attribute.value)){
+                } else if (Array.isArray(attribute.value)) {
                     attribute.value = attribute.value.map(val => val.replace("#payload#", payload));
                 }
             }
@@ -454,25 +495,24 @@ export class SWSEItem extends Item {
     }
 
 
-
     crawlAttributes(data, funct) {
         if (!data) {
             return;
         }
-        for(let attribute of Object.values(data.attributes) || []){
+        for (let attribute of Object.values(data.attributes) || []) {
             funct(attribute)
         }
-        if(data.levels){
+        if (data.levels) {
 
-            for(let level of Object.values(data.levels) || []){
+            for (let level of Object.values(data.levels) || []) {
 
-                for(let attribute of Object.values(level.attributes) || []){
+                for (let attribute of Object.values(level.attributes) || []) {
                     funct(attribute)
                 }
             }
         }
         //funct(data);
-        for(let mode of data.modes || []){
+        for (let mode of data.modes || []) {
             this.crawlAttributes(mode, funct)
         }
 
@@ -542,7 +582,7 @@ export class SWSEItem extends Item {
         return subtypes.includes(this.data.data.subtype?.toLowerCase()) || subtypes.includes(this.data.data.attributes?.treatedAsForRange?.toLowerCase())
     }
 
-    addAttribute(attribute){
+    addAttribute(attribute) {
         let data = {};
         let attributes = this.data.data.attributes
         let attributeId = 0;
@@ -639,40 +679,17 @@ export class SWSEItem extends Item {
      * @param {SWSEActor} actor
      * @returns {Dialog}
      */
-    rollItem(actor) {
-
-        if (this.type === "weapon") {
-            let targets = Array.from(game.user.targets); //get targeted tokens
-
-            //Do we need this?  for range we do
-            let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === this.parent.id); //get selected tokens of this actor
-            if(sources.length === 0){
-                sources = canvas.tokens.objects.children.filter(token => token.data.actorId === this.parent.id);
-            }
-
+    rollItem(actor, context) {
+        // let actor = this.ge
+        if (this.type === "weapon" && false) { //hidden but saved for later
             let range = this.effectiveRange;
             let isAccurate = this.accurate;
             let isInaccurate = this.inaccurate;
-            let rangedAttackModifier;
-            if(sources.length > 0 && targets.length > 0){
-                if(sources.length > 1 || targets.length > 1){
-                    console.warn("found too many selected targets or resolved too many sources");
-                }
-                let source = sources[0];
-                let target = targets[0];
-                let distance = this.getTokenDistanceInSquares(source, target)
-
-               rangedAttackModifier = getRangeAttackModifier(range, distance, isAccurate, isInaccurate)
-            }
+            let rangedAttackModifier = getRangedAttackMod(range, isAccurate, isInaccurate, actor);
 
             let attack = generateAttackFromWeapon(this, actor);
-            console.log(attack);
-            let modifiers = "";
-            if(!rangedAttackModifier) {
-                modifiers += getRangeModifierBlock(range, isAccurate, isInaccurate)  //add innacurate and accurate
-            }
-            modifiers += getRateOfFireModifier(attack.ratesOfFire);
-            modifiers += getStun(attack.hasStun)
+
+            let modifiers = this.getModifierHTML(rangedAttackModifier);
             let templateType = "attack";
             const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
 
@@ -692,6 +709,10 @@ export class SWSEItem extends Item {
 
                         console.log(event.currentTarget.id)
                         let formula = target.data("roll");
+                        if (rangedAttackModifier) {
+                            formula += getBonusString(rangedAttackModifier);
+                        }
+
                         let parent = target.parents(".dialog")
                         if (event.currentTarget.id === "attack") {
                             let attackMods = parent.find(".attack-modifier")
@@ -720,6 +741,36 @@ export class SWSEItem extends Item {
                 }
             })
         }
+    }
+
+    static getModifierHTML(rangedAttackModifier, item) {
+        let modifiers = [];
+        let uniqueId = Math.floor(Math.random()*50000 + Math.random()*50000)
+        if (isNaN(rangedAttackModifier)) {
+            modifiers.push(getRangeModifierBlock(item.effectiveRange, item.accurate, item.inaccurate, uniqueId))
+        }
+
+        let attackLabel = document.createElement("label");
+        modifiers.push(attackLabel);
+        attackLabel.innerText = "Attack Modifier:";
+
+        let attackInput = document.createElement("input");
+        attackInput.classList.add("attack-modifier", "suppress-propagation")
+        attackInput.dataset.source = "Miscellaneous"
+        modifiers.push(attackInput);
+
+        modifiers.push(document.createElement("br"))
+
+        let damageLabel = document.createElement("label");
+        damageLabel.innerText = "Damage Modifier:";
+        modifiers.push(damageLabel);
+
+        let damageInput = document.createElement("input");
+        damageInput.dataset.source = "Miscellaneous"
+        damageInput.classList.add("damage-modifier", "suppress-propagation")
+        modifiers.push(damageInput);
+
+        return modifiers;
     }
 
     static getItemDialogue(attack, actor) {
@@ -752,27 +803,27 @@ export class SWSEItem extends Item {
         })
     }
 
-    setAttribute(attribute, value){
-        let attributesForUpdate= this.getAttributesForUpdate(attribute);
-        if(Object.keys(attributesForUpdate).length > 0){
-            for(let attribute of Object.values(attributesForUpdate)){
+    setAttribute(attribute, value) {
+        let attributesForUpdate = this.getAttributesForUpdate(attribute);
+        if (Object.keys(attributesForUpdate).length > 0) {
+            for (let attribute of Object.values(attributesForUpdate)) {
                 attribute.value = value;
             }
         } else {
             let nullEntry = Object.entries(this.data.data.attributes).find(entry => entry[1] === null)
-            if(nullEntry){
-                attributesForUpdate[nullEntry[0]] = {value:value, key: attribute};
+            if (nullEntry) {
+                attributesForUpdate[nullEntry[0]] = {value: value, key: attribute};
             } else {
-                attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value:value, key: attribute};
+                attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value: value, key: attribute};
             }
         }
         this.setAttributes(attributesForUpdate)
     }
 
-    getAttributesForUpdate(attribute){
+    getAttributesForUpdate(attribute) {
         let attributes = {};
-        for(let entry of Object.entries(this.data.data.attributes)){
-            if(entry[1]?.key === attribute){
+        for (let entry of Object.entries(this.data.data.attributes)) {
+            if (entry[1]?.key === attribute) {
                 attributes[entry[0]] = entry[1];
             }
         }
@@ -785,6 +836,7 @@ export class SWSEItem extends Item {
         update.data.attributes = attributes;
         this.update(update);
     }
+
     setModeAttributes(modeIndex, attributes) {
         let update = {};
         update.data = {};
@@ -793,6 +845,7 @@ export class SWSEItem extends Item {
         update.data.modes[modeIndex].attributes = attributes;
         this.update(update);
     }
+
     updateData(data) {
         let update = {};
         update.data = data;
@@ -824,9 +877,9 @@ export class SWSEItem extends Item {
         }
 
 
-        if(this.data.type === 'class'){
+        if (this.data.type === 'class') {
             let classLevel = this.getClassLevel();
-            for (let i = 1; i <=classLevel; i++){
+            for (let i = 1; i <= classLevel; i++) {
                 let level = this.data.data.levels[i];
                 for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
                     values.push(...extractAttributeValues(attribute, this.data._id));
@@ -837,16 +890,16 @@ export class SWSEItem extends Item {
         //
         values.push(...this.extractModeAttributes(this.getActiveModes(), attributeKey, values));
 
-        for(let child of this.data.data.items || []){
+        for (let child of this.data.data.items || []) {
             values.push(...this.getAttributesFromItem(child._id, attributeKey))
         }
 
         return values;
     }
 
-    getProvidedItems(filter){
+    getProvidedItems(filter) {
         let items = this.data.data.providedItems;
-        if(!!filter){
+        if (!!filter) {
             return items.filter(filter);
         }
         return items;
@@ -883,32 +936,32 @@ export class SWSEItem extends Item {
         let childModes = [];
         for (let activeMode of activeModes) {
             let values = Object.values(activeMode.modes || []).filter(mode => !!mode);
-            let parentModePath1 = parentModePath+(!!parentModePath ? ".": "")+activeMode.name;
-            values.forEach(val =>val.modePath = parentModePath1+(!!parentModePath1 ? ".": "")+val.name)
+            let parentModePath1 = parentModePath + (!!parentModePath ? "." : "") + activeMode.name;
+            values.forEach(val => val.modePath = parentModePath1 + (!!parentModePath1 ? "." : "") + val.name)
             childModes.push(...values)
             childModes.push(...this.getChildModes(values.filter(mode => !!mode && mode.isActive), parentModePath1))
         }
         return childModes;
     }
 
-    activateMode(mode){
+    activateMode(mode) {
         let modes = this.data.data.modes;
         let update = {};
 
         update.data = {};
-        this.recursiveModeActivation(modes, mode, update.data);
+        this._activateMode(modes, mode, update.data);
 
         this.update(update);
     }
 
-    recursiveModeActivation(modes, mode, data) {
+    _activateMode(modes, mode, data) {
         let modeTokens = mode.split(".");
 
         data.modes = {};
-        if(modeTokens.length === 1){
+        if (modeTokens.length === 1) {
             let groups = Object.values(modes || []).filter(m => !!m && m.name === mode).map(m => m.group).filter(g => !!g)
 
-            if(groups.length > 0){
+            if (groups.length > 0) {
                 groups.forEach(group => {
                     Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
                         data.modes[parseInt(entity[0])] = {};
@@ -919,7 +972,7 @@ export class SWSEItem extends Item {
             } else {
                 Object.entries(modes || []).filter(entity => !!entity[1] && entity[1].name === mode).forEach((entity) => {
                     data.modes[parseInt(entity[0])] = {};
-                    data.modes[parseInt(entity[0])].isActive =  !entity[1].isActive;
+                    data.modes[parseInt(entity[0])].isActive = !entity[1].isActive;
                 })
             }
         } else {
@@ -929,34 +982,25 @@ export class SWSEItem extends Item {
             Object.entries(modes || []).filter(entity => entity[1]?.isActive && entity[1]?.name === first).forEach(entity => {
                 data.modes = data.modes || {};
                 data.modes[parseInt(entity[0])] = data.modes[parseInt(entity[0])] || {};
-                this.recursiveModeActivation(entity[1].modes, modeTokens.slice(1).join("."), data.modes[parseInt(entity[0])])
+                this._activateMode(entity[1].modes, modeTokens.slice(1).join("."), data.modes[parseInt(entity[0])])
             })
         }
     }
 
-    deactivateMode(mode){
+    deactivateMode(mode) {
         let update = {};
         update.data = {};
-        update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !==mode.toLowerCase());
+        update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !== mode.toLowerCase());
         this.update(update);
     }
 
     getClassLevel() {
-        if(this.data.type !== 'class' || !this.parent){
+        if (this.data.type !== 'class' || !this.parent) {
             return undefined;
         }
         let classLevels = this.parent.classes.filter(clazz => clazz.data.name === this.data.name)
 
         return classLevels.length;
     }
-
-    getTokenDistanceInSquares(source, target) {
-        let xDiff = Math.abs(source.x - target.x);
-        let yDiff = Math.abs(source.y - target.y);
-        let squareSize = source.scene.dimensions.size;
-
-        let effectiveDiff = Math.max(xDiff, yDiff) / squareSize;
-
-        return effectiveDiff;
-    }
 }
+

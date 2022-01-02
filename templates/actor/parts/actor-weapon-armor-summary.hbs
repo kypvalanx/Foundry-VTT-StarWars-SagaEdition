@@ -1,4 +1,5 @@
 <div class="flex flex-col weapon-summary-header swse flex-grow">
+    <div><button id="fullAttack">Full Attack</button></div>
     {{#each data.data.armors as |armor id|}}
         {{#unless armor.hide}}
             <div class="resource armor panel">
@@ -16,7 +17,7 @@
             {{#unless attack.hide}}
                 <div class="resource attack panel"
                      data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
-                     data-label="{{attack.name}}" data-img="{{attack.img}}"> <!--TODO add onclick event to add a dialog box to roll for this.  add ability to shift roll the default.-->
+                     data-label="{{attack.name}}" data-img="{{attack.img}}">
                     <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
                     <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
                     <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>

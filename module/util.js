@@ -7,9 +7,10 @@ export function resolveValueArray(values, actor) {
     }
     let total = 0;
     for (let value of values) {
-        if (typeof value === 'undefined') {
-
-        } else if (typeof value === 'number') {
+        if (!value) {
+            continue;
+        }
+        if (typeof value === 'number') {
             total += value;
         } else if (typeof value === 'string' && value.startsWith("@")) {
             //ask Actor to resolve
@@ -127,6 +128,9 @@ export function toShortAttribute(attributeName) {
 }
 
 export function increaseDamageDie(damageDieSize, bonus) {
+    if(typeof damageDieSize === "string"){
+        damageDieSize = parseInt(damageDieSize);
+    }
     let index = dieSize.indexOf(damageDieSize);
     if (index === -1) {
         return 0;
@@ -183,7 +187,7 @@ export function extractAttributeValues(attribute, source) {
     return values
 }
 
-export function getRangeAttackModifier(effectiveRange, distance, accurate, inaccurate){
+export function resolveRangeAttackModifier(effectiveRange, distance, accurate, inaccurate){
     let range = SWSE.Combat.range[effectiveRange];
     if(!range){
         return 0;
@@ -200,4 +204,135 @@ export function getRangeAttackModifier(effectiveRange, distance, accurate, inacc
     }
 
     return SWSE.Combat.rangePenalty[resolvedRange];
+}
+
+export function handleExclusiveSelect(e, selects) {
+    let selected = {};
+    for (let select of selects) {
+        for (let o of select.options) {
+            o.disabled = false
+        }
+
+        if (select.value) {
+            selected[select.id] = select.value;
+        }
+    }
+    for (let select of selects) {
+        for (let entry of Object.entries(selected)) {
+            if (select.id !== entry[0]) {
+                for (let o of select.options) {
+                    if (o.value === entry[1]) {
+                        o.disabled = true
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+export function handleAttackSelect(selects) {
+    let selectedValuesBySelect = {};
+    let availableDoubleAttacks = [];
+    let availableTripleAttacks = [];
+    for (let select of selects) {
+        for (let o of select.options) {
+            o.disabled = false
+        }
+
+        if (select.value) {
+            selectedValuesBySelect[select.id] = select.value;
+            if(select.value !== "--") {
+                let selected = JSON.parse(select.value)
+                availableDoubleAttacks.push(selected.itemId);
+                if (selected.mods === "doubleAttack") {
+                    availableTripleAttacks.push(selected.itemId);
+                }
+            }
+        }
+    }
+    availableDoubleAttacks = availableDoubleAttacks.filter((value, index, self) => self.indexOf(value) === index)
+    availableTripleAttacks = availableTripleAttacks.filter((value, index, self) => self.indexOf(value) === index)
+
+    //disable options in other selects that match a selected select
+    for (let select of selects) {
+        for (let entry of Object.entries(selectedValuesBySelect)) {
+            if (select.id !== entry[0]) {
+                for (let o of select.options) {
+                    if (o.value !== "--" && o.value === entry[1]) {
+                        o.disabled = true
+                    }
+                }
+            }
+        }
+
+        for (let o of select.options) {
+            if(o.value !== "--"){
+                let selected = JSON.parse(o.value);
+                if (selected.mods === "doubleAttack" && !availableDoubleAttacks.includes(selected.itemId)){
+                    o.disabled = true
+                }
+                if (selected.mods === "tripleAttack" && !availableTripleAttacks.includes(selected.itemId)){
+                    o.disabled = true
+                }
+            }
+        }
+
+    }
+}
+
+export function getOrdinal(i) {
+    switch (i) {
+        case 1:
+            return "primary";
+        case 2:
+            return "secondary";
+        case 3:
+            return "tertiary";
+        case 4:
+            return "quaternary";
+        case 5:
+            return "quinary";
+        case 6:
+            return "senary";
+        case 7:
+            return "septenary";
+        case 8:
+            return "octonary";
+        case 9:
+            return "nonary";
+        case 10:
+            return "denary";
+    }
+    return `${i}`
+}
+
+export function getRangedAttackMod(range, isAccurate, isInaccurate, actor) {
+    let targets = Array.from(game.user.targets); //get targeted tokens
+
+    let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === actor.id); //get selected tokens of this actor
+    if (sources.length === 0) {
+        sources = canvas.tokens.objects.children.filter(token => token.data.actorId === actor.id);
+    }
+
+    let rangedAttackModifier;
+    if (sources.length > 0 && targets.length > 0) {
+        if (sources.length > 1 || targets.length > 1) {
+            console.warn("found too many selected targets or resolved too many sources");
+        }
+        let source = sources[0];
+        let target = targets[0];
+        let distance = getTokenDistanceInSquares(source, target)
+
+        rangedAttackModifier = resolveRangeAttackModifier(range, distance, isAccurate, isInaccurate)
+    }
+    return rangedAttackModifier;
+}
+
+export function getTokenDistanceInSquares(source, target) {
+    let xDiff = Math.abs(source.x - target.x);
+    let yDiff = Math.abs(source.y - target.y);
+    let squareSize = source.scene.dimensions.size;
+
+    return Math.max(xDiff, yDiff) / squareSize;
 }
