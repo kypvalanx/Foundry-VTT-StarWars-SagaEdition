@@ -306,7 +306,7 @@ export function generateUnarmedAttack(actor) {
 
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, "Unarmed Attack", actor.data._id, []);
+    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id, []);
 }
 
 /**

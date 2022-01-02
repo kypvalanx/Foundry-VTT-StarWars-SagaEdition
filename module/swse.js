@@ -21,7 +21,7 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    // rollAttack,
+    //rollAttack,
     generateCompendiums
   };
 
@@ -124,7 +124,7 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
     return false;
 
   }
-  if (type === "attack" || type === "item") {
+  if (type === "item") {
     createItemMacro(data, slot).then(() => {});
     return false;
 
@@ -168,14 +168,14 @@ async function createItemMacro(data, slot) {
   if(data.img){
     img = data.img;
   }
-  let id;
+  let id = [];
   if(data.label === 'Unarmed Attack'){
-    id = 'Unarmed Attack';
+    id.push( 'Unarmed Attack');
   } else {
-    id = data.data._id;
+    id.push(data.data._id);
   }
 
-  const command = `game.swse.rollItem("${actorId}", "${id}");`;
+  const command = `game.swse.rollItem("${actorId}", ["${id.join(`","`)}"]);`;
   const name = `${actor.name}: ${data?.data?.name || data.label}`
   let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
   if (!macro) {
@@ -194,14 +194,25 @@ async function createItemMacro(data, slot) {
   await game.user.assignHotbarMacro(macro, slot);
 }
 
-function rollItem(actorId, itemId) {
+
+function rollItem(actorId, itemIds) {
   const actor = getActorFromId(actorId);
   if (!actor) {
     const msg = `${actorId} not found`;
     console.warn(msg);
     return ui.notifications.error(msg);
   }
-  return actor.rollOwnedItem(itemId);
+  return actor.rollOwnedItem(itemIds);
+}
+
+function rollAttack(actorId, itemIds) {
+  const actor = getActorFromId(actorId);
+  if (!actor) {
+    const msg = `${actorId} not found`;
+    console.warn(msg);
+    return ui.notifications.error(msg);
+  }
+  return actor.attack({type: (itemIds.length === 1 ? "singleAttack": "fullAttack"),items:itemIds});
 }
 
 export const getActorFromId = function (id) {

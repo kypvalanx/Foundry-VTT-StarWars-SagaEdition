@@ -1,8 +1,17 @@
 import {resolveHealth} from "./health.js";
-import {generateAttacks, generateUnarmedAttack} from "./attack-handler.js";
+import {generateAttackFromWeapon, generateAttacks, generateUnarmedAttack} from "./attack-handler.js";
 import {resolveOffense} from "./offense.js";
 import {SpeciesHandler} from "./species.js";
-import {excludeItemsByType, filterItemsByType, toNumber, toShortAttribute} from "../util.js";
+import {
+    excludeItemsByType,
+    filterItemsByType,
+    getBonusString,
+    getOrdinal,
+    getRangedAttackMod,
+    handleAttackSelect,
+    toNumber,
+    toShortAttribute
+} from "../util.js";
 import {meetsPrerequisites} from "../prerequisite.js";
 import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
@@ -1026,18 +1035,27 @@ export class SWSEActor extends Actor {
 
     /**
      *
-     * @param itemId
+     * @param itemIds
      */
-    rollOwnedItem(itemId) {
-        if(itemId === "Unarmed Attack"){
-            let attacks = generateUnarmedAttack(this)
-            SWSEItem.getItemDialogue(attacks, this).render(true);
-            return;
+    rollOwnedItem(itemIds) {
+
+
+        // if(itemId === "Unarmed Attack"){
+        //     let attacks = generateUnarmedAttack(this)
+        //     SWSEItem.getItemDialogue(attacks, this).render(true);
+        //     return;
+        // }
+
+
+        let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
+
+        if(items.length === 0){
+            this.attack(null, {type:(itemIds.length === 1 ? "singleAttack" : "fullAttack"),items:itemIds})
+        } else {
+            for(let item of items) {
+                item.rollItem(this).render(true);
+            }
         }
-        let item = this.items.get(itemId);
-
-
-        item.rollItem(this).render(true);
 
     }
 
@@ -1135,5 +1153,352 @@ export class SWSEActor extends Actor {
         }
         let sourceIds = attributes.map(item => item.source).distinct()
         return sourceIds.map(sourceId => this.items.get(sourceId));
+    }
+
+
+
+    async attack(event, context) {
+        let options = this.buildAttackDialog(context);
+        await new Dialog(options).render(true);
+    }
+
+    buildAttackDialog(context) {
+        let availableAttacks = 1;
+        let title = "Single Attack";
+        let dualWeaponModifier = -10;
+        let doubleAttack = [];
+        let tripleAttack = [];
+        let hands = 2; //TODO resolve extra hands
+
+        if (context.type === "fullAttack") {
+            title = "Full Attack";
+            doubleAttack = this.getInheritableAttributesByKey("doubleAttack", null, "VALUES");
+            tripleAttack = this.getInheritableAttributesByKey("tripleAttack", null, "VALUES");
+
+            //availableAttacks = this.fullAttackCount;
+            let equippedItems = this.getEquippedItems()
+            availableAttacks = 0;
+            let doubleAttackBonus = 0;
+            let tripleAttackBonus = 0;
+            let availableWeapons = 0
+            for(let item of equippedItems){
+                availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
+                if(doubleAttack.includes(item.data.data.subtype)){
+                    doubleAttackBonus = 1;
+                }if(tripleAttack.includes(item.data.data.subtype)){
+                    tripleAttackBonus = 1;
+                }
+            }
+            availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
+
+
+            //how many attacks?
+            //
+            //how many provided attacks from weapons max 2
+            //+1 if has double attack and equipped item
+            //+1 if has triple attack and equipped item
+
+            let dualWeaponModifiers = this.getInheritableAttributesByKey("dualWeaponModifier", null, "NUMERIC_VALUES");
+            dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
+            console.log(dualWeaponModifier, doubleAttack, tripleAttack)
+        }
+
+        let suppliedItems = context.items || [];
+
+        // if (suppliedItems.length > 0) {
+        //     availableAttacks = suppliedItems.length;
+        // }
+
+        let content = `<p>Select Attacks:</p>`;
+        let resolvedAttacks = [];
+        if (suppliedItems.length < availableAttacks) {
+            //CREATE OPTIONS
+            resolvedAttacks = this.getAttackOptions(doubleAttack, tripleAttack, hands);
+        }
+
+
+        let blockHeight = 225;
+
+
+        for (let i = 0; i < availableAttacks; i++) {
+            let item = suppliedItems.length > i ? suppliedItems[i] : undefined;
+            let select;
+            if (!!item) {
+                let attack = this.data.data.attacks.find(o => o.itemId === item || o.name === item)
+                select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
+            } else {
+                select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
+            }
+
+
+            let attackBlock = `<div class="attack panel attack-block"><div class="attack-name">${select}</div><div class="attack-options"></div><div class="attack-total"></div></div>`
+
+
+            content += attackBlock;
+
+        }
+
+        let height = availableAttacks * blockHeight + 85
+
+
+        return {
+            title,
+            content,
+            buttons: {
+                attack: {
+                    label: "Attack",
+                    callback: (html) => {
+                        let attacks = [];
+                        let attackBlocks = html.find(".attack-block");
+                        for(let attackBlock of attackBlocks){
+                            let attackFromBlock = this.getAttackFromBlock(attackBlock);
+                            if(!!attackFromBlock) {
+                                attacks.push(attackFromBlock);
+                            }
+                        }
+
+                        this.rollAttacks(attacks);
+                    }
+                }
+            },
+            render: async (html) => {
+                let selects = html.find("select");
+                selects.on("change", e => handleAttackSelect(selects));
+                handleAttackSelect(selects)
+
+                let attackIds = html.find(".attack-id");
+                attackIds.each((i, div) => this.populateItemStats(div, context));
+
+                attackIds.on("change", e => {
+                    let attackIds = html.find(".attack-id");
+                    context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
+                    context.damageMods = this.getDamageMods(selects, dualWeaponModifier);
+                    attackIds.each((i, div) => this.populateItemStats(div, context));
+                    this._render();
+                })
+            },
+            options: {
+                height
+            }
+        };
+    }
+
+    getDamageMods() {
+        return [];
+    }
+
+    getAttackMods(selects, dualWeaponModifier) {
+        let attackMods = []
+        let itemIds = [];
+        for (let select of selects) {
+            if (select.value === "--") {
+                continue;
+            }
+            let attack = JSON.parse(select.value);
+            let mods = attack.mods
+            if (mods === "doubleAttack") {
+                attackMods.push({value: -5, source: "Double Attack"});
+            }
+            if (mods === "tripleAttack") {
+                attackMods.push({value: -5, source: "Triple Attack"});
+            }
+            itemIds.push(attack.itemId)
+        }
+        itemIds = itemIds.filter((value, index, self) => self.indexOf(value) === index)
+
+        if (itemIds.length > 1) {
+            attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
+        }
+        return attackMods;
+    }
+
+
+    /**
+     *
+     * @param html
+     * @param context
+     */
+    populateItemStats(html, context) {
+        let value = html.value || $(html).data("value");
+        if (value === "--") {
+            return;
+        }
+        let attack;
+        if(typeof value === "string"){
+            attack = JSON.parse(value);
+        } else {
+            attack = value;
+        }
+        //let attack = JSON.parse(value);
+
+
+        let parent = $(html).parents(".attack");
+        let options = parent.children(".attack-options")
+        options.empty();
+        if (attack.name === "Unarmed Attack") {
+            let attack = generateUnarmedAttack(this);
+            options.append(SWSEItem.getModifierHTML(0))
+
+            options.find(".attack-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+            options.find(".damage-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+
+            let total = parent.children(".attack-total");
+            this.setAttackTotal(attack, total, options, context);
+        } else {
+            let item = this.items.get(attack.itemId)
+
+
+            if (item) {
+                let rangedAttackModifier = getRangedAttackMod(item.effectiveRange, item.accurate, item.inaccurate, this);
+
+                let attack = generateAttackFromWeapon(item, this);
+                options.append(SWSEItem.getModifierHTML(rangedAttackModifier, item))
+
+                options.find(".attack-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+                options.find(".damage-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
+
+                let total = parent.children(".attack-total");
+                this.setAttackTotal(attack, total, options, context);
+            }
+        }
+
+    }
+
+    setAttackTotal(attack, total, options, context) {
+        options.children()
+        total.empty();
+        let damageRoll = `<div>${attack.dam}</div>` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
+        let attackRoll = `<div>${attack.th}</div>` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
+        total.append(`<div class="flex flex-row"><div>Attack Roll: <div class="attack-roll">${attackRoll}</div></div> <div class="flex"><div>Damage Roll: <div class="damage-roll">${damageRoll}</div></div></div>`)
+    }
+
+    getModifiersFromContextAndInputs(options, modifiers, inputCriteria) {
+        let bonuses = [];
+        options.find(inputCriteria).each((i, modifier) => {
+                if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
+                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
+                }
+            }
+        )
+        for (let attackMod of modifiers || []) {
+            bonuses.push({source: attackMod.source, value: getBonusString(attackMod.value)});
+        }
+
+        let roll = ""
+        for(let bonus of bonuses){
+            roll += `<div title="${bonus.source}">${bonus.value}</div>`
+        }
+        return roll;
+    }
+
+    getAttackOptions(doubleAttack, tripleAttack, hands) {
+        let attacks = this.data.data.attacks;
+
+        let resolvedAttacks = [];
+
+        //only 2 different weapons can be used
+        //double attacks can only be used once first attack is used
+        //triple attacks can only be used once doubel attack is used
+        let existingWeaponNames = [];
+        let id = 1;
+        for (let attack of attacks) {
+            let source = attack.source;
+            if (!source) {
+                continue;
+            }
+
+            let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
+
+            existingWeaponNames.push(attack.name)
+            if (duplicateCount > 0) {
+                attack.name = attack.name + ` #${duplicateCount + 1}`;
+            }
+
+            resolvedAttacks.push(this.createAttackOption(attack, id++))
+            let additionalDamageDice = source.additionalDamageDice
+            // if (additionalDamageDice.length === 0) {
+            //     continue;
+            // }
+            for (let i = 0; i < additionalDamageDice.length; i++) {
+                let additionalDamageDie = additionalDamageDice[i];
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.dam = additionalDamageDie;
+                clonedAttack.name = clonedAttack.name + ` (${getOrdinal(i + 2)} attack)`
+                clonedAttack.itemId = clonedAttack.itemId + `#${getOrdinal(i + 2)}`
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+
+            if (doubleAttack.includes(source.data.data.subtype)) {
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.name = clonedAttack.name + ` (Double attack)`
+                clonedAttack.mods = "doubleAttack";
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+            if (tripleAttack.includes(source.data.data.subtype)) {
+                let clonedAttack = JSON.parse(JSON.stringify(attack));
+                clonedAttack.name = clonedAttack.name + ` (Triple attack)`
+                clonedAttack.mods = "tripleAttack";
+                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+            }
+        }
+        return resolvedAttacks;
+    }
+    // methods revolving around attack blocks.  can make this more simplified with an attack object maybe.
+    getAttackFromBlock(attackBlock) {
+        let attackId = $(attackBlock).find(".attack-id")[0]
+        let attackValue = attackId.value || $(attackId).data("value");
+
+        if(attackValue !== "--"){
+            let attackJSON = attackValue;
+            if(typeof attackJSON === "string"){
+                attackJSON = JSON.parse(attackJSON);
+            }
+
+            let attack = {};
+            let attackRoll = $(attackBlock).find(".attack-roll")[0].innerText.replace(/\n/g, "");
+            let damageRoll = $(attackBlock).find(".damage-roll")[0].innerText.replace(/\n/g, "");
+            attack.name = attackJSON.name;
+            attack.toHit = attackRoll;
+            attack.damage = damageRoll;
+            return attack;
+        }
+        return undefined;
+    }
+
+    rollAttacks(attacks, rollMode) {
+        let cls = getDocumentClass("ChatMessage");
+
+        let attackRows = "";
+        let roll;
+
+        for(let attack of attacks){
+            let attackRoll = new Roll(attack.toHit).roll();
+            roll = attackRoll;
+            let damageRoll = new Roll(attack.damage).roll();
+            attackRows += `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRoll.result}">${attackRoll.total}</a></td><td><a class="inline-roll inline-result" title="${damageRoll.result}">${damageRoll.total}</a></td></tr>`
+        }
+
+        let content = `<table>
+<thead><th>Attack</th><th>To Hit</th><th>Damage</th></thead>
+<tbody>${attackRows}</tbody>
+</table>`;
+
+        let messageData = {
+            user: game.user.id,
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            content,
+            sound: CONFIG.sounds.dice,
+            roll
+        }
+
+        let msg = new cls(messageData);
+        if ( rollMode ) msg.applyRollMode(rollMode);
+
+        return cls.create(msg.data, { rollMode });
+    }
+
+    createAttackOption(attack, id) {
+        let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
+        return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
     }
 }
