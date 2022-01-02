@@ -19,7 +19,7 @@
     }
   ],
   "gridDistance": 1,
-  "gridUnits": "square",
+  "gridUnits": "squares",
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "power",
   "url": "https://github.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",

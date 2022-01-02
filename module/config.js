@@ -3,11 +3,11 @@ SWSE.duplicateSkillList = ["Skill Training"]
 
 SWSE.Combat = {};
 SWSE.Combat.range = {
-    "Heavy Weapons":	{"point-blank": "0-50 squares",	"short": "51-100 squares",  "medium": "101-250 squares",	"long": "251-500 squares"},
-    "Pistols":	        {"point-blank": "0-20 squares",	"short": "21-40 squares",	"medium": "41-60 squares",	    "long": "61-80 squares"},
-    "Rifles":	        {"point-blank": "0-30 squares",	"short": "31-60 squares",	"medium": "61-150 squares",	    "long": "151-300 squares"},
-    "Simple Ranged Weapons":	{"point-blank": "0-20 squares",	"short": "21-40 squares",	"medium": "41-60 squares",	    "long": "61-80 squares"},
-    "Thrown Weapons":	{"point-blank": "0-6 squares",	"short": "7-8 squares",	    "medium": "9-10 squares",	    "long": "11-12 squares"}
+    "Heavy Weapons":	        {"point-blank": {"string": "0-50 squares", "low":0,"high":50},	"short": {"string": "51-100 squares", "low":51,"high":100},  "medium": {"string": "101-250 squares", "low":101,"high":250},	"long": {"string": "251-500 squares", "low":251,"high":500}},
+    "Pistols":	                {"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
+    "Rifles":	                {"point-blank": {"string": "0-30 squares", "low":0,"high":30},	"short": {"string": "31-60 squares", "low":31,"high":60},	"medium": {"string": "61-150 squares", "low":61,"high":150},	    "long": {"string": "151-300 squares", "low":151,"high":300}},
+    "Simple Ranged Weapons":	{"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
+    "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}}
 };
 
 SWSE.Combat.rangePenalty = {"point-blank": 0,	"short": -2,  "medium": -5,	"long": -10}
@@ -38,6 +38,8 @@ SWSE.Abilities.droidSkip = {
     cha: false,
 };
 
+
+
 SWSE.Abilities.standardScorePackage = [15,14,13,12,10,8];
 
 SWSE.Abilities.abilityCost = {
@@ -57,3 +59,11 @@ SWSE.Abilities.abilityCost = {
 SWSE.Abilities.defaultAbilityRoll = "4d6kh3";
 SWSE.Abilities.defaultPointBuyTotal = 28;
 SWSE.Abilities.droidPointBuyTotal = 21;
+
+
+
+/**
+ * set the available attributes for an item attribute field
+ * @type {*[]}
+ */
+SWSE.RecognizedAttributes = [];

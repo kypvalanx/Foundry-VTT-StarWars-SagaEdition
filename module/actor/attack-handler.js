@@ -1,6 +1,7 @@
 import {getBonusString, increaseDamageDie, resolveValueArray} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {d20, sizeArray} from "../swse.js";
+import {Attack} from "./attack.js";
 
 
 /**
@@ -8,25 +9,41 @@ import {d20, sizeArray} from "../swse.js";
  * @param {SWSEActor} actor
  * @returns {Promise<void>}
  */
-export async function generateAttacks(actor) {
-    actor.data.data.attacks = [];
-    let unarmedAttack = generateUnarmedAttacks(actor);
-    actor.data.data.attacks.push(unarmedAttack);
-    for (const weapon of actor.getEquippedItems().filter(item => item.type === 'weapon')) {
-        let attack = generateAttackFromWeapon(weapon, actor);
-        actor.data.data.attacks.push(attack);
+export function generateAttacks(actor) {
+    let attacks = [];
+    attacks.push(generateUnarmedAttack(actor));
+    attacks.push(...actor.getEquippedItems()
+        .filter(item => item.type === 'weapon')
+        .map(weapon => generateAttackFromWeapon(weapon, actor)));
+    return attacks;
+}
+
+function canFinesse(size, item, focus) {
+    let isOneHanded = compareSizes(size, item.size) < 1;
+    let isLight = compareSizes(size, item.size) < 0;
+    return isLight || (isOneHanded && focus) || isLightsaber(item);
+}
+
+function getGroupedModes(item) {
+    let modes = item.modes;
+    let groupedModes = {}
+    for (let mode of modes.filter(m => !!m)) {
+        if (!groupedModes[mode.group]) {
+            groupedModes[mode.group] = [];
+        }
+        groupedModes[mode.group].push(mode);
     }
+    return Object.values(groupedModes);
 }
 
 /**
  *
  * @param {SWSEItem} item
  * @param {SWSEActor} actor
- * @returns {{dam, itemId, notes, actorId, th, critical, sound: string, name, range, type, ratesOfFire, hasStun}|undefined}
+ * @returns {Attack|undefined}
  */
 export function generateAttackFromWeapon(item, actor) {
     let actorData = actor.data;
-    //let itemData = item.data;
     if (!actorData || !item) {
         return undefined;
     }
@@ -35,32 +52,39 @@ export function generateAttackFromWeapon(item, actor) {
         return undefined;
     }
 
-    let proficiencies = actorData.proficiency.weapon;
-    let weaponTypes = getPossibleProficiencies(item);
-    let proficient = isProficient(proficiencies, weaponTypes);
-    let proficiencyBonus = proficient ? 0 : -5;
-    let ranged = isRanged(item);
-    let hasWeaponFinesse = actorData.prerequisites.feats.includes("weapon finesse");
-    let focus = isFocus(actorData.proficiency.focus, weaponTypes);
-    let isOneHanded = compareSizes(size, item.size) < 1;
-    let isLight = compareSizes(size, item.size) < 0;// || (isOneHanded && focus && hasWeaponFinesse) || (isLightsaber(item));
-    let isTwoHanded = compareSizes(size, item.size) === 1;
+    let groupedModes = getGroupedModes(item);
 
-    let offense = actorData.data.offense;
-    let meleeToHit = (hasWeaponFinesse && (isLight || (isOneHanded && focus) || isLightsaber(item))) ? Math.max(offense.mab, offense.fab) : offense.mab;
-    let strMod = parseInt(actor.getAttributeMod("str"));
-    let strBonus = isTwoHanded ? strMod * 2 : strMod;
-    let notes = [];
-    let rof = item.ratesOfFire;
-    if (rof.length > 0) {
-        notes.push(`(ROF: ${rof.join(", ")})`)
-    }
-    let isAutofireOnly = rof ? rof.size === 1 && rof[0].toLowerCase() === 'autofire' : false;
+    let notes = item.getAttribute('special').filter(s => !!s).map(s => s.value);
+
+    let range = item.effectiveRange;
+    let critical = "x2"
+    let type = item.damageType
 
     let damageBonuses = [];
     damageBonuses.push(actor.getHalfCharacterLevel())
-    damageBonuses.push(ranged ? 0 : strBonus)
     damageBonuses.push(...item.getAttribute("bonusDamage"))
+
+    let attackBonuses = [actorData.data.offense.bab]
+    let weaponTypes = getPossibleProficiencies(actor, item);
+
+    if(isRanged(item)){
+        attackBonuses.push(resolveFinesseBonus(actor, [{value:"DEX"}]));
+    } else {
+        let strMod = parseInt(actor.getAttributeMod("str"));
+        let isTwoHanded = compareSizes(size, item.size) === 1;
+        damageBonuses.push(isTwoHanded ? strMod * 2 : strMod)
+        let finesseStats = [{value: "STR"}];
+        if(canFinesse(size, item, isFocus(actor,weaponTypes))) {
+            finesseStats.push(...actor.getInheritableAttributesByKey("finesseStat"));
+        }
+        attackBonuses.push(resolveFinesseBonus(actor, finesseStats));
+    }
+    attackBonuses.push(isProficient(actor, weaponTypes) ? 0 : -5);
+    attackBonuses.push(isFocus(actor, weaponTypes) ? 1 : 0)
+    attackBonuses.push(actor.data.acPenalty) //TODO this looks like it could use some TLC
+    attackBonuses.push(...(item.getAttribute("toHitModifier")))
+
+    let attackRoll = d20 + getBonusString(resolveValueArray(attackBonuses, actor));
 
     let damageBonus = resolveValueArray(damageBonuses);
     let damage;
@@ -74,49 +98,59 @@ export function generateAttackFromWeapon(item, actor) {
     let hasStun = false;
     if (item.stunDamageDie) {
         stunDamageDie = item.stunDamageDie;
-        stunDamage = `(Stun: ${stunDamageDie + getBonusString(damageBonus)})`
+        damage = stunDamageDie + getBonusString(damageBonus)
         notes.push("(Stun Setting)")
         hasStun = true;
     }
 
-    let specials = item.getAttribute('special');
-    for(let special of specials) {
-        notes.push(special?.value);
-    }
-
-    let range = item.effectiveRange;
-    let critical = "x2"
-    let type = item.damageType
-
-
-    let atkBonus = (ranged ? offense.rab : meleeToHit) + proficiencyBonus + (focus ? 1 : 0) + actor.data.acPenalty;
-
-    let attackRoll = d20 + getBonusString(atkBonus);
-    return createAttack(item.name, attackRoll, [damage, stunDamage].filter(t => !!t).join(", "), notes.join(", "), range, critical, type, item.id, actor.id, rof, hasStun)
+    return createAttack(item.name, attackRoll, damage, notes.join(", "), range, critical, type, item.id, actor.id, groupedModes, hasStun, item)
 }
 
 function isOversized(actorSize, itemSize) {
     return compareSizes(actorSize, itemSize) > 1;
 }
 
-function getPossibleProficiencies(weapon) {
+function getPossibleProficiencies(actor, weapon) {
+    let weaponFamiliarities = {};
+        actor.getInheritableAttributesByKey("weaponFamiliarity").forEach(fam => {
+            let toks = fam.split(":");
+            if (toks.length===2) {
+                weaponFamiliarities[toks[0]] = toks[1];
+            }
+        });
+
     let descriptors = [weapon.name, weapon.subType];
-    if (weapon.data.data.treatedAsForRange) {
-        descriptors.push(weapon.data.data.treatedAsForRange);
+    let explodedDescriptors = [];
+
+    for(let descriptor of descriptors){
+        let familiarity = weaponFamiliarities[descriptor];
+        if(familiarity){
+            explodedDescriptors.push(familiarity);
+        }
     }
+
+    descriptors.push(...explodedDescriptors);
+
     return descriptors.filter(descriptor => !!descriptor);
 }
 
+const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
+    "heavy weapons", "simple ranged weapons"];
+const LIGHTSABER_WEAPON_TYPES = ["lightsabers", "lightsaber"];
+const SIMPLE_WEAPON_TYPES = ['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon'];
+const UNARMED_WEAPON_TYPES = ["simple melee weapon"];
+
 function isRanged(weapon) {
-    return ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
-        "heavy weapons", "simple ranged weapons"].includes(weapon.data.data.subtype.toLowerCase());
+    return RANGED_WEAPON_TYPES.includes(weapon.data.data.subtype.toLowerCase());
 }
+
 
 function isLightsaber(weapon) {
-    return ["lightsabers", "lightsaber"].includes(weapon.subtype);
+    return LIGHTSABER_WEAPON_TYPES.includes(weapon.subtype);
 }
 
-function isFocus(focuses, categories) {
+function isFocus(actor, categories) {
+    let focuses = actor.getInheritableAttributesByKey("weaponFocus").map(prof => prof.value.toLowerCase())
     focuses = explodeProficiencies(focuses);
     for (const focus of focuses) {
         if (categories.map(cat => cat.toLowerCase()).includes(focus.toLowerCase())) {
@@ -126,7 +160,8 @@ function isFocus(focuses, categories) {
     return false;
 }
 
-function isProficient(proficiencies, weaponDescriptors) {
+function isProficient(actor, weaponDescriptors) {
+    let proficiencies = actor.getInheritableAttributesByKey("weaponProficiency").map(prof => prof.value.toLowerCase())
     proficiencies = explodeProficiencies(proficiencies);
     for (let proficiency of proficiencies) {
         if (weaponDescriptors.map(cat => cat.toLowerCase()).includes(proficiency.toLowerCase())) {
@@ -153,6 +188,7 @@ function compareSizes(size1, size2) {
     return sizeArray.indexOf(size1) - sizeArray.indexOf(size2);
 }
 
+
 /**
  *
  * @param proficiencies {[]}
@@ -162,7 +198,7 @@ function explodeProficiencies(proficiencies) {
     let result = [];
     for (let proficiency of proficiencies ? proficiencies : []) {
         if (proficiency === 'simple weapons') {
-            result.push(...['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon']);
+            result.push(...SIMPLE_WEAPON_TYPES);
             continue;
         }
         result.push(proficiency)
@@ -170,23 +206,24 @@ function explodeProficiencies(proficiencies) {
     return result;
 }
 
-function multipleAttacks(atkBonus, proficient, feats) {
-    if (!proficient) {
-        return atkBonus - 10;
-    }
-    if (feats.includes("dual weapon mastery iii")) {
-        return atkBonus;
-    }
-    if (feats.includes("dual weapon mastery ii")) {
-        return atkBonus - 2;
-    }
-    if (feats.includes("dual weapon mastery i")) {
-        return atkBonus - 5;
-    }
-}
-
-function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, rof, hasStun) {
-    return {
+/**
+ *
+ * @param name
+ * @param th
+ * @param dam
+ * @param notes
+ * @param range
+ * @param critical
+ * @param type
+ * @param itemId
+ * @param actorId
+ * @param modes
+ * @param hasStun
+ * @param source
+ * @returns {Attack}
+ */
+function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, modes, hasStun, source) {
+    return new Attack(
         name,
         th,
         dam,
@@ -194,34 +231,47 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
         range,
         critical,
         type,
-        sound: "",
-        itemId: itemId,
-        actorId: actorId,
-        ratesOfFire: rof,
-        hasStun
-    };
+        "",
+        itemId,
+        actorId,
+        modes,
+        hasStun,
+        source);
 }
 
-export function generateUnarmedAttacks(actor) {
+export function resolveFinesseBonus(actor, finesseStats) {
+    let bonus = 0;
+    for(let stat of finesseStats){
+        bonus = Math.max(bonus, actor.getCharacterAttribute(stat.value).mod);
+    }
+    return bonus;
+}
+
+/**
+ *
+ * @param actor
+ * @returns {Attack|undefined}
+ */
+
+export function generateUnarmedAttack(actor) {
     if (!actor) {
         return undefined;
     }
     let unarmedDamage = actor.getInheritableAttributesByKey('unarmedDamage');
     let unarmedModifier = actor.getInheritableAttributesByKey('unarmedModifier');
     let actorData = actor.data;
-    let size = actor.size;
-    let feats = actorData.prerequisites?.feats || [];
 
-    let proficiencies = actorData.proficiency.weapon;
-
-    let proficient = isProficient(proficiencies, ["simple melee weapon"]);
+    let proficient = isProficient(actor, UNARMED_WEAPON_TYPES);
     let proficiencyBonus = proficient ? 0 : -5;
-    let focus = isFocus(actorData.proficiency?.focus, ["simple melee weapon"]);
-    let hasWeaponFinesse = feats.includes("weapon finesse");
+    let focus = isFocus(actor, UNARMED_WEAPON_TYPES);
+    let finesseStats = actor.getInheritableAttributesByKey("finesseStat");
+    finesseStats.push({value:"STR"});
+    let finesseBonus = resolveFinesseBonus(actor, finesseStats);
     let offense = actorData.data?.offense;
 
     let atkBonuses = [];
-    atkBonuses.push(hasWeaponFinesse ? Math.max(offense?.mab, offense?.fab) : offense?.mab)
+    atkBonuses.push(offense?.bab)
+    atkBonuses.push(finesseBonus)
     atkBonuses.push(proficiencyBonus)
     atkBonuses.push(focus ? 1 : 0)
     atkBonuses.push(actor.data.acPenalty)
@@ -252,40 +302,33 @@ export function generateUnarmedAttacks(actor) {
     damageBonuses.push(actor.getHalfCharacterLevel())
     damageBonuses.push(actor.getAttributeMod("str"))
 
-    let dam = resolveUnarmedDamageDie(size, actor) + getBonusString(resolveValueArray(damageBonuses));
+    let dam = resolveUnarmedDamageDie(actor) + getBonusString(resolveValueArray(damageBonuses));
 
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id);
+    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id, []);
 }
 
 /**
  *
  * @param {SWSEItem} size
- * @param actor
- * @returns {string}
+ * @param {SWSEActor} actor
+ * @returns {String}
  */
-function resolveUnarmedDamageDie(size, actor) {
-    let damageDie = getDamageDieSizeByCharacterSize(size);
+function resolveUnarmedDamageDie(actor) {
+    let inheritableAttributesByKey = actor.getInheritableAttributesByKey("unarmedDamageDie");
+    if(inheritableAttributesByKey.length>1) {
+        console.warn("found multiple unarmedDieSize attributes")
+    } else if(inheritableAttributesByKey.length<1){
+        inheritableAttributesByKey = [1];
+    }
+    let damageDie = inheritableAttributesByKey[0].value;
     let bonus = actor.getInheritableAttributesByKey("bonusUnarmedDamageDieSize")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
     damageDie = increaseDamageDie(damageDie, bonus);
     return `1d${damageDie}`;
 }
 
-/**
- *
- * @param {SWSEItem} size
- * @returns {number}
- */
-function getDamageDieSizeByCharacterSize(size) {
-    let attributes = size?.getAttribute('unarmedDieSize');
-    let max = 0;
-    for(let attribute of attributes || []){
-        max = Math.max(max, attribute.value);
-    }
-    return max;
-}
 
 //test()
 

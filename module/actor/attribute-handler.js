@@ -9,11 +9,11 @@ export function generateAttributes(actor) {
     let actorData = actor.data;
 
     actorData.data.lockAttributes = actor.shouldLockAttributes
-    let inheritableAttributes = actor.getInheritableAttributesByKey('attributeBonus')
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
         let longKey = getLongKey(key);
+        let attributeBonuses = actor.getInheritableAttributesByKey(`${longKey}Bonus`)
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
@@ -23,11 +23,10 @@ export function generateAttributes(actor) {
         // let ageBonuses = [];
         // let equipmentBonuses = []; //TODO WIRE ME UP
         // let buffBonuses = []; //TODO WIRE ME UP
-        for (let bonusAttribute of inheritableAttributes) {
-                if (bonusAttribute.value.attribute.toLowerCase() === longKey) {
-                    bonuses.push(bonusAttribute.value.bonus)
-                }
-
+        for (let bonusAttribute of attributeBonuses) {
+            //let sourceItem = actor.items.find(item => item.id === bonusAttribute.source)
+            //console.warn(sourceItem.name) TODO we need to add a source field when generating these.  it would be great to show users where bonuses come from.
+            bonuses.push(bonusAttribute.value)
         }
         // attribute.classLevelBonus = resolveValueArray(classLevelBonuses, actor);
         // attribute.speciesBonus = resolveValueArray(speciesBonuses, actor);

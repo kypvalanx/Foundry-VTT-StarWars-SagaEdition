@@ -63,7 +63,6 @@ export function resolveDefenses(actor) {
  * @private
  */
 function _resolveFort(actor, defenseBonuses, conditionBonus) {
-    let actorData = actor.data
     let total = [];
     total.push(10);
     let heroicLevel = actor.getHeroicLevel();
@@ -72,9 +71,9 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     total.push(abilityBonus);
     let traitBonus = _getTraitDefBonus('fortitude', defenseBonuses);
     total.push(traitBonus);
-    let classBonus = _getClassDefBonus('fortitude', actorData);
+    let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", undefined, "MAX");
     total.push(classBonus);
-    let equipmentBonus = _getEquipmentFortBonus(actor);
+    let equipmentBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", undefined,"SUM");
     total.push(equipmentBonus);
     total.push(conditionBonus);
     let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
@@ -94,7 +93,7 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(actor.characterLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
-    let classBonus = _getClassDefBonus('will', actorData);
+    let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus").map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
     total.push(classBonus);
     let traitBonus = _getTraitDefBonus('will', defenseBonuses);
     total.push(traitBonus);
@@ -114,7 +113,7 @@ function _resolveRef(actor, defenseBonuses, conditionBonus) {
     total.push(abilityBonus);
     let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
     total.push(traitBonus);
-    let classBonus = _getClassDefBonus('reflex', actorData);
+    let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus").map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
 
     let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
@@ -182,9 +181,9 @@ function _getFortStatMod(actor) {
     return actor.ignoreCon() ? attributes.str.mod : attributes.con.mod;
 }
 
-function _getClassDefBonus(stat, actorData) {
+function _getClassDefBonus(stat, actor) {
     let bonus = 0;
-    for (let charclass of actorData.classes) {
+    for (let charclass of actor.classes || []) {
         bonus = Math.max(bonus, charclass.data.data.defense[stat]);
     }
     return bonus;

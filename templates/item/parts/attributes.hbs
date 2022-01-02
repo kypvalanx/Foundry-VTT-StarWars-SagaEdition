@@ -1,4 +1,7 @@
 <ul>
+<!--    <li class="attribute flexrow"><button class="attribute-add attribute-left-button">Add Attribute</button><button class="mode-add attribute-right-button">Add Mode</button></li>-->
+<!--<br/>-->
+    <!--INHERITED ATTRIBUTES-->
     {{#each data.data.items as |item key|}}
         {{#each item.data.attributes as |attr key|}}
             {{#unlessEquals attr.key 'upgradePointCost'}}
@@ -21,5 +24,12 @@
         </li>
     {{/if}}
 {{/each}}
-    <li class="attribute flexrow"><button class="attribute-add attribute-button">Add Attribute</button></li>
+    <li class="attribute flexrow subtle"><a class="attribute-add"><i class="fas fa-plus"></i> add a new attribute.</a></li>
+    <li class="attribute flexrow subtle"><a class="mode-add"><i class="fas fa-plus"></i> add a new mode.</a></li>
+    {{#each data.data.modes as |mode mkey|}}
+
+        {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey)}}
+
+    {{/each}}
+
 </ul>

@@ -34,6 +34,14 @@
   border: 1px solid #999;
 }
 
+.attack-block {
+  min-height: 225px;
+}
+
+.border-light {
+  border: 1px solid #7a7971;
+}
+
 .grid,
 .grid-2col {
   display: grid;
@@ -474,6 +482,10 @@
   text-align: center;
 }
 
+.swse .item-attribute {
+  cursor: pointer;
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -550,7 +562,7 @@
 .swse .attack {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  grid-template-rows: repeat(4, 1fr);
   grid-column-gap: 9px;
   grid-row-gap: 1px;
 }
@@ -569,6 +581,10 @@
 
 .swse .attack .attack-notes {
   grid-area: 3 / 1 / 4 / 4;
+  white-space: nowrap;
+  overflow: hidden;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
 }
 
 .swse .attack .range {
@@ -581,6 +597,36 @@
 
 .swse .attack .type {
   grid-area: 3 / 4 / 4 / 6;
+}
+
+.swse .attack .modes {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  grid-area: 4 / 1 / 5 / 6;
+}
+
+.swse .attack .modes .mode-group {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  border: 1px solid #7a7971;
+}
+
+.swse .attack .modes .mode-group .mode-selector {
+  border: 1px solid #7a7971;
 }
 
 .swse .armor {
@@ -685,6 +731,14 @@
   grid-template-rows: 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
+  height: 30px;
+}
+
+.swse .mode {
+  border-top: thin solid #7a7971;
+  border-bottom: thin solid #7a7971;
+  -webkit-box-shadow: #7a7971;
+  box-shadow: #7a7971;
 }
 
 .swse .attribute-key {
@@ -695,10 +749,82 @@
   grid-area: 1 / 5 / 2 / 9;
 }
 
+.swse .attribute-key-1 {
+  grid-area: 1 / 2 / 2 / 6;
+}
+
+.swse .attribute-value-1 {
+  grid-area: 1 / 6 / 2 / 9;
+}
+
+.swse .attribute-key-2 {
+  grid-area: 1 / 3 / 2 / 7;
+}
+
+.swse .attribute-value-2 {
+  grid-area: 1 / 7 / 2 / 9;
+}
+
+.swse .attribute-indent-graphic {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.swse .attribute-indent-key {
+  grid-area: 1 / 2 / 2 / 5;
+}
+
+.swse .attribute-indent-value {
+  grid-area: 1 / 5 / 2 / 9;
+}
+
+.swse .attribute-indent-graphic-1 {
+  grid-area: 1 / 2 / 2 / 3;
+}
+
+.swse .attribute-indent-key-1 {
+  grid-area: 1 / 3 / 2 / 6;
+}
+
+.swse .attribute-indent-value-1 {
+  grid-area: 1 / 6 / 2 / 9;
+}
+
+.swse .attribute-indent-graphic-2 {
+  grid-area: 1 / 3 / 2 / 4;
+}
+
+.swse .attribute-indent-key-2 {
+  grid-area: 1 / 4 / 2 / 7;
+}
+
+.swse .attribute-indent-value-2 {
+  grid-area: 1 / 7 / 2 / 9;
+}
+
 .swse .attribute-delete {
   grid-area: 1 / 9 / 2 / 10;
 }
 
-.swse .attribute-button {
+.swse .attribute-add {
   grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .mode-add {
+  grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .subtle {
+  color: #7a7971;
+}
+
+.swse .attribute-full {
+  grid-area: 1 / 1 / 2 / 10;
+}
+
+.swse .attribute-left-button {
+  grid-area: 1 / 1 / 2 / 5;
+}
+
+.swse .attribute-right-button {
+  grid-area: 1 / 5 / 2 / 10;
 }

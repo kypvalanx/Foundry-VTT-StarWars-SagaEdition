@@ -2,7 +2,8 @@
   "Actor": {
     "types": [
       "character",
-      "npc"
+      "npc",
+      "computer"
     ],
     "templates": {
       "common": {
@@ -321,6 +322,13 @@
       "biography": "",
       "attributes": {
       }
+    },
+    "computer": {
+      "templates": [],
+      "content": "",
+      "cursor": "root",
+      "attributes": {
+      }
     }
   },
   "Item": {
@@ -350,6 +358,8 @@
         "sourceString": "",
         "attributes": {},
         "choices": [],
+        "modes": [],
+        "providedItems": [],
         "payload": ""
       },
       "item": {
@@ -378,6 +388,10 @@
         "supplier": {},
         "possibleProviders": [],
         "isSupplied": false
+      },
+      "mode": {
+        "modes": [],
+        "activeModes": []
       }
     },
     "trait": {
@@ -394,7 +408,8 @@
         "item",
         "categories",
         "modifiable",
-        "source"
+        "source",
+        "mode"
       ],
       "weapon": {}
     },

@@ -5,8 +5,14 @@ import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {registerSystemSettings} from "./settings/system.js";
+import {registerHandlebarsHelpers} from "./settings/helpers.js";
 import {generateCompendiums} from "./compendium/generation.js";
 
+
+
+export const dieSize = [2, 3, 4, 6, 8, 10, 12];
+export const sizeArray = ["Colossal", "Gargantuan", "Huge", "Large", "Medium", "Small", "Tiny", "Diminutive", "Fine"];
+export const d20 = "1d20";
 
 Hooks.once('init', async function() {
 
@@ -15,7 +21,7 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    // rollAttack,
+    //rollAttack,
     generateCompendiums
   };
 
@@ -29,12 +35,14 @@ Hooks.once('init', async function() {
     decimals: 2
   };
 
+
   // Define custom Entity classes
   CONFIG.SWSE = SWSE;
   CONFIG.Actor.documentClass = SWSEActor;
   CONFIG.Item.documentClass = SWSEItem;
 
   registerSystemSettings();
+  registerHandlebarsHelpers();
 
 
   // Register sheet application classes
@@ -43,56 +51,6 @@ Hooks.once('init', async function() {
   Items.unregisterSheet("core", ItemSheet);
   Items.registerSheet("swse", SWSEItemSheet, { makeDefault: true });
 
-  // If you need to add Handlebars helpers, here are a few useful examples:
-  Handlebars.registerHelper('concat', function() {
-    let outStr = '';
-    for (const arg of Object.keys(arguments)) {
-      if (typeof arguments[arg] != 'object') {
-        outStr += arguments[arg];
-      }
-    }
-    return outStr;
-  });
-
-  Handlebars.registerHelper('toLowerCase', function(str) {
-    return str.toLowerCase();
-  });
-  Handlebars.registerHelper('toTitleCase', function(str) {
-    return str.titleCase();
-  });
-
-  Handlebars.registerHelper('notEmpty', function (array, options) {
-    console.log(array, options)
-    return (array && array.length > 0)? options.fn():"";
-  })
-
-  Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
-    return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
-  });
-
-  Handlebars.registerHelper('ifLast', function(arg1, arg2, options) {
-    return (arg1 + 1 === arg2.length) ? options.fn(this) : options.inverse(this);
-  });
-
-  Handlebars.registerHelper('unlessEquals', function(arg1, arg2, options) {
-    return (arg1 !== arg2) ? options.fn(this) : options.inverse(this);
-  });
-
-
-  Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
-    return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
-  });
-
-  Handlebars.registerHelper('sum', function(arg1, arg2, options) {
-    return parseInt(arg1) + parseInt(arg2)
-  });
-
-  Handlebars.registerHelper('times', function(n, block) {
-    let accum = '';
-    for(let i = 0; i < n; ++i)
-      accum += block.fn(i);
-    return accum;
-  });
 
 
   await loadTemplates([
@@ -106,7 +64,10 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-portrait.hbs',
     'systems/swse/templates/actor/parts/actor-darkside.hbs',
     'systems/swse/templates/actor/parts/actor-defenses.hbs',
-    'systems/swse/templates/item/parts/attributes.hbs']);
+    'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
+    'systems/swse/templates/actor/parts/attack/single-attack.hbs',
+    'systems/swse/templates/item/parts/attributes.hbs',
+    'systems/swse/templates/item/parts/mode.hbs']);
 
 });
 
@@ -163,7 +124,7 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
     return false;
 
   }
-  if (type === "attack" || type === "item") {
+  if (type === "item") {
     createItemMacro(data, slot).then(() => {});
     return false;
 
@@ -207,14 +168,14 @@ async function createItemMacro(data, slot) {
   if(data.img){
     img = data.img;
   }
-  let id;
+  let id = [];
   if(data.label === 'Unarmed Attack'){
-    id = 'Unarmed Attack';
+    id.push( 'Unarmed Attack');
   } else {
-    id = data.data._id;
+    id.push(data.data._id);
   }
 
-  const command = `game.swse.rollItem("${actorId}", "${id}");`;
+  const command = `game.swse.rollItem("${actorId}", ["${id.join(`","`)}"]);`;
   const name = `${actor.name}: ${data?.data?.name || data.label}`
   let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
   if (!macro) {
@@ -231,6 +192,27 @@ async function createItemMacro(data, slot) {
   }
 
   await game.user.assignHotbarMacro(macro, slot);
+}
+
+
+function rollItem(actorId, itemIds) {
+  const actor = getActorFromId(actorId);
+  if (!actor) {
+    const msg = `${actorId} not found`;
+    console.warn(msg);
+    return ui.notifications.error(msg);
+  }
+  return actor.rollOwnedItem(itemIds);
+}
+
+function rollAttack(actorId, itemIds) {
+  const actor = getActorFromId(actorId);
+  if (!actor) {
+    const msg = `${actorId} not found`;
+    console.warn(msg);
+    return ui.notifications.error(msg);
+  }
+  return actor.attack({type: (itemIds.length === 1 ? "singleAttack": "fullAttack"),items:itemIds});
 }
 
 export const getActorFromId = function (id) {
@@ -255,17 +237,6 @@ function rollVariable(actorId, variable) {
 
   return actor.rollVariable(variable);
 }
-
-function rollItem(actorId, itemId) {
-  const actor = getActorFromId(actorId);
-  if (!actor) {
-    const msg = `${actorId} not found`;
-    console.warn(msg);
-    return ui.notifications.error(msg);
-  }
-
-  return actor.rollOwnedItem(itemId);
-}
 Hooks.on('renderChatMessage', (chatItem, html) => {
   html.find(".toggle-hide").on("click", (ev) => {
     let nodes = $(ev.currentTarget)[0].parentElement.childNodes;
@@ -282,6 +253,3 @@ Hooks.on('renderChatMessage', (chatItem, html) => {
   });
 //add things you want to like to chat messages here
 });
-export const dieSize = [2, 3, 4, 6, 8, 10, 12];
-export const sizeArray = ["Colossal", "Gargantuan", "Huge", "Large", "Medium", "Small", "Tiny", "Diminutive", "Fine"];
-export const d20 = "1d20";
