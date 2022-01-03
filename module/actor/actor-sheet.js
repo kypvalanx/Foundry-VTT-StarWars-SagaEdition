@@ -1,8 +1,6 @@
 import {filterItemsByType, getBonusString, getOrdinal, getRangedAttackMod, handleAttackSelect} from "../util.js";
 import {SWSE} from "../config.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
-import {generateAttackFromWeapon, generateUnarmedAttack} from "./attack-handler.js";
-import {SWSEItem} from "../item/item.js";
 
 // noinspection JSClosureCompilerSyntax
 /**

@@ -69,12 +69,10 @@ export class SWSEActor extends Actor {
         this.data.prerequisites = {};
 
         new SpeciesHandler().generateSpeciesData(this);
-        let {level, classSummary} = this._generateClassData(actorData);
         this.data.data.condition = this.data.data.condition || 0;
 
-        actorData.levelSummary = level;
-        actorData.classSummary = classSummary;
 
+        this.classes = filterItemsByType(this.items.values(), "class");
         this.equipped = this.getEquippedItems().map(item => item.data);
         this.unequipped = this.getUnequippedItems().map(item => item.data);
         this.inventory = this.getNonequippableItems().map(item => item.data);
@@ -85,6 +83,11 @@ export class SWSEActor extends Actor {
         this.techniques = this.getTechniques().map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
+
+
+        let {level, classSummary} = this._generateClassData(actorData);
+        actorData.levelSummary = level;
+        actorData.classSummary = classSummary;
 
         this.inheritableItems = [];
         if(this.species){
@@ -107,21 +110,9 @@ export class SWSEActor extends Actor {
         }
 
         actorData.speed = this.speed;
-
         generateAttributes(this);
 
-        //TODO separated for now.  this part handles the darkside score widget.  it's clever i swear
-        {
-            for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
-                actorData.data.darkSideArray = actorData.data.darkSideArray || [];
-
-                if (actorData.data.darkSideScore < i) {
-                    actorData.data.darkSideArray.push({value: i, active: false})
-                } else {
-                    actorData.data.darkSideArray.push({value: i, active: true})
-                }
-            }
-        }
+        this.handleDarksideArray(actorData);
 
         actorData.acPenalty = generateArmorCheckPenalties(this);
 
@@ -132,9 +123,7 @@ export class SWSEActor extends Actor {
         this.feats = feats.activeFeats;
         this.inheritableItems.push(...this.feats)
 
-        actorData.hideForce = 0 === this.feats.filter(feat => {
-            return feat.name === 'Force Training'
-        }).length
+        actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
 
@@ -163,6 +152,18 @@ export class SWSEActor extends Actor {
         }
     }
 
+    handleDarksideArray(actorData) {
+        for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
+            actorData.data.darkSideArray = actorData.data.darkSideArray || [];
+
+            if (actorData.data.darkSideScore < i) {
+                actorData.data.darkSideArray.push({value: i, active: false})
+            } else {
+                actorData.data.darkSideArray.push({value: i, active: true})
+            }
+        }
+    }
+
     get age() {
         return this.data.data.age;
     }
@@ -172,7 +173,10 @@ export class SWSEActor extends Actor {
     }
 
     get speed(){
-        let attributeTraits = this.data.traits.filter(trait => {
+        if(!this.traits){
+            return;
+        }
+        let attributeTraits = this.traits.filter(trait => {
             let result = /\w* Speed \d*/.exec(trait.name);
             return !!result;
         })
@@ -514,26 +518,21 @@ export class SWSEActor extends Actor {
     /**
      * Extracts important stats from the class
      */
-    _generateClassData(actorData) {
-        this.classes = filterItemsByType(this.items, "class");
+    _generateClassData() {
 
         let classLevels = {};
-        let classFeatures = [];
+
 
         for (let characterClass of this.classes) {
             if (!classLevels[characterClass.name]) {
                 classLevels[characterClass.name] = 0;
             }
-            let levelOfClass = ++classLevels[characterClass.name]
-            let levelData = characterClass.data.data.levels[levelOfClass]
-            classFeatures.push(...levelData.features || [])
+            ++classLevels[characterClass.name]
         }
 
         let classSummary = Object.entries(classLevels).map((entity) => `${entity[0]} ${entity[1]}`).join(' / ');
 
-        this.resolveClassFeatures(actorData, classFeatures);
-        let level = this.classes.length;
-        return {level, classSummary};
+        return {level: this.classes.length, classSummary};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -590,16 +589,6 @@ export class SWSEActor extends Actor {
             return this.update({_id:this.id,'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
         }
         return undefined;
-    }
-
-    handleClassFeatures(classLevels, classFeatures, actorData) {
-        for (let [name, classItems] of classLevels.entries()) {
-            for (let i = 0; i < classItems.length; i++) {
-                classFeatures.push(...(this._getClassFeatures(name, classItems[i], i)))
-            }
-        }
-
-        this.resolveClassFeatures(actorData, classFeatures);
     }
 
     _getClassFeatures(className, classObject, i) {
@@ -920,25 +909,30 @@ export class SWSEActor extends Actor {
     cleanItemName(feat) {
         return feat.replace("*", "").trim();
     }
-    resolveClassFeatures(actorData, classFeatures) {
-        actorData.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
-        actorData.bonuses = {};
-        actorData.activeFeatures = [];
-        let tempFeatures = new Set();
+    resolveClassFeatures(classFeatures) {
+        let provides = this.getInheritableAttributesByKey("provides");
+        this.data.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
+        this.data.bonuses = {};
+        this.data.activeFeatures = [];
+        for(let provided of provides){
+            let value = provided.value;
+            this.data.availableItems[value] = this.data.availableItems[value] ? this.data.availableItems[value] + 1 : 1;
+        }
+
         for (let feature of classFeatures) {
             let type = feature.key;
             let value = feature.value;
             if (type === 'PROVIDES') {
-                actorData.availableItems[value] = actorData.availableItems[value] ? actorData.availableItems[value] + 1 : 1;
+                this.data.availableItems[value] = this.data.availableItems[value] ? this.data.availableItems[value] + 1 : 1;
             } else if (type === 'BONUS') {
-                actorData.bonuses[value] = actorData.bonuses[value] ? actorData.bonuses[value] + 1 : 1;
+                this.data.bonuses[value] = this.data.bonuses[value] ? this.data.bonuses[value] + 1 : 1;
             } else if (type === 'TRAIT') {
 
             }
         }
         let classLevel = this.classes.length;
-        actorData.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (actorData.availableItems['General Feats'] ? actorData.availableItems['General Feats'] : 0);
-        actorData.activeFeatures.push(...tempFeatures)
+        this.data.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.data.availableItems['General Feats'] ? this.data.availableItems['General Feats'] : 0);
+
     }
 
     async filterOutInvisibleAbilities(actorData) {
@@ -954,16 +948,19 @@ export class SWSEActor extends Actor {
     }
 
     _reduceProvidedItemsByExistingItems(actorData) {
+
+        this.resolveClassFeatures([])
+
         for (let talent of this.talents) {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
         }
         for (let feat of this.feats) {
-            if (feat.data.isSupplied) {
+            if (feat.data.supplier.id) {
                 continue;
             }
             let type = 'General Feats';
             if (feat.data.bonusFeatCategories && feat.data.bonusFeatCategories.length > 0) {
-                type = feat.data.bonusFeatCategories[0].category
+                type = feat.data.bonusFeatCategories[0].value
             }
             this.reduceAvailableItem(actorData, type);
         }
