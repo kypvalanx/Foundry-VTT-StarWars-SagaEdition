@@ -21,7 +21,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
         return;
     }
 
-    let collection = await CompendiumCollection.createCompendium({label: compendiumName, name: compendiumName.toLowerCase().replace(" ", "-")+`-${content.version}`,entity: entity, version: content.version});
+    let collection = await CompendiumCollection.createCompendium({label: compendiumName, name: compendiumName.toLowerCase().replace(" ", "-"),entity: entity, version: content.version});
 
    // await new Compendium(collection, {label: compendiumName, entity: entity, version: content.version})
     pack = await game.packs.find(p => p.metadata.label === compendiumName);

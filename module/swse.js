@@ -73,7 +73,7 @@ Hooks.once('init', async function() {
 
 
 Hooks.on("ready", async function() {
-  await generateCompendiums();
+  //await generateCompendiums();
 
   game.generated = {};
   game.generated.exoticWeapons= [];

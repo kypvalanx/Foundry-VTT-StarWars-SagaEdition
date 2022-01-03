@@ -1,7 +1,7 @@
 <form class="{{cssClass}}" autocomplete="off">
     {{#unless data.data.attributeGenerationType}}
         <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
-    {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="world.swse-species">Please Select a Species</span></a><br/>{{/unless}}
+    {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="swse.species">Please Select a Species</span></a><br/>{{/unless}}
     {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
     {{#if data.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{data.remainingSkills}}</span><br/>{{/if}}
@@ -90,7 +90,7 @@
                         <th>Total HP</th>
                         <!--                  <th>First Level Class</th> -->
                         <th>
-                            <a data-action="compendium" data-action-target="world.swse-classes"
+                            <a data-action="compendium" data-action-target="swse.classes"
                                title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a></th>
                     </tr>
                     </thead>
@@ -156,7 +156,7 @@
             <div class="tab items" data-group="primary" data-tab="equipment">
                 <div>
                     <h2><label class="resource-label">Equipment <a data-action="compendium"
-                                                                   data-action-target="world.swse-items"
+                                                                   data-action-target="swse.items"
                                                                    title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -234,7 +234,7 @@
             <div class="tab items" data-group="primary" data-tab="feats">
                 <div>
                     <h2><label class="resource-label">Feats <a data-action="compendium"
-                                                               data-action-target="world.swse-feats"
+                                                               data-action-target="swse.feats"
                                                                title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -264,7 +264,7 @@
             <div class="tab items" data-group="primary" data-tab="talents">
                 <div>
                     <h2><label class="resource-label">Talents <a data-action="compendium"
-                                                                 data-action-target="world.swse-talents"
+                                                                 data-action-target="swse.talents"
                                                                  title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -290,7 +290,7 @@
             <div class="tab items" data-group="primary" data-tab="traits">
                 <div>
                     <h2><label class="resource-label">Traits <a data-action="compendium"
-                                                                 data-action-target="world.swse-talents"
+                                                                 data-action-target="swse.talents"
                                                                  title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -314,7 +314,7 @@
             <div class="tab items" data-group="primary" data-tab="force">
                 <div>
                     <h2><label class="resource-label">Force Powers <a data-action="compendium"
-                                                                      data-action-target="world.swse-force powers"
+                                                                      data-action-target="swse.force powers"
                                                                       title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -334,7 +334,7 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Secrets <a data-action="compendium"
-                                                                       data-action-target="world.swse-force secrets"
+                                                                       data-action-target="swse.force secrets"
                                                                        title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -353,7 +353,7 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Techniques <a data-action="compendium"
-                                                                          data-action-target="world.swse-force techniques"
+                                                                          data-action-target="swse.force techniques"
                                                                           title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
@@ -372,7 +372,7 @@
                 <br/>
                 <div>
                     <h2><label class="resource-label">Force Regimens <a data-action="compendium"
-                                                                        data-action-target="world.swse-force regimens"
+                                                                        data-action-target="swse.force regimens"
                                                                         title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>

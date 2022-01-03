@@ -898,11 +898,11 @@ export class SWSEActor extends Actor {
     static getCompendium(type) {
         switch (type) {
             case 'item':
-                return game.packs.find(p => p.metadata.label === "SWSE Items");
+                return game.packs.find(pack => pack.collection.startsWith("swse.items"));
             case 'trait':
-                return game.packs.find(p => p.metadata.label === "SWSE Traits");
+                return game.packs.find(pack => pack.collection.startsWith("swse.traits"));
             case 'feat':
-                return game.packs.find(p => p.metadata.label === "SWSE Feats");
+                return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
         }
     }
 
