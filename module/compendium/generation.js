@@ -7,6 +7,10 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
     }catch(e){
         return;
     }
+
+    if(response.status ===404){
+        return;
+    }
     const content = await response.json();
 
     let pack = await game.packs.find(p => p.metadata.label === compendiumName);

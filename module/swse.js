@@ -77,7 +77,7 @@ Hooks.on("ready", async function() {
 
   game.generated = {};
   game.generated.exoticWeapons= [];
-  let pack = await game.packs.find(p => p.metadata.label === "SWSE Items");
+  let pack = await game.packs.find(pack => pack.collection.startsWith("swse.items"));
   pack.getIndex().then( index => {
   for(let i of index){
     pack.getDocument(i._id).then(entity =>{

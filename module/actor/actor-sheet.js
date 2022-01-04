@@ -842,9 +842,9 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        if (Array.from(this.actor.items.values())
-            .map(i => i.data.finalName)
-            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName)) {
+        let takeMultipleTimes = item.getAttribute("takeMultipleTimes").map(a => a.value === "true").reduce((a,b) => a || b, false);
+
+        if (this.actorHasItem(item) && !takeMultipleTimes) {
             let itemType = item.data.type;
             await Dialog.prompt({
                 title: `You already have this ${itemType}`,
@@ -855,6 +855,12 @@ export class SWSEActorSheet extends ActorSheet {
             return [];
         }
         return entitiesToAdd
+    }
+
+    actorHasItem(item) {
+        return Array.from(this.actor.items.values())
+            .map(i => i.data.finalName)
+            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName);
     }
 
     async addFeat(item) {

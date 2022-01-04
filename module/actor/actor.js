@@ -8,7 +8,7 @@ import {
     getBonusString,
     getOrdinal,
     getRangedAttackMod,
-    handleAttackSelect,
+    handleAttackSelect, resolveValueArray,
     toNumber,
     toShortAttribute
 } from "../util.js";
@@ -127,7 +127,6 @@ export class SWSEActor extends Actor {
 
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
 
-        this.generateProvidedItemsFromItems(actorData);
         this._reduceProvidedItemsByExistingItems(actorData);
 
         actorData.data.health = resolveHealth(this);
@@ -915,8 +914,17 @@ export class SWSEActor extends Actor {
         this.data.bonuses = {};
         this.data.activeFeatures = [];
         for(let provided of provides){
-            let value = provided.value;
-            this.data.availableItems[value] = this.data.availableItems[value] ? this.data.availableItems[value] + 1 : 1;
+            let key = provided.value;
+            let value = 1;
+            if(key.includes(":")){
+                continue;
+                let toks = key.split(":");
+                key = toks[0];
+                let raw = toks[1];
+
+                value = resolveValueArray(raw,this)
+            }
+            this.data.availableItems[key] = this.data.availableItems[key] ? this.data.availableItems[key] + value : value;
         }
 
         for (let feature of classFeatures) {
@@ -950,6 +958,8 @@ export class SWSEActor extends Actor {
     _reduceProvidedItemsByExistingItems(actorData) {
 
         this.resolveClassFeatures([])
+
+        this.generateProvidedItemsFromItems(actorData);
 
         for (let talent of this.talents) {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);

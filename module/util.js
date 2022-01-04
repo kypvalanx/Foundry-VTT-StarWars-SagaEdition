@@ -3,6 +3,18 @@ import {SWSE} from "./config.js";
 
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
+        if(false) {
+            //build parser here
+            let raw = `${values}`.replace(/-/g, " - ").replace(/\+/g, " + ");
+            let holder = null;
+            while (raw !== holder) {
+                holder = raw;
+                raw = raw.replace(/  /g, " ");
+            }
+            raw = raw.replace(/ - /g, " + -");
+            let values = raw.split(" + ");
+        }
+
         values = [values];
     }
     let total = 0;
@@ -23,6 +35,8 @@ export function resolveValueArray(values, actor) {
             catch(e){
                 console.log("actor has not been initialised", e);
             }
+
+        } else if (typeof value === 'string' && value.startsWith("MAX(") && value.endsWith(")")) {
 
         } else if (typeof value === 'string') {
             total += parseInt(value);

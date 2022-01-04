@@ -54,8 +54,12 @@ export function generateAttributes(actor) {
         attribute.mod = Math.floor((attribute.total - 10) / 2);
         attribute.roll = attribute.mod + actor.conditionBonus;
         attribute.label = key.toUpperCase();
-        actor.resolvedVariables.set("@" + attribute.label, "1d20 + " + attribute.roll);
-        actor.resolvedLabels.set("@" + attribute.label, attribute.label);
+        actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);
+        actor.resolvedLabels.set("@" + attribute.label + "ROLL", attribute.label);
+        actor.resolvedVariables.set("@" + attribute.label + "MOD", attribute.roll);
+        actor.resolvedLabels.set("@" + attribute.label + "MOD", attribute.label);
+        actor.resolvedVariables.set("@" + attribute.label + "TOTAL", attribute.total);
+        actor.resolvedLabels.set("@" + attribute.label + "TOTAL", attribute.label);
 
         prerequisites.attributes[key] = {};
         prerequisites.attributes[key].value = attribute.total;
