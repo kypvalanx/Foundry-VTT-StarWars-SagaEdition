@@ -1,64 +1,12 @@
-import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {extractAttributeValues, getBonusString, getRangedAttackMod, increaseDamageDie, toNumber} from "../util.js";
-
-function getRangeModifierBlock(range, accurate, innacurate, id) {
-    if (range === 'Grenades') {
-        range = 'Thrown Weapons'
-    }
-
-    let table = document.createElement("table");
-    let thead = table.appendChild(document.createElement("thead"));
-    let tbody = table.appendChild(document.createElement("tbody"));
-
-    let firstHeader = thead.appendChild(document.createElement("tr"));
-    let secondHeader = thead.appendChild(document.createElement("tr"));
-    let radioButtons = tbody.appendChild(document.createElement("tr"));
-    let selected = true;
-
-    for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
-        let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
-        if (accurate && rangeName === 'short') {
-            rangePenaltyElement = 0;
-        }
-        if (innacurate && rangeName === 'long') {
-            continue;
-        }
-        let th1 = firstHeader.appendChild(document.createElement("th"));
-
-        let r1Div = th1.appendChild(document.createElement("div"));
-        r1Div.classList.add("swse", "padding-3", "center")
-        r1Div.innerText = `${rangeName.titleCase()} (${rangePenaltyElement})`;
-
-        let th2 = secondHeader.appendChild(document.createElement("th"));
-
-        let rangeValue = th2.appendChild(document.createElement("div"));
-        rangeValue.classList.add("swse", "padding-3", "center")
-        rangeValue.innerText = `${rangeIncrement.string.titleCase()}`;
-
-        let td = radioButtons.appendChild(document.createElement("td"));
-
-        let radioButtonDiv = td.appendChild(td.appendChild(document.createElement("div")));
-        radioButtonDiv.classList.add("swse", "center")
-
-        let label = radioButtonDiv.appendChild(document.createElement("label"));
-        label.setAttribute("for", `range-${rangeName}`);
-
-        let input = radioButtonDiv.appendChild(document.createElement("input"));
-        input.classList.add("modifier", "center", "swse", "attack-modifier");
-        input.setAttribute("type", "radio");
-        input.setAttribute("id", `range-${rangeName}`);
-        input.setAttribute("name", `range-selection-${id}`);
-        input.setAttribute("value", `${rangePenaltyElement}`);
-        input.dataset.source = "Range Modifier";
-        if(selected) {
-            input.setAttribute("checked", true);
-            selected = false;
-        }
-    }
-
-    return table;
-}
+import {
+    extractAttributeValues,
+    getBonusString,
+    getRangedAttackMod,
+    getRangeModifierBlock,
+    increaseDamageDie,
+    toNumber
+} from "../util.js";
 
 // noinspection JSClosureCompilerSyntax
 /**

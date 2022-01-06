@@ -1,7 +1,7 @@
 import {getBonusString, increaseDamageDie, resolveValueArray} from "../util.js";
 import {SWSEItem} from "../item/item.js";
-import {d20, sizeArray} from "../swse.js";
 import {Attack} from "./attack.js";
+import {d20, sizeArray} from "../constants.js";
 
 
 /**

@@ -8,7 +8,8 @@ import {
     getBonusString,
     getOrdinal,
     getRangedAttackMod,
-    handleAttackSelect, resolveValueArray,
+    handleAttackSelect,
+    resolveExpression,
     toNumber,
     toShortAttribute
 } from "../util.js";
@@ -18,7 +19,7 @@ import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills} from "./skill-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEItem} from "../item/item.js";
-import {sizeArray} from "../swse.js";
+import {sizeArray} from "../constants.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -83,7 +84,6 @@ export class SWSEActor extends Actor {
         this.techniques = this.getTechniques().map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
-
 
         let {level, classSummary} = this._generateClassData(actorData);
         actorData.levelSummary = level;
@@ -404,7 +404,7 @@ export class SWSEActor extends Actor {
 
     getVariable(variableName) {
         let value = this.resolvedVariables.get(variableName);
-        if (!value) {
+        if (value === undefined) {
             console.warn("could not find " + variableName, this.resolvedVariables);
         }
         return value;
@@ -840,21 +840,22 @@ export class SWSEActor extends Actor {
             }
 
             let entity = await pack.getDocument(entry._id);
-            //entity.data.data = entity.data.data || {};
 
             entity.prepareData();
 
-            // for (let prerequisite of data.prerequisites) {
-            //     if(prerequisite.requirement){
-            //         prerequisite.requirement = prerequisite.requirement.replace("#payload#", payload);
-            //     }
-            // }
+            if(itemName === "Bonus Feat" && payload){
+                for(let attr of Object.values(entity.data.data.attributes)){
+                    if(attr.key === "provides"){
+                        attr.key = "bonusFeat";
+                        attr.value = payload;
+                    }
+                }
 
+            }
 
             if (prerequisite) {
                 entity.setPrerequisite(prerequisite);
             }
-
 
             if (payload !== "") {
                 entity.setPayload(payload);
@@ -917,12 +918,9 @@ export class SWSEActor extends Actor {
             let key = provided.value;
             let value = 1;
             if(key.includes(":")){
-                continue;
                 let toks = key.split(":");
                 key = toks[0];
-                let raw = toks[1];
-
-                value = resolveValueArray(raw,this)
+                value = resolveExpression(toks[1],this)
             }
             this.data.availableItems[key] = this.data.availableItems[key] ? this.data.availableItems[key] + value : value;
         }
@@ -959,7 +957,6 @@ export class SWSEActor extends Actor {
 
         this.resolveClassFeatures([])
 
-        this.generateProvidedItemsFromItems(actorData);
 
         for (let talent of this.talents) {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
@@ -988,32 +985,6 @@ export class SWSEActor extends Actor {
 
         if (actorData.availableItems[type] === 0) {
             delete actorData.availableItems[type];
-        }
-    }
-
-    //TODO this seems Force Training specific.  maybe move it.
-    generateProvidedItemsFromItems(actorData) {
-        for (let feat of this.feats) {
-            if (feat.name === 'Force Training') {
-                let type = 'Force Powers';
-                let forcePowers = Math.max(1, 1 + actorData.data.attributes.wis.mod);
-                if (actorData.availableItems[type]) {
-                    actorData.availableItems[type] += forcePowers;
-                } else {
-                    actorData.availableItems[type] = forcePowers;
-                }
-            }
-        }
-        for (let trait of this.traits) {
-            if (trait.data.finalName === 'Bonus Feat') {
-                //TODO find species that have this category that shouldn't
-                let type = 'General Feats'
-                if (actorData.availableItems[type]) {
-                    actorData.availableItems[type] += 1;
-                } else {
-                    actorData.availableItems[type] = 1;
-                }
-            }
         }
     }
 

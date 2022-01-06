@@ -45,13 +45,16 @@ export function resolveDefenses(actor) {
     let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(defenseBonuses);
 
+    let damageReduction = actor.getInheritableAttributesByKey("damageReduction", null, "SUM")
+
+
     let armors = []
 
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
 
-    return {defense: {fort, will, ref, dt, situationalBonuses}, armors};
+    return {defense: {fort, will, ref, dt, damageThreshold: dt, damageReduction, situationalBonuses}, armors};
 }
 
 /**
