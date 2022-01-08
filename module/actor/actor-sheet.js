@@ -121,9 +121,9 @@ export class SWSEActorSheet extends ActorSheet {
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
-        html.find("div.item-container").each((i, div) => {
-            div.addEventListener("drop", (ev) => this._onDrop(ev), false);
-        });
+        // html.find("div.item-container").each((i, div) => {
+        //     div.addEventListener("drop", (ev) => this._onDrop(ev), false);
+        // });
         //end dragging
 
         html.find('.condition-radio').on("click", async event => {
@@ -459,7 +459,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     getPointBuyTotal() {
-        if (this.actor.data.data.isDroid) {
+        if (this.actor.isDroid) {
             return CONFIG.SWSE.Abilities.droidPointBuyTotal;
         }
         return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
@@ -699,6 +699,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     async _onDropItem(ev, data) {
+        ev.preventDefault();
         if (!this.actor.isOwner) return false;
         //the dropped item has an owner
         if (data.actorId) {
@@ -1012,6 +1013,23 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async equipItem(itemId, ev) {
+        let item = this.actor.items.get(itemId);
+
+        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
+        if(meetsPrereqs.doesFail){
+            new Dialog({
+                title: "You Don't Meet the Prerequisites!",
+                content: `You do not meet the prerequisites for equipping ${item.data.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return;
+        }
+
         this._pendingUpdates['data.equippedIds'] = [itemId].concat(this.actor.data.data.equippedIds);
         await this._onSubmit(ev);
     }
@@ -1292,13 +1310,13 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
-                for (let weapon of this.actor.data.prerequisites.trainedSkills) {
+                for (let weapon of this.actor.trainedSkills) {
                     if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {
-                for (let weapon of this.actor.data.prerequisites.focusSkills) {
+                for (let weapon of this.actor.focusSkills) {
                     if (!this.actor.data.prerequisites.masterSkills.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
@@ -1364,6 +1382,15 @@ export class SWSEActorSheet extends ActorSheet {
         return resolvedOptions;
     }
 
+    /**
+     *
+     * @param event
+     * @param sheet {SWSEActorSheet}
+     * @param scores
+     * @param canReRoll
+     * @returns {Promise<void>}
+     * @private
+     */
     async _selectAttributeScores(event, sheet, scores, canReRoll) {
         if (Object.keys(scores).length === 0) {
             let existingValues = sheet.actor.getAttributeBases();
@@ -1377,7 +1404,7 @@ export class SWSEActorSheet extends ActorSheet {
         let data = {
             canReRoll,
             abilities: CONFIG.SWSE.Abilities.droidSkip,
-            isDroid: sheet.actor.data.data.isDroid,
+            isDroid: sheet.actor.isDroid,
             scores,
             formula: CONFIG.SWSE.Abilities.defaultAbilityRoll
         };
@@ -1448,6 +1475,13 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
+    /**
+     *
+     * @param event
+     * @param sheet {SWSEActorSheet}
+     * @returns {Promise<void>}
+     * @private
+     */
     async _selectAttributesManually(event, sheet) {
         let existingValues = sheet.actor.getAttributeBases();
         let combined = {};
@@ -1459,7 +1493,7 @@ export class SWSEActorSheet extends ActorSheet {
             availablePoints: sheet.getPointBuyTotal(),
             abilityCost: CONFIG.SWSE.Abilities.abilityCost,
             abilities: combined,
-            isDroid: sheet.actor.data.data.isDroid
+            isDroid: sheet.actor.isDroid
         };
         const template = `systems/swse/templates/dialog/manual-attributes.hbs`;
 
@@ -1482,6 +1516,13 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
+    /**
+     *
+     * @param event
+     * @param sheet {SWSEActorSheet}
+     * @returns {Promise<void>}
+     * @private
+     */
     async _selectAttributeLevelBonuses(event, sheet) {
         let level = $(event.currentTarget).data("level");
         let bonus = sheet.actor.getAttributeLevelBonus(level);
@@ -1499,7 +1540,7 @@ export class SWSEActorSheet extends ActorSheet {
         let data = {
             abilityCost: CONFIG.SWSE.Abilities.abilityCost,
             abilities: combined,
-            isDroid: sheet.actor.data.data.isDroid,
+            isDroid: sheet.actor.isDroid,
             availableBonuses
         };
         const template = `systems/swse/templates/dialog/level-attribute-bonus.hbs`;
@@ -1539,6 +1580,13 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
+    /**
+     *
+     * @param event
+     * @param sheet {SWSEActorSheet}
+     * @returns {Promise<void>}
+     * @private
+     */
     async _assignAttributePoints(event, sheet) {
         let existingValues = sheet.actor.getAttributeBases();
         let bonuses = sheet.actor.getAttributeBonuses();
@@ -1551,7 +1599,7 @@ export class SWSEActorSheet extends ActorSheet {
             availablePoints: sheet.getPointBuyTotal(),
             abilityCost: CONFIG.SWSE.Abilities.abilityCost,
             abilities: combined,
-            isDroid: sheet.actor.data.data.isDroid
+            isDroid: sheet.actor.isDroid
         };
         const template = `systems/swse/templates/dialog/point-buy.hbs`;
 

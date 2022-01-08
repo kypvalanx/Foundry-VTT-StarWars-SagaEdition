@@ -174,7 +174,7 @@ meetsPrerequisites(target, prereqs) {
                 break;
             case 'ATTRIBUTE':
                 let toks = prereq.requirement.split(" ");
-                if (!(target.getAttribute(toks[0]) < parseInt(toks[1]))) {
+                if (!(target.getInheritableAttributesByKey(toks[0]) < parseInt(toks[1]))) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -212,13 +212,14 @@ meetsPrerequisites(target, prereqs) {
             }
             case 'SPECIAL':
                 if (prereq.requirement.toLowerCase() === 'not a droid') {
-                    if (!target.data.data.isDroid) {
+                    let inheritableAttributesByKey = target.getInheritableAttributesByKey("isDroid", "OR", null);
+                    if (!inheritableAttributesByKey) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 } else if (prereq.requirement.toLowerCase() === 'is a droid') {
-                    if (target.data.data.isDroid) {
+                    if (target.getInheritableAttributesByKey("isDroid", "OR", null)) {
                         successList.push({prereq, count: 1});
                         continue;
                     }

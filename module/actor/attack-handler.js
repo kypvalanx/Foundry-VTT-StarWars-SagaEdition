@@ -54,7 +54,7 @@ export function generateAttackFromWeapon(item, actor) {
 
     let groupedModes = getGroupedModes(item);
 
-    let notes = item.getAttribute('special').filter(s => !!s).map(s => s.value);
+    let notes = item.getInheritableAttributesByKey('special').filter(s => !!s).map(s => s.value);
 
     let range = item.effectiveRange;
     let critical = "x2"
@@ -62,7 +62,7 @@ export function generateAttackFromWeapon(item, actor) {
 
     let damageBonuses = [];
     damageBonuses.push(actor.getHalfCharacterLevel())
-    damageBonuses.push(...item.getAttribute("bonusDamage"))
+    damageBonuses.push(...item.getInheritableAttributesByKey("bonusDamage"))
 
     let attackBonuses = [actorData.data.offense.bab]
     let weaponTypes = getPossibleProficiencies(actor, item);
@@ -82,7 +82,7 @@ export function generateAttackFromWeapon(item, actor) {
     attackBonuses.push(isProficient(actor, weaponTypes) ? 0 : -5);
     attackBonuses.push(isFocus(actor, weaponTypes) ? 1 : 0)
     attackBonuses.push(actor.data.acPenalty) //TODO this looks like it could use some TLC
-    attackBonuses.push(...(item.getAttribute("toHitModifier")))
+    attackBonuses.push(...(item.getInheritableAttributesByKey("toHitModifier")))
 
     let attackRoll = d20 + getBonusString(resolveValueArray(attackBonuses, actor));
 

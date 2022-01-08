@@ -313,6 +313,25 @@ export function increaseDamageDie(damageDieSize, bonus) {
     return dieSize[index + bonus];
 }
 
+export function toBoolean(value){
+    if (typeof value === "undefined") {
+        return false;
+    }
+    if (value.value) {
+        return toBoolean(value.value)
+    }
+    if (typeof value === "boolean") {
+        return value;
+    }
+
+    if (typeof value === "number") {
+        return value > 0;
+    }
+
+    return value.toLowerCase() === "true" || value.toLowerCase() === "t";
+
+}
+
 export function toNumber(value) {
     if (Array.isArray(value)) {
         return value.reduce((a, b) => toNumber(a) + toNumber(b), 0)
@@ -568,4 +587,28 @@ export function getRangeModifierBlock(range, accurate, innacurate, id) {
     }
 
     return table;
+}
+
+export function reduceArray(reduce, values) {
+    if (!reduce) {
+        return values;
+    }
+    switch (reduce.toUpperCase()) {
+        case "SUM":
+            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a + b, 0);
+        case "AND":
+            return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a && b, true);
+        case "OR":
+            return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a || b, false);
+        case "MAX":
+            return values.map(attr => toNumber(attr.value)).reduce((a, b) => Math.max(a, b), 0);
+        case "MIN":
+            return values.map(attr => toNumber(attr.value)).reduce((a, b) => Math.min(a, b), 0);
+        case "VALUES":
+            return values.map(attr => attr.value);
+        case "NUMERIC_VALUES":
+            return values.map(attr => toNumber(attr.value));
+        default:
+            return values.map(attr => toNumber(attr.value)).reduce(reduce);
+    }
 }

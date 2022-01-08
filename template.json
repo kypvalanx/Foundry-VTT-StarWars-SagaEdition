@@ -421,7 +421,7 @@
         "modifiable",
         "source"
       ],
-      "armor": {}
+      "armorType": ""
     },
     "equipment": {
       "templates": [

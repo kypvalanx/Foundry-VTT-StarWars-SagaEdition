@@ -54,6 +54,7 @@ export function generateAttributes(actor) {
         attribute.mod = Math.floor((attribute.total - 10) / 2);
         attribute.roll = attribute.mod + actor.conditionBonus;
         attribute.label = key.toUpperCase();
+        attribute.skip = key === "con" && actor.isDroid
         actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);
         actor.resolvedLabels.set("@" + attribute.label + "ROLL", attribute.label);
         actor.resolvedVariables.set("@" + attribute.label + "MOD", attribute.roll);

@@ -1,13 +1,19 @@
-import {filterItemsByType} from "../util.js";
+import {filterItemsByType, toNumber} from "../util.js";
 
-async function getAvailableTrainedSkillCount(actor) {
-    let firstClass = await actor.getFirstClass();
+/**
+ *
+ * @param actor {SWSEActor}
+ * @returns {Promise<number>}
+ */
+export function getAvailableTrainedSkillCount(actor) {
+    let firstClass = actor.getFirstClass();
     let remainingSkills = 0;
     if (firstClass) {
-        let intBonus = await actor.getAttributeMod("int")
-        let classBonus = firstClass.getAttribute("trainedSkillsFirstLevel");
-        remainingSkills = parseInt(classBonus) + parseInt(intBonus);
+        let intBonus = actor.getAttributeMod("int")
+        let classBonus = firstClass.getInheritableAttributesByKey("trainedSkillsFirstLevel");
+        remainingSkills = toNumber(classBonus) + toNumber(intBonus);
     }
+    //TODO add an attribute to Skill Training
     remainingSkills += filterItemsByType(actor.items.values(), "feat").filter(item => item.data.name === 'Skill Training').length;
     return remainingSkills;
 }
@@ -18,22 +24,19 @@ async function getAvailableTrainedSkillCount(actor) {
  * @returns {Promise<void>}
  */
 export async function generateSkills(actor) {
-    let actorData = actor.data;
-    let remainingSkills = await getAvailableTrainedSkillCount(actor, actorData);
-
-    let prerequisites = actorData.prerequisites;
+    let prerequisites = actor.data.prerequisites;
     prerequisites.trainedSkills = [];
     let classSkills = await actor._getClassSkills();
     let halfCharacterLevel = actor.getHalfCharacterLevel();
     let conditionBonus = actor.conditionBonus;
-    for (let [key, skill] of Object.entries(actorData.data.skills)) {
+    for (let [key, skill] of Object.entries(actor.data.data.skills)) {
         skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
 
         // Calculate the modifier using d20 rules.
         let attributeMod = actor.getAttributeMod(skill.attribute);
         let trainedSkillBonus = skill.trained === true ? 5 : 0;
         let getAbilitySkillBonus = actor._getAbilitySkillBonus(key);
-        let acPenalty = skill.acp ? actorData.acPenalty : 0;
+        let acPenalty = skill.acp ? actor.data.acPenalty : 0;
 
         skill.value = halfCharacterLevel + attributeMod + trainedSkillBonus + conditionBonus + getAbilitySkillBonus + acPenalty;
         skill.key = `@${actor.cleanSkillName(key)}`;
@@ -57,12 +60,6 @@ export async function generateSkills(actor) {
             await actor.update(data);
             return;
         }
-        remainingSkills = remainingSkills - 1;
         prerequisites.trainedSkills.push(key.toLowerCase());
-    }
-    if (remainingSkills > 0) {
-        actorData.data.remainingSkills = remainingSkills;
-    } else if (remainingSkills < 0) {
-        actorData.data.tooManySkills = Math.abs(remainingSkills);
     }
 }
