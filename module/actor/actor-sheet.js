@@ -843,7 +843,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        let takeMultipleTimes = item.getAttribute("takeMultipleTimes").map(a => a.value === "true").reduce((a,b) => a || b, false);
+        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a,b) => a || b, false);
 
         if (this.actorHasItem(item) && !takeMultipleTimes) {
             let itemType = item.data.type;

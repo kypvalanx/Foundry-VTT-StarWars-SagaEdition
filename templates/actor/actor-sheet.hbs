@@ -3,7 +3,6 @@
         <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
     {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="swse.species">Please Select a Species</span></a><br/>{{/unless}}
     {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
-    {{log actor.tooManySkills}}
     {{#if actor.remainingSkills}}
         <span class="warning">Remaining Trained Skills: {{actor.remainingSkills}}</span><br/>{{/if}}
     {{#if actor.tooManySkills}}<span class="warning">Too Many Skills Selected: {{actor.tooManySkills}}</span><br/>{{/if}}

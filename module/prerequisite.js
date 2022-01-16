@@ -174,7 +174,7 @@ meetsPrerequisites(target, prereqs) {
                 break;
             case 'ATTRIBUTE':
                 let toks = prereq.requirement.split(" ");
-                if (!(target.getInheritableAttributesByKey(toks[0]) < parseInt(toks[1]))) {
+                if (!(target.getAttribute(toks[0]) < parseInt(toks[1]))) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
