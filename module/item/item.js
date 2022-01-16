@@ -1,64 +1,12 @@
-import {SWSE} from "../config.js";
 import {generateAttackFromWeapon} from "../actor/attack-handler.js";
-import {extractAttributeValues, getBonusString, getRangedAttackMod, increaseDamageDie, toNumber} from "../util.js";
-
-function getRangeModifierBlock(range, accurate, innacurate, id) {
-    if (range === 'Grenades') {
-        range = 'Thrown Weapons'
-    }
-
-    let table = document.createElement("table");
-    let thead = table.appendChild(document.createElement("thead"));
-    let tbody = table.appendChild(document.createElement("tbody"));
-
-    let firstHeader = thead.appendChild(document.createElement("tr"));
-    let secondHeader = thead.appendChild(document.createElement("tr"));
-    let radioButtons = tbody.appendChild(document.createElement("tr"));
-    let selected = true;
-
-    for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
-        let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
-        if (accurate && rangeName === 'short') {
-            rangePenaltyElement = 0;
-        }
-        if (innacurate && rangeName === 'long') {
-            continue;
-        }
-        let th1 = firstHeader.appendChild(document.createElement("th"));
-
-        let r1Div = th1.appendChild(document.createElement("div"));
-        r1Div.classList.add("swse", "padding-3", "center")
-        r1Div.innerText = `${rangeName.titleCase()} (${rangePenaltyElement})`;
-
-        let th2 = secondHeader.appendChild(document.createElement("th"));
-
-        let rangeValue = th2.appendChild(document.createElement("div"));
-        rangeValue.classList.add("swse", "padding-3", "center")
-        rangeValue.innerText = `${rangeIncrement.string.titleCase()}`;
-
-        let td = radioButtons.appendChild(document.createElement("td"));
-
-        let radioButtonDiv = td.appendChild(td.appendChild(document.createElement("div")));
-        radioButtonDiv.classList.add("swse", "center")
-
-        let label = radioButtonDiv.appendChild(document.createElement("label"));
-        label.setAttribute("for", `range-${rangeName}`);
-
-        let input = radioButtonDiv.appendChild(document.createElement("input"));
-        input.classList.add("modifier", "center", "swse", "attack-modifier");
-        input.setAttribute("type", "radio");
-        input.setAttribute("id", `range-${rangeName}`);
-        input.setAttribute("name", `range-selection-${id}`);
-        input.setAttribute("value", `${rangePenaltyElement}`);
-        input.dataset.source = "Range Modifier";
-        if(selected) {
-            input.setAttribute("checked", true);
-            selected = false;
-        }
-    }
-
-    return table;
-}
+import {
+    extractAttributeValues,
+    getBonusString,
+    getRangedAttackMod,
+    getRangeModifierBlock,
+    increaseDamageDie, reduceArray,
+    toNumber
+} from "../util.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -99,24 +47,24 @@ export class SWSEItem extends Item {
     }
 
     get levelUpHitPoints() {
-        return this.getAttribute("levelUpHitPoints").map(attr => attr.value)[0];
+        return this.getInheritableAttributesByKey("levelUpHitPoints").map(attr => attr.value)[0];
     }
 
     get classLevelHealth() {
         if (this.type !== "class") {
             return 0;
         }
-        let isFirstLevel = this.getAttribute("isFirstLevel");
+        let isFirstLevel = this.getInheritableAttributesByKey("isFirstLevel");
         if (isFirstLevel.length > 0 && isFirstLevel.map(attr => attr.value)[0] !== 'false' && isFirstLevel.map(attr => attr.value)[0] !== false) {
 
-            return this.getAttribute("firstLevelHitPoints").map(attr => parseInt(attr.value))[0];
+            return this.getInheritableAttributesByKey("firstLevelHitPoints").map(attr => parseInt(attr.value))[0];
         }
-        let attrs = this.getAttribute("rolledHp");
+        let attrs = this.getInheritableAttributesByKey("rolledHp");
 
         if (attrs.length > 0) {
             let rolledHp = attrs.map(attr => parseInt(attr.value))[0]
 
-            let max = this.getAttribute("levelUpHitPoints").map(attr => parseInt(attr.value.split("d")[1]))[0]
+            let max = this.getInheritableAttributesByKey("levelUpHitPoints").map(attr => parseInt(attr.value.split("d")[1]))[0]
             return rolledHp > max ? max : rolledHp;
         }
 
@@ -127,7 +75,7 @@ export class SWSEItem extends Item {
         if (this.type !== 'weapon') {
             return false;
         }
-        let damageDie = this.getAttribute("damageDie");
+        let damageDie = this.getInheritableAttributesByKey("damageDie");
         return damageDie[0].value.includes("/");
     }
 
@@ -140,15 +88,15 @@ export class SWSEItem extends Item {
     }
 
     get fortitudeDefenseBonus() {
-        return toNumber(this.getAttribute('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getInheritableAttributesByKey('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     get reflexDefenseBonus() {
-        return toNumber(this.getAttribute('reflexDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getInheritableAttributesByKey('reflexDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     get maximumDexterityBonus() {
-        return toNumber(this.getAttribute('maximumDexterityBonus')) - toNumber(this.getStripping("reduceJointProtection"));
+        return toNumber(this.getInheritableAttributesByKey('maximumDexterityBonus')) - toNumber(this.getStripping("reduceJointProtection"));
     }
 
     get mods() {
@@ -161,14 +109,14 @@ export class SWSEItem extends Item {
     }
 
     get prefix() {
-        return this.getAttribute('prefix')?.value;
+        return this.getInheritableAttributesByKey('prefix')?.value;
     }
 
     get suffix() {
         if (this.mods?.filter(item => item.name === 'Bayonet Ring').length > 0) {
             return `with ${this.name}`
         }
-        return this.getAttribute('suffix')?.value;
+        return this.getInheritableAttributesByKey('suffix')?.value;
     }
 
     get size() {
@@ -219,7 +167,7 @@ export class SWSEItem extends Item {
     }
 
     get effectiveRange() {
-        let treatedAsForRange = this.getAttribute("treatedAs")[0];
+        let treatedAsForRange = this.getInheritableAttributesByKey("treatedAs")[0];
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
 
         if (this.getStripping("reduceRange")?.value) {
@@ -230,7 +178,7 @@ export class SWSEItem extends Item {
     }
 
     get accurate() {
-        let specials = this.getAttribute('special')?.value;
+        let specials = this.getInheritableAttributesByKey('special')?.value;
         for (let special of specials ? specials : []) {
             if (special.toLowerCase().startsWith('accurate')) {
                 return true;
@@ -241,7 +189,7 @@ export class SWSEItem extends Item {
     }
 
     get inaccurate() {
-        let specials = this.getAttribute('special')?.value;
+        let specials = this.getInheritableAttributesByKey('special')?.value;
         for (let special of specials ? specials : []) {
             if (special.toLowerCase().startsWith('inaccurate')) {
                 return true;
@@ -252,7 +200,7 @@ export class SWSEItem extends Item {
 
 
     get damageDie() {
-        let damageDice = this.getAttribute('damageDie');
+        let damageDice = this.getInheritableAttributesByKey('damageDie');
         let damageDie = damageDice[damageDice.length - 1]?.value;
 
         if (!damageDie) {
@@ -265,17 +213,17 @@ export class SWSEItem extends Item {
         let quantity = parseInt(tok[0]);
         let size = parseInt(tok[1]);
 
-        for (let bonusDamageDie of this.getAttribute('bonusDamageDie')) {
+        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDie')) {
             quantity = quantity + parseInt(bonusDamageDie.value);
         }
-        for (let bonusDamageDie of this.getAttribute('bonusDamageDieSize')) {
+        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDieSize')) {
             size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
         }
         return quantity + "d" + size;
     }
 
     get additionalDamageDice() {
-        let attribute = this.getAttribute('damageDie');
+        let attribute = this.getInheritableAttributesByKey('damageDie');
         let damageDie = attribute[attribute.length - 1]?.value;
 
         if (!damageDie) {
@@ -287,8 +235,8 @@ export class SWSEItem extends Item {
         }
         let damageDice = damageDie.split("/");
 
-        let bonusDice = this.getAttribute('bonusDamageDie');
-        let bonusSize = this.getAttribute('bonusDamageDieSize');
+        let bonusDice = this.getInheritableAttributesByKey('bonusDamageDie');
+        let bonusSize = this.getInheritableAttributesByKey('bonusDamageDieSize');
         let atks = [];
         for (let die of damageDice) {
 
@@ -311,7 +259,7 @@ export class SWSEItem extends Item {
     }
 
     get stunDamageDie() {
-        let damageDie = this.getAttribute('stunDamageDie')[0]?.value;
+        let damageDie = this.getInheritableAttributesByKey('stunDamageDie')[0]?.value;
         if (!damageDie || this.getStripping("stripStun")?.value) {
             return ""
         }
@@ -319,17 +267,17 @@ export class SWSEItem extends Item {
         let quantity = parseInt(tok[0]);
         let size = parseInt(tok[1]);
 
-        for (let bonusDamageDie of this.getAttribute('bonusStunDamageDie')) {
+        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusStunDamageDie')) {
             quantity = quantity + parseInt(bonusDamageDie.value);
         }
-        for (let bonusDamageDie of this.getAttribute('bonusStunDamageDieSize')) {
+        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusStunDamageDieSize')) {
             size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
         }
         return quantity + "d" + size;
     }
 
     get damageType() {
-        let attributes = this.getAttribute('damageType');
+        let attributes = this.getInheritableAttributesByKey('damageType');
         return attributes.map(attribute => attribute.value).join(', ');
     }
 
@@ -343,23 +291,27 @@ export class SWSEItem extends Item {
         const itemData = this.data;
         itemData.finalName = this.name;
 
-        itemData.data.isEquipable = this.type === "weapon" || this.type === "armor";
-        itemData.data.isModification = this.type === "upgrade" || this.subType === "weapons and armor accessories";
-        itemData.data.isBioPart = this.subType === "Implants" || this.subType === "Bio-Implants" || this.subType === "Cybernetic Devices" || this.subType === "Advanced Cybernetics";
-        itemData.data.isDroidPart = this.subType === "Locomotion Systems" || this.subType === "Processor Systems"
-            || this.subType === "Appendages" || this.subType === "Droid Accessories (Sensor Systems)"
-            || this.subType === "Droid Accessories (Translator Units)" || this.subType === "Droid Accessories (Miscellaneous Systems)"
-            || this.subType === "Droid Accessories (Communications Systems)" || this.subType === "Droid Accessories (Droid Stations)"
-            || this.subType === "Droid Accessories (Shield Generator Systems)";
-
         if (this.type === "weapon") this.prepareWeapon(itemData);
         if (this.type === "armor") this.prepareArmor(itemData);
-
         if (this.type === "feat") this.prepareFeatData(itemData);
+    }
 
-        // if(Object.keys(this._pendingUpdate).length>0){
-        //     return this.update(this._pendingUpdate);
-        // }
+
+    get isEquipable() {
+        return (this.type === "weapon" || this.type === "armor") && !this.isBioPart && !this.isDroidPart;
+    }
+
+    get isModification() {
+        return this.type === "upgrade" || this.subType === "weapons and armor accessories";
+    }
+
+    get isBioPart() {
+        return this.subType === "Implants" || this.subType === "Bio-Implants" || this.subType === "Cybernetic Devices" || this.subType === "Advanced Cybernetics";
+    }
+
+    get isDroidPart() {
+        return this.subType === "Locomotion Systems" || this.subType === "Processor Systems"
+            || this.subType === "Appendages" || this.subType.startsWith("Droid Accessories")
     }
 
     prepareFeatData(itemData) {
@@ -596,7 +548,7 @@ export class SWSEItem extends Item {
     }
 
     canStripAutoFire() {
-        let ratesOfFire = this.getAttribute('ratesOfFire');
+        let ratesOfFire = this.getInheritableAttributesByKey('ratesOfFire');
         if (ratesOfFire.length === 0) {
             return false;
         }
@@ -616,7 +568,7 @@ export class SWSEItem extends Item {
 
     canStripStun() {
 
-        return this.getAttribute('stunDamageDie').length > 0 && this.getAttribute('damageDie').length > 0;
+        return this.getInheritableAttributesByKey('stunDamageDie').length > 0 && this.getInheritableAttributesByKey('damageDie').length > 0;
     }
 
     isExotic() {
@@ -745,7 +697,7 @@ export class SWSEItem extends Item {
 
     static getModifierHTML(rangedAttackModifier, item) {
         let modifiers = [];
-        let uniqueId = Math.floor(Math.random()*50000 + Math.random()*50000)
+        let uniqueId = Math.floor(Math.random() * 50000 + Math.random() * 50000)
         if (isNaN(rangedAttackModifier)) {
             modifiers.push(getRangeModifierBlock(item.effectiveRange, item.accurate, item.inaccurate, uniqueId))
         }
@@ -862,9 +814,10 @@ export class SWSEItem extends Item {
     /**
      * Checks item for any attributes matching the provided attributeKey.  this includes active modes.
      * @param attributeKey {String}
+     * @param reduce
      * @returns {[]|*[]}
      */
-    getAttribute(attributeKey) {
+    getInheritableAttributesByKey(attributeKey, reduce) {
         if (!attributeKey) {
             return [];
         }
@@ -894,7 +847,7 @@ export class SWSEItem extends Item {
             values.push(...this.getAttributesFromItem(child._id, attributeKey))
         }
 
-        return values;
+        return reduceArray(reduce, values);
     }
 
     getProvidedItems(filter) {

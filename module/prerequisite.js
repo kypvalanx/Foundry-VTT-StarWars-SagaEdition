@@ -212,13 +212,14 @@ meetsPrerequisites(target, prereqs) {
             }
             case 'SPECIAL':
                 if (prereq.requirement.toLowerCase() === 'not a droid') {
-                    if (!target.data.data.isDroid) {
+                    let inheritableAttributesByKey = target.getInheritableAttributesByKey("isDroid", "OR", null);
+                    if (!inheritableAttributesByKey) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 } else if (prereq.requirement.toLowerCase() === 'is a droid') {
-                    if (target.data.data.isDroid) {
+                    if (target.getInheritableAttributesByKey("isDroid", "OR", null)) {
                         successList.push({prereq, count: 1});
                         continue;
                     }

@@ -21,7 +21,7 @@ function generateArmorBlock(actor, armor) {
 
 
     return {
-        name: armor.data.data.finalName,
+        name: armor.name,
         speed: speed,
         refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
         fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
@@ -45,13 +45,16 @@ export function resolveDefenses(actor) {
     let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(defenseBonuses);
 
+    let damageReduction = actor.getInheritableAttributesByKey("damageReduction", "SUM", null)
+
+
     let armors = []
 
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
 
-    return {defense: {fort, will, ref, dt, situationalBonuses}, armors};
+    return {defense: {fort, will, ref, dt, damageThreshold: dt, damageReduction, situationalBonuses}, armors};
 }
 
 /**
@@ -71,9 +74,9 @@ function _resolveFort(actor, defenseBonuses, conditionBonus) {
     total.push(abilityBonus);
     let traitBonus = _getTraitDefBonus('fortitude', defenseBonuses);
     total.push(traitBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", undefined, "MAX");
+    let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", "MAX", undefined);
     total.push(classBonus);
-    let equipmentBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", undefined,"SUM");
+    let equipmentBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", "SUM", undefined);
     total.push(equipmentBonus);
     total.push(conditionBonus);
     let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
@@ -93,7 +96,7 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(actor.characterLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus").map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
+    let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus").map(attr => attr.value).reduce((a, b)=> Math.max(a,b), 0);
     total.push(classBonus);
     let traitBonus = _getTraitDefBonus('will', defenseBonuses);
     total.push(traitBonus);
@@ -113,7 +116,7 @@ function _resolveRef(actor, defenseBonuses, conditionBonus) {
     total.push(abilityBonus);
     let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
     total.push(traitBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus").map(attr => attr.value).reduce((a,b)=> Math.max(a,b), 0);
+    let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus").map(attr => attr.value).reduce((a, b)=> Math.max(a,b), 0);
 
     let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)

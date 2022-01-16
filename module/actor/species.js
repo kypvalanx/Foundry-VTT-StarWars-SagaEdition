@@ -10,16 +10,9 @@ export class SpeciesHandler {
             return;
         }
 
-        let speciesName = actorData.species.name;
-
-        actorData.data.isDroid = this._isDroid(speciesName);
         let prerequisites = actorData.prerequisites;
         prerequisites.species = actorData.species?.name.toLowerCase();
-        prerequisites.isDroid = actorData.data.isDroid;
-        actorData.data.attributes.con.skip = actorData.data.isDroid;
-    }
-
-    _isDroid(speciesName) {
-        return speciesName.toLowerCase().includes("droid");
+        prerequisites.isDroid = actor.isDroid
+        actorData.data.attributes.con.skip = actor.getInheritableAttributesByKey("isDroid", "OR", null);
     }
 }
