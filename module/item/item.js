@@ -435,7 +435,7 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace("#payload#", payload);
             }
         });
-        this.crawlAttributes(this.data.data, (attribute) => {
+        this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
                     attribute.value = attribute.value.replace("#payload#", payload);
@@ -447,7 +447,7 @@ export class SWSEItem extends Item {
     }
 
 
-    crawlAttributes(data, funct) {
+    _crawlAttributes(data, funct) {
         if (!data) {
             return;
         }
@@ -465,7 +465,7 @@ export class SWSEItem extends Item {
         }
         //funct(data);
         for (let mode of data.modes || []) {
-            this.crawlAttributes(mode, funct)
+            this._crawlAttributes(mode, funct)
         }
 
     }
@@ -494,6 +494,7 @@ export class SWSEItem extends Item {
         this.data.data.isSupplied = true;
     }
 
+    //TODO MOVE ME
     stripHTML(str) {
         let parser = new DOMParser();
         let doc = parser.parseFromString(str, 'text/html');

@@ -40,9 +40,10 @@ function getGroupedModes(item) {
  *
  * @param {SWSEItem} item
  * @param {SWSEActor} actor
+ * @param {number} attackIteration
  * @returns {Attack|undefined}
  */
-export function generateAttackFromWeapon(item, actor) {
+export function generateAttackFromWeapon(item, actor, attackIteration) {
     let actorData = actor.data;
     if (!actorData || !item) {
         return undefined;
@@ -90,6 +91,10 @@ export function generateAttackFromWeapon(item, actor) {
     let damage;
 
     let damageDie = item.damageDie;
+    if(attackIteration){
+        damageDie = item.additionalDamageDice[attackIteration - 1]
+    }
+
     if (damageDie) {
         damage = damageDie + getBonusString(damageBonus);
     }
