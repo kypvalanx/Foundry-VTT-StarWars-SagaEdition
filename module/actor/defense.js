@@ -93,7 +93,6 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(10);
     let heroicLevel = actor.getHeroicLevel();
     total.push(heroicLevel);
-    total.push(actor.characterLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
     let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus").map(attr => attr.value).reduce((a, b)=> Math.max(a,b), 0);
@@ -250,8 +249,9 @@ function _getEquipmentMaxDexBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 1000;
     for (let item of equipped) {
-        if (!isNaN(item.maximumDexterityBonus)) {
-            bonus = Math.min(bonus, item.maximumDexterityBonus);
+        let maximumDexterityBonus = item.maximumDexterityBonus;
+        if (!isNaN(maximumDexterityBonus)) {
+            bonus = Math.min(bonus, maximumDexterityBonus);
         }
     }
     return bonus;

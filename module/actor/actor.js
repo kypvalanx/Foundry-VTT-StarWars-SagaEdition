@@ -351,7 +351,7 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
-            } else if (doesFail && !feat.data.data.isSupplied) {
+            } else if (doesFail && !feat.data.data.supplier) {
                 removeFeats.push(feat.data);
             } else if (prereqResponse.failureList.length > 0) {
 
