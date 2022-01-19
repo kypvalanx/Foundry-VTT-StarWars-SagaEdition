@@ -4,7 +4,7 @@ import {
     getBonusString,
     getRangedAttackMod,
     getRangeModifierBlock,
-    increaseDamageDie, reduceArray,
+    increaseDieSize, reduceArray,
     toNumber
 } from "../util.js";
 
@@ -96,7 +96,11 @@ export class SWSEItem extends Item {
     }
 
     get maximumDexterityBonus() {
-        return toNumber(this.getInheritableAttributesByKey('maximumDexterityBonus')) - toNumber(this.getStripping("reduceJointProtection"));
+        let maxDexBonuses = this.getInheritableAttributesByKey('maximumDexterityBonus');
+        if(maxDexBonuses.length === 0){
+            return undefined;
+        }
+        return toNumber(maxDexBonuses) - toNumber(this.getStripping("reduceJointProtection"));
     }
 
     get mods() {
@@ -209,17 +213,20 @@ export class SWSEItem extends Item {
         if (damageDie.includes("/")) {
             damageDie = damageDie.split("/")[0]
         }
-        let tok = damageDie.split('d');
-        let quantity = parseInt(tok[0]);
-        let size = parseInt(tok[1]);
+        // let tok = damageDie.split('d');
+        // let quantity = parseInt(tok[0]);
+        // let size = parseInt(tok[1]);
 
-        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDie')) {
-            quantity = quantity + parseInt(bonusDamageDie.value);
-        }
+        // for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDie')) {
+        //     quantity = quantity + parseInt(bonusDamageDie.value);
+        // }
         for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDieSize')) {
-            size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+            damageDie = increaseDamageDie(damageDie, parseInt(bonusDamageDie.value));
         }
-        return quantity + "d" + size;
+        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusDamageDieType')) {
+            damageDie = increaseDieType(damageDie, parseInt(bonusDamageDie.value));
+        }
+        return damageDie;
     }
 
     get additionalDamageDice() {
@@ -235,23 +242,23 @@ export class SWSEItem extends Item {
         }
         let damageDice = damageDie.split("/");
 
-        let bonusDice = this.getInheritableAttributesByKey('bonusDamageDie');
+        //let bonusDice = this.getInheritableAttributesByKey('bonusDamageDie');
         let bonusSize = this.getInheritableAttributesByKey('bonusDamageDieSize');
         let atks = [];
         for (let die of damageDice) {
 
-            let tok = die.split('d');
-            let quantity = parseInt(tok[0]);
-            let size = parseInt(tok[1]);
+            // let tok = die.split('d');
+            // let quantity = parseInt(tok[0]);
+            // let size = parseInt(tok[1]);
 
-            for (let bonusDamageDie of bonusDice) {
-                quantity = quantity + parseInt(bonusDamageDie.value);
-            }
+            // for (let bonusDamageDie of bonusDice) {
+            //     quantity = quantity + parseInt(bonusDamageDie.value);
+            // }
             for (let bonusDamageDie of bonusSize) {
-                size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+                die = increaseDamageDie(die, parseInt(bonusDamageDie.value));
             }
 
-            atks.push(quantity + "d" + size);
+            atks.push(die);
         }
 
 
@@ -263,17 +270,17 @@ export class SWSEItem extends Item {
         if (!damageDie || this.getStripping("stripStun")?.value) {
             return ""
         }
-        let tok = damageDie.split('d');
-        let quantity = parseInt(tok[0]);
-        let size = parseInt(tok[1]);
-
-        for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusStunDamageDie')) {
-            quantity = quantity + parseInt(bonusDamageDie.value);
-        }
+        // let tok = damageDie.split('d');
+        // let quantity = parseInt(tok[0]);
+        // let size = parseInt(tok[1]);
         for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusStunDamageDieSize')) {
-            size = increaseDamageDie(size, parseInt(bonusDamageDie.value));
+            damageDie = increaseDamageDie(damageDie, parseInt(bonusDamageDie.value));
         }
-        return quantity + "d" + size;
+
+        // for (let bonusDamageDie of this.getInheritableAttributesByKey('bonusStunDamageDie')) {
+        //     quantity = quantity + parseInt(bonusDamageDie.value);
+        // }
+        return damageDie;
     }
 
     get damageType() {
@@ -435,7 +442,7 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace("#payload#", payload);
             }
         });
-        this.crawlAttributes(this.data.data, (attribute) => {
+        this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
                     attribute.value = attribute.value.replace("#payload#", payload);
@@ -447,7 +454,7 @@ export class SWSEItem extends Item {
     }
 
 
-    crawlAttributes(data, funct) {
+    _crawlAttributes(data, funct) {
         if (!data) {
             return;
         }
@@ -465,7 +472,7 @@ export class SWSEItem extends Item {
         }
         //funct(data);
         for (let mode of data.modes || []) {
-            this.crawlAttributes(mode, funct)
+            this._crawlAttributes(mode, funct)
         }
 
     }
@@ -494,6 +501,7 @@ export class SWSEItem extends Item {
         this.data.data.isSupplied = true;
     }
 
+    //TODO MOVE ME
     stripHTML(str) {
         let parser = new DOMParser();
         let doc = parser.parseFromString(str, 'text/html');

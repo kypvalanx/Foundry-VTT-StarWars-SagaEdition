@@ -1,4 +1,4 @@
-import {getBonusString, increaseDamageDie, resolveValueArray} from "../util.js";
+import {getBonusString, increaseDieSize, increaseDieType, resolveValueArray} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {Attack} from "./attack.js";
 import {d20, sizeArray} from "../constants.js";
@@ -40,9 +40,10 @@ function getGroupedModes(item) {
  *
  * @param {SWSEItem} item
  * @param {SWSEActor} actor
+ * @param {number} attackIteration
  * @returns {Attack|undefined}
  */
-export function generateAttackFromWeapon(item, actor) {
+export function generateAttackFromWeapon(item, actor, attackIteration) {
     let actorData = actor.data;
     if (!actorData || !item) {
         return undefined;
@@ -67,14 +68,14 @@ export function generateAttackFromWeapon(item, actor) {
     let attackBonuses = [actorData.data.offense.bab]
     let weaponTypes = getPossibleProficiencies(actor, item);
 
-    if(isRanged(item)){
-        attackBonuses.push(resolveFinesseBonus(actor, [{value:"DEX"}]));
+    if (isRanged(item)) {
+        attackBonuses.push(resolveFinesseBonus(actor, [{value: "DEX"}]));
     } else {
         let strMod = parseInt(actor.getAttributeMod("str"));
         let isTwoHanded = compareSizes(size, item.size) === 1;
         damageBonuses.push(isTwoHanded ? strMod * 2 : strMod)
         let finesseStats = [{value: "STR"}];
-        if(canFinesse(size, item, isFocus(actor,weaponTypes))) {
+        if (canFinesse(size, item, isFocus(actor, weaponTypes))) {
             finesseStats.push(...actor.getInheritableAttributesByKey("finesseStat"));
         }
         attackBonuses.push(resolveFinesseBonus(actor, finesseStats));
@@ -90,11 +91,14 @@ export function generateAttackFromWeapon(item, actor) {
     let damage;
 
     let damageDie = item.damageDie;
+    if (attackIteration) {
+        damageDie = item.additionalDamageDice[attackIteration - 1]
+    }
+
     if (damageDie) {
         damage = damageDie + getBonusString(damageBonus);
     }
     let stunDamageDie = "";
-    let stunDamage;
     let hasStun = false;
     if (item.stunDamageDie) {
         stunDamageDie = item.stunDamageDie;
@@ -112,19 +116,19 @@ function isOversized(actorSize, itemSize) {
 
 function getPossibleProficiencies(actor, weapon) {
     let weaponFamiliarities = {};
-        actor.getInheritableAttributesByKey("weaponFamiliarity").forEach(fam => {
-            let toks = fam.split(":");
-            if (toks.length===2) {
-                weaponFamiliarities[toks[0]] = toks[1];
-            }
-        });
+    actor.getInheritableAttributesByKey("weaponFamiliarity").forEach(fam => {
+        let toks = fam.split(":");
+        if (toks.length === 2) {
+            weaponFamiliarities[toks[0]] = toks[1];
+        }
+    });
 
     let descriptors = [weapon.name, weapon.subType];
     let explodedDescriptors = [];
 
-    for(let descriptor of descriptors){
+    for (let descriptor of descriptors) {
         let familiarity = weaponFamiliarities[descriptor];
-        if(familiarity){
+        if (familiarity) {
             explodedDescriptors.push(familiarity);
         }
     }
@@ -241,7 +245,7 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
 
 export function resolveFinesseBonus(actor, finesseStats) {
     let bonus = 0;
-    for(let stat of finesseStats){
+    for (let stat of finesseStats) {
         bonus = Math.max(bonus, actor.getCharacterAttribute(stat.value).mod);
     }
     return bonus;
@@ -265,7 +269,7 @@ export function generateUnarmedAttack(actor) {
     let proficiencyBonus = proficient ? 0 : -5;
     let focus = isFocus(actor, UNARMED_WEAPON_TYPES);
     let finesseStats = actor.getInheritableAttributesByKey("finesseStat");
-    finesseStats.push({value:"STR"});
+    finesseStats.push({value: "STR"});
     let finesseBonus = resolveFinesseBonus(actor, finesseStats);
     let offense = actorData.data?.offense;
 
@@ -310,36 +314,13 @@ export function generateUnarmedAttack(actor) {
 }
 
 /**
- *
- * @param {SWSEItem} size
+ * Resolves the die to be thrown when making an unarmed attack
  * @param {SWSEActor} actor
  * @returns {String}
  */
 function resolveUnarmedDamageDie(actor) {
-    let inheritableAttributesByKey = actor.getInheritableAttributesByKey("unarmedDamageDie");
-    if(inheritableAttributesByKey.length>1) {
-        console.warn("found multiple unarmedDieSize attributes")
-    } else if(inheritableAttributesByKey.length<1){
-        inheritableAttributesByKey = [1];
-    }
-    let damageDie = inheritableAttributesByKey[0].value;
+    let damageDie = actor.getInheritableAttributesByKey(actor.isDroid ? "droidUnarmedDamageDie" : "unarmedDamageDie", "MAX");
     let bonus = actor.getInheritableAttributesByKey("bonusUnarmedDamageDieSize")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
-    damageDie = increaseDamageDie(damageDie, bonus);
-    return `1d${damageDie}`;
-}
-
-
-//test()
-
-function test() {
-
-    console.log("+5" === getBonusString(5))
-    console.log("-5" === getBonusString(-5))
-    console.log("" === getBonusString(0))
-
-    console.log(undefined === increaseDamageDie(-1))
-    console.log(undefined === increaseDamageDie(12))
-    console.log(8 === increaseDamageDie(6))
-
+    return increaseDieSize(damageDie, bonus);
 }

@@ -232,7 +232,7 @@ meetsPrerequisites(target, prereqs) {
                 failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                 break;
             case 'GENDER':
-                if (target.data.data.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
+                if (target.data.data.sex && target.data.data.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     continue;
                 }

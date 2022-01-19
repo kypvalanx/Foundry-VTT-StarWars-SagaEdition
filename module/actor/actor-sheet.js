@@ -1107,7 +1107,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addClassFeats(item, context) {
-        let feats = item.getAttribute("classFeat").map(attr => attr.value);
+        let feats = item.getInheritableAttributesByKey("classFeat").map(attr => attr.value);
         if (feats.length === 0) {
             return;
         }

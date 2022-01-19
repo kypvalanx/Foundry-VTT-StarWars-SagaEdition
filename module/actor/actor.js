@@ -351,7 +351,7 @@ export class SWSEActor extends Actor {
                 this.checkIsSkillFocus(feat, prerequisites);
                 this.checkIsSkillMastery(feat, prerequisites);
                 this.checkForProficiencies(feat, actorData);
-            } else if (doesFail && !feat.data.data.isSupplied) {
+            } else if (doesFail && !feat.data.data.supplier) {
                 removeFeats.push(feat.data);
             } else if (prereqResponse.failureList.length > 0) {
 
@@ -1199,7 +1199,6 @@ export class SWSEActor extends Actor {
 
             let dualWeaponModifiers = this.getInheritableAttributesByKey("dualWeaponModifier", "NUMERIC_VALUES", null);
             dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
-            console.log(dualWeaponModifier, doubleAttack, tripleAttack)
         }
 
         let suppliedItems = context.items || [];
@@ -1273,7 +1272,6 @@ export class SWSEActor extends Actor {
                     context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
                     context.damageMods = this.getDamageMods(selects, dualWeaponModifier);
                     attackIds.each((i, div) => this.populateItemStats(div, context));
-                    this._render();
                 })
             },
             options: {
@@ -1344,13 +1342,20 @@ export class SWSEActor extends Actor {
             let total = parent.children(".attack-total");
             this.setAttackTotal(attack, total, options, context);
         } else {
-            let item = this.items.get(attack.itemId)
+            let itemId = attack.itemId;
+            let iterative = 0;
+            if(itemId.includes("#")){
+                let toks = itemId.split("#");
+                iterative = parseInt(toks[1]);
+                itemId = toks[0];
+            }
 
+            let item = this.items.get(itemId)
 
             if (item) {
                 let rangedAttackModifier = getRangedAttackMod(item.effectiveRange, item.accurate, item.inaccurate, this);
 
-                let attack = generateAttackFromWeapon(item, this);
+                let attack = generateAttackFromWeapon(item, this, iterative);
                 options.append(SWSEItem.getModifierHTML(rangedAttackModifier, item))
 
                 options.find(".attack-modifier").on("change", ()=> this.setAttackTotal(attack, total, options, context))
@@ -1423,7 +1428,7 @@ export class SWSEActor extends Actor {
                 let clonedAttack = JSON.parse(JSON.stringify(attack));
                 clonedAttack.dam = additionalDamageDie;
                 clonedAttack.name = clonedAttack.name + ` (${getOrdinal(i + 2)} attack)`
-                clonedAttack.itemId = clonedAttack.itemId + `#${getOrdinal(i + 2)}`
+                clonedAttack.itemId = clonedAttack.itemId + `#${i + 1}`
                 resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
             }
 
@@ -1466,6 +1471,7 @@ export class SWSEActor extends Actor {
 
     rollAttacks(attacks, rollMode) {
         let cls = getDocumentClass("ChatMessage");
+        //let csd = getDocumentClass("ChatSpeakerData");
 
         let attackRows = "";
         let roll;
@@ -1482,8 +1488,20 @@ export class SWSEActor extends Actor {
 <tbody>${attackRows}</tbody>
 </table>`;
 
+        let speaker = cls.getSpeaker();
+
+        delete speaker.alias
+
+        let flavor = attacks[0].name;
+        if(attacks.length > 1){
+            flavor = "Full Attack " + flavor;
+        }
+
+
         let messageData = {
             user: game.user.id,
+            speaker: speaker,
+            flavor: flavor,
             type: CONST.CHAT_MESSAGE_TYPES.ROLL,
             content,
             sound: CONFIG.sounds.dice,

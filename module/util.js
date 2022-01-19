@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import {SWSE} from "./config.js";
-import {dieSize} from "./constants.js";
+import {dieSize, dieType} from "./constants.js";
 
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
@@ -302,15 +302,60 @@ export function toShortAttribute(attributeName) {
     }
 }
 
-export function increaseDamageDie(damageDieSize, bonus) {
-    if(typeof damageDieSize === "string"){
-        damageDieSize = parseInt(damageDieSize);
-    }
-    let index = dieSize.indexOf(damageDieSize);
+/**
+ *
+ * @param die {string}
+ * @param bonus {number}
+ * @returns {string}
+ */
+export function increaseDamageDie(die, bonus) {
+    let index = dieSize.indexOf(`${die}`);
     if (index === -1) {
-        return 0;
+        return "0";
     }
-    return dieSize[index + bonus];
+    return dieSize[index + bonus] || "0";
+}
+
+/**
+ *
+ * @param die {string}
+ * @param bonus {number}
+ * @returns {string}
+ */
+export function increaseDieType(die, bonus= 0) {
+    let size;
+    let quantity;
+    die = `${die}`;
+    if(die === "1"){
+        quantity = "1"
+        size = "1"
+    } else if(die.includes("d")){
+        let toks = die.split("d");
+        quantity = toks[0].trim();
+        size = toks[1].trim();
+    }
+    let index = dieType.indexOf(`${size}`);
+    if (index === -1) {
+        return "0";
+    }
+    size = dieType[index + bonus];
+    if(size === "1"){
+        return quantity;
+    }
+    return `${quantity}d${size}` || "0";
+}
+/**
+ *
+ * @param die {string}
+ * @param bonus {number}
+ * @returns {string}
+ */
+export function increaseDieSize(die, bonus) {
+    let index = dieSize.indexOf(`${die}`);
+    if (index === -1) {
+        return "0";
+    }
+    return dieSize[index + bonus] || "0";
 }
 
 export function toBoolean(value){
@@ -601,7 +646,31 @@ export function reduceArray(reduce, values) {
         case "OR":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a || b, false);
         case "MAX":
-            return values.map(attr => toNumber(attr.value)).reduce((a, b) => Math.max(a, b), 0);
+            return values.map(attr => attr.value).reduce((a, b) => {
+                let sub = {}
+                if(typeof a === 'string' && a.includes("d")){
+                    let toks = a.split("d")
+                    let key = toNumber(toks[0]) * toNumber(toks[1]);
+                    sub[key] = a;
+                    a = key;
+                } else {
+                    let key = toNumber(a);
+                    sub[key] = a;
+                    a = key;
+                }
+                if(typeof b === 'string' && b.includes("d")){
+                    let toks = b.split("d")
+                    let key = toNumber(toks[0]) * toNumber(toks[1]);
+                    sub[key] = b;
+                    b = key;
+                } else {
+                    let key = toNumber(b);
+                    sub[key] = b;
+                    b = key;
+                }
+                let result = Math.max(a, b);
+                return sub[result];
+            }, 0);
         case "MIN":
             return values.map(attr => toNumber(attr.value)).reduce((a, b) => Math.min(a, b), 0);
         case "VALUES":
