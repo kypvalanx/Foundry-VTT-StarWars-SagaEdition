@@ -6,7 +6,7 @@ import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
-import {generateCompendiums} from "./compendium/generation.js";
+import {generateCompendiums, deleteEmptyCompendiums} from "./compendium/generation.js";
 
 
 Hooks.once('init', async function() {
@@ -17,7 +17,7 @@ Hooks.once('init', async function() {
     rollVariable,
     rollItem,
     //rollAttack,
-    generateCompendiums
+    generateCompendiums, deleteEmptyCompendiums
   };
 
 
@@ -100,15 +100,35 @@ Array.prototype.distinct = function() {
   return this.filter((value, index, self) => self.indexOf(value) === index)
 }
 
-
+/**
+ * Convert a string to Title Case where the first letter of each word is capitalized
+ * @memberof String.prototype
+ * @returns {string}
+ */
 String.prototype.titleCase = function() {
   if (!this.length) return this;
-  return this.toLowerCase().split(' ').map(function (word) {
-    return word.replace(word[0], word[0].toUpperCase());
-  }).join(' ').split('(').map(function (word) {
-    return word.replace(word[0], word[0].toUpperCase());
-  }).join('(');
+  return this.toLowerCase().split(' ').reduce((parts, word) => {
+    if ( !word ) return parts;
+    const title = word.replace(word[0], word[0].toUpperCase());
+    parts.push(title);
+    return parts;
+  }, []).join(' ').split('(').reduce((parts, word) => {
+    if ( !word ) return parts;
+    const title = word.replace(word[0], word[0].toUpperCase());
+    parts.push(title);
+    return parts;
+  }, []).join('(');
 };
+
+//
+// String.prototype.titleCase = function() {
+//   if (!this.length) return this;
+//   return this.toLowerCase().split(' ').map(function (word) {
+//     return word.replace(word[0], word[0].toUpperCase());
+//   }).join(' ').split('(').map(function (word) {
+//     return word.replace(word[0], word[0].toUpperCase());
+//   }).join('(');
+// };
 
 
 Hooks.on("hotbarDrop", (bar, data, slot) => {

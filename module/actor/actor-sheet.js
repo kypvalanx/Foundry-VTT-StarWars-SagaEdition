@@ -1,5 +1,6 @@
 import {filterItemsByType, getBonusString, getOrdinal, getRangedAttackMod, handleAttackSelect} from "../util.js";
 import {SWSE} from "../config.js";
+import {skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 
 // noinspection JSClosureCompilerSyntax
@@ -1054,7 +1055,7 @@ export class SWSEActorSheet extends ActorSheet {
                 continue;
             }
 
-            let options = await this._explodeOptions(choice.options);
+            let options = this._explodeOptions(choice.options);
 
             let greetingString;
             let optionString = "";
@@ -1108,27 +1109,59 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClassFeats(item, context) {
         let feats = item.getInheritableAttributesByKey("classFeat").map(attr => attr.value);
+        let availableClassFeats = item.getInheritableAttributesByKey("availableClassFeats", "SUM");
         if (feats.length === 0) {
             return;
         }
         let additionalEntitiesToAdd = [];
         feats = feats.map(feat => this.actor.cleanItemName(feat))
         if (context.isFirstLevel) {
-            await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${feat})`));
-            let newVar = await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feats)
+            if(availableClassFeats > 0 && availableClassFeats < feats.length){
+                let selectedFeats = [];
+                for(let i = 0; i < availableClassFeats; i ++){
+                    let options = "";
 
-            let featString = newVar.notificationMessage;
+                    for (let feat of this._explodeFeatNames(feats)) {
+                        let owned = "";
+                        let ownedFeats = this.actor.feats.filter(f => f.finalName === feat);
+                        ownedFeats.push(...selectedFeats.filter(f => f === feat))
+                        if (ownedFeats.length > 0) {
+                            owned = "<i>(you already have this feat)</i>"
+                        }
 
-            new Dialog({
-                title: "Adding Class Starting Feats",
-                content: `Adding class starting feats: <ul>${featString}</ul>`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
+                        options += `<option value="${feat}">${feat}${owned}</option>`
                     }
+
+                    await Dialog.prompt({
+                        title: "Select a Starting feat from this class",
+                        content: `<p>Select a Starting feat from this class</p>
+                        <div><select id='feat'>${options}</select> 
+                        </div>`,
+                        callback: async (html) => {
+                            let feat = html.find("#feat")[0].value;
+                            selectedFeats.push(feat);
+                            await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, `Bonus Feat (${feat})`)
+                            await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feat)
+                        }
+                    });
                 }
-            }).render(true);
+            } else {
+                await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${feat})`));
+                let newVar = await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feats)
+
+                let featString = newVar.notificationMessage;
+
+                new Dialog({
+                    title: "Adding Class Starting Feats",
+                    content: `Adding class starting feats: <ul>${featString}</ul>`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+            }
         } else if (this._isFirstLevelOfClass(item.data.name)) {
             let options = "";
             for (let feat of feats) {
@@ -1288,7 +1321,22 @@ export class SWSEActorSheet extends ActorSheet {
         return items.length === 1;
     }
 
-    async _explodeOptions(options) {
+    _explodeFeatNames(feats){
+        let explode = [];
+        for(let feat of feats){
+            if("Skill Focus" === feat){
+                skills.forEach(skill => {
+                    console.log("skill", skill)
+                    if (skill && !this.actor.focusSkills.includes(skill.toLowerCase())) {
+                        explode.push(`${feat} (${skill})`);
+                    }
+                })
+            } else{ explode.push(feat)};
+        }
+        return explode;
+    }
+
+    _explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
             if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
@@ -1310,9 +1358,9 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
-                for (let weapon of this.actor.trainedSkills) {
-                    if (!this.actor.data.prerequisites.focusSkills.includes(weapon.toLowerCase())) {
-                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                for (let skill of this.actor.skills) {
+                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.toLowerCase())) {
+                        resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {

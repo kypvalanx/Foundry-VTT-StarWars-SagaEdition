@@ -55,6 +55,14 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
 });
 }
 
+export const deleteEmptyCompendiums = async function(){
+    await game.packs.forEach(p => {
+        if(p.index.size === 0){
+            p.delete();
+        }
+    });
+}
+
 export const generateCompendiums = async function (forceRefresh = false) {
     console.log("Generating Compendiums...")
 

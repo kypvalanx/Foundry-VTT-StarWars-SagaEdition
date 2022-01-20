@@ -57,7 +57,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
 
     let notes = item.getInheritableAttributesByKey('special').filter(s => !!s).map(s => s.value);
 
-    let range = item.effectiveRange;
+    let range = item.effectiveRange.value;
     let critical = "x2"
     let type = item.damageType
 
@@ -82,7 +82,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
     }
     attackBonuses.push(isProficient(actor, weaponTypes) ? 0 : -5);
     attackBonuses.push(isFocus(actor, weaponTypes) ? 1 : 0)
-    attackBonuses.push(actor.data.acPenalty) //TODO this looks like it could use some TLC
+    attackBonuses.push(actor.acPenalty) //TODO this looks like it could use some TLC
     attackBonuses.push(...(item.getInheritableAttributesByKey("toHitModifier")))
 
     let attackRoll = d20 + getBonusString(resolveValueArray(attackBonuses, actor));
@@ -117,7 +117,7 @@ function isOversized(actorSize, itemSize) {
 function getPossibleProficiencies(actor, weapon) {
     let weaponFamiliarities = {};
     actor.getInheritableAttributesByKey("weaponFamiliarity").forEach(fam => {
-        let toks = fam.split(":");
+        let toks = fam.value.split(":");
         if (toks.length === 2) {
             weaponFamiliarities[toks[0]] = toks[1];
         }
