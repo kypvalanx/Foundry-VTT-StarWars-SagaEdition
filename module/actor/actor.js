@@ -499,7 +499,7 @@ export class SWSEActor extends Actor {
 
     getHeroicLevel(){
         if (this.classes) {
-            let heroicLevel = this.classes.filter(c=>c.name !== 'NonHeroic' && c.name !== 'Beast').length;
+            let heroicLevel = this.classes.filter(c=>c.getInheritableAttributesByKey("isHeroic", "OR")).length;
             this.resolvedVariables.set("@heroicLevel", heroicLevel);
             return heroicLevel;
         }
@@ -527,8 +527,15 @@ export class SWSEActor extends Actor {
         return Object.values(this.data.data.skills).filter(skill => skill.trained);
     }
 
+    get skills(){
+        return Object.values(this.data.data.skills);
+    }
+
     get focusSkills(){
-        return this.data.prerequisites.focusSkills
+        return this.data.prerequisites.focusSkills || []
+    }
+    get inactiveProvidedFeats(){
+        return this.data.inactiveProvidedFeats;
     }
 
     get shield(){
@@ -801,6 +808,10 @@ export class SWSEActor extends Actor {
             values.push(...this.getAttributesFromItem(item._id, attributeKey));
         }
         return reduceArray(reduce, values);
+    }
+
+    get acPenalty(){
+        return this.data.acPenalty
     }
 
     get fullAttackCount(){
