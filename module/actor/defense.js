@@ -1,5 +1,5 @@
 import {SWSEActor} from "./actor.js";
-import {resolveValueArray} from "../util.js";
+import {resolveValueArray, toNumber} from "../util.js";
 
 
 function reduceSpeedForArmorType(speed, armorType) {
@@ -16,7 +16,7 @@ function reduceSpeedForArmorType(speed, armorType) {
  * @returns {{fortDefense: (*|number), notes: (*|string), refDefense: (*|number), name, type: string, maxDex: (*|number), speed}}
  */
 function generateArmorBlock(actor, armor) {
-    let attributes = armor.data.data.attributes;
+    let attributes = armor.getInheritableAttributesByKey("special", (a,b)=>`${a}, ${b}`);
     let speed = actor.speed
 
 
@@ -26,7 +26,7 @@ function generateArmorBlock(actor, armor) {
         refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
         fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
         maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
-        notes: attributes.special && Array.isArray(attributes.special.value) ? attributes.special.value.join(", ") : "",
+        notes: attributes,
         type: armor.armorType
     };
 }
@@ -37,15 +37,15 @@ function generateArmorBlock(actor, armor) {
  * @returns
  */
 export function resolveDefenses(actor) {
-    let defenseBonuses = actor.getTraitAttributesByKey('defenseBonuses');
-    let conditionBonus = actor.conditionBonus;
-    let fort = _resolveFort(actor, defenseBonuses, conditionBonus);
-    let will = _resolveWill(actor, defenseBonuses, conditionBonus);
-    let ref = _resolveRef(actor, defenseBonuses, conditionBonus);
-    let dt = _resolveDt(actor, defenseBonuses, conditionBonus);
-    let situationalBonuses = _getSituationalBonuses(defenseBonuses);
+    let fort = _resolveFort(actor, actor.conditionBonus);
+    let will = _resolveWill(actor, actor.conditionBonus);
+    let ref = _resolveRef(actor, actor.conditionBonus);
+    let dt = _resolveDt(actor, actor.conditionBonus);
+    let situationalBonuses = _getSituationalBonuses(
+        actor.getInheritableAttributesByKey(["fortitudeDefenseBonus", "reflexDefenseBonus", "willDefenseBonus"],
+            undefined, undefined, attr => attr.modifier));
 
-    let damageReduction = actor.getInheritableAttributesByKey("damageReduction", "SUM", null)
+    let damageReduction = actor.getInheritableAttributesByKey("damageReduction", "SUM")
 
 
     let armors = []
@@ -60,34 +60,40 @@ export function resolveDefenses(actor) {
 /**
  *
  * @param actor {SWSEActor}
- * @param defenseBonuses {[]}
  * @param conditionBonus {number}
  * @returns {number}
  * @private
  */
-function _resolveFort(actor, defenseBonuses, conditionBonus) {
+function _resolveFort(actor, conditionBonus) {
     let total = [];
     total.push(10);
     let heroicLevel = actor.getHeroicLevel();
     total.push(heroicLevel);
     let abilityBonus = _getFortStatMod(actor);
     total.push(abilityBonus);
-    let traitBonus = _getTraitDefBonus('fortitude', defenseBonuses);
-    total.push(traitBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", "MAX", undefined);
+    let otherBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", "SUM", undefined, attr => !attr.modifier)
+    total.push(otherBonus);
+    let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", "MAX");
     total.push(classBonus);
-    let equipmentBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", "SUM", undefined);
+    let equipmentBonus = _getEquipmentFortBonus(actor);
     total.push(equipmentBonus);
     total.push(conditionBonus);
     let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
     let miscBonuses = [];
     miscBonuses.push(conditionBonus)
-    miscBonuses.push(traitBonus)
+    miscBonuses.push(otherBonus)
     let miscBonus = resolveValueArray(miscBonuses)
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
-function _resolveWill(actor, defenseBonuses, conditionBonus) {
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param conditionBonus
+ * @returns {{classBonus, total: number, miscBonus: number, abilityBonus, armorBonus: number}}
+ * @private
+ */
+function _resolveWill(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
@@ -95,38 +101,50 @@ function _resolveWill(actor, defenseBonuses, conditionBonus) {
     total.push(heroicLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus").map(attr => attr.value).reduce((a, b)=> Math.max(a,b), 0);
+    let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus", "MAX");
     total.push(classBonus);
-    let traitBonus = _getTraitDefBonus('will', defenseBonuses);
-    total.push(traitBonus);
+    let otherBonus = actor.getInheritableAttributesByKey("willDefenseBonus", "SUM", undefined, attr => !attr.modifier)
+    total.push(otherBonus);
     total.push(conditionBonus);
-    let miscBonus = resolveValueArray([traitBonus, conditionBonus])
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     let armorBonus = resolveValueArray([heroicLevel]);
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
-function _resolveRef(actor, defenseBonuses, conditionBonus) {
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param conditionBonus
+ * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
+ * @private
+ */
+function _resolveRef(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
     let armorBonus = _selectRefBonus(actor.getHeroicLevel(), _getEquipmentRefBonus(actor));
     total.push(armorBonus);
-    let abilityBonus = _selectDexMod(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
-    let traitBonus = _getTraitDefBonus('reflex', defenseBonuses);
-    total.push(traitBonus);
-    let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus").map(attr => attr.value).reduce((a, b)=> Math.max(a,b), 0);
-
-    let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense")
-        .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
+    let otherBonus = actor.getInheritableAttributesByKey("reflexDefenseBonus", "SUM", undefined, attr => !attr.modifier)
+    total.push(otherBonus);
+    let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus", "MAX");
     total.push(classBonus);
-    total.push(_getTraitRefMod(actor));
-    total.push(conditionBonus);
+    let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense", "SUM");
     total.push(dodgeBonus);
-    let miscBonus = resolveValueArray([traitBonus, conditionBonus, dodgeBonus])
+    let sizeBonus = actor.getInheritableAttributesByKey("sizeModifier", "SUM");
+    total.push(sizeBonus);
+    total.push(conditionBonus);
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, sizeBonus])
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @returns {number}
+ * @private
+ */
 function _getDamageThresholdSizeMod(actor) {
     let attributes = actor.getTraitAttributesByKey('damageThresholdSizeModifier')
 
@@ -138,9 +156,16 @@ function _getDamageThresholdSizeMod(actor) {
     return resolveValueArray(total, actor)
 }
 
-function _resolveDt(actor, defenseBonuses, conditionBonus) {
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param conditionBonus
+ * @returns {{total: number}}
+ * @private
+ */
+function _resolveDt(actor, conditionBonus) {
     let total = [];
-    total.push(_resolveFort(actor, defenseBonuses, conditionBonus).total);
+    total.push(_resolveFort(actor, conditionBonus).total);
     total.push(_getDamageThresholdSizeMod(actor))
     return {total: resolveValueArray(total, actor)}
 }
@@ -152,9 +177,9 @@ function capFirst(word) {
 function _getSituationalBonuses(defenseBonuses) {
     let situational = []
     for (let defenseBonus of defenseBonuses) {
-        if (defenseBonus.value.modifier) {
-            situational.push(`${(defenseBonus.value.bonus > -1 ? "+" : "") + defenseBonus.value.bonus} ${defenseBonus.value.bonus < 0 ? "penalty" : "bonus"} to their ${capFirst(defenseBonus.value.defense)} Defense to resist ${defenseBonus.value.modifier}`);
-        }
+        let value = toNumber(defenseBonus.value);
+        let defense = defenseBonus.key.replace("DefenseBonus", "");
+        situational.push(`${(value > -1 ? "+" : "") + value} ${value < 0 ? "penalty" : "bonus"} to their ${defense.titleCase()} Defense to resist ${defenseBonus.modifier}`);
     }
     return situational;
 }
@@ -164,10 +189,6 @@ function _selectRefBonus(heroicLevel, armorBonus) {
         return armorBonus;
     }
     return heroicLevel;
-}
-
-function _selectDexMod(dexterityModifier, maxDexterityBonus) {
-    return Math.min(dexterityModifier, maxDexterityBonus);
 }
 
 function _getDexMod(actorData) {
@@ -183,39 +204,6 @@ function _getFortStatMod(actor) {
     return actor.ignoreCon() ? attributes.str.mod : attributes.con.mod;
 }
 
-function _getClassDefBonus(stat, actor) {
-    let bonus = 0;
-    for (let charclass of actor.classes || []) {
-        bonus = Math.max(bonus, charclass.data.data.defense[stat]);
-    }
-    return bonus;
-}
-
-/**
- *
- * @param defenseType {string}
- * @param defenseBonuses {[]}
- * @returns {number}
- * @private
- */
-function _getTraitDefBonus(defenseType, defenseBonuses) {
-    let bonus = 0;
-    for (let defenseBonus of defenseBonuses) {
-        if (!defenseBonus.value.modifier && (defenseBonus.value.defense === 'all' || defenseBonus.value.defense === defenseType)) {
-            bonus = bonus + defenseBonus.value.bonus;
-        }
-    }
-    return bonus;
-}
-
-function _getTraitRefMod(actor) {
-    let sizeBonuses = actor.getTraitAttributesByKey('sizeModifier');
-    let total = 0;
-    for (let sizeBonus of sizeBonuses) {
-        total = total + sizeBonus;
-    }
-    return total;
-}
 
 /**
  *

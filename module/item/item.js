@@ -3,8 +3,8 @@ import {
     extractAttributeValues,
     getBonusString,
     getRangedAttackMod,
-    getRangeModifierBlock,
-    increaseDieSize, reduceArray,
+    getRangeModifierBlock, increaseDamageDie, increaseDieType,
+    reduceArray,
     toNumber
 } from "../util.js";
 
@@ -88,11 +88,11 @@ export class SWSEItem extends Item {
     }
 
     get fortitudeDefenseBonus() {
-        return toNumber(this.getInheritableAttributesByKey('fortitudeDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getInheritableAttributesByKey('equipmentFortitudeDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     get reflexDefenseBonus() {
-        return toNumber(this.getInheritableAttributesByKey('reflexDefenseBonus')) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     get maximumDexterityBonus() {
@@ -392,10 +392,10 @@ export class SWSEItem extends Item {
         let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", itemData.data.subtype === 'Light Armor');
         this.setStripping('makeHeavy', "Make Armor Heavy", itemData.data.subtype === 'Medium Armor' || makeMedium);
 
-        let defensiveMaterial = Math.min(itemData.data.attributes.reflexDefenseBonus?.value ? itemData.data.attributes.reflexDefenseBonus?.value : 0,
-            itemData.data.attributes.fortitudeDefenseBonus?.value ? itemData.data.attributes.fortitudeDefenseBonus?.value : 0);
+        let defensiveMaterial = Math.min(this.getInheritableAttributesByKey("armorReflexDefenseBonus", "MAX"),
+            this.getInheritableAttributesByKey("equipmentFortitudeDefenseBonus", "MAX"));
 
-        let jointProtection = itemData.data.attributes.maximumDexterityBonus ? parseInt(itemData.data.attributes.maximumDexterityBonus.value) : 0;
+        let jointProtection = this.getInheritableAttributesByKey("maximumDexterityBonus", "MIN");
 
         this.setStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
         this.setStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
@@ -819,13 +819,17 @@ export class SWSEItem extends Item {
     //     data.attributes[attributeIndex] = attr;
     //     this.updateData(data);
     // }
+
+
     /**
      * Checks item for any attributes matching the provided attributeKey.  this includes active modes.
-     * @param attributeKey {String}
+     * @param attributeKey {string|[string]}
      * @param reduce
-     * @returns {[]|*[]}
+     * @param itemFilter {unused}
+     * @param attributeFilter {unused}
+     * @returns {[]}
      */
-    getInheritableAttributesByKey(attributeKey, reduce) {
+    getInheritableAttributesByKey(attributeKey, reduce, itemFilter, attributeFilter) {
         if (!attributeKey) {
             return [];
         }

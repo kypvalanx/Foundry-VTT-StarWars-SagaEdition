@@ -4,6 +4,8 @@ import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
+import {CompendiumDirectorySWSE} from "./compendium/compendium-directory.js";
+import {CompendiumBrowser} from "./compendium/compendium-browser.js"
 import {registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
 import {generateCompendiums, deleteEmptyCompendiums} from "./compendium/generation.js";
@@ -35,10 +37,15 @@ Hooks.once('init', async function() {
   CONFIG.SWSE = SWSE;
   CONFIG.Actor.documentClass = SWSEActor;
   CONFIG.Item.documentClass = SWSEItem;
+  //CONFIG.ui.compendium = CompendiumDirectorySWSE;
 
   registerSystemSettings();
   registerHandlebarsHelpers();
 
+  // Create compendium browsers
+  // game.swse.compendiums = {
+  //   spells: new CompendiumBrowser({ type: "spells" })
+  // };
 
   // Register sheet application classes
   Actors.unregisterSheet("core", ActorSheet);

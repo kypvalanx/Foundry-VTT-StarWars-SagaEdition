@@ -1,4 +1,4 @@
-import {filterItemsByType, toNumber} from "../util.js";
+import {filterItemsByType, resolveValueArray, toNumber} from "../util.js";
 
 /**
  *
@@ -6,16 +6,9 @@ import {filterItemsByType, toNumber} from "../util.js";
  * @returns {Promise<number>}
  */
 export function getAvailableTrainedSkillCount(actor) {
-    let firstClass = actor.getFirstClass();
-    let remainingSkills = 0;
-    if (firstClass) {
-        let intBonus = actor.getAttributeMod("int")
-        let classBonus = firstClass.getInheritableAttributesByKey("trainedSkillsFirstLevel");
-        remainingSkills = toNumber(classBonus) + toNumber(intBonus);
-    }
-    //TODO add an attribute to Skill Training
-    remainingSkills += filterItemsByType(actor.items.values(), "feat").filter(item => item.data.name === 'Skill Training').length;
-    return remainingSkills;
+    let intBonus = actor.getAttributeMod("int")
+    let classBonus = actor.getInheritableAttributesByKey("trainedSkillsFirstLevel", "SUM", item => item.document.getInheritableAttributesByKey("isFirstLevel", "OR"))
+    return resolveValueArray([classBonus, intBonus, actor.getInheritableAttributesByKey("trainedSkills", "SUM")]);
 }
 
 /**
@@ -35,10 +28,10 @@ export async function generateSkills(actor) {
         // Calculate the modifier using d20 rules.
         let attributeMod = actor.getAttributeMod(skill.attribute);
         let trainedSkillBonus = skill.trained === true ? 5 : 0;
-        let getAbilitySkillBonus = actor._getAbilitySkillBonus(key);
+        let getAbilitySkillBonus = actor.getAbilitySkillBonus(key);
         let acPenalty = skill.acp ? actor.data.acPenalty : 0;
 
-        skill.value = halfCharacterLevel + attributeMod + trainedSkillBonus + conditionBonus + getAbilitySkillBonus + acPenalty;
+        skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty]);
         skill.key = `@${actor.cleanSkillName(key)}`;
         actor.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
         skill.label = await actor._uppercaseFirstLetters(key).replace("Knowledge", "K.");
