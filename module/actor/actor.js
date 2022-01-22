@@ -1143,8 +1143,7 @@ export class SWSEActor extends Actor {
      * @returns {undefined|SWSEItem}
      */
     get size(){
-        let actorData = this.data;
-        for (let trait of actorData?.traits ? actorData.traits : []) {
+        for (let trait of this.traits || []) {
             if (sizeArray.includes(trait.name)) {
                 return trait;
             }
@@ -1174,7 +1173,7 @@ export class SWSEActor extends Actor {
         let dualWeaponModifier = -10;
         let doubleAttack = [];
         let tripleAttack = [];
-        let hands = 2; //TODO resolve extra hands
+        //let hands = 2; //TODO resolve extra hands
 
         if (context.type === "fullAttack") {
             title = "Full Attack";
@@ -1218,7 +1217,7 @@ export class SWSEActor extends Actor {
         let resolvedAttacks = [];
         if (suppliedItems.length < availableAttacks) {
             //CREATE OPTIONS
-            resolvedAttacks = this.getAttackOptions(doubleAttack, tripleAttack, hands);
+            resolvedAttacks = this.getAttackOptions(doubleAttack, tripleAttack);
         }
 
 
@@ -1402,7 +1401,7 @@ export class SWSEActor extends Actor {
         return roll;
     }
 
-    getAttackOptions(doubleAttack, tripleAttack, hands) {
+    getAttackOptions(doubleAttack, tripleAttack) {
         let attacks = this.data.data.attacks;
 
         let resolvedAttacks = [];
