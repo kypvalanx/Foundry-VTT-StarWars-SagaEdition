@@ -86,7 +86,7 @@ export class SWSEActor extends Actor {
                 this.inheritableItems.push(classObject);
             }
         }
-        this.traits = await this.getTraits().map(trait => trait.data);
+        this.traits = this.getTraits().map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
         this.powers = this.getPowers().map(item => item.data);
         this.secrets = this.getSecrets().map(item => item.data);
@@ -138,9 +138,7 @@ export class SWSEActor extends Actor {
 
         actorData.data.attacks = generateAttacks(this);
         await this._manageAutomaticItems(actorData, feats.removeFeats);
-        if (await this.handleLeveBasedAttributeBonuses(actorData)) {
-            return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
-        }
+        await this.handleLeveBasedAttributeBonuses(actorData)
 
         try {
             if (this.sheet?.rendered) {
@@ -212,8 +210,7 @@ export class SWSEActor extends Actor {
 
     getTraits() {
         let traits = filterItemsByType(this.items.values(), "trait");
-        this.data.traits = [];
-        let activeTraits = this.data.traits;
+        let activeTraits = [];
         let possibleTraits = []
         for (let trait of traits) {
             if (!trait.data.data.prerequisite || trait.data.data.prerequisite.length === 0) {
@@ -227,8 +224,7 @@ export class SWSEActor extends Actor {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleTraits) {
-                let meetsPrerequisites1 = meetsPrerequisites(this, possible.data.data.prerequisite);
-                if (!meetsPrerequisites1.doesFail) {
+                if (!meetsPrerequisites(this, possible.data.data.prerequisite).doesFail) {
                     activeTraits.push(possible);
                     shouldRetry = true;
                 }
@@ -1117,7 +1113,7 @@ export class SWSEActor extends Actor {
     }
 
     get shouldLockAttributes() {
-        return !!this.data.traits.find(trait => trait.name === 'Disable Attribute Modification');
+        return !!this.traits.find(trait => trait.name === 'Disable Attribute Modification');
     }
 
     get isForceSensitive() {

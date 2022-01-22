@@ -210,16 +210,20 @@ export function resolveExpression(expression, actor){
 
 /**
  *
- * @param type
- * @param items
+ * @param type {string|[string]}
+ * @param items {[SWSEItem]}
  * @returns {[SWSEItem]}
  */
 export function filterItemsByType(items, type) {
     let types = [];
-    types[0] = type;
-    if (arguments.length > 2) {
-        for (let i = 2; i < arguments.length; i++) {
-            types[i - 1] = arguments[i];
+    if(Array.isArray(type)){
+        types = type;
+    }
+    else {
+        if (arguments.length > 1) {
+            for (let i = 1; i < arguments.length; i++) {
+                types[i - 1] = arguments[i];
+            }
         }
     }
     let filtered = [];

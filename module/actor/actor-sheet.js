@@ -1056,6 +1056,9 @@ export class SWSEActorSheet extends ActorSheet {
 
     async activateChoices(item, additionalEntitiesToAdd, context) {
         let choices = item.data.data.choices;
+        if(choices.length === 0){
+            return true;
+        }
         for (let choice of choices ? choices : []) {
             if (choice.isFirstLevel && !context.isFirstLevel) {
                 continue;
