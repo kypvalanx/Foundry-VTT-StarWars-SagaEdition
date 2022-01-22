@@ -7,7 +7,7 @@ export class SpeciesHandler {
      */
     generateSpeciesData(actor) {
         let actorData = actor.data;
-        let speciesList = filterItemsByType(actor.items, "species");
+        let speciesList = filterItemsByType(actor.items.values(), "species");
         actor.species = (speciesList.length > 0 ? speciesList[0] : null);
 
         if (!actor.species) {
