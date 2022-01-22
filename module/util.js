@@ -417,10 +417,10 @@ export function extractAttributeValues(attribute, source) {
     if (value) {
         if (Array.isArray(value)) {
             for (let v of value) {
-                values.push({source, value: v})
+                values.push({source, value: v, modifier: attribute.modifier, key: attribute.key})
             }
         } else {
-            values.push({source, value})
+            values.push({source, value, modifier: attribute.modifier, key: attribute.key})
         }
     }
     return values
@@ -638,7 +638,12 @@ export function reduceArray(reduce, values) {
     if (!reduce) {
         return values;
     }
-    switch (reduce.toUpperCase()) {
+
+    if(typeof reduce === "string"){
+        reduce = reduce.toUpperCase();
+    }
+
+    switch (reduce) {
         case "SUM":
             return values.map(attr => toNumber(attr.value)).reduce((a, b) => a + b, 0);
         case "AND":
@@ -678,6 +683,6 @@ export function reduceArray(reduce, values) {
         case "NUMERIC_VALUES":
             return values.map(attr => toNumber(attr.value));
         default:
-            return values.map(attr => toNumber(attr.value)).reduce(reduce);
+            return values.map(attr => attr.value).reduce(reduce, "");
     }
 }

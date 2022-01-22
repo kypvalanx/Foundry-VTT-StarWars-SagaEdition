@@ -1,4 +1,4 @@
-import {filterItemsByType, getBonusString, getOrdinal, getRangedAttackMod, handleAttackSelect} from "../util.js";
+import {filterItemsByType} from "../util.js";
 import {SWSE} from "../config.js";
 import {skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
@@ -63,9 +63,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     /** @override */
     getData(options) {
-        const data = super.getData(options);
-
-        return data;
+        return super.getData(options);
     }
 
     /** @override */
@@ -809,9 +807,17 @@ export class SWSEActorSheet extends ActorSheet {
         return await this.checkPrerequisitesAndResolveOptions(item);
     }
 
+    /**
+     * Checks prerequisites of an item and offers available options
+     * @param item {SWSEItem}
+     * @returns {Promise<[]|*[]>}
+     */
     async checkPrerequisitesAndResolveOptions(item) {
-        let entitiesToAdd = [item.data.toObject(false)];
-        await this.activateChoices(item, entitiesToAdd, {});
+        let entitiesToAdd = [];
+        if(!await this.activateChoices(item, entitiesToAdd, {})){
+            return [];
+        }
+        entitiesToAdd.push(item.data.toObject(false))
 
         let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
 
@@ -1084,6 +1090,7 @@ export class SWSEActorSheet extends ActorSheet {
             await Dialog.prompt({
                 title: greetingString,
                 content: content,
+                rejectClose: false,
                 callback: async (html) => {
                     let choice = html.find("#choice")[0];
                     let key = choice?.value;
@@ -1092,6 +1099,9 @@ export class SWSEActorSheet extends ActorSheet {
                         key = choice?.innerText;
                     }
                     let selectedChoice = options[key];
+                    if(!selectedChoice){
+                        return false;
+                    }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
                         await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'TRAIT'));
                         await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
@@ -1107,6 +1117,12 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
+    /**
+     * Adds Feats provided by a class and provides choices to the player when one is available
+     * @param item {SWSEItem}
+     * @param context
+     * @returns {Promise<[]>}
+     */
     async addClassFeats(item, context) {
         let feats = item.getInheritableAttributesByKey("classFeat").map(attr => attr.value);
         let availableClassFeats = item.getInheritableAttributesByKey("availableClassFeats", "SUM");
@@ -1331,7 +1347,7 @@ export class SWSEActorSheet extends ActorSheet {
                         explode.push(`${feat} (${skill})`);
                     }
                 })
-            } else{ explode.push(feat)};
+            } else{ explode.push(feat)}
         }
         return explode;
     }
@@ -1357,10 +1373,16 @@ export class SWSEActorSheet extends ActorSheet {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
-            } else if (key === 'AVAILABLE_SKILL_FOCUS') {
-                for (let skill of this.actor.skills) {
+            } else if (key === 'UNFOCUSED_SKILLS') {
+                for (let skill of skills) {
                     if (!this.actor.data.prerequisites.focusSkills.includes(skill.toLowerCase())) {
                         resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_SKILL_FOCUS') {
+                for (let skill of this.actor.trainedSkills) {
+                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.label.toLowerCase())) {
+                        resolvedOptions[skill.label.titleCase()] = {abilities: [], items: [], payload: skill.label.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {

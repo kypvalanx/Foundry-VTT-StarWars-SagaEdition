@@ -1,4 +1,4 @@
-import {getBonusString, increaseDieSize, increaseDieType, resolveValueArray} from "../util.js";
+import {getBonusString, increaseDieSize, resolveValueArray} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {Attack} from "./attack.js";
 import {d20, sizeArray} from "../constants.js";
@@ -114,6 +114,12 @@ function isOversized(actorSize, itemSize) {
     return compareSizes(actorSize, itemSize) > 1;
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param weapon {SWSEItem}
+ * @returns {(*|string)[]}
+ */
 function getPossibleProficiencies(actor, weapon) {
     let weaponFamiliarities = {};
     actor.getInheritableAttributesByKey("weaponFamiliarity").forEach(fam => {
@@ -153,6 +159,12 @@ function isLightsaber(weapon) {
     return LIGHTSABER_WEAPON_TYPES.includes(weapon.subtype);
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param categories
+ * @returns {boolean}
+ */
 function isFocus(actor, categories) {
     let focuses = actor.getInheritableAttributesByKey("weaponFocus").map(prof => prof.value.toLowerCase())
     focuses = explodeProficiencies(focuses);
@@ -164,6 +176,12 @@ function isFocus(actor, categories) {
     return false;
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param weaponDescriptors
+ * @returns {boolean}
+ */
 function isProficient(actor, weaponDescriptors) {
     let proficiencies = actor.getInheritableAttributesByKey("weaponProficiency").map(prof => prof.value.toLowerCase())
     proficiencies = explodeProficiencies(proficiencies);
@@ -253,7 +271,7 @@ export function resolveFinesseBonus(actor, finesseStats) {
 
 /**
  *
- * @param actor
+ * @param actor {SWSEActor}
  * @returns {Attack|undefined}
  */
 

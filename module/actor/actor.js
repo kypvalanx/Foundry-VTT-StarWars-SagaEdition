@@ -31,6 +31,7 @@ export class SWSEActor extends Actor {
     resolvedVariables = new Map();
 
     resolvedLabels = new Map();
+    inheritableItems = [];
 
 
     /**
@@ -516,11 +517,11 @@ export class SWSEActor extends Actor {
     }
 
     get hideForce(){
-        return !this.getInheritableAttributesByKey("forceSensitivity", "OR", null);
+        return !this.getInheritableAttributesByKey("forceSensitivity", "OR");
     }
 
     get isDroid() {
-        return this.getInheritableAttributesByKey("isDroid", "OR", null);
+        return this.getInheritableAttributesByKey("isDroid", "OR");
     }
 
     get trainedSkills(){
@@ -539,7 +540,7 @@ export class SWSEActor extends Actor {
     }
 
     get shield(){
-        return this.getInheritableAttributesByKey("srRating", "MAX", null)
+        return this.getInheritableAttributesByKey("srRating", "MAX")
     }
 
     /**
@@ -794,18 +795,28 @@ export class SWSEActor extends Actor {
     /**
      * Collects all attribute values from equipped items, class levels, regimes, affiliations, feats and talents.
      * It also checks active modes.
-     * @param attributeKey
+     * @param attributeKey {string|[string]}
      * @param reduce
      * @param itemFilter
+     * @param attributeFilter
      * @returns {[]}
      */
-    getInheritableAttributesByKey(attributeKey, reduce, itemFilter){
-        let values = [];
+    getInheritableAttributesByKey(attributeKey, reduce, itemFilter = (() => true), attributeFilter = (() => true)){
         if(!itemFilter){
-            itemFilter = (() => true);
+            itemFilter = () =>true;
         }
-        for (let item of this.inheritableItems.filter(itemFilter)) {
-            values.push(...this.getAttributesFromItem(item._id, attributeKey));
+        if(!attributeFilter){
+            attributeFilter = () =>true;
+        }
+        let values = [];
+        if(Array.isArray(attributeKey)){
+            for (let tok of attributeKey){
+                values.push(...this.getInheritableAttributesByKey(tok, undefined, itemFilter, attributeFilter))
+            }
+        } else {
+            for (let item of this.inheritableItems.filter(itemFilter)) {
+                values.push(...this.getAttributesFromItem(item._id, attributeKey).filter(attributeFilter));
+            }
         }
         return reduceArray(reduce, values);
     }
@@ -825,8 +836,14 @@ export class SWSEActor extends Actor {
      * @returns {Array.<{source: String, value: *}>}
      */
     getAttributesFromItem(itemId, attributeKey) {
+        /**
+         * @type {SWSEItem}
+         */
         let item = this.items.get(itemId);
-        return item.getInheritableAttributesByKey(attributeKey);
+        if(item) {
+            return item.getInheritableAttributesByKey(attributeKey);
+        }
+        return [];
     }
 
 
@@ -835,14 +852,9 @@ export class SWSEActor extends Actor {
         return item.getActiveModes();
     }
 
-    _getAbilitySkillBonus(skill) {
+    getAbilitySkillBonus(skill) {
         if (skill.toLowerCase() === 'stealth') {
-            let stealthBonuses = this.getTraitAttributesByKey('sneakModifier');
-            let total = 0;
-            for (let stealthBonus of stealthBonuses) {
-                total = total + stealthBonus.value;
-            }
-            return total;
+            return this.getInheritableAttributesByKey('sneakModifier', "SUM");
         }
         return 0;
     }
@@ -971,18 +983,6 @@ export class SWSEActor extends Actor {
         let classLevel = this.classes.length;
         this.data.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.data.availableItems['General Feats'] ? this.data.availableItems['General Feats'] : 0);
 
-    }
-
-    async filterOutInvisibleAbilities(actorData) {
-        let filtered = [];
-        for (let trait of this.traits) {
-            if (trait.name === 'Species' || trait.name === 'Homebrew Content' || trait.name === 'Web Enhancements' || trait.name.includes('Creations')) {
-
-                continue;
-            }
-            filtered.push(trait)
-        }
-        return filtered;
     }
 
     _reduceProvidedItemsByExistingItems(actorData) {
@@ -1182,8 +1182,8 @@ export class SWSEActor extends Actor {
 
         if (context.type === "fullAttack") {
             title = "Full Attack";
-            doubleAttack = this.getInheritableAttributesByKey("doubleAttack", "VALUES", null);
-            tripleAttack = this.getInheritableAttributesByKey("tripleAttack", "VALUES", null);
+            doubleAttack = this.getInheritableAttributesByKey("doubleAttack", "VALUES");
+            tripleAttack = this.getInheritableAttributesByKey("tripleAttack", "VALUES");
 
             //availableAttacks = this.fullAttackCount;
             let equippedItems = this.getEquippedItems()
@@ -1208,7 +1208,7 @@ export class SWSEActor extends Actor {
             //+1 if has double attack and equipped item
             //+1 if has triple attack and equipped item
 
-            let dualWeaponModifiers = this.getInheritableAttributesByKey("dualWeaponModifier", "NUMERIC_VALUES", null);
+            let dualWeaponModifiers = this.getInheritableAttributesByKey("dualWeaponModifier", "NUMERIC_VALUES");
             dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
         }
 
@@ -1272,13 +1272,13 @@ export class SWSEActor extends Actor {
             },
             render: async (html) => {
                 let selects = html.find("select");
-                selects.on("change", e => handleAttackSelect(selects));
+                selects.on("change", () => handleAttackSelect(selects));
                 handleAttackSelect(selects)
 
                 let attackIds = html.find(".attack-id");
                 attackIds.each((i, div) => this.populateItemStats(div, context));
 
-                attackIds.on("change", e => {
+                attackIds.on("change", () => {
                     let attackIds = html.find(".attack-id");
                     context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
                     context.damageMods = this.getDamageMods(selects, dualWeaponModifier);

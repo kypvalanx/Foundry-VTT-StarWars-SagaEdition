@@ -1,11 +1,21 @@
-<form class="{{cssClass}}" autocomplete="off">
+<form class="{{cssClass}} feat-sheet" autocomplete="off">
     <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
         <div class="header-fields">
           <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
             <div class="resource">
+                <label class="resource-label">Type:</label>
+                {{data.type}}
+            </div>
+            <div class="resource">
                 <label class="resource-label">Categories:</label>
-                {{#each data.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
+                {{#if data.data.categories}}
+                    {{#each data.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
+                {{/if}}
+                {{#unless data.data.categories}}
+                    {{#each item.data._source.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
+                {{/unless}}
+                {{log item data}}
             </div>
             {{#if data.data.isSupplied}}
             <div class="resource">
@@ -26,7 +36,10 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
+            {{#if data.data.description}}
             {{editor content=data.data.description target="data.data.description" button=true owner=owner editable=editable}}
+            {{/if}}
+            {{#unless data.data.description}}{{{item.data._source.data.description}}}{{/unless}}
         </div>
 
         {{!-- Attributes Tab --}}
