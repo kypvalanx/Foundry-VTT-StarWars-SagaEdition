@@ -3,7 +3,9 @@ import {
     extractAttributeValues,
     getBonusString,
     getRangedAttackMod,
-    getRangeModifierBlock, increaseDamageDie, increaseDieType,
+    getRangeModifierBlock,
+    increaseDamageDie,
+    increaseDieType,
     reduceArray,
     toNumber
 } from "../util.js";
@@ -54,8 +56,7 @@ export class SWSEItem extends Item {
         if (this.type !== "class") {
             return 0;
         }
-        let isFirstLevel = this.getInheritableAttributesByKey("isFirstLevel");
-        if (isFirstLevel.length > 0 && isFirstLevel.map(attr => attr.value)[0] !== 'false' && isFirstLevel.map(attr => attr.value)[0] !== false) {
+        if (this.actAsFirstLevel) {
 
             return this.getInheritableAttributesByKey("firstLevelHitPoints").map(attr => parseInt(attr.value))[0];
         }
@@ -69,6 +70,10 @@ export class SWSEItem extends Item {
         }
 
         return 1;
+    }
+
+    get actAsFirstLevel() {
+        return this.getInheritableAttributesByKey("isFirstLevel", "AND") && this.getInheritableAttributesByKey("isHeroic", "AND");
     }
 
     get isDoubleWeapon() {
@@ -88,16 +93,26 @@ export class SWSEItem extends Item {
     }
 
     get fortitudeDefenseBonus() {
-        return toNumber(this.getInheritableAttributesByKey('equipmentFortitudeDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        if (this._parentIsProficientWithArmor()) {
+            return toNumber(this.getInheritableAttributesByKey('equipmentFortitudeDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        }
+        return 0;
     }
 
     get reflexDefenseBonus() {
-        return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        if (this._parentIsProficientWithArmor()) {
+            return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        }
+        return 0;
+    }
+
+    _parentIsProficientWithArmor() {
+        return this.parent.getInheritableAttributesByKey("armorProficiency", "VALUES").includes(this.armorType.toLowerCase());
     }
 
     get maximumDexterityBonus() {
         let maxDexBonuses = this.getInheritableAttributesByKey('maximumDexterityBonus');
-        if(maxDexBonuses.length === 0){
+        if (maxDexBonuses.length === 0) {
             return undefined;
         }
         return toNumber(maxDexBonuses) - toNumber(this.getStripping("reduceJointProtection"));
@@ -155,7 +170,10 @@ export class SWSEItem extends Item {
         if (this.subType === 'Medium Armor' || this.getStripping("makeMedium")?.value) {
             return 'Medium';
         }
-        return 'Light';
+        if (this.subType === 'Light Armor') {
+            return 'Light';
+        }
+        return 'NA';
     }
 
     get subType() {
@@ -448,6 +466,27 @@ export class SWSEItem extends Item {
                     attribute.value = attribute.value.replace("#payload#", payload);
                 } else if (Array.isArray(attribute.value)) {
                     attribute.value = attribute.value.map(val => val.replace("#payload#", payload));
+                }
+            }
+        });
+    }
+
+
+    setParent(current) {
+        this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
+            if (prerequisite.requirement) {
+                prerequisite.requirement = prerequisite.requirement.replace("#parent#", current);
+            }
+            if (prerequisite.text) {
+                prerequisite.text = prerequisite.text.replace("#parent#", current);
+            }
+        });
+        this._crawlAttributes(this.data.data, (attribute) => {
+            if (attribute.value) {
+                if (typeof attribute.value === "string") {
+                    attribute.value = attribute.value.replace("#parent#", current);
+                } else if (Array.isArray(attribute.value)) {
+                    attribute.value = attribute.value.map(val => val.replace("#parent#", current));
                 }
             }
         });

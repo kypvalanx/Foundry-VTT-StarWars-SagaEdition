@@ -16,7 +16,10 @@ function reduceSpeedForArmorType(speed, armorType) {
  * @returns {{fortDefense: (*|number), notes: (*|string), refDefense: (*|number), name, type: string, maxDex: (*|number), speed}}
  */
 function generateArmorBlock(actor, armor) {
-    let attributes = armor.getInheritableAttributesByKey("special", (a,b)=>`${a}, ${b}`);
+    let attributes = armor.getInheritableAttributesByKey("special", "VALUES");
+    if(!armor._parentIsProficientWithArmor()){
+        attributes.push("(Not Proficient)");
+    }
     let speed = actor.speed
 
 
@@ -26,7 +29,7 @@ function generateArmorBlock(actor, armor) {
         refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
         fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
         maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
-        notes: attributes,
+        notes: attributes.join(", "),
         type: armor.armorType
     };
 }
@@ -41,9 +44,7 @@ export function resolveDefenses(actor) {
     let will = _resolveWill(actor, actor.conditionBonus);
     let ref = _resolveRef(actor, actor.conditionBonus);
     let dt = _resolveDt(actor, actor.conditionBonus);
-    let situationalBonuses = _getSituationalBonuses(
-        actor.getInheritableAttributesByKey(["fortitudeDefenseBonus", "reflexDefenseBonus", "willDefenseBonus"],
-            undefined, undefined, attr => attr.modifier));
+    let situationalBonuses = _getSituationalBonuses(actor);
 
     let damageReduction = actor.getInheritableAttributesByKey("damageReduction", "SUM")
 
@@ -174,13 +175,25 @@ function capFirst(word) {
     return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
-function _getSituationalBonuses(defenseBonuses) {
+function _getSituationalBonuses(actor) {
+    let defenseBonuses =
+        actor.getInheritableAttributesByKey(["fortitudeDefenseBonus", "reflexDefenseBonus", "willDefenseBonus"],
+            undefined, undefined, attr => attr.modifier)
+
     let situational = []
     for (let defenseBonus of defenseBonuses) {
         let value = toNumber(defenseBonus.value);
         let defense = defenseBonus.key.replace("DefenseBonus", "");
         situational.push(`${(value > -1 ? "+" : "") + value} ${value < 0 ? "penalty" : "bonus"} to their ${defense.titleCase()} Defense to resist ${defenseBonus.modifier}`);
     }
+
+    let immunities =
+        actor.getInheritableAttributesByKey("immunity")
+
+    for (let immunity of immunities) {
+        situational.push(`Immunity: ${immunity.value}`);
+    }
+
     return situational;
 }
 

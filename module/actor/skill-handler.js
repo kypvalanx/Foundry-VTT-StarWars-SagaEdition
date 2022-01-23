@@ -29,7 +29,7 @@ export async function generateSkills(actor) {
         let attributeMod = actor.getAttributeMod(skill.attribute);
         let trainedSkillBonus = skill.trained === true ? 5 : 0;
         let getAbilitySkillBonus = actor.getAbilitySkillBonus(key);
-        let acPenalty = skill.acp ? actor.data.acPenalty : 0;
+        let acPenalty = skill.acp ? actor.acPenalty : 0;
 
         skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty]);
         skill.key = `@${actor.cleanSkillName(key)}`;

@@ -116,14 +116,13 @@ export class SWSEActor extends Actor {
 
         this.handleDarksideArray(actorData);
 
-        actorData.acPenalty = generateArmorCheckPenalties(this);
 
-        await generateSkills(this);
 
         actorData.data.offense = resolveOffense(this);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
         this.inheritableItems.push(...this.feats)
+        await generateSkills(this);
 
         actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
@@ -554,9 +553,7 @@ export class SWSEActor extends Actor {
      * Extracts important stats from the class
      */
     _generateClassData() {
-
         let classLevels = {};
-
 
         for (let characterClass of this.classes) {
             if (!classLevels[characterClass.name]) {
@@ -818,7 +815,7 @@ export class SWSEActor extends Actor {
     }
 
     get acPenalty(){
-        return this.data.acPenalty
+        return generateArmorCheckPenalties(this)
     }
 
     get fullAttackCount(){
@@ -855,7 +852,15 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    async addItemsFromCompendium(compendium, additionalEntitiesToAdd, items) {
+    /**
+     *
+     * @param compendium
+     * @param additionalEntitiesToAdd
+     * @param items
+     * @param parentName
+     * @returns {Promise<{addedEntities: [], notificationMessage: string}>}
+     */
+    async addItemsFromCompendium(compendium, additionalEntitiesToAdd, items, parentName) {
         if (!Array.isArray(items)) {
             items = [items];
         }
@@ -900,6 +905,8 @@ export class SWSEActor extends Actor {
             if (payload !== "") {
                 entity.setPayload(payload);
             }
+
+            entity.setParent(parentName);
             entity.setSourceString();
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
@@ -934,7 +941,11 @@ export class SWSEActor extends Actor {
         return {itemName, prerequisite, payload};
     }
 
-
+    /**
+     *
+     * @param type
+     * @returns {CompendiumCollection}
+     */
     static getCompendium(type) {
         switch (type) {
             case 'item':

@@ -734,7 +734,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else if (item.data.type === "talent") {
             entitiesToAdd.push(...await this.addTalent(item));
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
-            entitiesToAdd.push(item.data.toObject(false))
+            entitiesToAdd.push(...await this.addItem(item));
         }
         //await this.activateChoices(item, entitiesToAdd, context);
         await super._onDropItemCreate(entitiesToAdd);
@@ -953,7 +953,24 @@ export class SWSEActorSheet extends ActorSheet {
         };
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entities.push(...await this.addClassFeats(item, context));
+        entities.push(...(await this.addClassFeats(item, context)));
+
+        entities.forEach(item => item.data.supplier = {
+            id: mainItem[0].id,
+            name: mainItem[0].name,
+            type: mainItem[0].data.type
+        })
+
+        return entities;
+    }
+
+    async addItem(item) {
+        let entities = [];
+        let context = {};
+        await this.activateChoices(item, entities, context);
+        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
+
+        await this.actor.addItemsFromCompendium('trait', entities, item.getProvidedItems(i => i.type === 'TRAIT'), item.name);
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1130,7 +1147,7 @@ export class SWSEActorSheet extends ActorSheet {
         let feats = item.getInheritableAttributesByKey("classFeat").map(attr => attr.value);
         let availableClassFeats = item.getInheritableAttributesByKey("availableClassFeats", "SUM");
         if (feats.length === 0) {
-            return;
+            return [];
         }
         let additionalEntitiesToAdd = [];
         feats = feats.map(feat => this.actor.cleanItemName(feat))
