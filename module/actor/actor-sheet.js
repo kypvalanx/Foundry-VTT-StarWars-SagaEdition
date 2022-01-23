@@ -945,6 +945,32 @@ export class SWSEActorSheet extends ActorSheet {
         let entities = [];
         let context = {};
         context.isFirstLevel = this.actor.classes.length === 0;
+        if(item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0){
+            new Dialog({
+                title: "The Beast class is not allowed at this time",
+                content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
+        if(item.name !== "Beast" && this.actor.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.actor.getAttribute("INT") < 3){
+            new Dialog({
+                title: "The Beast class is not allowed to multiclass at this time",
+                content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return [];
+        }
         await this.activateChoices(item, entities, context);
         item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
             type: "Boolean",
@@ -1134,7 +1160,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             });
         }
-
+        return true;
     }
 
     /**
@@ -1621,9 +1647,13 @@ export class SWSEActorSheet extends ActorSheet {
         for (let val of Object.keys(CONFIG.SWSE.Abilities.droidSkip)) {
             combined[val] = {val: bonus[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
+        let isHeroic = this.actor.getInheritableAttributesByKey("isHeroic", "OR");
 
-        let availableBonuses = [false, false];
-        for (let i = 0; i < 2 - Object.values(bonus).filter(b => b === 1).length; i++) {
+        let availableBonuses = [false];
+        if(isHeroic){
+            availableBonuses = [false, false];
+        }
+        for (let i = 0; i < availableBonuses.length - Object.values(bonus).filter(b => b === 1).length; i++) {
             availableBonuses[i] = true;
         }
 

@@ -57,12 +57,12 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
 
     let notes = item.getInheritableAttributesByKey('special').filter(s => !!s).map(s => s.value);
 
-    let range = item.effectiveRange.value;
+    let range = item.effectiveRange;
     let critical = "x2"
     let type = item.damageType
 
     let damageBonuses = [];
-    damageBonuses.push(actor.getHalfCharacterLevel())
+    damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(...item.getInheritableAttributesByKey("bonusDamage"))
 
     let attackBonuses = [actorData.data.offense.bab]
@@ -147,7 +147,7 @@ function getPossibleProficiencies(actor, weapon) {
 const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
     "heavy weapons", "simple ranged weapons"];
 const LIGHTSABER_WEAPON_TYPES = ["lightsabers", "lightsaber"];
-const SIMPLE_WEAPON_TYPES = ['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon'];
+const SIMPLE_WEAPON_TYPES = ['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon', "grenades"];
 const UNARMED_WEAPON_TYPES = ["simple melee weapon"];
 
 function isRanged(weapon) {
@@ -321,7 +321,7 @@ export function generateUnarmedAttack(actor) {
 
     let th = d20 + getBonusString(resolveValueArray(atkBonuses));
 
-    damageBonuses.push(actor.getHalfCharacterLevel())
+    damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(actor.getAttributeMod("str"))
 
     let dam = resolveUnarmedDamageDie(actor) + getBonusString(resolveValueArray(damageBonuses));

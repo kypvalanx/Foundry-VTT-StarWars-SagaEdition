@@ -9,6 +9,8 @@ export function generateAttributes(actor) {
     let actorData = actor.data;
 
     actorData.data.lockAttributes = actor.shouldLockAttributes
+    actorData.data.isBeast = actor.classes.filter(clazz => clazz.name === "Beast").length > 0
+
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
@@ -17,6 +19,9 @@ export function generateAttributes(actor) {
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
+    if(actorData.data.isBeast && key === "int"){
+        attribute.base = Math.min(attribute.base, 2);
+    }
         let bonuses = [];
         // let classLevelBonuses = []; //TODO WIRE ME UP
         // let speciesBonuses = [];

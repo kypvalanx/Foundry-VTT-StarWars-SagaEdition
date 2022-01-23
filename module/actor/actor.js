@@ -484,6 +484,11 @@ export class SWSEActor extends Actor {
         return Math.floor(this.characterLevel / 2);
     }
 
+    get halfHeroicLevel() {
+        let heroicLevel = this.heroicLevel;
+        return Math.floor(heroicLevel / 2);
+    }
+
     get characterLevel() {
         if (this.classes) {
             let charLevel = this.classes.length;
@@ -493,7 +498,7 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    getHeroicLevel(){
+    get heroicLevel(){
         if (this.classes) {
             let heroicLevel = this.classes.filter(c=>c.getInheritableAttributesByKey("isHeroic", "OR")).length;
             this.resolvedVariables.set("@heroicLevel", heroicLevel);
@@ -568,6 +573,8 @@ export class SWSEActor extends Actor {
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
+
+        let isHeroic = this.getInheritableAttributesByKey("isHeroic", "OR");
         let characterLevel = this.classes.length;
         if (characterLevel > 0) {
             this.classes[characterLevel - 1].data.isLatest = true;
@@ -596,7 +603,7 @@ export class SWSEActor extends Actor {
                         + (actorData.data.levelAttributeBonus[bonusAttributeLevel].int || 0)
                         + (actorData.data.levelAttributeBonus[bonusAttributeLevel].wis || 0)
                         + (actorData.data.levelAttributeBonus[bonusAttributeLevel].cha || 0)
-                    actorData.data.levelAttributeBonus[bonusAttributeLevel].warn = total !== 2;
+                    actorData.data.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
                 }
             }
         }
@@ -846,8 +853,12 @@ export class SWSEActor extends Actor {
     }
 
     getAbilitySkillBonus(skill) {
+        //TODO camelcase and simplify unless this could be more complex?
         if (skill.toLowerCase() === 'stealth') {
             return this.getInheritableAttributesByKey('sneakModifier', "SUM");
+        }
+        if (skill.toLowerCase() === 'perception') {
+            return this.getInheritableAttributesByKey('perceptionModifier', "SUM");
         }
         return 0;
     }

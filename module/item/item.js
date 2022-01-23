@@ -189,7 +189,7 @@ export class SWSEItem extends Item {
     }
 
     get effectiveRange() {
-        let treatedAsForRange = this.getInheritableAttributesByKey("treatedAs")[0];
+        let treatedAsForRange = this.getInheritableAttributesByKey("treatedAs", "VALUES")[0];
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
 
         if (this.getStripping("reduceRange")?.value) {

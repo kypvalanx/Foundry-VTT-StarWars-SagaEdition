@@ -68,7 +68,7 @@ export function resolveDefenses(actor) {
 function _resolveFort(actor, conditionBonus) {
     let total = [];
     total.push(10);
-    let heroicLevel = actor.getHeroicLevel();
+    let heroicLevel = actor.heroicLevel;
     total.push(heroicLevel);
     let abilityBonus = _getFortStatMod(actor);
     total.push(abilityBonus);
@@ -98,7 +98,7 @@ function _resolveWill(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    let heroicLevel = actor.getHeroicLevel();
+    let heroicLevel = actor.heroicLevel;
     total.push(heroicLevel);
     let abilityBonus = _getWisMod(actorData);
     total.push(abilityBonus);
@@ -123,7 +123,7 @@ function _resolveRef(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    let armorBonus = _selectRefBonus(actor.getHeroicLevel(), _getEquipmentRefBonus(actor));
+    let armorBonus = _selectRefBonus(actor.heroicLevel, _getEquipmentRefBonus(actor));
     total.push(armorBonus);
     let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
