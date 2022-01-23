@@ -899,9 +899,9 @@ export class SWSEActor extends Actor {
 
             entity.prepareData();
 
-            if(itemName === "Bonus Feat" && payload){
-                for(let attr of Object.values(entity.data.data.attributes)){
-                    if(attr.key === "provides"){
+            if (itemName === "Bonus Feat" && payload) {
+                for (let attr of Object.values(entity.data.data.attributes)) {
+                    if (attr.key === "provides") {
                         attr.key = "bonusFeat";
                         attr.value = payload;
                     }
@@ -916,8 +916,10 @@ export class SWSEActor extends Actor {
             if (payload !== "") {
                 entity.setPayload(payload);
             }
-
-            entity.setParent(parentName);
+            if (!!parentName)
+            {
+                entity.setParent(parentName);
+            }
             entity.setSourceString();
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
