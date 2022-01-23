@@ -100,10 +100,7 @@ export class SWSEItem extends Item {
     }
 
     get reflexDefenseBonus() {
-        if (this._parentIsProficientWithArmor()) {
-            return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
-        }
-        return 0;
+        return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     _parentIsProficientWithArmor() {
