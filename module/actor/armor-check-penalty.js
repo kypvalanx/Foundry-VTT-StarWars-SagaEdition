@@ -6,24 +6,15 @@ import {filterItemsByType} from "../util.js";
  * @returns {number}
  */
 export function generateArmorCheckPenalties(actor) {
-    let lightProficiency = false;
-    let mediumProficiency = false;
-    let heavyProficiency = false;
+    let armorProficiencies = actor.getInheritableAttributesByKey("armorProficiency", "VALUES");
 
-    for(let feat of filterItemsByType(actor.items.values(), "feat")){
-        if('Armor Proficiency (Light)' === feat.finalName){
-            lightProficiency = true;
-        }
-        if('Armor Proficiency (Medium)' === feat.finalName){
-            mediumProficiency = true;
-        }
-        if('Armor Proficiency (Heavy)' === feat.finalName){
-            heavyProficiency = true;
-        }
-    }
+    let lightProficiency = armorProficiencies.includes("light");
+    let mediumProficiency = armorProficiencies.includes("medium");
+    let heavyProficiency = armorProficiencies.includes("heavy");
+
 
     mediumProficiency = mediumProficiency && lightProficiency;
-    heavyProficiency = heavyProficiency && lightProficiency;
+    heavyProficiency = heavyProficiency && mediumProficiency;
 
     let wearingLight = false;
     let wearingMedium = false;

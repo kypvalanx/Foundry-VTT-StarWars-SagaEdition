@@ -27,7 +27,7 @@ meetsPrerequisites(target, prereqs) {
     }
 
     for (let prereq of prereqs) {
-        switch (prereq.type) {
+        switch (prereq.type.toUpperCase()) {
             case undefined:
                 continue;
             case 'AGE':
@@ -72,7 +72,7 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TRAINED SKILL':
-                if (target.data.prerequisites.trainedSkills.filter(trainedSkill => trainedSkill.toLowerCase() === prereq.requirement.toLowerCase()).length === 1) {
+                if (target.trainedSkills.filter(trainedSkill => trainedSkill.toLowerCase() === prereq.requirement.toLowerCase()).length === 1) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -246,7 +246,7 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             default:
-                console.log("this prereq is not supported", prereq)
+                console.warn("this prereq is not supported", prereq)
         }
 
         failureList.push({fail: true, message: `${prereq.text}`});

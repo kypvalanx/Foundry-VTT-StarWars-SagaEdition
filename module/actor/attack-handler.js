@@ -296,7 +296,7 @@ export function generateUnarmedAttack(actor) {
     atkBonuses.push(finesseBonus)
     atkBonuses.push(proficiencyBonus)
     atkBonuses.push(focus ? 1 : 0)
-    atkBonuses.push(actor.data.acPenalty)
+    atkBonuses.push(actor.acPenalty)
     let notes = "";
     let damageBonuses = [];
     let type = "Bludgeoning";

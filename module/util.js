@@ -418,7 +418,7 @@ export function toNumber(value) {
 export function extractAttributeValues(attribute, source) {
     let values = [];
     let value = attribute.value;
-    if (value) {
+    if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
             for (let v of value) {
                 values.push({source, value: v, modifier: attribute.modifier, key: attribute.key})
