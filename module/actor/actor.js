@@ -1,7 +1,7 @@
 import {resolveHealth} from "./health.js";
 import {generateAttackFromWeapon, generateAttacks, generateUnarmedAttack} from "./attack-handler.js";
 import {resolveOffense} from "./offense.js";
-import {SpeciesHandler} from "./species.js";
+import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
@@ -37,19 +37,19 @@ export class SWSEActor extends Actor {
     /**
      * Augment the basic actor data with additional dynamic data.
      */
-    async prepareData() {
-        await super.prepareData();
+    prepareData() {
+        super.prepareData();
         const actorData = this.data;
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
-        if (actorData.type === 'character') await this._prepareCharacterData(actorData);
-        if (actorData.type === 'npc') await this._prepareCharacterData(actorData);
-        if (actorData.type === 'computer') await this._prepareComputerData(actorData);
+        if (actorData.type === 'character') this._prepareCharacterData(actorData);
+        if (actorData.type === 'npc') this._prepareCharacterData(actorData);
+        if (actorData.type === 'computer') this._prepareComputerData(actorData);
     }
     /**
      * Prepare Computer type specific data
      */
-    async _prepareComputerData(actorData) {
+    _prepareComputerData(actorData) {
         let div = document.createElement("DIV");
         div.innerHTML = actorData.data.content;
         let rough = div.textContent || div.innerText || "";
@@ -67,16 +67,21 @@ export class SWSEActor extends Actor {
     /**
      * Prepare Character type specific data
      */
-    async _prepareCharacterData(actorData) {
+    _prepareCharacterData(actorData) {
         this.data.prerequisites = {};
+        this.inheritableItems = [];
+        this.resolvedVariables = new Map();
+        this.resolvedLabels = new Map();
 
-        new SpeciesHandler().generateSpeciesData(this);
         this.data.data.condition = this.data.data.condition || 0;
 
-        this.inheritableItems = [];
+        let speciesList = filterItemsByType(this.items.values(), "species");
+        this.species = (speciesList.length > 0 ? speciesList[0] : null);
+
         if(this.species){
             this.inheritableItems.push(this.species.data)
         }
+        generateSpeciesData(this);
 
         this.classes = filterItemsByType(this.items.values(), "class");
         let uniqueClassNames = [];
@@ -111,18 +116,15 @@ export class SWSEActor extends Actor {
         this.unequipped = this.getUnequippedItems().map(item => item.data);
         this.inventory = this.getNonequippableItems().map(item => item.data);
 
-
         generateAttributes(this);
 
         this.handleDarksideArray(actorData);
-
-
 
         actorData.data.offense = resolveOffense(this);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
         this.inheritableItems.push(...this.feats)
-        await generateSkills(this);
+        generateSkills(this);
 
         actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
@@ -136,18 +138,20 @@ export class SWSEActor extends Actor {
         actorData.data.armors = armors;
 
         actorData.data.attacks = generateAttacks(this);
-        await this._manageAutomaticItems(actorData, feats.removeFeats);
-        await this.handleLeveBasedAttributeBonuses(actorData)
+        this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
+        // if (await this.handleLeveBasedAttributeBonuses(actorData)) {
+        //     return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
+        // }
 
-        try {
-            if (this.sheet?.rendered) {
-                this.sheet.render(true);
-            } else {
-                this.sheet.render(false)
-            }
-        } catch (e) {
-            console.log("couldn't find charactersheet.  probably fine")
-        }
+        // try {
+        //     if (this.sheet?.rendered) {
+        //         this.sheet.render(true);
+        //     } else {
+        //         this.sheet.render(false)
+        //     }
+        // } catch (e) {
+        //     console.log("couldn't find charactersheet.  probably fine")
+        // }
     }
 
     handleDarksideArray(actorData) {
@@ -525,10 +529,10 @@ export class SWSEActor extends Actor {
     }
 
     get trainedSkills(){
-        return Object.values(this.data.data.skills).filter(skill => skill.trained);
+        return this.skills.filter(skill => skill && skill.trained);
     }
 
-    get skills(){
+    get skills() {
         return Object.values(this.data.data.skills);
     }
 

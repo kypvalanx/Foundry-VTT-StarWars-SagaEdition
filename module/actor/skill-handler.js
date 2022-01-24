@@ -1,4 +1,4 @@
-import {filterItemsByType, resolveValueArray, toNumber} from "../util.js";
+import {resolveValueArray} from "../util.js";
 
 /**
  *
@@ -13,13 +13,12 @@ export function getAvailableTrainedSkillCount(actor) {
 
 /**
  *
- * @param actor {SWSEActor}
- * @returns {Promise<void>}
+ * @param actor
  */
-export async function generateSkills(actor) {
+export function generateSkills(actor) {
     let prerequisites = actor.data.prerequisites;
     prerequisites.trainedSkills = [];
-    let classSkills = await actor._getClassSkills();
+    let classSkills = actor._getClassSkills();
     let halfCharacterLevel = actor.getHalfCharacterLevel();
     let conditionBonus = actor.conditionBonus;
     for (let [key, skill] of Object.entries(actor.data.data.skills)) {
@@ -34,7 +33,7 @@ export async function generateSkills(actor) {
         skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty]);
         skill.key = `@${actor.cleanSkillName(key)}`;
         actor.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
-        skill.label = await actor._uppercaseFirstLetters(key).replace("Knowledge", "K.");
+        skill.label = key.titleCase().replace("Knowledge", "K.");
         actor.resolvedLabels.set(skill.key, skill.label);
 
         skill.title = `Half character level: ${halfCharacterLevel}
@@ -50,7 +49,7 @@ export async function generateSkills(actor) {
         if (classSkills.size === 0) {
             let data = {};
             data["data.skills." + key + ".trained"] = false;
-            await actor.update(data);
+            actor.update(data);
             return;
         }
         prerequisites.trainedSkills.push(key.toLowerCase());

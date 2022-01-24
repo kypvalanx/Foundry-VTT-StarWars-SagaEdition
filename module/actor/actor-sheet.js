@@ -74,7 +74,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (!this.options.editable) return;
 
 
-        html.find("input.plain").on("change", this._onChangeInput.bind(this));
+        //html.find("input.plain").on("change", this._onChangeInput.bind(this));
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
@@ -98,11 +98,12 @@ export class SWSEActorSheet extends ActorSheet {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
 
-        html.find("input.skill").on("change", async (event) => {
-            let data = {};
-            data["data.skills." + event.currentTarget.dataset.id + ".trained"] = event.currentTarget.checked;
-            await this.actor.update(data);
-        })
+        // html.find("input.skill").on("change", async (event) => {
+        //     event.preventDefault();
+        //     let data = {};
+        //     data["data.skills." + event.currentTarget.dataset.id + ".trained"] = event.currentTarget.checked;
+        //     await this.actor.update(data);
+        // })
 
         // Species controls
         html.find(".species-control").click(this._onSpeciesControl.bind(this));
@@ -342,8 +343,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
-
     buildGenderDialog(sheet) {
         let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
         let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
@@ -501,8 +500,15 @@ export class SWSEActorSheet extends ActorSheet {
             for (const el of elems) {
                 const name = el.dataset.name;
                 let value;
-                if (el.nodeName === "INPUT") value = el.value;
-                else if (el.nodeName === "SELECT") value = el.options[el.selectedIndex].value;
+                if (el.nodeName === "INPUT") {
+                    switch (el.type) {
+                        case "checkbox":
+                            value = el.checked;
+                            break;
+                        default:
+                            value = el.value;
+                    }
+                } else if (el.nodeName === "SELECT") value = el.options[el.selectedIndex].value;
 
                 if (el.dataset.dtype === "Number") value = Number(value);
                 else if (el.dataset.dtype === "Boolean") value = Boolean(value);
@@ -814,7 +820,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     async checkPrerequisitesAndResolveOptions(item) {
         let entitiesToAdd = [];
-        if(!await this.activateChoices(item, entitiesToAdd, {})){
+        if (!await this.activateChoices(item, entitiesToAdd, {})) {
             return [];
         }
         entitiesToAdd.push(item.data.toObject(false))
@@ -850,7 +856,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a,b) => a || b, false);
+        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
 
         if (this.actorHasItem(item) && !takeMultipleTimes) {
             let itemType = item.data.type;
@@ -945,7 +951,7 @@ export class SWSEActorSheet extends ActorSheet {
         let entities = [];
         let context = {};
         context.isFirstLevel = this.actor.classes.length === 0;
-        if(item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0){
+        if (item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0) {
             new Dialog({
                 title: "The Beast class is not allowed at this time",
                 content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
@@ -958,7 +964,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
-        if(item.name !== "Beast" && this.actor.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.actor.getAttribute("INT") < 3){
+        if (item.name !== "Beast" && this.actor.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.actor.getAttribute("INT") < 3) {
             new Dialog({
                 title: "The Beast class is not allowed to multiclass at this time",
                 content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
@@ -1066,7 +1072,7 @@ export class SWSEActorSheet extends ActorSheet {
         let item = this.actor.items.get(itemId);
 
         let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
-        if(meetsPrereqs.doesFail){
+        if (meetsPrereqs.doesFail) {
             new Dialog({
                 title: "You Don't Meet the Prerequisites!",
                 content: `You do not meet the prerequisites for equipping ${item.data.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
@@ -1099,7 +1105,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async activateChoices(item, additionalEntitiesToAdd, context) {
         let choices = item.data.data.choices;
-        if(choices.length === 0){
+        if (choices.length === 0) {
             return true;
         }
         for (let choice of choices ? choices : []) {
@@ -1145,7 +1151,7 @@ export class SWSEActorSheet extends ActorSheet {
                         key = choice?.innerText;
                     }
                     let selectedChoice = options[key];
-                    if(!selectedChoice){
+                    if (!selectedChoice) {
                         return false;
                     }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
@@ -1178,9 +1184,9 @@ export class SWSEActorSheet extends ActorSheet {
         let additionalEntitiesToAdd = [];
         feats = feats.map(feat => this.actor.cleanItemName(feat))
         if (context.isFirstLevel) {
-            if(availableClassFeats > 0 && availableClassFeats < feats.length){
+            if (availableClassFeats > 0 && availableClassFeats < feats.length) {
                 let selectedFeats = [];
-                for(let i = 0; i < availableClassFeats; i ++){
+                for (let i = 0; i < availableClassFeats; i++) {
                     let options = "";
 
                     for (let feat of this._explodeFeatNames(feats)) {
@@ -1383,17 +1389,19 @@ export class SWSEActorSheet extends ActorSheet {
         return items.length === 1;
     }
 
-    _explodeFeatNames(feats){
+    _explodeFeatNames(feats) {
         let explode = [];
-        for(let feat of feats){
-            if("Skill Focus" === feat){
+        for (let feat of feats) {
+            if ("Skill Focus" === feat) {
                 skills.forEach(skill => {
                     console.log("skill", skill)
                     if (skill && !this.actor.focusSkills.includes(skill.toLowerCase())) {
                         explode.push(`${feat} (${skill})`);
                     }
                 })
-            } else{ explode.push(feat)}
+            } else {
+                explode.push(feat)
+            }
         }
         return explode;
     }
@@ -1428,7 +1436,11 @@ export class SWSEActorSheet extends ActorSheet {
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
                 for (let skill of this.actor.trainedSkills) {
                     if (!this.actor.data.prerequisites.focusSkills.includes(skill.label.toLowerCase())) {
-                        resolvedOptions[skill.label.titleCase()] = {abilities: [], items: [], payload: skill.label.titleCase()};
+                        resolvedOptions[skill.label.titleCase()] = {
+                            abilities: [],
+                            items: [],
+                            payload: skill.label.titleCase()
+                        };
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {
@@ -1650,7 +1662,7 @@ export class SWSEActorSheet extends ActorSheet {
         let isHeroic = this.actor.getInheritableAttributesByKey("isHeroic", "OR");
 
         let availableBonuses = [false];
-        if(isHeroic){
+        if (isHeroic) {
             availableBonuses = [false, false];
         }
         for (let i = 0; i < availableBonuses.length - Object.values(bonus).filter(b => b === 1).length; i++) {
@@ -1828,7 +1840,6 @@ export class SWSEActorSheet extends ActorSheet {
         this.actor.attack(ev, {type: "singleAttack", items: [itemId]});
         return undefined;
     }
-
 
 
 }
