@@ -5,6 +5,7 @@
         <div class="temp"><h3>Temp</h3></div>
         <div class="mod"><h3>Mod</h3></div>
     </div>
+    {{log data actor}}
     {{#each data.data.attributes as |attribute id|}}
         {{#unless attribute.skip}}
             <div class="ability-score draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}" data-type="ability">

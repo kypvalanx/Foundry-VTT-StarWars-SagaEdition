@@ -72,7 +72,7 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TRAINED SKILL':
-                if (target.trainedSkills.filter(trainedSkill => trainedSkill.toLowerCase() === prereq.requirement.toLowerCase()).length === 1) {
+                if (Object.entries(target.data.data.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
                     successList.push({prereq, count: 1});
                     continue;
                 }

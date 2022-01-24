@@ -1,22 +1,14 @@
-import {filterItemsByType} from "../util.js";
-
-export class SpeciesHandler {
     /**
      *
      * @param actor {SWSEActor}
      */
-    generateSpeciesData(actor) {
-        let actorData = actor.data;
-        let speciesList = filterItemsByType(actor.items.values(), "species");
-        actor.species = (speciesList.length > 0 ? speciesList[0] : null);
-
+    export function generateSpeciesData(actor) {
         if (!actor.species) {
             return;
         }
 
-        let prerequisites = actorData.prerequisites;
-        prerequisites.species = actorData.species?.name.toLowerCase();
+        let prerequisites = actor.data.prerequisites;
+        prerequisites.species = actor.data.species?.name.toLowerCase();
         prerequisites.isDroid = actor.isDroid
-        actorData.data.attributes.con.skip = actor.getInheritableAttributesByKey("isDroid", "OR");
+        actor.data.data.attributes.con.skip = actor.isDroid;
     }
-}

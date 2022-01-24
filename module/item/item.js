@@ -100,10 +100,7 @@ export class SWSEItem extends Item {
     }
 
     get reflexDefenseBonus() {
-        if (this._parentIsProficientWithArmor()) {
-            return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
-        }
-        return 0;
+        return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
     _parentIsProficientWithArmor() {
@@ -472,21 +469,21 @@ export class SWSEItem extends Item {
     }
 
 
-    setParent(current) {
+    setParent(parent) {
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace("#parent#", current);
+                prerequisite.requirement = prerequisite.requirement.replace("#parent#", parent);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace("#parent#", current);
+                prerequisite.text = prerequisite.text.replace("#parent#", parent);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
-                    attribute.value = attribute.value.replace("#parent#", current);
+                    attribute.value = attribute.value.replace("#parent#", parent);
                 } else if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace("#parent#", current));
+                    attribute.value = attribute.value.map(val => val.replace("#parent#", parent));
                 }
             }
         });
