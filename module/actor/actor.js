@@ -182,6 +182,11 @@ export class SWSEActor extends Actor {
             let result = /\w* Speed \d*/.exec(trait.name);
             return !!result;
         })
+
+        if(attributeTraits.length === 0){
+            attributeTraits.push({name:"Stationary 0"});
+        }
+
         let armorType = "";
         for(let armor of this.getEquippedItems().filter(item => item.type === "armor")){
             if(armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)){

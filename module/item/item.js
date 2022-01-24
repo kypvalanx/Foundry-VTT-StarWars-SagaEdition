@@ -161,13 +161,15 @@ export class SWSEItem extends Item {
     }
 
     get armorType() {
-        if (this.subType === 'Heavy Armor' || this.getStripping("makeHeavy")?.value) {
+        let armorType = this.getInheritableAttributesByKey("armorType", "VALUES")[0] || this.subType;
+
+        if (armorType === 'Heavy Armor' || this.getStripping("makeHeavy")?.value) {
             return 'Heavy';
         }
-        if (this.subType === 'Medium Armor' || this.getStripping("makeMedium")?.value) {
+        if (armorType === 'Medium Armor' || this.getStripping("makeMedium")?.value) {
             return 'Medium';
         }
-        if (this.subType === 'Light Armor') {
+        if (armorType === 'Light Armor') {
             return 'Light';
         }
         return 'NA';
