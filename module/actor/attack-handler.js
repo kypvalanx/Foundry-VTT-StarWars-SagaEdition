@@ -262,7 +262,7 @@ function createAttack(name, th, dam, notes, range, critical, type, itemId, actor
 }
 
 export function resolveFinesseBonus(actor, finesseStats) {
-    let bonus = 0;
+    let bonus = -9999;
     for (let stat of finesseStats) {
         bonus = Math.max(bonus, actor.getCharacterAttribute(stat.value).mod);
     }
