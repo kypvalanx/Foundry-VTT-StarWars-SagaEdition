@@ -1,35 +1,59 @@
 <ul>
-<!--    <li class="attribute flexrow"><button class="attribute-add attribute-left-button">Add Attribute</button><button class="mode-add attribute-right-button">Add Mode</button></li>-->
-<!--<br/>-->
-    <!--INHERITED ATTRIBUTES-->
+
+    <!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
     {{#each data.data.items as |item key|}}
         {{#each item.data.attributes as |attr key|}}
             {{#unlessEquals attr.key 'upgradePointCost'}}
-            <li class="attribute flexrow" data-attribute="{{key}}">
-                <label class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}">{{attr.key}}</label>
-                <div class="attribute-value">{{attr.value}}</div>
-<!--                <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-            </li>
+                <li class="attribute flexrow" data-attribute="{{key}}">
+                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+                           value="{{key}}">{{attr.key}}</label>
+                    <div class="attribute-value">{{attr.value}}</div>
+                </li>
             {{/unlessEquals}}
         {{/each}}
     {{/each}}
+    <!-- active item -->
+    {{#if data.data.attributes}}
+        {{#each data.data.attributes as |attr key|}}
+            {{#if attr}}
+                <li class="attribute flexrow" data-attribute="{{key}}">
+                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+                           value="{{key}}">{{attr.key}}</label>
+                    <input class="attribute-value" name="data.attributes.{{key}}.value" type="text"
+                           value="{{attr.value}}" placeholder="" title=""/>
+                    <a class="attribute-delete" data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
+                </li>
+            {{/if}}
+        {{/each}}
+        <li class="attribute flexrow subtle"><a class="attribute-add"><i class="fas fa-plus"></i> add a new
+            attribute.</a></li>
+        <li class="attribute flexrow subtle"><a class="mode-add"><i class="fas fa-plus"></i> add a new mode.</a></li>
 
-{{#each data.data.attributes as |attr key|}}
-    {{#if attr}}
-        <li class="attribute flexrow" data-attribute="{{key}}">
-          <label class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}">{{attr.key}}</label>
-          <input class="attribute-value" name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
-<!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-          <a class="attribute-delete" data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
-        </li>
+        {{#each data.data.modes as |mode mkey|}}
+
+            {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=true}}
+
+        {{/each}}
+
     {{/if}}
-{{/each}}
-    <li class="attribute flexrow subtle"><a class="attribute-add"><i class="fas fa-plus"></i> add a new attribute.</a></li>
-    <li class="attribute flexrow subtle"><a class="mode-add"><i class="fas fa-plus"></i> add a new mode.</a></li>
-    {{#each data.data.modes as |mode mkey|}}
+    <!-- Compendium Item -->
+    {{#unless data.data.attributes}}
+        {{#each item.data._source.data.attributes as |attr key|}}
+            {{#if attr}}
+                <li class="attribute flexrow" data-attribute="{{key}}">
+                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+                           value="{{key}}">{{attr.key}}</label>
+                    <input class="attribute-value disabled" name="data.attributes.{{key}}.value" type="text"
+                           value="{{attr.value}}" placeholder="" title=""/>
+                </li>
+            {{/if}}
+        {{/each}}
 
-        {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey)}}
+        {{#each item.data._source.data.modes as |mode mkey|}}
 
-    {{/each}}
+            {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=false}}
 
+        {{/each}}
+
+    {{/unless}}
 </ul>

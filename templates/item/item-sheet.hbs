@@ -9,13 +9,13 @@
                 <div class="resource">
                     <label class="resource-label">Cost</label>
                     <label>
-                        <input type="text" name="data.cost" value="{{item.data.data.cost}}" data-dtype="String"/>
+                        <input type="text" name="data.cost" value="{{#if item.data.data}}{{item.data.data.cost}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.cost}}{{/unless}}" data-dtype="String"/>
                     </label>
                 </div>
                 <div class="resource">
                     <label class="resource-label">Weight</label>
                     <label>
-                        <input type="text" name="data.weight" value="{{item.data.data.weight}}" data-dtype="String"/>
+                        <input type="text" name="data.weight" value="{{#if item.data.data}}{{item.data.data.weight}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.weight}}{{/unless}}" data-dtype="String"/>
                     </label>
                 </div>
             </div>
@@ -35,9 +35,10 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            <p>{{{data.data.description}}}</p>
-            <!--            {{editor content=data.data.description target="data.description" button=true owner=owner
-                                     editable=editable}}-->
+            {{#if data.data.description}}
+                {{editor content=data.data.description target="data.data.description" button=true owner=owner editable=editable}}
+            {{/if}}
+            {{#unless data.data.description}}{{{item.data._source.data.description}}}{{/unless}}
         </div>
 
         {{!-- Stripping Tab --}}

@@ -65,7 +65,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
     damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(...item.getInheritableAttributesByKey("bonusDamage"))
 
-    let attackBonuses = [actorData.data.offense.bab]
+    let attackBonuses = [actorData.data.offense.bab,  actor.conditionBonus]
     let weaponTypes = getPossibleProficiencies(actor, item);
 
     if (isRanged(item)) {
@@ -283,18 +283,19 @@ export function generateUnarmedAttack(actor) {
     let unarmedModifier = actor.getInheritableAttributesByKey('unarmedModifier');
     let actorData = actor.data;
 
-    let proficient = isProficient(actor, UNARMED_WEAPON_TYPES);
-    let proficiencyBonus = proficient ? 0 : -5;
+    //let proficient = isProficient(actor, UNARMED_WEAPON_TYPES);
+    //let proficiencyBonus = proficient ? 0 : -5;
     let focus = isFocus(actor, UNARMED_WEAPON_TYPES);
-    let finesseStats = actor.getInheritableAttributesByKey("finesseStat");
-    finesseStats.push({value: "STR"});
-    let finesseBonus = resolveFinesseBonus(actor, finesseStats);
+    let finesseStats = [{value: "STR"}];
+    finesseStats.push(...actor.getInheritableAttributesByKey("finesseStat"));
+
     let offense = actorData.data?.offense;
 
     let atkBonuses = [];
     atkBonuses.push(offense?.bab)
-    atkBonuses.push(finesseBonus)
-    atkBonuses.push(proficiencyBonus)
+    atkBonuses.push(actor.conditionBonus);
+    atkBonuses.push(resolveFinesseBonus(actor, finesseStats));
+    //atkBonuses.push(proficiencyBonus)
     atkBonuses.push(focus ? 1 : 0)
     atkBonuses.push(actor.acPenalty)
     let notes = "";
