@@ -8,7 +8,9 @@ import {resolveValueArray} from "../util.js";
 export function getAvailableTrainedSkillCount(actor) {
     let intBonus = actor.getAttributeMod("int")
     let classBonus = actor.getInheritableAttributesByKey("trainedSkillsFirstLevel", "SUM", item => item.document.getInheritableAttributesByKey("isFirstLevel", "OR"))
-    return Math.max(resolveValueArray([classBonus, intBonus, actor.getInheritableAttributesByKey("trainedSkills", "SUM")]), 1);
+    let classSkills = Math.max(resolveValueArray([classBonus, intBonus]), 1);
+    let otherSkills = actor.getInheritableAttributesByKey("trainedSkills", "SUM");
+    return resolveValueArray([classSkills, otherSkills]);
 }
 
 /**
