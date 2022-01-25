@@ -21,6 +21,7 @@ export function generateSkills(actor) {
     let classSkills = actor._getClassSkills();
     let halfCharacterLevel = actor.getHalfCharacterLevel();
     let conditionBonus = actor.conditionBonus;
+    let skillFocuses = actor.getInheritableAttributesByKey("skillFocus", "VALUES").map(skill => (skill || "").toLowerCase())
     for (let [key, skill] of Object.entries(actor.data.data.skills)) {
         skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
 
@@ -29,8 +30,9 @@ export function generateSkills(actor) {
         let trainedSkillBonus = skill.trained === true ? 5 : 0;
         let getAbilitySkillBonus = actor.getAbilitySkillBonus(key);
         let acPenalty = skill.acp ? actor.acPenalty : 0;
+        let skillFocusBonus = skillFocuses.includes(key) ? 5 : 0;
 
-        skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty]);
+        skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty, skillFocusBonus]);
         skill.key = `@${actor.cleanSkillName(key)}`;
         actor.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
@@ -39,6 +41,7 @@ export function generateSkills(actor) {
         skill.title = `Half character level: ${halfCharacterLevel}
             Attribute Mod: ${attributeMod}
             Trained Skill Bonus: ${trainedSkillBonus}
+            Skill Focus Bonus: ${skillFocusBonus}
             Condition Bonus: ${conditionBonus}
             Ability Skill Bonus: ${getAbilitySkillBonus}
             Armor Check Penalty: ${acPenalty}`;
