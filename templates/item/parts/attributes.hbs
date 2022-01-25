@@ -38,7 +38,6 @@
     {{/if}}
     <!-- Compendium Item -->
     {{#unless data.data.attributes}}
-        {{log data}}
         {{#each item.data._source.data.attributes as |attr key|}}
             {{#if attr}}
                 <li class="attribute flexrow" data-attribute="{{key}}">
