@@ -882,9 +882,9 @@ export class SWSEActorSheet extends ActorSheet {
 
         let optionString = "";
         for (let category of item.data.data.bonusFeatCategories) {
-            if (this.actor.data.availableItems[category.category] > 0) {
+            if (this.actor.data.availableItems[category.value] > 0) {
                 possibleFeatTypes.push(category);
-                optionString += `<option value="${category}">${category.category}</option>`;
+                optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
             }
         }
 
@@ -898,16 +898,16 @@ export class SWSEActorSheet extends ActorSheet {
                 content: content,
                 callback: async (html) => {
                     let key = html.find("#choice")[0].value;
-                    possibleFeatTypes = [JSON.parse(key)];
+                    possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
                 }
             });
         }
 
-        for (let category of item.data.data.categories) {
-            if (!category.value.endsWith(" Bonus Feats")) {
-                possibleFeatTypes.push(category);
-            }
-        }
+        // for (let category of item.data.data.categories) {
+        //     if (!category.value.endsWith(" Bonus Feats")) {
+        //         possibleFeatTypes.push(category);
+        //     }
+        // }
 
         item.data.data.categories = possibleFeatTypes;
 
