@@ -193,7 +193,7 @@ export class SWSEActor extends Actor {
                 armorType = armor.armorType;
             }
         }
-        return attributeTraits.map(trait => trait.name).map(name => this.applyArmorSpeedPenalty(name,armorType)).join("; ");
+        return attributeTraits.map(trait => trait.name).map(name => this.applyArmorSpeedPenalty(name,armorType)).map(name => this.applyConditionSpeedPenalty(name,armorType)).join("; ");
     }
 
     get remainingSkills(){
@@ -214,6 +214,17 @@ export class SWSEActor extends Actor {
         let result = /([\w\s]*)\s(\d*)/.exec(speed);
 
         return `${result[1]} ${Math.floor(parseInt(result[2])*3/4)}`
+    }
+
+    applyConditionSpeedPenalty(speed){
+        let conditionBonus = this.conditionBonus;
+        if(!(conditionBonus === -10)){
+            return speed;
+        }
+
+        let result = /([\w\s]*)\s(\d*)/.exec(speed);
+
+        return `${result[1]} ${Math.floor(parseInt(result[2])/2)}`
     }
 
     getTraits() {
