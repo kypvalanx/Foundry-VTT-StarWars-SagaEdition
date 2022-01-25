@@ -73,6 +73,9 @@ function _resolveFort(actor, conditionBonus) {
     let abilityBonus = _getFortStatMod(actor);
     total.push(abilityBonus);
     let otherBonus = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", "SUM", undefined, attr => !attr.modifier)
+
+    let miscBonusTip = actor.getInheritableAttributesByKey("fortitudeDefenseBonus", "SUMMARY", undefined, attr => !attr.modifier)
+    miscBonusTip += `Condition: ${conditionBonus};  `
     total.push(otherBonus);
     let classBonus = actor.getInheritableAttributesByKey("classFortitudeDefenseBonus", "MAX");
     total.push(classBonus);
@@ -84,7 +87,7 @@ function _resolveFort(actor, conditionBonus) {
     miscBonuses.push(conditionBonus)
     miscBonuses.push(otherBonus)
     let miscBonus = resolveValueArray(miscBonuses)
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
 }
 
 /**
@@ -105,11 +108,13 @@ function _resolveWill(actor, conditionBonus) {
     let classBonus = actor.getInheritableAttributesByKey("classWillDefenseBonus", "MAX");
     total.push(classBonus);
     let otherBonus = actor.getInheritableAttributesByKey("willDefenseBonus", "SUM", undefined, attr => !attr.modifier)
-    total.push(otherBonus);
+    let miscBonusTip = actor.getInheritableAttributesByKey("willDefenseBonus", "SUMMARY", undefined, attr => !attr.modifier)
+    miscBonusTip += `Condition: ${conditionBonus};  `
+        total.push(otherBonus);
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     let armorBonus = resolveValueArray([heroicLevel]);
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
 }
 
 /**
@@ -128,16 +133,17 @@ function _resolveRef(actor, conditionBonus) {
     let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
     let otherBonus = actor.getInheritableAttributesByKey("reflexDefenseBonus", "SUM", undefined, attr => !attr.modifier)
+    let miscBonusTip = actor.getInheritableAttributesByKey("reflexDefenseBonus", "SUMMARY", undefined, attr => !attr.modifier)
     total.push(otherBonus);
     let classBonus = actor.getInheritableAttributesByKey("classReflexDefenseBonus", "MAX");
     total.push(classBonus);
     let dodgeBonus = actor.getInheritableAttributesByKey("bonusDodgeReflexDefense", "SUM");
+    miscBonusTip += actor.getInheritableAttributesByKey("bonusDodgeReflexDefense", "SUMMARY");
+    miscBonusTip += `Condition: ${conditionBonus};  `
     total.push(dodgeBonus);
-    let sizeBonus = actor.getInheritableAttributesByKey("sizeModifier", "SUM");
-    total.push(sizeBonus);
     total.push(conditionBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, sizeBonus])
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus}
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
 }
 
 /**

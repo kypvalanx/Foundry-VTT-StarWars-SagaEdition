@@ -413,18 +413,19 @@ export function toNumber(value) {
  * @param attribute {Object}
  * @param attribute.value {*}
  * @param source {String}
+ * @param sourceString {String}
  * @returns {Array.<{source: String, value: String}>}
  */
-export function extractAttributeValues(attribute, source) {
+export function extractAttributeValues(attribute, source, sourceString) {
     let values = [];
     let value = attribute.value;
     if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
             for (let v of value) {
-                values.push({source, value: v, modifier: attribute.modifier, key: attribute.key})
+                values.push({source, value: v, modifier: attribute.modifier, key: attribute.key, sourceString})
             }
         } else {
-            values.push({source, value, modifier: attribute.modifier, key: attribute.key})
+            values.push({source, value, modifier: attribute.modifier, key: attribute.key, sourceString})
         }
     }
     return values
@@ -686,6 +687,10 @@ export function reduceArray(reduce, values) {
             return values.map(attr => attr.value);
         case "NUMERIC_VALUES":
             return values.map(attr => toNumber(attr.value));
+        case "SUMMARY":
+            let summary = "";
+            values.forEach(value => summary += `${value.sourceString}: ${value.value};  `)
+            return summary;
         default:
             return values.map(attr => attr.value).reduce(reduce, "");
     }

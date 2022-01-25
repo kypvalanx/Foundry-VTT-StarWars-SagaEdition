@@ -876,7 +876,7 @@ export class SWSEItem extends Item {
 
         //add attributes from this item
         for (let attribute of Object.values(this.data.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
-            values.push(...extractAttributeValues(attribute, this.data._id));
+            values.push(...extractAttributeValues(attribute, this.data._id, this.data.name));
         }
 
 
@@ -885,7 +885,7 @@ export class SWSEItem extends Item {
             for (let i = 1; i <= classLevel; i++) {
                 let level = this.data.data.levels[i];
                 for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === attributeKey)) {
-                    values.push(...extractAttributeValues(attribute, this.data._id));
+                    values.push(...extractAttributeValues(attribute, this.data._id, this.data.name));
                 }
             }
         }
@@ -912,7 +912,7 @@ export class SWSEItem extends Item {
         let values = [];
         for (let mode of activeModes) {
             for (let attribute of Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || []) {
-                values.push(...extractAttributeValues(attribute, this.data._id));
+                values.push(...extractAttributeValues(attribute, this.data._id, this.data.name));
             }
             values.push(...this.extractModeAttributes(Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
         }
