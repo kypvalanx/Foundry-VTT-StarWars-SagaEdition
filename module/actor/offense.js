@@ -4,6 +4,6 @@
  * @returns {{bab: *}}
  */
     export function resolveOffense(actor) {
-        let bab = actor.getInheritableAttributesByKey("baseAttackBonus", "SUM", undefined) + actor.conditionBonus;
+        let bab = actor.getInheritableAttributesByKey("baseAttackBonus", "SUM", undefined);
         return {bab: bab};
     }

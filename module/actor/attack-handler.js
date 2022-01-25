@@ -65,7 +65,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
     damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(...item.getInheritableAttributesByKey("bonusDamage"))
 
-    let attackBonuses = [actorData.data.offense.bab]
+    let attackBonuses = [actorData.data.offense.bab,  actor.conditionBonus]
     let weaponTypes = getPossibleProficiencies(actor, item);
 
     if (isRanged(item)) {
@@ -293,6 +293,7 @@ export function generateUnarmedAttack(actor) {
 
     let atkBonuses = [];
     atkBonuses.push(offense?.bab)
+    atkBonuses.push(actor.conditionBonus);
     atkBonuses.push(finesseBonus)
     atkBonuses.push(proficiencyBonus)
     atkBonuses.push(focus ? 1 : 0)
