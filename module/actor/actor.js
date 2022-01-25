@@ -739,7 +739,7 @@ export class SWSEActor extends Actor {
         let skills = this.getInheritableAttributesByKey("classSkill").map(attr => attr.value);
 
         for (let skill of skills) {
-            if (skill.toLowerCase() === "knowledge (all skills, taken individually)") {
+            if (["knowledge (all skills, taken individually)", "knowledge (all types, taken individually)"].includes(skill.toLowerCase())) {
                 classSkills.add("knowledge (galactic lore)");
                 classSkills.add("knowledge (bureaucracy)");
                 classSkills.add("knowledge (life sciences)");
