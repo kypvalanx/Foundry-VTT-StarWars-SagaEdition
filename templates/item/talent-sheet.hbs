@@ -4,11 +4,16 @@
         <div class="header-fields">
           <h1 class="charname"><label name="name" type="text" value="{{item.name}}" placeholder="Name">{{item.name}}</label></h1>
           <div class="resource">
-            <label class="resource-label">Talent Tree: </label><span>{{data.talentTree}}</span>
+            <label class="resource-label">Talent Tree: </label><span>{{#if data.talentTree}}{{data.talentTree}}{{/if}}{{#unless data.talentTree}}{{data._source.talentTree}}{{/unless}}</span>
           </div>
           <div class="resource">
             <label class="resource-label">Categories:</label>
-              {{#each data.categories as |category|}}{{category}}, {{/each}}
+              {{#if data.data.categories}}
+                  {{#each data.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
+              {{/if}}
+              {{#unless data.data.categories}}
+                  {{#each item.data._source.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
+              {{/unless}}
           </div>
         </div>
     </header>
@@ -24,25 +29,16 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
-            {{editor content=data.description target="data.description" button=true owner=owner editable=editable}}
+            {{#if data.data.description}}
+                {{editor content=data.data.description target="data.data.description" button=true owner=owner editable=editable}}
+            {{/if}}
+            {{#unless data.data.description}}{{{item.data._source.data.description}}}{{/unless}}
         </div>
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
-            <header class="attributes-header flexrow">
-                <span class="attribute-key">Attribute Key</span>
-                <span class="attribute-value">Value</span>
-            </header>
+            {{> 'systems/swse/templates/item/parts/attributes.hbs'}}
 
-            <ol class="attributes-list">
-                {{#each data.attributes as |attr key|}}
-                    <li class="attribute flexrow" data-attribute="{{key}}">
-                        <label class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}">{{key}}</label>
-                        <input name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
-                        <!--                      //<label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.dtype}}">{{attr.value}}</label>-->
-                    </li>
-                {{/each}}
-            </ol>
         </div>
     </section>
 </form>

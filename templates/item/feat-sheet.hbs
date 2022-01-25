@@ -15,7 +15,6 @@
                 {{#unless data.data.categories}}
                     {{#each item.data._source.data.categories as |category id|}}{{#if id}}, {{/if}}{{category.value}}{{/each}}
                 {{/unless}}
-                {{log item data}}
             </div>
             {{#if data.data.isSupplied}}
             <div class="resource">
@@ -45,20 +44,6 @@
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
             {{> 'systems/swse/templates/item/parts/attributes.hbs'}}
-<!--            <header class="attributes-header flexrow">-->
-<!--                <span class="attribute-key">Attribute Key</span>-->
-<!--                <span class="attribute-value">Value</span>-->
-<!--            </header>-->
-
-<!--            <ol class="attributes-list">-->
-<!--            {{#each data.data.attributes as |attr key|}}-->
-<!--                  <li class="attribute flexrow" data-attribute="{{key}}">-->
-<!--                      <label class="attribute-key" type="text" name="data.attributes.{{key}}.key" value="{{key}}">{{attr.key}}</label>-->
-<!--                      <input name="data.attributes.{{key}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>-->
-<!--&lt;!&ndash;                      //<label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.dtype}}">{{attr.value}}</label>&ndash;&gt;-->
-<!--                  </li>-->
-<!--            {{/each}}-->
-<!--            </ol>-->
         </div>
     </section>
 </form>

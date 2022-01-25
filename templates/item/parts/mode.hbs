@@ -3,7 +3,8 @@
         <div class="mode flexrow">
             <label class="mode-name" type="text" name="{{modePath}}.name" value="{{mode.name}}">{{mode.name}}</label>
             {{#if mode.group}}
-                <label class="mode-group" type="text" name="{{modePath}}.group" value="{{mode.group}}" title="modes in groups are exclusive to each other">Group: {{mode.group}}</label>
+                <label class="mode-group" type="text" name="{{modePath}}.group" value="{{mode.group}}"
+                       title="modes in groups are exclusive to each other">Group: {{mode.group}}</label>
             {{/if}}
             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
             <a class="attribute-delete" data-mode-id="{{mkey}}"><i class="fas fa-trash"></i></a>
@@ -14,18 +15,30 @@
                     {{#if attr}}
                         <li class="attribute flexrow">
                             <div class="attribute-indent-graphic">|</div>
-                            <label class="attribute-indent-key" type="text" name="{{../modePath}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
-                            <input class="attribute-indent-value" name="{{../modePath}}.attributes.{{akey}}.value" type="text" value="{{attr.value}}" placeholder="" title=""/>
+                            <label class="attribute-indent-key" type="text"
+                                   name="{{../modePath}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
+                            <input class="attribute-indent-value" name="{{../modePath}}.attributes.{{akey}}.value"
+                                   type="text" value="{{attr.value}}" placeholder="" title=""/>
                             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-                            <a class="attribute-delete" data-mode-id="{{../mkey}}" data-attribute-id="{{akey}}"><i class="fas fa-trash"></i></a>
+                            <a class="attribute-delete" data-mode-id="{{../mkey}}" data-attribute-id="{{akey}}"><i
+                                    class="fas fa-trash"></i></a>
                         </li>
                     {{/if}}
                 {{/each}}
-                <li class="attribute flexrow subtle"><a class="attribute-add attribute-indent-graphic" data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add a new attribute to this mode.</a></li>
+                {{#if active}}
+                    <li class="attribute flexrow subtle"><a class="attribute-add attribute-indent-graphic"
+                                                            data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add a
+                        new attribute to this mode.</a></li>
+                {{/if}}
                 {{#unlessEquals depth 2}}
-                    <li class="attribute flexrow subtle"><a class="mode-add attribute-indent-graphic" data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add a new mode to this mode.</a></li>
+
+                    {{#if active}}
+                        <li class="attribute flexrow subtle"><a class="mode-add attribute-indent-graphic"
+                                                                data-mode-id="{{mkey}}"><i class="fas fa-plus"></i> add
+                            a new mode to this mode.</a></li>
+                    {{/if}}
                     {{#each mode.modes as |subMode subMkey|}}
-                        {{> 'systems/swse/templates/item/parts/mode.hbs' mode=subMode mkey=(concat ../mkey "." subMkey) depth=2 modePath=(concat ../modePath '.modes.' subMkey)}}
+                        {{> 'systems/swse/templates/item/parts/mode.hbs' mode=subMode mkey=(concat ../mkey "." subMkey) depth=2 modePath=(concat ../modePath '.modes.' subMkey active=active)}}
                     {{/each}}
                 {{/unlessEquals}}
             </ul>
