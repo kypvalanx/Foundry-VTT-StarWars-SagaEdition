@@ -2,6 +2,7 @@ import {filterItemsByType} from "../util.js";
 import {SWSE} from "../config.js";
 import {skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
+import {SWSEItem} from "../item/item.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -717,7 +718,10 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         //the dropped item is from a compendium
-        const item = await Item.implementation.fromDropData(data);
+        const compendiumItem = await Item.implementation.fromDropData(data);
+
+        let item = compendiumItem.clone();
+        item.prepareData();
 
         let entitiesToAdd = [];
         let context = {};
