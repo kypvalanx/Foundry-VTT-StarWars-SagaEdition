@@ -1663,10 +1663,9 @@ export class SWSEActorSheet extends ActorSheet {
         for (let val of Object.keys(CONFIG.SWSE.Abilities.droidSkip)) {
             combined[val] = {val: bonus[val], skip: CONFIG.SWSE.Abilities.droidSkip[val]};
         }
-        let isHeroic = this.actor.getInheritableAttributesByKey("isHeroic", "OR");
 
         let availableBonuses = [false];
-        if (isHeroic) {
+        if (this.actor.isHeroic) {
             availableBonuses = [false, false];
         }
         for (let i = 0; i < availableBonuses.length - Object.values(bonus).filter(b => b === 1).length; i++) {
