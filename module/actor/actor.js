@@ -126,6 +126,15 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.feats)
         generateSkills(this);
 
+
+        let remainingSkills = getAvailableTrainedSkillCount(this);
+        remainingSkills = remainingSkills - this.trainedSkills.length;
+        this.remainingSkills =  remainingSkills < 0 ? false : remainingSkills;
+        this.tooManySKills =  remainingSkills<0 ? Math.abs(remainingSkills) : false;
+
+        this.isHeroic = this.getInheritableAttributesByKey("isHeroic", "OR");
+
+
         actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
         actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
@@ -139,19 +148,6 @@ export class SWSEActor extends Actor {
 
         actorData.data.attacks = generateAttacks(this);
         this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
-        // if (await this.handleLeveBasedAttributeBonuses(actorData)) {
-        //     return; //do not continue to process.  this just set a class to the first class and will rerun the prepare method
-        // }
-
-        // try {
-        //     if (this.sheet?.rendered) {
-        //         this.sheet.render(true);
-        //     } else {
-        //         this.sheet.render(false)
-        //     }
-        // } catch (e) {
-        //     console.log("couldn't find charactersheet.  probably fine")
-        // }
     }
 
     handleDarksideArray(actorData) {
@@ -196,16 +192,6 @@ export class SWSEActor extends Actor {
         return attributeTraits.map(trait => trait.name).map(name => this.applyArmorSpeedPenalty(name,armorType)).map(name => this.applyConditionSpeedPenalty(name,armorType)).join("; ");
     }
 
-    get remainingSkills(){
-        let remainingSkills = getAvailableTrainedSkillCount(this);
-        remainingSkills = remainingSkills - this.trainedSkills.length;
-        return remainingSkills < 0 ? false : remainingSkills;
-    }
-    get tooManySkills(){
-        let remainingSkills = getAvailableTrainedSkillCount(this);
-        remainingSkills = remainingSkills - this.trainedSkills.length;
-        return remainingSkills<0 ? Math.abs(remainingSkills) : false;
-    }
 
     applyArmorSpeedPenalty(speed, armorType) {
         if (!armorType || "Light" === armorType) {
