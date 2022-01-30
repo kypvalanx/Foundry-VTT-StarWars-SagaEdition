@@ -6,7 +6,7 @@
 </div>
 <ol class="items-list">
     {{#each actor.affiliations as |item id|}}
-        <li class="item flexrow" data-item-id="{{item.id}}">
+        <li class="item flexrow" data-item-id="{{item._id}}">
             <h4 class="item-name"><b>{{item.name}}</b></h4>
             {{#if item.prerequisite }}<h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisite}}</h4>{{/if}}
             <div class="item-controls">
