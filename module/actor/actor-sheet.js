@@ -757,7 +757,7 @@ export class SWSEActorSheet extends ActorSheet {
         let allTreesOnTalent = new Set();
         let optionString = "";
 
-        if (item.data.data.bonusTalentTree === this.actor.getInheritableAttributesByKey('bonusTalentTree')[0]) {
+        if (!!item.data.data.bonusTalentTree && item.data.data.bonusTalentTree === this.actor.getInheritableAttributesByKey('bonusTalentTree')[0]) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
@@ -1006,7 +1006,10 @@ export class SWSEActorSheet extends ActorSheet {
         await this.activateChoices(item, entities, context);
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        await this.actor.addItemsFromCompendium('trait', entities, item.getProvidedItems(i => i.type === 'TRAIT'), item.name);
+        entities.push(... (await this.actor.addItemsFromCompendium(null, item.getProvidedItems(), item.name)).entities);
+        // await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'), item.name);
+        // await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'), item.name);
+        // await this.actor.addItemsFromCompendium('species', entities, item.getProvidedItems(i => i.type === 'SPECIES'), item.name);
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1037,9 +1040,9 @@ export class SWSEActorSheet extends ActorSheet {
         await this.activateChoices(item, entities, {});
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        await this.actor.addItemsFromCompendium('trait', entities, item.getProvidedItems(i => i.type === 'TRAIT'));
-        await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'));
-        await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'));
+        entities.push(...(await this.actor.addItemsFromCompendium(null, item.getProvidedItems())).entities);
+        //await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'));
+        //await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'));
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1159,9 +1162,9 @@ export class SWSEActorSheet extends ActorSheet {
                         return false;
                     }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                        await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'TRAIT'));
-                        await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
-                        await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'FEAT'));
+                        additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, selectedChoice.providedItems)).entities);
+                        //await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
+                        //await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'FEAT'));
                     }
                     if (selectedChoice.payload && selectedChoice.payload !== "") {
                         item.setPayload(selectedChoice.payload);
@@ -1212,14 +1215,24 @@ export class SWSEActorSheet extends ActorSheet {
                         callback: async (html) => {
                             let feat = html.find("#feat")[0].value;
                             selectedFeats.push(feat);
-                            await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, `Bonus Feat (${feat})`)
-                            await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feat)
+                            additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, [{
+                                type: 'TRAIT',
+                                name: `Bonus Feat (${feat})`
+                            }, {
+                                type: 'FEAT',
+                                name: feat
+                            }])).entities);
                         }
                     });
                 }
             } else {
-                await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, await feats.map(feat => `Bonus Feat (${feat})`));
-                let newVar = await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feats)
+                additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                    return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
+                }))).entities);
+                let newVar = await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                    return {type: 'FEAT', name: feat}
+                }));
+                additionalEntitiesToAdd.push(...newVar.entities);
 
                 let featString = newVar.notificationMessage;
 
@@ -1253,8 +1266,11 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    await this.actor.addItemsFromCompendium('trait', additionalEntitiesToAdd, `Bonus Feat (${feat})`)
-                    await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, feat)
+                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {
+                        type: 'TRAIT',
+                        name: `Bonus Feat (${feat})`
+                    })).entities);
+                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {type: 'FEAT', name: feat})).entities);
                 }
             });
         }
@@ -1794,14 +1810,14 @@ export class SWSEActorSheet extends ActorSheet {
     async addOptionalRuleFeats(item) {
         let items = [];
 
-        if (item.name === 'Point-Blank Shot') {
-            if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                await this.actor.addItemsFromCompendium('feat', items, {
-                    category: 'Precise Shot',
-                    prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'
-                });
-            }
-        }
+        // if (item.name === 'Point-Blank Shot') {
+        //     if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
+        //         await this.actor.addItemsFromCompendium('feat', items, {
+        //             category: 'Precise Shot',
+        //             prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'
+        //         });
+        //     }
+        // }
 
         return items;
     }

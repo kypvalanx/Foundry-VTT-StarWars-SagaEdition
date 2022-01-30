@@ -442,9 +442,8 @@ export class SWSEItem extends Item {
     setSourceString() {
         let sourceString = '';
 
-        let itemData = this.data;
-        if (itemData.data.supplier) {
-            sourceString = `${itemData.data.supplier.type}, ${itemData.data.supplier.name}`;
+        if (this.data.data.supplier && this.data.data.supplier.type && this.data.data.supplier.name) {
+            sourceString = `${this.data.data.supplier.type}, ${this.data.data.supplier.name}`;
         }
         this.data.data.sourceString = sourceString;
     }
