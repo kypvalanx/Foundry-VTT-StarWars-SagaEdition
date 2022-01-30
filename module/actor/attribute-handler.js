@@ -16,11 +16,12 @@ export function generateAttributes(actor) {
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
         let longKey = getLongKey(key);
         let attributeBonuses = actor.getInheritableAttributesByKey(`${longKey}Bonus`)
+        let attributeMax = actor.getInheritableAttributesByKey(`${longKey}Max`, "MIN");
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
-    if(actorData.data.isBeast && key === "int"){
-        attribute.base = Math.min(attribute.base, 2);
+    if(attributeMax){
+        attribute.base = Math.min(attribute.base, attributeMax);
     }
         let bonuses = [];
         // let classLevelBonuses = []; //TODO WIRE ME UP

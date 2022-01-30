@@ -28,10 +28,10 @@ import {sizeArray} from "../constants.js";
  * @extends {Actor}
  */
 export class SWSEActor extends Actor {
-    resolvedVariables = new Map();
+    //resolvedVariables = new Map();
 
-    resolvedLabels = new Map();
-    inheritableItems = [];
+    //resolvedLabels = new Map();
+    //inheritableItems = [];
 
 
     /**
@@ -871,30 +871,25 @@ export class SWSEActor extends Actor {
 
     /**
      *
-     * @param compendium
      * @param additionalEntitiesToAdd
-     * @param items
+     * @param items {[{name: string,type: string}] | {name: string, type: string}}
      * @param parentName
-     * @returns {Promise<{addedEntities: [], notificationMessage: string}>}
+     * @returns {Promise<{entities: [], notificationMessage: string}>}
      */
-    async addItemsFromCompendium(compendium, additionalEntitiesToAdd, items, parentName) {
+    async addItemsFromCompendium(additionalEntitiesToAdd, items, parentName) {
         if (!Array.isArray(items)) {
             items = [items];
         }
-
+        let indices = {};
         let entities = [];
         let notificationMessage = "";
-        let pack = SWSEActor.getCompendium(compendium);
-        let index = await pack.getIndex();
-        for (let item of items.filter(item => item).map(item => item.value ? item.value : item)) {
-            let {itemName, prerequisite, payload} = this.resolveItemParts(item);
-
-            let cleanItemName1 = this.cleanItemName(itemName);
-            let entry = await index.find(f => f.name === cleanItemName1);
-            if (!entry) {
-                let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
-                entry = await index.find(f => f.name === cleanItemName2);
-            }
+        for (let provided of items.filter(item => item)) {
+            let item = provided.name;
+            let prerequisite = provided.prerequisite;
+            let type = provided.type;
+            let {index, pack} = await this.getIndexAndPack(indices, type).then();
+            let {itemName, payload} = this.resolveItemParts(item);
+            let entry = await this.getIndexEntryByName(itemName, index, payload);
 
             if (!entry) {
                 console.warn(`attempted to add ${itemName}`, arguments)
@@ -912,21 +907,19 @@ export class SWSEActor extends Actor {
                         attr.value = payload;
                     }
                 }
-
             }
 
-            if (prerequisite) {
+            if (!!prerequisite) {
                 entity.setPrerequisite(prerequisite);
             }
 
-            if (payload !== "") {
+            if (!!payload) {
                 entity.setPayload(payload);
             }
             if (!!parentName)
             {
                 entity.setParent(parentName);
             }
-            entity.setSourceString();
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
             entities.push(entity.data.toObject(false));
@@ -934,7 +927,31 @@ export class SWSEActor extends Actor {
         if(additionalEntitiesToAdd) {
             additionalEntitiesToAdd.push(...entities);
         }
-        return {addedEntities: entities, notificationMessage: notificationMessage};
+        return {entities, notificationMessage};
+    }
+
+    async getIndexAndPack(indices, type) {
+        let index = indices[type];
+        let pack = SWSEActor.getCompendium(type);
+        if (!index) {
+            let start = Date.now();
+            console.warn("start")
+            index = await pack.getIndex();
+            let end = Date.now();
+            console.warn("end: " + (end - start))
+            indices[type] = index;
+        }
+        return {index, pack};
+    }
+
+    async getIndexEntryByName(itemName, index, payload) {
+        let cleanItemName1 = this.cleanItemName(itemName);
+        let entry = await index.find(f => f.name === cleanItemName1);
+        if (!entry) {
+            let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
+            entry = await index.find(f => f.name === cleanItemName2);
+        }
+        return entry;
     }
 
     resolveItemParts(item) {
@@ -942,7 +959,6 @@ export class SWSEActor extends Actor {
         if(item.name){
             itemName = item.name;
         }
-        let prerequisite = item.prerequisite;
         if (item.category) {
             console.error("deprecated", item);
             itemName = item.category;
@@ -957,7 +973,7 @@ export class SWSEActor extends Actor {
             payload = result[2];
         }
 
-        return {itemName, prerequisite, payload};
+        return {itemName, payload};
     }
 
     /**
@@ -966,13 +982,15 @@ export class SWSEActor extends Actor {
      * @returns {CompendiumCollection}
      */
     static getCompendium(type) {
-        switch (type) {
+        switch (type.toLowerCase()) {
             case 'item':
                 return game.packs.find(pack => pack.collection.startsWith("swse.items"));
             case 'trait':
                 return game.packs.find(pack => pack.collection.startsWith("swse.traits"));
             case 'feat':
                 return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
+            case 'species':
+                return game.packs.find(pack => pack.collection.startsWith("swse.species"));
         }
     }
 

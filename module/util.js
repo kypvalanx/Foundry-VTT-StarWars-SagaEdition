@@ -682,7 +682,7 @@ export function reduceArray(reduce, values) {
                 return sub[result];
             }, 0);
         case "MIN":
-            return values.map(attr => toNumber(attr.value)).reduce((a, b) => Math.min(a, b), 0);
+            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a === undefined ? b : Math.min(a, b), undefined);
         case "VALUES":
             return values.map(attr => attr.value);
         case "NUMERIC_VALUES":
