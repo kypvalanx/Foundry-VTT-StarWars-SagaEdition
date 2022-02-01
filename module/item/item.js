@@ -467,6 +467,11 @@ export class SWSEItem extends Item {
                 }
             }
         });
+        this._crawlProvidedItems(this.data.data, (providedItem) => {
+            if (providedItem.name) {
+                    providedItem.name = providedItem.name.replace("#payload#", payload);
+            }
+        });
     }
 
 
@@ -510,6 +515,29 @@ export class SWSEItem extends Item {
         //funct(data);
         for (let mode of data.modes || []) {
             this._crawlAttributes(mode, funct)
+        }
+
+    }
+
+    _crawlProvidedItems(data, funct) {
+        if (!data) {
+            return;
+        }
+        for (let attribute of Object.values(data.providedItems) || []) {
+            funct(attribute)
+        }
+        if (data.levels) {
+
+            for (let level of Object.values(data.levels) || []) {
+
+                for (let attribute of Object.values(level.providedItems) || []) {
+                    funct(attribute)
+                }
+            }
+        }
+        //funct(data);
+        for (let mode of data.modes || []) {
+            this._crawlProvidedItems(mode, funct)
         }
 
     }

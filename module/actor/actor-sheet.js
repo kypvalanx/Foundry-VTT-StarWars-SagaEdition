@@ -1,6 +1,6 @@
-import {filterItemsByType} from "../util.js";
+import {filterItemsByType, unique} from "../util.js";
 import {SWSE} from "../config.js";
-import {skills} from "../constants.js";
+import {lightsaberForms, skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {SWSEItem} from "../item/item.js";
 
@@ -247,7 +247,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         let itemId = li.data("itemId");
         let itemToDelete = this.actor.items.get(itemId);
-        if (keyboard.isDown("Shift")) {
+        if (game.keyboard.downKeys.has("Shift")) {
             await this.removeItemFromActor(itemId, itemToDelete);
         } else {
             button.disabled = true;
@@ -736,7 +736,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else if (item.data.type === "forceSecret") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Secrets"));
         } else if (item.data.type === "forceTechnique") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Techniques"));
+            entitiesToAdd.push(...await this.addForceItem(item, "Force Technique"));
         } else if (item.data.type === "forcePower") {
             entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
         } else if (item.data.type === "affiliation") {
@@ -757,7 +757,8 @@ export class SWSEActorSheet extends ActorSheet {
         let allTreesOnTalent = new Set();
         let optionString = "";
 
-        if (!!item.data.data.bonusTalentTree && item.data.data.bonusTalentTree === this.actor.getInheritableAttributesByKey('bonusTalentTree')[0]) {
+        let actorsBonusTrees = this.actor.getInheritableAttributesByKey('bonusTalentTree', "VALUES");
+        if (actorsBonusTrees.includes(item.data.data.bonusTalentTree)) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
                     optionString += `<option value="${id}">${id}</option>`
@@ -765,7 +766,7 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }
         } else {
-            for (let talentTree of item.data.data.possibleProviders) {
+            for (let talentTree of item.data.data.possibleProviders.filter(unique)) {
                 allTreesOnTalent.add(talentTree);
                 let count = this.actor.data.availableItems[talentTree];
                 if (count && count > 0) {
@@ -827,7 +828,23 @@ export class SWSEActorSheet extends ActorSheet {
         if (!await this.activateChoices(item, entitiesToAdd, {})) {
             return [];
         }
-        entitiesToAdd.push(item.data.toObject(false))
+
+
+        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
+
+        if (this.actorHasItem(item) && !takeMultipleTimes) {
+            let itemType = item.data.type;
+            await Dialog.prompt({
+                title: `You already have this ${itemType}`,
+                content: `You have already taken the ${item.data.finalName} ${itemType}`,
+                callback: () => {
+                }
+            })
+            return [];
+        }
+
+        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
+        //entitiesToAdd.push(item.data.toObject(false))
 
         let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
 
@@ -860,18 +877,15 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
+        entitiesToAdd.push(... (await this.actor.addItemsFromCompendium(null,item.getProvidedItems())).entities);
 
-        if (this.actorHasItem(item) && !takeMultipleTimes) {
-            let itemType = item.data.type;
-            await Dialog.prompt({
-                title: `You already have this ${itemType}`,
-                content: `You have already taken the ${item.data.finalName} ${itemType}`,
-                callback: () => {
-                }
-            })
-            return [];
-        }
+
+        entitiesToAdd.forEach(item => item.data.supplier = {
+            id: mainItem[0].id,
+            name: mainItem[0].name,
+            type: mainItem[0].data.type
+        })
+
         return entitiesToAdd
     }
 
@@ -1161,14 +1175,14 @@ export class SWSEActorSheet extends ActorSheet {
                     if (!selectedChoice) {
                         return false;
                     }
+                    if (selectedChoice.payload && selectedChoice.payload !== "") {
+                        item.setPayload(selectedChoice.payload);
+
+                    }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
                         additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, selectedChoice.providedItems)).entities);
                         //await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
                         //await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'FEAT'));
-                    }
-                    if (selectedChoice.payload && selectedChoice.payload !== "") {
-                        item.setPayload(selectedChoice.payload);
-
                     }
                 }
             });
@@ -1332,7 +1346,7 @@ export class SWSEActorSheet extends ActorSheet {
         for (let rollStr of rolls) {
             let roll = new Roll(rollStr, this.actor.data.data);
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
-            roll = roll.roll();
+            roll = roll.roll({async:false});
             let item = dataset.item;
             if (dataset.itemAttribute) {
                 if (item) {
@@ -1523,6 +1537,12 @@ export class SWSEActorSheet extends ActorSheet {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
+            } else if (key === 'AVAILABLE_LIGHTSABER_FORMS') {
+                for (let form of lightsaberForms) {
+                    if (!this.actor.talents.map(t => t.name).includes(form)) {
+                        resolvedOptions[form] = {abilities: [], items: [], payload: form};
+                    }
+                }
             } else {
                 resolvedOptions[key] = value;
             }
@@ -1595,7 +1615,7 @@ export class SWSEActorSheet extends ActorSheet {
                         button.addEventListener("click", () => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
-                                let roll = new Roll(rollFormula).roll();
+                                let roll = new Roll(rollFormula).roll({async:false});
                                 let title = "";
                                 for (let term of roll.terms) {
                                     for (let result of term.results) {

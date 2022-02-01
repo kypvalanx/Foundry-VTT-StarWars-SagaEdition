@@ -19,84 +19,84 @@
       "name": "affiliations",
       "label": "Affiliations",
       "path": "packs/swse-affiliations.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "classes",
       "label": "Classes",
       "path": "packs/swse-classes.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "feats",
       "label": "Feats",
       "path": "packs/swse-feats.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "force powers",
       "label": "Force Powers",
       "path": "packs/swse-force powers.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "force regimens",
       "label": "Force Regimens",
       "path": "packs/swse-force regimens.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "force secrets",
       "label": "Force Secrets",
       "path": "packs/swse-force secrets.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "force techniques",
       "label": "Force Techniques",
       "path": "packs/swse-force techniques.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "items",
       "label": "Items",
       "path": "packs/swse-items.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "species",
       "label": "Species",
       "path": "packs/swse-species.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "talents",
       "label": "Talents",
       "path": "packs/swse-talents.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "templates",
       "label": "Templates",
       "path": "packs/swse-templates.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     },
     {
       "name": "traits",
       "label": "Traits",
       "path": "packs/swse-traits.db",
-      "entity": "Item",
+      "type": "Item",
       "system": "swse"
     }
   ],
