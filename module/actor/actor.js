@@ -1542,9 +1542,7 @@ export class SWSEActor extends Actor {
 <tbody>${attackRows}</tbody>
 </table>`;
 
-        let speaker = cls.getSpeaker();
-
-        delete speaker.alias
+        let speaker = ChatMessage.getSpeaker({actor: this});
 
         let flavor = attacks[0].name;
         if(attacks.length > 1){
