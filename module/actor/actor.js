@@ -934,11 +934,7 @@ export class SWSEActor extends Actor {
         let index = indices[type];
         let pack = SWSEActor.getCompendium(type);
         if (!index) {
-            let start = Date.now();
-            console.warn("start")
             index = await pack.getIndex();
-            let end = Date.now();
-            console.warn("end: " + (end - start))
             indices[type] = index;
         }
         return {index, pack};
@@ -991,6 +987,8 @@ export class SWSEActor extends Actor {
                 return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
             case 'species':
                 return game.packs.find(pack => pack.collection.startsWith("swse.species"));
+            case 'talent':
+                return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
         }
     }
 
@@ -1035,7 +1033,9 @@ export class SWSEActor extends Actor {
 
 
         for (let talent of this.talents) {
+            if(!talent.data.supplier.id) {
             this.reduceAvailableItem(actorData, talent.data.talentTreeSource);
+        }
         }
         for (let feat of this.feats) {
             if (feat.data.supplier.id) {
@@ -1048,7 +1048,7 @@ export class SWSEActor extends Actor {
             this.reduceAvailableItem(actorData, type);
         }
         this.reduceAvailableItem(actorData, "Force Secrets", this.secrets.length);
-        this.reduceAvailableItem(actorData, "Force Techniques", this.techniques.length);
+        this.reduceAvailableItem(actorData, "Force Technique", this.techniques.length);
         this.reduceAvailableItem(actorData, "Force Powers", this.powers.length);
     }
 
@@ -1114,7 +1114,7 @@ export class SWSEActor extends Actor {
     }
 
     async sendRollToChat(template, formula, modifications, notes, name, actor) {
-        let roll = new Roll(formula).roll();
+        let roll = new Roll(formula).roll({async:false});
         roll.toMessage({
             speaker: ChatMessage.getSpeaker({actor}),
             flavor: name
@@ -1531,9 +1531,9 @@ export class SWSEActor extends Actor {
         let roll;
 
         for(let attack of attacks){
-            let attackRoll = new Roll(attack.toHit).roll();
+            let attackRoll = new Roll(attack.toHit).roll({async:false});
             roll = attackRoll;
-            let damageRoll = new Roll(attack.damage).roll();
+            let damageRoll = new Roll(attack.damage).roll({async:false});
             attackRows += `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRoll.result}">${attackRoll.total}</a></td><td><a class="inline-roll inline-result" title="${damageRoll.result}">${damageRoll.total}</a></td></tr>`
         }
 
@@ -1542,9 +1542,7 @@ export class SWSEActor extends Actor {
 <tbody>${attackRows}</tbody>
 </table>`;
 
-        let speaker = cls.getSpeaker();
-
-        delete speaker.alias
+        let speaker = ChatMessage.getSpeaker({actor: this});
 
         let flavor = attacks[0].name;
         if(attacks.length > 1){
