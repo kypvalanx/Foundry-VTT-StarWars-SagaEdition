@@ -3,6 +3,10 @@
 import {SWSE} from "./config.js";
 import {dieSize, dieType} from "./constants.js";
 
+export function unique(value, index, self) {
+    return self.indexOf(value) === index;
+}
+
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
         values = [resolveExpression(values, actor)];

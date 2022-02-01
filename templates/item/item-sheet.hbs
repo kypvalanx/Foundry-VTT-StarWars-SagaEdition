@@ -26,6 +26,7 @@
     <nav class="sheet-tabs tabs" data-group="primary">
         <a class="item" data-tab="description">Description</a>
         <a class="item" data-tab="attributes">Attributes</a>
+        <a class="item" data-tab="provided">Provided</a>
         <a class="item" data-tab="stripping">Stripping</a>
         <a class="item" data-tab="modifications">Modifications</a>
     </nav>
@@ -108,6 +109,11 @@
         <div class="tab attributes" data-group="primary" data-tab="attributes">
             {{> 'systems/swse/templates/item/parts/attributes.hbs'}}
 
+        </div>
+
+        {{!-- Provided Tab --}}
+        <div class="tab" data-group="primary" data-tab="provided">
+            {{> 'systems/swse/templates/item/parts/provided.hbs'}}
         </div>
     </section>
 </form>

@@ -68,6 +68,7 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-defenses.hbs',
     'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
     'systems/swse/templates/actor/parts/attack/single-attack.hbs',
+    'systems/swse/templates/item/parts/provided.hbs',
     'systems/swse/templates/item/parts/attributes.hbs',
     'systems/swse/templates/item/parts/mode.hbs']);
 

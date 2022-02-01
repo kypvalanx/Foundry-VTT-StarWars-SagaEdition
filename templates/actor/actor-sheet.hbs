@@ -275,9 +275,13 @@
                                     href="{{talent.data.talentTreeUrl}}"><b>{{talent.talentTree}}</b></a></h4>
                             <h4 class="item-name">{{#if talent.data.prerequisites}}
                                 <b>Prerequisites:</b> {{talent.data.prerequisites}}{{/if}}</h4>
+<!--                            <h4 class="item-name">-->
+<!--                                <b>Source:</b> {{talent.data.talentTreeSource}}</h4>-->
                             <div class="item-controls">
                                 <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                {{#unless talent.data.supplier.id}}
+                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                {{/unless}}
                             </div>
                         </li>
                     {{/each}}
@@ -295,15 +299,19 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.traits as |trait id|}}
-                        <li class="item flexrow" data-item-id="{{trait._id}}">
-                            <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
-                            <h4 class="item-name">Source: {{trait.data.supplier.type}}
-                                , {{trait.data.supplier.name}}</h4>
-<!--                            <h4 class="item-name">{{#if trait.data.prerequisites}}-->
-<!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
-                            <div class="item-controls">
-                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                        {{log trait}}
+                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.data.textDescription}}">
+                            <div class="flexrow">
+                                <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
+                                <h4 class="item-name">Source: {{trait.data.supplier.type}}
+                                    , {{trait.data.supplier.name}}</h4>
+                                    <!--                            <h4 class="item-name">{{#if trait.data.prerequisites}}-->
+                                    <!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
+                                <div class="item-controls">
+                                    <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                </div>
                             </div>
+                            <!--<div>{{trait.data.textDescription}}</div>-->
                         </li>
                     {{/each}}
                 </ol>

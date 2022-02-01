@@ -51,7 +51,7 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'DARK SIDE SCORE':
-                if (!target.darkSideScore < resolveValueArray([prereq.requirement], target)) {
+                if (!(target.darkSideScore < resolveValueArray([prereq.requirement], target))) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -146,7 +146,7 @@ meetsPrerequisites(target, prereqs) {
 
                 break;
             case 'TRADITION':
-                let ownedTraditions = filterItemsByType(target.items.values(), "forceTradition");
+                let ownedTraditions = filterItemsByType(target.items.values(), "affiliation");
                 let filteredTraditions = ownedTraditions.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredTraditions.length > 0) {
                     if (!meetsPrerequisites(target, filteredTraditions[0].data.data.prerequisite).doesFail) {
