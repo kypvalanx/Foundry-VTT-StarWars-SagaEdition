@@ -1332,7 +1332,7 @@ export class SWSEActorSheet extends ActorSheet {
         for (let rollStr of rolls) {
             let roll = new Roll(rollStr, this.actor.data.data);
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
-            roll = roll.roll();
+            roll = roll.roll({async:false});
             let item = dataset.item;
             if (dataset.itemAttribute) {
                 if (item) {
@@ -1595,7 +1595,7 @@ export class SWSEActorSheet extends ActorSheet {
                         button.addEventListener("click", () => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
                             html.find(".movable").each((i, item) => {
-                                let roll = new Roll(rollFormula).roll();
+                                let roll = new Roll(rollFormula).roll({async:false});
                                 let title = "";
                                 for (let term of roll.terms) {
                                     for (let result of term.results) {
