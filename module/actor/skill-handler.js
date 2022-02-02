@@ -35,10 +35,10 @@ export function generateSkills(actor) {
         let skillFocusBonus = skillFocuses.includes(key) ? 5 : 0;
 
         skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty, skillFocusBonus]);
-        skill.key = `@${actor.cleanSkillName(key)}`;
-        actor.resolvedVariables.set(skill.key, "1d20 + " + skill.value);
+        skill.key = key;
+        actor.resolvedVariables.set(`@${actor.cleanSkillName(key)}`, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
-        actor.resolvedLabels.set(skill.key, skill.label);
+        actor.resolvedLabels.set(`@${actor.cleanSkillName(key)}`, skill.label);
 
         skill.title = `Half character level: ${halfCharacterLevel}
             Attribute Mod: ${attributeMod}
