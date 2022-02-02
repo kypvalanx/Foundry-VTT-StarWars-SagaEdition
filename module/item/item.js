@@ -452,24 +452,24 @@ export class SWSEItem extends Item {
         this.data.data.payload = payload;
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace("#payload#", payload);
+                prerequisite.requirement = prerequisite.requirement.replace(/#payload#/g, payload);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace("#payload#", payload);
+                prerequisite.text = prerequisite.text.replace(/#payload#/g, payload);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
-                    attribute.value = attribute.value.replace("#payload#", payload);
+                    attribute.value = attribute.value.replace(/#payload#/g, payload);
                 } else if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace("#payload#", payload));
+                    attribute.value = attribute.value.map(val => val.replace(/#payload#/g, payload));
                 }
             }
         });
         this._crawlProvidedItems(this.data.data, (providedItem) => {
             if (providedItem.name) {
-                    providedItem.name = providedItem.name.replace("#payload#", payload);
+                    providedItem.name = providedItem.name.replace(/#payload#/g, payload);
             }
         });
     }
@@ -478,10 +478,10 @@ export class SWSEItem extends Item {
     setParent(parent) {
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace("#parent#", parent);
+                prerequisite.requirement = prerequisite.requirement.replace(/#parent#/g, parent);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace("#parent#", parent);
+                prerequisite.text = prerequisite.text.replace(/#parent#/g, parent);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {

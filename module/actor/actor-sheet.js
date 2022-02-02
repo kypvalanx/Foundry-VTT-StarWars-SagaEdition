@@ -842,7 +842,6 @@ export class SWSEActorSheet extends ActorSheet {
             return [];
         }
 
-        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
         //entitiesToAdd.push(item.data.toObject(false))
 
         let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
@@ -875,6 +874,8 @@ export class SWSEActorSheet extends ActorSheet {
                 }).render(true);
             }
         }
+
+        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
         entitiesToAdd.push(... (await this.actor.addItemsFromCompendium(null,item.getProvidedItems())).entities);
 
@@ -965,7 +966,6 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }).render(true);
         }
-        let entities = [];
         let context = {};
         context.isFirstLevel = this.actor.classes.length === 0;
         if (item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0) {
@@ -994,6 +994,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
+        let entities = [];
         await this.activateChoices(item, entities, context);
         item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
             type: "Boolean",
@@ -1020,9 +1021,6 @@ export class SWSEActorSheet extends ActorSheet {
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
         entities.push(... (await this.actor.addItemsFromCompendium(null, item.getProvidedItems(), item.name)).entities);
-        // await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'), item.name);
-        // await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'), item.name);
-        // await this.actor.addItemsFromCompendium('species', entities, item.getProvidedItems(i => i.type === 'SPECIES'), item.name);
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1034,8 +1032,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addSpecies(item) {
-
-        if (this.actor.data.species != null) {
+        if (filterItemsByType(this.actor.items.values(), "species").length > 0) {
             new Dialog({
                 title: "Species Selection",
                 content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
@@ -1048,22 +1045,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
-
-        let entities = []
-        await this.activateChoices(item, entities, {});
-        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
-
-        entities.push(...(await this.actor.addItemsFromCompendium(null, item.getProvidedItems())).entities);
-        //await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'));
-        //await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'));
-
-        entities.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-        return entities;
-
+        return await this.checkPrerequisitesAndResolveOptions(item, "Species")
     }
 
     async moveExistingItemWithinActor(data, ev) {
@@ -1162,7 +1144,7 @@ export class SWSEActorSheet extends ActorSheet {
             let response = await Dialog.prompt({
                 title: greetingString,
                 content: content,
-                rejectClose: false,
+                rejectClose: async (html) => {return false},
                 callback: async (html) => {
                     let choice = html.find("#choice")[0];
                     if (choice === undefined) {
@@ -1183,8 +1165,6 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
                         additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, selectedChoice.providedItems)).entities);
-                        //await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
-                        //await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'FEAT'));
                     }
                 }
             });
@@ -1450,32 +1430,59 @@ export class SWSEActorSheet extends ActorSheet {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
             if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
+                let weaponProficiencies = this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")
                 for (let weapon of game.generated.exoticWeapons) {
-                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                    if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
                     }
                 }
             } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
-                for (let weapon of this.actor.data.proficiency.weapon) {
-                    if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
+                let focuses = this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                    if (!focuses.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
+            } else if (key === 'AVAILABLE_WEAPON_SPECIALIZATION') {
+                let weaponSpecializations = this.actor.getInheritableAttributesByKey("weaponSpecialization", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!weaponSpecializations.includes(weapon)) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
+                let greaterWeaponSpecialization = this.actor.getInheritableAttributesByKey("greaterWeaponSpecialization", "VALUES")
+                let greaterWeaponFocus = this.actor.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
+                for (let weaponSpecialization of this.actor.getInheritableAttributesByKey("weaponSpecialization", "VALUES")) {
+                    if (!greaterWeaponSpecialization.includes(weaponSpecialization) && greaterWeaponFocus.includes(weaponSpecialization)) {
+                        resolvedOptions[weaponSpecialization.titleCase()] = {abilities: [], items: [], payload: weaponSpecialization.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
+                let greaterWeaponFocus = this.actor.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
+                for (let weaponFocus of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!greaterWeaponFocus.includes(weaponFocus)) {
+                        resolvedOptions[weaponFocus.titleCase()] = {abilities: [], items: [], payload: weaponFocus.titleCase()};
+                    }
+                }
             } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
+                let weaponProficiencies = this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES");
                 for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
-                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                    if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'UNFOCUSED_SKILLS') {
+                let skillFocuses = this.actor.getInheritableAttributesByKey("skillFocus", "VALUES");
                 for (let skill of skills) {
-                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.toLowerCase())) {
+                    if (!skillFocuses.includes(skill)) {
                         resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
+                let skillFocuses = this.actor.getInheritableAttributesByKey("skillFocus", "VALUES");
                 for (let skill of this.actor.trainedSkills) {
-                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.key.toLowerCase())) {
+                    if (!skillFocuses.includes(skill.key)) {
                         resolvedOptions[skill.key.titleCase()] = {
                             abilities: [],
                             items: [],
@@ -1484,62 +1491,81 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {
-                for (let weapon of this.actor.focusSkills) {
-                    if (!this.actor.data.prerequisites.masterSkills.includes(weapon.toLowerCase())) {
-                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                let masterSkills = this.actor.getInheritableAttributesByKey("skillMastery", "VALUES");
+                masterSkills.push("Use The Force")
+                for (let skill of this.actor.getInheritableAttributesByKey("skillFocus", "VALUES")) {
+                    if (!masterSkills.includes(skill)) {
+                        resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.weapon) {
-                    if (!this.actor.data.proficiency.doubleAttack.includes(weapon.toLowerCase())) {
+                let doubleAttack = this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                    if (!doubleAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.tripleAttack.includes(weapon.toLowerCase())) {
+                let tripleAttack = this.actor.getInheritableAttributesByKey("tripleAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!tripleAttack.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.savageAttack.includes(weapon.toLowerCase())) {
+                let savageAttack = this.actor.getInheritableAttributesByKey("savageAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!savageAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.relentlessAttack.includes(weapon.toLowerCase())) {
+                let relentlessAttack = this.actor.getInheritableAttributesByKey("relentlessAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!relentlessAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.autofireSweep.includes(weapon.toLowerCase())) {
+                let autofireSweep = this.actor.getInheritableAttributesByKey("autofireSweep", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!autofireSweep.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.autofireAssault.includes(weapon.toLowerCase())) {
+                let autofireAssault = this.actor.getInheritableAttributesByKey("autofireAssault", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!autofireAssault.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_HALT') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.halt.includes(weapon.toLowerCase())) {
+                let halt = this.actor.getInheritableAttributesByKey("halt", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!halt.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RETURN_FIRE') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.returnFire.includes(weapon.toLowerCase())) {
+                let returnFire = this.actor.getInheritableAttributesByKey("returnFire", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!returnFire.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.criticalStrike.includes(weapon.toLowerCase())) {
+                let criticalStrike = this.actor.getInheritableAttributesByKey("criticalStrike", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!criticalStrike.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
