@@ -802,7 +802,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
-        return await this.checkPrerequisitesAndResolveOptions(item);
+        return await this.checkPrerequisitesAndResolveOptions(item, "Talent");
     }
 
     async addForceItem(item, itemType) {
@@ -815,7 +815,7 @@ export class SWSEActorSheet extends ActorSheet {
             });
             return [];
         }
-        return await this.checkPrerequisitesAndResolveOptions(item);
+        return await this.checkPrerequisitesAndResolveOptions(item, itemType);
     }
 
     /**
@@ -823,7 +823,7 @@ export class SWSEActorSheet extends ActorSheet {
      * @param item {SWSEItem}
      * @returns {Promise<[]|*[]>}
      */
-    async checkPrerequisitesAndResolveOptions(item) {
+    async checkPrerequisitesAndResolveOptions(item, type) {
         let entitiesToAdd = [];
         if (!await this.activateChoices(item, entitiesToAdd, {})) {
             return [];
@@ -833,10 +833,9 @@ export class SWSEActorSheet extends ActorSheet {
         let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
 
         if (this.actorHasItem(item) && !takeMultipleTimes) {
-            let itemType = item.data.type;
             await Dialog.prompt({
-                title: `You already have this ${itemType}`,
-                content: `You have already taken the ${item.data.finalName} ${itemType}`,
+                title: `You already have this ${type}`,
+                content: `You have already taken the ${item.data.finalName} ${type}`,
                 callback: () => {
                 }
             })
@@ -929,7 +928,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.categories = possibleFeatTypes;
 
-        let items = await this.checkPrerequisitesAndResolveOptions(item);
+        let items = await this.checkPrerequisitesAndResolveOptions(item, "Feat");
 
         if (items.length > 0) {
             items.push(...await this.addOptionalRuleFeats(item));
