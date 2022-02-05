@@ -122,10 +122,6 @@ function resolveParensAndFunctions(expression, actor){
  * @param actor {SWSEActor}
  */
 export function resolveExpression(expression, actor){
-    if(!actor){
-        console.warn("actor is null");
-    }
-
     if(typeof expression === "number"){
         return expression;
     }
@@ -199,6 +195,28 @@ export function resolveExpression(expression, actor){
     }
 
 
+    if(expression.includes(">") || expression.includes("<")) {
+        let raw = expression.replace(/>/g, " > ").replace(/</g, " < ")
+        let holder = null;
+        while (raw !== holder) {
+            holder = raw;
+            raw = raw.replace(/  /g, " ");
+        }
+        let toks = raw.trim().split(" ");
+        if(toks.length !== 3){
+            console.error("this kind of expression only accepts 2 terms and an operator");
+        }
+
+        for(let i = 1; i < toks.length; i++){
+            if(toks[i] === ">") {
+                return resolveExpression(toks[i - 1], actor) > resolveExpression(toks[i + 1], actor)
+            }
+            if(toks[i] === "<") {
+                return resolveExpression(toks[i - 1], actor) < resolveExpression(toks[i + 1], actor)
+            }
+        }
+    }
+
     if(typeof expression === "string"){
         if(expression.startsWith("@")){
             let variable = actor.getVariable(expression);
@@ -209,7 +227,6 @@ export function resolveExpression(expression, actor){
             return parseInt(expression);
         }
     }
-    console.log(expression)
 }
 
 /**
@@ -647,6 +664,15 @@ export function reduceArray(reduce, values) {
     if (!reduce) {
         return values;
     }
+    if(!Array.isArray(values)){
+        values = [values];
+    }
+    if(Array.isArray(reduce)){
+        for(let r of reduce){
+            values = reduceArray(r, values);
+        }
+        return values;
+    }
 
     if(typeof reduce === "string"){
         reduce = reduce.toUpperCase();
@@ -689,6 +715,10 @@ export function reduceArray(reduce, values) {
             return values.map(attr => toNumber(attr.value)).reduce((a, b) => a === undefined ? b : Math.min(a, b), undefined);
         case "VALUES":
             return values.map(attr => attr.value);
+        case "VALUES_TO_LOWERCASE":
+            return values.map(attr => attr.value.toLowerCase());
+        case "UNIQUE":
+            return values.filter(unique);
         case "NUMERIC_VALUES":
             return values.map(attr => toNumber(attr.value));
         case "SUMMARY":
@@ -697,5 +727,25 @@ export function reduceArray(reduce, values) {
             return summary;
         default:
             return values.map(attr => attr.value).reduce(reduce, "");
+    }
+}
+
+/**
+ *
+ * @param type
+ * @returns {CompendiumCollection}
+ */
+export function getCompendium(type) {
+    switch (type.toLowerCase()) {
+        case 'item':
+            return game.packs.find(pack => pack.collection.startsWith("swse.items"));
+        case 'trait':
+            return game.packs.find(pack => pack.collection.startsWith("swse.traits"));
+        case 'feat':
+            return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
+        case 'species':
+            return game.packs.find(pack => pack.collection.startsWith("swse.species"));
+        case 'talent':
+            return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
     }
 }

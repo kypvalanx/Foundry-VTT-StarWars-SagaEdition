@@ -1,5 +1,4 @@
 export const SWSE = {}
-SWSE.duplicateSkillList = ["Skill Training"]
 
 SWSE.Combat = {};
 SWSE.Combat.range = {

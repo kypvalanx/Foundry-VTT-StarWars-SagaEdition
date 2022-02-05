@@ -15,7 +15,7 @@
         <tbody>
         {{#each data.data.skills as |skill id|}}
             {{#unless skill.hide}}
-                <tr class="draggable" data-variable="{{skill.key}}" data-label="{{skill.label}}" data-type="skill">
+                <tr class="draggable" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
                     <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
                            data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
                             class="fas fa-dice-d20"></i>

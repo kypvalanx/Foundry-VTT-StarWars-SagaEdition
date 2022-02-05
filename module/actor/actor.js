@@ -20,6 +20,7 @@ import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js"
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEItem} from "../item/item.js";
 import {sizeArray} from "../constants.js";
+import {SWSE} from "../config.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -741,8 +742,13 @@ export class SWSEActor extends Actor {
         return classSkills;
     }
 
+    /**
+     *
+     * @param ability {string}
+     * @returns {*}
+     */
     getAttributeMod(ability) {
-        return this.data.data.attributes[ability].mod;
+        return this.data.data.attributes[ability.toLowerCase()].mod;
     }
 
     /**
@@ -869,132 +875,19 @@ export class SWSEActor extends Actor {
         return 0;
     }
 
-    /**
-     *
-     * @param additionalEntitiesToAdd
-     * @param items {[{name: string,type: string}] | {name: string, type: string}}
-     * @param parentName
-     * @returns {Promise<{entities: [], notificationMessage: string}>}
-     */
-    async addItemsFromCompendium(additionalEntitiesToAdd, items, parentName) {
-        if (!Array.isArray(items)) {
-            items = [items];
-        }
-        let indices = {};
-        let entities = [];
-        let notificationMessage = "";
-        for (let provided of items.filter(item => item)) {
-            let item = provided.name;
-            let prerequisite = provided.prerequisite;
-            let type = provided.type;
-            let {index, pack} = await this.getIndexAndPack(indices, type).then();
-            let {itemName, payload} = this.resolveItemParts(item);
-            let entry = await this.getIndexEntryByName(itemName, index, payload);
 
-            if (!entry) {
-                console.warn(`attempted to add ${itemName}`, arguments)
-                continue;
-            }
 
-            let entity = await pack.getDocument(entry._id);
 
-            entity.prepareData();
 
-            if (itemName === "Bonus Feat" && payload) {
-                for (let attr of Object.values(entity.data.data.attributes)) {
-                    if (attr.key === "provides") {
-                        attr.key = "bonusFeat";
-                        attr.value = payload;
-                    }
-                }
-            }
 
-            if (!!prerequisite) {
-                entity.setPrerequisite(prerequisite);
-            }
 
-            if (!!payload) {
-                entity.setPayload(payload);
-            }
-            if (!!parentName)
-            {
-                entity.setParent(parentName);
-            }
-            entity.setTextDescription();
-            notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
-            entities.push(entity.data.toObject(false));
-        }
-        if(additionalEntitiesToAdd) {
-            additionalEntitiesToAdd.push(...entities);
-        }
-        return {entities, notificationMessage};
+//TODO evaluate this.  do we need it?
+    hasItem(item) {
+        return Array.from(this.items.values())
+            .map(i => i.data.finalName)
+            .includes(item.data.finalName);
     }
 
-    async getIndexAndPack(indices, type) {
-        let index = indices[type];
-        let pack = SWSEActor.getCompendium(type);
-        if (!index) {
-            index = await pack.getIndex();
-            indices[type] = index;
-        }
-        return {index, pack};
-    }
-
-    async getIndexEntryByName(itemName, index, payload) {
-        let cleanItemName1 = this.cleanItemName(itemName);
-        let entry = await index.find(f => f.name === cleanItemName1);
-        if (!entry) {
-            let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
-            entry = await index.find(f => f.name === cleanItemName2);
-        }
-        return entry;
-    }
-
-    resolveItemParts(item) {
-        let itemName = item;
-        if(item.name){
-            itemName = item.name;
-        }
-        if (item.category) {
-            console.error("deprecated", item);
-            itemName = item.category;
-        }
-        if (item.trait) {
-            itemName = item.trait;
-        }
-        let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
-        let payload = "";
-        if (result) {
-            itemName = result[1];
-            payload = result[2];
-        }
-
-        return {itemName, payload};
-    }
-
-    /**
-     *
-     * @param type
-     * @returns {CompendiumCollection}
-     */
-    static getCompendium(type) {
-        switch (type.toLowerCase()) {
-            case 'item':
-                return game.packs.find(pack => pack.collection.startsWith("swse.items"));
-            case 'trait':
-                return game.packs.find(pack => pack.collection.startsWith("swse.traits"));
-            case 'feat':
-                return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
-            case 'species':
-                return game.packs.find(pack => pack.collection.startsWith("swse.species"));
-            case 'talent':
-                return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
-        }
-    }
-
-    cleanItemName(feat) {
-        return feat.replace("*", "").trim();
-    }
     resolveClassFeatures(classFeatures) {
         let provides = this.getInheritableAttributesByKey("provides");
         this.data.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you

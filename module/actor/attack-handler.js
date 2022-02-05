@@ -67,6 +67,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
 
     let attackBonuses = [actorData.data.offense.bab,  actor.conditionBonus]
     let weaponTypes = getPossibleProficiencies(actor, item);
+    damageBonuses.push(...getSpecializationDamageBonuses(actor, weaponTypes));
 
     if (isRanged(item)) {
         attackBonuses.push(resolveFinesseBonus(actor, [{value: "DEX"}]));
@@ -80,8 +81,8 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
         }
         attackBonuses.push(resolveFinesseBonus(actor, finesseStats));
     }
-    attackBonuses.push(isProficient(actor, weaponTypes) ? 0 : -5);
-    attackBonuses.push(isFocus(actor, weaponTypes) ? 1 : 0)
+    attackBonuses.push(...getProficiencyBonus(actor, weaponTypes));
+    attackBonuses.push(...getFocusAttackBonuses(actor, weaponTypes))
     attackBonuses.push(actor.acPenalty) //TODO this looks like it could use some TLC
     attackBonuses.push(...(item.getInheritableAttributesByKey("toHitModifier")))
 
@@ -162,35 +163,69 @@ function isLightsaber(weapon) {
 /**
  *
  * @param actor {SWSEActor}
- * @param categories
+ * @param weaponTypes {[string]}
+ * @returns {[]}
+ */
+function getFocusAttackBonuses(actor, weaponTypes) {
+    let bonuses = [];
+    let weaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("weaponFocus", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    if(weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length>0){
+        bonuses.push(1); //{value:1,source:"Weapon Focus"}
+    }
+
+    let greaterWeaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("greaterWeaponFocus", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    if(weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length>0){
+        bonuses.push(1); //{value:1,source:"Greater Weapon Focus"}
+    }
+
+    return bonuses;
+}
+
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param weaponTypes {[string]}
+ * @returns {[]}
+ */
+function getSpecializationDamageBonuses(actor, weaponTypes) {
+    let bonuses = [];
+    let weaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("weaponSpecialization", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    if(weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length>0){
+        bonuses.push(2); //{value:1,source:"Weapon Specialization"}
+    }
+
+    let greaterWeaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("greaterWeaponSpecialization", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    if(weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length>0){
+        bonuses.push(2); //{value:1,source:"Greater Weapon Specialization"}
+    }
+
+    return bonuses;
+}
+
+
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param weaponTypes {[string]}
  * @returns {boolean}
  */
-function isFocus(actor, categories) {
-    let focuses = actor.getInheritableAttributesByKey("weaponFocus").map(prof => prof.value.toLowerCase())
-    focuses = explodeProficiencies(focuses);
-    for (const focus of focuses) {
-        if (categories.map(cat => cat.toLowerCase()).includes(focus.toLowerCase())) {
-            return true;
-        }
-    }
-    return false;
+function isFocus(actor, weaponTypes) {
+    let weaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("weaponFocus", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    return weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length > 0;
+
 }
 
 /**
  *
  * @param actor {SWSEActor}
  * @param weaponDescriptors
- * @returns {boolean}
+ * @returns {[]}
  */
-function isProficient(actor, weaponDescriptors) {
-    let proficiencies = actor.getInheritableAttributesByKey("weaponProficiency").map(prof => prof.value.toLowerCase())
-    proficiencies = explodeProficiencies(proficiencies);
-    for (let proficiency of proficiencies) {
-        if (weaponDescriptors.map(cat => cat.toLowerCase()).includes(proficiency.toLowerCase())) {
-            return true;
-        }
-    }
-    return false;
+function getProficiencyBonus(actor, weaponDescriptors) {
+    let bonuses = [];
+    let proficiencies = explodeProficiencies(actor.getInheritableAttributesByKey("weaponProficiency", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
+    bonuses.push(weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase())).length > 0 ? 0: -5)
+    return bonuses
 }
 
 /**
@@ -283,20 +318,17 @@ export function generateUnarmedAttack(actor) {
     let unarmedModifier = actor.getInheritableAttributesByKey('unarmedModifier');
     let actorData = actor.data;
 
-    //let proficient = isProficient(actor, UNARMED_WEAPON_TYPES);
-    //let proficiencyBonus = proficient ? 0 : -5;
-    let focus = isFocus(actor, UNARMED_WEAPON_TYPES);
-    let finesseStats = [{value: "STR"}];
-    finesseStats.push(...actor.getInheritableAttributesByKey("finesseStat"));
 
     let offense = actorData.data?.offense;
 
     let atkBonuses = [];
     atkBonuses.push(offense?.bab)
     atkBonuses.push(actor.conditionBonus);
+
+    let finesseStats = [{value: "STR"}];
+    finesseStats.push(...actor.getInheritableAttributesByKey("finesseStat"));
     atkBonuses.push(resolveFinesseBonus(actor, finesseStats));
-    //atkBonuses.push(proficiencyBonus)
-    atkBonuses.push(focus ? 1 : 0)
+    atkBonuses.push(...(getFocusAttackBonuses(actor, UNARMED_WEAPON_TYPES)))
     atkBonuses.push(actor.acPenalty)
     let notes = "";
     let damageBonuses = [];
@@ -323,6 +355,7 @@ export function generateUnarmedAttack(actor) {
     let th = d20 + getBonusString(resolveValueArray(atkBonuses));
 
     damageBonuses.push(actor.halfHeroicLevel)
+    damageBonuses.push(...getSpecializationDamageBonuses(actor, UNARMED_WEAPON_TYPES));
     damageBonuses.push(actor.getAttributeMod("str"))
 
     let dam = resolveUnarmedDamageDie(actor) + getBonusString(resolveValueArray(damageBonuses));

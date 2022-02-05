@@ -308,7 +308,7 @@ export class SWSEItem extends Item {
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
-    async prepareData() {
+    prepareData() {
         super.prepareData();
         this._pendingUpdate = {};
         // Get the Item's data
@@ -335,7 +335,7 @@ export class SWSEItem extends Item {
 
     get isDroidPart() {
         return this.subType === "Locomotion Systems" || this.subType === "Processor Systems"
-            || this.subType === "Appendages" || this.subType.startsWith("Droid Accessories")
+            || this.subType === "Appendages" || this.subType?.startsWith("Droid Accessories")
     }
 
     prepareFeatData(itemData) {
@@ -452,47 +452,57 @@ export class SWSEItem extends Item {
         this.data.data.payload = payload;
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace("#payload#", payload);
+                prerequisite.requirement = prerequisite.requirement.replace(/#payload#/g, payload);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace("#payload#", payload);
+                prerequisite.text = prerequisite.text.replace(/#payload#/g, payload);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
-                    attribute.value = attribute.value.replace("#payload#", payload);
+                    attribute.value = attribute.value.replace(/#payload#/g, payload);
                 } else if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace("#payload#", payload));
+                    attribute.value = attribute.value.map(val => val.replace(/#payload#/g, payload));
                 }
             }
         });
         this._crawlProvidedItems(this.data.data, (providedItem) => {
             if (providedItem.name) {
-                    providedItem.name = providedItem.name.replace("#payload#", payload);
+                    providedItem.name = providedItem.name.replace(/#payload#/g, payload);
             }
         });
+        this.data.data.choices = [];
     }
 
 
+    /**
+     *
+     * @param parent {SWSEItem}
+     */
     setParent(parent) {
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace("#parent#", parent);
+                prerequisite.requirement = prerequisite.requirement.replace(/#parent#/g, parent.name);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace("#parent#", parent);
+                prerequisite.text = prerequisite.text.replace(/#parent#/g, parent.name);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
-                    attribute.value = attribute.value.replace("#parent#", parent);
+                    attribute.value = attribute.value.replace("#parent#", parent.name);
                 } else if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace("#parent#", parent));
+                    attribute.value = attribute.value.map(val => val.replace("#parent#", parent.name));
                 }
             }
         });
+        this.data.data.supplier = {
+            id: parent.id,
+            name: parent.name,
+            type: parent.data.type
+        }
     }
 
 
@@ -513,7 +523,7 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        for (let mode of data.modes || []) {
+        for (let mode of Object.values(data.modes) || []) {
             this._crawlAttributes(mode, funct)
         }
 
@@ -536,7 +546,7 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        for (let mode of data.modes || []) {
+        for (let mode of Object.values(data.modes) || []) {
             this._crawlProvidedItems(mode, funct)
         }
 

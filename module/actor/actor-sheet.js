@@ -1,4 +1,4 @@
-import {filterItemsByType, unique} from "../util.js";
+import {filterItemsByType, unique, getCompendium} from "../util.js";
 import {SWSE} from "../config.js";
 import {lightsaberForms, skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
@@ -723,31 +723,27 @@ export class SWSEActorSheet extends ActorSheet {
         let item = compendiumItem.clone();
         item.prepareData();
 
-        let entitiesToAdd = [];
         let context = {};
 
-        //only one species allowed
         if (item.data.type === "species") {
-            entitiesToAdd.push(...await this.addSpecies(item));
+            await this.addSpecies(item);
         } else if (item.data.type === "class") {
-            entitiesToAdd.push(...await this.addClass(item, context));
+            await this.addClass(item, context);
         } else if (item.data.type === "feat") {
-            entitiesToAdd.push(...await this.addFeat(item));
+            await this.addFeat(item);
         } else if (item.data.type === "forceSecret") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Secrets"));
+            await this.addForceItem(item, "Force Secrets");
         } else if (item.data.type === "forceTechnique") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Technique"));
+            await this.addForceItem(item, "Force Technique");
         } else if (item.data.type === "forcePower") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
+            await this.addForceItem(item, "Force Powers");
         } else if (item.data.type === "affiliation") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Affiliations"));
+            await this.addForceItem(item, "Affiliations");
         } else if (item.data.type === "talent") {
-            entitiesToAdd.push(...await this.addTalent(item));
+            await this.addTalent(item);
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
-            entitiesToAdd.push(...await this.addItem(item));
+            await this.addItem(item);
         }
-        //await this.activateChoices(item, entitiesToAdd, context);
-        await super._onDropItemCreate(entitiesToAdd);
     }
 
 
@@ -802,7 +798,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
-        return await this.checkPrerequisitesAndResolveOptions(item);
+        await this.checkPrerequisitesAndResolveOptions(item, "Talent");
     }
 
     async addForceItem(item, itemType) {
@@ -815,85 +811,182 @@ export class SWSEActorSheet extends ActorSheet {
             });
             return [];
         }
-        return await this.checkPrerequisitesAndResolveOptions(item);
+        await this.checkPrerequisitesAndResolveOptions(item, itemType);
     }
 
     /**
      * Checks prerequisites of an item and offers available options
      * @param item {SWSEItem}
-     * @returns {Promise<[]|*[]>}
+     * @param type
      */
-    async checkPrerequisitesAndResolveOptions(item) {
-        let entitiesToAdd = [];
-        if (!await this.activateChoices(item, entitiesToAdd, {})) {
+    async checkPrerequisitesAndResolveOptions(item, type) {
+        let choices = await this.activateChoices(item, {});
+        if (!choices.success) {
             return [];
         }
 
+        if(type !== "provided") {
+            let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
 
-        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
-
-        if (this.actorHasItem(item) && !takeMultipleTimes) {
-            let itemType = item.data.type;
-            await Dialog.prompt({
-                title: `You already have this ${itemType}`,
-                content: `You have already taken the ${item.data.finalName} ${itemType}`,
-                callback: () => {
-                }
-            })
-            return [];
-        }
-
-        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
-        //entitiesToAdd.push(item.data.toObject(false))
-
-        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
-
-        if (meetsPrereqs.failureList.length > 0) {
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
+            if (this.actor.hasItem(item) && !takeMultipleTimes) {
+                await Dialog.prompt({
+                    title: `You already have this ${type}`,
+                    content: `You have already taken the ${item.data.finalName} ${type}`,
+                    callback: () => {
                     }
-                }).render(true);
-
+                })
                 return [];
+            }
 
-            } else {
-                new Dialog({
-                    title: "You MAY Meet the Prerequisites!",
-                    content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+            //entitiesToAdd.push(item.data.toObject(false))
+
+            let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
+
+            if (meetsPrereqs.failureList.length > 0) {
+                if (meetsPrereqs.doesFail) {
+                    new Dialog({
+                        title: "You Don't Meet the Prerequisites!",
+                        content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
+                    }).render(true);
+
+                    return [];
+
+                } else {
+                    new Dialog({
+                        title: "You MAY Meet the Prerequisites!",
+                        content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                }
             }
         }
 
-        entitiesToAdd.push(... (await this.actor.addItemsFromCompendium(null,item.getProvidedItems())).entities);
+        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-
-        entitiesToAdd.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-
-        return entitiesToAdd
+        let providedItems = item.getProvidedItems();
+        providedItems.push(...choices.items);
+        await this.addItemsFromCompendium(providedItems, mainItem[0]);
     }
 
-    actorHasItem(item) {
-        return Array.from(this.actor.items.values())
-            .map(i => i.data.finalName)
-            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName);
+
+    /**
+     *
+     * @param items {[{name: string,type: string}] | {name: string, type: string}}
+     * @param parent {SWSEItem}
+     * @returns {Promise<string>}
+     */
+    async addItemsFromCompendium(items, parent) {
+        if (!Array.isArray(items)) {
+            items = [items];
+        }
+        let indices = {};
+        let notificationMessage = "";
+        for (let provided of items.filter(item => !!item)) {
+            let item = provided.name;
+            let prerequisite = provided.prerequisite;
+            let type = provided.type;
+            let {index, pack} = await this.getIndexAndPack(indices, type);
+            let {itemName, payload} = this.resolveItemParts(item);
+            let entry = await this.getIndexEntryByName(itemName, index, payload);
+
+            if (!entry) {
+                console.warn(`attempted to add ${itemName}`, arguments)
+                continue;
+            }
+
+            /**
+             *
+             * @type {SWSEItem}
+             */
+            let entity = await pack.getDocument(entry._id);
+
+            entity.prepareData();
+
+            if (itemName === "Bonus Feat" && payload) {
+                for (let attr of Object.values(entity.data.data.attributes)) {
+                    if (attr.key === "provides") {
+                        attr.key = "bonusFeat";
+                        attr.value = payload;
+                    }
+                }
+            }
+
+            if (!!prerequisite) {
+                entity.setPrerequisite(prerequisite);
+            }
+
+            if (!!payload) {
+                entity.setPayload(payload);
+            }
+            if (!!parent)
+            {
+                entity.setParent(parent);
+            }
+            entity.setTextDescription();
+            notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
+            await this.checkPrerequisitesAndResolveOptions(entity, "provided");
+            //entities.push(entity.data.toObject(false));
+        }
+        return notificationMessage;
     }
+
+
+    async getIndexEntryByName(itemName, index, payload) {
+        let cleanItemName1 = this.cleanItemName(itemName);
+        let entry = await index.find(f => f.name === cleanItemName1);
+        if (!entry) {
+            let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
+            entry = await index.find(f => f.name === cleanItemName2);
+        }
+        return entry;
+    }
+
+    cleanItemName(feat) {
+        return feat.replace("*", "").trim();
+    }
+
+    /**
+     *
+     * @param item {string}
+     // * @param item.name {string}
+     // * @param item.type {string}
+     * @returns {{itemName, payload: string}}
+     */
+    resolveItemParts(item) {
+        let itemName = item;
+        let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
+        let payload = "";
+        if (result) {
+            itemName = result[1];
+            payload = result[2];
+        }
+        return {itemName, payload};
+    }
+
+
+    async getIndexAndPack(indices, type) {
+        let index = indices[type];
+        let pack = getCompendium(type);
+        if (!index) {
+            index = await pack.getIndex();
+            indices[type] = index;
+        }
+        return {index, pack};
+    }
+
+
+
 
     async addFeat(item) {
         let possibleFeatTypes = [];
@@ -929,13 +1022,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.categories = possibleFeatTypes;
 
-        let items = await this.checkPrerequisitesAndResolveOptions(item);
-
-        if (items.length > 0) {
-            items.push(...await this.addOptionalRuleFeats(item));
-        }
-
-        return items;
+        await this.checkPrerequisitesAndResolveOptions(item, "Feat");
     }
 
     async addClass(item) {
@@ -966,7 +1053,6 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             }).render(true);
         }
-        let entities = [];
         let context = {};
         context.isFirstLevel = this.actor.classes.length === 0;
         if (item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0) {
@@ -995,7 +1081,10 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
-        await this.activateChoices(item, entities, context);
+        let choices = await this.activateChoices(item, context);
+        if(!choices.success){
+            return;
+        }
         item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
             type: "Boolean",
             value: context.isFirstLevel,
@@ -1003,27 +1092,19 @@ export class SWSEActorSheet extends ActorSheet {
         };
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entities.push(...(await this.addClassFeats(item, context)));
+        await this.addItemsFromCompendium(choices.items, mainItem[0])
 
-        entities.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-
-        return entities;
+        await this.addClassFeats(mainItem[0], context);
     }
 
     async addItem(item) {
         let entities = [];
         let context = {};
-        await this.activateChoices(item, entities, context);
+        //TODO might return future items
+        await this.activateChoices(item, context);
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entities.push(... (await this.actor.addItemsFromCompendium(null, item.getProvidedItems(), item.name)).entities);
-        // await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'), item.name);
-        // await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'), item.name);
-        // await this.actor.addItemsFromCompendium('species', entities, item.getProvidedItems(i => i.type === 'SPECIES'), item.name);
+        await this.addItemsFromCompendium(item.getProvidedItems(), item.name);
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1035,8 +1116,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addSpecies(item) {
-
-        if (this.actor.data.species != null) {
+        if (filterItemsByType(this.actor.items.values(), "species").length > 0) {
             new Dialog({
                 title: "Species Selection",
                 content: "Only one species allowed at a time.  Please remove the existing one before adding a new one.",
@@ -1047,24 +1127,9 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             }).render(true);
-            return [];
+            return;
         }
-
-        let entities = []
-        await this.activateChoices(item, entities, {});
-        let mainItem = await super._onDropItemCreate(item.data.toObject(false));
-
-        entities.push(...(await this.actor.addItemsFromCompendium(null, item.getProvidedItems())).entities);
-        //await this.actor.addItemsFromCompendium('feat', entities, item.getProvidedItems(i => i.type === 'FEAT'));
-        //await this.actor.addItemsFromCompendium('item', entities, item.getProvidedItems(i => i.type === 'ITEM'));
-
-        entities.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-        return entities;
-
+        await this.checkPrerequisitesAndResolveOptions(item, "Species")
     }
 
     async moveExistingItemWithinActor(data, ev) {
@@ -1124,11 +1189,22 @@ export class SWSEActorSheet extends ActorSheet {
         return cursor;
     }
 
-    async activateChoices(item, additionalEntitiesToAdd, context) {
+    /**
+     * if no choices exist > success empty item array
+     * if no choices can be run > success empty array
+     * if a choice is exited from > fail
+     * if choices run, modify parent item and return future items
+     *
+     * @param item
+     * @param context
+     * @returns {Promise<{success: boolean, items: []}>}
+     */
+    async activateChoices(item, context) {
         let choices = item.data.data.choices;
         if (choices.length === 0) {
-            return true;
+            return {success: true, items: []};
         }
+        let items = [];
         for (let choice of choices ? choices : []) {
             if (choice.isFirstLevel && !context.isFirstLevel) {
                 continue;
@@ -1160,12 +1236,15 @@ export class SWSEActorSheet extends ActorSheet {
 
             let content = `<p>${greetingString}</p>${optionString}`;
 
-            await Dialog.prompt({
+            let response = await Dialog.prompt({
                 title: greetingString,
                 content: content,
-                rejectClose: false,
+                rejectClose: async (html) => {return false},
                 callback: async (html) => {
                     let choice = html.find("#choice")[0];
+                    if (choice === undefined) {
+                        return false;
+                    }
                     let key = choice?.value;
 
                     if (!key) {
@@ -1180,14 +1259,18 @@ export class SWSEActorSheet extends ActorSheet {
 
                     }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                        additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, selectedChoice.providedItems)).entities);
-                        //await this.actor.addItemsFromCompendium('item', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'ITEM'));
-                        //await this.actor.addItemsFromCompendium('feat', additionalEntitiesToAdd, selectedChoice.providedItems?.filter(i => i.type === 'FEAT'));
+                        return {success: true, items: selectedChoice.providedItems}
                     }
+                    return {success: true, items:[]}
                 }
             });
+
+            if(response === false){
+                return {success: false, items: []};
+            }
+            items.push(...response.items)
         }
-        return true;
+        return {success: true, items};
     }
 
     /**
@@ -1202,8 +1285,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (feats.length === 0) {
             return [];
         }
-        let additionalEntitiesToAdd = [];
-        feats = feats.map(feat => this.actor.cleanItemName(feat))
+        feats = feats.map(feat => this.cleanItemName(feat))
         if (context.isFirstLevel) {
             if (availableClassFeats > 0 && availableClassFeats < feats.length) {
                 let selectedFeats = [];
@@ -1229,26 +1311,24 @@ export class SWSEActorSheet extends ActorSheet {
                         callback: async (html) => {
                             let feat = html.find("#feat")[0].value;
                             selectedFeats.push(feat);
-                            additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, [{
+                            await this.addItemsFromCompendium([{
                                 type: 'TRAIT',
                                 name: `Bonus Feat (${feat})`
                             }, {
                                 type: 'FEAT',
                                 name: feat
-                            }])).entities);
+                            }], item);
                         }
                     });
                 }
             } else {
-                additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                await this.addItemsFromCompendium(feats.map(feat => {
                     return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                }))).entities);
-                let newVar = await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                }), item);
+                let featString = await this.addItemsFromCompendium(feats.map(feat => {
                     return {type: 'FEAT', name: feat}
-                }));
-                additionalEntitiesToAdd.push(...newVar.entities);
+                }), item);
 
-                let featString = newVar.notificationMessage;
 
                 new Dialog({
                     title: "Adding Class Starting Feats",
@@ -1280,15 +1360,14 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {
+                    await this.addItemsFromCompendium({
                         type: 'TRAIT',
                         name: `Bonus Feat (${feat})`
-                    })).entities);
-                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {type: 'FEAT', name: feat})).entities);
+                    }, item);
+                    await this.addItemsFromCompendium({type: 'FEAT', name: feat}, item);
                 }
             });
         }
-        return additionalEntitiesToAdd;
     }
 
     /* -------------------------------------------- */
@@ -1444,96 +1523,142 @@ export class SWSEActorSheet extends ActorSheet {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
             if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
+                let weaponProficiencies = this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")
                 for (let weapon of game.generated.exoticWeapons) {
-                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                    if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
                     }
                 }
             } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
-                for (let weapon of this.actor.data.proficiency.weapon) {
-                    if (!this.actor.data.proficiency.focus.includes(weapon.toLowerCase())) {
+                let focuses = this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                    if (!focuses.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
+            } else if (key === 'AVAILABLE_WEAPON_SPECIALIZATION') {
+                let weaponSpecializations = this.actor.getInheritableAttributesByKey("weaponSpecialization", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!weaponSpecializations.includes(weapon)) {
+                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
+                let greaterWeaponSpecialization = this.actor.getInheritableAttributesByKey("greaterWeaponSpecialization", "VALUES")
+                let greaterWeaponFocus = this.actor.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
+                for (let weaponSpecialization of this.actor.getInheritableAttributesByKey("weaponSpecialization", "VALUES")) {
+                    if (!greaterWeaponSpecialization.includes(weaponSpecialization) && greaterWeaponFocus.includes(weaponSpecialization)) {
+                        resolvedOptions[weaponSpecialization.titleCase()] = {abilities: [], items: [], payload: weaponSpecialization.titleCase()};
+                    }
+                }
+            } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
+                let greaterWeaponFocus = this.actor.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
+                for (let weaponFocus of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!greaterWeaponFocus.includes(weaponFocus)) {
+                        resolvedOptions[weaponFocus.titleCase()] = {abilities: [], items: [], payload: weaponFocus.titleCase()};
+                    }
+                }
             } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
+                let weaponProficiencies = this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES");
                 for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
-                    if (!this.actor.data.proficiency.weapon.includes(weapon.toLowerCase())) {
+                    if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'UNFOCUSED_SKILLS') {
+                let skillFocuses = this.actor.getInheritableAttributesByKey("skillFocus", "VALUES");
                 for (let skill of skills) {
-                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.toLowerCase())) {
+                    if (!skillFocuses.includes(skill)) {
                         resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
+                let skillFocuses = this.actor.getInheritableAttributesByKey("skillFocus", "VALUES");
                 for (let skill of this.actor.trainedSkills) {
-                    if (!this.actor.data.prerequisites.focusSkills.includes(skill.label.toLowerCase())) {
-                        resolvedOptions[skill.label.titleCase()] = {
+                    if (!skillFocuses.includes(skill.key)) {
+                        resolvedOptions[skill.key.titleCase()] = {
                             abilities: [],
                             items: [],
-                            payload: skill.label.titleCase()
+                            payload: skill.key.titleCase()
                         };
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {
-                for (let weapon of this.actor.focusSkills) {
-                    if (!this.actor.data.prerequisites.masterSkills.includes(weapon.toLowerCase())) {
-                        resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                let masterSkills = this.actor.getInheritableAttributesByKey("skillMastery", "VALUES");
+                masterSkills.push("Use The Force")
+                for (let skill of this.actor.getInheritableAttributesByKey("skillFocus", "VALUES")) {
+                    if (!masterSkills.includes(skill)) {
+                        resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.weapon) {
-                    if (!this.actor.data.proficiency.doubleAttack.includes(weapon.toLowerCase())) {
+                let doubleAttack = this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                    if (!doubleAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.tripleAttack.includes(weapon.toLowerCase())) {
+                let tripleAttack = this.actor.getInheritableAttributesByKey("tripleAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!tripleAttack.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.savageAttack.includes(weapon.toLowerCase())) {
+                let savageAttack = this.actor.getInheritableAttributesByKey("savageAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!savageAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
-                for (let weapon of this.actor.data.proficiency.doubleAttack) {
-                    if (!this.actor.data.proficiency.relentlessAttack.includes(weapon.toLowerCase())) {
+                let relentlessAttack = this.actor.getInheritableAttributesByKey("relentlessAttack", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                    if (!relentlessAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.autofireSweep.includes(weapon.toLowerCase())) {
+                let autofireSweep = this.actor.getInheritableAttributesByKey("autofireSweep", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!autofireSweep.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.autofireAssault.includes(weapon.toLowerCase())) {
+                let autofireAssault = this.actor.getInheritableAttributesByKey("autofireAssault", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!autofireAssault.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_HALT') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.halt.includes(weapon.toLowerCase())) {
+                let halt = this.actor.getInheritableAttributesByKey("halt", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!halt.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RETURN_FIRE') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.returnFire.includes(weapon.toLowerCase())) {
+                let returnFire = this.actor.getInheritableAttributesByKey("returnFire", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!returnFire.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
-                for (let weapon of this.actor.data.proficiency.focus) {
-                    if (!this.actor.data.proficiency.criticalStrike.includes(weapon.toLowerCase())) {
+                let criticalStrike = this.actor.getInheritableAttributesByKey("criticalStrike", "VALUES")
+
+                for (let weapon of this.actor.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                    if (!criticalStrike.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }

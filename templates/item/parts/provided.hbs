@@ -3,9 +3,7 @@
 
     {{/if}}
     {{#unless item.data.providedItems}}
-        {{log item.data._source.data.providedItems}}
         {{#each item.data._source.data.providedItems as |item id|}}
-            {{log id item}}
             <li class="flexrow">
                 <div>{{item.name}}</div>
                 <div>{{#if item.prerequisite}} Prerequisite:{{item.prerequisite.text}}{{/if}}</div>

@@ -75,22 +75,19 @@ Hooks.once('init', async function() {
 });
 
 
-Hooks.on("ready", async function() {
+Hooks.on("ready", function() {
   //await generateCompendiums();
 
   game.generated = {};
   game.generated.exoticWeapons= [];
-  let pack = await game.packs.find(pack => pack.collection.startsWith("swse.items"));
+  let pack = game.packs.find(pack => pack.collection.startsWith("swse.items"));
   pack.getIndex().then( index => {
   for(let i of index){
-    pack.getDocument(i._id).then(entity =>{
+    pack.getDocument(i._id).then(entity => {
     if(entity.data.type === 'weapon'){
-      for(let category of entity.data._source.data.categories){
-        if(category.value.toLowerCase().includes('exotic')){
+        if(entity.data._source.data.subtype.toLowerCase().includes('exotic')){
           game.generated.exoticWeapons.push(entity.name);
-          break;
         }
-      }
     }});
   }})
 });
