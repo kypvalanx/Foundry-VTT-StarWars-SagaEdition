@@ -1,4 +1,4 @@
-import {filterItemsByType, unique} from "../util.js";
+import {filterItemsByType, unique, getCompendium} from "../util.js";
 import {SWSE} from "../config.js";
 import {lightsaberForms, skills} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
@@ -723,31 +723,27 @@ export class SWSEActorSheet extends ActorSheet {
         let item = compendiumItem.clone();
         item.prepareData();
 
-        let entitiesToAdd = [];
         let context = {};
 
-        //only one species allowed
         if (item.data.type === "species") {
-            entitiesToAdd.push(...await this.addSpecies(item));
+            await this.addSpecies(item);
         } else if (item.data.type === "class") {
-            entitiesToAdd.push(...await this.addClass(item, context));
+            await this.addClass(item, context);
         } else if (item.data.type === "feat") {
-            entitiesToAdd.push(...await this.addFeat(item));
+            await this.addFeat(item);
         } else if (item.data.type === "forceSecret") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Secrets"));
+            await this.addForceItem(item, "Force Secrets");
         } else if (item.data.type === "forceTechnique") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Technique"));
+            await this.addForceItem(item, "Force Technique");
         } else if (item.data.type === "forcePower") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Force Powers"));
+            await this.addForceItem(item, "Force Powers");
         } else if (item.data.type === "affiliation") {
-            entitiesToAdd.push(...await this.addForceItem(item, "Affiliations"));
+            await this.addForceItem(item, "Affiliations");
         } else if (item.data.type === "talent") {
-            entitiesToAdd.push(...await this.addTalent(item));
+            await this.addTalent(item);
         } else if (item.data.type === "weapon" || item.data.type === "armor" || item.data.type === "equipment" || item.data.type === "template" || item.data.type === "upgrade") {
-            entitiesToAdd.push(...await this.addItem(item));
+            await this.addItem(item);
         }
-        //await this.activateChoices(item, entitiesToAdd, context);
-        await super._onDropItemCreate(entitiesToAdd);
     }
 
 
@@ -802,7 +798,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
-        return await this.checkPrerequisitesAndResolveOptions(item, "Talent");
+        await this.checkPrerequisitesAndResolveOptions(item, "Talent");
     }
 
     async addForceItem(item, itemType) {
@@ -815,85 +811,182 @@ export class SWSEActorSheet extends ActorSheet {
             });
             return [];
         }
-        return await this.checkPrerequisitesAndResolveOptions(item, itemType);
+        await this.checkPrerequisitesAndResolveOptions(item, itemType);
     }
 
     /**
      * Checks prerequisites of an item and offers available options
      * @param item {SWSEItem}
-     * @returns {Promise<[]|*[]>}
+     * @param type
      */
     async checkPrerequisitesAndResolveOptions(item, type) {
-        let entitiesToAdd = [];
-        if (!await this.activateChoices(item, entitiesToAdd, {})) {
+        let choices = await this.activateChoices(item, {});
+        if (!choices.success) {
             return [];
         }
 
+        if(type !== "provided") {
+            let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
 
-        let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes").map(a => a.value === "true").reduce((a, b) => a || b, false);
-
-        if (this.actorHasItem(item) && !takeMultipleTimes) {
-            await Dialog.prompt({
-                title: `You already have this ${type}`,
-                content: `You have already taken the ${item.data.finalName} ${type}`,
-                callback: () => {
-                }
-            })
-            return [];
-        }
-
-        //entitiesToAdd.push(item.data.toObject(false))
-
-        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
-
-        if (meetsPrereqs.failureList.length > 0) {
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
+            if (this.actor.hasItem(item) && !takeMultipleTimes) {
+                await Dialog.prompt({
+                    title: `You already have this ${type}`,
+                    content: `You have already taken the ${item.data.finalName} ${type}`,
+                    callback: () => {
                     }
-                }).render(true);
-
+                })
                 return [];
+            }
 
-            } else {
-                new Dialog({
-                    title: "You MAY Meet the Prerequisites!",
-                    content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+            //entitiesToAdd.push(item.data.toObject(false))
+
+            let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
+
+            if (meetsPrereqs.failureList.length > 0) {
+                if (meetsPrereqs.doesFail) {
+                    new Dialog({
+                        title: "You Don't Meet the Prerequisites!",
+                        content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
+                    }).render(true);
+
+                    return [];
+
+                } else {
+                    new Dialog({
+                        title: "You MAY Meet the Prerequisites!",
+                        content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                }
             }
         }
 
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entitiesToAdd.push(... (await this.actor.addItemsFromCompendium(null,item.getProvidedItems())).entities);
-
-
-        entitiesToAdd.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-
-        return entitiesToAdd
+        let providedItems = item.getProvidedItems();
+        providedItems.push(...choices.items);
+        await this.addItemsFromCompendium(providedItems, mainItem[0]);
     }
 
-    actorHasItem(item) {
-        return Array.from(this.actor.items.values())
-            .map(i => i.data.finalName)
-            .includes(item.data.finalName) && !SWSE.duplicateSkillList.includes(item.data.finalName);
+
+    /**
+     *
+     * @param items {[{name: string,type: string}] | {name: string, type: string}}
+     * @param parent {SWSEItem}
+     * @returns {Promise<string>}
+     */
+    async addItemsFromCompendium(items, parent) {
+        if (!Array.isArray(items)) {
+            items = [items];
+        }
+        let indices = {};
+        let notificationMessage = "";
+        for (let provided of items.filter(item => !!item)) {
+            let item = provided.name;
+            let prerequisite = provided.prerequisite;
+            let type = provided.type;
+            let {index, pack} = await this.getIndexAndPack(indices, type);
+            let {itemName, payload} = this.resolveItemParts(item);
+            let entry = await this.getIndexEntryByName(itemName, index, payload);
+
+            if (!entry) {
+                console.warn(`attempted to add ${itemName}`, arguments)
+                continue;
+            }
+
+            /**
+             *
+             * @type {SWSEItem}
+             */
+            let entity = await pack.getDocument(entry._id);
+
+            entity.prepareData();
+
+            if (itemName === "Bonus Feat" && payload) {
+                for (let attr of Object.values(entity.data.data.attributes)) {
+                    if (attr.key === "provides") {
+                        attr.key = "bonusFeat";
+                        attr.value = payload;
+                    }
+                }
+            }
+
+            if (!!prerequisite) {
+                entity.setPrerequisite(prerequisite);
+            }
+
+            if (!!payload) {
+                entity.setPayload(payload);
+            }
+            if (!!parent)
+            {
+                entity.setParent(parent);
+            }
+            entity.setTextDescription();
+            notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
+            await this.checkPrerequisitesAndResolveOptions(entity, "provided");
+            //entities.push(entity.data.toObject(false));
+        }
+        return notificationMessage;
     }
+
+
+    async getIndexEntryByName(itemName, index, payload) {
+        let cleanItemName1 = this.cleanItemName(itemName);
+        let entry = await index.find(f => f.name === cleanItemName1);
+        if (!entry) {
+            let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
+            entry = await index.find(f => f.name === cleanItemName2);
+        }
+        return entry;
+    }
+
+    cleanItemName(feat) {
+        return feat.replace("*", "").trim();
+    }
+
+    /**
+     *
+     * @param item {string}
+     // * @param item.name {string}
+     // * @param item.type {string}
+     * @returns {{itemName, payload: string}}
+     */
+    resolveItemParts(item) {
+        let itemName = item;
+        let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
+        let payload = "";
+        if (result) {
+            itemName = result[1];
+            payload = result[2];
+        }
+        return {itemName, payload};
+    }
+
+
+    async getIndexAndPack(indices, type) {
+        let index = indices[type];
+        let pack = getCompendium(type);
+        if (!index) {
+            index = await pack.getIndex();
+            indices[type] = index;
+        }
+        return {index, pack};
+    }
+
+
+
 
     async addFeat(item) {
         let possibleFeatTypes = [];
@@ -929,13 +1022,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.categories = possibleFeatTypes;
 
-        let items = await this.checkPrerequisitesAndResolveOptions(item, "Feat");
-
-        if (items.length > 0) {
-            items.push(...await this.addOptionalRuleFeats(item));
-        }
-
-        return items;
+        await this.checkPrerequisitesAndResolveOptions(item, "Feat");
     }
 
     async addClass(item) {
@@ -994,8 +1081,10 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
-        let entities = [];
-        await this.activateChoices(item, entities, context);
+        let choices = await this.activateChoices(item, context);
+        if(!choices.success){
+            return;
+        }
         item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
             type: "Boolean",
             value: context.isFirstLevel,
@@ -1003,24 +1092,19 @@ export class SWSEActorSheet extends ActorSheet {
         };
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entities.push(...(await this.addClassFeats(item, context)));
+        await this.addItemsFromCompendium(choices.items, mainItem[0])
 
-        entities.forEach(item => item.data.supplier = {
-            id: mainItem[0].id,
-            name: mainItem[0].name,
-            type: mainItem[0].data.type
-        })
-
-        return entities;
+        await this.addClassFeats(mainItem[0], context);
     }
 
     async addItem(item) {
         let entities = [];
         let context = {};
-        await this.activateChoices(item, entities, context);
+        //TODO might return future items
+        await this.activateChoices(item, context);
         let mainItem = await super._onDropItemCreate(item.data.toObject(false));
 
-        entities.push(... (await this.actor.addItemsFromCompendium(null, item.getProvidedItems(), item.name)).entities);
+        await this.addItemsFromCompendium(item.getProvidedItems(), item.name);
 
         entities.forEach(item => item.data.supplier = {
             id: mainItem[0].id,
@@ -1043,9 +1127,9 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
             }).render(true);
-            return [];
+            return;
         }
-        return await this.checkPrerequisitesAndResolveOptions(item, "Species")
+        await this.checkPrerequisitesAndResolveOptions(item, "Species")
     }
 
     async moveExistingItemWithinActor(data, ev) {
@@ -1105,11 +1189,22 @@ export class SWSEActorSheet extends ActorSheet {
         return cursor;
     }
 
-    async activateChoices(item, additionalEntitiesToAdd, context) {
+    /**
+     * if no choices exist > success empty item array
+     * if no choices can be run > success empty array
+     * if a choice is exited from > fail
+     * if choices run, modify parent item and return future items
+     *
+     * @param item
+     * @param context
+     * @returns {Promise<{success: boolean, items: []}>}
+     */
+    async activateChoices(item, context) {
         let choices = item.data.data.choices;
         if (choices.length === 0) {
-            return true;
+            return {success: true, items: []};
         }
+        let items = [];
         for (let choice of choices ? choices : []) {
             if (choice.isFirstLevel && !context.isFirstLevel) {
                 continue;
@@ -1164,16 +1259,18 @@ export class SWSEActorSheet extends ActorSheet {
 
                     }
                     if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                        additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, selectedChoice.providedItems)).entities);
+                        return {success: true, items: selectedChoice.providedItems}
                     }
+                    return {success: true, items:[]}
                 }
             });
 
             if(response === false){
-                return false;
+                return {success: false, items: []};
             }
+            items.push(...response.items)
         }
-        return true;
+        return {success: true, items};
     }
 
     /**
@@ -1188,8 +1285,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (feats.length === 0) {
             return [];
         }
-        let additionalEntitiesToAdd = [];
-        feats = feats.map(feat => this.actor.cleanItemName(feat))
+        feats = feats.map(feat => this.cleanItemName(feat))
         if (context.isFirstLevel) {
             if (availableClassFeats > 0 && availableClassFeats < feats.length) {
                 let selectedFeats = [];
@@ -1215,26 +1311,24 @@ export class SWSEActorSheet extends ActorSheet {
                         callback: async (html) => {
                             let feat = html.find("#feat")[0].value;
                             selectedFeats.push(feat);
-                            additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, [{
+                            await this.addItemsFromCompendium([{
                                 type: 'TRAIT',
                                 name: `Bonus Feat (${feat})`
                             }, {
                                 type: 'FEAT',
                                 name: feat
-                            }])).entities);
+                            }], item);
                         }
                     });
                 }
             } else {
-                additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                await this.addItemsFromCompendium(feats.map(feat => {
                     return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                }))).entities);
-                let newVar = await this.actor.addItemsFromCompendium(null, feats.map(feat => {
+                }), item);
+                let featString = await this.addItemsFromCompendium(feats.map(feat => {
                     return {type: 'FEAT', name: feat}
-                }));
-                additionalEntitiesToAdd.push(...newVar.entities);
+                }), item);
 
-                let featString = newVar.notificationMessage;
 
                 new Dialog({
                     title: "Adding Class Starting Feats",
@@ -1266,15 +1360,14 @@ export class SWSEActorSheet extends ActorSheet {
                         </div>`,
                 callback: async (html) => {
                     let feat = html.find("#feat")[0].value;
-                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {
+                    await this.addItemsFromCompendium({
                         type: 'TRAIT',
                         name: `Bonus Feat (${feat})`
-                    })).entities);
-                    additionalEntitiesToAdd.push(...(await this.actor.addItemsFromCompendium(null, {type: 'FEAT', name: feat})).entities);
+                    }, item);
+                    await this.addItemsFromCompendium({type: 'FEAT', name: feat}, item);
                 }
             });
         }
-        return additionalEntitiesToAdd;
     }
 
     /* -------------------------------------------- */

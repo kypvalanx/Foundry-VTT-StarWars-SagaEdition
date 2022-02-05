@@ -36,6 +36,7 @@ export function generateSkills(actor) {
 
         skill.value = resolveValueArray( [halfCharacterLevel, attributeMod, trainedSkillBonus, conditionBonus, getAbilitySkillBonus, acPenalty, skillFocusBonus]);
         skill.key = key;
+        skill.variable = `@${actor.cleanSkillName(key)}`;
         actor.resolvedVariables.set(`@${actor.cleanSkillName(key)}`, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
         actor.resolvedLabels.set(`@${actor.cleanSkillName(key)}`, skill.label);

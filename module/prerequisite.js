@@ -1,4 +1,4 @@
-import {filterItemsByType, resolveValueArray} from "./util.js";
+import {filterItemsByType, resolveExpression, resolveValueArray} from "./util.js";
 
 export function
 /**
@@ -241,9 +241,17 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'EQUIPPED':
+                let req = prereq.requirement;
+                let comparison;
+                if(req.includes(":")){
+                    let toks = req.split(":");
+                    req = toks[0];
+                    comparison = toks[1];
+                }
                 let equippedItems = target.getEquippedItems();
-                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === prereq.requirement);
-                if (filteredEquippedItems.length > 0) {
+                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item.data.data.subtype === req);
+                let count = filteredEquippedItems.length;
+                if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
