@@ -1,0 +1,13 @@
+<div class="vehicle-station {{type}} swse"  data-actor-id="{{crew.id}}">
+    {{log crew}}
+    {{#if crew.id}}
+        <div class="crew-member-portrait"
+             style="background-image: url('{{crew.img}}');">
+            <div>{{type}}: {{crew.name}}</div>
+            <a class="crew-control crew-remove" title="Remove Crew" data-actor-id="{{crew.id}}" data-position="{{type}}"><i class="fas fa-trash"></i></a>
+        </div>
+<!--        <div class=""><img class="crew-member-portrait" src="{{crew.img}}" alt="{{crew.name}}" data-edit="img" title="{{crew.name}}"/></div>-->
+{{/if}}
+    {{#unless crew.id}}{{type}} slot{{/unless}}
+
+</div>

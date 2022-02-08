@@ -1,0 +1,41 @@
+<div class="vehicle-summary-header swse">
+
+    <div><div class="name"><h2><label for="name">Name<input class="plain" name="name" type="text" value="{{actor.data.name}}"
+                                                            placeholder=""/></label></h2></div>
+
+        <div class="type"><h2>
+            <label for="type">Type <select>
+                <option value="-">-</option>
+                <option value="custom">Custom</option>
+            </select>
+        </label></h2></div>
+    </div>
+    <div class="vehicle-template">
+
+        <label for="species">Vehicle Template</label>
+        <div class="flex item" id="view-vehicle-template" data-item-id="{{actor.vehicleTemplate.id}}">
+
+            {{#if actor.vehicleTemplate}}
+                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.vehicleTemplate.id}}">{{actor.vehicleTemplate.name}}</div>
+                <div class="species-controls flex-col">
+                    <a class="species-control edit" title="view item"><i
+                            class="fas fa-eye"></i></a>
+                </div>
+                <div class="species-controls flex-col">
+                    <a class="species-control delete" title="delete item"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            {{/if}}
+            {{#unless actor.vehicleTemplate}}
+                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="swse.vehicle templates">Add Vehicle Template</div>
+                <div class="species-controls flex-col">
+                    <a data-action="compendium" data-action-target="swse.vehicle templates"
+                       title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                </div>
+            {{/unless}}
+        </div>
+
+    </div>
+
+
+</div>

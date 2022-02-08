@@ -3,9 +3,18 @@
     "types": [
       "character",
       "npc",
-      "computer"
+      "computer",
+      "vehicle",
+      "npc-vehicle"
     ],
     "templates": {
+      "alignment": {
+        "darkSideScore": 0,
+        "darkSideArray": []
+      },
+      "equipment": {
+        "equippedIds": []
+      },
       "common": {
         "health": {
           "value": 10,
@@ -13,10 +22,6 @@
           "max": 10,
           "condition": 0
         },
-        "darkSideScore": 0,
-        "darkSideArray": [],
-        "equippedIds": [],
-        "classesfirst": "",
         "attributes": {
           "str": {
             "total": 10,
@@ -299,11 +304,21 @@
         "gender": "",
         "genderDisplay": "",
         "player": ""
+      },
+      "crew": {
+        "pilot": [],
+        "copilot": [],
+        "gunner": [],
+        "commander": [],
+        "systemOperator": [],
+        "engineer": []
       }
     },
     "character": {
       "templates": [
-        "common"
+        "common",
+        "alignment",
+        "equipment"
       ],
       "biography": "",
       "attributes": {
@@ -311,14 +326,28 @@
     },
     "npc": {
       "templates": [
-        "common"
+        "common",
+        "alignment",
+        "equipment"
       ],
       "biography": "",
       "attributes": {
       }
     },
     "vehicle": {
-      "templates": [],
+      "templates": [
+        "common",
+        "crew"
+      ],
+      "biography": "",
+      "attributes": {
+      }
+    },
+    "npc-vehicle": {
+      "templates": [
+        "common",
+        "crew"
+      ],
       "biography": "",
       "attributes": {
       }
@@ -348,7 +377,8 @@
       "forceRegimen",
       "classFeature",
       "trait",
-      "template"
+      "template",
+      "vehicleTemplate"
     ],
     "templates": {
       "base": {
@@ -436,6 +466,13 @@
     "template": {
       "templates": [
         "base",
+        "mod"
+      ]
+    },
+    "vehicleTemplate": {
+      "templates": [
+        "base",
+        "item",
         "mod"
       ]
     },

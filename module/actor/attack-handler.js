@@ -19,8 +19,9 @@ export function generateAttacks(actor) {
 }
 
 function canFinesse(size, item, focus) {
-    let isOneHanded = compareSizes(size, item.size) < 1;
-    let isLight = compareSizes(size, item.size) < 0;
+    let sizes = compareSizes(size, item.size);
+    let isOneHanded = sizes < 1;
+    let isLight = sizes < 0;
     return isLight || (isOneHanded && focus) || isLightsaber(item);
 }
 

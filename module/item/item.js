@@ -99,7 +99,7 @@ export class SWSEItem extends Item {
         return 0;
     }
 
-    get reflexDefenseBonus() {
+    get armorReflexDefenseBonus() {
         return toNumber(this.getInheritableAttributesByKey('armorReflexDefenseBonus', "MAX")) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 

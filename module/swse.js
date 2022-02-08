@@ -66,6 +66,9 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-portrait.hbs',
     'systems/swse/templates/actor/parts/actor-darkside.hbs',
     'systems/swse/templates/actor/parts/actor-defenses.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-summary.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-stations.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-station.hbs',
     'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
     'systems/swse/templates/actor/parts/attack/single-attack.hbs',
     'systems/swse/templates/item/parts/provided.hbs',
@@ -236,12 +239,12 @@ function rollAttack(actorId, itemIds) {
 }
 
 export const getActorFromId = function (id) {
-  const speaker = ChatMessage.getSpeaker();
   let actor = null;
   if (id) {
     actor = game.actors.tokens[id];
     if (!actor) actor = game.actors.get(id);
   }
+  const speaker = ChatMessage.getSpeaker();
   if (speaker.token && !actor) actor = game.actors.tokens[speaker.token];
   if (!actor) actor = game.actors.get(speaker.actor);
   return actor;

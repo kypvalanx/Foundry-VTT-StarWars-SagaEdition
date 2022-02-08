@@ -9,7 +9,7 @@ export function generateAttributes(actor) {
     let actorData = actor.data;
 
     actorData.data.lockAttributes = actor.shouldLockAttributes
-    actorData.data.isBeast = actor.classes.filter(clazz => clazz.name === "Beast").length > 0
+    actorData.data.isBeast = actor.classes?.filter(clazz => clazz.name === "Beast").length > 0
 
     let prerequisites = actorData.prerequisites;
     prerequisites.attributes = {};
@@ -17,12 +17,16 @@ export function generateAttributes(actor) {
         let longKey = getLongKey(key);
         let attributeBonuses = actor.getInheritableAttributesByKey(`${longKey}Bonus`)
         let attributeMax = actor.getInheritableAttributesByKey(`${longKey}Max`, "MIN");
+        let attributeBase = actor.getInheritableAttributesByKey(`base${longKey.titleCase()}`, "MAX");
+        if (attributeBase > 0) {
+            attribute.base = attributeBase;
+        }
         if (actorData.data.lockAttributes) {
             attribute.base = 10;
         }
-    if(attributeMax){
-        attribute.base = Math.min(attribute.base, attributeMax);
-    }
+        if (attributeMax) {
+            attribute.base = Math.min(attribute.base, attributeMax);
+        }
         let bonuses = [];
         // let classLevelBonuses = []; //TODO WIRE ME UP
         // let speciesBonuses = [];
@@ -56,11 +60,11 @@ export function generateAttributes(actor) {
 
         // Calculate the modifier using d20 rules.
         attribute.bonus = resolveValueArray(bonuses, actor);
-        attribute.total = attribute.skip ? 10 : attribute.base + attribute.bonus;
+        attribute.total = attribute.skip ? 10 : resolveValueArray([attribute.base, attribute.bonus], actor);
         attribute.mod = Math.floor((attribute.total - 10) / 2);
         attribute.roll = attribute.mod + actor.conditionBonus;
         attribute.label = key.toUpperCase();
-        attribute.skip = key === "con" && actor.isDroid
+        attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.data.type))
         actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);
         actor.resolvedLabels.set("@" + attribute.label + "ROLL", attribute.label);
         actor.resolvedVariables.set("@" + attribute.label + "MOD", attribute.roll);

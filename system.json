@@ -98,6 +98,13 @@
       "path": "packs/swse-traits.db",
       "type": "Item",
       "system": "swse"
+    },
+    {
+      "name": "vehicle templates",
+      "label": "Vehicle Templates",
+      "path": "packs/swse-vehicle templates.db",
+      "type": "Item",
+      "system": "swse"
     }
   ],
   "languages": [

@@ -26,7 +26,7 @@ function generateArmorBlock(actor, armor) {
     return {
         name: armor.name,
         speed: speed,
-        refDefense: armor.reflexDefenseBonus ? armor.reflexDefenseBonus : 0,
+        refDefense: armor.armorReflexDefenseBonus ? armor.armorReflexDefenseBonus : 0,
         fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
         maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
         notes: attributes.join(", "),
@@ -128,7 +128,7 @@ function _resolveRef(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    let armorBonus = _selectRefBonus(actor.heroicLevel, _getEquipmentRefBonus(actor));
+    let armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
     total.push(armorBonus);
     let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
@@ -173,12 +173,9 @@ function _getDamageThresholdSizeMod(actor) {
 function _resolveDt(actor, conditionBonus) {
     let total = [];
     total.push(_resolveFort(actor, conditionBonus).total);
-    total.push(_getDamageThresholdSizeMod(actor))
+    total.push(_getDamageThresholdSizeMod(actor));
+    total.push(...actor.getInheritableAttributesByKey("damageThresholdBonus", "VALUES"));
     return {total: resolveValueArray(total, actor)}
-}
-
-function capFirst(word) {
-    return word.charAt(0).toUpperCase() + word.slice(1)
 }
 
 function _getSituationalBonuses(actor) {
@@ -241,15 +238,13 @@ function _getEquipmentFortBonus(actor) {
     return bonus;
 }
 
-function _getEquipmentRefBonus(actor) {
-    let equipped = actor.getEquippedItems();
-    let bonus = -1;
-    for (let item of equipped) {
-        if (item.reflexDefenseBonus) {
-            bonus = Math.max(bonus, item.reflexDefenseBonus);
-        }
+function getArmorReflexDefenseBonus(actor) {
+    let bonuses = actor.inheritableItems.map(i => i.document.armorReflexDefenseBonus).filter(bonus => !!bonus)
+
+    if(bonuses.length === 0){
+        return undefined;
     }
-    return bonus;
+    return Math.max(bonuses)
 }
 
 function _getEquipmentMaxDexBonus(actor) {
