@@ -1291,7 +1291,7 @@ export class SWSEActor extends Actor {
             }
             this.reduceAvailableItem(actorData, type);
         }
-        this.reduceAvailableItem(actorData, "Force Secrets", this.secrets.length);
+        this.reduceAvailableItem(actorData, "Force Secret", this.secrets.length);
         this.reduceAvailableItem(actorData, "Force Technique", this.techniques.length);
         this.reduceAvailableItem(actorData, "Force Powers", this.powers.length);
     }
