@@ -172,6 +172,23 @@ meetsPrerequisites(target, prereqs) {
                     }
                 }
                 break;
+            case 'FORCE POWER':
+                let ownedForcePowers = filterItemsByType(target.items.values(), "forcePower");
+                if (!isNaN(prereq.requirement)) {
+                    if (!(ownedForcePowers.length < parseInt(prereq.requirement))) {
+                        successList.push({prereq, count: 1});
+                        continue;
+                    }
+                }
+
+                let filteredForcePowers = ownedForcePowers.filter(feat => feat.data.finalName === prereq.requirement);
+                if (filteredForcePowers.length > 0) {
+                    if (!meetsPrerequisites(target, filteredForcePowers[0].data.data.prerequisite).doesFail) {
+                        successList.push({prereq, count: 1});
+                        continue;
+                    }
+                }
+                break;
             case 'ATTRIBUTE':
                 let toks = prereq.requirement.split(" ");
                 if (!(target.getAttribute(toks[0]) < parseInt(toks[1]))) {
