@@ -204,7 +204,18 @@ meetsPrerequisites(target, prereqs) {
                     continue;
                 }
                 if(meetsChildPrereqs.failureList.length > 1) {
-                    failureList.push({fail:meetsChildPrereqs.doesFail, message: `at least of ${prereq.count}:`, children:meetsChildPrereqs.failureList})
+                    if(prereq.text){
+                        failureList.push({
+                            fail: meetsChildPrereqs.doesFail,
+                            message: prereq.text
+                        })
+                    } else {
+                        failureList.push({
+                            fail: meetsChildPrereqs.doesFail,
+                            message: `at least of ${prereq.count}:`,
+                            children: meetsChildPrereqs.failureList
+                        })
+                    }
                 } else {
                     failureList.push(...meetsChildPrereqs.failureList)
                 }

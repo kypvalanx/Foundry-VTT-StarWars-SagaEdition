@@ -1,0 +1,24 @@
+<div class="crew-quality">
+    <h2>
+        <label for="crew-quality">Crew Quality
+            <select name="data.crewQuality.quality">
+                {{#select actor.data.data.crewQuality.quality}}
+                    <option value="-">-</option>
+                    <option value="Untrained">Untrained</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Skilled">Skilled</option>
+                    <option value="Expert">Expert</option>
+                    <option value="Ace">Ace</option>
+                {{/select}}
+            </select>
+        </label>
+    </h2>
+    {{#if actor.data.hasAstromechSlot}}
+        <h2>
+            <label for="crew-quality">Includes Astromech
+                <input type="checkbox" name="data.hasAstromech" {{#if actor.data.data.hasAstromech}}
+                       checked="isChecked"{{/if}}/>
+            </label>
+        </h2>
+    {{/if}}
+</div>

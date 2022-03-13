@@ -40,11 +40,13 @@ function generateArmorBlock(actor, armor) {
  * @returns
  */
 export function resolveDefenses(actor) {
-    let fort = _resolveFort(actor, actor.conditionBonus);
-    let will = _resolveWill(actor, actor.conditionBonus);
-    let ref = _resolveRef(actor, actor.conditionBonus);
-    let dt = _resolveDt(actor, actor.conditionBonus);
+    let conditionBonus = actor.conditionBonus;
+    let fort = _resolveFort(actor, conditionBonus);
+    let will = _resolveWill(actor, conditionBonus);
+    let ref = _resolveRef(actor, conditionBonus);
+    let dt = _resolveDt(actor, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(actor);
+    let shield = _resolveShield(actor);
 
     let damageReduction = actor.getInheritableAttributesByKey("damageReduction", "SUM")
 
@@ -55,7 +57,7 @@ export function resolveDefenses(actor) {
         armors.push(generateArmorBlock(actor, armor));
     }
 
-    return {defense: {fort, will, ref, dt, damageThreshold: dt, damageReduction, situationalBonuses}, armors};
+    return {defense: {fort, will, ref, dt, damageThreshold: dt, damageReduction, situationalBonuses, shield}, armors};
 }
 
 /**
@@ -99,6 +101,7 @@ function _resolveFort(actor, conditionBonus) {
  */
 function _resolveWill(actor, conditionBonus) {
     let actorData = actor.data
+    let skip = ['vehicle', 'npc-vehicle'].includes(actorData.type);
     let total = [];
     total.push(10);
     let heroicLevel = actor.heroicLevel;
@@ -114,7 +117,7 @@ function _resolveWill(actor, conditionBonus) {
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     let armorBonus = resolveValueArray([heroicLevel]);
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip}
 }
 
 /**
@@ -128,7 +131,20 @@ function _resolveRef(actor, conditionBonus) {
     let actorData = actor.data
     let total = [];
     total.push(10);
-    let armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+    let armorBonus;
+    if(["vehicle", "npc-vehicle"].includes(actor.data.type)){
+        if(actor.pilot){
+            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
+            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
+            if(armorReflexDefenseBonus) {
+                armorBonus = Math.max(armorBonus, armorReflexDefenseBonus);
+            }
+        } else {
+            armorBonus = getArmorReflexDefenseBonus(actor)||0;
+        }
+    } else {
+        armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+    }
     total.push(armorBonus);
     let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
@@ -143,7 +159,7 @@ function _resolveRef(actor, conditionBonus) {
     total.push(dodgeBonus);
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip:false}
 }
 
 /**
@@ -178,6 +194,19 @@ function _resolveDt(actor, conditionBonus) {
     return {total: resolveValueArray(total, actor)}
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param conditionBonus
+ * @returns {{total: number}}
+ * @private
+ */
+function _resolveShield(actor, conditionBonus) {
+    let total = [];
+    total.push(...actor.getInheritableAttributesByKey("shieldRating", "VALUES"));
+    return {total: resolveValueArray(total, actor), current: resolveValueArray(total, actor)}
+}
+
 function _getSituationalBonuses(actor) {
     let defenseBonuses =
         actor.getInheritableAttributesByKey(["fortitudeDefenseBonus", "reflexDefenseBonus", "willDefenseBonus"],
@@ -201,7 +230,7 @@ function _getSituationalBonuses(actor) {
 }
 
 function _selectRefBonus(heroicLevel, armorBonus) {
-    if (armorBonus > -1) {
+    if (armorBonus) {
         return armorBonus;
     }
     return heroicLevel;
@@ -212,7 +241,7 @@ function _getDexMod(actorData) {
 }
 
 function _getWisMod(actorData) {
-    return actorData.data.attributes.wis.mod;
+    return actorData.data.attributes.wis?.mod || 0;
 }
 
 function _getFortStatMod(actor) {

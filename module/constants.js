@@ -21,3 +21,16 @@ export const lightsaberForms = ["Ataru",
     "Dun Möch",
     "Maho-Kai",
     "Tripzest"];
+
+export const crewPositions = ['Pilot', 'Copilot', 'Gunner', 'Commander', 'System Operator', 'Engineer', 'Astromech Droid'];
+export const vehicleActorTypes = ["vehicle", "npc-vehicle"];
+
+export const crewQuality = {
+    "Untrained":{"Attack Bonus":-5, "Check Modifier": 0, "CL Modifier":-1},
+    "Normal":   {"Attack Bonus": 0, "Check Modifier": 5, "CL Modifier": 0},
+    "Skilled":  {"Attack Bonus": 2, "Check Modifier": 6, "CL Modifier": 1},
+    "Expert":   {"Attack Bonus": 5, "Check Modifier": 8, "CL Modifier": 2},
+    "Ace":      {"Attack Bonus":10, "Check Modifier":12, "CL Modifier": 4}
+}
+
+export const uniqueKey = ["damage", "stunDamage"]

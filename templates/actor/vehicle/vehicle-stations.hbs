@@ -1,20 +1,5 @@
 <div class="vehicle-stations-header swse">
-    {{#each actor.pilotSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='pilot' crew=crew}}
-    {{/each}}
-    {{#each actor.copilotSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='copilot' crew=crew}}
-    {{/each}}
-    {{#each actor.gunnerSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='gunner' crew=crew}}
-    {{/each}}
-    {{#each actor.commanderSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='commander' crew=crew}}
-    {{/each}}
-    {{#each actor.systemOperatorSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='systemOperator' crew=crew}}
-    {{/each}}
-    {{#each actor.engineerSlots as |crew id|}}
-        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type='engineer' crew=crew}}
+    {{#each actor.crewSlots as |crew id|}}
+        {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type=crew.type crew=crew}}
     {{/each}}
 </div>

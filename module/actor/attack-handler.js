@@ -9,12 +9,39 @@ import {d20, sizeArray} from "../constants.js";
  * @param {SWSEActor} actor
  * @returns {Promise<void>}
  */
+export function generateVehicleAttacks(actor) {
+    let map = {}
+    actor.data.data.equippedIds.forEach(
+        equippedId => {
+
+            map[equippedId.id] =
+                actor.getCrewByPosition(equippedId.position, equippedId.slot)
+        }
+    )
+
+    let attacks = [];
+    attacks.push(...actor.getAvailableItemsFromRelationships()
+        .filter(item => item.data.subtype && item.data.subtype.toLowerCase() === 'weapon systems')
+        .map(weapon => generateAttackFromShipWeapon(weapon,map[weapon._id] )));
+    return attacks;
+}
+
+
+/**
+ *
+ * @param {SWSEActor} actor
+ * @returns {Promise<void>}
+ */
 export function generateAttacks(actor) {
     let attacks = [];
     attacks.push(generateUnarmedAttack(actor));
     attacks.push(...actor.getEquippedItems()
         .filter(item => item.type === 'weapon')
         .map(weapon => generateAttackFromWeapon(weapon, actor)));
+    attacks.push(...actor.getAvailableItemsFromRelationships()
+        .filter(item => item.data.subtype.toLowerCase() === 'weapon systems')
+        .map(weapon => generateAttackFromShipWeapon(weapon, actor.data)))
+    // attacks.push(...actor.getAvailableItemsFromRelationships().filter(item => item.type === "vehicleSystem"))
     return attacks;
 }
 
@@ -66,7 +93,7 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
     damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(...item.getInheritableAttributesByKey("bonusDamage"))
 
-    let attackBonuses = [actorData.data.offense.bab,  actor.conditionBonus]
+    let attackBonuses = [actorData.data.offense.bab, actor.conditionBonus]
     let weaponTypes = getPossibleProficiencies(actor, item);
     damageBonuses.push(...getSpecializationDamageBonuses(actor, weaponTypes));
 
@@ -109,7 +136,22 @@ export function generateAttackFromWeapon(item, actor, attackIteration) {
         hasStun = true;
     }
 
-    return createAttack(item.name, attackRoll, damage, notes.join(", "), range, critical, type, item.id, actor.id, groupedModes, hasStun, item)
+    return new Attack({
+        name: item.name,
+        attackRoll: attackRoll,
+        attackRollBreakDown:attackBonuses.join(" + "),
+        damage: damage,
+        notes: notes.join(", "),
+        range,
+        critical,
+        type,
+        sound: "",
+        itemId: item.id,
+        actorId: actor.id,
+        modes: groupedModes,
+        hasStun,
+        source: item
+    })
 }
 
 function isOversized(actorSize, itemSize) {
@@ -170,12 +212,12 @@ function isLightsaber(weapon) {
 function getFocusAttackBonuses(actor, weaponTypes) {
     let bonuses = [];
     let weaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("weaponFocus", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
-    if(weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length>0){
+    if (weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length > 0) {
         bonuses.push(1); //{value:1,source:"Weapon Focus"}
     }
 
     let greaterWeaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("greaterWeaponFocus", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
-    if(weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length>0){
+    if (weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length > 0) {
         bonuses.push(1); //{value:1,source:"Greater Weapon Focus"}
     }
 
@@ -191,12 +233,12 @@ function getFocusAttackBonuses(actor, weaponTypes) {
 function getSpecializationDamageBonuses(actor, weaponTypes) {
     let bonuses = [];
     let weaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("weaponSpecialization", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
-    if(weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length>0){
+    if (weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length > 0) {
         bonuses.push(2); //{value:1,source:"Weapon Specialization"}
     }
 
     let greaterWeaponFocus = explodeProficiencies(actor.getInheritableAttributesByKey("greaterWeaponSpecialization", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
-    if(weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length>0){
+    if (weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length > 0) {
         bonuses.push(2); //{value:1,source:"Greater Weapon Specialization"}
     }
 
@@ -225,7 +267,7 @@ function isFocus(actor, weaponTypes) {
 function getProficiencyBonus(actor, weaponDescriptors) {
     let bonuses = [];
     let proficiencies = explodeProficiencies(actor.getInheritableAttributesByKey("weaponProficiency", ["VALUES_TO_LOWERCASE", "UNIQUE"]));
-    bonuses.push(weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase())).length > 0 ? 0: -5)
+    bonuses.push(weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase())).length > 0 ? 0 : -5)
     return bonuses
 }
 
@@ -262,39 +304,6 @@ function explodeProficiencies(proficiencies) {
         result.push(proficiency)
     }
     return result;
-}
-
-/**
- *
- * @param name
- * @param th
- * @param dam
- * @param notes
- * @param range
- * @param critical
- * @param type
- * @param itemId
- * @param actorId
- * @param modes
- * @param hasStun
- * @param source
- * @returns {Attack}
- */
-function createAttack(name, th, dam, notes, range, critical, type, itemId, actorId, modes, hasStun, source) {
-    return new Attack(
-        name,
-        th,
-        dam,
-        notes,
-        range,
-        critical,
-        type,
-        "",
-        itemId,
-        actorId,
-        modes,
-        hasStun,
-        source);
 }
 
 export function resolveFinesseBonus(actor, finesseStats) {
@@ -353,17 +362,27 @@ export function generateUnarmedAttack(actor) {
         notes += unarmedModifier.map(modifier => modifier.value).join(", ")
     }
 
-    let th = d20 + getBonusString(resolveValueArray(atkBonuses));
+    let attackRoll = d20 + getBonusString(resolveValueArray(atkBonuses));
 
     damageBonuses.push(actor.halfHeroicLevel)
     damageBonuses.push(...getSpecializationDamageBonuses(actor, UNARMED_WEAPON_TYPES));
     damageBonuses.push(actor.getAttributeMod("str"))
 
-    let dam = resolveUnarmedDamageDie(actor) + getBonusString(resolveValueArray(damageBonuses));
+    let damage = resolveUnarmedDamageDie(actor) + getBonusString(resolveValueArray(damageBonuses));
 
     let range = "Simple Melee Weapon";
     let critical = "x2";
-    return createAttack(name, th, dam, notes, range, critical, type, null, actor.data._id, []);
+    return new Attack({
+        name,
+        attackRoll,
+        attackRollBreakDown:atkBonuses.join(" + "),
+        damage,
+        notes,
+        range,
+        critical,
+        type,
+        actorId: actor.data._id,
+    });
 }
 
 /**
@@ -376,4 +395,43 @@ function resolveUnarmedDamageDie(actor) {
     let bonus = actor.getInheritableAttributesByKey("bonusUnarmedDamageDieSize")
         .map(attr => parseInt(`${attr.value}`)).reduce((a, b) => a + b, 0)
     return increaseDieSize(damageDie, bonus);
+}
+
+export function generateAttackFromShipWeapon(weapon, actor) {
+    let parent = weapon.document?.parent;
+    if(!parent){
+        parent = game.data.actors.find(actor => actor._id === weapon.parentId)
+    }
+
+    if(!actor){
+        let equippedId = parent.data.data.equippedIds.find(id => id.id === weapon._id)
+        actor = parent.getCrewByPosition(equippedId.position, equippedId.slot);
+    }
+
+    let offense = actor.data?.offense;
+
+    let atkBonuses = [];
+    atkBonuses.push(offense?.bab)
+    atkBonuses.push(parent.data?.attributes?.int?.mod ||parent.data?.data.attributes.int.mod)
+    //trained pilots get a bonus to hit when using weapons in the pilot slot
+    if (weapon.position === 'pilot' && actor.data.skills.pilot.trained) {
+        atkBonuses.push("2")
+    }
+
+    let notes = [`Weapon Emplacement on ${parent.name}`];
+
+    let th = d20 + getBonusString(resolveValueArray(atkBonuses));
+
+    let dam = Object.values(weapon.data?.attributes || weapon.data.data.attributes).filter(x => x.key === 'damage').map(attr => attr.value).join(' + ')
+    return new Attack({
+        name: weapon.name,
+        attackRoll: th,
+        attackRollBreakDown:atkBonuses.join(" + "),
+        damage: dam,
+        notes: notes.join(', '),
+        range: "Vehicle Weapon",
+        itemId: weapon._id,
+        actorId: actor.data._id,
+        provider: parent._id
+    });
 }

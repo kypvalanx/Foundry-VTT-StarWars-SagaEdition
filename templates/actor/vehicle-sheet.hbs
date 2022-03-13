@@ -1,16 +1,4 @@
 <form class="{{cssClass}}" autocomplete="off">
-    {{#unless data.data.attributeGenerationType}}
-        <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
-    {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="swse.species">Please Select a Species</span></a><br/>{{/unless}}
-    {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
-    {{#if actor.remainingSkills}}
-        <span class="warning">Remaining Trained Skills: {{actor.remainingSkills}}</span><br/>{{/if}}
-    {{#if actor.tooManySkills}}<span class="warning">Too Many Skills Selected: {{actor.tooManySkills}}</span><br/>{{/if}}
-    {{#each actor.data.availableItems as |item id|}}
-        <span class="warning">Items from {{id}} remaining: {{item}}</span><br/>{{/each}}
-    {{#each actor.inactiveProvidedFeats as |feat id|}}
-        <span class="warning">The {{feat.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
-    {{/each}}
     <div>
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
@@ -26,18 +14,23 @@
         <section class="sheet-body">
             {{!-- Summary Page --}}
             <div class="tab summary flex-col" data-group="primary" data-tab="summary">
-                <div>
-                    <!--summary-->
-                    {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
-                </div>
                 <div class="flex flex-row">
-                    <div>
+                    <div class="flex flex-col">
                         <!--attributes-->
+                        {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}
                         {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
+                        {{> 'systems/swse/templates/actor/vehicle/crew-quality.hbs'}}
+                        {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
                     </div>
                     <div class="flex-grow">
+                        <!--summary-->
+                        {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
+                    </div>
+                </div>
+                <div class="flex flex-row">
+                    <div class="flex-grow">
                         <!--health-->
-                        {{> 'systems/swse/templates/actor/parts/actor-health.hbs'}}
+                        {{> 'systems/swse/templates/actor/vehicle/vehicle-health.hbs'}}
                     </div>
                     <div class="flex flex-col">
                         <!--portrait-->
@@ -53,8 +46,8 @@
                     </div>
                 </div>
                 <div class="flex flex-row">
-                    {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
-                    {{> 'systems/swse/templates/actor/parts/actor-skills.hbs'}}
+                    {{> 'systems/swse/templates/actor/vehicle/vehicle-attacks-summary.hbs'}}
+                    {{> 'systems/swse/templates/actor/vehicle/vehicle-skills.hbs'}}
                 </div>
             </div>
 
@@ -69,6 +62,37 @@
                 {{editor content=data.biography target="data.biography" button=true owner=owner editable=editable}}
             </div>
 
+
+
+            {{!-- Systems Tab --}}
+            <div class="tab items" data-group="primary" data-tab="systems">
+
+                <div>
+                    <h2><label class="resource-label">Systems <a data-action="compendium"
+                                                                 data-action-target="swse.vehicle systems"
+                                                                 title="{{localize "Open Compendium"}}"><i
+                            class="fas fa-folder-plus"></i></a></label></h2>
+                </div>
+                <div class="grid-2col">
+                    <div>
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true}}
+                    </div>
+                    <div>
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true}}
+
+                        {{#each actor.gunnerPositions as |position id|}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true}}
+                        {{/each}}
+                        {{#if actor.allowGunnerSlots}}
+                            <div class="subtle item-container new-gunner"
+                                 title="Drag a weapon emplacement here to create a new gunner position">New Gunner
+                            </div>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+
             {{!-- Owned Equipment Tab --}}
             <div class="tab items" data-group="primary" data-tab="inventory">
                 <div>
@@ -77,68 +101,10 @@
                                                                    title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
-                <div class="grid-2col">
-                    <div class="border unequipped item-container">
-                        <div>
-                            <label class="resource-label">Unequipped</label>
-                        </div>
-                        <ol class="items-list">
-                            {{#each actor.unequipped as |item id|}}
-                                <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                    data-item-name="{{item.name}}">
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                                 height="24" alt=""/></div>
-                                    <h4 class="item-name">{{item.name}}</h4>
-                                    <div class="item-controls">
-                                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                        <a class="item-control item-delete" title="Delete Item"><i
-                                                class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-                            {{/each}}
-                        </ol>
-                    </div>
-                    <div class="border equipped item-container">
-                        <div>
-                            <label class="resource-label">Equipped</label>
-                        </div>
-                        <ol class="items-list">
-                            {{#each actor.equipped as |item id|}}
-                                <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                    data-item-name="{{item.name}}">
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                                 height="24" alt=""/></div>
-                                    <h4 class="item-name">{{item.name}}</h4>
-                                    <div class="item-controls">
-                                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                        <a class="item-control item-delete" title="Delete Item"><i
-                                                class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-                            {{/each}}
-                        </ol>
-                    </div>
-                </div>
 
-                <div class="border general-equipment">
-                    <div>
-                        <label class="resource-label">General Equipment</label>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.inventory as |item id|}}
-                            <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                data-item-name="{{item.name}}">
-                                <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                             height="24" alt=""/></div>
-                                <h4 class="item-name">{{item.name}}</h4>
-                                <div class="item-controls">
-                                    <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </div>
+
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="Cargo" items=actor.inventory draggable=false}}
+
 
             </div>
 
@@ -146,8 +112,8 @@
             <div class="tab items" data-group="primary" data-tab="traits">
                 <div>
                     <h2><label class="resource-label">Traits <a data-action="compendium"
-                                                                 data-action-target="swse.talents"
-                                                                 title="{{localize "Open Compendium"}}"><i
+                                                                data-action-target="swse.talents"
+                                                                title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <ol class="items-list">
@@ -157,7 +123,8 @@
                                 <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
                                 <h4 class="item-name">Source: {{trait.data.supplier.type}}
                                     , {{trait.data.supplier.name}}</h4>
-                                    <!--                            <h4 class="item-name">{{#if trait.data.prerequisites}}-->
+                                    <!--                            <h4 class="item-name">{{#if
+                                    trait.data.prerequisites}}-->
                                     <!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
                                 <div class="item-controls">
                                     <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>

@@ -1,0 +1,11 @@
+<li class="item flexrow {{#if draggable}}draggable{{/if}}" data-item-id="{{item._id}}"
+    data-item-name="{{item.name}}">
+    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
+                                 height="24" alt=""/></div>
+    <h4 class="item-name">{{item.name}}</h4>
+    <div class="item-controls">
+        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+        <a class="item-control item-delete" title="Delete Item"><i
+                class="fas fa-trash"></i></a>
+    </div>
+</li>

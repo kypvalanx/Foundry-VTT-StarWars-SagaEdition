@@ -831,14 +831,74 @@
 
 .swse .vehicle-station {
   width: 200px;
-  height: 200px;
+  height: 250px;
   border: 1px solid black;
   text-shadow: 1px 1px #ffffff;
 }
 
 .swse .crew-member-portrait {
-  width: 100%;
-  height: 100%;
+  width: 200px;
+  height: 200px;
   background-position: center center;
   background-repeat: no-repeat;
+}
+
+.swse .vehicle-summary-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+}
+
+.swse .vehicle-summary-header .name {
+  grid-area: 1 / 1 / 2 / 4;
+}
+
+.swse .vehicle-summary-header .type {
+  grid-area: 1 / 4 / 2 / 5;
+}
+
+.swse .vehicle-summary-header .captain {
+  grid-area: 2 / 1 / 3 / 3;
+}
+
+.swse .vehicle-summary-header .crew {
+  grid-area: 2 / 3 / 3 / 5;
+}
+
+.swse .vehicle-summary-header .cargoCapacity {
+  grid-area: 3 / 1 / 4 / 2;
+}
+
+.swse .vehicle-summary-header .consumables {
+  grid-area: 3 / 2 / 4 / 3;
+}
+
+.swse .vehicle-summary-header .passengers {
+  grid-area: 3 / 3 / 4 / 4;
+}
+
+.swse .vehicle-summary-header .cost {
+  grid-area: 3 / 4 / 4 / 5;
+}
+
+.swse .vehicle-summary-header .hyperdrive {
+  grid-area: 4 / 1 / 5 / 3;
+}
+
+.swse .vehicle-summary-header .size {
+  grid-area: 4 / 3 / 5 / 4;
+}
+
+.swse .vehicle-summary-header .maxVelocity {
+  grid-area: 4 / 4 / 5 / 5;
+}
+
+.swse .vehicle-summary-header .fightingSpace {
+  grid-area: 5 / 1 / 6 / 3;
+}
+
+.swse .vehicle-summary-header .vehicleSpeed {
+  grid-area: 5 / 3 / 6 / 5;
 }

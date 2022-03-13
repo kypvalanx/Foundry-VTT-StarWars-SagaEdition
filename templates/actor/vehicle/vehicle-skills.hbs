@@ -1,0 +1,27 @@
+<div class="skills-header swse flex-grow resource flex-group-center">
+    <label class="resource-label">Skills</label>
+
+    <table class="skill">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Bonus</th>
+            <th>Attribute</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each data.data.skills as |skill id|}}
+            {{#unless skill.hide}}
+                <tr class="draggable" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
+                    <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
+                           data-label="{{id}}" data-roll="1d20 + {{skill.value}}"><i
+                            class="fas fa-dice-d20"></i>
+                    </a><a href="{{skill.link}}">{{skill.label}}</a></th>
+                    <td title="{{skill.title}}">{{skill.value}}</td>
+                    <td>{{skill.attribute}}</td>
+                </tr>
+            {{/unless}}
+        {{/each}}
+        </tbody>
+    </table>
+</div>

@@ -66,14 +66,22 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-portrait.hbs',
     'systems/swse/templates/actor/parts/actor-darkside.hbs',
     'systems/swse/templates/actor/parts/actor-defenses.hbs',
+    'systems/swse/templates/actor/parts/equipable-item.hbs',
+    'systems/swse/templates/actor/parts/item-list.hbs',
     'systems/swse/templates/actor/vehicle/vehicle-summary.hbs',
     'systems/swse/templates/actor/vehicle/vehicle-stations.hbs',
     'systems/swse/templates/actor/vehicle/vehicle-station.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-skills.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-attacks-summary.hbs',
     'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
     'systems/swse/templates/actor/parts/attack/single-attack.hbs',
     'systems/swse/templates/item/parts/provided.hbs',
     'systems/swse/templates/item/parts/attributes.hbs',
-    'systems/swse/templates/item/parts/mode.hbs']);
+    'systems/swse/templates/item/parts/mode.hbs',
+    'systems/swse/templates/actor/vehicle/crew-quality.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-template.hbs',
+    'systems/swse/templates/actor/parts/actor-type.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-health.hbs']);
 
 });
 
@@ -193,14 +201,14 @@ async function createItemMacro(data, slot) {
   }
   let id = [];
   if(data.label === 'Unarmed Attack'){
-    id.push( 'Unarmed Attack');
+    id.push( {id:'Unarmed Attack'});
   } else {
-    id.push(data.data._id);
+    id.push({id:data.itemId,provider:data.provider});
   }
 
-  const command = `game.swse.rollItem("${actorId}", ["${id.join(`","`)}"]);`;
+  const command = `game.swse.rollItem("${actorId}", [${id.map(id=>`{id:"${id.id}",provider:"${id.provider}"}`).join(`","`)}]);`;
   const name = `${actor.name}: ${data?.data?.name || data.label}`
-  let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
+  let macro = game.macros.find((m) => m.name === name && m.command === command);
   if (!macro) {
     macro = await Macro.create(
         {
@@ -241,12 +249,15 @@ function rollAttack(actorId, itemIds) {
 export const getActorFromId = function (id) {
   let actor = null;
   if (id) {
-    actor = game.actors.tokens[id];
-    if (!actor) actor = game.actors.get(id);
+    actor = game.actors?.tokens[id]
+    if (!actor) actor = game.actors?.get(id);
+    if (!actor) actor = game.data.actors.find(a=>a._id === id);
   }
-  const speaker = ChatMessage.getSpeaker();
-  if (speaker.token && !actor) actor = game.actors.tokens[speaker.token];
-  if (!actor) actor = game.actors.get(speaker.actor);
+  if(!actor) {
+    const speaker = ChatMessage.getSpeaker();
+    if (speaker.token && !actor) actor = game.actors.tokens[speaker.token];
+    if (!actor) actor = game.actors.get(speaker.actor);
+  }
   return actor;
 };
 

@@ -3,14 +3,14 @@
         <thead></thead>
         <tbody>
     {{#each abilities as |ability key|}}
-        {{#unlessBoth ability.skip ../isDroid}}
+        {{#unless ability.skip}}
             <tr>
                 <th>{{key}}</th>
                 <td><label>
                     <input class="adjustable-value" data-label="{{key}}" value="{{val}}">
                 </label></td>
             </tr>
-        {{/unlessBoth}}
+        {{/unless}}
     {{/each}}
         </tbody>
     </table>

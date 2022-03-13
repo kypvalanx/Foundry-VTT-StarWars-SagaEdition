@@ -54,6 +54,9 @@ export class SWSEItemSheet extends ItemSheet {
         if (type === 'upgrade') {
             return `${path}/item-sheet.hbs`;
         }
+        if (type === 'vehicleSystem') {
+            return `${path}/item-sheet.hbs`;
+        }
 
         return `${path}/feat-sheet.hbs`;
         //return `${path}/${this.item.data.type}-sheet.html`; //TODO add sheets for each type
@@ -285,12 +288,9 @@ export class SWSEItemSheet extends ItemSheet {
     /** @override */
     async _onDrop(event) {
         // Try to extract the droppedItem
-        //console.log(event)
         let droppedItem;
         try {
             droppedItem = JSON.parse(event.dataTransfer.getData("text/plain"));
-
-            //console.log(droppedItem)
         } catch (err) {
             return false;
         }
@@ -304,7 +304,6 @@ export class SWSEItemSheet extends ItemSheet {
         //       (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
         //     await this.item.takeOwnership(ownedItem);
         //   }
-        //
         // }else
         if (droppedItem.data.type === 'template') {
 

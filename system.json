@@ -105,6 +105,20 @@
       "path": "packs/swse-vehicle templates.db",
       "type": "Item",
       "system": "swse"
+    },
+    {
+      "name": "vehicle systems",
+      "label": "Vehicle Systems",
+      "path": "packs/swse-vehicle systems.db",
+      "type": "Item",
+      "system": "swse"
+    },
+    {
+      "name": "vehicles",
+      "label": "Vehicles",
+      "path": "packs/swse-vehicles.db",
+      "type": "Actor",
+      "system": "swse"
     }
   ],
   "languages": [

@@ -9,6 +9,7 @@ import {
     reduceArray,
     toNumber
 } from "../util.js";
+import {uniqueKey} from "../constants.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -46,6 +47,10 @@ export class SWSEItem extends Item {
             finalName = `${prefix}${finalName}${suffix}`
         }
         return finalName;
+    }
+
+    get sizeMod(){
+        return this.getInheritableAttributesByKey("shipSkillModifier", "SUM")
     }
 
     get levelUpHitPoints() {
@@ -469,12 +474,34 @@ export class SWSEItem extends Item {
         });
         this._crawlProvidedItems(this.data.data, (providedItem) => {
             if (providedItem.name) {
-                    providedItem.name = providedItem.name.replace(/#payload#/g, payload);
+                providedItem.name = providedItem.name.replace(/#payload#/g, payload);
             }
         });
         this.data.data.choices = [];
     }
 
+
+    addItemAttributes(modifiers) {
+        let attributes = this.data.data.attributes
+        let attributeId = 0;
+        while (attributes[attributeId]) {
+            attributeId++;
+        }
+
+        for(let modifier of modifiers){
+            let existingAttribute = Object.values(attributes).find(attribute=> attribute.key === modifier.key);
+            if(existingAttribute && uniqueKey.includes(modifier.key)){
+                existingAttribute.value = modifier.value;
+            } else {
+                attributes[attributeId] = modifier;
+                attributeId++;
+            }
+        }
+    }
+    addProvidedItems(modifiers) {
+        this.data.data.providedItems = this.data.data.providedItems || [];
+        this.data.data.providedItems.push(...modifiers)
+    }
 
     /**
      *
@@ -523,8 +550,10 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        for (let mode of Object.values(data.modes) || []) {
-            this._crawlAttributes(mode, funct)
+        if(data.modes) {
+            for (let mode of Object.values(data.modes) || []) {
+                this._crawlAttributes(mode, funct)
+            }
         }
 
     }
@@ -589,7 +618,7 @@ export class SWSEItem extends Item {
      * @returns {Promise<void>}
      */
     async takeOwnership(item) {
-        let items = this.data.data.items;
+        let items = this.data.data?.items || [];
         items.push(item)
         let filteredItems = [];
         let foundIds = [];
