@@ -20,8 +20,10 @@
     {{/each}}
     {{#unless data.data.lockAttributes}}
         <div class="flex flex-row">
-            <div class="generationType" title="Select Ability Generation Type"><a><i
-                    class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
+            {{#unless data.data.disableAttributeGenerationChange}}
+                <div class="generationType" title="Select Ability Generation Type"><a><i
+                        class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
+            {{/unless}}
             {{#ifEquals data.data.attributeGenerationType "Roll"}}
                 <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
@@ -42,35 +44,3 @@
         </div>
     {{/unless}}
 </div>
-<!--    -->
-<!--    <table class="fixed">-->
-<!--        <thead>-->
-<!--        <tr>-->
-<!--            <th>Attribute</th>-->
-<!--            <th>Score</th>-->
-<!--            <th>Temporary Bonus</th>-->
-<!--            <th>Modifier</th>-->
-<!--        </tr>-->
-<!--        </thead>-->
-<!--        <tbody>-->
-        <!--        {{#each data.attributes as |attribute id|}}-->
-        <!--            {{#unless attribute.skip}}-->
-<!--                <tr class="attribute" data-label="{{attribute.label}}">-->
-<!--                    <th><a class="rollable" title="Roll 1d20 + {{attribute.roll}}"-->
-<!--                           data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><i-->
-<!--                            class="fas fa-dice"></i>-->
-<!--                    </a>{{attribute.label}}</th>-->
-<!--                    <td><span class="center" title="classLevelBonus: {{attribute.classLevelBonus}}-->
-<!--speciesBonus: {{attribute.speciesBonus}}-->
-<!--ageBonus: {{attribute.ageBonus}}-->
-<!--equipmentBonus: {{attribute.equipmentBonus}}-->
-<!--buffBonus: {{attribute.buffBonus}}-->
-<!--customBonus: {{attribute.customBonus}}">{{attribute.total}}</span></td>-->
-<!--                    <td><span class="center text-box direct" name="data.attributes.{{id}}.customBonus"-->
-<!--                              data-dtype="Number">{{attribute.customBonus}}</span></td>-->
-<!--                    <td><span class="center">{{attribute.roll}}</span></td>-->
-<!--                </tr>-->
-        <!--            {{/unless}}-->
-        <!--        {{/each}}-->
-<!--        </tbody>-->
-<!--    </table>-->

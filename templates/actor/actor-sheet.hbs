@@ -24,9 +24,8 @@
             <a class="item" data-tab="traits">Traits</a>
             {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
             <a class="item" data-tab="affiliations">Affiliations</a>
-            <!--            {{#if
-                    actor.prerequisites.isForceTrained}}<a class="item" data-tab="force">The Force</a>{{/if}}-->
-            <!--        <a class="item" data-tab="description">Description</a>-->
+            <a class="item" data-tab="description">Notes</a>
+
         </nav>
 
         {{!-- Sheet Body --}}
@@ -38,8 +37,9 @@
                     {{> 'systems/swse/templates/actor/parts/actor-summary.hbs'}}
                 </div>
                 <div class="flex flex-row">
-                    <div>
+                    <div class="flex flex-col">
                         <!--attributes-->
+                        {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}
                         {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
                     </div>
                     <div class="flex-grow">
@@ -160,68 +160,11 @@
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
                 <div class="grid-2col">
-                    <div class="border unequipped item-container">
-                        <div>
-                            <label class="resource-label">Unequipped</label>
-                        </div>
-                        <ol class="items-list">
-                            {{#each actor.unequipped as |item id|}}
-                                <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                    data-item-name="{{item.name}}">
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                                 height="24" alt=""/></div>
-                                    <h4 class="item-name">{{item.name}}</h4>
-                                    <div class="item-controls">
-                                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                        <a class="item-control item-delete" title="Delete Item"><i
-                                                class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-                            {{/each}}
-                        </ol>
-                    </div>
-                    <div class="border equipped item-container">
-                        <div>
-                            <label class="resource-label">Equipped</label>
-                        </div>
-                        <ol class="items-list">
-                            {{#each actor.equipped as |item id|}}
-                                <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                    data-item-name="{{item.name}}">
-                                    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                                 height="24" alt=""/></div>
-                                    <h4 class="item-name">{{item.name}}</h4>
-                                    <div class="item-controls">
-                                        <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                        <a class="item-control item-delete" title="Delete Item"><i
-                                                class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-                            {{/each}}
-                        </ol>
-                    </div>
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true}}
                 </div>
 
-                <div class="border general-equipment">
-                    <div>
-                        <label class="resource-label">General Equipment</label>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.inventory as |item id|}}
-                            <li class="item flexrow draggable" data-item-id="{{item._id}}"
-                                data-item-name="{{item.name}}">
-                                <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                                             height="24" alt=""/></div>
-                                <h4 class="item-name">{{item.name}}</h4>
-                                <div class="item-controls">
-                                    <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </div>
-
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory draggable=true}}
             </div>
 
 

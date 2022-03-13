@@ -15,11 +15,11 @@
     {{#each data.data.attacks as |attack id|}}
         {{#if attack}}
             {{#unless attack.hide}}
-                <div class="resource attack panel"
-                     data-attack-id="{{attack.id}}" data-item-id="{{attack.itemId}}"
+                <div class="resource attack {{#if attack.provider}}vehicle{{/if}} panel"
+                     data-attack-id="{{attack.id}}" {{#unless attack.provider}}data-item-id="{{attack.itemId}}"{{/unless}}{{#if attack.provider}} data-provided-item-id="{{attack.itemId}}" data-provider="{{attack.provider}}"{{/if}}
                      data-label="{{attack.name}}" data-img="{{attack.img}}">
                     <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
-                    <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
+                    <div class="to-hit" title="1d20 + {{attack.attackRollBreakdown}}"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
                     <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
                     <div class="attack-notes"><label for="notes">Notes</label><div class="plain input" title="{{attack.notes}}">{{attack.notes}}</div></div>
                     <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>

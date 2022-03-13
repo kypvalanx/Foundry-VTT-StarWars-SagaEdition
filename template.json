@@ -3,9 +3,18 @@
     "types": [
       "character",
       "npc",
-      "computer"
+      "computer",
+      "vehicle",
+      "npc-vehicle"
     ],
     "templates": {
+      "alignment": {
+        "darkSideScore": 0,
+        "darkSideArray": []
+      },
+      "equipment": {
+        "equippedIds": []
+      },
       "common": {
         "health": {
           "value": 10,
@@ -13,10 +22,18 @@
           "max": 10,
           "condition": 0
         },
-        "darkSideScore": 0,
-        "darkSideArray": [],
-        "equippedIds": [],
-        "classesfirst": "",
+        "classes": [],
+        "traits": [],
+        "age": 0,
+        "gender": "",
+        "genderDisplay": "",
+        "player": ""
+      },
+      "crew": {
+        "crewQuality": {},
+        "crew" : []
+      },
+      "characterAttributes": {
         "attributes": {
           "str": {
             "total": 10,
@@ -90,7 +107,9 @@
             "bonus": 0,
             "base": 10
           }
-        },
+        }
+      },
+      "characterSkills": {
         "skills": {
           "acrobatics": {
             "value": 0,
@@ -98,7 +117,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/acrobatics"
+            "link": "https://swse.fandom.com/wiki/Acrobatics"
           },
           "climb": {
             "value": 0,
@@ -106,7 +125,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/climb"
+            "link": "https://swse.fandom.com/wiki/Climb"
           },
           "deception": {
             "value": 0,
@@ -114,7 +133,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/deception"
+            "link": "https://swse.fandom.com/wiki/Deception"
           },
           "endurance": {
             "value": 0,
@@ -122,7 +141,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/endurance"
+            "link": "https://swse.fandom.com/wiki/Endurance"
           },
           "gather information": {
             "value": 0,
@@ -130,7 +149,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/gather_information"
+            "link": "https://swse.fandom.com/wiki/Gather_Information"
           },
           "initiative": {
             "value": 0,
@@ -138,7 +157,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/initiative"
+            "link": "https://swse.fandom.com/wiki/Initiative"
           },
           "jump": {
             "value": 0,
@@ -146,7 +165,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/jump"
+            "link": "https://swse.fandom.com/wiki/Jump"
           },
           "knowledge (bureaucracy)": {
             "value": 0,
@@ -154,7 +173,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (galactic lore)": {
             "value": 0,
@@ -162,7 +181,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (life sciences)": {
             "value": 0,
@@ -170,7 +189,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (physical sciences)": {
             "value": 0,
@@ -178,7 +197,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (social sciences)": {
             "value": 0,
@@ -186,7 +205,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (tactics)": {
             "value": 0,
@@ -194,7 +213,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "knowledge (technology)": {
             "value": 0,
@@ -202,7 +221,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/knowledge"
+            "link": "https://swse.fandom.com/wiki/Knowledge"
           },
           "mechanics": {
             "value": 0,
@@ -210,7 +229,7 @@
             "uut": false,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/mechanics"
+            "link": "https://swse.fandom.com/wiki/Mechanics"
           },
           "perception": {
             "value": 0,
@@ -218,7 +237,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/perception"
+            "link": "https://swse.fandom.com/wiki/Perception"
           },
           "persuasion": {
             "value": 0,
@@ -226,7 +245,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/persuasion"
+            "link": "https://swse.fandom.com/wiki/Persuasion"
           },
           "pilot": {
             "value": 0,
@@ -234,7 +253,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/pilot"
+            "link": "https://swse.fandom.com/wiki/Pilot"
           },
           "ride": {
             "value": 0,
@@ -242,7 +261,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/ride"
+            "link": "https://swse.fandom.com/wiki/Ride"
           },
           "stealth": {
             "value": 0,
@@ -250,7 +269,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/stealth"
+            "link": "https://swse.fandom.com/wiki/Stealth"
           },
           "survival": {
             "value": 0,
@@ -258,7 +277,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/survival"
+            "link": "https://swse.fandom.com/wiki/Survival"
           },
           "swim": {
             "value": 0,
@@ -266,7 +285,7 @@
             "uut": true,
             "trained": false,
             "acp": true,
-            "link": "https://swse.fandom.com/wiki/swim"
+            "link": "https://swse.fandom.com/wiki/Swim"
           },
           "treat injury": {
             "value": 0,
@@ -274,7 +293,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/treat_injury"
+            "link": "https://swse.fandom.com/wiki/Treat_Injury"
           },
           "use computer": {
             "value": 0,
@@ -282,7 +301,7 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/use_computer"
+            "link": "https://swse.fandom.com/wiki/Use_Computer"
           },
           "use the force": {
             "value": 0,
@@ -290,20 +309,127 @@
             "uut": false,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/use_the_force"
+            "link": "https://swse.fandom.com/wiki/Use_the_Force"
           }
-        },
-        "classes": [],
-        "traits": [],
-        "age": 0,
-        "gender": "",
-        "genderDisplay": "",
-        "player": ""
+        }
+      },
+      "vehicleAttributes": {
+        "attributes": {
+          "str": {
+            "total": 0,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus": 0,
+            "bonus": 0,
+            "base": 0
+          },
+          "dex": {
+            "total": 0,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus": 0,
+            "bonus": 0,
+            "base": 0
+          },
+          "int": {
+            "total": 0,
+            "mod": 0,
+            "classLevelBonus": 0,
+            "speciesBonus": 0,
+            "ageBonus": 0,
+            "equipmentBonus": 0,
+            "buffBonus": 0,
+            "customBonus": 0,
+            "bonus": 0,
+            "base": 0
+          }
+        }
+      },
+      "vehicleSkills": {
+        "skills": {
+          "pilot (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Pilot"
+          },
+          "initiative (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": true,
+            "link": "https://swse.fandom.com/wiki/Initiative"
+          },
+          "pilot (copilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Pilot"
+          },
+          "use computer (commander)": {
+            "value": 0,
+            "attribute": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Use_Computer"
+          },
+          "knowledge (tactics) (commander)": {
+            "value": 0,
+            "attribute": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Knowledge"
+          },
+          "use computer (system operator)": {
+            "value": 0,
+            "attribute": "int",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Use_Computer"
+          },
+          "mechanics (system operator)": {
+            "value": 0,
+            "attribute": "int",
+            "uut": false,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Mechanics"
+          },
+          "mechanics (engineer)": {
+            "value": 0,
+            "attribute": "int",
+            "uut": false,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Mechanics"
+          }
+        }
       }
     },
     "character": {
       "templates": [
-        "common"
+        "common",
+        "alignment",
+        "characterAttributes",
+        "crew",
+        "equipment",
+        "characterSkills"
       ],
       "biography": "",
       "attributes": {
@@ -311,14 +437,37 @@
     },
     "npc": {
       "templates": [
-        "common"
+        "common",
+        "alignment",
+        "characterAttributes",
+        "crew",
+        "equipment",
+        "characterSkills"
       ],
       "biography": "",
       "attributes": {
       }
     },
     "vehicle": {
-      "templates": [],
+      "templates": [
+        "common",
+        "crew",
+        "vehicleAttributes",
+        "equipment",
+        "vehicleSkills"
+      ],
+      "biography": "",
+      "attributes": {
+      }
+    },
+    "npc-vehicle": {
+      "templates": [
+        "common",
+        "crew",
+        "vehicleAttributes",
+        "equipment",
+        "vehicleSkills"
+      ],
       "biography": "",
       "attributes": {
       }
@@ -348,7 +497,9 @@
       "forceRegimen",
       "classFeature",
       "trait",
-      "template"
+      "template",
+      "vehicleTemplate",
+      "vehicleSystem"
     ],
     "templates": {
       "base": {
@@ -436,6 +587,13 @@
     "template": {
       "templates": [
         "base",
+        "mod"
+      ]
+    },
+    "vehicleTemplate": {
+      "templates": [
+        "base",
+        "item",
         "mod"
       ]
     },

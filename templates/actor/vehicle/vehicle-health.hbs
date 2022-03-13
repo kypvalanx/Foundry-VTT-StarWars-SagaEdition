@@ -1,0 +1,19 @@
+{{!-- Health Block --}}
+<div class="health-block panel flex flex-col">
+    <div><h1 class="resource-label">Hit Points</h1></div>
+    <div class="flex flex-row">
+        <div><h3><label>Total</label><div class="plain input static">{{data.data.health.max}}</div></h3></div>
+        <div><label class="top">Current</label>
+            <input class="plain small" type="number" name="data.health.value" value="{{data.data.health.value}}" data-dtype="Number"/>
+        </div>
+    </div>
+    <div class="flex flex-row panel">
+        <div><label>Damage Threshold</label><div class="plain input static">{{data.data.defense.dt.total}}</div></div>
+        <div><label>Fort</label><div class="plain input static">{{data.data.defense.fort.total}}</div></div>
+        <div><label>Misc</label><div class="plain input static"></div></div>
+    </div>
+    <div class="flex flex-row">
+        <div><label>Damage Reduction</label><div class="plain input static">{{data.data.defense.damageReduction}}</div></div>
+        <div><label>Shield</label><div class="plain input static">{{data.data.defense.shield.current}}</div></div>
+    </div>
+</div>

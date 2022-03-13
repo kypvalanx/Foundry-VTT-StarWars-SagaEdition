@@ -1,0 +1,33 @@
+.vehicle-station{
+  width:200px;
+  height:250px;
+  border: 1px solid black;
+  text-shadow: 1px 1px #ffffff;
+}
+.crew-member-portrait{
+  width: 200px;
+  height: 200px;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.vehicle-summary-header {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
+  .name { grid-area: 1 / 1 / 2 / 4; }
+  .type { grid-area: 1 / 4 / 2 / 5; }
+  .captain { grid-area: 2 / 1 / 3 / 3; }
+  .crew { grid-area: 2 / 3 / 3 / 5; }
+  .cargoCapacity { grid-area: 3 / 1 / 4 / 2; }
+  .consumables { grid-area: 3 / 2 / 4 / 3; }
+  .passengers { grid-area: 3 / 3 / 4 / 4; }
+  .cost { grid-area: 3 / 4 / 4 / 5; }
+  .hyperdrive { grid-area: 4 / 1 / 5 / 3; }
+  .size { grid-area: 4 / 3 / 5 / 4; }
+  .maxVelocity { grid-area: 4 / 4 / 5 / 5; }
+  .fightingSpace { grid-area: 5 / 1 / 6 / 3; }
+  .vehicleSpeed { grid-area: 5 / 3 / 6 / 5; }
+}

@@ -1,0 +1,87 @@
+<div class="vehicle-summary-header swse">
+
+    <div class="name"><h2><label for="name">Vehicle Name<input class="plain" name="name" type="text"
+                                                               value="{{actor.data.name}}"
+                                                               placeholder=""/></label></h2></div>
+
+    <div class="type"><label for="type">Vehicle Type</label>
+        <div class="plain input static">{{actor.data.subType}}</div>
+    </div>
+
+
+    <div class="captain"><label for="captain">Captain<input class="plain" name="data.captain" type="text"
+                                                            value="{{actor.data.data.captain}}"
+                                                            placeholder=""/></label></div>
+
+    <div class="crew"><label for="crew">Crew</label>
+        <div class="plain input static">{{actor.data.crew}}</div>
+    </div>
+
+    <div class="passengers"><label for="passengers">Passengers</label>
+        <div class="plain input static">{{actor.data.passengers}}</div>
+    </div>
+
+    <div class="size flex flex-row">
+        <label class="flex-grow" for="size">Size
+            <div class="plain input static">{{actor.size.name}}</div>
+        </label>
+        <label for="sizeMod">Mod
+            <div class="plain input static">{{actor.size.document.sizeMod}}</div></label>
+    </div>
+
+
+    <div class="cargoCapacity">
+        <label for="cargo">Cargo Capacity
+            <div class="plain input static">{{tons actor.data.cargo.value}}/{{tons actor.data.cargo.capacity}}</div>
+        </label>
+    </div>
+    <div class="consumables"><label for="consumables">Consumables
+        <div class="plain input static">{{actor.data.consumables}}</div>
+    </label></div>
+
+    <div class="cost"><label for="cost">Cost
+        <div class="plain input static">{{actor.data.cost}}</div>
+    </label></div>
+
+
+    <div class="hyperdrive flex flex-row">
+        <label class="flex-grow" for="hyperdrive">Hyperdrive
+            <div class="plain input static">{{actor.data.hyperdrive.primary}}</div>
+        </label>
+        <label class="flex-grow" for="backupHyperdrive">Backup
+            <div class="plain input static">{{actor.data.hyperdrive.backup}}</div>
+        </label>
+    </div>
+    <!--    <div class="armorBonus"><label for="armorBonus">Armor Bonus</label><div class="plain input static">{{actor.data.type}}</div></div>-->
+    <div class="maxVelocity"><label for="maxVelocity">Maximum Velocity</label>
+        <div class="plain input static">{{actor.data.maximumVelocity}} km/h</div>
+    </div>
+
+
+    <div class="fightingSpace">
+        <label for="fightingSpace">Fighting Space
+    </label>
+        <div class="flex flex-row">
+            <label class="flex-grow" for="vehicleSpeed">Character Scale
+                <div class="plain input static">{{actor.data.fightingSpace.character}} sq.</div>
+            </label>
+            <label class="flex-grow" for="vehicleSpeed">Vehicle Scale
+                <div class="plain input static">{{actor.data.fightingSpace.vehicle}} sq.</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="vehicleSpeed">
+        <label for="vehicleSpeed">Vehicle Speed
+    </label>
+        <div class="flex flex-row">
+            <label class="flex-grow" for="vehicleSpeed">Character Scale
+                <div class="plain input static">{{actor.data.speed.character}} sq.</div>
+            </label>
+            <label class="flex-grow" for="vehicleSpeed">Vehicle Scale
+                <div class="plain input static">{{actor.data.speed.vehicle}} sq.</div>
+            </label>
+        </div>
+    </div>
+
+</div>

@@ -18,6 +18,9 @@ export const registerHandlebarsHelpers = function () {
     Handlebars.registerHelper('toTitleCase', function(str) {
         return str.titleCase();
     });
+    Handlebars.registerHelper('toHtmlClass', function(str) {
+        return str.toLowerCase().replace(/ /g, "-");
+    });
 
     Handlebars.registerHelper('notEmpty', function (array, options) {
         console.log(array, options)
@@ -51,5 +54,30 @@ export const registerHandlebarsHelpers = function () {
         for(let i = 0; i < n; ++i)
             accum += block.fn(i);
         return accum;
+    });
+
+    Handlebars.registerHelper('select', function( value, options ){
+        let $el = $('<select />').html( options.fn(this) );
+        $el.find('[value="' + value + '"]').attr({'selected':'selected'});
+        return $el.html();
+    });
+
+
+    Handlebars.registerHelper('tons', function(str) {
+        if (str === 0){
+            return str;
+        }
+        if(Math.abs(str) < 1){
+            str = str * 1000;
+            if(Math.abs(str) === 1){
+                return `${str} kg`;
+            }
+            return `${str} kgs`;
+        }
+
+        if(Math.abs(str) === 1){
+            return `${str} Ton`;
+        }
+        return `${str} Tons`;
     });
 }

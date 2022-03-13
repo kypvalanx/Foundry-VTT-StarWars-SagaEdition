@@ -5,6 +5,8 @@
             <h1 class="charname"><label>
                 <input name="name" type="text" value="{{item.name}}" placeholder="Name"/>
             </label></h1>
+            <div><label>Subtype:<span class="plain input static">{{#if item.data.data}}{{item.data.data.subtype}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.subtype}}{{/unless}}</span></label></div>
+
             <div class="grid grid-2col">
                 <div class="resource">
                     <label class="resource-label">Cost</label>

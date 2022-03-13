@@ -708,11 +708,17 @@ export function reduceArray(reduce, values) {
                     sub[key] = b;
                     b = key;
                 }
-                let result = Math.max(a, b);
+                let result = a === undefined ? b : Math.max(a, b);
                 return sub[result];
-            }, 0);
+            }, undefined);
         case "MIN":
             return values.map(attr => toNumber(attr.value)).reduce((a, b) => a === undefined ? b : Math.min(a, b), undefined);
+        case "FIRST":
+            let map = values.map(attr => attr.value);
+            if(map.length > 0) {
+                return map[0];
+            }
+            return undefined;
         case "VALUES":
             return values.map(attr => attr.value);
         case "VALUES_TO_LOWERCASE":
@@ -747,5 +753,26 @@ export function getCompendium(type) {
             return game.packs.find(pack => pack.collection.startsWith("swse.species"));
         case 'talent':
             return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
+        case 'vehicletemplate':
+            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle templates"));
+        case 'vehiclesystem':
+            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
+        case 'template':
+            return game.packs.find(pack => pack.collection.startsWith("swse.templates"));
     }
+}
+
+
+export async function getIndexAndPack(indices, type) {
+    let index = indices[type];
+    let pack = getCompendium(type);
+    if(!pack){
+        ui.notifications.error(`${type} compendium not defined`)
+        console.error(`${type} compendium not defined`)
+    }
+    if (!index) {
+        index = await pack.getIndex();
+        indices[type] = index;
+    }
+    return {index, pack};
 }

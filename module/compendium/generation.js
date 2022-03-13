@@ -1,4 +1,5 @@
 import {SWSEItem} from "../item/item.js";
+import {SWSEActor} from "../actor/actor.js";
 
 async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
     let response;
@@ -42,12 +43,22 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
     //     await pack.createEntity(i);
     // }
 
-    let items;
-    items = await SWSEItem.create(content.entries);
-    for(let item of items) {
-        promises.push(collection.importDocument(item));
+    if('Item' === entity){
+        let items = await SWSEItem.create(content.entries);
+        for(let item of items) {
+            promises.push(collection.importDocument(item));
+        }
+    } else if('Actor' === entity){
+        let actors = await SWSEActor.create(content.entries);
+        for(let actor of actors) {
+            let providedItems = actor.data.data.providedItems;
+            delete actor.data.data.providedItems;
+
+            await actor.addItems(providedItems, null, {skipPrerequisite:true})
+
+            promises.push(collection.importDocument(actor));
+        }
     }
-    console.log(pack)
         // await pack.createEntity(content.entries);
     Promise.all(promises).then(() => {
         console.log(`Done Generating ${compendiumName}... ${content.entries.length} entries`);
@@ -63,7 +74,7 @@ export const deleteEmptyCompendiums = async function(){
     });
 }
 
-export const generateCompendiums = async function (forceRefresh = false) {
+export const generateCompendiums = async function (forceRefresh = false, type = "Item") {
     console.log("Generating Compendiums...")
 
     let pack = await game.packs.find(p => p.metadata.label === 'SWSE Abilities');
@@ -76,29 +87,37 @@ export const generateCompendiums = async function (forceRefresh = false) {
     }
 
 
-    await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
+    if(type.toLowerCase() === "actor") {
+        await importCompendium("systems/swse/raw_export/Vehicles.json", 'SWSE Vehicles', "Actor", forceRefresh);
+    }
+    if(type.toLowerCase() === "item") {
+        await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Classes.json", 'SWSE Classes', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Vehicle Stock Templates.json", 'SWSE Vehicle Templates', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Feats.json", 'SWSE Feats', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Vehicle Systems.json", 'SWSE Vehicle Systems', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Force Powers.json", 'SWSE Force Powers', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Classes.json", 'SWSE Classes', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Force Regimens.json", 'SWSE Force Regimens', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Feats.json", 'SWSE Feats', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Force Secrets.json", 'SWSE Force Secrets', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Force Powers.json", 'SWSE Force Powers', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Force Techniques.json", 'SWSE Force Techniques', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Force Regimens.json", 'SWSE Force Regimens', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Affiliations.json", 'SWSE Affiliations', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Force Secrets.json", 'SWSE Force Secrets', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Items.json", 'SWSE Items', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Force Techniques.json", 'SWSE Force Techniques', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Species.json", 'SWSE Species', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Affiliations.json", 'SWSE Affiliations', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/Talents.json", 'SWSE Talents', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Items.json", 'SWSE Items', "Item", forceRefresh);
 
-    await importCompendium("systems/swse/raw_export/templates.json", 'SWSE Templates', "Item", forceRefresh);
+        await importCompendium("systems/swse/raw_export/Species.json", 'SWSE Species', "Item", forceRefresh);
 
+        await importCompendium("systems/swse/raw_export/Talents.json", 'SWSE Talents', "Item", forceRefresh);
+
+        await importCompendium("systems/swse/raw_export/templates.json", 'SWSE Templates', "Item", forceRefresh);
+    }
     console.log("End Generation")
 }

@@ -1,0 +1,11 @@
+<div class="border item-container {{container}}">
+    <div>
+        <label class="resource-label">{{label}}</label>
+    </div>
+    <ol class="items-list">
+        {{#each items as |item id|}}
+
+            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item draggable=../draggable}}
+        {{/each}}
+    </ol>
+</div>
