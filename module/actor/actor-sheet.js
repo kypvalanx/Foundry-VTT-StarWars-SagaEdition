@@ -946,8 +946,14 @@ export class SWSEActorSheet extends ActorSheet {
         if(itemType === 'forcePower'){
             itemType = 'Force Powers'
         }
-        let viewable = itemType.replace(/([A-Z])/g, " $1");
-        if (!this.actor.data.availableItems[itemType] && itemType !== 'Affiliations') {
+        if(itemType === 'forceTechnique'){
+            itemType = 'Force Technique'
+        }
+        if(itemType === 'forceSecret'){
+            itemType = 'Force Secret'
+        }
+        let viewable = itemType;//.replace(/([A-Z])/g, " $1");
+        if (!this.actor.data.availableItems[itemType] && itemType !== 'affiliation') {
             await Dialog.prompt({
                 title: `You can't take any more ${viewable.titleCase()}`,
                 content: `You can't take any more ${viewable.titleCase()}`,

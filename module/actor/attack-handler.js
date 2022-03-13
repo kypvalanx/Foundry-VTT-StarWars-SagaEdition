@@ -200,7 +200,7 @@ function isRanged(weapon) {
 
 
 function isLightsaber(weapon) {
-    return LIGHTSABER_WEAPON_TYPES.includes(weapon.subtype);
+    return LIGHTSABER_WEAPON_TYPES.includes(weapon.data.data.subtype.toLowerCase());
 }
 
 /**
