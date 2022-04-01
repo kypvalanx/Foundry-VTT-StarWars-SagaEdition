@@ -990,7 +990,7 @@ export class SWSEActor extends Actor {
     }
 
     ignoreCon() {
-        return this.data.data.attributes.con?.skip || true;
+        return this.data.data.attributes.con?.skip;
     }
 
 
