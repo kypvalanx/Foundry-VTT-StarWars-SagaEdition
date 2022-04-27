@@ -16,13 +16,13 @@
         {{#if attack}}
             {{#unless attack.hide}}
                 <div class="resource attack {{#if attack.provider}}vehicle{{/if}} panel"
-                     data-attack-id="{{attack.id}}" {{#unless attack.provider}}data-item-id="{{attack.itemId}}"{{/unless}}{{#if attack.provider}} data-provided-item-id="{{attack.itemId}}" data-provider="{{attack.provider}}"{{/if}}
+                     data-attack-id="{{attack.toJSONString}}" data-item-id="{{attack.itemId}}" data-provider-id="{{attack.providerId}}" data-actor-id="{{attack.actorId}}"
                      data-label="{{attack.name}}" data-img="{{attack.img}}">
                     <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
-                    <div class="to-hit" title="1d20 + {{attack.attackRollBreakdown}}"><label for="attack">Attack</label><div class="plain input">{{attack.th}}</div></div>
-                    <div class="damage"><label for="damage">Damage</label><div class="plain input">{{attack.dam}}</div></div>
-                    <div class="attack-notes"><label for="notes">Notes</label><div class="plain input" title="{{attack.notes}}">{{attack.notes}}</div></div>
-                    <div class="range"><label for="range">Range</label><div class="plain input">{{attack.range}}</div></div>
+                    <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div></div>
+                    <div class="damage"><label for="damage">Damage</label><div class="plain input">{{{attack.damageRoll.renderFormulaHTML}}}</div></div>
+                    <div class="attack-notes" title="{{{attack.notesText}}}"><label for="notes">Notes</label><div class="plain input">{{{attack.notesHTML}}}</div></div>
+                    <div class="range"><label for="range">Range</label><div class="plain input">{{attack.rangeDisplay}}</div></div>
                     <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
                     <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
                     <div class="modes">

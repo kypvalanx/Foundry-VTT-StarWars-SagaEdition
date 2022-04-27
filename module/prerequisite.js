@@ -1,6 +1,9 @@
-import {filterItemsByType, resolveExpression, resolveValueArray} from "./util.js";
+import {filterItemsByType, resolveExpression, resolveValueArray, toNumber} from "./util.js";
+import {weaponGroup} from "./constants.js";
+import {getInheritableAttribute} from "./attribute-helper.js";
+import {SWSEActor} from "./actor/actor.js";
+import {SWSEItem} from "./item/item.js";
 
-export function
 /**
  *
  * @param {SWSEActor|SWSEItem} target
@@ -12,7 +15,7 @@ export function
  * @param {Object[]} prereqs[].children available on AND and OR
  * @returns {{failureList: [], doesFail: boolean, silentFail: []}}
  */
-meetsPrerequisites(target, prereqs) {
+export function meetsPrerequisites(target, prereqs) {
     //TODO add links to failures to upen up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
     let failureList = [];
@@ -20,6 +23,9 @@ meetsPrerequisites(target, prereqs) {
     let successList = [];
     if (!prereqs) {
         return {doesFail: false, failureList, silentFail: silentFail, successList};
+    }
+    if(!target){
+        return {doesFail: true, failureList, silentFail: silentFail, successList};
     }
 
     if (!Array.isArray(prereqs)) {
@@ -31,15 +37,15 @@ meetsPrerequisites(target, prereqs) {
             case undefined:
                 continue;
             case 'AGE':
-                let age = target.age;
-                if (parseInt(prereq.low) > age || (prereq.high && parseInt(prereq.high) < age)) {
+                let age = toNumber(target.age) || toNumber(target.data.age);
+                if (!age || toNumber(prereq.low) > age || (prereq.high && toNumber(prereq.high) < age)) {
                     failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                     continue;
                 }
                 successList.push({prereq, count: 1});
                 continue;
             case 'CHARACTER LEVEL':
-                if (!(target.characterLevel < parseInt(prereq.requirement))) {
+                if (!(target.characterLevel < toNumber(prereq.requirement))) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -57,7 +63,7 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'ITEM':
-                let ownedItem = target.getInventoryItems();
+                let ownedItem = target.getInventoryItems(this.items.values());
                 let filteredItem = ownedItem.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
@@ -98,8 +104,8 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TRAIT':
-                let ownedTraits = filterItemsByType(target.items.values(), "trait");
-                let filteredTraits = ownedTraits.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredTraits = filterItemsByType(target.items.values(), "trait")
+                    .filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredTraits.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredTraits) {
@@ -190,12 +196,50 @@ meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'ATTRIBUTE':
-                let toks = prereq.requirement.split(" ");
-                if (!(target.getAttribute(toks[0]) < parseInt(toks[1]))) {
+                if(prereq.requirement.includes(":")){
+                    let toks = prereq.requirement.split(":");
+                    let val = getInheritableAttribute({
+                        entity: target,
+                        attributeKey: toks[0],
+                        reduce: "SUM"
+                    });
+                    let check = parseInt(toks[1].substring(1));
+                    if(toks[1].startsWith(">")){
+                        if(val > check){
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                    } else if(toks[1].startsWith("<")){
+                        if(val < check){
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                    } else if(toks[1].startsWith("=")){
+                        if(val === check){
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                    }
+                } else {
+                    let toks = prereq.requirement.split(" ");
+                    let actorAttribute = SWSEActor.getActorAttribute(target, toks[0]);
+                    let number = parseInt(toks[1]);
+                    if (!(actorAttribute < number)) {
+                        successList.push({prereq, count: 1});
+                        continue;
+                    }
+                }
+                break;
+            case 'NOT': {
+                let meetsChildPrereqs = meetsPrerequisites(target, prereq.child);
+                if (meetsChildPrereqs.doesFail) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
-                break;
+                meetsChildPrereqs.successList.forEach(item => item.fail = true)
+                failureList.push(...meetsChildPrereqs.successList)
+                continue;
+            }
             case 'AND': {
                 let meetsChildPrereqs = meetsPrerequisites(target, prereq.children);
                 if (!(meetsChildPrereqs.doesFail)) {
@@ -240,14 +284,22 @@ meetsPrerequisites(target, prereqs) {
             }
             case 'SPECIAL':
                 if (prereq.requirement.toLowerCase() === 'not a droid') {
-                    let inheritableAttributesByKey = target.getInheritableAttributesByKey("isDroid", "OR");
+                    let inheritableAttributesByKey = getInheritableAttribute({
+                        entity: target,
+                        attributeKey: "isDroid",
+                        reduce: "OR"
+                    });
                     if (!inheritableAttributesByKey) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                     break;
                 } else if (prereq.requirement.toLowerCase() === 'is a droid') {
-                    if (target.getInheritableAttributesByKey("isDroid", "OR")) {
+                    if (getInheritableAttribute({
+                        entity: target,
+                        attributeKey: "isDroid",
+                        reduce: "OR"
+                    })) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -280,6 +332,58 @@ meetsPrerequisites(target, prereqs) {
                 let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item.data.data.subtype === req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "TYPE":
+                if (target.type && target.type.toLowerCase() === prereq.requirement.toLowerCase()) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "SUBTYPE":
+                if (target.data.data.subtype && target.data.data.subtype.toLowerCase() === prereq.requirement.toLowerCase()) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "WEAPON_GROUP":
+                if (weaponGroup[ prereq.requirement].includes(target.data.data.subtype)) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "TEMPLATE":
+                let templates = target.data.data.items.filter(item => item.type === "template").map(item => item.name)
+                if (templates.includes(prereq.requirement)) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "MODE":
+                let modes = Object.values(target.data.data.modes).map(item => item.name.toLowerCase());
+                if (modes.includes(prereq.requirement.toLowerCase())) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "DAMAGE_TYPE":
+                let damageTypes = getInheritableAttribute({
+                    entity: target,
+                    attributeKey: "damageType",
+                    reduce: "VALUES_TO_LOWERCASE"
+                });
+                if (damageTypes.includes(prereq.requirement.toLowerCase())) {
+                    successList.push({prereq, count: 1});
+                    continue;
+                }
+                break;
+            case "WEAPON_SIZE":
+                let weaponSize = SWSEItem.getItemSize(target);
+
+                if(prereq.requirement.toLowerCase() === weaponSize.toLowerCase()){
+
                     successList.push({prereq, count: 1});
                     continue;
                 }

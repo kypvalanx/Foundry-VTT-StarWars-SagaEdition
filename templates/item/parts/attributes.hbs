@@ -16,13 +16,7 @@
     {{#if data.data.attributes}}
         {{#each data.data.attributes as |attr key|}}
             {{#if attr}}
-                <li class="attribute flexrow" data-attribute="{{key}}">
-                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
-                           value="{{key}}">{{attr.key}}</label>
-                    <input class="attribute-value" name="data.attributes.{{key}}.value" type="text"
-                           value="{{attr.value}}" placeholder="" title=""/>
-                    <a class="attribute-delete" data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
-                </li>
+                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key}}
             {{/if}}
         {{/each}}
         <li class="attribute flexrow subtle"><a class="attribute-add"><i class="fas fa-plus"></i> add a new

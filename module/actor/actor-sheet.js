@@ -1,8 +1,10 @@
-import {filterItemsByType, getCompendium, unique} from "../util.js";
-import {lightsaberForms, skills, crewPositions, vehicleActorTypes} from "../constants.js";
+import {filterItemsByType, unique} from "../util.js";
+import {crewPositions, skills, vehicleActorTypes} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {SWSEItem} from "../item/item.js";
 import {getActorFromId} from "../swse.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
+import {Attack} from "./attack.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -77,9 +79,6 @@ export class SWSEActorSheet extends ActorSheet {
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
-
-        //html.find("input.plain").on("change", this._onChangeInput.bind(this));
-
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
             this._onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
@@ -120,13 +119,8 @@ export class SWSEActorSheet extends ActorSheet {
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
-        // html.find("div.item-container").each((i, div) => {
-        //     div.addEventListener("drop", (ev) => this._onDrop(ev), false);
-        // });
-        //end dragging
-
         html.find('.condition-radio').on("click", async event => {
-            await this.actor.update({"data.condition": parseInt(event.currentTarget.value)});
+            await this.actor.update({"data.condition": event.currentTarget.value});
         })
 
         html.find('.mode-selector').on("click", async event => {
@@ -155,38 +149,30 @@ export class SWSEActorSheet extends ActorSheet {
         // Add Inventory Item
         html.find('.item-create').click(this._onItemCreate.bind(this));
 
-        // Update Inventory Item
-        html.find('.item-edit').click(ev => {
-            let li = $(ev.currentTarget);
-            if (!li.hasClass("item")) {
-                li = li.parents(".item");
-            }
-            const item = this.actor.items.get(li.data("itemId"));
-            item.sheet.render(true);
-        });
-
         // Delete Inventory Item
-        html.find('.item-delete').click(async ev => await this._onItemDelete(ev));
+        html.find('.item-delete').click(this._onItemDelete.bind(this));
 
-        html.find('.item-duplicate').click(async ev => {
-            const li = $(ev.currentTarget).parents(".item");
-            let itemToDuplicate = this.actor.items.get(li.data("itemId"));
-            let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
-
-            await this._onDropItem(ev, {id, pack, 'type': 'Item'})
-        })
+        html.find('.item-duplicate').click(this._onDuplicate.bind(this))
 
         // Rollable abilities.
         html.find('.rollable').click(this._onRoll.bind(this));
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
-        html.find('[data-action="view"]').click(event => this._onItemEdit(event));
+        html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
 
+
+    _onDuplicate(event) {
+        const li = $(event.currentTarget).parents(".item");
+        let itemToDuplicate = this.actor.items.get(li.data("itemId"));
+        let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
+
+        this._onDropItem(event, {id, pack, 'type': 'Item'})
+    }
 
     /** @inheritdoc */
     _onDragStart(event) {
@@ -210,7 +196,7 @@ export class SWSEActorSheet extends ActorSheet {
             dragData.tokenId = this.actor.token.id;
         }
 
-        if(elem.dataset.provider){
+        if (elem.dataset.provider) {
             dragData.provider = elem.dataset.provider;
             dragData.itemId = elem.dataset.providedItemId;
             dragData.type = 'Item';
@@ -727,7 +713,7 @@ export class SWSEActorSheet extends ActorSheet {
         let targetItemContainer = this.getParentByHTMLClass(event, "vehicle-station");
 
         if (targetItemContainer !== null) {
-            let currentPosition = crewPositions.filter(x => targetItemContainer.dataset.position ===x);
+            let currentPosition = crewPositions.filter(x => targetItemContainer.dataset.position === x);
             if (currentPosition.length > 0) {
                 currentPosition = currentPosition[0];
 
@@ -830,7 +816,7 @@ export class SWSEActorSheet extends ActorSheet {
         let context = {};
 
         switch (item.data.type) {
-            case "vehicleTemplate":
+            case "vehicleBaseType":
             case "species":
                 await this.addItemWithOneItemRestriction(item);
                 break;
@@ -880,7 +866,7 @@ export class SWSEActorSheet extends ActorSheet {
                 "forceRegimen",
                 "trait", "template"].includes(type)
         } else if (vehicleActorTypes.includes(this.actor.data.type)) {
-            return ["vehicleTemplate", "vehicleSystem"].includes(type)
+            return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
         }
 
         return false;
@@ -893,7 +879,11 @@ export class SWSEActorSheet extends ActorSheet {
         let allTreesOnTalent = new Set();
         let optionString = "";
 
-        let actorsBonusTrees = this.actor.getInheritableAttributesByKey('bonusTalentTree', "VALUES");
+        let actorsBonusTrees = getInheritableAttribute({
+            entity: this.actor,
+            attributeKey: 'bonusTalentTree',
+            reduce: "VALUES"
+        });
         if (actorsBonusTrees.includes(item.data.data.bonusTalentTree)) {
             for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
                 if (id.includes("Talent") && !id.includes("Force") && item > 0) {
@@ -938,18 +928,18 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type:"Talent"});
+        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Talent"});
     }
 
     async addForceItem(item) {
         let itemType = item.data.type;
-        if(itemType === 'forcePower'){
+        if (itemType === 'forcePower') {
             itemType = 'Force Powers'
         }
-        if(itemType === 'forceTechnique'){
+        if (itemType === 'forceTechnique') {
             itemType = 'Force Technique'
         }
-        if(itemType === 'forceSecret'){
+        if (itemType === 'forceSecret') {
             itemType = 'Force Secret'
         }
         let viewable = itemType;//.replace(/([A-Z])/g, " $1");
@@ -962,7 +952,7 @@ export class SWSEActorSheet extends ActorSheet {
             });
             return [];
         }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type:itemType});
+        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: itemType});
     }
 
 
@@ -1000,7 +990,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         item.data.data.categories = possibleFeatTypes;
 
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type:"Feat"});
+        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Feat"});
     }
 
     async addClass(item) {
@@ -1068,7 +1058,7 @@ export class SWSEActorSheet extends ActorSheet {
             value: context.isFirstLevel,
             key: "isFirstLevel"
         };
-        let mainItem = await this.actor.createEmbeddedDocuments("Item",[item.data.toObject(false)]);
+        let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
         await this.actor.addItems(choices.items, mainItem[0])
 
@@ -1083,7 +1073,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (!choices.success) {
             return [];
         }
-        let mainItem = await this.actor.createEmbeddedDocuments("Item",[item.data.toObject(false)]);
+        let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
 
         let providedItems = item.getProvidedItems() || [];
@@ -1115,7 +1105,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return;
         }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type:type.titleCase()})
+        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
     }
 
     async moveExistingItemWithinActor(data, ev) {
@@ -1181,8 +1171,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
-
     getParentByHTMLClass(ev, token) {
         let cursor = ev.target;
         while (cursor != null && !cursor.classList.contains(token)) {
@@ -1199,8 +1187,19 @@ export class SWSEActorSheet extends ActorSheet {
      * @returns {Promise<[]>}
      */
     async addClassFeats(item, context) {
-        let feats = item.getInheritableAttributesByKey("classFeat").map(attr => attr.value);
-        let availableClassFeats = item.getInheritableAttributesByKey("availableClassFeats", "SUM");
+        let feats = getInheritableAttribute({
+            entity: item,
+            attributeKey: "classFeat",
+
+
+        }).map(attr => attr.value);
+        let availableClassFeats = getInheritableAttribute({
+            entity: item,
+            attributeKey: "availableClassFeats",
+            reduce: "SUM",
+
+
+        });
         if (feats.length === 0) {
             return [];
         }
@@ -1770,24 +1769,14 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onActivateItem(ev) {
         let elem = ev.currentTarget;
-        let itemId = elem.dataset.itemId;
-        let provider;
-        if(elem.dataset.provider){
-            itemId = elem.dataset.providedItemId;
-            provider = elem.dataset.provider;
-        }
+        let attack = Attack.fromJSON(JSON.parse(elem.dataset.attackId));
 
-        if (!itemId) {
-            itemId = elem.dataset.label;
-        }
-        //let itemId = div.data("itemId");
-        //this.actor.rollOwnedItem(itemId);
-        this.actor.attack(ev, {type: "singleAttack", items: [{id:itemId, provider}]});
+        this.actor.attack(ev, {type: "singleAttack", items: [attack]});
         return undefined;
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {
-        if(weaponOnly){
+        if (weaponOnly) {
             new Dialog({
                 title: "Weapon Systems Only",
                 content: `This slot only allows weapon systems to be added at this time.`,

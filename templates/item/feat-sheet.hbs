@@ -2,7 +2,7 @@
     <header class="sheet-header">
         <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"/>
         <div class="header-fields">
-          <h1 class="charname"><input name="name" type="text" value="{{item.name}}" placeholder="Name"/></h1>
+          <h1 class="charname"><input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/></h1>
             <div class="resource">
                 <label class="resource-label">Type:</label>
                 {{data.type}}
@@ -29,6 +29,7 @@
         <a class="item" data-tab="description">Description</a>
         <a class="item" data-tab="attributes">Attributes</a>
         <a class="item" data-tab="provided">Provided</a>
+        <a class="item" data-tab="prerequisites">Prerequisites</a>
     </nav>
 
     {{!-- Sheet Body --}}
@@ -50,6 +51,11 @@
         {{!-- Provided Tab --}}
         <div class="tab" data-group="primary" data-tab="provided">
             {{> 'systems/swse/templates/item/parts/provided.hbs'}}
+        </div>
+        {{!-- Prerequisite Tab --}}
+        <div class="tab" data-group="primary" data-tab="prerequisites">
+            {{log item}}
+            {{> 'systems/swse/templates/item/parts/prerequisites.hbs' prerequisite=item.data.data.prerequisite}}
         </div>
     </section>
 </form>

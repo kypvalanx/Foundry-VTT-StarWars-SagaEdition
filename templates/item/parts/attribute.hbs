@@ -1,0 +1,8 @@
+<li class="attribute flexrow" data-attribute="{{key}}">
+    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+           value="{{key}}">{{attr.key}}</label>
+    <input class="attribute-value" name="data.attributes.{{key}}.value" type="text"
+           value="{{attr.value}}" placeholder="" title=""/>
+    <input class="attribute-override" name="data.attributes.{{key}}.override" type="checkbox" {{#if attr.override}}checked{{/if}} title="attributes with this enabled will override other attributes by the same name rather than both being active">
+    <a class="attribute-delete" data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
+</li>

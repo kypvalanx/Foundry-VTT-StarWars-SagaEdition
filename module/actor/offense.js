@@ -1,3 +1,5 @@
+import {getInheritableAttribute} from "../attribute-helper.js";
+
 /**
  *
  * @param actor {SWSEActor}
@@ -7,7 +9,11 @@ export function resolveOffense(actor) {
     actor.data.data.offense = actor.data.data.offense || {}
     let offense = actor.data.data.offense;
     let old = offense.bab;
-    let bab = actor.getInheritableAttributesByKey("baseAttackBonus", "SUM", undefined);
+    let bab = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "baseAttackBonus",
+        reduce: "SUM"
+    });
     offense.bab = bab;
 
     let data = {};

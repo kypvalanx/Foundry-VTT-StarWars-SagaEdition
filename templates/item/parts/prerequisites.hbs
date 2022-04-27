@@ -1,0 +1,13 @@
+<div>
+    {{log prerequisite}}
+    type: {{prerequisite.type}}
+    text: {{prerequisite.text}}
+    {{#if prerequisite.count}}count: {{prerequisite.count}}{{/if}}
+    {{#if prerequisite.requirement}}requirement: {{prerequisite.requirement}}{{/if}}
+
+    {{#if prerequisite.children}}
+        {{#each prerequisite.children as |child id|}}
+            {{> 'systems/swse/templates/item/parts/prerequisites.hbs' prerequisite=child}}
+        {{/each}}
+    {{/if}}
+</div>

@@ -1,3 +1,4 @@
+import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
@@ -101,14 +102,7 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
         // Update Inventory Item
-        html.find('.item-edit').click(ev => {
-            let li = $(ev.currentTarget);
-            if (!li.hasClass("item")) {
-                li = li.parents(".item");
-            }
-            const item = this.actor.items.get(li.data("itemId"));
-            item.sheet.render(true);
-        });
+        html.find('[data-action="view"]').click(this.actor.sheet._onItemEdit.bind(this.actor.sheet));
 
         // Delete Inventory Item
         html.find('.item-delete').click(ev => {
@@ -287,6 +281,7 @@ export class SWSEItemSheet extends ItemSheet {
     /* -------------------------------------------- */
     /** @override */
     async _onDrop(event) {
+        if (!this.actor.isOwner) return false;
         // Try to extract the droppedItem
         let droppedItem;
         try {
@@ -295,30 +290,36 @@ export class SWSEItemSheet extends ItemSheet {
             return false;
         }
 
+        // if(!droppedItem.actorId){
+        //
+        // }
+
         let actor = this.actor;
+
+
+
         let ownedItem = actor.items.get(droppedItem.data._id);
 
-        let itemType = this.item.type;
-        // if(droppedItem.data.type ==='upgrade'){
-        //   if((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
-        //       (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")){
-        //     await this.item.takeOwnership(ownedItem);
-        //   }
-        // }else
-        if (droppedItem.data.type === 'template') {
+        let isItemMod = Object.values(droppedItem.data.data.attributes).find(attr => attr.key === "itemMod");
+        if (isItemMod?.value === "true") {
+            let meetsPrereqs = meetsPrerequisites(this.object, droppedItem.data.data.prerequisite)
 
-            if (this._canAttach(droppedItem.data.data.attributes.application)) {
-                await this.item.takeOwnership(ownedItem);
-            } else {
-                //debugger
+            if (meetsPrereqs.doesFail) {
+                new Dialog({
+                    title: "You Don't Meet the Prerequisites!",
+                    content: `You do not meet the prerequisites for the ${droppedItem.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+                return;
             }
 
-        } else {
-            if ((itemType === 'armor' && ownedItem.modSubType === "Armor Upgrade") ||
-                (itemType === 'weapon' && ownedItem.modSubType === "Weapons Upgrade")) {
                 await this.item.takeOwnership(ownedItem);
-            }
-            console.log("can't add this to an item");
+
         }
     }
 

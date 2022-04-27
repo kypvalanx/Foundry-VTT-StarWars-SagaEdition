@@ -4,11 +4,11 @@ import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
-import {CompendiumDirectorySWSE} from "./compendium/compendium-directory.js";
-import {CompendiumBrowser} from "./compendium/compendium-browser.js"
 import {registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
 import {generateCompendiums, deleteEmptyCompendiums} from "./compendium/generation.js";
+import {getInheritableAttribute} from "./attribute-helper.js";
+import {runTests} from "../module_test/runTests.js";
 
 
 Hooks.once('init', async function() {
@@ -19,7 +19,8 @@ Hooks.once('init', async function() {
     rollVariable,
     rollItem,
     //rollAttack,
-    generateCompendiums, deleteEmptyCompendiums
+    generateCompendiums, deleteEmptyCompendiums,
+    runTests
   };
 
 
@@ -76,6 +77,8 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
     'systems/swse/templates/actor/parts/attack/single-attack.hbs',
     'systems/swse/templates/item/parts/provided.hbs',
+    'systems/swse/templates/item/parts/prerequisites.hbs',
+    'systems/swse/templates/item/parts/attribute.hbs',
     'systems/swse/templates/item/parts/attributes.hbs',
     'systems/swse/templates/item/parts/mode.hbs',
     'systems/swse/templates/actor/vehicle/crew-quality.hbs',
@@ -101,7 +104,17 @@ Hooks.on("ready", function() {
         }
     }});
   }})
+
+  let templates = game.packs.find(pack => pack.collection.startsWith("swse.templates"));
+  templates.getIndex().then( index => {
+    for(let i of index){
+      templates.getDocument(i._id).then(entity => {
+        let exoticWeaponTypes = getInheritableAttribute({entity, attributeKey: "exoticWeapon", reduce: "VALUES"})
+        game.generated.exoticWeapons.push(... exoticWeaponTypes);
+      });
+    }})
 });
+
 
 if(!Map.prototype.computeIfAbsent){
   Map.prototype.computeIfAbsent = function (key, mappingFunction) {
@@ -113,7 +126,26 @@ if(!Map.prototype.computeIfAbsent){
 }
 
 Array.prototype.distinct = function() {
-  return this.filter((value, index, self) => self.indexOf(value) === index)
+  return this.filter((value, index, self) => {
+    if("object" === typeof value){
+      let keys = Object.keys(value);
+      let foundIndex = self.findIndex((val, i, s) => {
+        if(Object.keys(val).length !== keys.length){
+          return false
+        }
+
+        for(let key of keys){
+          if(value[key] !== val[key]){
+            return false;
+          }
+        }
+        return true;
+      });
+      return foundIndex === index
+    } else {
+      return self.indexOf(value) === index
+    }
+  })
 }
 
 /**

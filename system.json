@@ -100,9 +100,9 @@
       "system": "swse"
     },
     {
-      "name": "vehicle templates",
-      "label": "Vehicle Templates",
-      "path": "packs/swse-vehicle templates.db",
+      "name": "vehicle base types",
+      "label": "Vehicle Base Types",
+      "path": "packs/swse-vehicle base types.db",
       "type": "Item",
       "system": "swse"
     },

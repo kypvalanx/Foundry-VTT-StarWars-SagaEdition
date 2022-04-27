@@ -1,4 +1,6 @@
 import {resolveValueArray} from "../util.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
+import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 
 /**
  *
@@ -7,9 +9,22 @@ import {resolveValueArray} from "../util.js";
  */
 export function getAvailableTrainedSkillCount(actor) {
     let intBonus = actor.getAttributeMod("int")
-    let classBonus = actor.getInheritableAttributesByKey("trainedSkillsFirstLevel", "SUM", item => item.document.getInheritableAttributesByKey("isFirstLevel", "OR"))
+    let classBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "trainedSkillsFirstLevel",
+        reduce: "SUM",
+        itemFilter: item => getInheritableAttribute({
+            entity: item.document,
+            attributeKey: "isFirstLevel",
+            reduce: "OR"
+        })
+    })
     let classSkills = Math.max(resolveValueArray([classBonus, intBonus]), 1);
-    let otherSkills = actor.getInheritableAttributesByKey("trainedSkills", "SUM");
+    let otherSkills = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "trainedSkills",
+        reduce: "SUM"
+    });
     return resolveValueArray([classSkills, otherSkills]);
 }
 
@@ -23,9 +38,17 @@ export function generateSkills(actor) {
     prerequisites.trainedSkills = [];
     let classSkills = actor._getClassSkills();
     let halfCharacterLevel = actor.getHalfCharacterLevel();
-    let conditionBonus = actor.conditionBonus;
-    let skillFocuses = actor.getInheritableAttributesByKey("skillFocus", "VALUES").map(skill => (skill || "").toLowerCase())
-    let shipModifier = actor.getInheritableAttributesByKey("shipSkillModifier", "SUM");
+    let conditionBonus = actor.data.data.condition === "OUT" ? -10 : actor.data.data.condition;
+    let skillFocuses = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "skillFocus",
+        reduce: "VALUES"
+    }).map(skill => (skill || "").toLowerCase())
+    let shipModifier = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "shipSkillModifier",
+        reduce: "SUM"
+    });
 
     for (let [key, skill] of Object.entries(actor.data.data.skills)) {
         skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
@@ -65,7 +88,7 @@ Ability Skill Modifier: ${getAbilitySkillBonus}`;
 Condition Modifier: ${conditionBonus}`;
         }
 
-        let acPenalty = skill.acp ? actor.acPenalty : 0;
+        let acPenalty = skill.acp ? generateArmorCheckPenalties(actor.data) : 0;
         if(acPenalty !== 0) {
             skillBonuses.push(acPenalty);
             skill.title += `

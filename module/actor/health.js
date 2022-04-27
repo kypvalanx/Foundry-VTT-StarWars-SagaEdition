@@ -1,4 +1,5 @@
 import {resolveValueArray} from "../util.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 /**
  *
@@ -17,7 +18,10 @@ export function resolveHealth(actor) {
         health.push(resolveAttributeMod(actor, ignoreCon));
     }
     let other = [];
-    let traitAttributes = actor.getInheritableAttributesByKey('hitPointEq');
+    let traitAttributes = getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'hitPointEq'
+    });
     for (let item of traitAttributes || []) {
         if (item) {
             other.push(item.value);

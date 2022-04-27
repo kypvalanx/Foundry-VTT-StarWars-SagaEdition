@@ -1,12 +1,18 @@
 import {filterItemsByType} from "../util.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
+import {getEquippedItems} from "./actor.js";
 
 /**
  *
- * @param actor {SWSEActor}
+ * @param actorData {ActorData}
  * @returns {number}
  */
-export function generateArmorCheckPenalties(actor) {
-    let armorProficiencies = actor.getInheritableAttributesByKey("armorProficiency", "VALUES");
+export function generateArmorCheckPenalties(actorData) {
+    let armorProficiencies = getInheritableAttribute({
+        entity: actorData,
+        attributeKey: "armorProficiency",
+        reduce: "VALUES"
+    });
 
     let lightProficiency = armorProficiencies.includes("light");
     let mediumProficiency = armorProficiencies.includes("medium");
@@ -20,14 +26,14 @@ export function generateArmorCheckPenalties(actor) {
     let wearingMedium = false;
     let wearingHeavy = false;
 
-    for(let armor of filterItemsByType(actor.getEquippedItems(), "armor")){
-        if('Heavy' === armor.armorType){
+    for(let armor of filterItemsByType(getEquippedItems(actorData), "armor")){
+        if('Heavy Armor' === armor.data.subtype){
             wearingHeavy = true;
         }
-        if('Medium' === armor.armorType){
+        if('Medium Armor' === armor.data.subtype){
             wearingMedium = true;
         }
-        if('Light' === armor.armorType){
+        if('Light Armor' === armor.data.subtype){
             wearingLight = true;
         }
     }
