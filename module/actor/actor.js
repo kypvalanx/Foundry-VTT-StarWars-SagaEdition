@@ -1,11 +1,5 @@
 import {resolveHealth} from "./health.js";
-import {
-    generateAttackFromShipWeapon,
-    generateAttackFromWeapon,
-    generateAttacks,
-    generateUnarmedAttack,
-    generateVehicleAttacks
-} from "./attack-handler.js";
+import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
 import {resolveOffense} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
@@ -13,11 +7,9 @@ import {
     filterItemsByType,
     getBonusString,
     getIndexAndPack,
-    getOrdinal,
-    getRangedAttackMod,
     handleAttackSelect,
-    reduceArray,
-    resolveExpression, resolveValueArray,
+    resolveExpression,
+    resolveValueArray,
     toShortAttribute,
     unique
 } from "../util.js";
@@ -25,11 +17,20 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js";
-import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEItem} from "../item/item.js";
-import {crewPositions, crewQuality, lightsaberForms, sizeArray, skills, vehicleActorTypes} from "../constants.js";
+import {crewPositions, crewQuality, lightsaberForms, sizeArray, skills} from "../constants.js";
 import {getActorFromId} from "../swse.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
+import {appendNumericTerm, Attack} from "./attack.js";
 
+
+function multiplyNumericTerms(roll, multiplier) {
+    for(let term of roll.terms){
+        if(term instanceof NumericTerm){
+            term.number = term.number * multiplier;
+        }
+    }
+}
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -79,8 +80,6 @@ export class SWSEActor extends Actor {
         } else if (this.id && !actorData.data.isNPC && !actorData.token.actorLink) {
             this.update({"token.actorLink": true})
         } else {
-
-
             this.data.data.condition = this.data.data.condition || 0;
 
             if (actorData.type === 'character') this._prepareCharacterData(actorData);
@@ -91,6 +90,7 @@ export class SWSEActor extends Actor {
 
 
         }
+        //console.warn(this.data.prerequisites)
     }
 
     /**
@@ -99,17 +99,17 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(actorData) {
-        let vehicleTemplates = filterItemsByType(this.items.values(), "vehicleTemplate");
-        this.vehicleTemplate = (vehicleTemplates.length > 0 ? vehicleTemplates[0] : null);
+        let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
+        this.vehicleTemplate = (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
 
         if (this.vehicleTemplate) {
             this.inheritableItems.push(this.vehicleTemplate.data)
         }
 
-        this.uninstalled = this.getUninstalledSystems().map(item => item.data);
-        this.installed = this.getInstalledSystems('installed').map(item => item.data);
-        this.inheritableItems.push(...this.installed)
-        this.pilotInstalled = this.getInstalledSystems('pilotInstalled').map(item => item.data);
+        this.uninstalled = this.getUninstalledSystems();
+        this.installed = this.getInstalledSystems('installed');
+        this.inheritableItems.push(...this.installed.map(item => item.data))
+        this.pilotInstalled = this.getInstalledSystems('pilotInstalled');
         this.gunnerPositions = this.getGunnerPositions()
         //this.inheritableItems.push(...this.systems)
         //this.uninstalled = this.getUnequippedItems().map(item => item.data);
@@ -120,9 +120,17 @@ export class SWSEActor extends Actor {
         this.data.data.attributeGenerationType = "Manual"
         this.data.data.disableAttributeGenerationChange = true;
 
-        this.data.crew = this.getInheritableAttributesByKey("crew", "SUM")
+        this.data.crew = getInheritableAttribute({
+            entity: this,
+            attributeKey: "crew",
+            reduce: "SUM"
+        })
 
-        let coverValues = this.getInheritableAttributesByKey("cover", "VALUES")
+        let coverValues = getInheritableAttribute({
+            entity: this,
+            attributeKey: "cover",
+            reduce: "VALUES"
+        })
 
         let coverMap = {};
         for (let coverValue of coverValues) {
@@ -171,7 +179,11 @@ export class SWSEActor extends Actor {
         });
 
         this.data.hasAstromechSlot = false;
-        let providedSlots = this.getInheritableAttributesByKey("providesSlot", "VALUES");
+        let providedSlots = getInheritableAttribute({
+            entity: this,
+            attributeKey: "providesSlot",
+            reduce: "VALUES"
+        });
         for (let position of providedSlots.filter(unique)) {
             let count = providedSlots.filter(s => s === position).length
             let positionCover;
@@ -195,28 +207,68 @@ export class SWSEActor extends Actor {
 
 
         if (!this.data.data.crewQuality || this.data.data.crewQuality.quality === "-" || this.data.data.crewQuality.quality === undefined) {
-            let quality = this.getInheritableAttributesByKey("crewQuality", "FIRST");
+            let quality = getInheritableAttribute({
+                entity: this,
+                attributeKey: "crewQuality",
+                reduce: "FIRST"
+            });
             if (quality) {
                 this.data.data.crewQuality = {quality: quality.titleCase()}
             }
         }
 
-        this.data.passengers = this.getInheritableAttributesByKey("passengers", "SUM")
-        this.data.subType = this.getInheritableAttributesByKey("vehicleSubType", "FIRST")
-        this.data.maximumVelocity = this.getInheritableAttributesByKey("maximumVelocity", "FIRST")
+        this.data.passengers = getInheritableAttribute({
+            entity: this,
+            attributeKey: "passengers",
+            reduce: "SUM"
+        })
+        this.data.subType = getInheritableAttribute({
+            entity: this,
+            attributeKey: "vehicleSubType",
+            reduce: "FIRST"
+        })
+        this.data.maximumVelocity = getInheritableAttribute({
+            entity: this,
+            attributeKey: "maximumVelocity",
+            reduce: "FIRST"
+        })
 
         //TODO make the summation reduce function handle units?
         this.data.cargo =
             {
-                value: this.getInheritableAttributesByKey("weight", "SUM"),
-                capacity: `${this.getInheritableAttributesByKey("cargoCapacity", "FIRST")}`
+                value: getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weight",
+                    reduce: "SUM"
+                }),
+                capacity: `${(getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "cargoCapacity",
+                    reduce: "FIRST"
+                }))}`
             }
 
-        this.data.consumables = this.getInheritableAttributesByKey("consumables", "FIRST")
-        this.data.grapple = resolveValueArray([this.pilot.data.offense?.bab, this.data.data.attributes.str.mod, this.getInheritableAttributesByKey("grappleSizeModifier", "SUM")], this)
+        this.data.consumables = getInheritableAttribute({
+            entity: this,
+            attributeKey: "consumables",
+            reduce: "FIRST"
+        })
+        this.data.grapple = resolveValueArray([this.pilot.data.offense?.bab, this.data.data.attributes.str.mod, getInheritableAttribute({
+            entity: this,
+            attributeKey: "grappleSizeModifier",
+            reduce: "SUM"
+        })], this)
 
-        let primary = `Class ${this.getInheritableAttributesByKey("hyperdrive", "MIN")}`;
-        let backup = `Class ${this.getInheritableAttributesByKey("hyperdrive", "MAX")}`;
+        let primary = `Class ${(getInheritableAttribute({
+            entity: this,
+            attributeKey: "hyperdrive",
+            reduce: "MIN"
+        }))}`;
+        let backup = `Class ${(getInheritableAttribute({
+            entity: this,
+            attributeKey: "hyperdrive",
+            reduce: "MAX"
+        }))}`;
         if (primary === backup) {
             backup = undefined;
         }
@@ -229,12 +281,28 @@ export class SWSEActor extends Actor {
         }
 
         this.data.speed = {
-            vehicle: this.getInheritableAttributesByKey("speedStarshipScale", "SUM"),
-            character: this.getInheritableAttributesByKey("speedCharacterScale", "SUM")
+            vehicle: getInheritableAttribute({
+                entity: this,
+                attributeKey: "speedStarshipScale",
+                reduce: "SUM"
+            }),
+            character: getInheritableAttribute({
+                entity: this,
+                attributeKey: "speedCharacterScale",
+                reduce: "SUM"
+            })
         }
 
-        let vehicleFightingSpace = this.getInheritableAttributesByKey("vehicleFightingSpace", "MAX");
-        let characterFightingSpace = this.getInheritableAttributesByKey("characterFightingSpace", "MAX");
+        let vehicleFightingSpace = getInheritableAttribute({
+            entity: this,
+            attributeKey: "vehicleFightingSpace",
+            reduce: "MAX"
+        });
+        let characterFightingSpace = getInheritableAttribute({
+            entity: this,
+            attributeKey: "characterFightingSpace",
+            reduce: "MAX"
+        });
         this.data.fightingSpace = {
             vehicle: vehicleFightingSpace,
             character: characterFightingSpace
@@ -282,18 +350,13 @@ export class SWSEActor extends Actor {
         generateSpeciesData(this);
 
         this.classes = filterItemsByType(this.items.values(), "class");
-        let uniqueClassNames = [];
-        for (let classObject of this.classes.map(item => item.data)) {
-            if (!uniqueClassNames.includes(classObject.name)) {
-                uniqueClassNames.push(classObject.name);
-                this.inheritableItems.push(classObject);
-            }
-        }
+
+        this.inheritableItems.push(...this.classes.map(item => item.data));
         this.traits = this.getTraits().map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
-        this.powers = this.getPowers().map(item => item.data);
-        this.secrets = this.getSecrets().map(item => item.data);
-        this.techniques = this.getTechniques().map(item => item.data);
+        this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
+        this.secrets = filterItemsByType(this.items.values(), "forceSecret").map(item => item.data);
+        this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
 
@@ -309,10 +372,10 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
 
-        this.equipped = this.getEquippedItems().map(item => item.data);
+        this.equipped = this.getEquippedItems()//.map(item => item.data);
         this.inheritableItems.push(...this.equipped)
-        this.unequipped = this.getUnequippedItems().map(item => item.data);
-        this.inventory = this.getNonequippableItems().map(item => item.data);
+        this.unequipped = this.getUnequippedItems()//.map(item => item.data);
+        this.inventory = this.getNonequippableItems()//.map(item => item.data);
 
         generateAttributes(this);
 
@@ -330,7 +393,11 @@ export class SWSEActor extends Actor {
         this.remainingSkills = remainingSkills < 0 ? false : remainingSkills;
         this.tooManySKills = remainingSkills < 0 ? Math.abs(remainingSkills) : false;
 
-        this.isHeroic = this.getInheritableAttributesByKey("isHeroic", "OR");
+        this.isHeroic = getInheritableAttribute({
+            entity: this,
+            attributeKey: "isHeroic",
+            reduce: "OR"
+        });
 
 
         actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
@@ -344,8 +411,8 @@ export class SWSEActor extends Actor {
         actorData.data.defense = defense;
         actorData.data.armors = armors;
 
-        actorData.data.attacks = generateAttacks(this);
         this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
+        actorData.data.attacks = generateAttacks(this);
     }
 
     handleDarksideArray(actorData) {
@@ -358,6 +425,10 @@ export class SWSEActor extends Actor {
                 actorData.data.darkSideArray.push({value: i, active: true})
             }
         }
+
+        let darkSideTaint = getInheritableAttribute({entity:actorData, attributeKey:"darksideTaint", reduce: "SUM"})
+
+        actorData.data.finalDarksideScore = actorData.data.darkSideScore + darkSideTaint
     }
 
     get hasCrew() {
@@ -436,7 +507,7 @@ export class SWSEActor extends Actor {
     gunner(index) {
         let actor = this.getActor(this.data.data.crew.find(c => c.position === 'Gunner' && c.slot === (index || 0))?.id);
 
-        if(!actor){
+        if (!actor) {
             actor = this.getCrewByQuality();
         }
 
@@ -504,13 +575,14 @@ export class SWSEActor extends Actor {
         if (!this.traits) {
             return;
         }
-        let attributeTraits = this.traits.filter(trait => {
-            let result = /\w* Speed \d*/.exec(trait.name);
-            return !!result;
+
+        let attributes = getInheritableAttribute({
+            entity: this,
+            attributeKey: 'speed', reduce:"VALUES"
         })
 
-        if (attributeTraits.length === 0) {
-            attributeTraits.push({name: "Stationary 0"});
+        if (attributes.length === 0) {
+            attributes.push("Stationary 0");
         }
 
         let armorType = "";
@@ -519,7 +591,7 @@ export class SWSEActor extends Actor {
                 armorType = armor.armorType;
             }
         }
-        return attributeTraits.map(trait => trait.name).map(name => this.applyArmorSpeedPenalty(name, armorType)).map(name => this.applyConditionSpeedPenalty(name, armorType)).join("; ");
+        return attributes.map(name => this.applyArmorSpeedPenalty(name, armorType)).map(name => this.applyConditionSpeedPenalty(name, armorType)).join("; ");
     }
 
 
@@ -533,8 +605,7 @@ export class SWSEActor extends Actor {
     }
 
     applyConditionSpeedPenalty(speed) {
-        let conditionBonus = this.conditionBonus;
-        if (!(conditionBonus === -10)) {
+        if (this.data.data.condition !== -10 && this.data.data.condition !== "OUT") {
             return speed;
         }
 
@@ -544,16 +615,9 @@ export class SWSEActor extends Actor {
     }
 
     getTraits() {
-        let traits = filterItemsByType(this.items.values(), "trait");
         let activeTraits = [];
-        let possibleTraits = []
-        for (let trait of traits) {
-            if (!trait.data.data.prerequisite || trait.data.data.prerequisite.length === 0) {
-                activeTraits.push(trait);
-            } else {
-                possibleTraits.push(trait);
-            }
-        }
+        let possibleTraits = filterItemsByType(this.items.values(), "trait");
+
 
         let shouldRetry = possibleTraits.length > 0;
         while (shouldRetry) {
@@ -581,7 +645,7 @@ export class SWSEActor extends Actor {
     }
 
     getEquippedItems() {
-        let getEquippedItems = this._getEquippedItems(this._getEquipable(this.getInventoryItems()), "equipped");
+        let getEquippedItems = this._getEquippedItems(this._getEquipable(this.getInventoryItems(this.items.values())), "equipped");
         let prerequisites = this.data.prerequisites;
         prerequisites.equippedItems = [];
         for (let item of getEquippedItems) {
@@ -591,38 +655,7 @@ export class SWSEActor extends Actor {
     }
 
     getInstalledWeapons() {
-        return this._getEquippedItems(this.getInventoryItems(), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
-    }
-
-    getPowers() {
-        let filterItemsByType1 = filterItemsByType(this.items.values(), "forcePower");
-        let prerequisites = this.data.prerequisites;
-        prerequisites.powers = [];
-        for (let power of filterItemsByType1) {
-            prerequisites.powers.push(power.name.toLowerCase());
-        }
-        return filterItemsByType1;
-    }
-
-    getSecrets() {
-        let filterItemsByType1 = filterItemsByType(this.items.values(), "forceSecret");
-        let prerequisites = this.data.prerequisites;
-        prerequisites.secrets = [];
-        for (let secret of filterItemsByType1) {
-            prerequisites.secrets.push(secret.name.toLowerCase());
-        }
-        return filterItemsByType1;
-    }
-
-    getTechniques() {
-        let filterItemsByType1 = filterItemsByType(this.items.values(), "forceTechnique");
-        let prerequisites = this.data.prerequisites;
-        prerequisites.techniques = [];
-        for (let technique of filterItemsByType1) {
-            prerequisites.techniques.push(technique.name.toLowerCase());
-        }
-
-        return filterItemsByType1;
+        return this._getEquippedItems(this.getInventoryItems(this.items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
     }
 
     getTalents() {
@@ -759,22 +792,9 @@ export class SWSEActor extends Actor {
     }
 
     get conditionBonus() {
-        switch (this.data.data.condition) {
-            case 0:
-                break;
-            case 1:
-                return -1;
-            case 2:
-                return -2;
-            case 3:
-                return -5;
-            case 4:
-                return -10;
-            case 5:
-                break;
-        }
-        return 0;
+        return this.data.data.condition;
     }
+
 
     setAttributes(attributes) {
         let update = {};
@@ -839,19 +859,16 @@ export class SWSEActor extends Actor {
      * @param {string} attributeName
      */
     getAttribute(attributeName) {
-        for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
-            if (toShortAttribute(attributeName).toLowerCase() === key.toLowerCase()) {
-                return attribute.total;
-            }
-        }
+        let swseActor = this;
+        return SWSEActor.getActorAttribute(swseActor, attributeName);
     }
 
-    /**
-     *
-     * @param {string} attributeName
-     */
-    getCharacterAttribute(attributeName) {
-        return this.data.data.attributes[toShortAttribute(attributeName).toLowerCase()];
+
+    static getActorAttribute(swseActor, attributeName) {
+        let attributes = swseActor.data?.attributes || swseActor.data?.data?.attributes;
+        let attribute = attributes[toShortAttribute(attributeName).toLowerCase()];
+
+        return attribute.total;
     }
 
     getHalfCharacterLevel() {
@@ -874,7 +891,11 @@ export class SWSEActor extends Actor {
 
     get heroicLevel() {
         if (this.classes) {
-            let heroicLevel = this.classes.filter(c => c.getInheritableAttributesByKey("isHeroic", "OR")).length;
+            let heroicLevel = this.classes.filter(c => getInheritableAttribute({
+                entity: c,
+                attributeKey: "isHeroic",
+                reduce: "OR"
+            })).length;
             this.resolvedVariables.set("@heroicLevel", heroicLevel);
             return heroicLevel;
         }
@@ -891,11 +912,19 @@ export class SWSEActor extends Actor {
     }
 
     get hideForce() {
-        return !this.getInheritableAttributesByKey("forceSensitivity", "OR");
+        return !getInheritableAttribute({
+            entity: this,
+            attributeKey: "forceSensitivity",
+            reduce: "OR"
+        });
     }
 
     get isDroid() {
-        return this.getInheritableAttributesByKey("isDroid", "OR");
+        return getInheritableAttribute({
+            entity: this,
+            attributeKey: "isDroid",
+            reduce: "OR"
+        });
     }
 
     get trainedSkills() {
@@ -907,7 +936,11 @@ export class SWSEActor extends Actor {
     }
 
     get focusSkills() {
-        return this.data.prerequisites.focusSkills || []
+        return getInheritableAttribute({
+            entity: this,
+            attributeKey: "skillFocus",
+            reduce: "VALUES"
+        })
     }
 
     get inactiveProvidedFeats() {
@@ -915,7 +948,11 @@ export class SWSEActor extends Actor {
     }
 
     get shield() {
-        return this.getInheritableAttributesByKey("srRating", "MAX")
+        return getInheritableAttribute({
+            entity: this,
+            attributeKey: "shieldRating",
+            reduce: "MAX"
+        })
     }
 
     /**
@@ -949,7 +986,11 @@ export class SWSEActor extends Actor {
 
     handleLeveBasedAttributeBonuses(actorData) {
 
-        let isHeroic = this.getInheritableAttributesByKey("isHeroic", "OR");
+        let isHeroic = getInheritableAttribute({
+            entity: this,
+            attributeKey: "isHeroic",
+            reduce: "OR"
+        });
         let characterLevel = this.classes.length;
         if (characterLevel > 0) {
             this.classes[characterLevel - 1].data.isLatest = true;
@@ -1008,7 +1049,7 @@ export class SWSEActor extends Actor {
     }
 
     getUnequippedItems() {
-        let items = this._getEquipable(this.getInventoryItems());
+        let items = this._getEquipable(this.getInventoryItems(this.items.values()));
 
         let equippedIds = (this.data.data.equippedIds || []).map(id => id.id);
 
@@ -1064,11 +1105,11 @@ export class SWSEActor extends Actor {
 
 
     getNonequippableItems() {
-        return this._getUnequipableItems(this.getInventoryItems()).filter(i => !i.data.hasItemOwner);
+        return this._getUnequipableItems(this.getInventoryItems(this.items.values())).filter(i => !i.data.hasItemOwner);
     }
 
-    getInventoryItems() {
-        return excludeItemsByType(this.items.values(), "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
+    getInventoryItems(items) {
+        return excludeItemsByType(items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
             .filter(item => !item.data.data.hasItemOwner);
     }
 
@@ -1090,7 +1131,10 @@ export class SWSEActor extends Actor {
         if (!this.classes) {
             return classSkills;
         }
-        let skills = this.getInheritableAttributesByKey("classSkill").map(attr => attr.value);
+        let skills = getInheritableAttribute({
+            entity: this,
+            attributeKey: "classSkill"
+        }).map(attr => attr.value);
 
         for (let skill of skills) {
             if (["knowledge (all skills, taken individually)", "knowledge (all types, taken individually)"].includes(skill.toLowerCase())) {
@@ -1168,76 +1212,38 @@ export class SWSEActor extends Actor {
         // for (let trait of this.traits) {
         //     values.push(...this.getAttributesFromItem(trait._id, attributeKey));
         // }
-        return this.getInheritableAttributesByKey(attributeKey, undefined, (item => item.type === "trait"));
-    }
+        return getInheritableAttribute({
+            entity: this,
+            attributeKey,
 
-    /**
-     * Collects all attribute values from equipped items, class levels, regimes, affiliations, feats and talents.
-     * It also checks active modes.
-     * @param attributeKey {string|[string]}
-     * @param reduce
-     * @param itemFilter
-     * @param attributeFilter
-     * @returns {[]}
-     */
-    getInheritableAttributesByKey(attributeKey, reduce, itemFilter = (() => true), attributeFilter = (() => true)) {
-        if (!itemFilter) {
-            itemFilter = () => true;
-        }
-        if (!attributeFilter) {
-            attributeFilter = () => true;
-        }
-        let values = [];
-        if (Array.isArray(attributeKey)) {
-            for (let tok of attributeKey) {
-                values.push(...this.getInheritableAttributesByKey(tok, undefined, itemFilter, attributeFilter))
-            }
-        } else {
-            for (let item of this.inheritableItems.filter(itemFilter)) {
-                values.push(...this.getAttributesFromItem(item._id, attributeKey).filter(attributeFilter));
-            }
-        }
-        return reduceArray(reduce, values);
-    }
-
-    get acPenalty() {
-        return generateArmorCheckPenalties(this)
+            itemFilter: (item => item.type === "trait")
+        });
     }
 
     get fullAttackCount() {
         return 2
     }
 
-    /**
-     * Checks a given item for any attributes matching the provided attributeKey.  this includes active modes.
-     * @param itemId {String}
-     * @param attributeKey {String}
-     * @returns {Array.<{source: String, value: *}>}
-     */
-    getAttributesFromItem(itemId, attributeKey) {
-        /**
-         * @type {SWSEItem}
-         */
-        let item = this.items.get(itemId);
-        if (item) {
-            return item.getInheritableAttributesByKey(attributeKey);
-        }
-        return [];
-    }
-
-
     getActiveModes(itemId) {
         let item = this.items.get(itemId);
-        return item.getActiveModes();
+        return SWSEItem.getActiveModesFromItemData(item.data);
     }
 
     getAbilitySkillBonus(skill) {
         //TODO camelcase and simplify unless this could be more complex?
         if (skill.toLowerCase() === 'stealth') {
-            return this.getInheritableAttributesByKey('sneakModifier', "SUM");
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: 'sneakModifier',
+                reduce: "SUM"
+            });
         }
         if (skill.toLowerCase() === 'perception') {
-            return this.getInheritableAttributesByKey('perceptionModifier', "SUM");
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: 'perceptionModifier',
+                reduce: "SUM"
+            });
         }
         return 0;
     }
@@ -1251,7 +1257,10 @@ export class SWSEActor extends Actor {
     }
 
     resolveClassFeatures() {
-        let provides = this.getInheritableAttributesByKey("provides");
+        let provides = getInheritableAttribute({
+            entity: this,
+            attributeKey: "provides"
+        });
         this.data.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
         this.data.bonuses = {};
         this.data.activeFeatures = [];
@@ -1438,7 +1447,7 @@ export class SWSEActor extends Actor {
     }
 
     get darkSideScore() {
-        return this.data.data.darkSideScore;
+        return this.data.data.finalDarksideScore;
     }
 
     set darkSideScore(score) {
@@ -1459,7 +1468,10 @@ export class SWSEActor extends Actor {
     }
 
     getItemContainingInheritableAttribute(key, value) {
-        let attributes = this.getInheritableAttributesByKey(key);
+        let attributes = getInheritableAttribute({
+            entity: this,
+            attributeKey: key
+        });
         if (value !== undefined) {
             attributes = attributes.filter(item => item.value === value);
         }
@@ -1468,11 +1480,24 @@ export class SWSEActor extends Actor {
     }
 
 
+    /**
+     *
+     * @param event
+     * @param context
+     * @returns {Promise<void>}
+     */
     async attack(event, context) {
         let options = this.buildAttackDialog(context);
         await new Dialog(options).render(true);
     }
 
+    /**
+     *
+     * @param context {object}
+     * @param context.type {string}
+     * @param context.items {Array.<Attack>}
+     * @returns {{buttons: {attack: {callback: buttons.attack.callback, label: string}}, options: {height: number}, title: string, render: ((function(*): Promise<void>)|*), content: string}}
+     */
     buildAttackDialog(context) {
         let availableAttacks = 1;
         let title = "Single Attack";
@@ -1483,8 +1508,16 @@ export class SWSEActor extends Actor {
 
         if (context.type === "fullAttack") {
             title = "Full Attack";
-            doubleAttack = this.getInheritableAttributesByKey("doubleAttack", "VALUES");
-            tripleAttack = this.getInheritableAttributesByKey("tripleAttack", "VALUES");
+            doubleAttack = getInheritableAttribute({
+                entity: this,
+                attributeKey: "doubleAttack",
+                reduce: "VALUES"
+            });
+            tripleAttack = getInheritableAttribute({
+                entity: this,
+                attributeKey: "tripleAttack",
+                reduce: "VALUES"
+            });
 
             //availableAttacks = this.fullAttackCount;
             let equippedItems = this.getEquippedItems()
@@ -1494,6 +1527,7 @@ export class SWSEActor extends Actor {
             let availableWeapons = 0
             for (let item of equippedItems) {
                 availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
+                //TODO support exotic weapons
                 if (doubleAttack.includes(item.data.data.subtype)) {
                     doubleAttackBonus = 1;
                 }
@@ -1510,7 +1544,11 @@ export class SWSEActor extends Actor {
             //+1 if has double attack and equipped item
             //+1 if has triple attack and equipped item
 
-            let dualWeaponModifiers = this.getInheritableAttributesByKey("dualWeaponModifier", "NUMERIC_VALUES");
+            let dualWeaponModifiers = getInheritableAttribute({
+                entity: this,
+                attributeKey: "dualWeaponModifier",
+                reduce: "NUMERIC_VALUES"
+            });
             dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
         }
 
@@ -1532,19 +1570,20 @@ export class SWSEActor extends Actor {
 
 
         for (let i = 0; i < availableAttacks; i++) {
-            let item = suppliedItems.length > i ? suppliedItems[i] : undefined;
+            let attack = suppliedItems.length > i ? suppliedItems[i] : undefined;
             let select;
-            if (!!item) {
-                let attack = this.data.data.attacks.find(o => o.itemId === item.id || o.name === item.id)
+            if (!!attack) {
                 select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
             } else {
                 select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
             }
 
 
-            let attackBlock = `<div class="attack panel attack-block"><div class="attack-name">${select}</div><div class="attack-options"></div><div class="attack-total"></div></div>`
-
-
+            let attackBlock = `<div class="attack panel attack-block">
+<div class="attack-name">${select}</div>
+<div class="attack-options"></div>
+<div class="attack-total"></div>
+</div>`
             content += attackBlock;
 
         }
@@ -1581,10 +1620,10 @@ export class SWSEActor extends Actor {
                 attackIds.each((i, div) => this.populateItemStats(div, context));
 
                 attackIds.on("change", () => {
-                    let attackIds = html.find(".attack-id");
+                    let context = {};
                     context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
                     context.damageMods = this.getDamageMods(selects, dualWeaponModifier);
-                    attackIds.each((i, div) => this.populateItemStats(div, context));
+                    html.find(".attack-id").each((i, div) => this.populateItemStats(div, context));
                 })
             },
             options: {
@@ -1600,23 +1639,36 @@ export class SWSEActor extends Actor {
     getAttackMods(selects, dualWeaponModifier) {
         let attackMods = []
         let itemIds = [];
+        let isDoubleAttack = false;
+        let isTripleAttack = false;
+        let standardAttacks = 0;
         for (let select of selects) {
             if (select.value === "--") {
                 continue;
             }
             let attack = JSON.parse(select.value);
-            let mods = attack.mods
-            if (mods === "doubleAttack") {
-                attackMods.push({value: -5, source: "Double Attack"});
+            let options = attack.options
+            if (options.doubleAttack) {
+                isDoubleAttack = true;
             }
-            if (mods === "tripleAttack") {
-                attackMods.push({value: -5, source: "Triple Attack"});
+            if (options.tripleAttack) {
+                isTripleAttack = true;
+            }
+            if (options.standardAttack) {
+                standardAttacks++;
             }
             itemIds.push(attack.itemId)
         }
-        itemIds = itemIds.filter((value, index, self) => self.indexOf(value) === index)
 
-        if (itemIds.length > 1) {
+
+        if (isDoubleAttack) {
+            attackMods.push({value: -5, source: "Double Attack"});
+        }
+        if (isTripleAttack) {
+            attackMods.push({value: -5, source: "Triple Attack"});
+        }
+
+        if (standardAttacks > 1) {
             attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
         }
         return attackMods;
@@ -1630,72 +1682,32 @@ export class SWSEActor extends Actor {
      */
     populateItemStats(html, context) {
         let value = html.value || $(html).data("value");
-        if (value === "--") {
-            return;
-        }
-        let attack;
-        if (typeof value === "string") {
-            attack = JSON.parse(value);
-        } else {
-            attack = value;
-        }
-        //let attack = JSON.parse(value);
-
 
         let parent = $(html).parents(".attack");
         let options = parent.children(".attack-options")
+        let total = parent.children(".attack-total");
+        total.empty();
         options.empty();
-        if (attack.name === "Unarmed Attack") {
-            let attack = generateUnarmedAttack(this);
-            options.append(SWSEItem.getModifierHTML(0))
 
-            options.find(".attack-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
-            options.find(".damage-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
-
-            let total = parent.children(".attack-total");
-            this.setAttackTotal(attack, total, options, context);
-        } else {
-            let itemId = attack.itemId;
-            let iterative = 0;
-            if (itemId.includes("#")) {
-                let toks = itemId.split("#");
-                iterative = parseInt(toks[1]);
-                itemId = toks[0];
-            }
-
-            let actor = this;
-            if (attack.provider) {
-                actor = getActorFromId(attack.provider)
-            }
-            let item = actor.items.get(itemId)
-
-            if (item) {
-                let rangedAttackModifier = getRangedAttackMod(item.effectiveRange, item.accurate, item.inaccurate, actor);
-
-                let newAttack;
-                if (attack.provider || vehicleActorTypes.includes(this.data.type)) {
-                    newAttack = generateAttackFromShipWeapon(item.data)
-                } else {
-                    newAttack = generateAttackFromWeapon(item, actor, iterative);
-                }
-                options.append(SWSEItem.getModifierHTML(rangedAttackModifier, item))
-
-                options.find(".attack-modifier").on("change", () => this.setAttackTotal(newAttack, total, options, context))
-                options.find(".damage-modifier").on("change", () => this.setAttackTotal(newAttack, total, options, context))
-
-                let total = parent.children(".attack-total");
-                this.setAttackTotal(newAttack, total, options, context);
-            }
+        if (value === "--") {
+            return;
         }
+        let attack = Attack.fromJSON(value);
 
+
+        options.append(attack.attackOptionHTML)
+        options.find(".attack-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
+        options.find(".damage-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
+
+        this.setAttackTotal(attack, total, options, context);
     }
 
     setAttackTotal(attack, total, options, context) {
         options.children()
         total.empty();
-        let damageRoll = `<div>${attack.dam}</div>` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
-        let attackRoll = `<div>${attack.th}</div>` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
-        total.append(`<div class="flex flex-row"><div>Attack Roll: <div class="attack-roll">${attackRoll}</div></div> <div class="flex"><div>Damage Roll: <div class="damage-roll">${damageRoll}</div></div></div>`)
+        let damageRoll = `${attack.damageRoll.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
+        let attackRoll = `${attack.attackRoll.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
+        total.append(`<div class="flex flex-row"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
     }
 
     getModifiersFromContextAndInputs(options, modifiers, inputCriteria) {
@@ -1712,9 +1724,19 @@ export class SWSEActor extends Actor {
 
         let roll = ""
         for (let bonus of bonuses) {
-            roll += `<div title="${bonus.source}">${bonus.value}</div>`
+            roll += `<span title="${bonus.source}">${bonus.value}</span>`
         }
         return roll;
+    }
+    getModifiersFromInputs(options, selector) {
+        let bonuses = [];
+        options.find(selector).each((i, modifier) => {
+                if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
+                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
+                }
+            }
+        )
+        return bonuses;
     }
 
     getAttackOptions(doubleAttack, tripleAttack) {
@@ -1728,7 +1750,7 @@ export class SWSEActor extends Actor {
         let existingWeaponNames = [];
         let id = 1;
         for (let attack of attacks) {
-            let source = attack.source;
+            let source = attack.item;
             if (!source) {
                 continue;
             }
@@ -1737,33 +1759,30 @@ export class SWSEActor extends Actor {
 
             existingWeaponNames.push(attack.name)
             if (duplicateCount > 0) {
-                attack.name = attack.name + ` #${duplicateCount + 1}`;
+                attack.options.duplicateCount = duplicateCount;
             }
 
-            resolvedAttacks.push(this.createAttackOption(attack, id++))
-            let additionalDamageDice = source.additionalDamageDice
-            // if (additionalDamageDice.length === 0) {
-            //     continue;
-            // }
+            let clonedAttack = attack.clone();
+            clonedAttack.options.standardAttack = true;
+            resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
+
+            let additionalDamageDice = attack.additionalDamageDice
+
             for (let i = 0; i < additionalDamageDice.length; i++) {
-                let additionalDamageDie = additionalDamageDice[i];
-                let clonedAttack = JSON.parse(JSON.stringify(attack));
-                clonedAttack.dam = additionalDamageDie;
-                clonedAttack.name = clonedAttack.name + ` (${getOrdinal(i + 2)} attack)`
-                clonedAttack.itemId = clonedAttack.itemId + `#${i + 1}`
+                let clonedAttack = attack.clone();
+                clonedAttack.options.additionalAttack = i+1;
+                clonedAttack.options.standardAttack = true;
                 resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
             }
 
-            if (doubleAttack.includes(source.data.data.subtype)) {
-                let clonedAttack = JSON.parse(JSON.stringify(attack));
-                clonedAttack.name = clonedAttack.name + ` (Double attack)`
-                clonedAttack.mods = "doubleAttack";
+            if (doubleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.doubleAttack = true;
                 resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
             }
-            if (tripleAttack.includes(source.data.data.subtype)) {
-                let clonedAttack = JSON.parse(JSON.stringify(attack));
-                clonedAttack.name = clonedAttack.name + ` (Triple attack)`
-                clonedAttack.mods = "tripleAttack";
+            if (tripleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.tripleAttack = true;
                 resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
             }
         }
@@ -1775,46 +1794,45 @@ export class SWSEActor extends Actor {
         let attackId = $(attackBlock).find(".attack-id")[0]
         let attackValue = attackId.value || $(attackId).data("value");
 
-        if (attackValue !== "--") {
-            let attackJSON = attackValue;
-            if (typeof attackJSON === "string") {
-                attackJSON = JSON.parse(attackJSON);
-            }
-
-            let attack = {};
-            let attackRoll = $(attackBlock).find(".attack-roll")[0].innerText.replace(/\n/g, "");
-            let damageRoll = $(attackBlock).find(".damage-roll")[0].innerText.replace(/\n/g, "");
-            attack.name = attackJSON.name;
-            attack.toHit = attackRoll;
-            attack.damage = damageRoll;
-            return attack;
+        if (attackValue === "--") {
+            return undefined;
         }
-        return undefined;
+        let attack = Attack.fromJSON(attackValue)
+
+        // let attack = {};
+
+        let attackModifiers = this.getModifiersFromInputs($(attackBlock), ".attack-modifier");
+        attackModifiers.forEach(modifier => modifier.type = 'attack');
+        let damageModifiers = this.getModifiersFromInputs($(attackBlock), ".damage-modifier");
+        damageModifiers.forEach(modifier => modifier.type = 'damage');
+
+        attack.withModifiers(attackModifiers);
+        attack.withModifiers(damageModifiers);
+
+        // let attackRoll = $(attackBlock).find(".attack-modifier").map((id,mod) => mod.innerText.replace(/\n/g, ""))
+        // let damageRoll = $(attackBlock).find(".damage-modifier").map((id,mod) => mod.innerText.replace(/\n/g, ""))
+        // // attack.name = attackValue.name;
+        // attack.toHit = attackRoll;
+        // attack.damage = damageRoll;
+        return attack;
     }
 
     rollAttacks(attacks, rollMode) {
         let cls = getDocumentClass("ChatMessage");
         //let csd = getDocumentClass("ChatSpeakerData");
 
-        let attackRows = "";
+        let attackRows = [];
         let roll;
 
         for (let attack of attacks) {
-            let attackRollResult = new Roll(attack.toHit).roll({async: false});
-            roll = attackRollResult;
-            let damageFormula = attack.damage;
-            if (damageFormula.includes("x")) {
-                damageFormula = damageFormula.replace(/x/g, "*")
-            }
-            let damageRoll = new Roll(damageFormula);
-            let damageRollResult = damageRoll.roll({async: false});
-            attackRows += `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRollResult.result}">${attackRollResult.total}</a></td><td><a class="inline-roll inline-result" title="${damageRollResult.result}">${damageRollResult.total}</a></td></tr>`
+            let resolvedAttack = this.resolveAttack(attack);
+            roll = resolvedAttack.attack;
+            let resolvedAttacks = [resolvedAttack];
+
+            attackRows.push(this.getAttackBlock(attack, resolvedAttacks))
         }
 
-        let content = `<table>
-<thead><th>Attack</th><th>To Hit</th><th>Damage</th></thead>
-<tbody>${attackRows}</tbody>
-</table>`;
+        let content = `${attackRows.join("<br>")}`;
 
         let speaker = ChatMessage.getSpeaker({actor: this});
 
@@ -1838,6 +1856,85 @@ export class SWSEActor extends Actor {
         if (rollMode) msg.applyRollMode(rollMode);
 
         return cls.create(msg.data, {rollMode});
+    }
+
+    /**
+     *
+     * @param attack {Attack}
+     * @returns {{damage: (Roll|Promise<Roll>), fail: boolean, critical: boolean, attack: (Roll|Promise<Roll>)}}
+     */
+    resolveAttack(attack) {
+        let attackRollResult = attack.attackRoll.roll.roll({async: false});
+
+        let fail = attack.isFailure(attackRollResult.total);
+        let critical = attack.isCritical(attackRollResult.total);
+
+        let damageRoll = attack.damageRoll.roll;
+        if(critical){
+            let criticalHitPreMultiplierBonuses = getInheritableAttribute({
+                entity: attack.item,
+                attributeKey: "criticalHitPreMultiplierBonus"
+            })
+
+            for(let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses){
+
+                let value = resolveValueArray(criticalHitPreMultiplierBonus, this)
+
+                damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
+            }
+
+            damageRoll.alter(2, 0, true)
+            multiplyNumericTerms(damageRoll, 2)
+
+
+            let postMultBonusDie = getInheritableAttribute({
+                entity: attack.item,
+                attributeKey: "criticalHitPostMultiplierBonusDie",
+                reduce: "SUM"
+            })
+            damageRoll.alter(1, postMultBonusDie)
+        }
+
+        let damageRollResult = damageRoll.roll({async: false});
+        return {attack: attackRollResult, damage: damageRollResult, damageType: attack.type, notes:attack.notes, critical: critical, fail: fail};
+    }
+
+    getAttackBlock(attack, resolvedAttacks) {
+
+        let attackRolls = '<th>Attack:</th>';
+        let damageRolls = '<th>Damage:</th>';
+
+        for(let resolvedAttack of resolvedAttacks){
+            let classes = [];
+            if(resolvedAttack.critical){
+                classes.push("critical")
+            }
+            if(resolvedAttack.fail){
+                classes.push("fail")
+            }
+
+            attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total}</td>`
+            damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total} (${resolvedAttack.damageType})</td>`
+        }
+
+
+        return `<table>
+<thead>
+<tr>
+<th>${attack.name}</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+${attackRolls}
+</tr>
+<tr>
+${damageRolls}
+</tr>
+</tbody>
+</table><br/><div>${attack.notes}</div>`
+
+        //return `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRollResult.result}">${attackRollResult.total}</a></td><td><a class="inline-roll inline-result" title="${damageRollResult.result}">${damageRollResult.total}</a></td></tr>`;
     }
 
     createAttackOption(attack, id) {
@@ -1938,7 +2035,12 @@ export class SWSEActor extends Actor {
         }
 
         if (options.type !== "provided") {
-            let takeMultipleTimes = item.getInheritableAttributesByKey("takeMultipleTimes")
+            let takeMultipleTimes = getInheritableAttribute({
+                entity: item,
+                attributeKey: "takeMultipleTimes",
+
+
+            })
                 .map(a => a.value === "true").reduce((a, b) => a || b, false);
 
             if (this.hasItem(item) && !takeMultipleTimes) {
@@ -2083,30 +2185,62 @@ export class SWSEActor extends Actor {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
             if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
-                let weaponProficiencies = this.getInheritableAttributesByKey("weaponProficiency", "VALUES")
+                let weaponProficiencies = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                })
                 for (let weapon of game.generated.exoticWeapons) {
                     if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
                     }
                 }
             } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
-                let focuses = this.getInheritableAttributesByKey("weaponFocus", "VALUES")
-                for (let weapon of this.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                let focuses = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                })) {
                     if (!focuses.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_WEAPON_SPECIALIZATION') {
-                let weaponSpecializations = this.getInheritableAttributesByKey("weaponSpecialization", "VALUES")
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                let weaponSpecializations = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponSpecialization",
+                    reduce: "VALUES"
+                })
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!weaponSpecializations.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
-                let greaterWeaponSpecialization = this.getInheritableAttributesByKey("greaterWeaponSpecialization", "VALUES")
-                let greaterWeaponFocus = this.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
-                for (let weaponSpecialization of this.getInheritableAttributesByKey("weaponSpecialization", "VALUES")) {
+                let greaterWeaponSpecialization = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "greaterWeaponSpecialization",
+                    reduce: "VALUES"
+                })
+                let greaterWeaponFocus = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "greaterWeaponFocus",
+                    reduce: "VALUES"
+                })
+                for (let weaponSpecialization of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponSpecialization",
+                    reduce: "VALUES"
+                })) {
                     if (!greaterWeaponSpecialization.includes(weaponSpecialization) && greaterWeaponFocus.includes(weaponSpecialization)) {
                         resolvedOptions[weaponSpecialization.titleCase()] = {
                             abilities: [],
@@ -2116,8 +2250,16 @@ export class SWSEActor extends Actor {
                     }
                 }
             } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
-                let greaterWeaponFocus = this.getInheritableAttributesByKey("greaterWeaponFocus", "VALUES")
-                for (let weaponFocus of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                let greaterWeaponFocus = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "greaterWeaponFocus",
+                    reduce: "VALUES"
+                })
+                for (let weaponFocus of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!greaterWeaponFocus.includes(weaponFocus)) {
                         resolvedOptions[weaponFocus.titleCase()] = {
                             abilities: [],
@@ -2127,21 +2269,33 @@ export class SWSEActor extends Actor {
                     }
                 }
             } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
-                let weaponProficiencies = this.getInheritableAttributesByKey("weaponProficiency", "VALUES");
+                let weaponProficiencies = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                });
                 for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
                     if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'UNFOCUSED_SKILLS') {
-                let skillFocuses = this.getInheritableAttributesByKey("skillFocus", "VALUES");
+                let skillFocuses = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "skillFocus",
+                    reduce: "VALUES"
+                });
                 for (let skill of skills) {
                     if (!skillFocuses.includes(skill)) {
                         resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_FOCUS') {
-                let skillFocuses = this.getInheritableAttributesByKey("skillFocus", "VALUES");
+                let skillFocuses = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "skillFocus",
+                    reduce: "VALUES"
+                });
                 for (let skill of this.trainedSkills) {
                     if (!skillFocuses.includes(skill.key)) {
                         resolvedOptions[skill.key.titleCase()] = {
@@ -2152,80 +2306,160 @@ export class SWSEActor extends Actor {
                     }
                 }
             } else if (key === 'AVAILABLE_SKILL_MASTERY') {
-                let masterSkills = this.getInheritableAttributesByKey("skillMastery", "VALUES");
+                let masterSkills = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "skillMastery",
+                    reduce: "VALUES"
+                });
                 masterSkills.push("Use The Force")
-                for (let skill of this.getInheritableAttributesByKey("skillFocus", "VALUES")) {
+                for (let skill of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "skillFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!masterSkills.includes(skill)) {
                         resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
-                let doubleAttack = this.getInheritableAttributesByKey("doubleAttack", "VALUES")
-                for (let weapon of this.getInheritableAttributesByKey("weaponProficiency", "VALUES")) {
+                let doubleAttack = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "doubleAttack",
+                    reduce: "VALUES"
+                })
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                })) {
                     if (!doubleAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
-                let tripleAttack = this.getInheritableAttributesByKey("tripleAttack", "VALUES")
+                let tripleAttack = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "tripleAttack",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "doubleAttack",
+                    reduce: "VALUES"
+                })) {
                     if (!tripleAttack.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
-                let savageAttack = this.getInheritableAttributesByKey("savageAttack", "VALUES")
+                let savageAttack = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "savageAttack",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "doubleAttack",
+                    reduce: "VALUES"
+                })) {
                     if (!savageAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
-                let relentlessAttack = this.getInheritableAttributesByKey("relentlessAttack", "VALUES")
+                let relentlessAttack = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "relentlessAttack",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("doubleAttack", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "doubleAttack",
+                    reduce: "VALUES"
+                })) {
                     if (!relentlessAttack.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
-                let autofireSweep = this.getInheritableAttributesByKey("autofireSweep", "VALUES")
+                let autofireSweep = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "autofireSweep",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!autofireSweep.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
-                let autofireAssault = this.getInheritableAttributesByKey("autofireAssault", "VALUES")
+                let autofireAssault = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "autofireAssault",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!autofireAssault.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_HALT') {
-                let halt = this.getInheritableAttributesByKey("halt", "VALUES")
+                let halt = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "halt",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!halt.includes(weapon)) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_RETURN_FIRE') {
-                let returnFire = this.getInheritableAttributesByKey("returnFire", "VALUES")
+                let returnFire = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "returnFire",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!returnFire.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
                 }
             } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
-                let criticalStrike = this.getInheritableAttributesByKey("criticalStrike", "VALUES")
+                let criticalStrike = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "criticalStrike",
+                    reduce: "VALUES"
+                })
 
-                for (let weapon of this.getInheritableAttributesByKey("weaponFocus", "VALUES")) {
+                for (let weapon of getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "weaponFocus",
+                    reduce: "VALUES"
+                })) {
                     if (!criticalStrike.includes(weapon.toLowerCase())) {
                         resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
                     }
@@ -2420,4 +2654,15 @@ export class SWSEActor extends Actor {
         }
         return {slot, position};
     }
+}
+
+/**
+ *
+ *
+ * @param actorData {ActorData|Object}
+ */
+export function getEquippedItems(actorData) {
+    actorData = actorData._source || actorData;
+    let equippedIds = actorData.data.equippedIds.map(id => id.id)
+    return actorData.items.filter(item => equippedIds.includes(item._id));
 }

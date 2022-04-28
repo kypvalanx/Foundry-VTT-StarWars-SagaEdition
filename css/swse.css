@@ -24,9 +24,10 @@
   border: 1px solid #7a7971;
   font-family: inherit;
   font-size: inherit;
+  overflow: auto;
   padding: 3px 6px;
   background-color: rgba(0, 0, 0, 0.05);
-  height: 26px;
+  min-height: 25px;
 }
 
 .panel {
@@ -427,10 +428,6 @@
   text-shadow: none;
 }
 
-.swse .tabs .item-edit {
-  cursor: pointer;
-}
-
 .swse .items-list {
   list-style: none;
   margin: 7px 0;
@@ -727,7 +724,7 @@
 
 .swse .attribute {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   grid-template-rows: 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
@@ -747,6 +744,10 @@
 
 .swse .attribute-value {
   grid-area: 1 / 5 / 2 / 9;
+}
+
+.swse .attribute-override {
+  grid-area: 1 / 9 / 2 / 10;
 }
 
 .swse .attribute-key-1 {
@@ -802,7 +803,7 @@
 }
 
 .swse .attribute-delete {
-  grid-area: 1 / 9 / 2 / 10;
+  grid-area: 1 / 10 / 2 / 11;
 }
 
 .swse .attribute-add {

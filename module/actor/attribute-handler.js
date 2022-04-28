@@ -1,5 +1,5 @@
 import {getLongKey, resolveValueArray} from "../util.js";
-import {SWSEItem} from "../item/item.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 /**
  *
@@ -17,9 +17,20 @@ export function generateAttributes(actor) {
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
         let longKey = getLongKey(key);
-        let attributeBonuses = actor.getInheritableAttributesByKey(`${longKey}Bonus`)
-        let attributeMax = actor.getInheritableAttributesByKey(`${longKey}Max`, "MIN");
-        let attributeBase = actor.getInheritableAttributesByKey(`base${longKey.titleCase()}`, "MAX");
+        let attributeBonuses = getInheritableAttribute({
+            entity: actor,
+            attributeKey: `${longKey}Bonus`
+        })
+        let attributeMax = getInheritableAttribute({
+            entity: actor,
+            attributeKey: `${longKey}Max`,
+            reduce: "MIN"
+        });
+        let attributeBase = getInheritableAttribute({
+            entity: actor,
+            attributeKey: `base${longKey.titleCase()}`,
+            reduce: "MAX"
+        });
         if (attributeBase > 0) {
             attribute.base = attributeBase;
         }
@@ -38,16 +49,22 @@ export function generateAttributes(actor) {
 
         // Calculate the modifier using d20 rules.
         attribute.bonus = resolveValueArray(bonuses, actor);
+
+        let oldTotal = attribute.total;
         attribute.total = attribute.skip ? 10 : resolveValueArray([attribute.base, attribute.bonus], actor);
+
+        if(attribute.total !== oldTotal){
+            data[`data.attributes.${key}.total`] = attribute.total;
+        }
+
         let old = attribute.mod;
         attribute.mod = Math.floor((attribute.total - 10) / 2);
-
 
         if(attribute.mod !== old){
             data[`data.attributes.${key}.mod`] = attribute.mod;
         }
 
-        attribute.roll = attribute.mod + actor.conditionBonus;
+        attribute.roll = attribute.mod + (actor.data.data.condition === "OUT" ? -10 : parseInt(actor.data.data.condition));
         attribute.label = key.toUpperCase();
         attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.data.type))
         actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);

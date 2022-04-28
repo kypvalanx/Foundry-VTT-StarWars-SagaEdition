@@ -1,24 +1,56 @@
 <form class="{{cssClass}}" autocomplete="off">
     <header class="sheet-header">
-        <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" alt="{{item.name}}"/>
-        <div class="header-fields">
-            <h1 class="charname"><label>
-                <input name="name" type="text" value="{{item.name}}" placeholder="Name"/>
-            </label></h1>
-            <div><label>Subtype:<span class="plain input static">{{#if item.data.data}}{{item.data.data.subtype}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.subtype}}{{/unless}}</span></label></div>
-
-            <div class="grid grid-2col">
+        <div class="flex flex-row">
+            <div>
+                <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" alt="{{item.name}}"/>
                 <div class="resource">
-                    <label class="resource-label">Cost</label>
+                    <label class="resource-label">Subtype</label>
                     <label>
-                        <input type="text" name="data.cost" value="{{#if item.data.data}}{{item.data.data.cost}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.cost}}{{/unless}}" data-dtype="String"/>
+                        <div class="plain input static">{{#if
+                                item.data.data}}{{item.data.data.subtype}}{{/if}}{{#unless
+                                item.data.data}}{{item.data._source.data.subtype}}{{/unless}}</div>
                     </label>
                 </div>
-                <div class="resource">
-                    <label class="resource-label">Weight</label>
-                    <label>
-                        <input type="text" name="data.weight" value="{{#if item.data.data}}{{item.data.data.weight}}{{/if}}{{#unless item.data.data}}{{item.data._source.data.weight}}{{/unless}}" data-dtype="String"/>
-                    </label>
+            </div>
+            <div class="header-fields flex-grow">
+                <h1 class="charname"><label>
+                    <input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/>
+                </label></h1>
+                <div class="grid grid-2col">
+                    <div class="resource">
+                        <label class="resource-label">Cost</label>
+                        <label>
+                            <input type="text" name="data.cost"
+                                   value="{{#if item.data.data}}{{item.data.data.cost}}{{/if}}{{#unless
+                                           item.data.data}}{{item.data._source.data.cost}}{{/unless}}"
+                                   data-dtype="String"/>
+                        </label>
+                    </div>
+                    <div class="resource">
+                        <label class="resource-label">Weight</label>
+                        <label>
+                            <input type="text" name="data.weight"
+                                   value="{{#if item.data.data}}{{item.data.data.weight}}{{/if}}{{#unless
+                                           item.data.data}}{{item.data._source.data.weight}}{{/unless}}"
+                                   data-dtype="String"/>
+                        </label>
+                    </div>
+                </div>
+                <div class="grid grid-2col">
+                    <div class="resource">
+                        <label class="resource-label">Size</label>
+                        <label>
+                            <div class="plain input static">{{#if item.data.data}}{{item.size}}{{/if}}{{#unless
+                                    item.data.data}}{{item.data._source.data.size}}{{/unless}}</div>
+                        </label>
+                    </div>
+                    <div class="resource">
+                        <label class="resource-label">Availability</label>
+                        <label>
+                            <div class="plain input static">{{#if item.data.data}}{{item.availability}}{{/if}}{{#unless
+                                    item.data.data}}{{item.data._source.data.size}}{{/unless}}</div>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -39,7 +71,8 @@
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="description">
             {{#if data.data.description}}
-                {{editor content=data.data.description target="data.data.description" button=true owner=owner editable=editable}}
+                {{editor content=data.data.description target="data.data.description" button=true owner=owner
+                         editable=editable}}
             {{/if}}
             {{#unless data.data.description}}{{{item.data._source.data.description}}}{{/unless}}
         </div>
@@ -50,38 +83,39 @@
                 <label class="resource-label">Upgrade Points: </label>
                 <label class="attribute-value">{{data.data.upgradePoints}}</label>
                 <table>
-                {{#each data.data.stripping as |stripping id|}}
-                    {{#if stripping.enabled}}
-                    <tr>
-                        <th><label>{{stripping.label}}</label></th>
-                        {{#ifEquals stripping.type "boolean"}}
-                        <td><label class="attribute-value checkbox">
-                            <input type="checkbox" name="data.stripping.{{id}}.value" {{checked stripping.value}}/></label>
-                        </td>
-                        {{/ifEquals}}
-                        {{#ifEquals stripping.type "number"}}
-                            <td>
-                                <div class="value grid grid-3col">
-                                    <div><a class="item-control value-minus"
-                                            name="data.stripping.{{id}}.value" data-low="{{stripping.low}}"><i
-                                            class="fas fa-minus"></i></a></div>
+                    {{#each data.data.stripping as |stripping id|}}
+                        {{#if stripping.enabled}}
+                            <tr>
+                                <th><label>{{stripping.label}}</label></th>
+                                {{#ifEquals stripping.type "boolean"}}
+                                    <td><label class="attribute-value checkbox">
+                                        <input type="checkbox" name="data.stripping.{{id}}.value" {{checked
+                                                stripping.value}}/></label>
+                                    </td>
+                                {{/ifEquals}}
+                                {{#ifEquals stripping.type "number"}}
+                                    <td>
+                                        <div class="value grid grid-3col">
+                                            <div><a class="item-control value-minus"
+                                                    name="data.stripping.{{id}}.value" data-low="{{stripping.low}}"><i
+                                                    class="fas fa-minus"></i></a></div>
 
-                                    <div><label class="attribute-value checkbox">
-                                        <input class="value" type="number"
-                                               name="data.stripping.{{id}}.value"
-                                               value="{{stripping.value}}">
-                                    </label></div>
+                                            <div><label class="attribute-value checkbox">
+                                                <input class="value" type="number"
+                                                       name="data.stripping.{{id}}.value"
+                                                       value="{{stripping.value}}">
+                                            </label></div>
 
-                                    <div><a class="item-control value-plus"
-                                            name="data.stripping.{{id}}.value" data-high="{{stripping.high}}"><i
-                                            class="fas fa-plus"></i></a>
-                                    </div>
-                                </div>
-                            </td>
-                        {{/ifEquals}}
-                    </tr>
-                    {{/if}}
-                {{/each}}
+                                            <div><a class="item-control value-plus"
+                                                    name="data.stripping.{{id}}.value" data-high="{{stripping.high}}"><i
+                                                    class="fas fa-plus"></i></a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                {{/ifEquals}}
+                            </tr>
+                        {{/if}}
+                    {{/each}}
                 </table>
             </div>
         </div>
@@ -99,7 +133,7 @@
                         </div>
                         <h4 class="item-name">{{item.name}}</h4>
                         <div class="item-controls">
-                            <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>
+                            <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
                             <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
                         </div>
                     </li>

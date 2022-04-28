@@ -20,6 +20,8 @@
                             <input class="attribute-indent-value" name="{{../modePath}}.attributes.{{akey}}.value"
                                    type="text" value="{{attr.value}}" placeholder="" title=""/>
                             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
+                            <input class="attribute-override" name="{{../modePath}}.attributes.{{akey}}.override" type="checkbox" {{#if attr.override}}checked{{/if}} title="attributes with this enabled will override other attributes by the same name rather than both being active">
+
                             <a class="attribute-delete" data-mode-id="{{../mkey}}" data-attribute-id="{{akey}}"><i
                                     class="fas fa-trash"></i></a>
                         </li>

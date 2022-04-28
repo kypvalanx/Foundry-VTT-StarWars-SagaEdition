@@ -498,8 +498,9 @@
       "classFeature",
       "trait",
       "template",
+      "vehicleSystem",
       "vehicleTemplate",
-      "vehicleSystem"
+      "vehicleBaseType"
     ],
     "templates": {
       "base": {

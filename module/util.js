@@ -9,32 +9,14 @@ export function unique(value, index, self) {
 
 export function resolveValueArray(values, actor) {
     if (!Array.isArray(values)) {
-        values = [resolveExpression(values, actor)];
+        values = [values];
     }
     let total = 0;
     for (let value of values) {
         if (!value) {
             continue;
         }
-        if (typeof value === 'number') {
-            total += value;
-        } else if (typeof value === 'string' && value.startsWith("@")) {
-            //ask Actor to resolve
-            try {
-                let variable = actor.getVariable(value);
-                if (variable) {
-                    total += resolveValueArray(variable, actor);
-                }
-            }
-            catch(e){
-                console.log("actor has not been initialised", e);
-            }
-
-        } else if (typeof value === 'string') {
-            total += parseInt(value);
-        } else if (typeof value === 'object') {
-            total += parseInt(value.value);
-        }
+        total += resolveExpression(value, actor);
     }
     return total;
 }
@@ -122,6 +104,9 @@ function resolveParensAndFunctions(expression, actor){
  * @param actor {SWSEActor}
  */
 export function resolveExpression(expression, actor){
+    if (typeof expression === 'object') {
+        return resolveExpression(expression.value, actor);
+    }
     if(typeof expression === "number"){
         return expression;
     }
@@ -227,6 +212,7 @@ export function resolveExpression(expression, actor){
             return parseInt(expression);
         }
     }
+
 }
 
 /**
@@ -327,19 +313,6 @@ export function toShortAttribute(attributeName) {
     }
 }
 
-/**
- *
- * @param die {string}
- * @param bonus {number}
- * @returns {string}
- */
-export function increaseDamageDie(die, bonus) {
-    let index = dieSize.indexOf(`${die}`);
-    if (index === -1) {
-        return "0";
-    }
-    return dieSize[index + bonus] || "0";
-}
 
 /**
  *
@@ -369,6 +342,7 @@ export function increaseDieType(die, bonus= 0) {
     }
     return `${quantity}d${size}` || "0";
 }
+
 /**
  *
  * @param die {string}
@@ -441,13 +415,16 @@ export function extractAttributeValues(attribute, source, sourceString) {
     let values = [];
     let value = attribute.value;
     if (value !== undefined && value !== null) {
-        if (Array.isArray(value)) {
-            for (let v of value) {
-                values.push({source, value: v, modifier: attribute.modifier, key: attribute.key, sourceString})
-            }
-        } else {
-            values.push({source, value, modifier: attribute.modifier, key: attribute.key, sourceString})
-        }
+        // if (Array.isArray(value)) {
+        //     for (let v of value) {
+        //         values.push({source, value: v, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
+        //     }
+        // } else {
+        //     values.push({source, value, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
+        // }
+        attribute.source = source;
+        attribute.sourceString = sourceString;
+        values.push(attribute)
     }
     return values
 }
@@ -498,8 +475,11 @@ export function handleExclusiveSelect(e, selects) {
 
 export function handleAttackSelect(selects) {
     let selectedValuesBySelect = {};
-    let availableDoubleAttacks = [];
-    let availableTripleAttacks = [];
+
+    let hasStandard = false;
+    let hasDoubleAttack = false;
+    let hasTripleAttack = false;
+
     for (let select of selects) {
         for (let o of select.options) {
             o.disabled = false
@@ -509,16 +489,19 @@ export function handleAttackSelect(selects) {
             selectedValuesBySelect[select.id] = select.value;
             if(select.value !== "--") {
                 let selected = JSON.parse(select.value)
-                availableDoubleAttacks.push(selected.itemId);
-                if (selected.mods === "doubleAttack") {
-                    availableTripleAttacks.push(selected.itemId);
+
+                if(selected.options.standardAttack){
+                    hasStandard = true;
+                }
+                if(selected.options.doubleAttack){
+                    hasDoubleAttack = true;
+                }
+                if(selected.options.tripleAttack){
+                    hasTripleAttack = true;
                 }
             }
         }
     }
-    availableDoubleAttacks = availableDoubleAttacks.filter((value, index, self) => self.indexOf(value) === index)
-    availableTripleAttacks = availableTripleAttacks.filter((value, index, self) => self.indexOf(value) === index)
-
     //disable options in other selects that match a selected select
     for (let select of selects) {
         for (let entry of Object.entries(selectedValuesBySelect)) {
@@ -531,13 +514,17 @@ export function handleAttackSelect(selects) {
             }
         }
 
+        let selectValue = select.value !== "--"? JSON.parse(select.value): {options:{}};
         for (let o of select.options) {
-            if(o.value !== "--"){
+            if(o.value !== "--" && !o.selected){
                 let selected = JSON.parse(o.value);
-                if (selected.mods === "doubleAttack" && !availableDoubleAttacks.includes(selected.itemId)){
+
+                //disable this doubleattack option if no standard attacks have been selected or we already have a double attack and it's not the current selection of this select box
+                if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))){
                     o.disabled = true
                 }
-                if (selected.mods === "tripleAttack" && !availableTripleAttacks.includes(selected.itemId)){
+                //disable this triple attack option if no double attacks have been selected or we already have a triple attack and it's not the current selection of this select box or if this select is currently selecting a double attack.
+                if (selected.options.tripleAttack && (!hasDoubleAttack || (hasTripleAttack && !selectValue.options.tripleAttack) || selectValue.options.doubleAttack)){
                     o.disabled = true
                 }
             }
@@ -575,9 +562,9 @@ export function getOrdinal(i) {
 export function getRangedAttackMod(range, isAccurate, isInaccurate, actor) {
     let targets = Array.from(game.user.targets); //get targeted tokens
 
-    let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === actor.id); //get selected tokens of this actor
+    let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (actor._id || actor.id)); //get selected tokens of this actor
     if (sources.length === 0) {
-        sources = canvas.tokens.objects.children.filter(token => token.data.actorId === actor.id);
+        sources = canvas.tokens.objects.children.filter(token => token.data.actorId ===  (actor._id || actor.id));
     }
 
     let rangedAttackModifier;

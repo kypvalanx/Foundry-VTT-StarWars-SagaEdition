@@ -63,6 +63,14 @@ export const registerHandlebarsHelpers = function () {
     });
 
 
+    Handlebars.registerHelper('radio', function( value, options ){
+        let $el = $('<div />').html( options.fn(this) );
+        let find = $el.find('[value="' + value + '"]');
+        find.attr({'checked':'checked'});
+        return $el.html();
+    });
+
+
     Handlebars.registerHelper('tons', function(str) {
         if (str === 0){
             return str;
