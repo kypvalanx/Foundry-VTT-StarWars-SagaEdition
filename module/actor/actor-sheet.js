@@ -1,12 +1,15 @@
-import {filterItemsByType, unique} from "../util.js";
+import {filterItemsByType, toNumber, unique} from "../util.js";
 import {crewPositions, skills, vehicleActorTypes} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {SWSEItem} from "../item/item.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {Attack} from "./attack.js";
+import {addSubCredits, transferCredits} from "./credits.js";
 
 // noinspection JSClosureCompilerSyntax
+
+
 
 
 /**
@@ -159,10 +162,23 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
+        html.find('[data-action="credit"]').click(this._onCredit.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
+    }
+
+    _onCredit(event) {
+        let element = $(event.currentTarget);
+        let type = element.data("action-type")
+        let actor = this.actor;
+        if ('add' === type || 'sub' === type) {
+            addSubCredits(type, actor);
+        }
+        if ('transfer' === type) {
+            transferCredits(actor, type);
+        }
     }
 
 

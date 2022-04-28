@@ -1408,6 +1408,14 @@ export class SWSEActor extends Actor {
         this.update({'data.attributeGenerationType': attributeGenerationType})
     }
 
+    get credits() {
+        return this.data.data.credits;
+    }
+
+    set credits(credits) {
+        this.update({'data.credits': credits})
+    }
+
     setAge(age) {
         this.update({'data.age': age})
     }
@@ -1809,11 +1817,6 @@ export class SWSEActor extends Actor {
         attack.withModifiers(attackModifiers);
         attack.withModifiers(damageModifiers);
 
-        // let attackRoll = $(attackBlock).find(".attack-modifier").map((id,mod) => mod.innerText.replace(/\n/g, ""))
-        // let damageRoll = $(attackBlock).find(".damage-modifier").map((id,mod) => mod.innerText.replace(/\n/g, ""))
-        // // attack.name = attackValue.name;
-        // attack.toHit = attackRoll;
-        // attack.damage = damageRoll;
         return attack;
     }
 
