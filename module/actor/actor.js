@@ -355,6 +355,7 @@ export class SWSEActor extends Actor {
         this.traits = this.getTraits().map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
         this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
+        this.languages = filterItemsByType(this.items.values(), "language");
         this.secrets = filterItemsByType(this.items.values(), "forceSecret").map(item => item.data);
         this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
@@ -1109,7 +1110,7 @@ export class SWSEActor extends Actor {
     }
 
     getInventoryItems(items) {
-        return excludeItemsByType(items, "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
+        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
             .filter(item => !item.data.data.hasItemOwner);
     }
 
@@ -1409,7 +1410,7 @@ export class SWSEActor extends Actor {
     }
 
     get credits() {
-        return this.data.data.credits;
+        return this.data.data.credits || 0;
     }
 
     set credits(credits) {

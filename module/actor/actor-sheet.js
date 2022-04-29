@@ -163,12 +163,49 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));
+        html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
+    _onLanguage(event) {
+        let element = $(event.currentTarget);
+        if(element.data("action-type") === "create"){
 
+            if(event.code === "Enter" || event.code === "NumpadEnter"){
+                event.preventDefault();
+                let name = element[0].value;
+                let names = [name]
+                if(name.includes(",")){
+                    names = name.split(",").map(n => n.trim());
+                }
+
+                let itemData = names.map(name => {
+                    return {
+                        name: name,
+                        type: "language",
+                        data: {
+                            attributes: {
+                                0 : {key: "readable", value: true, override: false},
+                                1 : {key: "writable", value: true, override: false},
+                                2 : {key: "spoken", value: true, override: false},
+                                3 : {key: "characterReads", value: true, override: false},
+                                4 : {key: "characterWrites", value: true, override: false},
+                                5 : {key: "characterSpeaks", value: true, override: false},
+                                6 : {key: "silentCommunication", value: false, override: false},
+                                7 : {key: "visualCommunication", value: false, override: false}
+                            }
+                        }
+                    }
+                })
+
+                this.actor.createEmbeddedDocuments('Item', itemData);
+            }
+        }
+
+    }
+    
     _onCredit(event) {
         let element = $(event.currentTarget);
         let type = element.data("action-type")

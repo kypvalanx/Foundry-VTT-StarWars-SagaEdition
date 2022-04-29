@@ -22,6 +22,7 @@
           "max": 10,
           "condition": 0
         },
+        "credits": 0,
         "classes": [],
         "traits": [],
         "age": 0,
@@ -500,7 +501,8 @@
       "template",
       "vehicleSystem",
       "vehicleTemplate",
-      "vehicleBaseType"
+      "vehicleBaseType",
+      "language"
     ],
     "templates": {
       "base": {
@@ -589,6 +591,11 @@
       "templates": [
         "base",
         "mod"
+      ]
+    },
+    "language": {
+      "templates": [
+        "base"
       ]
     },
     "vehicleTemplate": {
