@@ -480,6 +480,8 @@ export class SWSEItem extends Item {
         const itemData = this.data;
         itemData.finalName = this.name;
 
+        this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
+
         if(this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
 
 
@@ -911,6 +913,20 @@ export class SWSEItem extends Item {
         console.log(attacks);
         attacks.push({key: "", value: "", dtype: "String"});
         await this.update({"data.weapon.damage.attacks": attacks});
+    }
+
+    increaseQuantity(){
+        let current = this.data.data.quantity;
+
+        let quantity = current+1;
+        this.update({"data.quantity": quantity});
+    }
+    decreaseQuantity(){
+
+        let current = this.data.data.quantity;
+
+        let quantity = Math.max(0,current-1);
+        this.update({"data.quantity": quantity});
     }
 
     getBaseUpgradePoints(ogName) {

@@ -2,8 +2,14 @@
     data-item-name="{{item.name}}">
     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                  height="24" alt=""/></div>
-    <h4 class="item-name">{{item.name}}</h4>
+    <h4 class="item-name {{#ifLT item.data.data.quantity 1 }}strikethrough{{/ifLT}}">{{item.name}}
+        {{#if quantity}}{{#ifGT item.data.data.quantity 1 }}({{item.data.data.quantity}}){{/ifGT}}{{/if}}</h4>
     <div class="item-controls">
+        {{log item}}
+        {{#if quantity}}
+            <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i class="fas fa-plus"></i></a>
+            <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i class="fas fa-minus"></i></a>
+        {{/if}}
         <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
         <a class="item-control item-delete" title="Delete Item"><i
                 class="fas fa-trash"></i></a>
