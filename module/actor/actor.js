@@ -356,6 +356,10 @@ export class SWSEActor extends Actor {
         this.talents = this.getTalents().map(talent => talent.data);
         this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
         this.languages = filterItemsByType(this.items.values(), "language");
+        let backgrounds = filterItemsByType(this.items.values(), "background");
+        this.background = (backgrounds.length > 0 ? backgrounds[0] : null);
+        let destinies = filterItemsByType(this.items.values(), "destiny");
+        this.destiny = (destinies.length > 0 ? destinies[0] : null);
         this.secrets = filterItemsByType(this.items.values(), "forceSecret").map(item => item.data);
         this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
@@ -372,6 +376,12 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.techniques)
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
+        if(this.background) {
+            this.inheritableItems.push(this.background)
+        }
+        if(this.destiny) {
+            this.inheritableItems.push(this.destiny)
+        }
 
         this.equipped = this.getEquippedItems()//.map(item => item.data);
         this.inheritableItems.push(...this.equipped)
@@ -414,6 +424,25 @@ export class SWSEActor extends Actor {
 
         this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
         actorData.data.attacks = generateAttacks(this);
+    }
+
+    async removeItem(itemId) {
+        await this.removeChildItems(itemId);
+        let ids = await this.removeSuppliedItems(itemId);
+        ids.push(itemId);
+        await this.deleteEmbeddedDocuments("Item", ids);
+    }
+
+    async removeChildItems(itemId) {
+        let itemToDelete = this.items.get(itemId);
+        for (let childItem of itemToDelete.data?.data?.items || []) {
+            let ownedItem = this.items.get(childItem._id);
+            await itemToDelete.revokeOwnership(ownedItem);
+        }
+    }
+
+    async removeSuppliedItems( id) {
+        return this.items.filter(item => item.data.data.supplier?.id === id).map(item => item.id) || []
     }
 
     handleDarksideArray(actorData) {
@@ -1129,13 +1158,10 @@ export class SWSEActor extends Actor {
 
     _getClassSkills() {
         let classSkills = new Set()
-        if (!this.classes) {
-            return classSkills;
-        }
         let skills = getInheritableAttribute({
             entity: this,
-            attributeKey: "classSkill"
-        }).map(attr => attr.value);
+            attributeKey: "classSkill", reduce:"VALUES"
+        });
 
         for (let skill of skills) {
             if (["knowledge (all skills, taken individually)", "knowledge (all types, taken individually)"].includes(skill.toLowerCase())) {
@@ -2129,7 +2155,7 @@ ${damageRolls}
             } else if (keys.length === 1) {
                 greetingString = choice.oneOption ? choice.oneOption : choice.description;
                 let optionLabel = keys[0];
-                optionString = `<div id="choice">${optionLabel}</div>`
+                optionString = `<div class="option">${optionLabel}</div>`
             } else {
                 greetingString = choice.description;
 
@@ -2138,12 +2164,19 @@ ${damageRolls}
                 }
 
                 if (optionString !== "") {
-                    optionString = `<div><select id='choice'>${optionString}</select></div>`
+                    optionString = `<div><select class="choice">${optionString}</select></div>`
                 }
             }
 
 
-            let content = `<p>${greetingString}</p>${optionString}`;
+
+            let content = `<p>${greetingString}</p>`;
+
+            let availableSelections = choice.availableSelections ? choice.availableSelections : 1;
+
+            for(let i = 0; i < availableSelections; i++){
+                content += optionString;
+            }
 
             let response = await Dialog.prompt({
                 title: greetingString,
@@ -2152,27 +2185,35 @@ ${damageRolls}
                     return false
                 },
                 callback: async (html) => {
-                    let choice = html.find("#choice")[0];
-                    if (choice === undefined) {
-                        return false;
-                    }
-                    let key = choice?.value;
+                    let find = html.find(".choice");
+                    let items = [];
+                    for(let i = 0; i < find.length;i++){
+                        let choice = find[i]
+                        if(!choice){
+                            continue;
+                        }
+                        let key = choice.value ? choice.value : choice.innerText;
 
-                    if (!key) {
-                        key = choice?.innerText;
-                    }
-                    let selectedChoice = options[key];
-                    if (!selectedChoice) {
-                        return false;
-                    }
-                    if (selectedChoice.payload && selectedChoice.payload !== "") {
-                        item.setPayload(selectedChoice.payload);
+                        let selectedChoice = options[key];
+                        if (!selectedChoice) {
+                            continue;
+                        }
+                        if (selectedChoice.payload && selectedChoice.payload !== "") {
+                            item.setPayload(selectedChoice.payload);
+                        }
+                        if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
+                            items = selectedChoice.providedItems
+                        }
+                        if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
+                            Object.values(selectedChoice.attributes).forEach(attr => {
+                                let index = Math.max(Object.keys(item.data.data.attributes)) +1
+                                item.data.data.attributes[index] = attr;
+                            })
+                        }
 
                     }
-                    if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                        return {success: true, items: selectedChoice.providedItems}
-                    }
-                    return {success: true, items: []}
+
+                    return {success: true, items: items}
                 }
             });
 
@@ -2598,6 +2639,7 @@ ${damageRolls}
 
 
     async getIndexEntryByName(itemName, index, payload) {
+        if(!index){return}
         let cleanItemName1 = this.cleanItemName(itemName);
         let entry = await index.find(f => f.name === cleanItemName1);
         if (!entry) {

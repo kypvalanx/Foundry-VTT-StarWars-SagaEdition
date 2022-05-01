@@ -93,6 +93,10 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
     if(type.toLowerCase() === "item") {
         await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
 
+        await importCompendium("systems/swse/raw_export/Destiny.json", 'SWSE Destiny', "Item", forceRefresh);
+
+        await importCompendium("systems/swse/raw_export/Background.json", 'SWSE Background', "Item", forceRefresh);
+
         await importCompendium("systems/swse/raw_export/Vehicle Base Types.json", 'SWSE Vehicle Base Types', "Item", forceRefresh);
 
         await importCompendium("systems/swse/raw_export/Vehicle Systems.json", 'SWSE Vehicle Systems', "Item", forceRefresh);

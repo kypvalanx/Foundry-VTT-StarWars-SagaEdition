@@ -502,7 +502,9 @@
       "vehicleSystem",
       "vehicleTemplate",
       "vehicleBaseType",
-      "language"
+      "language",
+      "background",
+      "destiny"
     ],
     "templates": {
       "base": {

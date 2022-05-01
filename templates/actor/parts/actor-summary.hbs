@@ -1,12 +1,17 @@
-
 <!--TODO find a spot for the portrait -->
 <div class="summary-header swse">
-    <div class="name"><label for="name">Name</label><h2><input class="plain" name="name" type="text" value="{{actor.data.name}}"
-                                                           placeholder=""/></h2></div>
-    <div class="player"><label for="player">Player</label><h2><input class="plain" name="data.player" type="text"
-                                                                     value="{{actor.data.data.player}}" placeholder=""/></h2></div>
-    <div class="classes"><label for="classes">Classes</label><div class="plain input static">{{actor.data.classSummary}}</div></div>
-    <div class="level"><label for="level">Level</label><div class="plain input static">{{actor.data.levelSummary}}</div></div>
+    <div class="name"><label for="name">Name</label>
+        <h2><input class="plain" name="name" type="text" value="{{actor.data.name}}"
+                   placeholder=""/></h2></div>
+    <div class="player"><label for="player">Player</label>
+        <h2><input class="plain" name="data.player" type="text"
+                   value="{{actor.data.data.player}}" placeholder=""/></h2></div>
+    <div class="classes"><label for="classes">Classes</label>
+        <div class="plain input static">{{actor.data.classSummary}}</div>
+    </div>
+    <div class="level"><label for="level">Level</label>
+        <div class="plain input static">{{actor.data.levelSummary}}</div>
+    </div>
 
     <div class="species">
 
@@ -14,7 +19,8 @@
         <div class="flex item" id="view-species" data-item-id="{{actor.species.id}}">
 
             {{#if actor.species}}
-                <div class="plain input flex-grow rollable" data-action="view" data-item-id="{{actor.species.id}}">{{actor.species.name}}</div>
+                <div class="plain input flex-grow rollable" data-action="view"
+                     data-item-id="{{actor.species.id}}">{{actor.species.name}}</div>
                 <div class="species-controls flex-col">
                     <a class="species-control edit" title="view item"><i
                             class="fas fa-eye"></i></a>
@@ -25,7 +31,9 @@
                 </div>
             {{/if}}
             {{#unless actor.species}}
-                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="swse.species">Add Species</div>
+                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="swse.species">
+                    Add Species
+                </div>
                 <div class="species-controls flex-col">
                     <a data-action="compendium" data-action-target="swse.species"
                        title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
@@ -53,14 +61,60 @@
                 Select Age{{/unless}}</div>
         </div>
     </div>
-    <div class="height"><label for="height">Height</label><h2><input class="plain" name="data.height" type="text"
-                                                                     value="{{actor.data.data.height}}" placeholder="Height"/></h2></div>
-    <div class="weight"><label for="weight">Weight</label><h2><input class="plain" name="data.weight" type="text"
-                                                                 value="{{actor.data.data.weight}}" placeholder="Weight"/></h2></div>
-    <div class="destiny"><label for="destiny">Destiny</label><h2><input class="plain" name="data.destiny" type="text"
-                                                                    value="{{actor.data.data.destiny}}" placeholder="Destiny"/></h2>
+    <div class="height"><label for="height">Height</label>
+        <h2><input class="plain" name="data.height" type="text"
+                   value="{{actor.data.data.height}}" placeholder="Height"/></h2></div>
+    <div class="weight"><label for="weight">Weight</label>
+        <h2><input class="plain" name="data.weight" type="text"
+                   value="{{actor.data.data.weight}}" placeholder="Weight"/></h2></div>
+    <div class="destiny">
+        {{#if actor.destiny}}
+            <label>Destiny</label>
+            <div class="flex item" data-item-id="{{actor.destiny.id}}">
+                <div class="plain input flex-grow rollable">{{actor.destiny.name}}</div>
+                <div class="species-controls flex-col">
+                    <a data-action="view"
+                       title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
+                </div>
+                <div class="species-controls flex-col">
+                    <a data-action="delete" data-action-target="swse.background"
+                       title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
+                </div>
+            </div>
+        {{else}}
+
+            {{#if actor.background}}
+                <label>Background</label>
+                <div class="flex item" data-item-id="{{actor.background.id}}">
+                    <div class="plain input flex-grow rollable">{{actor.background.name}}</div>
+                    <div class="species-controls flex-col">
+                        <a data-action="view"
+                           title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
+                    </div>
+                    <div class="species-controls flex-col">
+                        <a data-action="delete"
+                           title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
+                    </div>
+                </div>
+            {{else}}
+                <label>Destiny or Background</label>
+                <div class="flex item">
+                    <div class="plain input flex-grow">Select a Destiny or a Background</div>
+                    <div class="species-controls flex-col">
+                        <a data-action="compendium" data-action-target="swse.destiny"
+                           title="{{localize "Open Destiny Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                    </div>
+                    <div class="species-controls flex-col">
+                        <a data-action="compendium" data-action-target="swse.background"
+                           title="{{localize "Open Background Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+                    </div>
+                </div>
+            {{/if}}
+        {{/if}}
+
     </div>
-    <div class="experience"><label for="experience">XP</label><h2><input class="plain" name="data.experience" type="text"
-                                                                     value="{{actor.data.data.experience}}" placeholder="0"/></h2>
+    <div class="experience"><label for="experience">XP</label>
+        <h2><input class="plain" name="data.experience" type="text"
+                   value="{{actor.data.data.experience}}" placeholder="0"/></h2>
     </div>
 </div>
