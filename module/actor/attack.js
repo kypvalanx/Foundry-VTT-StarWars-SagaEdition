@@ -226,7 +226,7 @@ export class Attack {
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
         }
 
-        terms.push(...appendNumericTerm(actorData.offense.bab, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(actorData.offense?.bab, "Base Attack Bonus"));
 
         if(!provider) {
             terms.push(...appendNumericTerm(attributeMod, "Attribute Modifier"));

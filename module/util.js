@@ -754,8 +754,8 @@ export async function getIndexAndPack(indices, type) {
     let index = indices[type];
     let pack = getCompendium(type);
     if(!pack){
-        ui.notifications.error(`${type} compendium not defined`)
         console.error(`${type} compendium not defined`)
+        return {}
     }
     if (!index) {
         index = await pack.getIndex();

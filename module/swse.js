@@ -84,7 +84,9 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/vehicle/crew-quality.hbs',
     'systems/swse/templates/actor/vehicle/vehicle-template.hbs',
     'systems/swse/templates/actor/parts/actor-type.hbs',
-    'systems/swse/templates/actor/vehicle/vehicle-health.hbs']);
+    'systems/swse/templates/actor/parts/languages.hbs',
+    'systems/swse/templates/actor/vehicle/vehicle-health.hbs',
+    'systems/swse/templates/credits/credit-chip.hbs']);
 
 });
 

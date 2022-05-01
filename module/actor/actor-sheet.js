@@ -1,12 +1,15 @@
-import {filterItemsByType, unique} from "../util.js";
+import {filterItemsByType, toNumber, unique} from "../util.js";
 import {crewPositions, skills, vehicleActorTypes} from "../constants.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {SWSEItem} from "../item/item.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {Attack} from "./attack.js";
+import {addSubCredits, transferCredits} from "./credits.js";
 
 // noinspection JSClosureCompilerSyntax
+
+
 
 
 /**
@@ -159,10 +162,61 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
+        html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
+        html.find('[data-action="credit"]').click(this._onCredit.bind(this));
+        html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
+    }
+    _onLanguage(event) {
+        let element = $(event.currentTarget);
+        if(element.data("action-type") === "create"){
+
+            if(event.code === "Enter" || event.code === "NumpadEnter"){
+                event.preventDefault();
+                let name = element[0].value;
+                let names = [name]
+                if(name.includes(",")){
+                    names = name.split(",").map(n => n.trim());
+                }
+
+                let itemData = names.map(name => {
+                    return {
+                        name: name,
+                        type: "language",
+                        data: {
+                            attributes: {
+                                0 : {key: "readable", value: true, override: false},
+                                1 : {key: "writable", value: true, override: false},
+                                2 : {key: "spoken", value: true, override: false},
+                                3 : {key: "characterReads", value: true, override: false},
+                                4 : {key: "characterWrites", value: true, override: false},
+                                5 : {key: "characterSpeaks", value: true, override: false},
+                                6 : {key: "silentCommunication", value: false, override: false},
+                                7 : {key: "visualCommunication", value: false, override: false}
+                            }
+                        }
+                    }
+                })
+
+                this.actor.createEmbeddedDocuments('Item', itemData);
+            }
+        }
+
+    }
+    
+    _onCredit(event) {
+        let element = $(event.currentTarget);
+        let type = element.data("action-type")
+        let actor = this.actor;
+        if ('add' === type || 'sub' === type) {
+            addSubCredits(type, actor);
+        }
+        if ('transfer' === type) {
+            transferCredits(actor, type);
+        }
     }
 
 
@@ -244,7 +298,7 @@ export class SWSEActorSheet extends ActorSheet {
         let itemId = li.data("itemId");
         let itemToDelete = this.actor.items.get(itemId);
         if (game.keyboard.downKeys.has("Shift")) {
-            await this.removeItemFromActor(itemId, itemToDelete);
+            await this.actor.removeItem(itemId);
         } else {
             button.disabled = true;
 
@@ -253,7 +307,7 @@ export class SWSEActorSheet extends ActorSheet {
                 title: title,
                 content: title,
                 yes: async () => {
-                    await this.removeItemFromActor(itemId, itemToDelete);
+                    await this.actor.removeItem(itemId);
                     button.disabled = false
                 },
                 no: () => (button.disabled = false),
@@ -261,25 +315,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async removeItemFromActor(itemId, itemToDelete) {
-        await this.removeChildItems(itemToDelete);
-        let ids = await this.removeSuppliedItems(itemToDelete);
-        ids.push(itemId);
-        await this.actor.deleteEmbeddedDocuments("Item", ids);
-    }
 
-    async removeChildItems(itemToDelete) {
-        if (itemToDelete.data.data.items) {
-            for (let childItem of itemToDelete.data.data.items) {
-                let ownedItem = this.actor.items.get(childItem._id);
-                await itemToDelete.revokeOwnership(ownedItem);
-            }
-        }
-    }
-
-    async removeSuppliedItems(itemToDelete) {
-        return this.actor.items.filter(item => item.data.data.supplier?.id === itemToDelete.id).map(item => item.id) || []
-    }
 
     async _selectAge(event, sheet) {
         let options = this.buildAgeDialog(sheet);
@@ -790,6 +826,8 @@ export class SWSEActorSheet extends ActorSheet {
                 return;
             } else {
                 //TODO implement logic for dragging to another character sheet
+                let sourceActor = game.actors.find(actor => actor.id === data.actorId);
+                await sourceActor.removeItem(data.itemId)
             }
         }
 
@@ -816,6 +854,10 @@ export class SWSEActorSheet extends ActorSheet {
         let context = {};
 
         switch (item.data.type) {
+            case "background":
+            case "destiny":
+                await this.addBackgroundOrDestiny(item);
+                break;
             case "vehicleBaseType":
             case "species":
                 await this.addItemWithOneItemRestriction(item);
@@ -864,7 +906,7 @@ export class SWSEActorSheet extends ActorSheet {
                 "forceTechnique",
                 "forceSecret",
                 "forceRegimen",
-                "trait", "template"].includes(type)
+                "trait", "template", "background", "destiny"].includes(type)
         } else if (vehicleActorTypes.includes(this.actor.data.type)) {
             return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
         }
@@ -1087,6 +1129,25 @@ export class SWSEActorSheet extends ActorSheet {
         //     type: mainItem[0].data.type
         // })
 
+    }
+
+    async addBackgroundOrDestiny(item) {
+        let type = item.data.type;
+        let viewable = type.replace(/([A-Z])/g, " $1");
+        if (filterItemsByType(this.actor.items.values(), ["background", "destiny"]).length > 0) {
+            new Dialog({
+                title: `${viewable.titleCase()} Selection`,
+                content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
+                buttons: {
+                    ok: {
+                        icon: '<i class="fas fa-check"></i>',
+                        label: 'Ok'
+                    }
+                }
+            }).render(true);
+            return;
+        }
+        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
     }
 
     async addItemWithOneItemRestriction(item) {

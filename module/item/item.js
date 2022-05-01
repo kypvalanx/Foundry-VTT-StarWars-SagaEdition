@@ -840,7 +840,7 @@ export class SWSEItem extends Item {
         let data = {};
         let attributes = this.data.data.attributes
         let attributeId = 0;
-        while (attributes[cursor]) {
+        while (attributes[attributeId]) {
             attributeId++;
         }
 
@@ -852,10 +852,7 @@ export class SWSEItem extends Item {
     canStripAutoFire() {
         let ratesOfFire = getInheritableAttribute({
             entity: this,
-            attributeKey: 'ratesOfFire',
-            
-            
-            
+            attributeKey: 'ratesOfFire'
         });
         if (ratesOfFire.length === 0) {
             return false;
@@ -875,19 +872,12 @@ export class SWSEItem extends Item {
     }
 
     canStripStun() {
-
         return getInheritableAttribute({
             entity: this,
-            attributeKey: 'stunDamage',
-            
-            
-            
+            attributeKey: 'stunDamage'
         }).length > 0 && getInheritableAttribute({
             entity: this,
-            attributeKey: 'damage',
-            
-            
-            
+            attributeKey: 'damage'
         }).length > 0;
     }
 
