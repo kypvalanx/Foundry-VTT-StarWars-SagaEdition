@@ -165,11 +165,16 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));
         html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
+        html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
+        html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
+
+
+
     _onLanguage(event) {
         let element = $(event.currentTarget);
         if(element.data("action-type") === "create"){
@@ -280,38 +285,6 @@ export class SWSEActorSheet extends ActorSheet {
         const data = JSON.parse(ev.dataTransfer.getData("text/plain"));
         if (ev.target.children.length === 0 && ev.target.classList.contains("container")) {
             ev.target.appendChild(document.getElementById(data.draggableId));
-        }
-    }
-
-    /**
-     * Handle deleting an existing Owned Item for the Actor
-     * @param {Event} event   The originating click event
-     * @private
-     */
-    async _onItemDelete(event) {
-        event.preventDefault();
-        const button = event.currentTarget;
-        if (button.disabled) return;
-
-        const li = $(button).closest(".item");
-
-        let itemId = li.data("itemId");
-        let itemToDelete = this.actor.items.get(itemId);
-        if (game.keyboard.downKeys.has("Shift")) {
-            await this.actor.removeItem(itemId);
-        } else {
-            button.disabled = true;
-
-            let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
-            await Dialog.confirm({
-                title: title,
-                content: title,
-                yes: async () => {
-                    await this.actor.removeItem(itemId);
-                    button.disabled = false
-                },
-                no: () => (button.disabled = false),
-            });
         }
     }
 
@@ -1475,6 +1448,38 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     /**
+     * Handle deleting an existing Owned Item for the Actor
+     * @param {Event} event   The originating click event
+     * @private
+     */
+    async _onItemDelete(event) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        if (button.disabled) return;
+
+        const li = $(button).closest(".item");
+
+        let itemId = li.data("itemId");
+        let itemToDelete = this.actor.items.get(itemId);
+        if (game.keyboard.downKeys.has("Shift")) {
+            await this.actor.removeItem(itemId);
+        } else {
+            button.disabled = true;
+
+            let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
+            await Dialog.confirm({
+                title: title,
+                content: title,
+                yes: async () => {
+                    await this.actor.removeItem(itemId);
+                    button.disabled = false
+                },
+                no: () => (button.disabled = false),
+            });
+        }
+    }
+
+    /**
      * Handle editing an existing Owned Item for the Actor
      * @param {Event} event   The originating click event
      * @private
@@ -1484,6 +1489,19 @@ export class SWSEActorSheet extends ActorSheet {
         const li = event.currentTarget.closest(".item");
         const item = this.actor.items.get(li.dataset.itemId);
         item.sheet.render(true);
+    }
+
+    _onDecreaseItemQuantity(event) {
+        event.preventDefault();
+        const li = event.currentTarget.closest(".item");
+        const item = this.actor.items.get(li.dataset.itemId);
+        item.decreaseQuantity();
+    }
+    _onIncreaseItemQuantity(event) {
+        event.preventDefault();
+        const li = event.currentTarget.closest(".item");
+        const item = this.actor.items.get(li.dataset.itemId);
+        item.increaseQuantity();
     }
 
 

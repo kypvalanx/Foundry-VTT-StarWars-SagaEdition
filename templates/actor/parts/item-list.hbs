@@ -5,7 +5,7 @@
     <ol class="items-list">
         {{#each items as |item id|}}
 
-            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item draggable=../draggable}}
+            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item draggable=../draggable quantity=../quantity}}
         {{/each}}
     </ol>
 </div>

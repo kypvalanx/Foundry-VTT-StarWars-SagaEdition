@@ -468,6 +468,10 @@
   margin: 0;
 }
 
+.swse .items-list .strikethrough {
+  text-decoration: line-through;
+}
+
 .swse .items-list .item-controls {
   -webkit-box-flex: 0;
   -ms-flex: 0 0 86px;

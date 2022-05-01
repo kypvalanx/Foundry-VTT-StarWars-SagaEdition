@@ -31,6 +31,14 @@ export const registerHandlebarsHelpers = function () {
         return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
     });
 
+
+    Handlebars.registerHelper('ifGT', function(arg1, arg2, options) {
+        return (arg1 > arg2) ? options.fn(this) : options.inverse(this);
+    });
+    Handlebars.registerHelper('ifLT', function(arg1, arg2, options) {
+        return (arg1 < arg2) ? options.fn(this) : options.inverse(this);
+    });
+
     Handlebars.registerHelper('ifLast', function(arg1, arg2, options) {
         return (arg1 + 1 === arg2.length) ? options.fn(this) : options.inverse(this);
     });
