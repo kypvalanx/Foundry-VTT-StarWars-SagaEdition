@@ -122,8 +122,8 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'PROFICIENCY':
-                if (target.data.proficiency.weapon.includes(prereq.requirement.toLowerCase())
-                    || target.data.proficiency.armor.includes(prereq.requirement.toLowerCase())) {
+                let proficiencies = getInheritableAttribute({entity:target, attributeKey:["weaponProficiency", "armorProficiency"], reduce:"VALUES_TO_LOWERCASE"})
+                if (proficiencies.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
