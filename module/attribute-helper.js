@@ -64,7 +64,7 @@ export function getInheritableAttribute(data = {}) {
 
 
     let values = [];
-    if (!data.attributeKey) {
+    if (!data.attributeKey || !data.entity) {
         return [];
     }
 

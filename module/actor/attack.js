@@ -198,7 +198,7 @@ export class Attack {
         let item = this.item;
         let provider = this.provider;
 
-        let actorData = actor.data;
+        let actorData = actor?.data;
         //let providerData = provider.data;
         let weaponTypes = getPossibleProficiencies(actor, item);
         let attributeStats = []
@@ -226,7 +226,7 @@ export class Attack {
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
         }
 
-        terms.push(...appendNumericTerm(actorData.offense?.bab, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(actorData?.offense?.bab, "Base Attack Bonus"));
 
         if(!provider) {
             terms.push(...appendNumericTerm(attributeMod, "Attribute Modifier"));
@@ -277,7 +277,7 @@ export class Attack {
             terms.push(...getDiceTermsFromString(damageDie))
         }
 
-        let heroicClassLevels = actorData.items.filter(item => item.type === 'class' && getInheritableAttribute({
+        let heroicClassLevels = (actorData?.items || []).filter(item => item.type === 'class' && getInheritableAttribute({
             entity: item,
             attributeKey: "isHeroic", reduce: "OR"
         }))

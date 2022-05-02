@@ -2708,6 +2708,9 @@ ${damageRolls}
  * @param actorData {ActorData|Object}
  */
 export function getEquippedItems(actorData) {
+    if(!actorData){
+        return [];
+    }
     actorData = actorData._source || actorData;
     let equippedIds = actorData.data.equippedIds.map(id => id.id)
     return actorData.items.filter(item => equippedIds.includes(item._id));
