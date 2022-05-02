@@ -40,12 +40,16 @@ export class SWSEItem extends Item {
         this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
 
         if(this.type === "vehicleTemplate") this.data.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
-
-
         if (this.type === "weapon") this.prepareWeapon(itemData);
         if (this.type === "armor") this.prepareArmor(itemData);
         if (this.type === "feat") this.prepareFeatData(itemData);
+    }
 
+    set type(type){
+        this.data.type = type;
+    }
+    get type(){
+        return this.data.type;
     }
 
     _onCreate(data, options, userId) {

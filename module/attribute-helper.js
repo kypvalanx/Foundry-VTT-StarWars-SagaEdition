@@ -17,14 +17,27 @@ function equippedItems(entity) {
     return [];
 }
 
-function inheritableItems(entity) {
+function inheritableItems(entity, attributeKey) {
     let items = entity.items || [];
     let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType"]);
 
     let activeTraits = [];
     possibleInheritableItems.push(...equippedItems(entity))
     
-    possibleInheritableItems = possibleInheritableItems.map(item => item instanceof SWSEItem ? item.data : item)
+    possibleInheritableItems = possibleInheritableItems
+        .map(item => item instanceof SWSEItem ? item.data : item)
+    
+    if(attributeKey){
+        possibleInheritableItems = possibleInheritableItems
+            .filter(item => {
+                let attrs = Object.values(item.data.attributes);
+                for(let level of Object.values(item.data?.levels || {})){
+                    attrs.push(...Object.values(level.data.attributes))
+                }
+                return attrs.map(attr => attr.key).includes(attributeKey) //||
+                    //Object.values(item.data)
+            })
+    }
 
     if(!entity.items){
         //this means it's an item, skip validation
@@ -89,7 +102,7 @@ export function getInheritableAttribute(data = {}) {
             values.push(...extractAttributeValues(attribute, entity._id, entity.name));
         }
         let names = [];
-        for (let item of inheritableItems(entity).filter(data.itemFilter)) {
+        for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
             names.push(item.name);
             let duplicates = names.filter(name => name === item.name).length;
             values.push(...getInheritableAttribute({

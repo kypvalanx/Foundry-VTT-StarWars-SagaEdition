@@ -950,6 +950,10 @@ export class SWSEActor extends Actor {
     }
 
     get isDroid() {
+        if (this.type === 'vehicle' || this.type === 'npc-vehicle'){
+            return false;
+        }
+
         return getInheritableAttribute({
             entity: this,
             attributeKey: "isDroid",

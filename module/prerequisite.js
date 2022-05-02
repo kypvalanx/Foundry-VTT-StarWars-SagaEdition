@@ -122,8 +122,8 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'PROFICIENCY':
-                if (target.data.proficiency.weapon.includes(prereq.requirement.toLowerCase())
-                    || target.data.proficiency.armor.includes(prereq.requirement.toLowerCase())) {
+                let proficiencies = getInheritableAttribute({entity:target, attributeKey:["weaponProficiency", "armorProficiency"], reduce:"VALUES_TO_LOWERCASE"})
+                if (proficiencies.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -331,7 +331,7 @@ export function meetsPrerequisites(target, prereqs) {
                     comparison = toks[1];
                 }
                 let equippedItems = getEquippedItems(target);
-                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item.data.data.subtype === req);
+                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item?.data?.data?.subtype === req|| item?.data?.subtype === req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
                     successList.push({prereq, count: 1});

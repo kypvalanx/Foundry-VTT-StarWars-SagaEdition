@@ -141,7 +141,7 @@ export function getFocusAttackBonuses(actor, weaponTypes) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     }));
     if (weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length > 0) {
-        bonuses.push(appendNumericTerm(1, "Weapon Focus"));
+        bonuses.push(...appendNumericTerm(1, "Weapon Focus"));
     }
 
     let greaterWeaponFocus = explodeProficiencies(getInheritableAttribute({
@@ -150,7 +150,7 @@ export function getFocusAttackBonuses(actor, weaponTypes) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     }));
     if (weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length > 0) {
-        bonuses.push(appendNumericTerm(1, "Greater Weapon Focus"));
+        bonuses.push(...appendNumericTerm(1, "Greater Weapon Focus"));
     }
 
     return bonuses;
