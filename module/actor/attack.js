@@ -554,6 +554,9 @@ function getItemStripping(itemData, key) {
 }
 
 function getDiceTermsFromString(dieString) {
+    if(!dieString){
+        return [];
+    }
     if (dieString === "0") {
         return [new NumericTerm({number: 0})];
     }

@@ -59,6 +59,9 @@ export class SWSEItem extends Item {
     }
 
     static buildItemName(itemData) {
+        if(!itemData){
+            return "";
+        }
         let id = itemData._id;
         let finalName = itemData.name;
         if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
