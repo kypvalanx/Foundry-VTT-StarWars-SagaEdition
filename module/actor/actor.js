@@ -1962,7 +1962,7 @@ ${attackRolls}
 ${damageRolls}
 </tr>
 </tbody>
-</table><br/><div>${attack.notes}</div>`
+</table><br/><div>${attack.notesHTML}</div>`
 
         //return `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRollResult.result}">${attackRollResult.total}</a></td><td><a class="inline-roll inline-result" title="${damageRollResult.result}">${damageRollResult.total}</a></td></tr>`;
     }
