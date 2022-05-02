@@ -28,6 +28,8 @@ export function meetsPrerequisites(target, prereqs) {
         return {doesFail: true, failureList, silentFail: silentFail, successList};
     }
 
+    let data = target.data.data || target.data;
+
     if (!Array.isArray(prereqs)) {
         prereqs = [prereqs];
     }
@@ -78,7 +80,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TRAINED SKILL':
-                if (Object.entries(target.data.data.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
+                if (Object.entries(data.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -136,11 +138,11 @@ export function meetsPrerequisites(target, prereqs) {
                     }
                 }
 
-                let talentsByTreeFilter = ownedTalents.filter(talent => talent.data.data.talentTree === prereq.requirement || talent.data.data.bonusTalentTree === prereq.requirement);
+                let talentsByTreeFilter = ownedTalents.filter(talent => data.talentTree === prereq.requirement || data.bonusTalentTree === prereq.requirement);
                 if (talentsByTreeFilter.length > 0) {
                     let count = 0;
                     for (let talent of talentsByTreeFilter) {
-                        if (!meetsPrerequisites(target, talent.data.data.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, data.prerequisite).doesFail) {
                             count++;
                         }
                     }

@@ -270,7 +270,7 @@ export class Attack {
         } else {
             let damageDice = getInheritableAttribute({
                 entity: itemData,
-                attributeKey: "damage",
+                attributeKey: ["damage", "damageDie"],
                 reduce: "VALUES"
             })
             let damageDie = damageDice[damageDice.length - 1];
