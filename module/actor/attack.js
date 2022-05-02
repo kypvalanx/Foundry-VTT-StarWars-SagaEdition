@@ -117,7 +117,7 @@ export class Attack {
         return 0 < getInheritableAttribute({
             entity: itemData,
             attributeKey: ['unarmedModifier', 'unarmedBonusDamage']
-        }).length || itemData.isUnarmed
+        }).length || itemData?.isUnarmed
     }
 
     modifiers(type) {
