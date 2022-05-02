@@ -331,7 +331,7 @@ export function meetsPrerequisites(target, prereqs) {
                     comparison = toks[1];
                 }
                 let equippedItems = getEquippedItems(target);
-                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item.data.data.subtype === req);
+                let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item?.data?.data?.subtype === req|| item?.data?.subtype === req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
                     successList.push({prereq, count: 1});

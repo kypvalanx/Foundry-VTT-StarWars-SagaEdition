@@ -582,9 +582,14 @@ function getDiceTermsFromString(dieString) {
  * @returns {String}
  */
 function resolveUnarmedDamageDie(actor) {
+    let isDroid = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "isDroid",
+        reduce: "OR"
+    });
     let damageDie = getInheritableAttribute({
         entity: actor,
-        attributeKey: actor.isDroid ? "droidUnarmedDamage" : "unarmedDamage",
+        attributeKey: isDroid ? "droidUnarmedDamage" : "unarmedDamage",
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({
@@ -593,6 +598,5 @@ function resolveUnarmedDamageDie(actor) {
         reduce: "SUM"
     })
     damageDie = increaseDieSize(damageDie, bonus);
-
     return getDiceTermsFromString(damageDie);
 }
