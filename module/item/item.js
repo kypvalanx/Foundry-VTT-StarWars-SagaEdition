@@ -27,12 +27,41 @@ export class SWSEItem extends Item {
         });
     }
 
+    /**
+     * Augment the basic Item data model with additional dynamic data.
+     */
+    prepareData() {
+        super.prepareData();
+        this._pendingUpdate = {};
+        // Get the Item's data
+        const itemData = this.data;
+        itemData.finalName = this.name;
+
+        this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
+
+        if(this.type === "vehicleTemplate") this.data.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
+
+
+        if (this.type === "weapon") this.prepareWeapon(itemData);
+        if (this.type === "armor") this.prepareArmor(itemData);
+        if (this.type === "feat") this.prepareFeatData(itemData);
+
+    }
+
+    _onCreate(data, options, userId) {
+        super._onCreate(data, options, userId);
+        this.prepareData();
+    }
+
     get name() {
         let itemData = this.data;
         return SWSEItem.buildItemName(itemData);
     }
 
     static buildItemName(itemData) {
+        if(!itemData){
+            return "";
+        }
         let id = itemData._id;
         let finalName = itemData.name;
         if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
@@ -468,26 +497,6 @@ export class SWSEItem extends Item {
             
         });
         return attributes.map(attribute => attribute.value).join(', ');
-    }
-
-    /**
-     * Augment the basic Item data model with additional dynamic data.
-     */
-    prepareData() {
-        super.prepareData();
-        this._pendingUpdate = {};
-        // Get the Item's data
-        const itemData = this.data;
-        itemData.finalName = this.name;
-
-        this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
-
-        if(this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
-
-
-        if (this.type === "weapon") this.prepareWeapon(itemData);
-        if (this.type === "armor") this.prepareArmor(itemData);
-        if (this.type === "feat") this.prepareFeatData(itemData);
     }
 
 
