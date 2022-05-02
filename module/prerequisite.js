@@ -1,7 +1,7 @@
 import {filterItemsByType, resolveExpression, resolveValueArray, toNumber} from "./util.js";
 import {weaponGroup} from "./constants.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
-import {SWSEActor} from "./actor/actor.js";
+import {getEquippedItems, SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 
 /**
@@ -330,7 +330,7 @@ export function meetsPrerequisites(target, prereqs) {
                     req = toks[0];
                     comparison = toks[1];
                 }
-                let equippedItems = target.getEquippedItems();
+                let equippedItems = getEquippedItems(target);
                 let filteredEquippedItems = equippedItems.filter(item => item.data.finalName === req || item.data.data.subtype === req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
