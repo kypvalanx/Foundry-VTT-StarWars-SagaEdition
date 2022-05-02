@@ -101,16 +101,18 @@ export class SWSEItemSheet extends ItemSheet {
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-        // Update Inventory Item
-        html.find('[data-action="view"]').click(this.actor.sheet._onItemEdit.bind(this.actor.sheet));
+        if(this.actor) {
+            // Update Inventory Item
+            html.find('[data-action="view"]').click(this.actor.sheet._onItemEdit.bind(this.actor.sheet));
 
-        // Delete Inventory Item
-        html.find('.item-delete').click(ev => {
-            const li = $(ev.currentTarget).parents(".item");
-            let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
-            let ownedItem = this.item.actor.items.get(itemToDelete._id);
-            this.item.revokeOwnership(ownedItem);
-        });
+            // Delete Inventory Item
+            html.find('.item-delete').click(ev => {
+                const li = $(ev.currentTarget).parents(".item");
+                let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
+                let ownedItem = this.item.actor.items.get(itemToDelete._id);
+                this.item.revokeOwnership(ownedItem);
+            });
+        }
 
         //AddItemAttribute
         html.find('.attribute-add').click(ev => {
