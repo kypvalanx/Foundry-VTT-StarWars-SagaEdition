@@ -2711,7 +2711,7 @@ export function getEquippedItems(actorData) {
     if(!actorData){
         return [];
     }
-    actorData = actorData._source || actorData;
-    let equippedIds = actorData.data.equippedIds.map(id => id.id)
+    let equippedIds = actorData?.data?.data?.equippedIds || actorData?.data?.equippedIds || actorData?._source?.data?.equippedIds ||[];
+    equippedIds = equippedIds.map(id => id.id)
     return actorData.items.filter(item => equippedIds.includes(item._id));
 }
