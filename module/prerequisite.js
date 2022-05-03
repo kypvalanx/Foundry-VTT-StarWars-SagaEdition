@@ -65,7 +65,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'ITEM':
-                let ownedItem = target.getInventoryItems(this.items.values());
+                let ownedItem = SWSEActor.getInventoryItems(SWSEActor.getItems(target));
                 let filteredItem = ownedItem.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
