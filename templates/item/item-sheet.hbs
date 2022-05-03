@@ -1,55 +1,44 @@
 <form class="{{cssClass}}" autocomplete="off">
     <header class="sheet-header">
-        <div class="flex flex-row">
-            <div>
-                <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}" alt="{{item.name}}"/>
-                <div class="resource">
-                    <label class="resource-label">Subtype</label>
-                    <label>
-                        <div class="plain input static">{{#if
-                                item.data.data}}{{item.data.data.subtype}}{{/if}}{{#unless
-                                item.data.data}}{{item.data._source.data.subtype}}{{/unless}}</div>
-                    </label>
+        <div class="flex flex-col">
+            <div class="flex flex-row">
+                <div>
+                    <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
+                         alt="{{item.name}}"/>
+
                 </div>
-            </div>
-            <div class="header-fields flex-grow">
-                <h1 class="charname"><label>
-                    <input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/>
-                </label></h1>
-                <div class="grid grid-2col">
-                    <div class="resource">
-                        <label class="resource-label">Cost</label>
-                        <label>
-                            <input type="text" name="data.cost"
-                                   value="{{#if item.data.data}}{{item.data.data.cost}}{{/if}}{{#unless
-                                           item.data.data}}{{item.data._source.data.cost}}{{/unless}}"
-                                   data-dtype="String"/>
-                        </label>
-                    </div>
-                    <div class="resource">
-                        <label class="resource-label">Weight</label>
-                        <label>
-                            <input type="text" name="data.weight"
-                                   value="{{#if item.data.data}}{{item.data.data.weight}}{{/if}}{{#unless
-                                           item.data.data}}{{item.data._source.data.weight}}{{/unless}}"
-                                   data-dtype="String"/>
-                        </label>
-                    </div>
-                </div>
-                <div class="grid grid-2col">
-                    <div class="resource">
-                        <label class="resource-label">Size</label>
-                        <label>
-                            <div class="plain input static">{{#if item.data.data}}{{item.size}}{{/if}}{{#unless
-                                    item.data.data}}{{item.data._source.data.size}}{{/unless}}</div>
-                        </label>
-                    </div>
-                    <div class="resource">
-                        <label class="resource-label">Availability</label>
-                        <label>
-                            <div class="plain input static">{{#if item.data.data}}{{item.availability}}{{/if}}{{#unless
-                                    item.data.data}}{{item.data._source.data.size}}{{/unless}}</div>
-                        </label>
+                <div class="header-fields flex-grow">
+                    <h1 class="charname"><label>
+                        <input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/>
+                    </label></h1>
+
+                    <div class="flex flex-row">
+                        <div class="flex-grow resource">
+                            <label class="resource-label">Type</label><br/>
+                            <label>
+                                <select name="type">
+                                        {{#select item.data.type}}
+                                            {{{options 'type'}}}
+                                        {{/select}}
+                                </select>
+                            </label>
+                        </div>
+                        <div class="flex-grow resource">
+                            <label class="resource-label">Subtype</label><br/>
+                            <label>
+                                <select name="data.subtype">
+                                    {{#if item.data.data}}
+                                        {{#select item.data.data.subtype}}
+                                            {{{options 'subtype' item.data.type}}}
+                                        {{/select}}
+                                    {{else}}
+                                        {{#select item.data._source.data.subtype}}
+                                            {{{options 'subtype' item.data.type}}}
+                                        {{/select}}
+                                    {{/if}}
+                                </select>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -58,7 +47,7 @@
 
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item" data-tab="description">Description</a>
+        <a class="item" data-tab="summary">Summary</a>
         <a class="item" data-tab="attributes">Attributes</a>
         <a class="item" data-tab="provided">Provided</a>
         <a class="item" data-tab="stripping">Stripping</a>
@@ -69,12 +58,14 @@
     <section class="sheet-body">
 
         {{!-- Description Tab --}}
-        <div class="tab" data-group="primary" data-tab="description">
-            {{#if data.data.description}}
+        <div class="tab" data-group="primary" data-tab="summary">
+            {{log data}}
+            {{#if data.data}}
                 {{editor content=data.data.description target="data.data.description" button=true owner=owner
                          editable=editable}}
+            {{else}}
+                {{{item.data._source.data.description}}}
             {{/if}}
-            {{#unless data.data.description}}{{{item.data._source.data.description}}}{{/unless}}
         </div>
 
         {{!-- Stripping Tab --}}

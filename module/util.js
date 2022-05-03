@@ -2,6 +2,7 @@
 
 import {SWSE} from "./config.js";
 import {dieSize, dieType} from "./constants.js";
+import {SWSEActor} from "./actor/actor.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -204,7 +205,7 @@ export function resolveExpression(expression, actor){
 
     if(typeof expression === "string"){
         if(expression.startsWith("@")){
-            let variable = actor.getVariable(expression);
+            let variable = SWSEActor.getVariableFromActorData(actor, expression);
             if (variable !== undefined) {
                 return resolveExpression(variable, actor);
             }

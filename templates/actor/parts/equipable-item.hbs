@@ -5,7 +5,6 @@
     <h4 class="item-name {{#ifLT item.data.data.quantity 1 }}strikethrough{{/ifLT}}">{{item.name}}
         {{#if quantity}}{{#ifGT item.data.data.quantity 1 }}({{item.data.data.quantity}}){{/ifGT}}{{/if}}</h4>
     <div class="item-controls">
-        {{log item}}
         {{#if quantity}}
             <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i class="fas fa-plus"></i></a>
             <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i class="fas fa-minus"></i></a>

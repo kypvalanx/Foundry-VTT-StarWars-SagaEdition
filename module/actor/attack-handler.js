@@ -83,6 +83,9 @@ export function canFinesse(size, item, focus) {
  * @returns {(*|string)[]}
  */
 export function getPossibleProficiencies(actor, weapon) {
+    if(!weapon){
+        return [];
+    }
     let weaponFamiliarities = {};
     getInheritableAttribute({
         entity: actor,
