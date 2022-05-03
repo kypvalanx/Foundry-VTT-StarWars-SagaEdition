@@ -25,10 +25,14 @@ import {appendNumericTerm, Attack} from "./attack.js";
 
 
 function multiplyNumericTerms(roll, multiplier) {
+    let previous;
     for(let term of roll.terms){
         if(term instanceof NumericTerm){
-            term.number = term.number * multiplier;
+            if(previous && previous.operator !== "*" && previous.operator !== "/"){
+                term.number = term.number * multiplier;
+            }
         }
+        previous = term;
     }
 }
 
@@ -676,7 +680,7 @@ export class SWSEActor extends Actor {
     }
 
     getEquippedItems() {
-        let getEquippedItems = this._getEquippedItems(this._getEquipable(this.getInventoryItems(this.items.values())), "equipped");
+        let getEquippedItems = this._getEquippedItems(this._getEquipable(SWSEActor.getInventoryItems(this.items.values())), "equipped");
         let prerequisites = this.data.prerequisites;
         prerequisites.equippedItems = [];
         for (let item of getEquippedItems) {
@@ -686,7 +690,7 @@ export class SWSEActor extends Actor {
     }
 
     getInstalledWeapons() {
-        return this._getEquippedItems(this.getInventoryItems(this.items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
+        return this._getEquippedItems(SWSEActor.getInventoryItems(this.items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
     }
 
     getTalents() {
@@ -1081,7 +1085,7 @@ export class SWSEActor extends Actor {
     }
 
     getUnequippedItems() {
-        let items = this._getEquipable(this.getInventoryItems(this.items.values()));
+        let items = this._getEquipable(SWSEActor.getInventoryItems(this.items.values()));
 
         let equippedIds = (this.data.data.equippedIds || []).map(id => id.id);
 
@@ -1137,10 +1141,10 @@ export class SWSEActor extends Actor {
 
 
     getNonequippableItems() {
-        return this._getUnequipableItems(this.getInventoryItems(this.items.values())).filter(i => !i.data.hasItemOwner);
+        return this._getUnequipableItems(SWSEActor.getInventoryItems(this.items.values())).filter(i => !i.data.hasItemOwner);
     }
 
-    getInventoryItems(items) {
+    static getInventoryItems(items) {
         return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
             .filter(item => !item.data.data.hasItemOwner);
     }
@@ -1898,8 +1902,8 @@ export class SWSEActor extends Actor {
     resolveAttack(attack) {
         let attackRollResult = attack.attackRoll.roll.roll({async: false});
 
-        let fail = attack.isFailure(attackRollResult.total);
-        let critical = attack.isCritical(attackRollResult.total);
+        let fail = attack.isFailure(attackRollResult);
+        let critical = attack.isCritical(attackRollResult);
 
         let damageRoll = attack.damageRoll.roll;
         if(critical){
@@ -2655,6 +2659,15 @@ ${damageRolls}
         return feat.replace("*", "").trim();
     }
 
+    static getItems(target){
+        if(SWSEActor === typeof target){
+            target = target.data;
+        }
+        if(!Array.isArray(target.items)){
+            return Object.values(target.items);
+        }
+        return target.items;
+    }
 
     async equipItem(itemId, equipType, options) {
         let item = this.items.get(itemId);

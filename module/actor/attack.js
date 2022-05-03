@@ -512,7 +512,9 @@ export class Attack {
         return modifiers;
     }
 
-    isCritical(num) {
+    isCritical(roll) {
+        let term = roll.terms.find(term => term.faces === 20);
+        let num = term.results[0].result;
         if (num === 20) {
             return true;
         }
@@ -523,7 +525,9 @@ export class Attack {
         }).includes(num);
     }
 
-    isFailure(num) {
+    isFailure(roll) {
+        let term = roll.terms.find(term => term.faces === 20);
+        let num = term.results[0].result;
         if (num === 1) {
             return true;
         }
