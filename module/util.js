@@ -565,7 +565,7 @@ export function getRangedAttackMod(range, isAccurate, isInaccurate, actor) {
 
     let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (actor._id || actor.id)); //get selected tokens of this actor
     if (sources.length === 0) {
-        sources = canvas.tokens.objects.children.filter(token => token.data.actorId ===  (actor._id || actor.id));
+        sources = canvas.tokens.objects.children.filter(token => token.data.actorId ===  (actor?._id || actor?.id));
     }
 
     let rangedAttackModifier;

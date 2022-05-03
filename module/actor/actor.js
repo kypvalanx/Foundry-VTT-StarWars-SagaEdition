@@ -25,10 +25,14 @@ import {appendNumericTerm, Attack} from "./attack.js";
 
 
 function multiplyNumericTerms(roll, multiplier) {
+    let previous;
     for(let term of roll.terms){
         if(term instanceof NumericTerm){
-            term.number = term.number * multiplier;
+            if(previous && previous.operator !== "*" && previous.operator !== "/"){
+                term.number = term.number * multiplier;
+            }
         }
+        previous = term;
     }
 }
 
@@ -1898,8 +1902,8 @@ export class SWSEActor extends Actor {
     resolveAttack(attack) {
         let attackRollResult = attack.attackRoll.roll.roll({async: false});
 
-        let fail = attack.isFailure(attackRollResult.total);
-        let critical = attack.isCritical(attackRollResult.total);
+        let fail = attack.isFailure(attackRollResult);
+        let critical = attack.isCritical(attackRollResult);
 
         let damageRoll = attack.damageRoll.roll;
         if(critical){
