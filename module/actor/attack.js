@@ -389,7 +389,7 @@ export class Attack {
 
             return value;
 
-        }).join("");
+        }).join("<span>  </span>");
     }
     get notesText() {
         return this.notes.map(note =>  note.value).join(", ");
