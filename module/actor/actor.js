@@ -32,6 +32,7 @@ function multiplyNumericTerms(roll, multiplier) {
     }
 }
 
+
 // noinspection JSClosureCompilerSyntax
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -814,11 +815,8 @@ export class SWSEActor extends Actor {
     }
 
     getVariable(variableName) {
-        let value = this.resolvedVariables.get(variableName);
-        if (value === undefined) {
-            console.warn("could not find " + variableName, this.resolvedVariables);
-        }
-        return value;
+        let swseActor = this;
+        return SWSEActor.getVariableFromActorData(swseActor, variableName);
     }
 
     get conditionBonus() {
@@ -2703,6 +2701,19 @@ ${damageRolls}
             slot = toks[2];
         }
         return {slot, position};
+    }
+
+
+    static getVariableFromActorData(swseActor, variableName) {
+        if(!swseActor.resolvedVariables){
+            swseActor = swseActor.document;
+        }
+
+        let value = swseActor.resolvedVariables?.get(variableName);
+        if (value === undefined) {
+            console.warn("could not find " + variableName, swseActor.resolvedVariables);
+        }
+        return value;
     }
 }
 

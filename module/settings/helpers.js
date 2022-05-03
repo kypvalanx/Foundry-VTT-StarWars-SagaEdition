@@ -1,3 +1,5 @@
+import {SUBTYPES} from "../constants.js";
+
 export const registerHandlebarsHelpers = function () {
 
 
@@ -68,6 +70,23 @@ export const registerHandlebarsHelpers = function () {
         let $el = $('<select />').html( options.fn(this) );
         $el.find('[value="' + value + '"]').attr({'selected':'selected'});
         return $el.html();
+    });
+
+    Handlebars.registerHelper('options', function(arg1, arg2){
+        let values = []
+        if('type' === arg1){
+            values = game.system.template.Item.types;
+        }
+        if('subtype' === arg1){
+            values = SUBTYPES[arg2.toLowerCase()];
+        }
+
+        let response = '';
+
+        for(let value of values){
+            response += `<option value="${value}">${value}</option>`;
+        }
+        return response;
     });
 
 
