@@ -58,13 +58,7 @@
 
         {{!-- Description Tab --}}
         <div class="tab" data-group="primary" data-tab="summary">
-            {{log data}}
-            {{#if data.data}}
-                {{editor content=data.data.description target="data.data.description" button=true owner=owner
-                         editable=editable}}
-            {{else}}
-                {{{item.data._source.data.description}}}
-            {{/if}}
+            {{> 'systems/swse/templates/item/parts/summary.hbs'}}
         </div>
 
         {{!-- Stripping Tab --}}

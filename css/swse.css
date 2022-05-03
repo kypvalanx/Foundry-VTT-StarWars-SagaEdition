@@ -487,6 +487,42 @@
   cursor: pointer;
 }
 
+.swse .item-pane {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-column-gap: 0;
+  grid-template-rows: 100%;
+  height: 100%;
+}
+
+.swse .item-pane .whole {
+  grid-column: 1 / 6;
+}
+
+.swse .item-pane .left-sidebar {
+  grid-column: 1 / 2;
+}
+
+.swse .item-pane .middle {
+  grid-column: 2 / 5;
+}
+
+.swse .item-pane .right-sidebar {
+  grid-column: 5 / 6;
+}
+
+.swse .item-pane .middle-right-sidebar {
+  grid-column: 2 / 6;
+}
+
+.swse .item-pane .left-sidebar-middle {
+  grid-column: 1 / 5;
+}
+
+.swse .item-pane .sidebar {
+  background: rgba(0, 0, 0, 0.1);
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;

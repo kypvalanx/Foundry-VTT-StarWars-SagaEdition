@@ -1,0 +1,14 @@
+<div class="item-pane">
+    <div class="left-sidebar sidebar">
+
+    </div>
+    <div class="middle-right-sidebar">
+        {{#if data.data}}
+            {{editor content=data.data.description target="data.description" button=true owner=owner
+                     editable=editable}}
+        {{else}}
+            {{editor content=item.data._source.data.description target="data.description" button=true owner=owner
+                     editable=editable}}
+        {{/if}}
+    </div>
+</div>
