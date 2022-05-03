@@ -4,3 +4,5 @@ Community content is available under [CC-BY-SA](https://www.fandom.com/licensing
 0.4.X -> v8.9
 
 0.5.X -> v9
+
+join the community [discord](https://discord.gg/tGpxsrH9Em) 
