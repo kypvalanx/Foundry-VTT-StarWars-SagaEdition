@@ -7,9 +7,20 @@
                          alt="{{item.name}}"/>
                 </div>
                 <div class="header-fields flex-grow">
-                    <h1 class="charname"><label>
-                        <input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/>
-                    </label></h1>
+                    <div class="flex flex-row">
+                        <div>
+                            <h1 class="charname"><label>
+                                <input name="name" type="text" value="{{item.baseName}}" placeholder="Name"/>
+                            </label></h1>
+                        </div>
+                        <div>
+                            {{log item}}
+                            <a data-action="to-chat"
+                               data-action-item="{{item.id}}" data-action-compendium=""
+                               title="Share"><i
+                                    class="fas fa-share"></i></a>
+                        </div>
+                    </div>
 
                     <div class="flex flex-row">
                         <div class="flex-grow resource">

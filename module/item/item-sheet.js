@@ -87,6 +87,8 @@ export class SWSEItemSheet extends ItemSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
+        html.find('[data-action="to-chat"]').click(this._onToSheet.bind(this));
+
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
@@ -100,6 +102,7 @@ export class SWSEItemSheet extends ItemSheet {
             li.setAttribute("draggable", true);
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
+
 
         if(this.actor) {
             // Update Inventory Item
@@ -244,6 +247,37 @@ export class SWSEItemSheet extends ItemSheet {
 
 
         // Roll handlers, click handlers, etc. would go here.
+    }
+
+    _onToSheet(event){
+        event.preventDefault();
+        const a = event.currentTarget;
+        const target = a.dataset.actionItem;
+        const item = game.items.get(target);
+
+        let name = item.data.name;
+        let description = item.data?.data?.description? item.data.data.description : item.data._source.data.description;
+
+
+
+        let content = `${description}`
+
+        let speaker = ChatMessage.getSpeaker({actor: this.object.parent});
+        console.log(item)
+        let messageData = {
+            user: game.user.id,
+            speaker: speaker,
+            flavor: name,
+            type: CONST.CHAT_MESSAGE_TYPES.OOC,
+            content,
+            sound: CONFIG.sounds.dice
+        }
+
+        let cls = getDocumentClass("ChatMessage");
+
+        let msg = new cls(messageData);
+
+        return cls.create(msg.data, {});
     }
 
 

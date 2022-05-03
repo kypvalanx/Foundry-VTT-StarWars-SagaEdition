@@ -182,10 +182,6 @@
   display: flex;
 }
 
-.flex div {
-  padding: 3px;
-}
-
 .flex-wrap {
   -ms-flex-wrap: wrap;
   flex-wrap: wrap;
@@ -405,6 +401,7 @@
 .swse .fas {
   horiz-align: center;
   min-width: 16px;
+  padding: 3px;
 }
 
 .swse .portrait-container {
