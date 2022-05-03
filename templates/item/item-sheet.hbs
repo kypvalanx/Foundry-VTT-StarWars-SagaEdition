@@ -5,7 +5,6 @@
                 <div>
                     <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"
                          alt="{{item.name}}"/>
-
                 </div>
                 <div class="header-fields flex-grow">
                     <h1 class="charname"><label>
@@ -17,9 +16,9 @@
                             <label class="resource-label">Type</label><br/>
                             <label>
                                 <select name="type">
-                                        {{#select item.data.type}}
-                                            {{{options 'type'}}}
-                                        {{/select}}
+                                    {{#select item.data.type}}
+                                        {{{options 'type'}}}
+                                    {{/select}}
                                 </select>
                             </label>
                         </div>
