@@ -16,7 +16,7 @@
                         <div>
                             {{log item}}
                             <a data-action="to-chat"
-                               data-action-item="{{item.id}}" data-action-compendium=""
+                               data-action-item="{{item.id}}" data-actor-id="{{#if item.parent}}{{item.parent.id}}{{/if}}" data-action-compendium="{{item.pack}}"
                                title="Share"><i
                                     class="fas fa-share"></i></a>
                         </div>

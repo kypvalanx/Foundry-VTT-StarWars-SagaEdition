@@ -252,13 +252,24 @@ export class SWSEItemSheet extends ItemSheet {
     _onToSheet(event){
         event.preventDefault();
         const a = event.currentTarget;
-        const target = a.dataset.actionItem;
-        const item = game.items.get(target);
+        const itemId = a.dataset.actionItem;
+        const actorId = a.dataset.actorId;
+        const actionCompendium = a.dataset.actionCompendium;
 
-        let name = item.data.name;
-        let description = item.data?.data?.description? item.data.data.description : item.data._source.data.description;
+        let item;
 
+        if(actorId){
+            let actor = game.data.actors.find(actor => actor._id === actorId);
+            item = actor.items.find(item => item._id === itemId);
+        }else if(actionCompendium){
+            let compendium = game.packs.find(pack => pack.collection === actionCompendium);
+            item = compendium.get(itemId)
+        }else{
+            item = game.items.get(itemId);
+        }
 
+        let name = item.name || item.data.name;
+        let description = item.description || item.data?.description || item.data?.data?.description || item.data?._source?.data?.description;
 
         let content = `${description}`
 

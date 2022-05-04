@@ -470,9 +470,6 @@
 }
 
 .swse .items-list .item-controls {
-  -webkit-box-flex: 0;
-  -ms-flex: 0 0 86px;
-  flex: 0 0 86px;
   text-align: right;
 }
 
