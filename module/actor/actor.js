@@ -1067,7 +1067,8 @@ export class SWSEActor extends Actor {
     }
 
     ignoreCon() {
-        return this.data.data.attributes.con?.skip || true;
+        let skip = this.data.data.attributes.con?.skip;
+        return skip === undefined ? true : skip;
     }
 
 

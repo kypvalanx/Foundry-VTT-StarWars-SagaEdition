@@ -87,6 +87,8 @@ export class SWSEItemSheet extends ItemSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
+        html.find('[data-action="to-chat"]').click(this._onToSheet.bind(this));
+
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
@@ -100,6 +102,7 @@ export class SWSEItemSheet extends ItemSheet {
             li.setAttribute("draggable", true);
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
+
 
         if(this.actor) {
             // Update Inventory Item
@@ -244,6 +247,48 @@ export class SWSEItemSheet extends ItemSheet {
 
 
         // Roll handlers, click handlers, etc. would go here.
+    }
+
+    _onToSheet(event){
+        event.preventDefault();
+        const a = event.currentTarget;
+        const itemId = a.dataset.actionItem;
+        const actorId = a.dataset.actorId;
+        const actionCompendium = a.dataset.actionCompendium;
+
+        let item;
+
+        if(actorId){
+            let actor = game.data.actors.find(actor => actor._id === actorId);
+            item = actor.items.find(item => item._id === itemId);
+        }else if(actionCompendium){
+            let compendium = game.packs.find(pack => pack.collection === actionCompendium);
+            item = compendium.get(itemId)
+        }else{
+            item = game.items.get(itemId);
+        }
+
+        let name = item.name || item.data.name;
+        let description = item.description || item.data?.description || item.data?.data?.description || item.data?._source?.data?.description;
+
+        let content = `${description}`
+
+        let speaker = ChatMessage.getSpeaker({actor: this.object.parent});
+        console.log(item)
+        let messageData = {
+            user: game.user.id,
+            speaker: speaker,
+            flavor: name,
+            type: CONST.CHAT_MESSAGE_TYPES.OOC,
+            content,
+            sound: CONFIG.sounds.dice
+        }
+
+        let cls = getDocumentClass("ChatMessage");
+
+        let msg = new cls(messageData);
+
+        return cls.create(msg.data, {});
     }
 
 
