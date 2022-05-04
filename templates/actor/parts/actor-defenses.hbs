@@ -7,39 +7,22 @@
         <div class="defense-misc"><h3>Misc</h3></div>
         <div class="defense-header resource-label"><h1>Defenses</h1></div>
     </div>
-    {{#unless data.data.defense.fort.skip}}
-        <div class="defense">
-            <div class="defense-label plain input static">Fort</div>
-            <div class="defense-total plain input static"><h2>{{data.data.defense.fort.total}}</h2></div>
-            <div class="defense-10 plain input static">10</div>
-            <div class="defense-level-armor plain input static">{{data.data.defense.fort.armorBonus}}</div>
-            <div class="defense-ability plain input static">{{data.data.defense.fort.abilityBonus}}</div>
-            <div class="defense-class plain input static">{{data.data.defense.fort.classBonus}}</div>
-            <div class="defense-misc plain input static" title="{{data.data.defense.fort.miscBonusTip}}">{{data.data.defense.fort.miscBonus}}</div>
-        </div>
-    {{/unless}}
-    {{#unless data.data.defense.reg.skip}}
-        <div class="defense">
-            <div class="defense-label plain input static">Ref</div>
-            <div class="defense-total plain input static"><h2>{{data.data.defense.ref.total}}</h2></div>
-            <div class="defense-10 plain input static">10</div>
-            <div class="defense-level-armor plain input static">{{data.data.defense.ref.armorBonus}}</div>
-            <div class="defense-ability plain input static">{{data.data.defense.ref.abilityBonus}}</div>
-            <div class="defense-class plain input static">{{data.data.defense.ref.classBonus}}</div>
-            <div class="defense-misc plain input static" title="{{data.data.defense.ref.miscBonusTip}}">{{data.data.defense.ref.miscBonus}}</div>
-        </div>
-    {{/unless}}
-    {{#unless data.data.defense.will.skip}}
-        <div class="defense">
-            <div class="defense-label plain input static">Will</div>
-            <div class="defense-total plain input static"><h2>{{data.data.defense.will.total}}</h2></div>
-            <div class="defense-10 plain input static">10</div>
-            <div class="defense-level-armor plain input static">{{data.data.defense.will.armorBonus}}</div>
-            <div class="defense-ability plain input static">{{data.data.defense.will.abilityBonus}}</div>
-            <div class="defense-class plain input static">{{data.data.defense.will.classBonus}}</div>
-            <div class="defense-misc plain input static" title="{{data.data.defense.will.miscBonusTip}}">{{data.data.defense.will.miscBonus}}</div>
-        </div>
-    {{/unless}}
+    {{#each data.data.defense as |def id|}}
+        {{#unless def.skip}}
+            {{#if def.armorBonus}}
+                <div class="defense">
+                    <div class="defense-label plain input static">{{toTitleCase id}}</div>
+                    <div class="defense-total plain input static"><h2>{{def.total}}</h2></div>
+                    <div class="defense-10 plain input static">10</div>
+                    <div class="defense-level-armor plain input static">{{def.armorBonus}}</div>
+                    <div class="defense-ability plain input static">{{def.abilityBonus}}</div>
+                    <div class="defense-class plain input static">{{def.classBonus}}</div>
+                    <div class="defense-misc plain input static" title="{{def.miscBonusTip}}">{{def.miscBonus}}</div>
+                </div>
+            {{/if}}
+        {{/unless}}
+    {{/each}}
+
 
 
     {{#each data.data.defense.situationalBonuses as |bonus id|}}

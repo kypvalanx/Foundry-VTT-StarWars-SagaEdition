@@ -49,10 +49,10 @@ function generateArmorBlock(actor, armor) {
 export function resolveDefenses(actor) {
     let conditionBonus = actor.data.data.condition === "OUT" ? -10 : actor.data.data.condition;
 
-    let fort = _resolveFort(actor, conditionBonus);
+    let fortitude = _resolveFort(actor, conditionBonus);
     let will = _resolveWill(actor, conditionBonus);
-    let ref = _resolveRef(actor, conditionBonus);
-    let dt = _resolveDt(actor, conditionBonus);
+    let reflex = _resolveRef(actor, conditionBonus);
+    let damageThreshold = _resolveDt(actor, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(actor);
     let shield = _resolveShield(actor);
 
@@ -62,14 +62,13 @@ export function resolveDefenses(actor) {
         reduce: "SUM"
     })
 
-
     let armors = []
 
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
 
-    return {defense: {fort, will, ref, dt, damageThreshold: dt, damageReduction, situationalBonuses, shield}, armors};
+    return {defense: {fortitude, will, reflex, damageThreshold, damageReduction, situationalBonuses, shield}, armors};
 }
 
 /**
