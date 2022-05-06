@@ -76,6 +76,7 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/vehicle/vehicle-attacks-summary.hbs',
     'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
     'systems/swse/templates/actor/parts/attack/single-attack.hbs',
+    'systems/swse/templates/actor/parts/attack/weapon-block.hbs',
     'systems/swse/templates/item/parts/provided.hbs',
     'systems/swse/templates/item/parts/summary.hbs',
     'systems/swse/templates/item/parts/prerequisites.hbs',

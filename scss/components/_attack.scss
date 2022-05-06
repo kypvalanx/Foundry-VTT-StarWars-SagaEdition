@@ -1,27 +1,36 @@
-.attack {
+.summary-block{
+  .attack{
+
+  }
+}
+
+.collapsed{
+  display: none;
+}
+
+.attack-block {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(4, 1fr);
   grid-column-gap: 9px;
   grid-row-gap: 1px;
 
-  .name { grid-area: 1 / 1 / 2 / 4; }
-  .to-hit { grid-area: 2 / 1 / 3 / 3; }
-  .damage { grid-area: 2 / 3 / 3 / 5; }
+  .to-hit { grid-area: 1 / 1 / 2 / 4; }
+  .damage { grid-area: 1 / 4 / 2 / 7; }
   .attack-notes {
-    grid-area: 3 / 1 / 4 / 4;
+    grid-area: 3 / 1 / 4 / 7;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .range { grid-area: 1 / 4 / 2 / 6; }
-  .critical { grid-area: 2 / 5 / 3 / 6; }
-  .type { grid-area: 3 / 4 / 4 / 6; }
+  .range { grid-area: 2 / 4 / 3 / 6; }
+  .critical { grid-area: 2 / 6 / 3 / 7; }
+  .type { grid-area: 2 / 1 / 3 / 4; }
   .modes {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    grid-area: 4 / 1 / 5 / 6;
+    grid-area: 4 / 1 / 5 / 7;
     .mode-group{
       display: flex;
       flex-direction: row;
@@ -37,6 +46,18 @@
 .attack.vehicle{
   //background-image: linear-gradient(to bottom, rgba(255, 0, 0, 0.1), rgba(255, 0, 0, 0.1)), url(http://lorempixel.com/output/nature-q-c-200-200-3.jpg);
 }
+
+
+.collapse-toggle {
+  min-width:25px;
+  min-height:25px;
+  float: right;
+}
+.name {
+   min-width:25px;
+   min-height:25px;
+   float: right;
+ }
 
 .armor {
   display: grid;
