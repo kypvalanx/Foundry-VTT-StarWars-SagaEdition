@@ -55,3 +55,7 @@ export const SUBTYPES = {
     "vehicleSystem": ["Starship Accessories", "Weapon Systems", "Defense Systems", "Movement Systems", "Droid Accessories (Droid Stations)"],
     "background": ["event", "occupation", "planet of origin"]
 }
+
+export const GM_BONUSES = [
+    {display: "Health Points", value:"hitPointEq"}
+]

@@ -18,7 +18,7 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js";
 import {SWSEItem} from "../item/item.js";
-import {crewPositions, crewQuality, lightsaberForms, sizeArray, skills} from "../constants.js";
+import {crewPositions, crewQuality, GM_BONUSES, lightsaberForms, sizeArray, skills} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {appendNumericTerm, Attack} from "./attack.js";
@@ -357,7 +357,7 @@ export class SWSEActor extends Actor {
         this.classes = filterItemsByType(this.items.values(), "class");
 
         this.inheritableItems.push(...this.classes.map(item => item.data));
-        this.traits = this.getTraits().map(trait => trait.data);
+        this.traits = this.getTraits()//.map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
         this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
         this.languages = filterItemsByType(this.items.values(), "language");
@@ -2152,37 +2152,45 @@ ${damageRolls}
                 continue;
             }
 
-            let options = this.explodeOptions(choice.options);
-
             let greetingString;
-            let optionString = "";
-            let keys = Object.keys(options);
-            if (keys.length === 0) {
-                greetingString = choice.noOptions ? choice.noOptions : choice.description;
-            } else if (keys.length === 1) {
-                greetingString = choice.oneOption ? choice.oneOption : choice.description;
-                let optionLabel = keys[0];
-                optionString = `<div class="option">${optionLabel}</div>`
-            } else {
+            let content;
+            let options;
+            if(Object.keys(choice.options)[0] === 'INTEGER'){
+                options = choice.options;
                 greetingString = choice.description;
+                content = `<p>${greetingString}</p>`;
+                content += `<input class="choice" type="number" data-option-key="">`
+            } else {
+                options = this.explodeOptions(choice.options);
 
-                for (let optionLabel of keys) {
-                    optionString += `<option value="${optionLabel}">${optionLabel}</option>`
+                let optionString = "";
+                let keys = Object.keys(options);
+                if (keys.length === 0) {
+                    greetingString = choice.noOptions ? choice.noOptions : choice.description;
+                } else if (keys.length === 1) {
+                    greetingString = choice.oneOption ? choice.oneOption : choice.description;
+                    let optionLabel = keys[0];
+                    optionString = `<div class="choice">${optionLabel}</div>`
+                } else {
+                    greetingString = choice.description;
+
+                    for (let optionLabel of keys) {
+                        optionString += `<option value="${optionLabel}">${optionLabel}</option>`
+                    }
+
+                    if (optionString !== "") {
+                        optionString = `<div><select class="choice">${optionString}</select></div>`
+                    }
                 }
 
-                if (optionString !== "") {
-                    optionString = `<div><select class="choice">${optionString}</select></div>`
+
+                content = `<p>${greetingString}</p>`;
+
+                let availableSelections = choice.availableSelections ? choice.availableSelections : 1;
+
+                for (let i = 0; i < availableSelections; i++) {
+                    content += optionString;
                 }
-            }
-
-
-
-            let content = `<p>${greetingString}</p>`;
-
-            let availableSelections = choice.availableSelections ? choice.availableSelections : 1;
-
-            for(let i = 0; i < availableSelections; i++){
-                content += optionString;
             }
 
             let response = await Dialog.prompt({
@@ -2200,13 +2208,25 @@ ${damageRolls}
                             continue;
                         }
                         let key = choice.value ? choice.value : choice.innerText;
-
                         let selectedChoice = options[key];
+                        if (!selectedChoice) {
+                            selectedChoice = options['INTEGER'];
+                        }
                         if (!selectedChoice) {
                             continue;
                         }
-                        if (selectedChoice.payload && selectedChoice.payload !== "") {
-                            item.setPayload(selectedChoice.payload);
+                        for(let entry of Object.entries(selectedChoice)){
+                            if(entry[0].startsWith("payload")){
+                                let payload = entry[1];
+                                let suffixOverride = undefined;
+                                if(payload === 'INTEGER'){
+                                    payload = key;
+                                } else {
+                                    suffixOverride = key;
+                                }
+
+                                item.setPayload(payload, entry[0], suffixOverride);
+                            }
                         }
                         if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
                             items = selectedChoice.providedItems
@@ -2236,7 +2256,15 @@ ${damageRolls}
     explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
-            if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
+            let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
+            if (key === 'AVAILABLE_GM_BONUSES'){
+                for(let bonus of GM_BONUSES){
+                    let data = {};
+                    data[destination] = bonus.value;
+                    resolvedOptions[bonus.display] = data;
+                }
+
+            } else if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
                 let weaponProficiencies = getInheritableAttribute({
                     entity: this,
                     attributeKey: "weaponProficiency",

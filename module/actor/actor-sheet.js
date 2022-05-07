@@ -890,6 +890,7 @@ export class SWSEActorSheet extends ActorSheet {
             case "equipment":
             case "template":
             case "upgrade":
+            case "trait":
                 await this.addItem(item);
                 break;
 

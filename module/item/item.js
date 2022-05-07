@@ -654,29 +654,41 @@ export class SWSEItem extends Item {
         this.data.data.sourceString = sourceString;
     }
 
-    setPayload(payload) {
-        this.data.data.payload = payload;
-        this.data.data.description = this.data.data.description.replace(/#payload#/g, payload)
+    setPayload(payload, payloadString, suffixOverride) {
+        if(!payloadString || payloadString === "#payload#"){
+            this.data.data.payload = payload;
+        }
+        if(suffixOverride){
+            this.data.data.payload = suffixOverride;
+        }
+
+        let pattern = "#payload#";
+        if(payloadString){
+            pattern = `#${payloadString}#`;
+        }
+        let regExp = new RegExp(pattern, "g");
+        this.data.data.description = this.data.data.description.replace(regExp, payload)
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
-                prerequisite.requirement = prerequisite.requirement.replace(/#payload#/g, payload);
+                prerequisite.requirement = prerequisite.requirement.replace(regExp, payload);
             }
             if (prerequisite.text) {
-                prerequisite.text = prerequisite.text.replace(/#payload#/g, payload);
+                prerequisite.text = prerequisite.text.replace(regExp, payload);
             }
         });
         this._crawlAttributes(this.data.data, (attribute) => {
             if (attribute.value) {
-                if (typeof attribute.value === "string") {
-                    attribute.value = attribute.value.replace(/#payload#/g, payload);
-                } else if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace(/#payload#/g, payload));
+                attribute.key = attribute.key.replace(regExp, payload);
+                if (Array.isArray(attribute.value)) {
+                    attribute.value = attribute.value.map(val => val.replace(regExp, payload));
+                } else {
+                    attribute.value = attribute.value.replace(regExp, payload);
                 }
             }
         });
         this._crawlProvidedItems(this.data.data, (providedItem) => {
             if (providedItem.name) {
-                providedItem.name = providedItem.name.replace(/#payload#/g, payload);
+                providedItem.name = providedItem.name.replace(regExp, payload);
             }
         });
         this.data.data.choices = [];
