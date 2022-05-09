@@ -69,6 +69,7 @@ export class SWSEActor extends Actor {
     prepareData() {
         super.prepareData();
         const actorData = this.data;
+        actorData.data.description = actorData.data.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 

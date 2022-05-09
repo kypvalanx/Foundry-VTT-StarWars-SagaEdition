@@ -210,7 +210,7 @@ export function resolveExpression(expression, actor){
                 return resolveExpression(variable, actor);
             }
         }else {
-            return parseInt(expression);
+            return toNumber(expression);
         }
     }
 
