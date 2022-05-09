@@ -2625,6 +2625,7 @@ ${damageRolls}
             }
 
             if (!!payload) {
+                entity.setChoice(payload)
                 entity.setPayload(payload);
             }
             if (!!parent) {
