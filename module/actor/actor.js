@@ -2212,6 +2212,7 @@ ${damageRolls}
                         }
                         let elementValue = foundElement.value || foundElement.innerText;
 
+                        item.setChoice(elementValue)
                         if(choice.type === 'INTEGER'){
                             item.setPayload(elementValue, payload);
                         } else {

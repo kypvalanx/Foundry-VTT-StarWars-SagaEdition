@@ -69,13 +69,11 @@ export class SWSEItem extends Item {
         let id = itemData._id;
         let finalName = itemData.name;
 
-        Object.values(itemData.data?.payloads || {}).forEach(payload => {
+        let modifiers = (itemData.data?.selectedChoices || []).join(", ");
+        if(modifiers){
+            finalName = `${finalName} (${modifiers})`
+        }
 
-            finalName = `${finalName} (${payload})`
-        })
-        // if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
-        //     finalName = `${finalName} (${itemData.data.payload})`
-        // }
 
         for (let prefix of getInheritableAttribute({
             entity: itemData,
@@ -659,14 +657,17 @@ export class SWSEItem extends Item {
         this.data.data.sourceString = sourceString;
     }
 
+    setChoice(choice){
+        this.data.data.selectedChoices = this.data.data.selectedChoices || [];
+        this.data.data.selectedChoices.push(choice);
+    }
+
     setPayload(payload, payloadString) {
         let pattern = "#payload#";
         if(payloadString){
             pattern = `#${payloadString}#`;
             pattern = pattern.replace(/##/g, "#")
         }
-        this.data.data.payloads = this.data.data.payloads || {};
-        this.data.data.payloads[pattern] = payload;
 
         let regExp = new RegExp(pattern, "g");
         this.data.data.description = this.data.data.description.replace(regExp, payload)
