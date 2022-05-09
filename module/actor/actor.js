@@ -37,6 +37,10 @@ function multiplyNumericTerms(roll, multiplier) {
 }
 
 
+function skipFirstLevelChoice(choice, context) {
+    return choice.isFirstLevel && !context.isFirstLevel;
+}
+
 // noinspection JSClosureCompilerSyntax
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -2148,15 +2152,15 @@ ${damageRolls}
         }
         let items = [];
         for (let choice of choices ? choices : []) {
-            if (choice.isFirstLevel && !context.isFirstLevel) {
+            if (skipFirstLevelChoice(choice, context)) {
                 continue;
             }
 
             let greetingString;
             let content;
             let options;
-            if(Object.keys(choice.options)[0] === 'INTEGER'){
-                options = choice.options;
+            let payload = choice.payload;
+            if('INTEGER' === choice.type){
                 greetingString = choice.description;
                 content = `<p>${greetingString}</p>`;
                 content += `<input class="choice" type="number" data-option-key="">`
@@ -2202,42 +2206,34 @@ ${damageRolls}
                 callback: async (html) => {
                     let find = html.find(".choice");
                     let items = [];
-                    for(let i = 0; i < find.length;i++){
-                        let choice = find[i]
-                        if(!choice){
-                            continue;
+                    for(let foundElement of find) {
+                        if(!foundElement){
+                            return;
                         }
-                        let key = choice.value ? choice.value : choice.innerText;
-                        let selectedChoice = options[key];
-                        if (!selectedChoice) {
-                            selectedChoice = options['INTEGER'];
-                        }
-                        if (!selectedChoice) {
-                            continue;
-                        }
-                        for(let entry of Object.entries(selectedChoice)){
-                            if(entry[0].startsWith("payload")){
-                                let payload = entry[1];
-                                let suffixOverride = undefined;
-                                if(payload === 'INTEGER'){
-                                    payload = key;
-                                } else {
-                                    suffixOverride = key;
-                                }
+                        let elementValue = foundElement.value || foundElement.innerText;
 
-                                item.setPayload(payload, entry[0], suffixOverride);
+                        if(choice.type === 'INTEGER'){
+                            item.setPayload(elementValue, payload);
+                        } else {
+                            let selectedChoice = options[elementValue];
+                            if (!selectedChoice) {
+                                return;
+                            }
+                            if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
+                                Object.entries(selectedChoice.payloads).forEach(payload => {
+                                    item.setPayload(payload[1], payload[0]);
+                                })
+                            }
+                            if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
+                                items = selectedChoice.providedItems
+                            }
+                            if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
+                                Object.values(selectedChoice.attributes).forEach(attr => {
+                                    let index = Math.max(Object.keys(item.data.data.attributes)) +1
+                                    item.data.data.attributes[index] = attr;
+                                })
                             }
                         }
-                        if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                            items = selectedChoice.providedItems
-                        }
-                        if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
-                            Object.values(selectedChoice.attributes).forEach(attr => {
-                                let index = Math.max(Object.keys(item.data.data.attributes)) +1
-                                item.data.data.attributes[index] = attr;
-                            })
-                        }
-
                     }
 
                     return {success: true, items: items}
@@ -2260,7 +2256,8 @@ ${damageRolls}
             if (key === 'AVAILABLE_GM_BONUSES'){
                 for(let bonus of GM_BONUSES){
                     let data = {};
-                    data[destination] = bonus.value;
+                    data.attributes = [];
+                    data.attributes.push(bonus)
                     resolvedOptions[bonus.display] = data;
                 }
 

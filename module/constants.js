@@ -57,5 +57,7 @@ export const SUBTYPES = {
 }
 
 export const GM_BONUSES = [
-    {display: "Health Points", value:"hitPointEq"}
+    {display: "Health Points", key:"hitPointEq", value:"#integer#"},
+    {display: "Trained Skills", key:"trainedSkills", value:"#integer#"},
+    {display: "General Feats", key:"provides", value:"General Feats:#integer#"}
 ]

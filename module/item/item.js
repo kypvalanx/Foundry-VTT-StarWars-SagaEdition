@@ -68,9 +68,14 @@ export class SWSEItem extends Item {
         }
         let id = itemData._id;
         let finalName = itemData.name;
-        if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
-            finalName = `${finalName} (${itemData.data.payload})`
-        }
+
+        Object.values(itemData.data?.payloads || {}).forEach(payload => {
+
+            finalName = `${finalName} (${payload})`
+        })
+        // if (itemData.data?.payload && itemData.data?.payload !== "" && !itemData.name?.includes("(")) {
+        //     finalName = `${finalName} (${itemData.data.payload})`
+        // }
 
         for (let prefix of getInheritableAttribute({
             entity: itemData,
@@ -654,18 +659,15 @@ export class SWSEItem extends Item {
         this.data.data.sourceString = sourceString;
     }
 
-    setPayload(payload, payloadString, suffixOverride) {
-        if(!payloadString || payloadString === "#payload#"){
-            this.data.data.payload = payload;
-        }
-        if(suffixOverride){
-            this.data.data.payload = suffixOverride;
-        }
-
+    setPayload(payload, payloadString) {
         let pattern = "#payload#";
         if(payloadString){
             pattern = `#${payloadString}#`;
+            pattern = pattern.replace(/##/g, "#")
         }
+        this.data.data.payloads = this.data.data.payloads || {};
+        this.data.data.payloads[pattern] = payload;
+
         let regExp = new RegExp(pattern, "g");
         this.data.data.description = this.data.data.description.replace(regExp, payload)
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
