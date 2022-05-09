@@ -13,35 +13,7 @@
         {{/unless}}
     {{/each}}
     {{#each data.data.attacks as |attack id|}}
-        {{#if attack}}
-            {{#unless attack.hide}}
-                <div class="resource attack {{#if attack.provider}}vehicle{{/if}} panel"
-                     data-attack-id="{{attack.toJSONString}}" data-item-id="{{attack.itemId}}" data-provider-id="{{attack.providerId}}" data-actor-id="{{attack.actorId}}"
-                     data-label="{{attack.name}}" data-img="{{attack.img}}">
-                    <div class="name"><label for="name">Weapon</label><div class="plain input">{{attack.name}}</div></div>
-                    <div class="to-hit"><label for="attack">Attack</label><div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div></div>
-                    <div class="damage"><label for="damage">Damage</label><div class="plain input">{{{attack.damageRoll.renderFormulaHTML}}}</div></div>
-                    <div class="attack-notes" title="{{{attack.notesText}}}"><label for="notes">Notes</label><div class="plain input">{{{attack.notesHTML}}}</div></div>
-                    <div class="range"><label for="range">Range</label><div class="plain input">{{attack.rangeDisplay}}</div></div>
-                    <div class="critical"><label for="critical">Crit.</label><div class="plain input">{{attack.critical}}</div></div>
-                    <div class="type"><label for="type">Type</label><div class="plain input">{{attack.type}}</div></div>
-                    <div class="modes">
-                        {{#each attack.modes as |group groupId|}}
-                            <div class="mode-group">
-                            {{#each group as |mode id|}}
-                                {{#if mode}}
-                                    <div class="mode-selector" data-mode-path="{{mode.modePath}}" data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}">
-                                        <label for="{{mode.name}} {{attack.itemId}}">{{mode.name}}</label>
-                                        <input class="" type="{{#unless mode.group}}checkbox{{/unless}}{{#if mode.group}}radio{{/if}}" name="{{mode.group}} {{attack.itemId}}" {{#if mode.isActive}}checked{{/if}}
-                                               data-mode="{{mode.name}}" data-item-id="{{attack.itemId}}" id="{{mode.name}} {{attack.itemId}}"/>
-                                    </div>
-                                {{/if}}
-                            {{/each}}
-                            </div>
-                        {{/each}}
-                    </div>
-                </div>
-            {{/unless}}
-        {{/if}}
+
+        {{> 'systems/swse/templates/actor/parts/attack/weapon-block.hbs' attack = attack}}
     {{/each}}
 </div>

@@ -13,6 +13,10 @@ export const registerHandlebarsHelpers = function () {
         }
         return outStr;
     });
+    Handlebars.registerHelper('arr', function() {
+        // Covnert arguments to array, ommiting the last item, which is the options obect
+        return Array.prototype.slice.call(arguments,0,-1);
+    })
 
     Handlebars.registerHelper('toLowerCase', function(str) {
         return str.toLowerCase();

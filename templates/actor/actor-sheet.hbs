@@ -250,29 +250,12 @@
             <div class="tab items" data-group="primary" data-tab="traits">
                 <div>
                     <h2><label class="resource-label">Traits <a data-action="compendium"
-                                                                data-action-target="swse.talents"
+                                                                data-action-target="swse.traits"
                                                                 title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
-                <ol class="items-list">
-                    {{#each actor.traits as |trait id|}}
-                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.data.textDescription}}">
-                            <div class="flexrow">
-                                <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
-                                <h4 class="item-name">Source: {{trait.data.supplier.type}}
-                                    , {{trait.data.supplier.name}}</h4>
-                                    <!--                            <h4 class="item-name">{{#if
-                                    trait.data.prerequisites}}-->
-                                    <!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i
-                                            class="fas fa-edit"></i></a>
-                                </div>
-                            </div>
-                            <!--<div>{{trait.data.textDescription}}</div>-->
-                        </li>
-                    {{/each}}
-                </ol>
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="items-list" fields= (arr "Source") items=actor.traits draggable=false quantity=false delete="unSupplied"}}
+
             </div>
 
             {{!-- Owned Powers Tab --}}

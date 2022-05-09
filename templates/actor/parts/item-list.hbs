@@ -1,11 +1,12 @@
 <div class="border item-container {{container}}">
+    {{#if label}}
     <div>
         <label class="resource-label">{{label}}</label>
     </div>
+    {{/if}}
     <ol class="items-list">
         {{#each items as |item id|}}
-
-            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item draggable=../draggable quantity=../quantity}}
+            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete}}
         {{/each}}
     </ol>
 </div>

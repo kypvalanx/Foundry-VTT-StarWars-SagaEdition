@@ -18,7 +18,7 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js";
 import {SWSEItem} from "../item/item.js";
-import {crewPositions, crewQuality, lightsaberForms, sizeArray, skills} from "../constants.js";
+import {crewPositions, crewQuality, GM_BONUSES, lightsaberForms, sizeArray, skills} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {appendNumericTerm, Attack} from "./attack.js";
@@ -36,6 +36,10 @@ function multiplyNumericTerms(roll, multiplier) {
     }
 }
 
+
+function skipFirstLevelChoice(choice, context) {
+    return choice.isFirstLevel && !context.isFirstLevel;
+}
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -357,7 +361,7 @@ export class SWSEActor extends Actor {
         this.classes = filterItemsByType(this.items.values(), "class");
 
         this.inheritableItems.push(...this.classes.map(item => item.data));
-        this.traits = this.getTraits().map(trait => trait.data);
+        this.traits = this.getTraits()//.map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
         this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
         this.languages = filterItemsByType(this.items.values(), "language");
@@ -2148,41 +2152,49 @@ ${damageRolls}
         }
         let items = [];
         for (let choice of choices ? choices : []) {
-            if (choice.isFirstLevel && !context.isFirstLevel) {
+            if (skipFirstLevelChoice(choice, context)) {
                 continue;
             }
 
-            let options = this.explodeOptions(choice.options);
-
             let greetingString;
-            let optionString = "";
-            let keys = Object.keys(options);
-            if (keys.length === 0) {
-                greetingString = choice.noOptions ? choice.noOptions : choice.description;
-            } else if (keys.length === 1) {
-                greetingString = choice.oneOption ? choice.oneOption : choice.description;
-                let optionLabel = keys[0];
-                optionString = `<div class="option">${optionLabel}</div>`
-            } else {
+            let content;
+            let options;
+            let payload = choice.payload;
+            if('INTEGER' === choice.type){
                 greetingString = choice.description;
+                content = `<p>${greetingString}</p>`;
+                content += `<input class="choice" type="number" data-option-key="">`
+            } else {
+                options = this.explodeOptions(choice.options);
 
-                for (let optionLabel of keys) {
-                    optionString += `<option value="${optionLabel}">${optionLabel}</option>`
+                let optionString = "";
+                let keys = Object.keys(options);
+                if (keys.length === 0) {
+                    greetingString = choice.noOptions ? choice.noOptions : choice.description;
+                } else if (keys.length === 1) {
+                    greetingString = choice.oneOption ? choice.oneOption : choice.description;
+                    let optionLabel = keys[0];
+                    optionString = `<div class="choice">${optionLabel}</div>`
+                } else {
+                    greetingString = choice.description;
+
+                    for (let optionLabel of keys) {
+                        optionString += `<option value="${optionLabel}">${optionLabel}</option>`
+                    }
+
+                    if (optionString !== "") {
+                        optionString = `<div><select class="choice">${optionString}</select></div>`
+                    }
                 }
 
-                if (optionString !== "") {
-                    optionString = `<div><select class="choice">${optionString}</select></div>`
+
+                content = `<p>${greetingString}</p>`;
+
+                let availableSelections = choice.availableSelections ? choice.availableSelections : 1;
+
+                for (let i = 0; i < availableSelections; i++) {
+                    content += optionString;
                 }
-            }
-
-
-
-            let content = `<p>${greetingString}</p>`;
-
-            let availableSelections = choice.availableSelections ? choice.availableSelections : 1;
-
-            for(let i = 0; i < availableSelections; i++){
-                content += optionString;
             }
 
             let response = await Dialog.prompt({
@@ -2194,30 +2206,35 @@ ${damageRolls}
                 callback: async (html) => {
                     let find = html.find(".choice");
                     let items = [];
-                    for(let i = 0; i < find.length;i++){
-                        let choice = find[i]
-                        if(!choice){
-                            continue;
+                    for(let foundElement of find) {
+                        if(!foundElement){
+                            return;
                         }
-                        let key = choice.value ? choice.value : choice.innerText;
+                        let elementValue = foundElement.value || foundElement.innerText;
 
-                        let selectedChoice = options[key];
-                        if (!selectedChoice) {
-                            continue;
+                        item.setChoice(elementValue)
+                        if(choice.type === 'INTEGER'){
+                            item.setPayload(elementValue, payload);
+                        } else {
+                            let selectedChoice = options[elementValue];
+                            if (!selectedChoice) {
+                                return;
+                            }
+                            if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
+                                Object.entries(selectedChoice.payloads).forEach(payload => {
+                                    item.setPayload(payload[1], payload[0]);
+                                })
+                            }
+                            if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
+                                items = selectedChoice.providedItems
+                            }
+                            if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
+                                Object.values(selectedChoice.attributes).forEach(attr => {
+                                    let index = Math.max(Object.keys(item.data.data.attributes)) +1
+                                    item.data.data.attributes[index] = attr;
+                                })
+                            }
                         }
-                        if (selectedChoice.payload && selectedChoice.payload !== "") {
-                            item.setPayload(selectedChoice.payload);
-                        }
-                        if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                            items = selectedChoice.providedItems
-                        }
-                        if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
-                            Object.values(selectedChoice.attributes).forEach(attr => {
-                                let index = Math.max(Object.keys(item.data.data.attributes)) +1
-                                item.data.data.attributes[index] = attr;
-                            })
-                        }
-
                     }
 
                     return {success: true, items: items}
@@ -2236,7 +2253,16 @@ ${damageRolls}
     explodeOptions(options) {
         let resolvedOptions = {};
         for (let [key, value] of Object.entries(options)) {
-            if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
+            let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
+            if (key === 'AVAILABLE_GM_BONUSES'){
+                for(let bonus of GM_BONUSES){
+                    let data = {};
+                    data.attributes = [];
+                    data.attributes.push(bonus)
+                    resolvedOptions[bonus.display] = data;
+                }
+
+            } else if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
                 let weaponProficiencies = getInheritableAttribute({
                     entity: this,
                     attributeKey: "weaponProficiency",
@@ -2599,6 +2625,7 @@ ${damageRolls}
             }
 
             if (!!payload) {
+                entity.setChoice(payload)
                 entity.setPayload(payload);
             }
             if (!!parent) {

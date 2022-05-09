@@ -10,7 +10,12 @@
             <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i class="fas fa-minus"></i></a>
         {{/if}}
         <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-        <a class="item-control item-delete" title="Delete Item"><i
-                class="fas fa-trash"></i></a>
+
+        {{#ifEquals delete 'unSupplied'}}
+            {{#unless item.data.data.supplier.id}}
+                <a class="item-control item-delete" title="Delete Item"><i
+                        class="fas fa-trash"></i></a>
+            {{/unless}}
+        {{/ifEquals}}
     </div>
 </li>
