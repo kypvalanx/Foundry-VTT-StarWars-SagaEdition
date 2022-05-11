@@ -6,6 +6,7 @@ import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
+import {activateChoices} from "../choice/choice.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -1099,7 +1100,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
-        let choices = await this.actor.activateChoices(item, context);
+        let choices = await activateChoices(item, context);
         if (!choices.success) {
             return;
         }
@@ -1119,7 +1120,7 @@ export class SWSEActorSheet extends ActorSheet {
         //let entities = [];
         let context = {};
         //TODO might return future items
-        let choices = await this.actor.activateChoices(item, context);
+        let choices = await activateChoices(item, context);
         if (!choices.success) {
             return [];
         }
