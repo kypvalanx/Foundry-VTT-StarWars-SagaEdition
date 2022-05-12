@@ -48,7 +48,7 @@ export async function activateChoices(item, context) {
             } else {
                 greetingString = choice.description;
 
-                for (let option of options) {
+                for (let option of Object.values(options)) {
                     optionString += `<option value="${option.name}"${option.isDefault ? " selected" : ""}>${option.name}</option>`
                 }
 

@@ -306,8 +306,11 @@ export class Attack {
         //actorData.
 
 
-        let roll = Roll.fromTerms(terms
-            .filter(term => !!term));
+        terms = terms
+            .filter(term => !!term);
+
+        terms = terms.length > 0 ? terms : [new NumericTerm({number: 0})]
+        let roll = Roll.fromTerms(terms);
 
         let bonusDamageDice = getInheritableAttribute({
             entity: itemData,
@@ -593,7 +596,7 @@ function resolveUnarmedDamageDie(actor) {
     });
     let damageDie = getInheritableAttribute({
         entity: actor,
-        attributeKey: isDroid ? "droidUnarmedDamage" : "unarmedDamage",
+        attributeKey: isDroid ? "droidUnarmedDamage" : ["unarmedDamage", "unarmedDamageDie"],
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({
