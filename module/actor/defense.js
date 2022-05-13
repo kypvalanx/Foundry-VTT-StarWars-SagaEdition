@@ -250,6 +250,12 @@ function _resolveRef(actor, conditionBonus) {
 function _resolveFFRef(actor, conditionBonus) {
     let total = [];
     total.push(10);
+
+    let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    if(abilityBonus < 0) {
+        total.push(abilityBonus);
+    }
+
     let armorBonus;
     if (["vehicle", "npc-vehicle"].includes(actor.data.type)) {
         if (actor.pilot) {
