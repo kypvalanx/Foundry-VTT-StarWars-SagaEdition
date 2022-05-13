@@ -766,3 +766,17 @@ export async function getIndexAndPack(indices, type) {
     }
     return {index, pack};
 }
+
+export function getEntityFromCompendiums(type, id){
+    let packs = game.packs.filter(pack => pack.metadata.type===type);
+
+    for(let pack of packs){
+        //let index = await pack.getIndex();
+        let entity = pack.get(id)///.find(thing => thing._id === id);
+
+        //let entity = await pack.getDocument(id)
+        if(entity){
+            return entity;
+        }
+    }
+}

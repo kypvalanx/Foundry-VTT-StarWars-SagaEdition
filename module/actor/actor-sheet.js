@@ -80,6 +80,40 @@ export class SWSEActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
+
+        html.find(".collapse-toggle").on("click", event => {
+            let down = "fa-minus";
+            let up = "fa-plus";
+            event.stopPropagation();
+            let button = $(event.currentTarget);
+
+            let hide = false;
+
+            let children = button.find("i.fas");
+            children.each((i, e) =>{
+                if(e.classList.contains(down)){
+                    e.classList.remove(down);
+                    e.classList.add(up);
+                    hide = true;
+                } else {
+                    e.classList.remove(up);
+                    e.classList.add(down);
+                }
+            })
+
+            let container = button.parents(".collapsible-container")
+            let collapsible = container.children(".collapsible")
+            collapsible.each((i, div) => {
+                if(hide){
+                    div.style.display = "none"
+                    //div.classList.add("collapsed");
+                } else {
+                    div.style.display = "grid"
+                    //div.classList.remove("collapsed");
+                }
+            })
+        })
+
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
@@ -142,38 +176,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#selectHeight").on("click", () => this._unavailable());
         html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
 
-        html.find(".collapse-toggle").on("click", event => {
-            let down = "fa-minus";
-            let up = "fa-plus";
-            event.stopPropagation();
-            let button = $(event.currentTarget);
-
-            let hide = false;
-
-            let children = button.find("i.fas");
-                children.each((i, e) =>{
-                if(e.classList.contains(down)){
-                    e.classList.remove(down);
-                    e.classList.add(up);
-                    hide = true;
-                } else {
-                    e.classList.remove(up);
-                    e.classList.add(down);
-                }
-            })
-
-            let container = button.parents(".collapsible-container")
-            let collapsible = container.children(".collapsible")
-            collapsible.each((i, div) => {
-                if(hide){
-                    div.style.display = "none"
-                    //div.classList.add("collapsed");
-                } else {
-                    div.style.display = "grid"
-                    //div.classList.remove("collapsed");
-                }
-            })
-        })
 
         html.find(".generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
