@@ -1,0 +1,25 @@
+{{!-- Defense Block --}}
+<div class="collapsible-container">
+<div class="defense">
+    {{log def}}
+    <div class="defense-label plain input static flex flex-row"><div>{{toTitleCase def.name}}</div>
+        {{#if def.defenseModifiers}}
+            <div class="collapse-toggle flex-float-right"><h3 class="plain input"><a data-action="hide"><i
+                    class="fas fa-plus"></i></a></h3></div>
+        {{/if}}
+    </div>
+    <div class="defense-total plain input static"><h2>{{def.total}}</h2></div>
+    <div class="defense-10 plain input static">10</div>
+    <div class="defense-level-armor plain input static">{{def.armorBonus}}</div>
+    <div class="defense-ability plain input static">{{def.abilityBonus}}</div>
+    <div class="defense-class plain input static">{{def.classBonus}}</div>
+    <div class="defense-misc plain input static" title="{{def.miscBonusTip}}">{{def.miscBonus}}</div>
+</div>
+<div class="collapsible" style="display: none">
+{{#if def.defenseModifiers}}
+    {{#each def.defenseModifiers as |defenseModifier id|}}
+    {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=defenseModifier}}
+    {{/each}}
+{{/if}}
+</div>
+</div>

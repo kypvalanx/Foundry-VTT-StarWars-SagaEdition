@@ -143,8 +143,8 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
 
         html.find(".collapse-toggle").on("click", event => {
-            let down = "fa-arrow-down";
-            let up = "fa-arrow-up";
+            let down = "fa-minus";
+            let up = "fa-plus";
             event.stopPropagation();
             let button = $(event.currentTarget);
 

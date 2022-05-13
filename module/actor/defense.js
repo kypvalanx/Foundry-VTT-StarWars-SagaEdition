@@ -116,7 +116,7 @@ function _resolveFort(actor, conditionBonus) {
     miscBonuses.push(conditionBonus)
     miscBonuses.push(otherBonus)
     let miscBonus = resolveValueArray(miscBonuses)
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip,  name: 'Fortitude', defenseBlock:true}
 }
 
 /**
@@ -160,7 +160,7 @@ function _resolveWill(actor, conditionBonus) {
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     let armorBonus = resolveValueArray([heroicLevel]);
-    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip}
+    return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip, name: 'Will', defenseBlock:true}
 }
 
 /**
@@ -224,6 +224,7 @@ function _resolveRef(actor, conditionBonus) {
     total.push(dodgeBonus);
     total.push(conditionBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
+    let defenseModifiers = [_resolveFFRef(actor, conditionBonus)]
     return {
         total: resolveValueArray(total, actor),
         abilityBonus,
@@ -231,7 +232,83 @@ function _resolveRef(actor, conditionBonus) {
         classBonus,
         miscBonus,
         miscBonusTip,
-        skip: false
+        skip: false,
+        name: 'Reflex',
+        defenseBlock:true,
+        defenseModifiers
+    }
+}
+
+
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param conditionBonus
+ * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
+ * @private
+ */
+function _resolveFFRef(actor, conditionBonus) {
+    let actorData = actor.data
+    let total = [];
+    total.push(10);
+    let armorBonus;
+    if (["vehicle", "npc-vehicle"].includes(actor.data.type)) {
+        if (actor.pilot) {
+            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
+            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
+            if (armorReflexDefenseBonus) {
+                armorBonus = Math.max(armorBonus, armorReflexDefenseBonus);
+            }
+        } else {
+            armorBonus = getArmorReflexDefenseBonus(actor) || 0;
+        }
+    } else {
+        armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+    }
+    total.push(armorBonus);
+    let otherBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "reflexDefenseBonus",
+        reduce: "SUM",
+        attributeFilter: attr => !attr.modifier
+    })
+    let miscBonusTip = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "reflexDefenseBonus",
+        reduce: "SUMMARY",
+        attributeFilter: attr => !attr.modifier
+    })
+    total.push(otherBonus);
+    let classBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "classReflexDefenseBonus",
+        reduce: "MAX"
+    }) || 0;
+    total.push(classBonus);
+    let dodgeBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "bonusDodgeReflexDefense",
+        reduce: "SUM"
+    });
+    miscBonusTip += getInheritableAttribute({
+        entity: actor,
+        attributeKey: "bonusDodgeReflexDefense",
+        reduce: "SUMMARY"
+    });
+    miscBonusTip += `Condition: ${conditionBonus};  `
+    total.push(dodgeBonus);
+    total.push(conditionBonus);
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
+    return {
+        total: resolveValueArray(total, actor),
+        abilityBonus:0,
+        armorBonus,
+        classBonus,
+        miscBonus,
+        miscBonusTip,
+        skip: false,
+        name: 'Reflex (Flat-Footed)',
+        defenseBlock:true
     }
 }
 

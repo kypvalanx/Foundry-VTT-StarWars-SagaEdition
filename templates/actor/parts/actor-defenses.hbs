@@ -9,16 +9,8 @@
     </div>
     {{#each data.data.defense as |def id|}}
         {{#unless def.skip}}
-            {{#if def.armorBonus}}
-                <div class="defense">
-                    <div class="defense-label plain input static">{{toTitleCase id}}</div>
-                    <div class="defense-total plain input static"><h2>{{def.total}}</h2></div>
-                    <div class="defense-10 plain input static">10</div>
-                    <div class="defense-level-armor plain input static">{{def.armorBonus}}</div>
-                    <div class="defense-ability plain input static">{{def.abilityBonus}}</div>
-                    <div class="defense-class plain input static">{{def.classBonus}}</div>
-                    <div class="defense-misc plain input static" title="{{def.miscBonusTip}}">{{def.miscBonus}}</div>
-                </div>
+            {{#if def.defenseBlock}}
+                {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=def}}
             {{/if}}
         {{/unless}}
     {{/each}}
