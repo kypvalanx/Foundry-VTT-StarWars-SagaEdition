@@ -124,10 +124,9 @@ export class Attack {
         if ('Unarmed Attack' === this.itemId) {
             return new UnarmedAttack(this.actorId);
         }
-        let find = actor.items.find(item => item._id === this.itemId);
-        if(!find){
-            find = actor.items.get(this.itemId)
-        }
+
+        let items = actor.items?._source || actor.items;
+        let find = items.find(item => item._id === this.itemId);
 
         if (find instanceof SWSEItem) {
             return find.data;
