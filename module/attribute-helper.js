@@ -86,64 +86,68 @@ export function getInheritableAttribute(data = {}) {
             let subData = JSON.parse(JSON.stringify(data))
             subData.attributeKey = subKey;
             subData.attributeFilter = data.attributeFilter
+            delete subData.reduce
             values.push(...getInheritableAttribute(subData))
         }
-        return values;
-    }
 
-    let entity = data.entity;
-    if (entity instanceof SWSEActor || entity instanceof SWSEItem || entity instanceof UnarmedAttack) {
-        entity = entity.data;
-    }
+    } else {
 
-    if (entity.type) {
-        let itemAttributes = Object.entries(entity.data?.attributes || entity._source?.data?.attributes|| []).filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0])).map(entry => entry[1]);
-        for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
-            values.push(...extractAttributeValues(attribute, entity._id, entity.name));
-        }
-        let names = [];
-        for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
-            names.push(item.name);
-            let duplicates = names.filter(name => name === item.name).length;
-            values.push(...getInheritableAttribute({
-                entity: item,
-                attributeKey: data.attributeKey,
-                duplicates,
-                recursive: true
-            }));
+        let entity = data.entity;
+        if (entity instanceof SWSEActor || entity instanceof SWSEItem || entity instanceof UnarmedAttack) {
+            entity = entity.data;
         }
 
-        if (entity.type === 'class') {
-            let classLevel = data.duplicates || 0;
-            if(classLevel > 0) {
-                let level = entity.data.levels[classLevel];
-                for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-                    values.push(...extractAttributeValues(attribute, entity._id, entity.name));
+        if (entity.type) {
+            let itemAttributes = Object.entries(entity.data?.attributes || entity._source?.data?.attributes || []).filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0])).map(entry => entry[1]);
+            for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
+                values.push(...extractAttributeValues(attribute, entity._id, entity.name));
+            }
+            let names = [];
+            for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
+                names.push(item.name);
+                let duplicates = names.filter(name => name === item.name).length;
+                values.push(...getInheritableAttribute({
+                    entity: item,
+                    attributeKey: data.attributeKey,
+                    duplicates,
+                    recursive: true
+                }));
+            }
+
+            if (entity.type === 'class') {
+                let classLevel = data.duplicates || 0;
+                if (classLevel > 0) {
+                    let level = entity.data.levels[classLevel];
+                    for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
+                        values.push(...extractAttributeValues(attribute, entity._id, entity.name));
+                    }
                 }
             }
+            values.push(...(extractModeAttributes(entity, Object.values(entity.data?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
+
         }
-        values.push(...(extractModeAttributes(entity, Object.values(entity.data?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
 
+
+        if(!data.recursive) {
+            values = values.filter(attr => {
+                if(attr.parentPrerequisite && meetsPrerequisites(data.parent, attr.parentPrerequisite).doesFail){
+                    return false;
+                }
+
+                return !meetsPrerequisites(entity, attr.prerequisite).doesFail
+            });
+        }
     }
 
-    let filtered = values.filter(data.attributeFilter);
+    values = values.filter(data.attributeFilter);
 
-    if(!data.recursive) {
-        filtered = filtered.filter(attr => {
-            if(attr.parentPrerequisite && meetsPrerequisites(data.parent, attr.parentPrerequisite).doesFail){
-                return false;
-            }
 
-            return !meetsPrerequisites(entity, attr.prerequisite).doesFail
-        });
-    }
-
-    let overrides = filtered.filter(attr => attr.override)
+    let overrides = values.filter(attr => attr.override)
 
     if(overrides.length > 0){
-        filtered = overrides;
+        values = overrides;
     }
-    return reduceArray(data.reduce, filtered);
+    return reduceArray(data.reduce, values);
 }
 
 

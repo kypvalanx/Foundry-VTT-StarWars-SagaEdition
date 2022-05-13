@@ -14,7 +14,14 @@ import {
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEActor} from "./actor.js";
 import {reduceWeaponRange, SWSEItem} from "../item/item.js";
-import {getOrdinal, getRangedAttackMod, getRangeModifierBlock, increaseDieSize, toNumber} from "../util.js";
+import {
+    getEntityFromCompendiums,
+    getOrdinal,
+    getRangedAttackMod,
+    getRangeModifierBlock,
+    increaseDieSize,
+    toNumber
+} from "../util.js";
 import {SWSERollWrapper} from "../common/roll.js";
 
 //Broken out because i have no idea if i'm doing this in a way that the roller understands
@@ -88,9 +95,17 @@ export class Attack {
      * @returns {ActorData}
      */
     get provider() {
-        let find = game.data.actors.find(actor => actor._id === this.providerId);
-        if (find instanceof SWSEActor) {
-            return find.data;
+        let actor = this.getActor(this.providerId)
+            if (actor instanceof SWSEActor) {
+                return actor.data;
+            }
+            return actor;
+    }
+
+    getActor(actorId) {
+        let find = game.data.actors.find(actor => actor._id === actorId);
+        if (!find) {
+            find = getEntityFromCompendiums("Actor", actorId)
         }
         return find;
     }
@@ -102,10 +117,17 @@ export class Attack {
     get item() {
         let provider = this.provider;
         let actor = !!provider ? provider : this.actor;
+        if(!actor){
+            return undefined;
+        }
+
         if ('Unarmed Attack' === this.itemId) {
             return new UnarmedAttack(this.actorId);
         }
-        let find = actor.items.find(item => item._id === this.itemId);
+
+        let items = actor.items?._source || actor.items;
+        let find = items.find(item => item._id === this.itemId);
+
         if (find instanceof SWSEItem) {
             return find.data;
         }
@@ -198,6 +220,10 @@ export class Attack {
         let item = this.item;
         let provider = this.provider;
 
+        if(!actor || !item){
+            return;
+        }
+
         let actorData = actor?.data;
         //let providerData = provider.data;
         let weaponTypes = getPossibleProficiencies(actor, item);
@@ -257,19 +283,24 @@ export class Attack {
     }
 
     get damageRoll() {
-        let actorData = this.actor
-        let itemData = this.item
+        let actor = this.actor
+        let item = this.item
+
+        if(!actor || !item){
+            return;
+        }
+
         let terms = [];
         if (this.isUnarmed) {
-            terms.push(...resolveUnarmedDamageDie(actorData));
+            terms.push(...resolveUnarmedDamageDie(actor));
             terms.push(...appendNumericTerm(getInheritableAttribute({
-                entity: itemData,
+                entity: item,
                 attributeKey: "unarmedBonusDamage",
                 reduce: "SUM"
             }), "Unarmed Bonus Damage"));
         } else {
             let damageDice = getInheritableAttribute({
-                entity: itemData,
+                entity: item,
                 attributeKey: ["damage", "damageDie"],
                 reduce: "VALUES"
             })
@@ -277,7 +308,7 @@ export class Attack {
             terms.push(...getDiceTermsFromString(damageDie))
         }
 
-        let heroicClassLevels = (actorData?.items || []).filter(item => item.type === 'class' && getInheritableAttribute({
+        let heroicClassLevels = (actor?.items || []).filter(item => item.type === 'class' && getInheritableAttribute({
             entity: item,
             attributeKey: "isHeroic", reduce: "OR"
         }))
@@ -285,7 +316,7 @@ export class Attack {
 
         terms.push(...appendNumericTerm(halfHeroicLevel, "Half Heroic Level"));
         terms.push(...getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "bonusDamage",
             reduce: "VALUES"
         }).map(value => appendNumericTerm(value)).flat());
@@ -295,22 +326,25 @@ export class Attack {
             terms.push(...appendNumericTerm(mod.value, mod.source))
         }
 
-        if (this.isMelee(itemData)) {
-            let strMod = parseInt(actorData.data.attributes.str.mod);
-            let isTwoHanded = compareSizes(getSize(actorData), getSize(itemData)) === 1;
+        if (this.isMelee(item)) {
+            let strMod = parseInt(actor.data.attributes.str.mod);
+            let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
             terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
         }
 
-        let weaponTypes = getPossibleProficiencies(actorData, itemData);
-        terms.push(...getSpecializationDamageBonuses(actorData, weaponTypes));
+        let weaponTypes = getPossibleProficiencies(actor, item);
+        terms.push(...getSpecializationDamageBonuses(actor, weaponTypes));
         //actorData.
 
 
-        let roll = Roll.fromTerms(terms
-            .filter(term => !!term));
+        terms = terms
+            .filter(term => !!term);
+
+        terms = terms.length > 0 ? terms : [new NumericTerm({number: 0})]
+        let roll = Roll.fromTerms(terms);
 
         let bonusDamageDice = getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "bonusDamageDie",
             reduce: "SUM"
         })
@@ -434,14 +468,18 @@ export class Attack {
     }
 
     get type() {
-        let itemData = this.item;
+        let item = this.item;
+
+        if(!item){
+            return;
+        }
         let attributes = getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: 'damageType',
             reduce: "VALUES"
         });
 
-        if(attributes.length === 0 && itemData.type === "vehicleSystem"){
+        if(attributes.length === 0 && item.type === "vehicleSystem"){
             attributes.push("Energy");
         }
 
@@ -551,7 +589,7 @@ export class Attack {
 }
 
 function getItemStripping(itemData, key) {
-    if (itemData.data.stripping) {
+    if (itemData?.data?.stripping) {
         return itemData.data.stripping[key];
     }
     return undefined;
@@ -593,7 +631,7 @@ function resolveUnarmedDamageDie(actor) {
     });
     let damageDie = getInheritableAttribute({
         entity: actor,
-        attributeKey: isDroid ? "droidUnarmedDamage" : "unarmedDamage",
+        attributeKey: isDroid ? "droidUnarmedDamage" : ["unarmedDamage", "unarmedDamageDie"],
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({

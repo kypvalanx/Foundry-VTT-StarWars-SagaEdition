@@ -743,6 +743,8 @@ export function getCompendium(type) {
             return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle templates"));
+        case 'vehiclebasetype':
+            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle base types"));
         case 'vehiclesystem':
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
@@ -763,4 +765,18 @@ export async function getIndexAndPack(indices, type) {
         indices[type] = index;
     }
     return {index, pack};
+}
+
+export function getEntityFromCompendiums(type, id){
+    let packs = game.packs.filter(pack => pack.metadata.type===type);
+
+    for(let pack of packs){
+        //let index = await pack.getIndex();
+        let entity = pack.get(id)///.find(thing => thing._id === id);
+
+        //let entity = await pack.getDocument(id)
+        if(entity){
+            return entity;
+        }
+    }
 }

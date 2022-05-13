@@ -1094,6 +1094,9 @@ export class SWSEItem extends Item {
     }
 
     static getModesFromItem(itemData) {
+        if(!itemData){
+            return [];
+        }
         if(itemData.data?.data?.modes){
             itemData = itemData.data;
         }

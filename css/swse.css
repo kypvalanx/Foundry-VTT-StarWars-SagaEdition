@@ -194,6 +194,13 @@
   flex-wrap: wrap;
 }
 
+.flex-float-right {
+  margin-left: auto;
+  -webkit-box-ordinal-group: 3;
+  -ms-flex-order: 2;
+  order: 2;
+}
+
 /* Styles limited to swse sheets */
 .swse .item-form {
   font-family: "Roboto", sans-serif;
@@ -737,42 +744,42 @@
 
 .swse .defense {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   grid-template-rows: 1fr;
   grid-column-gap: 3px;
   grid-row-gap: 3px;
 }
 
 .swse .defense .defense-header {
-  grid-area: 1 / 1 / 2 / 4;
+  grid-area: 1 / 1 / 2 / 5;
 }
 
 .swse .defense .defense-label {
-  grid-area: 1 / 1 / 2 / 2;
+  grid-area: 1 / 1 / 2 / 3;
 }
 
 .swse .defense .defense-total {
-  grid-area: 1 / 2 / 2 / 3;
-}
-
-.swse .defense .defense-10 {
   grid-area: 1 / 3 / 2 / 4;
 }
 
-.swse .defense .defense-level-armor {
+.swse .defense .defense-10 {
   grid-area: 1 / 4 / 2 / 5;
 }
 
-.swse .defense .defense-ability {
+.swse .defense .defense-level-armor {
   grid-area: 1 / 5 / 2 / 6;
 }
 
-.swse .defense .defense-class {
+.swse .defense .defense-ability {
   grid-area: 1 / 6 / 2 / 7;
 }
 
-.swse .defense .defense-misc {
+.swse .defense .defense-class {
   grid-area: 1 / 7 / 2 / 8;
+}
+
+.swse .defense .defense-misc {
+  grid-area: 1 / 8 / 2 / 9;
 }
 
 .swse .attribute {
