@@ -743,6 +743,8 @@ export function getCompendium(type) {
             return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle templates"));
+        case 'vehiclebasetype':
+            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle base types"));
         case 'vehiclesystem':
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
