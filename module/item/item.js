@@ -683,9 +683,9 @@ export class SWSEItem extends Item {
             if (attribute.value) {
                 attribute.key = attribute.key.replace(regExp, payload);
                 if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => val.replace(regExp, payload));
+                    attribute.value = attribute.value.map(val => `${val}`.replace(regExp, payload));
                 } else {
-                    attribute.value = attribute.value.replace(regExp, payload);
+                    attribute.value = `${attribute.value}`.replace(regExp, payload);
                 }
             }
         });
