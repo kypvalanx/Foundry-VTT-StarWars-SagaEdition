@@ -2154,7 +2154,7 @@ ${damageRolls}
             let namedCrew = provided.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
             let equip = provided.equip;
             let {index, pack} = await getIndexAndPack(indices, type);
-            let {entry, payload} = await this.getIndexEntryByName(item, index);
+            let {entry, payload, itemName} = await this.getIndexEntryByName(item, index);
 
             if (!entry) {
                 console.warn(`attempted to add ${itemName}`, arguments)
@@ -2254,7 +2254,7 @@ ${damageRolls}
             entry = await index.find(f => f.name === cleanItemName2);
             payload = undefined;
         }
-        return {entry, payload};
+        return {entry, payload, itemName};
     }
 
     cleanItemName(feat) {
@@ -2335,13 +2335,19 @@ ${damageRolls}
 /**
  *
  *
- * @param actorData {ActorData|Object}
+ * @param actorData {ActorData}
  */
 export function getEquippedItems(actorData) {
     if(!actorData){
         return [];
     }
+    if(actorData instanceof SWSEActor){
+        actorData = actorData.data;
+    }
+
     let equippedIds = actorData?.data?.data?.equippedIds || actorData?.data?.equippedIds || actorData?._source?.data?.equippedIds ||[];
     equippedIds = equippedIds.map(id => id.id)
-    return actorData.items.filter(item => equippedIds.includes(item._id));
+    let items = actorData?.items?._source || actorData.items ||[]
+
+    return items.filter(item => equippedIds.includes(item._id));
 }

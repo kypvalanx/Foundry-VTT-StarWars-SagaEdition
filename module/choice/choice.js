@@ -433,7 +433,7 @@ function explodeOptions(options, actor) {
                 }
             }
         } else {
-            resolvedOptions[key] = value;
+            resolvedOptions.push(value);
         }
     }
     return resolvedOptions;

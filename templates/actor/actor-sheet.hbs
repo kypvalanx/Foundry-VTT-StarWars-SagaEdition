@@ -175,11 +175,11 @@
                                     class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
                     <div class="grid-2col">
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true quantity=true}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true quantity=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true delete="always"}}
                     </div>
 
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory draggable=true quantity=true}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory draggable=true quantity=true delete="always"}}
 
                     {{> 'systems/swse/templates/credits/credit-chip.hbs'}}
 
