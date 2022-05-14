@@ -1,4 +1,4 @@
-import {GM_BONUSES, lightsaberForms} from "../constants.js";
+import {GM_BONUSES, lightsaberForms, skills} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 
 function skipFirstLevelChoice(choice, context) {
@@ -17,6 +17,7 @@ function skipFirstLevelChoice(choice, context) {
  * @returns {Promise<{success: boolean, items: []}>}
  */
 export async function activateChoices(item, context) {
+    let actor = context.actor;
     let choices = item.data.data.choices;
     if (choices?.length === 0) {
         return {success: true, items: []};
@@ -36,7 +37,7 @@ export async function activateChoices(item, context) {
             content = `<p>${greetingString}</p>`;
             content += `<input class="choice" type="number" data-option-key="">`
         } else {
-            options = explodeOptions(choice.options);
+            options = explodeOptions(choice.options, actor);
 
             let optionString = "";
             let keys = Object.keys(options);
@@ -86,10 +87,16 @@ export async function activateChoices(item, context) {
                     if(choice.type === 'INTEGER'){
                         item.setPayload(elementValue, payload);
                     } else {
-                        let selectedChoice = options[elementValue];
+                        let selectedChoice = options.find(option => option.name === elementValue);
                         if (!selectedChoice) {
                             return;
                         }
+                        if(selectedChoice.payload){
+                            selectedChoice.payloads = selectedChoice.payloads || {};
+                            selectedChoice.payloads["payload"] = selectedChoice.payload;
+                        }
+
+
                         if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
                             Object.entries(selectedChoice.payloads).forEach(payload => {
                                 item.setPayload(payload[1], payload[0]);
@@ -120,7 +127,7 @@ export async function activateChoices(item, context) {
 }
 
 
-function explodeOptions(options) {
+function explodeOptions(options, actor) {
     if(!Array.isArray(options)){
         let resolvedOptions = [];
         for (let [key, value] of Object.entries(options)) {
@@ -130,302 +137,299 @@ function explodeOptions(options) {
         options = resolvedOptions;
     }
 
-    let resolvedOptions = {};
+    let resolvedOptions = [];
     for (let value of options) {
         let key = value.name;
         let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
         if (key === 'AVAILABLE_GM_BONUSES'){
             for(let bonus of GM_BONUSES){
-                let data = {};
-                data.attributes = [];
-                data.attributes.push(bonus)
-                resolvedOptions[bonus.display] = data;
+                resolvedOptions.push({name:bonus.display, attributes:[bonus]});
             }
 
         } else if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
             let weaponProficiencies = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponProficiency",
                 reduce: "VALUES"
             })
             for (let weapon of game.generated.exoticWeapons) {
                 if (!weaponProficiencies.includes(weapon)) {
-                    resolvedOptions[weapon] = {abilities: [], items: [], payload: weapon};
+                    resolvedOptions.push( {name: weapon, abilities: [], items: [], payload: weapon});
                 }
             }
         } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
             let focuses = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponProficiency",
                 reduce: "VALUES"
             })) {
                 if (!focuses.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name: weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_WEAPON_SPECIALIZATION') {
             let weaponSpecializations = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponSpecialization",
                 reduce: "VALUES"
             })
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!weaponSpecializations.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
             let greaterWeaponSpecialization = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "greaterWeaponSpecialization",
                 reduce: "VALUES"
             })
             let greaterWeaponFocus = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "greaterWeaponFocus",
                 reduce: "VALUES"
             })
             for (let weaponSpecialization of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponSpecialization",
                 reduce: "VALUES"
             })) {
                 if (!greaterWeaponSpecialization.includes(weaponSpecialization) && greaterWeaponFocus.includes(weaponSpecialization)) {
-                    resolvedOptions[weaponSpecialization.titleCase()] = {
+                    resolvedOptions.push({name:weaponSpecialization.titleCase(),
                         abilities: [],
                         items: [],
                         payload: weaponSpecialization.titleCase()
-                    };
+                    });
                 }
             }
         } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
             let greaterWeaponFocus = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "greaterWeaponFocus",
                 reduce: "VALUES"
             })
             for (let weaponFocus of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!greaterWeaponFocus.includes(weaponFocus)) {
-                    resolvedOptions[weaponFocus.titleCase()] = {
+                    resolvedOptions.push({name:weaponFocus.titleCase(),
                         abilities: [],
                         items: [],
                         payload: weaponFocus.titleCase()
-                    };
+                    });
                 }
             }
         } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
             let weaponProficiencies = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponProficiency",
                 reduce: "VALUES"
             });
             for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
                 if (!weaponProficiencies.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name: weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'UNFOCUSED_SKILLS') {
             let skillFocuses = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "skillFocus",
                 reduce: "VALUES"
             });
             for (let skill of skills) {
                 if (!skillFocuses.includes(skill)) {
-                    resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
+                    resolvedOptions.push({name:skill.titleCase(), abilities: [], items: [], payload: skill.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_SKILL_FOCUS') {
             let skillFocuses = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "skillFocus",
                 reduce: "VALUES"
             });
             for (let skill of this.trainedSkills) {
                 if (!skillFocuses.includes(skill.key)) {
-                    resolvedOptions[skill.key.titleCase()] = {
+                    resolvedOptions.push({name:skill.key.titleCase(),
                         abilities: [],
                         items: [],
                         payload: skill.key.titleCase()
-                    };
+                    });
                 }
             }
         } else if (key === 'AVAILABLE_SKILL_MASTERY') {
             let masterSkills = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "skillMastery",
                 reduce: "VALUES"
             });
             masterSkills.push("Use The Force")
             for (let skill of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "skillFocus",
                 reduce: "VALUES"
             })) {
                 if (!masterSkills.includes(skill)) {
-                    resolvedOptions[skill.titleCase()] = {abilities: [], items: [], payload: skill.titleCase()};
+                    resolvedOptions.push({name:skill.titleCase(), abilities: [], items: [], payload: skill.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
             let doubleAttack = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "doubleAttack",
                 reduce: "VALUES"
             })
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponProficiency",
                 reduce: "VALUES"
             })) {
                 if (!doubleAttack.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
             let tripleAttack = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "tripleAttack",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "doubleAttack",
                 reduce: "VALUES"
             })) {
                 if (!tripleAttack.includes(weapon.toLowerCase())) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
             let savageAttack = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "savageAttack",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "doubleAttack",
                 reduce: "VALUES"
             })) {
                 if (!savageAttack.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
             let relentlessAttack = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "relentlessAttack",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "doubleAttack",
                 reduce: "VALUES"
             })) {
                 if (!relentlessAttack.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
             let autofireSweep = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "autofireSweep",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!autofireSweep.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
             let autofireAssault = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "autofireAssault",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!autofireAssault.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_HALT') {
             let halt = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "halt",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!halt.includes(weapon)) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_RETURN_FIRE') {
             let returnFire = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "returnFire",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!returnFire.includes(weapon.toLowerCase())) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
             let criticalStrike = getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "criticalStrike",
                 reduce: "VALUES"
             })
 
             for (let weapon of getInheritableAttribute({
-                entity: this,
+                entity: actor,
                 attributeKey: "weaponFocus",
                 reduce: "VALUES"
             })) {
                 if (!criticalStrike.includes(weapon.toLowerCase())) {
-                    resolvedOptions[weapon.titleCase()] = {abilities: [], items: [], payload: weapon.titleCase()};
+                    resolvedOptions.push({name:weapon.titleCase(), abilities: [], items: [], payload: weapon.titleCase()});
                 }
             }
         } else if (key === 'AVAILABLE_LIGHTSABER_FORMS') {
             for (let form of lightsaberForms) {
                 if (!this.talents.map(t => t.name).includes(form)) {
-                    resolvedOptions[form] = {abilities: [], items: [], payload: form};
+                    resolvedOptions.push({name:form, abilities: [], items: [], payload: form});
                 }
             }
         } else {

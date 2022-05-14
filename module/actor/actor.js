@@ -2062,7 +2062,7 @@ ${damageRolls}
      * @param type
      */
     async checkPrerequisitesAndResolveOptions(item, options) {
-        let choices = await activateChoices(item, {});
+        let choices = await activateChoices(item, {actor:this});
         if (!choices.success) {
             return [];
         }
@@ -2154,8 +2154,7 @@ ${damageRolls}
             let namedCrew = provided.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
             let equip = provided.equip;
             let {index, pack} = await getIndexAndPack(indices, type);
-            let {itemName, payload} = this.resolveItemParts(item);
-            let entry = await this.getIndexEntryByName(itemName, index, payload);
+            let {entry, payload} = await this.getIndexEntryByName(item, index);
 
             if (!entry) {
                 console.warn(`attempted to add ${itemName}`, arguments)
@@ -2244,15 +2243,18 @@ ${damageRolls}
     }
 
 
-    async getIndexEntryByName(itemName, index, payload) {
+    async getIndexEntryByName(item, index) {
         if(!index){return}
+
+        let {itemName, payload} = this.resolveItemParts(item);
         let cleanItemName1 = this.cleanItemName(itemName);
         let entry = await index.find(f => f.name === cleanItemName1);
         if (!entry) {
             let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
             entry = await index.find(f => f.name === cleanItemName2);
+            payload = undefined;
         }
-        return entry;
+        return {entry, payload};
     }
 
     cleanItemName(feat) {

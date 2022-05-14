@@ -251,7 +251,7 @@ function _resolveFFRef(actor, conditionBonus) {
     let total = [];
     total.push(10);
 
-    let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    let abilityBonus = Math.min(_getDexMod(actor.data), _getEquipmentMaxDexBonus(actor));
     if(abilityBonus < 0) {
         total.push(abilityBonus);
     }
