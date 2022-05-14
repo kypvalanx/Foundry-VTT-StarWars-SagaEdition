@@ -1743,8 +1743,8 @@ export class SWSEActor extends Actor {
     setAttackTotal(attack, total, options, context) {
         options.children()
         total.empty();
-        let damageRoll = `${attack.damageRoll.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
-        let attackRoll = `${attack.attackRoll.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
+        let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
+        let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
         total.append(`<div class="flex flex-row"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
     }
 
