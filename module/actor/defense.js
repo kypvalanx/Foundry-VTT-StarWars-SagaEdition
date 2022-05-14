@@ -186,7 +186,7 @@ function _resolveRef(actor, conditionBonus) {
             armorBonus = getArmorReflexDefenseBonus(actor) || 0;
         }
     } else {
-        armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+        armorBonus = _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
     }
     total.push(armorBonus);
     let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
@@ -248,9 +248,14 @@ function _resolveRef(actor, conditionBonus) {
  * @private
  */
 function _resolveFFRef(actor, conditionBonus) {
-    let actorData = actor.data
     let total = [];
     total.push(10);
+
+    let abilityBonus = Math.min(_getDexMod(actor.data), _getEquipmentMaxDexBonus(actor));
+    if(abilityBonus < 0) {
+        total.push(abilityBonus);
+    }
+
     let armorBonus;
     if (["vehicle", "npc-vehicle"].includes(actor.data.type)) {
         if (actor.pilot) {
@@ -263,7 +268,7 @@ function _resolveFFRef(actor, conditionBonus) {
             armorBonus = getArmorReflexDefenseBonus(actor) || 0;
         }
     } else {
-        armorBonus = _selectRefBonus(actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+        armorBonus = _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
     }
     total.push(armorBonus);
     let otherBonus = getInheritableAttribute({
@@ -393,8 +398,33 @@ function _getSituationalBonuses(actor) {
     return situational;
 }
 
-function _selectRefBonus(heroicLevel, armorBonus) {
+function _selectRefBonus(actor, heroicLevel, armorBonus) {
     if (armorBonus) {
+        let proficientWithEquipped = true;
+        for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+            if(!armor._parentIsProficientWithArmor()){
+                proficientWithEquipped = false;
+            }
+        }
+        if(proficientWithEquipped) {
+            let improvedArmoredDefense = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "improvedArmoredDefense",
+                reduce: "OR"
+            })
+            if (improvedArmoredDefense) {
+                return Math.max(armorBonus, heroicLevel + Math.floor(armorBonus / 2))
+            }
+            let armoredDefense = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "armoredDefense",
+                reduce: "OR"
+            })
+            if (armoredDefense) {
+                return Math.max(armorBonus, heroicLevel)
+            }
+        }
+
         return armorBonus;
     }
     return heroicLevel;

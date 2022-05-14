@@ -1102,6 +1102,7 @@ export class SWSEActorSheet extends ActorSheet {
             }).render(true);
             return [];
         }
+        context.actor = this.actor;
         let choices = await activateChoices(item, context);
         if (!choices.success) {
             return;
@@ -1120,7 +1121,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addItem(item) {
         //let entities = [];
-        let context = {};
+        let context = {actor:this.actor};
         //TODO might return future items
         let choices = await activateChoices(item, context);
         if (!choices.success) {

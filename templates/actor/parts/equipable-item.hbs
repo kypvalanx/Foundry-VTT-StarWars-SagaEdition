@@ -17,5 +17,9 @@
                         class="fas fa-trash"></i></a>
             {{/unless}}
         {{/ifEquals}}
+        {{#ifEquals delete 'always'}}
+                <a class="item-control item-delete" title="Delete Item"><i
+                        class="fas fa-trash"></i></a>
+        {{/ifEquals}}
     </div>
 </li>
