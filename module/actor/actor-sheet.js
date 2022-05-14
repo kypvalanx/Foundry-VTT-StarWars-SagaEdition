@@ -1545,7 +1545,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     _isFirstLevelOfClass(name) {
-        let items = this.actor.items.filter(i => i.name === name);
+        let items = this.actor.items.filter(i => i.data.name === name);
         return items.length === 1;
     }
 

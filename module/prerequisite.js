@@ -130,27 +130,31 @@ export function meetsPrerequisites(target, prereqs) {
                 break;
             case 'TALENT':
                 let ownedTalents = filterItemsByType(target.items.values(), "talent");
-                let filteredTalents = ownedTalents.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredTalents = ownedTalents.filter(talent => {
+                    return talent.data.finalName === prereq.requirement ||
+                        talent.data.data.possibleProviders.includes(prereq.requirement) ||
+                        talent.data.data.talentTree === prereq.requirement
+                });
                 if (filteredTalents.length > 0) {
                     if (!meetsPrerequisites(target, filteredTalents[0].data.data.prerequisite).doesFail) {
-                        successList.push({prereq, count: 1});
+                        successList.push({prereq, count: filteredTalents.length});
                         continue;
                     }
                 }
-
-                let talentsByTreeFilter = ownedTalents.filter(talent => data.talentTree === prereq.requirement || data.bonusTalentTree === prereq.requirement);
-                if (talentsByTreeFilter.length > 0) {
-                    let count = 0;
-                    for (let talent of talentsByTreeFilter) {
-                        if (!meetsPrerequisites(target, data.prerequisite).doesFail) {
-                            count++;
-                        }
-                    }
-                    if (count > 0) {
-                        successList.push({prereq, count})
-                        continue;
-                    }
-                }
+                //
+                // let talentsByTreeFilter = ownedTalents.filter(talent => data.talentTree === prereq.requirement || data.bonusTalentTree === prereq.requirement);
+                // if (talentsByTreeFilter.length > 0) {
+                //     let count = 0;
+                //     for (let talent of talentsByTreeFilter) {
+                //         if (!meetsPrerequisites(target, data.prerequisite).doesFail) {
+                //             count++;
+                //         }
+                //     }
+                //     if (count > 0) {
+                //         successList.push({prereq, count})
+                //         continue;
+                //     }
+                // }
 
                 break;
             case 'TRADITION':
@@ -266,22 +270,19 @@ export function meetsPrerequisites(target, prereqs) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
-                if(meetsChildPrereqs.failureList.length > 1) {
                     if(prereq.text){
                         failureList.push({
-                            fail: meetsChildPrereqs.doesFail,
+                            fail: true,
                             message: prereq.text
                         })
                     } else {
                         failureList.push({
-                            fail: meetsChildPrereqs.doesFail,
-                            message: `at least of ${prereq.count}:`,
+                            fail: true,
+                            message: `at least ${prereq.count} of:`,
                             children: meetsChildPrereqs.failureList
                         })
                     }
-                } else {
-                    failureList.push(...meetsChildPrereqs.failureList)
-                }
+
                 continue;
             }
             case 'SPECIAL':

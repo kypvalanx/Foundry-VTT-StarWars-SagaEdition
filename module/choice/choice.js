@@ -40,7 +40,6 @@ export async function activateChoices(item, context) {
             options = explodeOptions(choice.options, actor);
 
             let optionString = "";
-            let keys = Object.keys(options);
             if (options.length === 0) {
                 greetingString = choice.noOptions ? choice.noOptions : choice.description;
             } else if (options.length === 1) {
@@ -83,7 +82,9 @@ export async function activateChoices(item, context) {
                     }
                     let elementValue = foundElement.value || foundElement.innerText;
 
-                    item.setChoice(elementValue)
+                    if(choice.showSelectionInName) {
+                        item.setChoice(elementValue)
+                    }
                     if(choice.type === 'INTEGER'){
                         item.setPayload(elementValue, payload);
                     } else {
@@ -256,9 +257,9 @@ function explodeOptions(options, actor) {
             let skillFocuses = getInheritableAttribute({
                 entity: actor,
                 attributeKey: "skillFocus",
-                reduce: "VALUES"
+                reduce: "VALUES_TO_LOWERCASE"
             });
-            for (let skill of this.trainedSkills) {
+            for (let skill of actor.trainedSkills) {
                 if (!skillFocuses.includes(skill.key)) {
                     resolvedOptions.push({name:skill.key.titleCase(),
                         abilities: [],
@@ -428,7 +429,7 @@ function explodeOptions(options, actor) {
             }
         } else if (key === 'AVAILABLE_LIGHTSABER_FORMS') {
             for (let form of lightsaberForms) {
-                if (!this.talents.map(t => t.name).includes(form)) {
+                if (!actor.talents.map(t => t.name).includes(form)) {
                     resolvedOptions.push({name:form, abilities: [], items: [], payload: form});
                 }
             }
@@ -437,4 +438,11 @@ function explodeOptions(options, actor) {
         }
     }
     return resolvedOptions;
+}
+
+test()
+
+function test()
+{
+    console.log("running choice tests");
 }
