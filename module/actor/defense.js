@@ -47,6 +47,9 @@ function generateArmorBlock(actor, armor) {
  * @returns
  */
 export function resolveDefenses(actor) {
+    if(!actor){
+        return {};
+    }
     let conditionBonus = actor.data.data.condition === "OUT" ? -10 : actor.data.data.condition;
 
     let fortitude = _resolveFort(actor, conditionBonus);
@@ -290,20 +293,9 @@ function _resolveFFRef(actor, conditionBonus) {
         reduce: "MAX"
     }) || 0;
     total.push(classBonus);
-    let dodgeBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "bonusDodgeReflexDefense",
-        reduce: "SUM"
-    });
-    miscBonusTip += getInheritableAttribute({
-        entity: actor,
-        attributeKey: "bonusDodgeReflexDefense",
-        reduce: "SUMMARY"
-    });
     miscBonusTip += `Condition: ${conditionBonus};  `
-    total.push(dodgeBonus);
     total.push(conditionBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     return {
         total: resolveValueArray(total, actor),
         abilityBonus:0,
@@ -480,4 +472,12 @@ function _getEquipmentMaxDexBonus(actor) {
         }
     }
     return bonus;
+}
+
+test()
+
+function test(){
+    resolveDefenses()
+    let actor = {}
+    //resolveDefenses(actor)
 }
