@@ -1638,8 +1638,11 @@ export class SWSEActor extends Actor {
                     callback: (html) => {
                         let attacks = [];
                         let attackBlocks = html.find(".attack-block");
+                        let selects = html.find("select");
+                        let attackMods = this.getAttackMods(selects, dualWeaponModifier);
+                        let damageMods = this.getDamageMods(selects, dualWeaponModifier);
                         for (let attackBlock of attackBlocks) {
-                            let attackFromBlock = this.getAttackFromBlock(attackBlock);
+                            let attackFromBlock = this.getAttackFromBlock(attackBlock, attackMods, damageMods);
                             if (!!attackFromBlock) {
                                 attacks.push(attackFromBlock);
                             }
@@ -1676,7 +1679,6 @@ export class SWSEActor extends Actor {
 
     getAttackMods(selects, dualWeaponModifier) {
         let attackMods = []
-        let itemIds = [];
         let isDoubleAttack = false;
         let isTripleAttack = false;
         let standardAttacks = 0;
@@ -1695,7 +1697,6 @@ export class SWSEActor extends Actor {
             if (options.standardAttack) {
                 standardAttacks++;
             }
-            itemIds.push(attack.itemId)
         }
 
 
@@ -1709,7 +1710,8 @@ export class SWSEActor extends Actor {
         if (standardAttacks > 1) {
             attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
         }
-        return attackMods;
+        attackMods.forEach(attack => attack.type = "attack");
+        return attackMods
     }
 
 
@@ -1828,7 +1830,7 @@ export class SWSEActor extends Actor {
     }
 
     // methods revolving around attack blocks.  can make this more simplified with an attack object maybe.
-    getAttackFromBlock(attackBlock) {
+    getAttackFromBlock(attackBlock, attackMods, damageMods) {
         let attackId = $(attackBlock).find(".attack-id")[0]
         let attackValue = attackId.value || $(attackId).data("value");
 
@@ -1846,6 +1848,9 @@ export class SWSEActor extends Actor {
 
         attack.withModifiers(attackModifiers);
         attack.withModifiers(damageModifiers);
+
+        attack.withModifiers(attackMods);
+        attack.withModifiers(damageMods);
 
         return attack;
     }
