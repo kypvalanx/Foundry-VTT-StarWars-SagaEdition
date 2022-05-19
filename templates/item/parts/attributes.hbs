@@ -24,14 +24,14 @@
 
     <!--not supporting modes in levels at this time-->
         {{#unless level}}
-        <li class="attribute flexrow subtle"><a class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i> add a new mode.</a></li>
+            <li class="attribute flexrow subtle"><a class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i> add a new mode.</a></li>
 
-        {{#each data.data.modes as |mode mkey|}}
+            {{#each data.data.modes as |mode mkey|}}
 
-            {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=true level=level}}
+                {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=true level=level}}
 
-        {{/each}}
-    {{/unless}}
+            {{/each}}
+        {{/unless}}
 
     {{/if}}
     <!-- Compendium Item -->
@@ -49,11 +49,11 @@
 
         <!--not supporting modes in levels at this time-->
         {{#unless level}}
-        {{#each data._source.data.modes as |mode mkey|}}
+            {{#each data._source.data.modes as |mode mkey|}}
 
-            {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=false level=level}}
+                {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'data.modes.' mkey) active=false level=level}}
 
-        {{/each}}
+            {{/each}}
         {{/unless}}
 
     {{/unless}}
