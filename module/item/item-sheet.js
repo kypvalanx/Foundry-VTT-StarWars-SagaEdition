@@ -102,6 +102,8 @@ export class SWSEItemSheet extends ItemSheet {
             });
         }
 
+        html.find('[data-action="class-control"]').click(this._onClassControl.bind(this));
+
         //AddItemAttribute
         html.find('.attribute-add').click(ev => {
             let modeId = $(ev.currentTarget).data('modeId')
@@ -251,6 +253,8 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Roll handlers, click handlers, etc. would go here.
     }
+
+
 
     _onToSheet(event) {
         event.preventDefault();
@@ -551,5 +555,28 @@ export class SWSEItemSheet extends ItemSheet {
         }
 
         Dialog.prompt(options);
+    }
+
+
+    _onClassControl(event) {
+        let element = $(event.currentTarget);
+
+        let data = this.item.data.data || this.item.data._source.data
+        let levelKeys = Object.values(data.levels).filter(i => !!i).map(i => parseInt(i.level));
+        let updateData = {};
+        switch (element.data("type")){
+            case "add-level":
+                let newLevel = Math.max(...levelKeys) + 1;
+
+                updateData.levels = {};
+                updateData.levels[newLevel] = {data:{description:"", attributes:{}}, level:`${newLevel}`, type:"level"};
+                break;
+            case "remove-level":
+                let currentLevel = Math.max(...levelKeys)
+                updateData.levels = {};
+                updateData.levels[currentLevel] = null;
+                break;
+        }
+        this.item.updateData(updateData);
     }
 }
