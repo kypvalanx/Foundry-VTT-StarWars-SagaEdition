@@ -35,9 +35,6 @@ export class SWSEItemSheet extends ItemSheet {
         // unique item sheet by type, like `weapon-sheet.html`.
 
         let type = this.item.data.type;
-        if (type === 'species') {
-            return `${path}/species-sheet.hbs`;
-        }
         if (type === 'feat') {
             return `${path}/feat-sheet.hbs`;
         }

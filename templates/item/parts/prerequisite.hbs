@@ -1,0 +1,69 @@
+<div class="prerequisite flex flex-col flex-grow">
+
+    {{log path}}
+    <div>Prerequisite:</div>
+    <div class="flex flex-row">
+        <label>
+            Type:<br/>
+            <select name="{{path}}.type">
+            {{#select prerequisite.type}}
+                <option value="AND">And</option>
+                <option value="OR">Or</option>
+                <option value="NOT">Not</option>
+                <option value="TRAIT">Trait</option>
+                <option value="FEAT">Feat</option>
+                <option value="AGE">Age</option>
+                <option value="ITEM">Item</option>
+            {{/select}}
+            </select>
+        </label>
+        {{log prerequisite}}
+
+        <label title="Human readable flavor text.">
+            Text:<br/>
+            <input value="{{prerequisite.text}}"  name="{{path}}.text">
+        </label>
+
+        {{#ifEquals prerequisite.type (arr "OR" "AND")}}
+            <label title="How many of below requirements need to be met">
+                Count:<br/>
+                <input type="number" value="{{prerequisite.count}}" name="{{path}}.count">
+            </label>
+        {{/ifEquals}}
+
+
+        {{#ifEquals prerequisite.type (arr "AGE")}}
+            <label title="Inclusive low value of age range.">
+                Low:<br/>
+                <input type="number" value="{{prerequisite.low}}" name="{{path}}.low">
+            </label>
+            <label title="Inclusive high value of age range.">
+                High:<br/>
+                <input type="number" value="{{prerequisite.high}}" name="{{path}}.high">
+            </label>
+        {{/ifEquals}}
+
+        {{#ifEquals prerequisite.type (arr "TRAIT" "ITEM" "FEAT")}}
+            <label>
+                Requirement:<br/>
+                <input type="text" value="{{prerequisite.requirement}}"  name="{{path}}.requirement">
+            </label>
+        {{/ifEquals}}
+    </div>
+
+    {{#ifEquals prerequisite.type (arr "OR" "AND")}}
+        {{#each prerequisite.children as |child id|}}
+            <div class="flex flex-row">
+                <div class="spacer">--</div>
+                {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=child path=(concat ../path '.children.' id)}}
+            </div>
+        {{/each}}
+    {{/ifEquals}}
+
+    {{#ifEquals prerequisite.type (arr "NOT")}}
+        <div class="flex flex-row">
+            <div class="spacer">--</div>
+            {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=prerequisite.child path=(concat path '.child')}}
+        </div>
+    {{/ifEquals}}
+</div>

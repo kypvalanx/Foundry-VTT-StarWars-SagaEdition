@@ -1,0 +1,13 @@
+<ul>
+    {{#if item.data.data}}
+        {{#each item.data.data.providedItems as |providedItem id|}}
+            {{log ../item}}
+            {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
+        {{/each}}
+    {{else}}
+        {{#each item.data._source.data.providedItems as |providedItem id|}}
+            {{log ../item}}
+            {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
+        {{/each}}
+    {{/if}}
+</ul>

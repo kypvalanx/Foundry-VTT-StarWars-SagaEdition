@@ -54,7 +54,8 @@ export const SUBTYPES = {
     "template": ["Vehicle Templates", "Weapon Templates", "Armor Templates", "Droid Templates", "General Templates"],
     "vehicleSystem": ["Starship Accessories", "Weapon Systems", "Defense Systems", "Movement Systems", "Droid Accessories (Droid Stations)"],
     "background": ["event", "occupation", "planet of origin"],
-    "class": ["Nonheroic", "Heroic", "Prestige"]
+    "class": ["Nonheroic", "Heroic", "Prestige"],
+    "species": ["Organic", "Droid"]
 }
 
 export const GM_BONUSES = [

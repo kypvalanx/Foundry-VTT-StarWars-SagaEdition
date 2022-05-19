@@ -549,6 +549,14 @@
   background: rgba(0, 0, 0, 0.1);
 }
 
+.swse .spacer {
+  padding: 6px;
+}
+
+.swse .prerequisite {
+  border: solid 1px black;
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;
