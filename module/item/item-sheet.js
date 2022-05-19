@@ -21,7 +21,8 @@ export class SWSEItemSheet extends ItemSheet {
             classes: ["swse", "sheet", "item"],
             width: 520,
             height: 480,
-            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "description"}]
+            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"},
+                {navSelector: ".level-tabs", contentSelector: ".level-body", initial: "1"}]
         });
     }
 
@@ -43,24 +44,8 @@ export class SWSEItemSheet extends ItemSheet {
         if (type === 'talent') {
             return `${path}/talent-sheet.hbs`;
         }
-        if (type === 'armor') {
-            return `${path}/item-sheet.hbs`;
-        }
-        if (type === 'weapon') {
-            return `${path}/item-sheet.hbs`;
-        }
-        if (type === 'equipment') {
-            return `${path}/item-sheet.hbs`;
-        }
-        if (type === 'upgrade') {
-            return `${path}/item-sheet.hbs`;
-        }
-        if (type === 'vehicleSystem') {
-            return `${path}/item-sheet.hbs`;
-        }
 
-        return `${path}/feat-sheet.hbs`;
-        //return `${path}/${this.item.data.type}-sheet.html`; //TODO add sheets for each type
+        return `${path}/item-sheet.hbs`;
     }
 
     /* -------------------------------------------- */
@@ -104,7 +89,7 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
 
-        if(this.actor) {
+        if (this.actor) {
             // Update Inventory Item
             html.find('[data-action="view"]').click(this.actor.sheet._onItemEdit.bind(this.actor.sheet));
 
@@ -120,55 +105,73 @@ export class SWSEItemSheet extends ItemSheet {
         //AddItemAttribute
         html.find('.attribute-add').click(ev => {
             let modeId = $(ev.currentTarget).data('modeId')
-            if (modeId === undefined) {
-                let attributes = this.item.data.data.attributes
-                let cursor = 0;
-                while (attributes[cursor]) {
-                    cursor++;
-                }
-                this.createItemAttribute(cursor)
+            let level = $(ev.currentTarget).data('level')
+
+            let itemData = this.item.data;
+            if (level) {
+                itemData = itemData.data?.levels[level].data || itemData._source.data.levels[level].data;
             } else {
-                let toks = `${modeId}`.split(".");
-                let attributes = this.item.data.data
-                for (let tok of toks) {
-                    attributes = attributes.modes[tok];
-                }
-                attributes = attributes.attributes;
+                itemData = itemData.data || itemData._source.data;
+            }
+
+            if (modeId === undefined) {
+                let attributes = itemData.attributes
                 let cursor = 0;
                 while (attributes[cursor]) {
                     cursor++;
                 }
-                this.createItemAttribute(cursor, modeId)
+                this.createItemAttribute(cursor, level)
+            } else {
+                for (let tok of `${modeId}`.split(".")) {
+                    itemData = itemData.modes[tok];
+                }
+                let attributes = itemData.attributes;
+                let cursor = 0;
+                while (attributes[cursor]) {
+                    cursor++;
+                }
+                this.createItemAttribute(cursor, level, modeId)
             }
         });
         //AddItemAttribute
         html.find('.mode-add').click(ev => {
             let modeId = $(ev.currentTarget).data('modeId')
+            let level = $(ev.currentTarget).data('level')
+
+
+            let itemData = this.item.data;
+            if (level) {
+                itemData = itemData.data?.levels[level].data || itemData._source.data.levels[level].data;
+            } else {
+                itemData = itemData.data || itemData._source.data;
+            }
+
             if (modeId === undefined) {
-                let modes = this.item.data.data.modes
+                let modes = itemData.modes || {}
                 let cursor = 0;
                 while (modes[cursor]) {
                     cursor++;
                 }
-                this.createItemMode(cursor)
+                this.createItemMode(cursor, level)
             } else {
                 let toks = `${modeId}`.split(".");
-                let modes = this.item.data.data
+                let modes = itemData
                 for (let tok of toks) {
                     modes = modes.modes[tok];
                 }
-                modes = modes.modes;
+                modes = modes.modes || {};
                 let cursor = 0;
                 while (modes[cursor]) {
                     cursor++;
                 }
-                this.createItemMode(cursor, modeId)
+                this.createItemMode(cursor, level, modeId)
             }
         });
 
         //deleteItemAttribute
         html.find('.attribute-delete').click(ev => {
             let li = $(ev.currentTarget);
+            let level = $(ev.currentTarget).data('level')
             let attributeId = li.data('attributeId');
             let modeId = li.data('modeId');
             let data = {};
@@ -249,7 +252,7 @@ export class SWSEItemSheet extends ItemSheet {
         // Roll handlers, click handlers, etc. would go here.
     }
 
-    _onToSheet(event){
+    _onToSheet(event) {
         event.preventDefault();
         const a = event.currentTarget;
         const itemId = a.dataset.actionItem;
@@ -258,13 +261,13 @@ export class SWSEItemSheet extends ItemSheet {
 
         let item;
 
-        if(actorId){
+        if (actorId) {
             let actor = game.data.actors.find(actor => actor._id === actorId);
             item = actor.items.find(item => item._id === itemId);
-        }else if(actionCompendium){
+        } else if (actionCompendium) {
             let compendium = game.packs.find(pack => pack.collection === actionCompendium);
             item = compendium.get(itemId)
-        }else{
+        } else {
             item = game.items.get(itemId);
         }
 
@@ -344,7 +347,6 @@ export class SWSEItemSheet extends ItemSheet {
         let actor = this.actor;
 
 
-
         let ownedItem = actor.items.get(droppedItem.data._id);
 
         let isItemMod = Object.values(droppedItem.data.data.attributes).find(attr => attr.key === "itemMod");
@@ -365,7 +367,7 @@ export class SWSEItemSheet extends ItemSheet {
                 return;
             }
 
-                await this.item.takeOwnership(ownedItem);
+            await this.item.takeOwnership(ownedItem);
 
         }
     }
@@ -465,18 +467,14 @@ export class SWSEItemSheet extends ItemSheet {
         return found;
     }
 
-    createItemAttribute(attributeId, modeId) {
-        let content = `<label>Key:</label>
-            <input id="key"><br/>
-        <label>Type:</label>
-            <select name="type" id="type">
-                <option>String</option>
-                <option>Boolean</option>
-                <option>List</option>
-                <option>Object</option>
-            </select><br/>
-        <label>Value:</label>
+    createItemAttribute(attributeId, level, modeId) {
+        let content = `<label>Key:
+            <input id="key">
+            </label>
+            <br/>
+        <label>Value:
             <input id="value">
+            </label>
         `;
 
         let options = {
@@ -484,34 +482,35 @@ export class SWSEItemSheet extends ItemSheet {
             content,
             callback: async (html) => {
                 let key = html.find("#key")[0].value;
-                let type = html.find("#type")[0].value;
                 let value = html.find("#value")[0].value;
-                if (modeId === undefined) {
-                    let data = {};
-                    data.attributes = {}
-                    data.attributes[attributeId] = {key, type, value};
-                    this.item.updateData(data);
-                } else {
-                    let toks = `${modeId}`.split(".");
 
-                    let data = {};
-                    for (let tok of toks) {
+                let updateData = {};
+                let data = updateData;
+                if (level) {
+                    updateData.levels = {};
+                    updateData.levels[level] = {};
+                    updateData.levels[level].data = {};
+                    data = updateData.levels[level].data;
+                }
+
+                if (modeId !== undefined) {
+                    for (let tok of `${modeId}`.split(".")) {
                         data.modes = {};
                         data.modes[tok] = {};
                         data = data.modes[tok];
                     }
-
-                    data.attributes = {};
-                    data.attributes[attributeId] = {key, type, value};
-                    this.item.updateData(data);
                 }
+
+                data.attributes = {};
+                data.attributes[attributeId] = {key, value};
+                this.item.updateData(updateData);
             }
         }
 
         Dialog.prompt(options);
     }
 
-    createItemMode(modeId, parentModeId) {
+    createItemMode(modeId, level, parentModeId) {
         let content = `
         <label>Name:</label>
             <input id="name">
@@ -525,25 +524,29 @@ export class SWSEItemSheet extends ItemSheet {
             callback: async (html) => {
                 let name = html.find("#name")[0].value;
                 let group = html.find("#group")[0].value;
-                if (parentModeId === undefined) {
-                    let data = {};
-                    data.modes = {}
-                    data.modes[modeId] = {name, group, attributes: {}};
-                    this.item.updateData(data);
-                } else {
+
+                let updateData = {};
+                let data = updateData;
+                if (level) {
+                    updateData.levels = {};
+                    updateData.levels[level] = {};
+                    updateData.levels[level].data = {};
+                    data = updateData.levels[level].data;
+                }
+
+                if (parentModeId !== undefined) {
                     let toks = `${parentModeId}`.split(".");
 
-                    let data = {};
                     for (let tok of toks) {
                         data.modes = {};
                         data.modes[tok] = {};
                         data = data.modes[tok];
                     }
-
-                    data.modes = {};
-                    data.modes[modeId] = {name, group, attributes: {}};
-                    this.item.updateData(data);
                 }
+
+                data.modes = {};
+                data.modes[modeId] = {name, group, attributes: {}};
+                this.item.updateData(updateData);
             }
         }
 

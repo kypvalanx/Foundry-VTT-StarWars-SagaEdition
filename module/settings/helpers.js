@@ -82,7 +82,7 @@ export const registerHandlebarsHelpers = function () {
             values = game.system.template.Item.types;
         }
         if('subtype' === arg1){
-            values = SUBTYPES[arg2.toLowerCase()];
+            values = SUBTYPES[arg2.toLowerCase()] || [];
         }
 
         let response = '';

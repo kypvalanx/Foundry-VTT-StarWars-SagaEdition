@@ -1,0 +1,34 @@
+<div class="level-body">
+    <nav class="level-tabs tabs" data-group="levels">
+        {{log item}}
+        {{#if item.data.data}}
+            {{#each item.data.data.levels as |level id|}}
+                <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
+            {{/each}}
+        {{else}}
+
+            {{#each item.data._source.data.levels as |level id|}}
+                <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
+            {{/each}}
+        {{/if}}
+    </nav>
+    <section class="level-content">
+        {{#if item.data.data}}
+            {{#each item.data.data.levels as |level id|}}
+
+            <div class="tab" data-group="levels" data-tab="{{id}}">
+                <h2>Level {{id}}</h2>
+                {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+            </div>
+            {{/each}}
+        {{else}}
+
+            {{#each item.data._source.data.levels as |level id|}}
+                <div class="tab" data-group="levels" data-tab="{{id}}">
+                    <h2>Level {{id}}</h2>
+                    {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+                </div>
+            {{/each}}
+        {{/if}}
+    </section>
+</div>
