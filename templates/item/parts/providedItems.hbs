@@ -1,13 +1,14 @@
 <ul>
     {{#if item.data.data}}
         {{#each item.data.data.providedItems as |providedItem id|}}
-            {{log ../item}}
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
         {{/each}}
     {{else}}
         {{#each item.data._source.data.providedItems as |providedItem id|}}
-            {{log ../item}}
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
         {{/each}}
     {{/if}}
+    <li class="provided-item flexrow subtle"><a data-action="provided-item-control" data-type="add-item"><i class="fas fa-plus"></i>
+        add a new
+        provided item.</a></li>
 </ul>

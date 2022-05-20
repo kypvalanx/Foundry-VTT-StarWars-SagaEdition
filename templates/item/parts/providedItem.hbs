@@ -1,24 +1,31 @@
-<li class="flex flex-col">
-    <div class="flex flex-row">
-        <input class="provided-item" name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.name" type="text"
-               value="{{providedItem.name}}" placeholder="" title=""/>
+{{#if providedItem}}
+    <li class="flex flex-col">
+        <div class="flex flex-row">
+            <input class="provided-item"
+                   name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.name" type="text"
+                   value="{{providedItem.name}}" placeholder="" title=""/>
 
-        <select name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.type">
-        {{#select providedItem.type}}
-            <option value="trait">Trait</option>
-            <option value="item">Item</option>
-            <option value="feat">Feat</option>
-            <option value="talent">Talent</option>
-            <option value="vehicleSystem">Vehicle System</option>
-            <option value="vehicleBaseType">Vehicle Base Type</option>
-            <option value="template">Template</option>
-            <option value="language">Language</option>
-        {{/select}}
-        </select>
-    </div>
-    {{#if providedItem.prerequisite}}
-        <div class="flex flex-col">
-        {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=providedItem.prerequisite path=(concat 'data.providedItems.' key '.prerequisite')}}
+            <select name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.type">
+                {{#select providedItem.type}}
+                    <option value="trait">Trait</option>
+                    <option value="item">Item</option>
+                    <option value="feat">Feat</option>
+                    <option value="talent">Talent</option>
+                    <option value="vehicleSystem">Vehicle System</option>
+                    <option value="vehicleBaseType">Vehicle Base Type</option>
+                    <option value="template">Template</option>
+                    <option value="language">Language</option>
+                {{/select}}
+            </select>
+            {{#if @root.editable}}
+                <a data-action="provided-item-control" data-type="delete-item" data-entity-id="{{key}}"><i
+                        class="fas fa-trash"></i></a>
+            {{/if}}
         </div>
-    {{/if}}
-</li>
+        {{#if providedItem.prerequisite}}
+            <div class="flex flex-col">
+                {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=providedItem.prerequisite path=(concat 'data.providedItems.' key '.prerequisite')}}
+            </div>
+        {{/if}}
+    </li>
+{{/if}}

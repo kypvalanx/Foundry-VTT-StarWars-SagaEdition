@@ -1,5 +1,4 @@
 <ul>
-
     <!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
     {{#each data.data.items as |item key|}}
         {{#each item.data.attributes as |attr key|}}
@@ -19,12 +18,14 @@
                 {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level}}
             {{/if}}
         {{/each}}
-        <li class="attribute flexrow subtle"><a class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i> add a new
+        <li class="attribute flexrow subtle"><a class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+            add a new
             attribute.</a></li>
 
-    <!--not supporting modes in levels at this time-->
+        <!--not supporting modes in levels at this time-->
         {{#unless level}}
-            <li class="attribute flexrow subtle"><a class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i> add a new mode.</a></li>
+            <li class="attribute flexrow subtle"><a class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+                add a new mode.</a></li>
 
             {{#each data.data.modes as |mode mkey|}}
 
@@ -32,18 +33,10 @@
 
             {{/each}}
         {{/unless}}
-
-    {{/if}}
-    <!-- Compendium Item -->
-    {{#unless data.data.attributes}}
+    {{else}}
         {{#each data._source.data.attributes as |attr key|}}
             {{#if attr}}
-                <li class="attribute flexrow" data-attribute="{{key}}">
-                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
-                           value="{{key}}">{{attr.key}}</label>
-                    <input class="attribute-value disabled" name="data.attributes.{{key}}.value" type="text"
-                           value="{{attr.value}}" placeholder="" title=""/>
-                </li>
+                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level}}
             {{/if}}
         {{/each}}
 
@@ -55,6 +48,6 @@
 
             {{/each}}
         {{/unless}}
+    {{/if}}
 
-    {{/unless}}
 </ul>

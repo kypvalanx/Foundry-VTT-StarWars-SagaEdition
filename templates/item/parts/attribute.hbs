@@ -4,5 +4,8 @@
     <input class="attribute-value" name="data.{{#if level}}levels.{{level}}.data.{{/if}}attributes.{{key}}.value" type="text"
            value="{{attr.value}}" placeholder="" title=""/>
     <input class="attribute-override" name="data.{{#if level}}levels.{{level}}.data.{{/if}}attributes.{{key}}.override" type="checkbox" {{#if attr.override}}checked{{/if}} title="attributes with this enabled will override other attributes by the same name rather than both being active">
+
+    {{#if @root.editable}}
     <a class="attribute-delete" data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
+    {{/if}}
 </li>

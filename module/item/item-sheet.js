@@ -100,6 +100,7 @@ export class SWSEItemSheet extends ItemSheet {
         }
 
         html.find('[data-action="class-control"]').click(this._onClassControl.bind(this));
+        html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
 
         //AddItemAttribute
         html.find('.attribute-add').click(ev => {
@@ -173,32 +174,36 @@ export class SWSEItemSheet extends ItemSheet {
             let level = $(ev.currentTarget).data('level')
             let attributeId = li.data('attributeId');
             let modeId = li.data('modeId');
-            let data = {};
+
+            let updateData = {};
+            let data = updateData;
+
+            if(level){
+                data = data.levels[level]
+            }
 
             if ((modeId || !isNaN(modeId)) && (attributeId || !isNaN(attributeId))) {
                 let modes = `${modeId}`.split(".")
 
-                let cursor = data;
                 for (let mode of modes) {
-                    cursor.modes = {};
-                    cursor.modes[mode] = {};
-                    cursor = cursor.modes[mode];
+                    data.modes = {};
+                    data.modes[mode] = {};
+                    data = data.modes[mode];
                 }
 
-                cursor.attributes = {};
-                cursor.attributes[attributeId] = null;
+                data.attributes = {};
+                data.attributes[attributeId] = null;
             } else if (modeId || !isNaN(modeId)) {
                 let modes = `${modeId}`.split(".")
 
                 let iterations = modes.length;
-                let cursor = data;
                 for (let mode of modes) {
-                    cursor.modes = {};
+                    data.modes = {};
                     if (!--iterations) {
-                        cursor.modes[mode] = null;
+                        data.modes[mode] = null;
                     } else {
-                        cursor.modes[mode] = {};
-                        cursor = cursor.modes[mode];
+                        data.modes[mode] = {};
+                        data = data.modes[mode];
                     }
                 }
             } else if (attributeId || !isNaN(attributeId)) {
@@ -206,7 +211,7 @@ export class SWSEItemSheet extends ItemSheet {
                 data.attributes[attributeId] = null;
             }
 
-            this.item.updateData(data);
+            this.item.updateData(updateData);
             this.render();
         });
 
@@ -572,6 +577,31 @@ export class SWSEItemSheet extends ItemSheet {
                 let currentLevel = Math.max(...levelKeys)
                 updateData.levels = {};
                 updateData.levels[currentLevel] = null;
+                break;
+        }
+        this.item.updateData(updateData);
+    }
+
+    _onProvidedItemControl(event) {
+        let element = $(event.currentTarget);
+
+        let data = this.item.data.data || this.item.data._source.data
+        let entityId = element.data("entityId")
+        let updateData = {};
+        switch (element.data("type")){
+            case "delete-item":
+                updateData.providedItems = {};
+                if(Array.isArray(data.providedItems)){
+                    data.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
+                }
+                updateData.providedItems[entityId] = null;
+                break;
+            case "add-item":
+                // updateData.providedItems = {};
+                // if(Array.isArray(data.providedItems)){
+                //     data.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
+                // }
+                // updateData.providedItems[entityId] = null; TODO work on this tomorrow
                 break;
         }
         this.item.updateData(updateData);
