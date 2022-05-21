@@ -101,8 +101,9 @@ export class SWSEItemSheet extends ItemSheet {
 
         html.find('[data-action="class-control"]').click(this._onClassControl.bind(this));
         html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
+        html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
 
-        //AddItemAttribute
+        //AddItemAttribute TODO switch to data action
         html.find('.attribute-add').click(ev => {
             let modeId = $(ev.currentTarget).data('modeId')
             let level = $(ev.currentTarget).data('level')
@@ -133,7 +134,7 @@ export class SWSEItemSheet extends ItemSheet {
                 this.createItemAttribute(cursor, level, modeId)
             }
         });
-        //AddItemAttribute
+        //AddItemmode TODO switch to data action
         html.find('.mode-add').click(ev => {
             let modeId = $(ev.currentTarget).data('modeId')
             let level = $(ev.currentTarget).data('level')
@@ -168,7 +169,7 @@ export class SWSEItemSheet extends ItemSheet {
             }
         });
 
-        //deleteItemAttribute
+        //deleteItemAttribute  TODO switch to data action
         html.find('.attribute-delete').click(ev => {
             let li = $(ev.currentTarget);
             let level = $(ev.currentTarget).data('level')
@@ -214,7 +215,7 @@ export class SWSEItemSheet extends ItemSheet {
             this.item.updateData(updateData);
             this.render();
         });
-
+        //TODO switch to data action
         html.find('.value-plus').click(ev => {
             let target = $(ev.currentTarget)
             let name = ev.currentTarget.name;
@@ -230,7 +231,7 @@ export class SWSEItemSheet extends ItemSheet {
             }
             this.object.update(update);
         });
-
+// TODO switch to data action
         html.find('.value-minus').click(ev => {
             let target = $(ev.currentTarget)
             let name = ev.currentTarget.name;
@@ -251,9 +252,6 @@ export class SWSEItemSheet extends ItemSheet {
         html.find("span.text-box.direct").on("click", (event) => {
             this._onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
-
-
-        // Roll handlers, click handlers, etc. would go here.
     }
 
 
@@ -559,6 +557,42 @@ export class SWSEItemSheet extends ItemSheet {
         Dialog.prompt(options);
     }
 
+
+    _onPrerequisiteControl(event){
+        let element = $(event.currentTarget);
+        let path = element.data("path");
+
+        let data = this.item.data.data || this.item.data._source.data
+
+        for(let tok of path.substring(5).split(".")){
+            if(!!data[tok]) {
+                data = data[tok];
+            }
+        }
+
+        let updateData = {};
+        switch (element.data("type")){
+            case 'remove-this-prerequisite':
+                updateData[path] = null;
+                break;
+            case 'add-child-prerequisite':
+                let maxKey = Math.max(...Object.keys(data))+1
+                let selectedKey = maxKey;
+                for(let i = 0; i <=maxKey; i++){
+                    if(data[i] === undefined || data[i] === null){
+                        selectedKey = i;
+                    }
+                }
+                if(path.endsWith("child")){
+
+                    updateData[`${path}`] = {};
+                } else {
+                    updateData[`${path}.${selectedKey}`] = {};
+                }
+                break;
+        }
+        this.item.update(updateData);
+    }
 
     _onClassControl(event) {
         let element = $(event.currentTarget);
