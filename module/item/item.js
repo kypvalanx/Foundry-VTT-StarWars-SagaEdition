@@ -55,6 +55,9 @@ export class SWSEItem extends Item {
     get strippable(){
         return ['armor', 'weapon'].includes(this.type)
     }
+    get hasPrerequisites(){
+        return ['feat', 'talent', 'class'].includes(this.type)
+    }
 
     get modifiable(){
         return ['armor', 'weapon'].includes(this.type)
