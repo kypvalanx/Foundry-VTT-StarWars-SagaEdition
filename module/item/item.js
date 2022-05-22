@@ -52,6 +52,21 @@ export class SWSEItem extends Item {
         return this.data.type;
     }
 
+    get strippable(){
+        return ['armor', 'weapon'].includes(this.type)
+    }
+    get hasPrerequisites(){
+        return ['feat', 'talent', 'class'].includes(this.type)
+    }
+
+    get modifiable(){
+        return ['armor', 'weapon'].includes(this.type)
+    }
+
+    get hasLevels(){
+        return ['class'].includes(this.type)
+    }
+
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         this.prepareData();

@@ -1,0 +1,39 @@
+<div class="level-body">
+    <nav class="level-tabs tabs" data-group="levels">
+        {{#if item.data.data}}
+            {{#each item.data.data.levels as |level id|}}
+                {{#if level.level}}
+                    <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
+                {{/if}}
+            {{/each}}
+        {{else}}
+
+            {{#each item.data._source.data.levels as |level id|}}
+                {{#if level.level}}
+                    <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
+                {{/if}}
+            {{/each}}
+        {{/if}}
+        <a data-type="add-level" data-action="class-control" title="Add Level"><i class="fas fa-plus"></i></a>
+        <a data-type="remove-level" data-action="class-control" title="Subtract Level"><i class="fas fa-minus"></i></a>
+    </nav>
+    <section class="level-content">
+        {{#if item.data.data}}
+            {{#each item.data.data.levels as |level id|}}
+
+            <div class="tab" data-group="levels" data-tab="{{id}}">
+                <h2>Level {{id}}</h2>
+                {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+            </div>
+            {{/each}}
+        {{else}}
+
+            {{#each item.data._source.data.levels as |level id|}}
+                <div class="tab" data-group="levels" data-tab="{{id}}">
+                    <h2>Level {{id}}</h2>
+                    {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+                </div>
+            {{/each}}
+        {{/if}}
+    </section>
+</div>

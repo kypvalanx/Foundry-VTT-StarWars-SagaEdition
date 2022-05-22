@@ -59,8 +59,10 @@
         <a class="item" data-tab="summary">Summary</a>
         <a class="item" data-tab="attributes">Attributes</a>
         <a class="item" data-tab="provided">Provided</a>
-        <a class="item" data-tab="stripping">Stripping</a>
-        <a class="item" data-tab="modifications">Modifications</a>
+        {{#if item.hasPrerequisites}}<a class="item" data-tab="prerequisites">Prerequisites</a>{{/if}}
+        {{#if item.strippable}}<a class="item" data-tab="stripping">Stripping</a>{{/if}}
+        {{#if item.modifiable}}<a class="item" data-tab="modifications">Modifications</a>{{/if}}
+        {{#if item.hasLevels}}<a class="item" data-tab="levels">Levels</a>{{/if}}
     </nav>
 
     {{!-- Sheet Body --}}
@@ -137,13 +139,24 @@
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
-            {{> 'systems/swse/templates/item/parts/attributes.hbs'}}
-
+            {{> 'systems/swse/templates/item/parts/attributes.hbs' data=item.data}}
         </div>
 
         {{!-- Provided Tab --}}
         <div class="tab" data-group="primary" data-tab="provided">
-            {{> 'systems/swse/templates/item/parts/provided.hbs'}}
+            {{> 'systems/swse/templates/item/parts/providedItems.hbs'}}
+        </div>
+
+        {{!-- Prerequisites Tab --}}
+        <div class="tab" data-group="primary" data-tab="prerequisites">
+            {{log item.data._source.data.prerequisite}}
+            {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=item.data._source.data.prerequisite path=(concat 'data.prerequisite')}}
+
+        </div>
+
+
+        <div class="tab" data-group="primary" data-tab="levels">
+            {{> 'systems/swse/templates/item/parts/levels.hbs'}}
         </div>
     </section>
 </form>

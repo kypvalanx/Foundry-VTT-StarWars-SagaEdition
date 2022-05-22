@@ -25,6 +25,23 @@
   .item {
     line-height: 40px;
     font-weight: bold;
+    flex-grow: 1;
+  }
+
+  .item.active {
+    text-decoration: underline;
+    text-shadow: none;
+  }
+}
+
+.vertical-tabs {
+
+  border-top: 1px solid #AAA;
+  border-bottom: 1px solid #AAA;
+
+  .item {
+    line-height: 40px;
+    font-weight: bold;
   }
 
   .item.active {

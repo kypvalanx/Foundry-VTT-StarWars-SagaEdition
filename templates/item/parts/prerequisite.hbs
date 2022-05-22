@@ -1,0 +1,116 @@
+{{#if prerequisite}}
+    <div class="prerequisite flex flex-col flex-grow">
+        <div>Prerequisite:</div>
+        <div class="flex flex-row">
+            <label>
+                Type:<br/>
+                <select name="{{path}}.type">
+                    {{#select prerequisite.type}}
+                        <option value="">--</option>
+                        <option value="AND">AND</option>
+                        <option value="ARMOR_TYPE">ARMOR_TYPE</option>
+                        <option value="ATTRIBUTE">ATTRIBUTE</option>
+                        <option value="BASE ATTACK BONUS">BASE ATTACK BONUS</option>
+                        <option value="CHARACTER LEVEL">CHARACTER LEVEL</option>
+                        <option value="CLASS">CLASS</option>
+                        <option value="CONDITION">CONDITION</option>
+                        <option value="DAMAGE_TYPE">DAMAGE_TYPE</option>
+                        <option value="DARK SIDE SCORE">DARK SIDE SCORE</option>
+                        <option value="EQUIPPED">EQUIPPED</option>
+                        <option value="FEAT">FEAT</option>
+                        <option value="FORCE POWER">FORCE POWER</option>
+                        <option value="FORCE SECRET">FORCE SECRET</option>
+                        <option value="FORCE TECHNIQUE">FORCE TECHNIQUE</option>
+                        <option value="LANGUAGE">LANGUAGE</option>
+                        <option value="MODE">MODE</option>
+                        <option value="NOT">NOT</option>
+                        <option value="OR">OR</option>
+                        <option value="PROFICIENCY">PROFICIENCY</option>
+                        <option value="SOURCE">SOURCE</option>
+                        <option value="SPECIAL">SPECIAL</option>
+                        <option value="SPECIES">SPECIES</option>
+                        <option value="SUBTYPE">SUBTYPE</option>
+                        <option value="TALENT">TALENT</option>
+                        <option value="TEMPLATE">TEMPLATE</option>
+                        <option value="TRADITION">TRADITION</option>
+                        <option value="TRAINED SKILL">TRAINED SKILL</option>
+                        <option value="TRAIT">TRAIT</option>
+                        <option value="TYPE">TYPE</option>
+                        <option value="WEAPON_GROUP">WEAPON_GROUP</option>
+                        <option value="WEAPON_SIZE">WEAPON_SIZE</option>
+                    {{/select}}
+                </select>
+            </label>
+
+            <label  class="flex-grow" title="Human readable flavor text.">
+                Text:<br/>
+                <input type="text" value="{{prerequisite.text}}" name="{{path}}.text">
+            </label>
+            {{#ifEquals prerequisite.type (arr "OR")}}
+
+                <label  class="flex-grow" title="How many of below requirements need to be met">
+                    Count:<br/>
+                    <input type="number" value="{{prerequisite.count}}" name="{{path}}.count">
+                </label>
+            {{/ifEquals}}
+            {{#ifEquals prerequisite.type (arr "OR" "AND")}}
+                {{#if @root.editable}}
+                    <a data-action="prerequisite-control" data-type="add-child-prerequisite"
+                       data-path="{{path}}.children" title="add child prerequisite"><i class="fas fa-plus"></i></a>
+                {{/if}}
+            {{/ifEquals}}
+
+            {{#ifEquals prerequisite.type (arr "NOT")}}
+                {{#if @root.editable}}
+                    {{#unless prerequisite.child}}
+                    <a data-action="prerequisite-control" data-type="add-child-prerequisite" data-path="{{path}}.child"
+                       title="add child prerequisite"><i class="fas fa-plus"></i></a>
+                    {{/unless}}
+                {{/if}}
+            {{/ifEquals}}
+
+
+            {{#ifEquals prerequisite.type (arr "AGE")}}
+                <label class="flex-grow" title="Inclusive low value of age range.">
+                    Low:<br/>
+                    <input type="number" value="{{prerequisite.low}}" name="{{path}}.low">
+                </label>
+                <label class="flex-grow" title="Inclusive high value of age range.">
+                    High:<br/>
+                    <input type="number" value="{{prerequisite.high}}" name="{{path}}.high">
+                </label>
+            {{/ifEquals}}
+
+            {{#ifEquals prerequisite.type (arr "ARMOR_TYPE" "ATTRIBUTE" "BASE ATTACK BONUS" "CHARACTER LEVEL" "CLASS" "CONDITION" "DAMAGE_TYPE" "DARK SIDE SCORE" "EQUIPPED" "FEAT" "FORCE POWER" "FORCE SECRET" "FORCE TECHNIQUE" "LANGUAGE" "MODE" "PROFICIENCY" "SOURCE" "SPECIAL" "SPECIES" "SUBTYPE" "TALENT" "TEMPLATE" "TRADITION" "TRAINED SKILL" "TRAIT" "TYPE" "WEAPON_GROUP" "WEAPON_SIZE")}}
+                <label class="flex-grow">
+                    Requirement:<br/>
+                    <input type="text" value="{{prerequisite.requirement}}" name="{{path}}.requirement">
+                </label>
+            {{/ifEquals}}
+            {{#if @root.editable}}
+                <a data-action="prerequisite-control" data-type="remove-this-prerequisite" data-path="{{path}}"><i
+                        class="fas fa-trash"></i></a>
+            {{/if}}
+        </div>
+
+        {{#ifEquals prerequisite.type (arr "OR" "AND")}}
+            {{#each prerequisite.children as |child id|}}
+                {{#if child}}
+                    <div class="flex flex-row">
+                        <div class="spacer">--</div>
+                        {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=child path=(concat ../path '.children.' id)}}
+                    </div>
+                {{/if}}
+            {{/each}}
+        {{/ifEquals}}
+
+        {{#ifEquals prerequisite.type (arr "NOT")}}
+            {{#if prerequisite.child}}
+            <div class="flex flex-row">
+                <div class="spacer">-</div>
+                {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=prerequisite.child path=(concat path '.child')}}
+            </div>
+            {{/if}}
+        {{/ifEquals}}
+    </div>
+{{/if}}
