@@ -27,9 +27,9 @@ import {activateChoices} from "../choice/choice.js";
 
 function multiplyNumericTerms(roll, multiplier) {
     let previous;
-    for(let term of roll.terms){
-        if(term instanceof NumericTerm){
-            if(previous && previous.operator !== "*" && previous.operator !== "/"){
+    for (let term of roll.terms) {
+        if (term instanceof NumericTerm) {
+            if (previous && previous.operator !== "*" && previous.operator !== "/") {
                 term.number = term.number * multiplier;
             }
         }
@@ -37,6 +37,21 @@ function multiplyNumericTerms(roll, multiplier) {
     }
 }
 
+
+function addMultiplierToDice(roll, number) {
+    let terms = [];
+
+    for (let term of roll.terms) {
+        terms.push(term);
+        if (term instanceof DiceTerm) {
+            terms.push(new OperatorTerm({operator: '*'}));
+            terms.push(new NumericTerm({number: '2'}))
+        }
+    }
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -377,10 +392,10 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.techniques)
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
-        if(this.background) {
+        if (this.background) {
             this.inheritableItems.push(this.background)
         }
-        if(this.destiny) {
+        if (this.destiny) {
             this.inheritableItems.push(this.destiny)
         }
 
@@ -442,7 +457,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    async removeSuppliedItems( id) {
+    async removeSuppliedItems(id) {
         return this.items.filter(item => item.data.data.supplier?.id === id).map(item => item.id) || []
     }
 
@@ -457,7 +472,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        let darkSideTaint = getInheritableAttribute({entity:actorData, attributeKey:"darksideTaint", reduce: "SUM"})
+        let darkSideTaint = getInheritableAttribute({entity: actorData, attributeKey: "darksideTaint", reduce: "SUM"})
 
         actorData.data.finalDarksideScore = actorData.data.darkSideScore + darkSideTaint
     }
@@ -609,7 +624,7 @@ export class SWSEActor extends Actor {
 
         let attributes = getInheritableAttribute({
             entity: this,
-            attributeKey: 'speed', reduce:"VALUES"
+            attributeKey: 'speed', reduce: "VALUES"
         })
 
         if (attributes.length === 0) {
@@ -948,7 +963,7 @@ export class SWSEActor extends Actor {
     }
 
     get isDroid() {
-        if (this.type === 'vehicle' || this.type === 'npc-vehicle'){
+        if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
             return false;
         }
 
@@ -1163,7 +1178,7 @@ export class SWSEActor extends Actor {
         let classSkills = new Set()
         let skills = getInheritableAttribute({
             entity: this,
-            attributeKey: "classSkill", reduce:"VALUES"
+            attributeKey: "classSkill", reduce: "VALUES"
         });
 
         for (let skill of skills) {
@@ -1768,6 +1783,7 @@ export class SWSEActor extends Actor {
         }
         return roll;
     }
+
     getModifiersFromInputs(options, selector) {
         let bonuses = [];
         options.find(selector).each((i, modifier) => {
@@ -1810,7 +1826,7 @@ export class SWSEActor extends Actor {
 
             for (let i = 0; i < additionalDamageDice.length; i++) {
                 let clonedAttack = attack.clone();
-                clonedAttack.options.additionalAttack = i+1;
+                clonedAttack.options.additionalAttack = i + 1;
                 clonedAttack.options.standardAttack = true;
                 resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
             }
@@ -1907,22 +1923,36 @@ export class SWSEActor extends Actor {
         let fail = attack.isFailure(attackRollResult);
         let critical = attack.isCritical(attackRollResult);
 
+
+        let ignoreCritical = getInheritableAttribute({
+            entity: attack.item,
+            attributeKey: "skipCriticalMultiply",
+            reduce: "OR"
+        })
+
         let damageRoll = attack.damageRoll.roll;
-        if(critical){
+        if (critical && !ignoreCritical) {
             let criticalHitPreMultiplierBonuses = getInheritableAttribute({
                 entity: attack.item,
                 attributeKey: "criticalHitPreMultiplierBonus"
             })
 
-            for(let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses){
+            for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
 
                 let value = resolveValueArray(criticalHitPreMultiplierBonus, this)
 
                 damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
             }
 
-            damageRoll.alter(2, 0, true)
-            multiplyNumericTerms(damageRoll, 2)
+
+        //TODO add a user option to use this kind of multiplication.  RAW the rolled dice values are doubled, not the number of dice
+            if(false) {
+                damageRoll.alter(2, 0, true)
+                multiplyNumericTerms(damageRoll, 2)
+            } else {
+                damageRoll = addMultiplierToDice(damageRoll, 2)
+                multiplyNumericTerms(damageRoll, 2)
+            }
 
 
             let postMultBonusDie = getInheritableAttribute({
@@ -1933,8 +1963,15 @@ export class SWSEActor extends Actor {
             damageRoll.alter(1, postMultBonusDie)
         }
 
-        let damageRollResult = damageRoll.roll({async: false});
-        return {attack: attackRollResult, damage: damageRollResult, damageType: attack.type, notes:attack.notes, critical: critical, fail: fail};
+        let damage = damageRoll.roll({async: false});
+        return {
+            attack: attackRollResult,
+            damage: damage,
+            damageType: attack.type,
+            notes: attack.notes,
+            critical,
+            fail
+        };
     }
 
     getAttackBlock(attack, resolvedAttacks) {
@@ -1942,15 +1979,14 @@ export class SWSEActor extends Actor {
         let attackRolls = '<th>Attack:</th>';
         let damageRolls = '<th>Damage:</th>';
 
-        for(let resolvedAttack of resolvedAttacks){
+        for (let resolvedAttack of resolvedAttacks) {
             let classes = [];
-            if(resolvedAttack.critical){
+            if (resolvedAttack.critical) {
                 classes.push("critical")
             }
-            if(resolvedAttack.fail){
+            if (resolvedAttack.fail) {
                 classes.push("fail")
             }
-
             attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total}</td>`
             damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total} (${resolvedAttack.damageType})</td>`
         }
@@ -2067,7 +2103,7 @@ ${damageRolls}
      * @param type
      */
     async checkPrerequisitesAndResolveOptions(item, options) {
-        let choices = await activateChoices(item, {actor:this});
+        let choices = await activateChoices(item, {actor: this});
         if (!choices.success) {
             return [];
         }
@@ -2130,7 +2166,6 @@ ${damageRolls}
         await this.addItems(providedItems, mainItem[0], options);
         return mainItem[0];
     }
-
 
 
     /**
@@ -2249,7 +2284,9 @@ ${damageRolls}
 
 
     async getIndexEntryByName(item, index) {
-        if(!index){return}
+        if (!index) {
+            return
+        }
 
         let {itemName, payload} = this.resolveItemParts(item);
         let cleanItemName1 = this.cleanItemName(itemName);
@@ -2266,11 +2303,11 @@ ${damageRolls}
         return feat.replace("*", "").trim();
     }
 
-    static getItems(target){
-        if(SWSEActor === typeof target){
+    static getItems(target) {
+        if (SWSEActor === typeof target) {
             target = target.data;
         }
-        if(!Array.isArray(target.items)){
+        if (!Array.isArray(target.items)) {
             return Object.values(target.items);
         }
         return target.items;
@@ -2325,7 +2362,7 @@ ${damageRolls}
 
 
     static getVariableFromActorData(swseActor, variableName) {
-        if(!swseActor.resolvedVariables){
+        if (!swseActor.resolvedVariables) {
             swseActor = swseActor.document;
         }
 
@@ -2343,16 +2380,16 @@ ${damageRolls}
  * @param actorData {ActorData}
  */
 export function getEquippedItems(actorData) {
-    if(!actorData){
+    if (!actorData) {
         return [];
     }
-    if(actorData instanceof SWSEActor){
+    if (actorData instanceof SWSEActor) {
         actorData = actorData.data;
     }
 
-    let equippedIds = actorData?.data?.data?.equippedIds || actorData?.data?.equippedIds || actorData?._source?.data?.equippedIds ||[];
+    let equippedIds = actorData?.data?.data?.equippedIds || actorData?.data?.equippedIds || actorData?._source?.data?.equippedIds || [];
     equippedIds = equippedIds.map(id => id.id)
-    let items = actorData?.items?._source || actorData.items ||[]
+    let items = actorData?.items?._source || actorData.items || []
 
     return items.filter(item => equippedIds.includes(item._id));
 }
