@@ -17,7 +17,7 @@ import {reduceWeaponRange, SWSEItem} from "../item/item.js";
 import {
     getEntityFromCompendiums,
     getOrdinal,
-    getRangedAttackMod,
+    getAttackRange,
     getRangeModifierBlock,
     increaseDieSize,
     toNumber
@@ -500,7 +500,7 @@ export class Attack {
     }
 
     get rangedAttackModifier() {
-        return getRangedAttackMod(this.range, this.isAccurate, this.isInaccurate, this.actor)
+        return getAttackRange(this.range, this.isAccurate, this.isInaccurate, this.actor)
     }
 
     get isAccurate() {
@@ -520,12 +520,11 @@ export class Attack {
     }
 
     get attackOptionHTML() {
-        let rangedAttackModifier = this.rangedAttackModifier;
+        let attackRange = this.rangedAttackModifier;
         let modifiers = [];
         let uniqueId = Math.floor(Math.random() * 50000 + Math.random() * 50000)
-        if (isNaN(rangedAttackModifier)) {
-            modifiers.push(getRangeModifierBlock(this.range, this.isAccurate, this.isInaccurate, uniqueId))
-        }
+        modifiers.push(getRangeModifierBlock(this.range, this.isAccurate, this.isInaccurate, uniqueId, attackRange))
+
 
         let attackLabel = document.createElement("label");
         modifiers.push(attackLabel);
