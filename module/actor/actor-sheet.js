@@ -280,29 +280,20 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
 
-        if (dragData.label === 'Unarmed Attack') {
-            dragData.type = 'Item';
-        }
 
         dragData.img = elem.dataset.img;
         dragData.itemId = elem.dataset.itemId;
+        dragData.providerId = elem.dataset.providerId;
         dragData.actorId = this.actor.id;
+        dragData.attacks = elem.dataset.attacks ? JSON.parse(elem.dataset.attacks) : [];
         if (this.actor.isToken) {
             dragData.sceneId = canvas.scene.id;
             dragData.tokenId = this.actor.token.id;
         }
 
-        if (elem.dataset.provider) {
-            dragData.provider = elem.dataset.provider;
-            dragData.itemId = elem.dataset.providedItemId;
-            dragData.type = 'Item';
+        if (dragData.attacks) {
+            dragData.type = 'attack';
         }
-
-        if (elem.dataset.actorId) {
-            dragData.id = elem.dataset.actorId;
-            dragData.type = "Actor";
-        }
-
 
         dragData.sourceContainer = this.getParentByHTMLClass(event, "item-container");
         dragData.draggableId = event.target.id;

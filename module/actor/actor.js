@@ -5,9 +5,7 @@ import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getBonusString,
     getIndexAndPack,
-    handleAttackSelect,
     resolveExpression,
     resolveValueArray,
     toShortAttribute,
@@ -21,37 +19,9 @@ import {SWSEItem} from "../item/item.js";
 import {crewPositions, crewQuality, sizeArray, skills} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
-import {appendNumericTerm, Attack} from "./attack.js";
+import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
 
-
-function multiplyNumericTerms(roll, multiplier) {
-    let previous;
-    for (let term of roll.terms) {
-        if (term instanceof NumericTerm) {
-            if (previous && previous.operator !== "*" && previous.operator !== "/") {
-                term.number = term.number * multiplier;
-            }
-        }
-        previous = term;
-    }
-}
-
-
-function addMultiplierToDice(roll, number) {
-    let terms = [];
-
-    for (let term of roll.terms) {
-        terms.push(term);
-        if (term instanceof DiceTerm) {
-            terms.push(new OperatorTerm({operator: '*'}));
-            terms.push(new NumericTerm({number: '2'}))
-        }
-    }
-
-    return Roll.fromTerms(terms
-        .filter(term => !!term))
-}
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -691,17 +661,13 @@ export class SWSEActor extends Actor {
     }
 
     getEquippedItems() {
-        let getEquippedItems = this._getEquippedItems(this._getEquipable(SWSEActor.getInventoryItems(this.items.values())), "equipped");
-        let prerequisites = this.data.prerequisites;
-        prerequisites.equippedItems = [];
-        for (let item of getEquippedItems) {
-            prerequisites.equippedItems.push(item.name.toLowerCase());
-        }
-        return getEquippedItems;
+        let items = this.items;
+        return SWSEActor._getEquippedItems(this.data, SWSEActor.getInventoryItems(items.values()), "equipped");
     }
 
     getInstalledWeapons() {
-        return this._getEquippedItems(SWSEActor.getInventoryItems(this.items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
+        let items = this.items;
+        return SWSEActor._getEquippedItems(this.data, SWSEActor.getInventoryItems(items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
     }
 
     getTalents() {
@@ -1083,11 +1049,10 @@ export class SWSEActor extends Actor {
     }
 
 
-    _getEquippedItems(items, equipTypes) {
-        if (!Array.isArray(equipTypes)) {
-            equipTypes = [equipTypes];
-        }
-        let equippedIds = (this.data.data.equippedIds || [])
+    static _getEquippedItems(actorData, items, equipTypes) {
+        equipTypes = Array.isArray(equipTypes) ? equipTypes : [equipTypes];
+
+        let equippedIds = actorData.data.equippedIds || [];
         if (equipTypes.length > 0) {
             equippedIds = equippedIds.filter(id => equipTypes.includes(id.type))
         }
@@ -1540,482 +1505,9 @@ export class SWSEActor extends Actor {
      * @returns {Promise<void>}
      */
     async attack(event, context) {
-        let options = this.buildAttackDialog(context);
-        await new Dialog(options).render(true);
+        context.actor = this.data;
+        await makeAttack(context);
     }
-
-    /**
-     *
-     * @param context {object}
-     * @param context.type {string}
-     * @param context.items {Array.<Attack>}
-     * @returns {{buttons: {attack: {callback: buttons.attack.callback, label: string}}, options: {height: number}, title: string, render: ((function(*): Promise<void>)|*), content: string}}
-     */
-    buildAttackDialog(context) {
-        let availableAttacks = 1;
-        let title = "Single Attack";
-        let dualWeaponModifier = -10;
-        let doubleAttack = [];
-        let tripleAttack = [];
-        //let hands = 2; //TODO resolve extra hands
-
-        if (context.type === "fullAttack") {
-            title = "Full Attack";
-            doubleAttack = getInheritableAttribute({
-                entity: this,
-                attributeKey: "doubleAttack",
-                reduce: "VALUES"
-            });
-            tripleAttack = getInheritableAttribute({
-                entity: this,
-                attributeKey: "tripleAttack",
-                reduce: "VALUES"
-            });
-
-            //availableAttacks = this.fullAttackCount;
-            let equippedItems = this.getEquippedItems()
-            availableAttacks = 0;
-            let doubleAttackBonus = 0;
-            let tripleAttackBonus = 0;
-            let availableWeapons = 0
-            for (let item of equippedItems) {
-                availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
-                //TODO support exotic weapons
-                if (doubleAttack.includes(item.data.data.subtype)) {
-                    doubleAttackBonus = 1;
-                }
-                if (tripleAttack.includes(item.data.data.subtype)) {
-                    tripleAttackBonus = 1;
-                }
-            }
-            availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
-
-
-            //how many attacks?
-            //
-            //how many provided attacks from weapons max 2
-            //+1 if has double attack and equipped item
-            //+1 if has triple attack and equipped item
-
-            let dualWeaponModifiers = getInheritableAttribute({
-                entity: this,
-                attributeKey: "dualWeaponModifier",
-                reduce: "NUMERIC_VALUES"
-            });
-            dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
-        }
-
-        let suppliedItems = context.items || [];
-
-        // if (suppliedItems.length > 0) {
-        //     availableAttacks = suppliedItems.length;
-        // }
-
-        let content = `<p>Select Attacks:</p>`;
-        let resolvedAttacks = [];
-        if (suppliedItems.length < availableAttacks) {
-            //CREATE OPTIONS
-            resolvedAttacks = this.getAttackOptions(doubleAttack, tripleAttack);
-        }
-
-
-        let blockHeight = 225;
-
-
-        for (let i = 0; i < availableAttacks; i++) {
-            let attack = suppliedItems.length > i ? suppliedItems[i] : undefined;
-            let select;
-            if (!!attack) {
-                select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
-            } else {
-                select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
-            }
-
-
-            let attackBlock = `<div class="attack panel attack-block">
-<div class="attack-name">${select}</div>
-<div class="attack-options"></div>
-<div class="attack-total"></div>
-</div>`
-            content += attackBlock;
-
-        }
-
-        let height = availableAttacks * blockHeight + 85
-
-
-        return {
-            title,
-            content,
-            buttons: {
-                attack: {
-                    label: "Attack",
-                    callback: (html) => {
-                        let attacks = [];
-                        let attackBlocks = html.find(".attack-block");
-                        let selects = html.find("select");
-                        let attackMods = this.getAttackMods(selects, dualWeaponModifier);
-                        let damageMods = this.getDamageMods(selects, dualWeaponModifier);
-                        for (let attackBlock of attackBlocks) {
-                            let attackFromBlock = this.getAttackFromBlock(attackBlock, attackMods, damageMods);
-                            if (!!attackFromBlock) {
-                                attacks.push(attackFromBlock);
-                            }
-                        }
-
-                        this.rollAttacks(attacks);
-                    }
-                }
-            },
-            render: async (html) => {
-                let selects = html.find("select");
-                selects.on("change", () => handleAttackSelect(selects));
-                handleAttackSelect(selects)
-
-                let attackIds = html.find(".attack-id");
-                attackIds.each((i, div) => this.populateItemStats(div, context));
-
-                attackIds.on("change", () => {
-                    let context = {};
-                    context.attackMods = this.getAttackMods(selects, dualWeaponModifier);
-                    context.damageMods = this.getDamageMods(selects, dualWeaponModifier);
-                    html.find(".attack-id").each((i, div) => this.populateItemStats(div, context));
-                })
-            },
-            options: {
-                height
-            }
-        };
-    }
-
-    getDamageMods() {
-        return [];
-    }
-
-    getAttackMods(selects, dualWeaponModifier) {
-        let attackMods = []
-        let isDoubleAttack = false;
-        let isTripleAttack = false;
-        let standardAttacks = 0;
-        for (let select of selects) {
-            if (select.value === "--") {
-                continue;
-            }
-            let attack = JSON.parse(select.value);
-            let options = attack.options
-            if (options.doubleAttack) {
-                isDoubleAttack = true;
-            }
-            if (options.tripleAttack) {
-                isTripleAttack = true;
-            }
-            if (options.standardAttack) {
-                standardAttacks++;
-            }
-        }
-
-
-        if (isDoubleAttack) {
-            attackMods.push({value: -5, source: "Double Attack"});
-        }
-        if (isTripleAttack) {
-            attackMods.push({value: -5, source: "Triple Attack"});
-        }
-
-        if (standardAttacks > 1) {
-            attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
-        }
-        attackMods.forEach(attack => attack.type = "attack");
-        return attackMods
-    }
-
-
-    /**
-     *
-     * @param html
-     * @param context
-     */
-    populateItemStats(html, context) {
-        let value = html.value || $(html).data("value");
-
-        let parent = $(html).parents(".attack");
-        let options = parent.children(".attack-options")
-        let total = parent.children(".attack-total");
-        total.empty();
-        options.empty();
-
-        if (value === "--") {
-            return;
-        }
-        let attack = Attack.fromJSON(value);
-
-
-        options.append(attack.attackOptionHTML)
-        options.find(".attack-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
-        options.find(".damage-modifier").on("change", () => this.setAttackTotal(attack, total, options, context))
-
-        this.setAttackTotal(attack, total, options, context);
-    }
-
-    setAttackTotal(attack, total, options, context) {
-        options.children()
-        total.empty();
-        let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.damageMods, ".damage-modifier");
-        let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + this.getModifiersFromContextAndInputs(options, context.attackMods, ".attack-modifier");
-        total.append(`<div class="flex flex-col"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
-    }
-
-    getModifiersFromContextAndInputs(options, modifiers, inputCriteria) {
-        let bonuses = [];
-        options.find(inputCriteria).each((i, modifier) => {
-                if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
-                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
-                }
-            }
-        )
-        for (let attackMod of modifiers || []) {
-            bonuses.push({source: attackMod.source, value: getBonusString(attackMod.value)});
-        }
-
-        let roll = ""
-        for (let bonus of bonuses) {
-            roll += `<span title="${bonus.source}">${bonus.value}</span>`
-        }
-        return roll;
-    }
-
-    getModifiersFromInputs(options, selector) {
-        let bonuses = [];
-        options.find(selector).each((i, modifier) => {
-                if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
-                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
-                }
-            }
-        )
-        return bonuses;
-    }
-
-    getAttackOptions(doubleAttack, tripleAttack) {
-        let attacks = this.data.data.attacks;
-
-        let resolvedAttacks = [];
-
-        //only 2 different weapons can be used
-        //double attacks can only be used once first attack is used
-        //triple attacks can only be used once doubel attack is used
-        let existingWeaponNames = [];
-        let id = 1;
-        for (let attack of attacks) {
-            let source = attack.item;
-            if (!source) {
-                continue;
-            }
-
-            let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
-
-            existingWeaponNames.push(attack.name)
-            if (duplicateCount > 0) {
-                attack.options.duplicateCount = duplicateCount;
-            }
-
-            let clonedAttack = attack.clone();
-            clonedAttack.options.standardAttack = true;
-            resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
-
-            let additionalDamageDice = attack.additionalDamageDice
-
-            for (let i = 0; i < additionalDamageDice.length; i++) {
-                let clonedAttack = attack.clone();
-                clonedAttack.options.additionalAttack = i + 1;
-                clonedAttack.options.standardAttack = true;
-                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
-            }
-
-            if (doubleAttack.includes(source.data.subtype)) {
-                let clonedAttack = attack.clone();
-                clonedAttack.options.doubleAttack = true;
-                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
-            }
-            if (tripleAttack.includes(source.data.subtype)) {
-                let clonedAttack = attack.clone();
-                clonedAttack.options.tripleAttack = true;
-                resolvedAttacks.push(this.createAttackOption(clonedAttack, id++))
-            }
-        }
-        return resolvedAttacks;
-    }
-
-    // methods revolving around attack blocks.  can make this more simplified with an attack object maybe.
-    getAttackFromBlock(attackBlock, attackMods, damageMods) {
-        let attackId = $(attackBlock).find(".attack-id")[0]
-        let attackValue = attackId.value || $(attackId).data("value");
-
-        if (attackValue === "--") {
-            return undefined;
-        }
-        let attack = Attack.fromJSON(attackValue)
-
-        // let attack = {};
-
-        let attackModifiers = this.getModifiersFromInputs($(attackBlock), ".attack-modifier");
-        attackModifiers.forEach(modifier => modifier.type = 'attack');
-        let damageModifiers = this.getModifiersFromInputs($(attackBlock), ".damage-modifier");
-        damageModifiers.forEach(modifier => modifier.type = 'damage');
-
-        attack.withModifiers(attackModifiers);
-        attack.withModifiers(damageModifiers);
-
-        attack.withModifiers(attackMods);
-        attack.withModifiers(damageMods);
-
-        return attack;
-    }
-
-    rollAttacks(attacks, rollMode) {
-        let cls = getDocumentClass("ChatMessage");
-        //let csd = getDocumentClass("ChatSpeakerData");
-
-        let attackRows = [];
-        let roll;
-
-        for (let attack of attacks) {
-            let resolvedAttack = this.resolveAttack(attack);
-            roll = resolvedAttack.attack;
-            let resolvedAttacks = [resolvedAttack];
-
-            attackRows.push(this.getAttackBlock(attack, resolvedAttacks))
-        }
-
-        let content = `${attackRows.join("<br>")}`;
-
-        let speaker = ChatMessage.getSpeaker({actor: this});
-
-        let flavor = attacks[0].name;
-        if (attacks.length > 1) {
-            flavor = "Full Attack " + flavor;
-        }
-
-
-        let messageData = {
-            user: game.user.id,
-            speaker: speaker,
-            flavor: flavor,
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-            content,
-            sound: CONFIG.sounds.dice,
-            roll
-        }
-
-        let msg = new cls(messageData);
-        if (rollMode) msg.applyRollMode(rollMode);
-
-        return cls.create(msg.data, {rollMode});
-    }
-
-    /**
-     *
-     * @param attack {Attack}
-     * @returns {{damage: (Roll|Promise<Roll>), fail: boolean, critical: boolean, attack: (Roll|Promise<Roll>)}}
-     */
-    resolveAttack(attack) {
-        let attackRollResult = attack.attackRoll.roll.roll({async: false});
-
-        let fail = attack.isFailure(attackRollResult);
-        let critical = attack.isCritical(attackRollResult);
-
-
-        let ignoreCritical = getInheritableAttribute({
-            entity: attack.item,
-            attributeKey: "skipCriticalMultiply",
-            reduce: "OR"
-        })
-
-        let damageRoll = attack.damageRoll.roll;
-        if (critical && !ignoreCritical) {
-            let criticalHitPreMultiplierBonuses = getInheritableAttribute({
-                entity: attack.item,
-                attributeKey: "criticalHitPreMultiplierBonus"
-            })
-
-            for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
-
-                let value = resolveValueArray(criticalHitPreMultiplierBonus, this)
-
-                damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
-            }
-
-
-        //TODO add a user option to use this kind of multiplication.  RAW the rolled dice values are doubled, not the number of dice
-            if(false) {
-                damageRoll.alter(2, 0, true)
-                multiplyNumericTerms(damageRoll, 2)
-            } else {
-                damageRoll = addMultiplierToDice(damageRoll, 2)
-                multiplyNumericTerms(damageRoll, 2)
-            }
-
-
-            let postMultBonusDie = getInheritableAttribute({
-                entity: attack.item,
-                attributeKey: "criticalHitPostMultiplierBonusDie",
-                reduce: "SUM"
-            })
-            damageRoll.alter(1, postMultBonusDie)
-        }
-
-        let damage = damageRoll.roll({async: false});
-        return {
-            attack: attackRollResult,
-            damage: damage,
-            damageType: attack.type,
-            notes: attack.notes,
-            critical,
-            fail
-        };
-    }
-
-    getAttackBlock(attack, resolvedAttacks) {
-
-        let attackRolls = '<th>Attack:</th>';
-        let damageRolls = '<th>Damage:</th>';
-
-        for (let resolvedAttack of resolvedAttacks) {
-            let classes = [];
-            if (resolvedAttack.critical) {
-                classes.push("critical")
-            }
-            if (resolvedAttack.fail) {
-                classes.push("fail")
-            }
-            attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total}</td>`
-            damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total} (${resolvedAttack.damageType})</td>`
-        }
-
-
-        return `<table>
-<thead>
-<tr>
-<th>${attack.name}</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-${attackRolls}
-</tr>
-<tr>
-${damageRolls}
-</tr>
-</tbody>
-</table><br/><div>${attack.notesHTML}</div>`
-
-        //return `<tr><td>${attack.name}</td><td><a class="inline-roll inline-result" title="${attackRollResult.result}">${attackRollResult.total}</a></td><td><a class="inline-roll inline-result" title="${damageRollResult.result}">${damageRollResult.total}</a></td></tr>`;
-    }
-
-    createAttackOption(attack, id) {
-        let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
-        return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
-    }
-
     resolveSlots(availableSlots, crew, type, cover) {
         let slots = [];
         for (let i = 0; i < availableSlots; i++) {
@@ -2271,7 +1763,7 @@ ${damageRolls}
      // * @param item.type {string}
      * @returns {{itemName, payload: string}}
      */
-    resolveItemParts(item) {
+    resolveItemNameAndPayload(item) {
         let itemName = item;
         let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
         let payload = "";
@@ -2288,7 +1780,7 @@ ${damageRolls}
             return
         }
 
-        let {itemName, payload} = this.resolveItemParts(item);
+        let {itemName, payload} = this.resolveItemNameAndPayload(item);
         let cleanItemName1 = this.cleanItemName(itemName);
         let entry = await index.find(f => f.name === cleanItemName1);
         if (!entry) {
@@ -2372,6 +1864,7 @@ ${damageRolls}
         }
         return value;
     }
+
 }
 
 /**

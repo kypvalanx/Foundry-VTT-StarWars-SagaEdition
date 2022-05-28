@@ -1,7 +1,7 @@
 {{#if attack}}
     {{#unless attack.hide}}
         <div class="flex flex-col {{#if attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container"
-             data-attack-id="{{attack.toJSONString}}" data-item-id="{{attack.itemId}}"
+             data-attacks="[{{attack.toJSONString}}]" data-item-id="{{attack.itemId}}"
              data-provider-id="{{attack.providerId}}" data-actor-id="{{attack.actorId}}"
              data-label="{{attack.name}}" data-img="{{attack.img}}">
             <div class="flex flex-row-reverse">
