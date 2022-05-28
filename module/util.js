@@ -436,23 +436,25 @@ export function extractAttributeValues(attribute, source, sourceString) {
     return values
 }
 
-export function resolveRangeAttackModifier(effectiveRange, distance, accurate, inaccurate){
+export function resolveAttackRange(effectiveRange, distance, accurate, inaccurate){
     let range = SWSE.Combat.range[effectiveRange];
     if(!range){
         return 0;
     }
 
+    //TODO add homebrew option for a range multiplier here
+
     let resolvedRange = Object.entries(range).filter(entry => entry[1].low <=distance && entry[1].high >=distance)[0][0];
 
-    if(resolvedRange === 'short range' && accurate){
-        return 0;
+    if(resolvedRange === 'short' && accurate){
+        return "point-blank";
     }
 
-    if(resolvedRange === 'long range' && inaccurate){
+    if(resolvedRange === 'long' && inaccurate){
         return "out of range";
     }
 
-    return SWSE.Combat.rangePenalty[resolvedRange];
+    return resolvedRange;
 }
 
 export function handleExclusiveSelect(e, selects) {
@@ -566,15 +568,15 @@ export function getOrdinal(i) {
     return `${i}`
 }
 
-export function getRangedAttackMod(range, isAccurate, isInaccurate, actor) {
+export function getAttackRange(range, isAccurate, isInaccurate, actor) {
     let targets = Array.from(game.user.targets); //get targeted tokens
 
-    let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (actor._id || actor.id)); //get selected tokens of this actor
+    let sources = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (actor._id || actor.id)) || []; //get selected tokens of this actor
     if (sources.length === 0) {
-        sources = canvas.tokens.objects.children.filter(token => token.data.actorId ===  (actor?._id || actor?.id));
+        sources = canvas.tokens.objects?.children.filter(token => token.data.actorId ===  (actor?._id || actor?.id)) || [];
     }
 
-    let rangedAttackModifier;
+    let attackRange;
     if (sources.length > 0 && targets.length > 0) {
         if (sources.length > 1 || targets.length > 1) {
             console.warn("found too many selected targets or resolved too many sources");
@@ -583,9 +585,9 @@ export function getRangedAttackMod(range, isAccurate, isInaccurate, actor) {
         let target = targets[0];
         let distance = getTokenDistanceInSquares(source, target)
 
-        rangedAttackModifier = resolveRangeAttackModifier(range, distance, isAccurate, isInaccurate)
+        attackRange = resolveAttackRange(range, distance, isAccurate, isInaccurate)
     }
-    return rangedAttackModifier;
+    return attackRange;
 }
 
 export function getTokenDistanceInSquares(source, target) {
@@ -596,7 +598,7 @@ export function getTokenDistanceInSquares(source, target) {
     return Math.max(xDiff, yDiff) / squareSize;
 }
 
-export function getRangeModifierBlock(range, accurate, innacurate, id) {
+export function getRangeModifierBlock(range, accurate, innacurate, id, defaultValue) {
     if (range === 'Grenades') {
         range = 'Thrown Weapons'
     }
@@ -608,7 +610,7 @@ export function getRangeModifierBlock(range, accurate, innacurate, id) {
     let firstHeader = thead.appendChild(document.createElement("tr"));
     let secondHeader = thead.appendChild(document.createElement("tr"));
     let radioButtons = tbody.appendChild(document.createElement("tr"));
-    let selected = true;
+    let selected = !defaultValue;
 
     for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
         let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
@@ -644,8 +646,9 @@ export function getRangeModifierBlock(range, accurate, innacurate, id) {
         input.setAttribute("id", `range-${rangeName}`);
         input.setAttribute("name", `range-selection-${id}`);
         input.setAttribute("value", `${rangePenaltyElement}`);
+
         input.dataset.source = "Range Modifier";
-        if (selected) {
+        if (selected || rangeName === defaultValue) {
             input.setAttribute("checked", true);
             selected = false;
         }

@@ -280,29 +280,20 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
 
-        if (dragData.label === 'Unarmed Attack') {
-            dragData.type = 'Item';
-        }
 
         dragData.img = elem.dataset.img;
         dragData.itemId = elem.dataset.itemId;
+        dragData.providerId = elem.dataset.providerId;
         dragData.actorId = this.actor.id;
+        dragData.attacks = elem.dataset.attacks ? JSON.parse(elem.dataset.attacks) : [];
         if (this.actor.isToken) {
             dragData.sceneId = canvas.scene.id;
             dragData.tokenId = this.actor.token.id;
         }
 
-        if (elem.dataset.provider) {
-            dragData.provider = elem.dataset.provider;
-            dragData.itemId = elem.dataset.providedItemId;
-            dragData.type = 'Item';
+        if (dragData.attacks.length > 0) {
+            dragData.type = 'attack';
         }
-
-        if (elem.dataset.actorId) {
-            dragData.id = elem.dataset.actorId;
-            dragData.type = "Actor";
-        }
-
 
         dragData.sourceContainer = this.getParentByHTMLClass(event, "item-container");
         dragData.draggableId = event.target.id;
@@ -1130,8 +1121,14 @@ export class SWSEActorSheet extends ActorSheet {
         let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
 
-        let providedItems = item.getProvidedItems() || [];
-        providedItems.push(...choices.items);
+        let providedItems = item.getProvidedItems() || {};
+        let providedItemCursor = 0;
+        (choices.items || []).forEach(item => {
+            while(providedItems[providedItemCursor]){
+                providedItemCursor++;
+            }
+            providedItems[providedItemCursor] = item;
+        })
 
         await this.actor.addItems(providedItems, mainItem);
 
@@ -1887,9 +1884,9 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onActivateItem(ev) {
         let elem = ev.currentTarget;
-        let attack = Attack.fromJSON(JSON.parse(elem.dataset.attackId));
+        let attacks = JSON.parse(elem.dataset.attacks);
 
-        this.actor.attack(ev, {type: "singleAttack", items: [attack]});
+        this.actor.attack(ev, {type: "singleAttack", attacks});
         return undefined;
     }
 

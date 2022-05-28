@@ -12,17 +12,21 @@ import {
     resolveFinesseBonus
 } from "./attack-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
-import {SWSEActor} from "./actor.js";
+import {getEquippedItems, SWSEActor} from "./actor.js";
 import {reduceWeaponRange, SWSEItem} from "../item/item.js";
 import {
+    getAttackRange,
+    getBonusString,
     getEntityFromCompendiums,
     getOrdinal,
-    getRangedAttackMod,
     getRangeModifierBlock,
+    handleAttackSelect,
     increaseDieSize,
+    resolveValueArray,
     toNumber
 } from "../util.js";
 import {SWSERollWrapper} from "../common/roll.js";
+import {createAttackMacro} from "../swse.js";
 
 //Broken out because i have no idea if i'm doing this in a way that the roller understands
 
@@ -500,7 +504,7 @@ export class Attack {
     }
 
     get rangedAttackModifier() {
-        return getRangedAttackMod(this.range, this.isAccurate, this.isInaccurate, this.actor)
+        return getAttackRange(this.range, this.isAccurate, this.isInaccurate, this.actor)
     }
 
     get isAccurate() {
@@ -520,12 +524,11 @@ export class Attack {
     }
 
     get attackOptionHTML() {
-        let rangedAttackModifier = this.rangedAttackModifier;
+        let attackRange = this.rangedAttackModifier;
         let modifiers = [];
         let uniqueId = Math.floor(Math.random() * 50000 + Math.random() * 50000)
-        if (isNaN(rangedAttackModifier)) {
-            modifiers.push(getRangeModifierBlock(this.range, this.isAccurate, this.isInaccurate, uniqueId))
-        }
+        modifiers.push(getRangeModifierBlock(this.range, this.isAccurate, this.isInaccurate, uniqueId, attackRange))
+
 
         let attackLabel = document.createElement("label");
         modifiers.push(attackLabel);
@@ -641,4 +644,501 @@ function resolveUnarmedDamageDie(actor) {
     })
     damageDie = increaseDieSize(damageDie, bonus);
     return getDiceTermsFromString(damageDie);
+}
+
+function attackOption(attack, id) {
+    let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
+    return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
+}
+
+export function attackOptions(attacks, doubleAttack, tripleAttack) {
+    let resolvedAttacks = [];
+
+    //only 2 different weapons can be used
+    //double attack can only be used once a standard attack is used
+    //triple attack can only be used once a double attack is used
+    let existingWeaponNames = [];
+    let id = 1;
+    for (let attack of attacks) {
+        let source = attack.item;
+        if (!source) {
+            continue;
+        }
+
+        let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
+
+        existingWeaponNames.push(attack.name)
+        if (duplicateCount > 0) {
+            attack.options.duplicateCount = duplicateCount;
+        }
+
+        let clonedAttack = attack.clone();
+        clonedAttack.options.standardAttack = true;
+        resolvedAttacks.push(attackOption(clonedAttack, id++))
+
+        let additionalDamageDice = attack.additionalDamageDice
+
+        for (let i = 0; i < additionalDamageDice.length; i++) {
+            let clonedAttack = attack.clone();
+            clonedAttack.options.additionalAttack = i + 1;
+            clonedAttack.options.standardAttack = true;
+            resolvedAttacks.push(attackOption(clonedAttack, id++))
+        }
+
+        if (doubleAttack.includes(source.data.subtype)) {
+            let clonedAttack = attack.clone();
+            clonedAttack.options.doubleAttack = true;
+            resolvedAttacks.push(attackOption(clonedAttack, id++))
+        }
+        if (tripleAttack.includes(source.data.subtype)) {
+            let clonedAttack = attack.clone();
+            clonedAttack.options.tripleAttack = true;
+            resolvedAttacks.push(attackOption(clonedAttack, id++))
+        }
+    }
+    return resolvedAttacks;
+}
+
+function multiplyNumericTerms(roll, multiplier) {
+    let previous;
+    for (let term of roll.terms) {
+        if (term instanceof NumericTerm) {
+            if (previous && previous.operator !== "*" && previous.operator !== "/") {
+                term.number = term.number * multiplier;
+            }
+        }
+        previous = term;
+    }
+}
+
+function addMultiplierToDice(roll, multiplier) {
+    let terms = [];
+
+    for (let term of roll.terms) {
+        terms.push(term);
+        if (term instanceof DiceTerm) {
+            terms.push(new OperatorTerm({operator: '*'}));
+            terms.push(new NumericTerm({number: `${multiplier}`}))
+        }
+    }
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+/**
+ *
+ * @param context {object}
+ * @param context.type {string}
+ * @param context.attacks {Array.<Attack>}
+ * @param context.actor {ActorData}
+ * @returns {{buttons: {attack: {callback: buttons.attack.callback, label: string}}, options: {height: number}, title: string, render: ((function(*): Promise<void>)|*), content: string}}
+ */
+function attackDialogue(context) {
+    context.attacks = context.attacks?.map(i => {
+        if(i instanceof Attack){
+            return i;
+        }
+        return Attack.fromJSON(i);
+    }) || [];
+    let actor = context.actor || context.attacks[0]?.actor;
+
+    if(!actor){
+        return;
+    }
+    let availableAttacks = 1;
+    let title = "Single Attack";
+    let dualWeaponModifier = -10;
+    let doubleAttack = [];
+    let tripleAttack = [];
+    //let hands = 2; //TODO resolve extra hands
+
+    if (context.type === "fullAttack") {
+        title = "Full Attack";
+        doubleAttack = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "doubleAttack",
+            reduce: "VALUES"
+        });
+        tripleAttack = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "tripleAttack",
+            reduce: "VALUES"
+        });
+
+        //availableAttacks = this.fullAttackCount;
+        let equippedItems = getEquippedItems(actor)
+        availableAttacks = 0;
+        let doubleAttackBonus = 0;
+        let tripleAttackBonus = 0;
+        let availableWeapons = 0
+        for (let item of equippedItems) {
+            availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
+            //TODO support exotic weapons
+            let subtype = item.data.subtype;
+            if (doubleAttack.includes(subtype)) {
+                doubleAttackBonus = 1;
+            }
+            if (tripleAttack.includes(subtype)) {
+                tripleAttackBonus = 1;
+            }
+        }
+        availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
+
+
+        //how many attacks?
+        //
+        //how many provided attacks from weapons max 2
+        //+1 if has double attack and equipped item
+        //+1 if has triple attack and equipped item
+
+        let dualWeaponModifiers = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "dualWeaponModifier",
+            reduce: "NUMERIC_VALUES"
+        });
+        dualWeaponModifier = dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
+    }
+
+    let suppliedAttacks = context.attacks || [];
+
+    // if (suppliedAttacks.length > 0) {
+    //     availableAttacks = suppliedAttacks.length;
+    // }
+
+    let content = `<p>Select Attacks:</p>`;
+    let resolvedAttacks = [];
+    if (suppliedAttacks.length < availableAttacks) {
+        //CREATE OPTIONS
+        resolvedAttacks = attackOptions(actor.data.attacks, doubleAttack, tripleAttack);
+    }
+
+
+    let blockHeight = 225;
+
+
+    for (let i = 0; i < availableAttacks; i++) {
+        let attack = suppliedAttacks.length > i ? suppliedAttacks[i] : undefined;
+        let select;
+        if (!!attack) {
+            select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
+        } else {
+            select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
+        }
+
+
+        let attackBlock = `<div class="attack panel attack-block">
+<div class="attack-name">${select}</div>
+<div class="attack-options"></div>
+<div class="attack-total"></div>
+</div>`
+        content += attackBlock;
+
+    }
+
+    let height = availableAttacks * blockHeight + 85
+
+
+    return {
+        title,
+        content,
+        buttons: {
+            attack: {
+                label: "Attack",
+                callback: (html) => {
+                    let attacks = [];
+                    let attackBlocks = html.find(".attack-block");
+                    let selects = html.find("select");
+                    let attackMods = getAttackMods(selects, dualWeaponModifier);
+                    let damageMods = [];
+                    for (let attackBlock of attackBlocks) {
+                        let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
+                        if (!!attackFromBlock) {
+                            attacks.push(attackFromBlock);
+                        }
+                    }
+
+                    rollAttacks(attacks, undefined);
+                }
+            },
+            saveMacro: {
+                label: "Save Macro",
+                callback: (html) => {
+                    let attacks = [];
+                    let attackBlocks = html.find(".attack-block");
+                    let selects = html.find("select");
+                    let attackMods = getAttackMods(selects, dualWeaponModifier);
+                    let damageMods = [];
+                    for (let attackBlock of attackBlocks) {
+                        let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
+                        if (!!attackFromBlock) {
+                            attacks.push(attackFromBlock);
+                        }
+                    }
+                    let data = {};
+                    data.attacks = attacks;
+                    data.actorId = actor._id;
+
+                    createAttackMacro(data).then(() => {});
+                }
+            }
+        },
+        render: async (html) => {
+            let selects = html.find("select");
+            selects.on("change", () => handleAttackSelect(selects));
+            handleAttackSelect(selects)
+
+            let attackIds = html.find(".attack-id");
+            attackIds.each((i, div) => populateItemStats(div, context));
+
+            attackIds.on("change", () => {
+                let context = {};
+                context.attackMods = getAttackMods(selects, dualWeaponModifier);
+                context.damageMods = [];
+                html.find(".attack-id").each((i, div) => populateItemStats(div, context));
+            })
+        },
+        options: {
+            height
+        }
+    };
+}
+
+/**
+ *
+ * @param context
+ * @param.items
+ * @param.actor
+ * @returns {Promise<void>}
+ */
+export async function makeAttack(context) {
+    let options = attackDialogue(context);
+    await new Dialog(options).render(true);
+}
+
+function getAttackMods(selects, dualWeaponModifier) {
+    let attackMods = []
+    let isDoubleAttack = false;
+    let isTripleAttack = false;
+    let standardAttacks = 0;
+    for (let select of selects) {
+        if (select.value === "--") {
+            continue;
+        }
+        let attack = JSON.parse(select.value);
+        let options = attack.options
+        if (options.doubleAttack) {
+            isDoubleAttack = true;
+        }
+        if (options.tripleAttack) {
+            isTripleAttack = true;
+        }
+        if (options.standardAttack) {
+            standardAttacks++;
+        }
+    }
+
+
+    if (isDoubleAttack) {
+        attackMods.push({value: -5, source: "Double Attack"});
+    }
+    if (isTripleAttack) {
+        attackMods.push({value: -5, source: "Triple Attack"});
+    }
+
+    if (standardAttacks > 1) {
+        attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
+    }
+    attackMods.forEach(attack => attack.type = "attack");
+    return attackMods
+}
+
+function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
+    let bonuses = [];
+    options.find(inputCriteria).each((i, modifier) => {
+            if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
+                bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
+            }
+        }
+    )
+    for (let attackMod of modifiers || []) {
+        bonuses.push({source: attackMod.source, value: getBonusString(attackMod.value)});
+    }
+    return bonuses;
+}
+
+function setAttackPreviewValues(preview, attack, attackConfigOptionFields, context) {
+    preview.empty();
+
+    let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(attackConfigOptionFields, ".damage-modifier", context.damageMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+    let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(attackConfigOptionFields, ".attack-modifier", context.attackMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+    preview.append(`<div class="flex flex-col"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
+}
+
+function populateItemStats(html, context) {
+    let value = html.value || $(html).data("value");
+
+    let parent = $(html).parents(".attack");
+    let options = parent.children(".attack-options")
+    let total = parent.children(".attack-total");
+    total.empty();
+    options.empty();
+
+    if (value === "--") {
+        return;
+    }
+    let attack = Attack.fromJSON(value);
+
+    options.append(attack.attackOptionHTML)
+    options.find(".attack-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".damage-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+
+    setAttackPreviewValues(total, attack, options, context);
+}
+
+function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
+    let attackId = $(attackBlock).find(".attack-id")[0]
+    let attackValue = attackId.value || $(attackId).data("value");
+
+    if (attackValue === "--") {
+        return undefined;
+    }
+    let attack = Attack.fromJSON(attackValue)
+
+    let attackModifiers = getModifiersFromContextAndInputs($(attackBlock), ".attack-modifier", attackMods);
+    attackModifiers.forEach(modifier => modifier.type = 'attack');
+    let damageModifiers = getModifiersFromContextAndInputs($(attackBlock), ".damage-modifier", damageMods);
+    damageModifiers.forEach(modifier => modifier.type = 'damage');
+
+    attack.withModifiers(attackModifiers);
+    attack.withModifiers(damageModifiers);
+
+    return attack;
+}
+
+function generateAttackCard(resolvedAttacks, attack) {
+    let attackRolls = '<th>Attack:</th>';
+    let damageRolls = '<th>Damage:</th>';
+
+    for (let resolvedAttack of resolvedAttacks) {
+        let classes = [];
+        if (resolvedAttack.critical) {
+            classes.push("critical")
+        }
+        if (resolvedAttack.fail) {
+            classes.push("fail")
+        }
+        attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total}</td>`
+        damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total} (${resolvedAttack.damageType})</td>`
+    }
+
+    return `<table>
+<thead>
+<tr>
+<th>${attack.name}</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+${attackRolls}
+</tr>
+<tr>
+${damageRolls}
+</tr>
+</tbody>
+</table><br/><div>${attack.notesHTML}</div>`
+}
+
+function resolveAttack(attack) {
+    let attackRollResult = attack.attackRoll.roll.roll({async: false});
+
+    let fail = attack.isFailure(attackRollResult);
+    let critical = attack.isCritical(attackRollResult);
+
+
+    let ignoreCritical = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "skipCriticalMultiply",
+        reduce: "OR"
+    })
+
+    let damageRoll = attack.damageRoll.roll;
+    if (critical && !ignoreCritical) {
+        let criticalHitPreMultiplierBonuses = getInheritableAttribute({
+            entity: attack.item,
+            attributeKey: "criticalHitPreMultiplierBonus"
+        })
+
+        for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
+
+            let value = resolveValueArray(criticalHitPreMultiplierBonus, attack.actor)
+
+            damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
+        }
+
+
+        //TODO add a user option to use this kind of multiplication.  RAW the rolled dice values are doubled, not the number of dice
+        if (false) {
+            damageRoll.alter(2, 0, true)
+            multiplyNumericTerms(damageRoll, 2)
+        } else {
+            damageRoll = addMultiplierToDice(damageRoll, 2)
+            multiplyNumericTerms(damageRoll, 2)
+        }
+
+
+        let postMultBonusDie = getInheritableAttribute({
+            entity: attack.item,
+            attributeKey: "criticalHitPostMultiplierBonusDie",
+            reduce: "SUM"
+        })
+        damageRoll.alter(1, postMultBonusDie)
+    }
+
+    let damage = damageRoll.roll({async: false});
+    return {
+        attack: attackRollResult,
+        damage: damage,
+        damageType: attack.type,
+        notes: attack.notes,
+        critical,
+        fail
+    };
+}
+
+export function rollAttacks(attacks, rollMode) {
+    let cls = getDocumentClass("ChatMessage");
+
+    let attackRows = [];
+    let roll;
+    for (let attack of attacks) {
+        let resolvedAttack = resolveAttack(attack);
+        roll = resolvedAttack.attack;
+        attackRows.push(generateAttackCard([resolvedAttack], attack))
+    }
+
+    let content = `${attackRows.join("<br>")}`;
+
+    let speaker = ChatMessage.getSpeaker({actor: attacks[0].actor});
+
+    let flavor = attacks[0].name;
+    if (attacks.length > 1) {
+        flavor = "Full Attack " + flavor;
+    }
+
+
+    let messageData = {
+        user: game.user.id,
+        speaker: speaker,
+        flavor: flavor,
+        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+        content,
+        sound: CONFIG.sounds.dice,
+        roll
+    }
+
+    let msg = new cls(messageData);
+    if (rollMode) msg.applyRollMode(rollMode);
+
+    return cls.create(msg.data, {rollMode});
 }

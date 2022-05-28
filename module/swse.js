@@ -6,9 +6,10 @@ import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
-import {generateCompendiums, deleteEmptyCompendiums} from "./compendium/generation.js";
+import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
 import {runTests} from "../module_test/runTests.js";
+import {makeAttack} from "./actor/attack.js";
 
 
 Hooks.once('init', async function() {
@@ -18,7 +19,7 @@ Hooks.once('init', async function() {
     SWSEItem,
     rollVariable,
     rollItem,
-    //rollAttack,
+    makeAttack,
     generateCompendiums, deleteEmptyCompendiums,
     runTests
   };
@@ -200,6 +201,11 @@ Hooks.on("hotbarDrop", (bar, data, slot) => {
     return false;
 
   }
+  if (type === "attack") {
+    createAttackMacro(data, slot).then(() => {});
+    return false;
+
+  }
   return true;
 });
 
@@ -248,6 +254,62 @@ async function createItemMacro(data, slot) {
 
   const command = `game.swse.rollItem("${actorId}", [${id.map(id=>`{id:"${id.id}",provider:"${id.provider}"}`).join(`","`)}]);`;
   const name = `${actor.name}: ${data?.data?.name || data.label}`
+  let macro = game.macros.find((m) => m.name === name && m.command === command);
+  if (!macro) {
+    macro = await Macro.create(
+        {
+          name: name,
+          type: "script",
+          img: img,
+          command: command,
+          flags: { "swse.itemMacro": true },
+        },
+        { displaySheet: false }
+    );
+  }
+
+  await game.user.assignHotbarMacro(macro, slot);
+}
+
+function getNumericArray(start, end) {
+  let array = [];
+  for(let i = start; i <= end; i++){
+    array.push(i);
+  }
+  return array;
+}
+
+export async function createAttackMacro(data, slot) {
+    let actorId = data.actorId;
+
+  const actor = getActorFromId(actorId);
+  if (!actor) return;
+  if (!data.attacks || data.attacks.length === 0) return;
+
+  if(!slot){
+    let user = game.users.get(game.userId)
+    let hotbar = Object.entries(user.data.hotbar).filter(i => !!i[1]).map(i => i[0])
+    let availableKeys = getNumericArray(1, 50).filter(i => !hotbar.includes(`${i}`))
+    slot = Math.min(...availableKeys);
+  }
+
+  let img = "systems/swse/icon/skill/default.png";
+
+  if(data.img){
+    img = data.img;
+  }
+
+  let context = {};
+  context.attacks = data.attacks;
+  let attackName = data.attacks[0].name
+  if(data.attacks.length > 1){
+    context.type = "fullAttack";
+    attackName = "Full Attack";
+  }
+
+
+  const command = `game.swse.makeAttack(${JSON.stringify(context)});`;
+  const name = `${actor.name}: ${attackName}`
   let macro = game.macros.find((m) => m.name === name && m.command === command);
   if (!macro) {
     macro = await Macro.create(
