@@ -291,7 +291,7 @@ export class SWSEActorSheet extends ActorSheet {
             dragData.tokenId = this.actor.token.id;
         }
 
-        if (dragData.attacks) {
+        if (dragData.attacks.length > 0) {
             dragData.type = 'attack';
         }
 
@@ -1121,8 +1121,14 @@ export class SWSEActorSheet extends ActorSheet {
         let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
 
-        let providedItems = item.getProvidedItems() || [];
-        providedItems.push(...choices.items);
+        let providedItems = item.getProvidedItems() || {};
+        let providedItemCursor = 0;
+        (choices.items || []).forEach(item => {
+            while(providedItems[providedItemCursor]){
+                providedItemCursor++;
+            }
+            providedItems[providedItemCursor] = item;
+        })
 
         await this.actor.addItems(providedItems, mainItem);
 
@@ -1878,9 +1884,9 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onActivateItem(ev) {
         let elem = ev.currentTarget;
-        let attack = Attack.fromJSON(JSON.parse(elem.dataset.attackId));
+        let attacks = JSON.parse(elem.dataset.attacks);
 
-        this.actor.attack(ev, {type: "singleAttack", items: [attack]});
+        this.actor.attack(ev, {type: "singleAttack", attacks});
         return undefined;
     }
 

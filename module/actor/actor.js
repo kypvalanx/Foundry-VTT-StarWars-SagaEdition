@@ -1653,8 +1653,16 @@ export class SWSEActor extends Actor {
 
         let mainItem = await this.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
-        let providedItems = item.getProvidedItems() || [];
-        providedItems.push(...choices.items);
+        let providedItems = item.getProvidedItems() || {};
+        let providedItemCursor = 0;
+        (choices.items || []).forEach(item => {
+            while(providedItems[providedItemCursor]){
+                providedItemCursor++;
+            }
+            providedItems[providedItemCursor] = item;
+        })
+
+
         await this.addItems(providedItems, mainItem[0], options);
         return mainItem[0];
     }
@@ -1673,7 +1681,7 @@ export class SWSEActor extends Actor {
         let indices = {};
         let notificationMessage = "";
         let addedItems = [];
-        for (let provided of items.filter(item => !!item)) {
+        for (let provided of items.filter(item => !!item && !!item.name && !!item.type)) {
             let item = provided.name;
             let prerequisite;
             if (!options.skipPrerequisite) {

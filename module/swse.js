@@ -6,7 +6,7 @@ import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
-import {generateCompendiums, deleteEmptyCompendiums} from "./compendium/generation.js";
+import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
 import {runTests} from "../module_test/runTests.js";
 import {makeAttack} from "./actor/attack.js";
@@ -284,12 +284,12 @@ export async function createAttackMacro(data, slot) {
 
   const actor = getActorFromId(actorId);
   if (!actor) return;
+  if (!data.attacks || data.attacks.length === 0) return;
 
   if(!slot){
     let user = game.users.get(game.userId)
-    let numericArray = getNumericArray(1,50);
-    let hotbar = Object.keys(user.data.hotbar)
-    let availableKeys = numericArray.filter(i => !hotbar.includes(`${i}`))
+    let hotbar = Object.entries(user.data.hotbar).filter(i => !!i[1]).map(i => i[0])
+    let availableKeys = getNumericArray(1, 50).filter(i => !hotbar.includes(`${i}`))
     slot = Math.min(...availableKeys);
   }
 
@@ -301,13 +301,15 @@ export async function createAttackMacro(data, slot) {
 
   let context = {};
   context.attacks = data.attacks;
+  let attackName = data.attacks[0].name
   if(data.attacks.length > 1){
-    context.type = "fullAttack"
+    context.type = "fullAttack";
+    attackName = "Full Attack";
   }
 
 
   const command = `game.swse.makeAttack(${JSON.stringify(context)});`;
-  const name = `${actor.name}: ${data?.data?.name || data.label || "Full Attack"}`
+  const name = `${actor.name}: ${attackName}`
   let macro = game.macros.find((m) => m.name === name && m.command === command);
   if (!macro) {
     macro = await Macro.create(
