@@ -5,8 +5,7 @@ import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getIndexAndPack,
-    resolveExpression,
+    getIndexAndPack, resolveExpression,
     resolveValueArray,
     toShortAttribute,
     unique
@@ -455,8 +454,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    getCrewByQuality() {
-        let quality = this.data.data.crewQuality.quality;
+    static getCrewByQuality(quality) {
         let attackBonus = 0;
         let checkModifier = 0;
         let cLModifier = 0;
@@ -495,7 +493,7 @@ export class SWSEActor extends Actor {
             case "Gunner":
                 return this.gunner(slot)
         }
-        return this.getCrewByQuality();
+        return SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
     }
 
     get pilot() {
@@ -504,7 +502,7 @@ export class SWSEActor extends Actor {
             pilot = this.astromech;
         }
         if (!pilot) {
-            pilot = this.getCrewByQuality();
+            pilot = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
         return pilot;
     }
@@ -515,7 +513,7 @@ export class SWSEActor extends Actor {
             copilot = this.astromech;
         }
         if (!copilot) {
-            copilot = this.getCrewByQuality();
+            copilot = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
         return copilot;
     }
@@ -524,7 +522,7 @@ export class SWSEActor extends Actor {
         let actor = this.getActor(this.data.data.crew.find(c => c.position === 'Gunner' && c.slot === (index || 0))?.id);
 
         if (!actor) {
-            actor = this.getCrewByQuality();
+            actor = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
 
         return actor;
@@ -536,7 +534,7 @@ export class SWSEActor extends Actor {
             commander = this.pilot;
         }
         if (!commander) {
-            commander = this.getCrewByQuality();
+            commander = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
         return commander;
     }
@@ -547,7 +545,7 @@ export class SWSEActor extends Actor {
             systemsOperator = this.astromech;
         }
         if (!systemsOperator) {
-            systemsOperator = this.getCrewByQuality();
+            systemsOperator = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
         return systemsOperator;
     }
@@ -558,7 +556,7 @@ export class SWSEActor extends Actor {
             engineer = this.astromech;
         }
         if (!engineer) {
-            engineer = this.getCrewByQuality();
+            engineer = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
         }
         return engineer;
     }
@@ -566,7 +564,7 @@ export class SWSEActor extends Actor {
     get astromech() {
         let actor = this.getActor(this.data.data.crew.find(c => c.position === 'Astromech Droid')?.id);
         if (!actor && this.data.data.hasAstromech && this.data.hasAstromechSlot) {
-            actor = this.getCrewByQuality();
+            actor = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
             //TODO figure out if this is consistent on different ships with droid sockets
 
             actor.data.skills['mechanics'].value = 13;
@@ -1802,17 +1800,6 @@ export class SWSEActor extends Actor {
     cleanItemName(feat) {
         return feat.replace("*", "").trim();
     }
-
-    static getItems(target) {
-        if (SWSEActor === typeof target) {
-            target = target.data;
-        }
-        if (!Array.isArray(target.items)) {
-            return Object.values(target.items);
-        }
-        return target.items;
-    }
-
     async equipItem(itemId, equipType, options) {
         let item = this.items.get(itemId);
 

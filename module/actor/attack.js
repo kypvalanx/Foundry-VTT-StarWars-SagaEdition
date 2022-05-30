@@ -1,6 +1,6 @@
 import {UnarmedAttack} from "./unarmed-attack.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
-import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
+import {crewQuality, LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
 import {compareSizes, getSize} from "./size.js";
 import {
     canFinesse,
@@ -84,12 +84,19 @@ export class Attack {
 
     /**
      *
-     * @returns {ActorData}
+     * @returns {ActorData | Object}
      */
     get actor() {
-        let find = game.data.actors.find(actor => actor._id === this.actorId);
-        if (find instanceof SWSEActor) {
-            return find.data;
+        let find;
+        if(this.actorId) {
+            find = game.data.actors.find(actor => actor._id === this.actorId);
+            if (find instanceof SWSEActor) {
+                return find.data;
+            }
+        } else if(this.providerId){
+            let provider = this.provider;
+            let quality = provider?.data?.crewQuality?.quality;
+            return SWSEActor.getCrewByQuality(quality);
         }
         return find;
     }

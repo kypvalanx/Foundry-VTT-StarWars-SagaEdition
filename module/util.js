@@ -3,6 +3,7 @@
 import {SWSE} from "./config.js";
 import {dieSize, dieType} from "./constants.js";
 import {SWSEActor} from "./actor/actor.js";
+import {SWSEItem} from "./item/item.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -815,3 +816,26 @@ export function fullJoin(...args){
 }
 
 test();
+
+/**
+ *
+ * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
+ * @returns {*}
+ */
+export function getItems(target) {
+    if(!target.items ){
+        console.log("unknown target", target)
+    }
+    return target.items.values();
+}
+//
+// {
+//
+//     if (SWSEActor === instanceOf target) {
+//     target = target.data;
+// }
+//     if (!Array.isArray(target.items)) {
+//         return Object.values(target.items);
+//     }
+//     return target.items;
+// }
