@@ -158,7 +158,15 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find('.condition-radio').on("click", async event => {
-            await this.actor.update({"data.condition": event.currentTarget.value});
+            if("0" === event.currentTarget.value){
+                this.actor.effects
+                    .filter(effect => effect.data.label.startsWith("EFFECT.StatusCondition"))
+                    .map(effect => effect.delete())
+            } else {
+                let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                tokens.forEach(token => token.toggleEffect(statusEffect))
+            }
         })
 
         html.find('.mode-selector').on("click", async event => {

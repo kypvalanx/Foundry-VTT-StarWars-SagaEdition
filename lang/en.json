@@ -1,1 +1,7 @@
-{}
+{
+  "EFFECT.StatusCondition-1": "Condition -1",
+  "EFFECT.StatusCondition-2": "Condition -2",
+  "EFFECT.StatusCondition-5": "Condition -5",
+  "EFFECT.StatusCondition-10": "Condition -10",
+  "EFFECT.StatusConditionHelpless": "Helpless"
+}

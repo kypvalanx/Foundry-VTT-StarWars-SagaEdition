@@ -66,3 +66,36 @@ SWSE.Abilities.droidPointBuyTotal = 21;
  * @type {*[]}
  */
 SWSE.RecognizedAttributes = [];
+
+CONFIG.statusEffects.push(...[
+    {
+        id: "condition-1",
+        label: "EFFECT.StatusCondition-1",
+        icon: "systems/swse/icon/status/condition-1.png",
+        changes: [{key: "condition", value:"-1"}]
+    },
+    {
+        id: "condition-2",
+        label: "EFFECT.StatusCondition-2",
+        icon: "systems/swse/icon/status/condition-2.png",
+        changes: [{key: "condition", value:"-2"}]
+    },
+    {
+        id: "condition-5",
+        label: "EFFECT.StatusCondition-5",
+        icon: "systems/swse/icon/status/condition-5.png",
+        changes: [{key: "condition", value:"-5"}]
+    },
+    {
+        id: "condition-10",
+        label: "EFFECT.StatusCondition-10",
+        icon: "systems/swse/icon/status/condition-10.png",
+        changes: [{key: "condition", value:"-10"}]
+    },
+    {
+        id: "conditionHelpless",
+        label: "EFFECT.StatusConditionHelpless",
+        icon: "systems/swse/icon/status/helpless.png",
+        changes: [{key: "condition", value:"OUT"}]
+    }
+])

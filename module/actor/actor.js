@@ -38,6 +38,19 @@ export class SWSEActor extends Actor {
         }
     }
 
+    _onCreateEmbeddedDocuments(embeddedName, ...args) {
+        super._onCreateEmbeddedDocuments(embeddedName, ...args);
+
+        if("ActiveEffect" === embeddedName){
+            let activeEffect = args[0][0];
+            if(activeEffect.data.label.startsWith("EFFECT.StatusCondition")) {
+                this.effects
+                    .filter(effect => effect !== activeEffect && effect.data.label.startsWith("EFFECT.StatusCondition"))
+                    .map(effect => effect.delete())
+            }
+        }
+    }
+
     /**
      * Augment the basic actor data with additional dynamic data.
      */
@@ -65,7 +78,13 @@ export class SWSEActor extends Actor {
         } else if (this.id && !actorData.data.isNPC && !actorData.token.actorLink) {
             this.update({"token.actorLink": true})
         } else {
-            this.data.data.condition = this.data.data.condition || 0;
+            let conditionEffect = this.effects.find(effect => effect.data.label.startsWith("EFFECT.StatusCondition"))
+
+            this.data.data.condition = 0;
+
+            if(conditionEffect){
+                this.data.data.condition = conditionEffect.data.changes.find(change => change.key === "condition").value
+            }
 
             if (actorData.type === 'character') this._prepareCharacterData(actorData);
             if (actorData.type === 'npc') this._prepareCharacterData(actorData);
