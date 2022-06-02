@@ -34,7 +34,7 @@ export function generateAttributes(actor) {
         if (attributeBase > 0) {
             attribute.base = attributeBase;
         }
-        if (attributeMax) {
+        if (!isNaN(attributeMax)) {
             attribute.base = Math.min(attribute.base, attributeMax);
         }
         let bonuses = [];
@@ -64,7 +64,17 @@ export function generateAttributes(actor) {
             data[`data.attributes.${key}.mod`] = attribute.mod;
         }
 
-        attribute.roll = attribute.mod + (actor.data.data.condition === "OUT" ? -10 : parseInt(actor.data.data.condition));
+        let conditionBonus = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "condition",
+            reduce: "FIRST"
+        })
+
+        if("OUT" === conditionBonus || !conditionBonus){
+            conditionBonus = "0";
+        }
+
+        attribute.roll = attribute.mod + parseInt(conditionBonus);
         attribute.label = key.toUpperCase();
         attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.data.type))
         actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);

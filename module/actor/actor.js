@@ -43,9 +43,9 @@ export class SWSEActor extends Actor {
 
         if("ActiveEffect" === embeddedName){
             let activeEffect = args[0][0];
-            if(activeEffect.data.label.startsWith("EFFECT.StatusCondition")) {
+            if(activeEffect.data?.flags?.core?.statusId?.startsWith("condition")) {
                 this.effects
-                    .filter(effect => effect !== activeEffect && effect.data.label.startsWith("EFFECT.StatusCondition"))
+                    .filter(effect => effect !== activeEffect && effect.data?.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             }
         }
@@ -78,9 +78,8 @@ export class SWSEActor extends Actor {
         } else if (this.id && !actorData.data.isNPC && !actorData.token.actorLink) {
             this.update({"token.actorLink": true})
         } else {
-            let conditionEffect = this.effects.find(effect => effect.data.label.startsWith("EFFECT.StatusCondition"))
-
             this.data.data.condition = 0;
+            let conditionEffect = this.effects.find(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
 
             if(conditionEffect){
                 this.data.data.condition = conditionEffect.data.changes.find(change => change.key === "condition").value
@@ -638,13 +637,18 @@ export class SWSEActor extends Actor {
     }
 
     applyConditionSpeedPenalty(speed) {
-        if (this.data.data.condition !== -10 && this.data.data.condition !== "OUT") {
-            return speed;
-        }
+        let multipliers = getInheritableAttribute({
+            entity : this,
+            attributeKey: "speedMultiplier",
+            reduce:"VALUES"
+        })
 
         let result = /([\w\s]*)\s(\d*)/.exec(speed);
 
-        return `${result[1]} ${Math.floor(parseInt(result[2]) / 2)}`
+        let number = parseInt(result[2]);
+
+        multipliers.forEach(m=> number = parseFloat(m) * number)
+        return `${result[1]} ${Math.floor(number)}`
     }
 
     getTraits() {

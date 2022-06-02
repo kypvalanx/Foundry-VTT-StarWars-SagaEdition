@@ -158,9 +158,10 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find('.condition-radio').on("click", async event => {
+            event.stopPropagation();
             if("0" === event.currentTarget.value){
                 this.actor.effects
-                    .filter(effect => effect.data.label.startsWith("EFFECT.StatusCondition"))
+                    .filter(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             } else {
                 let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))

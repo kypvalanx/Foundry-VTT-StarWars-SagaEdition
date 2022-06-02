@@ -423,13 +423,6 @@ export function extractAttributeValues(attribute, source, sourceString) {
     let values = [];
     let value = attribute.value;
     if (value !== undefined && value !== null) {
-        // if (Array.isArray(value)) {
-        //     for (let v of value) {
-        //         values.push({source, value: v, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
-        //     }
-        // } else {
-        //     values.push({source, value, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
-        // }
         attribute.source = source;
         attribute.sourceString = sourceString;
         values.push(attribute)

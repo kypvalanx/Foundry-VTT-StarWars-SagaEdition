@@ -90,12 +90,12 @@ CONFIG.statusEffects.push(...[
         id: "condition-10",
         label: "EFFECT.StatusCondition-10",
         icon: "systems/swse/icon/status/condition-10.png",
-        changes: [{key: "condition", value:"-10"}]
+        changes: [{key: "condition", value:"-10"}, {key: "speedMultiplier", value: "0.5"}]
     },
     {
         id: "conditionHelpless",
         label: "EFFECT.StatusConditionHelpless",
         icon: "systems/swse/icon/status/helpless.png",
-        changes: [{key: "condition", value:"OUT"}]
+        changes: [{key: "condition", value:"OUT"}, {key: "dexterityMax", value: "0"}]
     }
 ])

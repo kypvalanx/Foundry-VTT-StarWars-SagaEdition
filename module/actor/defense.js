@@ -50,7 +50,15 @@ export function resolveDefenses(actor) {
     if(!actor){
         return {};
     }
-    let conditionBonus = actor.data.data.condition === "OUT" ? -10 : actor.data.data.condition;
+     let conditionBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "condition",
+        reduce: "FIRST"
+    })
+
+    if("OUT" === conditionBonus || !conditionBonus){
+        conditionBonus = "0";
+    }
 
     let fortitude = _resolveFort(actor, conditionBonus);
     let will = _resolveWill(actor, conditionBonus);
