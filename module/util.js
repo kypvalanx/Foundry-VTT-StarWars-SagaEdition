@@ -3,6 +3,7 @@
 import {SWSE} from "./config.js";
 import {dieSize, dieType} from "./constants.js";
 import {SWSEActor} from "./actor/actor.js";
+import {SWSEItem} from "./item/item.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -422,13 +423,6 @@ export function extractAttributeValues(attribute, source, sourceString) {
     let values = [];
     let value = attribute.value;
     if (value !== undefined && value !== null) {
-        // if (Array.isArray(value)) {
-        //     for (let v of value) {
-        //         values.push({source, value: v, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
-        //     }
-        // } else {
-        //     values.push({source, value, modifier: attribute.modifier, key: attribute.key, sourceString, override: !!attribute.override, prerequisite: attribute.prerequisite})
-        // }
         attribute.source = source;
         attribute.sourceString = sourceString;
         values.push(attribute)
@@ -815,3 +809,26 @@ export function fullJoin(...args){
 }
 
 test();
+
+/**
+ *
+ * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
+ * @returns {*}
+ */
+export function getItems(target) {
+    if(!target.items ){
+        console.log("unknown target", target)
+    }
+    return target.items.values();
+}
+//
+// {
+//
+//     if (SWSEActor === instanceOf target) {
+//     target = target.data;
+// }
+//     if (!Array.isArray(target.items)) {
+//         return Object.values(target.items);
+//     }
+//     return target.items;
+// }

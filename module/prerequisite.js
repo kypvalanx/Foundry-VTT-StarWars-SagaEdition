@@ -1,4 +1,4 @@
-import {filterItemsByType, resolveExpression, resolveValueArray, toNumber} from "./util.js";
+import {filterItemsByType, getItems, resolveExpression, resolveValueArray, toNumber} from "./util.js";
 import {weaponGroup} from "./constants.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
 import {getEquippedItems, SWSEActor} from "./actor/actor.js";
@@ -6,7 +6,7 @@ import {SWSEItem} from "./item/item.js";
 
 /**
  *
- * @param {SWSEActor|SWSEItem} target
+ * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
  * @param {Object[]} prereqs
  * @param {string} prereqs[].text always available
  * @param {string} prereqs[].type always available
@@ -65,7 +65,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'ITEM':
-                let ownedItem = SWSEActor.getInventoryItems(SWSEActor.getItems(target));
+                let ownedItem = SWSEActor.getInventoryItems(getItems(target));
                 let filteredItem = ownedItem.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
@@ -86,17 +86,18 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'FEAT':
-                let ownedFeats = filterItemsByType(target.items.values(), "feat");
-                let filteredFeats = ownedFeats.filter(feat => feat.data.finalName === prereq.requirement);
+                let ownedFeats = filterItemsByType(getItems(target), "feat");
+                let filteredFeats = ownedFeats.filter(feat => SWSEItem.buildItemName(feat) === prereq.requirement);
                 if (filteredFeats.length > 0) {
-                    if (!meetsPrerequisites(target, filteredFeats[0].data.data.prerequisite).doesFail) {
+                    let prereqs1 = filteredFeats[0].data?.prerequisite || filteredFeats[0].data?.data?.prerequisite;
+                    if (!meetsPrerequisites(target, prereqs1).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                 }
                 break;
             case 'CLASS':
-                let ownedClasses = filterItemsByType(target.items.values(), "class");
+                let ownedClasses = filterItemsByType(getItems(target), "class");
                 let filteredClasses = ownedClasses.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredClasses.length > 0) {
                     if (!meetsPrerequisites(target, filteredClasses[0].data.data.prerequisite).doesFail) {
@@ -106,7 +107,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TRAIT':
-                let filteredTraits = filterItemsByType(target.items.values(), "trait")
+                let filteredTraits = filterItemsByType(getItems(target), "trait")
                     .filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredTraits.length > 0) {
                     let parentsMeetPrequisites = false;
@@ -129,7 +130,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'TALENT':
-                let ownedTalents = filterItemsByType(target.items.values(), "talent");
+                let ownedTalents = filterItemsByType(getItems(target), "talent");
                 let filteredTalents = ownedTalents.filter(talent => {
                     return talent.data.finalName === prereq.requirement ||
                         talent.data.data.possibleProviders.includes(prereq.requirement) ||
@@ -141,24 +142,10 @@ export function meetsPrerequisites(target, prereqs) {
                         continue;
                     }
                 }
-                //
-                // let talentsByTreeFilter = ownedTalents.filter(talent => data.talentTree === prereq.requirement || data.bonusTalentTree === prereq.requirement);
-                // if (talentsByTreeFilter.length > 0) {
-                //     let count = 0;
-                //     for (let talent of talentsByTreeFilter) {
-                //         if (!meetsPrerequisites(target, data.prerequisite).doesFail) {
-                //             count++;
-                //         }
-                //     }
-                //     if (count > 0) {
-                //         successList.push({prereq, count})
-                //         continue;
-                //     }
-                // }
 
                 break;
             case 'TRADITION':
-                let ownedTraditions = filterItemsByType(target.items.values(), "affiliation");
+                let ownedTraditions = filterItemsByType(getItems(target), "affiliation");
                 let filteredTraditions = ownedTraditions.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredTraditions.length > 0) {
                     if (!meetsPrerequisites(target, filteredTraditions[0].data.data.prerequisite).doesFail) {
@@ -168,7 +155,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'FORCE TECHNIQUE':
-                let ownedForceTechniques = filterItemsByType(target.items.values(), "forceTechnique");
+                let ownedForceTechniques = filterItemsByType(getItems(target), "forceTechnique");
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForceTechniques.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -185,7 +172,7 @@ export function meetsPrerequisites(target, prereqs) {
                 }
                 break;
             case 'FORCE POWER':
-                let ownedForcePowers = filterItemsByType(target.items.values(), "forcePower");
+                let ownedForcePowers = filterItemsByType(getItems(target), "forcePower");
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForcePowers.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -311,7 +298,7 @@ export function meetsPrerequisites(target, prereqs) {
                     failureList.push({fail: false, message: `${prereq.type}: ${prereq.text}`});
                     continue;
                 } else if (prereq.requirement === 'is part of a military') {
-                    if(filterItemsByType(target.items.values(), "affiliation").length > 0) {
+                    if(filterItemsByType(getItems(target), "affiliation").length > 0) {
                         successList.push({prereq, count: 1});
                         continue;
                     }

@@ -127,6 +127,10 @@ export function getInheritableAttribute(data = {}) {
 
         }
 
+        if(entity.effects){
+            entity.effects.filter(effect => !effect.data?.disabled).forEach(e =>  values.push(...extractEffectChange(e.data?.changes || [], data.attributeKey, e)))
+        }
+
 
         if(!data.recursive) {
             values = values.filter(attr => {
@@ -150,6 +154,15 @@ export function getInheritableAttribute(data = {}) {
     return reduceArray(data.reduce, values);
 }
 
+//TODO evaluate if we want to add attributes to a custom event class rather than using changes
+export function extractEffectChange(changes, attributeKey, entity) {
+    let values = [];
+        for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
+            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.label));
+        }
+
+    return values;
+}
 
 export function extractModeAttributes(entity, activeModes, attributeKey) {
     let values = [];

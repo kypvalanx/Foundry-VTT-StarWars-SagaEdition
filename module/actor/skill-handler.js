@@ -38,7 +38,17 @@ export function generateSkills(actor) {
     prerequisites.trainedSkills = [];
     let classSkills = actor._getClassSkills();
     let halfCharacterLevel = actor.getHalfCharacterLevel();
-    let conditionBonus = actor.data.data.condition === "OUT" ? -10 : actor.data.data.condition;
+
+    let conditionBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "condition",
+        reduce: "FIRST"
+    })
+
+    if("OUT" === conditionBonus || !conditionBonus){
+        conditionBonus = "0";
+    }
+
     let skillFocuses = getInheritableAttribute({
         entity: actor,
         attributeKey: "skillFocus",
@@ -82,8 +92,8 @@ Trained Skill Bonus: ${trainedSkillBonus}`;
 Ability Skill Modifier: ${getAbilitySkillBonus}`;
         }
 
-        if(conditionBonus !== 0) {
-            skillBonuses.push(conditionBonus);
+        if(parseInt(conditionBonus) !== 0) {
+            skillBonuses.push(parseInt(conditionBonus));
             skill.title += `
 Condition Modifier: ${conditionBonus}`;
         }
