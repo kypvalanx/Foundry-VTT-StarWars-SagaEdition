@@ -218,7 +218,7 @@ export function getProficiencyBonus(actor, weaponDescriptors) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     });
     let proficiencies = explodeProficiencies(rawProficiencies);
-    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase())).length > 0) {
+    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack").length > 0) {
         return []
     }
 

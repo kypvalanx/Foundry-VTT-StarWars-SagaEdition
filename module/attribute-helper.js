@@ -128,7 +128,7 @@ export function getInheritableAttribute(data = {}) {
         }
 
         if(entity.effects){
-            entity.effects.filter(effect => !effect.data?.disabled).forEach(e =>  values.push(...extractEffectChange(e.data?.changes || [], data.attributeKey, e)))
+            entity.effects.filter(effect => effect.data?.disabled !== false || effect.disabled !== false).forEach(e =>  values.push(...extractEffectChange(e.data?.changes || e.changes || [], data.attributeKey, e)))
         }
 
 
@@ -158,7 +158,7 @@ export function getInheritableAttribute(data = {}) {
 export function extractEffectChange(changes, attributeKey, entity) {
     let values = [];
         for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.label));
+            values.push(...extractAttributeValues(attribute, entity.data?._id || entity._id, entity.data?.label || entity.label));
         }
 
     return values;
