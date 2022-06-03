@@ -291,9 +291,10 @@ export class Attack {
         terms.push(...appendNumericTerm(generateArmorCheckPenalties(actor), "Armor Check Penalty"));
 
         getInheritableAttribute({
-            entity: item,
+            entity: [item, actor],
             attributeKey: "toHitModifier",
-            parent: !!provider ? provider : actor
+            parent: !!provider ? provider : actor,
+            itemFilter: ((item) => item.type !== 'weapon')
         }).forEach(val => {
             let value = val.value;
             let flavor = val.modifier;

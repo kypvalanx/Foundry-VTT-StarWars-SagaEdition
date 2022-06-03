@@ -66,7 +66,7 @@ function inheritableItems(entity, attributeKey) {
  * @param data.entity {object}
  * @param data.attributeKey {string}
  * @param data.attributeFilter {function}
- * @param data.itemFilter {function}
+ * @param data.itemFilter {function} filters out child items based on a filter
  * @param data.duplicates {number}
  * @param data.reduce {string}
  * @returns {*|string|[]|*[]}
@@ -86,6 +86,17 @@ export function getInheritableAttribute(data = {}) {
             let subData = JSON.parse(JSON.stringify(data))
             subData.attributeKey = subKey;
             subData.attributeFilter = data.attributeFilter
+            subData.itemFilter = data.itemFilter
+            delete subData.reduce
+            values.push(...getInheritableAttribute(subData))
+        }
+
+    }  else if(Array.isArray(data.entity)){
+        for(let entity of data.entity){
+            let subData = JSON.parse(JSON.stringify(data))
+            subData.entity = entity;
+            subData.attributeFilter = data.attributeFilter
+            subData.itemFilter = data.itemFilter
             delete subData.reduce
             values.push(...getInheritableAttribute(subData))
         }
