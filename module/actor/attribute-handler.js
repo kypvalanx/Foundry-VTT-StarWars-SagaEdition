@@ -50,8 +50,20 @@ export function generateAttributes(actor) {
         // Calculate the modifier using d20 rules.
         attribute.bonus = resolveValueArray(bonuses, actor);
 
+
+        let attributeMaxBonus = getInheritableAttribute({
+            entity: actor,
+            attributeKey: `${longKey}MaxBonus`,
+            reduce: "MIN"
+        });
+
+        if (!isNaN(attributeMaxBonus)) {
+            attribute.bonus = Math.min(attribute.bonus, attributeMaxBonus);
+        }
+
         let oldTotal = attribute.total;
         attribute.total = attribute.skip ? 10 : resolveValueArray([attribute.base, attribute.bonus], actor);
+
 
         if(attribute.total !== oldTotal){
             data[`data.attributes.${key}.total`] = attribute.total;

@@ -173,7 +173,7 @@ export function getSpecializationDamageBonuses(actor, weaponTypes) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     }));
     if (weaponTypes.filter(wt => weaponFocus.includes(wt.toLowerCase())).length > 0) {
-        bonuses.push(appendNumericTerm(2, "Weapon Specialization"));
+        bonuses.push(...appendNumericTerm(2, "Weapon Specialization"));
     }
 
     let greaterWeaponFocus = explodeProficiencies(getInheritableAttribute({
@@ -182,7 +182,7 @@ export function getSpecializationDamageBonuses(actor, weaponTypes) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     }));
     if (weaponTypes.filter(wt => greaterWeaponFocus.includes(wt.toLowerCase())).length > 0) {
-        bonuses.push(appendNumericTerm(2, "Greater Weapon Specialization"));
+        bonuses.push(...appendNumericTerm(2, "Greater Weapon Specialization"));
     }
 
     return bonuses;
@@ -218,7 +218,7 @@ export function getProficiencyBonus(actor, weaponDescriptors) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     });
     let proficiencies = explodeProficiencies(rawProficiencies);
-    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase())).length > 0) {
+    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack").length > 0) {
         return []
     }
 

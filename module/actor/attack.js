@@ -266,9 +266,20 @@ export class Attack {
         terms.push(...appendNumericTerm(actorData?.offense?.bab, "Base Attack Bonus"));
 
         if(!provider) {
+
+            let conditionBonus = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "condition",
+                reduce: "FIRST"
+            })
+
+            if("OUT" === conditionBonus || !conditionBonus){
+                conditionBonus = "0";
+            }
+
             terms.push(...appendNumericTerm(attributeMod, "Attribute Modifier"));
             terms.push(...getProficiencyBonus(actor, weaponTypes));
-            terms.push(...appendNumericTerm(actorData.condition === "OUT" ? -10 : actorData.condition, "Condition Modifier"));
+            terms.push(...appendNumericTerm(toNumber(conditionBonus), "Condition Modifier"));
             terms.push(...getFocusAttackBonuses(actor, weaponTypes));
         }
 
