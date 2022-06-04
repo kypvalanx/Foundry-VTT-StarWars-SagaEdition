@@ -73,3 +73,11 @@
   .max-dexterity { grid-area: 2 / 3 / 3 / 4; }
   .armor-notes { grid-area: 3 / 1 / 4 / 4; }
 }
+
+.critical{
+  color: green;
+}
+
+.fail{
+  color: red;
+}

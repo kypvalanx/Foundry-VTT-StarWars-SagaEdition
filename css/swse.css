@@ -744,6 +744,14 @@
   grid-area: 3 / 1 / 4 / 4;
 }
 
+.swse .critical {
+  color: green;
+}
+
+.swse .fail {
+  color: red;
+}
+
 .swse .ability-score {
   display: grid;
   grid-template-columns: repeat(5, 1fr);

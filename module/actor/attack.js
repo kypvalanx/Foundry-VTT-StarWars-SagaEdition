@@ -1039,19 +1039,27 @@ function generateAttackCard(resolvedAttacks, attack) {
     let attackRolls = '<th>Attack:</th>';
     let damageRolls = '<th>Damage:</th>';
 
+
     for (let resolvedAttack of resolvedAttacks) {
         let classes = [];
+        let modifiers = [];
         if (resolvedAttack.critical) {
             classes.push("critical")
+            modifiers.push(`<i class="fas fa-dice-d20">`)
         }
         if (resolvedAttack.fail) {
             classes.push("fail")
+            modifiers.push(`<i class="fas fa-trash">`)
         }
-        attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total}</td>`
-        damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total} (${resolvedAttack.damageType})</td>`
+        attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total} ${modifiers.join(" ")}</td>`
+        let damageType = "";
+        if(resolvedAttack.damageType){
+            damageType = ` (${resolvedAttack.damageType}) `;
+        }
+        damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total}${damageType}</td>`
     }
 
-    return `<table>
+    return `<table class="swse">
 <thead>
 <tr>
 <th>${attack.name}</th>
