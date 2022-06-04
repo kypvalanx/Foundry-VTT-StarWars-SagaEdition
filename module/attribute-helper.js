@@ -3,6 +3,7 @@ import {SWSEItem} from "./item/item.js";
 import {SWSEActor} from "./actor/actor.js";
 import {UnarmedAttack} from "./actor/unarmed-attack.js";
 import {meetsPrerequisites} from "./prerequisite.js";
+import {SIZE_ATTRIBUTES} from "./constants.js";
 
 function equippedItems(entity) {
     if(entity.items) {
@@ -60,13 +61,69 @@ function inheritableItems(entity, attributeKey) {
     return activeTraits;
 }
 
+function getAttributesFromClass(data, entity) {
+    let vals = [];
+    let classLevel = data.duplicates || 0;
+    if (classLevel > 0) {
+        let level = entity.data.levels[classLevel];
+        for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
+            vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
+        }
+    }
+    return vals;
+}
+
+function getAttributesFromEmbeddedItems(entity, data) {
+    let vals = [];
+    let names = [];
+    for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
+        names.push(item.name);
+        let duplicates = names.filter(name => name === item.name).length;
+        vals.push(...getInheritableAttribute({
+            entity: item,
+            attributeKey: data.attributeKey,
+            duplicates,
+            recursive: true
+        }));
+    }
+    return vals;
+}
+function getAttributesFromSizeArray(entity, data) {
+    if(["sizeIndex", "sizeBonus", "damageThresholdEffectiveSize"].includes(data.attributeKey)){
+        return [];
+    }
+
+    let sizeIndex = getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"})
+    if(sizeIndex.length === 0){
+        return [];
+    }
+    sizeIndex = sizeIndex.reduce((a, b) => a+b, 0)
+    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
+    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
+    let resolvedSize = sizeIndex + sizeBonus + (["damageThresholdSizeModifier"].includes(data.attributeKey) ? damageThresholdEffectiveSize : 0);
+
+    if(isNaN(resolvedSize)){
+        return [];
+    }
+
+    let sizeAttribute = SIZE_ATTRIBUTES[resolvedSize] || SIZE_ATTRIBUTES[0];
+    let attributes = sizeAttribute?.attributes || []
+
+    let vals = [];
+
+    for (let attribute of attributes.filter(attr => attr && attr.key === data.attributeKey)) {
+        vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
+    }
+    return vals;
+}
+
 /**
  *
  * @param data
  * @param data.entity {object}
  * @param data.attributeKey {string}
  * @param data.attributeFilter {function}
- * @param data.itemFilter {function}
+ * @param data.itemFilter {function} filters out child items based on a filter
  * @param data.duplicates {number}
  * @param data.reduce {string}
  * @returns {*|string|[]|*[]}
@@ -75,17 +132,27 @@ export function getInheritableAttribute(data = {}) {
     data.attributeFilter = data.attributeFilter || (() => true);
     data.itemFilter = data.itemFilter || (() => true)
 
-
-    let values = [];
-    if (!data.attributeKey || !data.entity) {
+    if(!data.attributeKey || !data.entity) {
         return [];
     }
 
+    let values = [];
     if(Array.isArray(data.attributeKey)){
         for(let subKey of data.attributeKey){
             let subData = JSON.parse(JSON.stringify(data))
             subData.attributeKey = subKey;
             subData.attributeFilter = data.attributeFilter
+            subData.itemFilter = data.itemFilter
+            delete subData.reduce
+            values.push(...getInheritableAttribute(subData))
+        }
+
+    }  else if(Array.isArray(data.entity)){
+        for(let entity of data.entity){
+            let subData = JSON.parse(JSON.stringify(data))
+            subData.entity = entity;
+            subData.attributeFilter = data.attributeFilter
+            subData.itemFilter = data.itemFilter
             delete subData.reduce
             values.push(...getInheritableAttribute(subData))
         }
@@ -97,31 +164,20 @@ export function getInheritableAttribute(data = {}) {
             entity = entity.data;
         }
 
+        if(!entity){
+            return values;
+        }
+
         if (entity.type) {
             let itemAttributes = Object.entries(entity.data?.attributes || entity._source?.data?.attributes || []).filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0])).map(entry => entry[1]);
             for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
                 values.push(...extractAttributeValues(attribute, entity._id, entity.name));
             }
-            let names = [];
-            for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
-                names.push(item.name);
-                let duplicates = names.filter(name => name === item.name).length;
-                values.push(...getInheritableAttribute({
-                    entity: item,
-                    attributeKey: data.attributeKey,
-                    duplicates,
-                    recursive: true
-                }));
-            }
+            values.push(...(getAttributesFromEmbeddedItems(entity, data)))
+            values.push(...(getAttributesFromSizeArray(entity, data)))
 
             if (entity.type === 'class') {
-                let classLevel = data.duplicates || 0;
-                if (classLevel > 0) {
-                    let level = entity.data.levels[classLevel];
-                    for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-                        values.push(...extractAttributeValues(attribute, entity._id, entity.name));
-                    }
-                }
+                values.push(... (getAttributesFromClass(data, entity)))
             }
             values.push(...(extractModeAttributes(entity, Object.values(entity.data?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
 

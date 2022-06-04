@@ -1,16 +1,23 @@
-<ul>
+
     <!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
     {{#each data.data.items as |item key|}}
-        {{#each item.data.attributes as |attr key|}}
-            {{#unlessEquals attr.key 'upgradePointCost'}}
-                <li class="attribute flexrow" data-attribute="{{key}}">
-                    <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
-                           value="{{key}}">{{attr.key}}</label>
-                    <div class="attribute-value">{{attr.value}}</div>
-                </li>
-            {{/unlessEquals}}
-        {{/each}}
+        {{#if item.data.attributes}}
+            <h3>Inherited Attributes</h3>
+            <ul>
+            {{#each item.data.attributes as |attr key|}}
+                {{#unlessEquals attr.key 'upgradePointCost'}}
+                    <li class="attribute flexrow" data-attribute="{{key}}">
+                        <label class="attribute-key" type="text" name="data.attributes.{{key}}.key"
+                               value="{{key}}">{{attr.key}}</label>
+                        <div class="attribute-value">{{attr.value}}</div>
+                    </li>
+                {{/unlessEquals}}
+            {{/each}}
+            </ul>
+        {{/if}}
     {{/each}}
+    <h3>Attributes</h3>
+    <ul>
     <!-- active item -->
     {{#if data.data.attributes}}
         {{#each data.data.attributes as |attr key|}}
