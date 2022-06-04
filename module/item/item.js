@@ -39,31 +39,33 @@ export class SWSEItem extends Item {
 
         this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
 
-        if(this.type === "vehicleTemplate") this.data.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
+        if (this.type === "vehicleTemplate") this.data.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
         if (this.type === "weapon") this.prepareWeapon(itemData);
         if (this.type === "armor") this.prepareArmor(itemData);
         if (this.type === "feat") this.prepareFeatData(itemData);
     }
 
-    set type(type){
+    set type(type) {
         this.data.type = type;
     }
-    get type(){
+
+    get type() {
         return this.data.type;
     }
 
-    get strippable(){
+    get strippable() {
         return ['armor', 'weapon'].includes(this.type)
     }
-    get hasPrerequisites(){
+
+    get hasPrerequisites() {
         return ['feat', 'talent', 'class'].includes(this.type)
     }
 
-    get modifiable(){
+    get modifiable() {
         return ['armor', 'weapon'].includes(this.type)
     }
 
-    get hasLevels(){
+    get hasLevels() {
         return ['class'].includes(this.type)
     }
 
@@ -78,30 +80,17 @@ export class SWSEItem extends Item {
     }
 
     static buildItemName(itemData) {
-        if(!itemData){
+        if (!itemData) {
             return "";
         }
         let id = itemData._id;
         let finalName = itemData.name;
 
-        if(itemData.document){
-            let sizeIndex = getInheritableAttribute({entity: itemData, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"});
-            if(sizeIndex.length > 0){
-                sizeIndex = sizeIndex.reduce((a, b) => a+b, 0)
+        finalName = this.addSizeAdjustmentPrefix(itemData, finalName);
 
-                let sizeBonus = toNumber(getInheritableAttribute({entity: itemData.document.parent, attributeKey: "sizeBonus", reduce:"SUM"}))
-
-                sizeIndex = sizeIndex + sizeBonus;
-
-                let resolvedSize = SIZE_ATTRIBUTES[sizeIndex].name;
-                if(resolvedSize !== finalName){
-                    finalName = `${finalName} (adjusted to ${resolvedSize})`
-                }
-            }
-        }
 
         let modifiers = (itemData.data?.selectedChoices || []).join(", ");
-        if(modifiers){
+        if (modifiers) {
             finalName = `${finalName} (${modifiers})`
         }
 
@@ -125,17 +114,71 @@ export class SWSEItem extends Item {
         return finalName;
     }
 
+    static addSizeAdjustmentPrefix(itemData, finalName) {
+        if (!itemData.document) {
+            return finalName;
+        }
+        let resolvedSizeIndex = this.getResolvedSizeIndex(itemData);
+
+        if(resolvedSizeIndex) {
+            let sizeattribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
+            let resolvedSize = sizeattribute.name;
+            if (resolvedSize !== finalName) {
+                finalName = `${finalName} (adjusted to ${resolvedSize})`
+            }
+        }
+
+        return finalName;
+    }
+
+    static getResolvedSizeIndex(itemData) {
+        let checkIfThisProvidesSize = getInheritableAttribute({
+            entity: itemData,
+            attributeKey: "sizeIndex",
+            reduce: "NUMERIC_VALUES"
+        });
+
+        if (checkIfThisProvidesSize.length === 0) {
+            return undefined;
+        }
+
+        let sizeIndex = getInheritableAttribute({
+            entity: itemData.document.parent,
+            attributeKey: "sizeIndex",
+            reduce: "NUMERIC_VALUES"
+        });
+
+        sizeIndex = sizeIndex.reduce((a, b) => a + b, 0)
+
+        let sizeBonus = toNumber(getInheritableAttribute({
+            entity: itemData.document.parent,
+            attributeKey: "sizeBonus",
+            reduce: "SUM"
+        }))
+
+        return sizeIndex + sizeBonus;
+    }
+
+    get generatedAttributes(){
+        let resolvedSizeIndex = SWSEItem.getResolvedSizeIndex(this.data)
+        if(resolvedSizeIndex){
+            let sizeAttribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
+            return sizeAttribute.attributes;
+        }
+    }
+
+
     get baseName() {
         return this.data.name ?? null;
     }
 
-    get sizeMod(){
+    get sizeMod() {
         return getInheritableAttribute({
             entity: this,
             attributeKey: "shipSkillModifier",
             reduce: "SUM",
-            
-            
+
+
         })
     }
 
@@ -143,9 +186,8 @@ export class SWSEItem extends Item {
         return getInheritableAttribute({
             entity: this,
             attributeKey: "levelUpHitPoints",
-            
-            
-            
+
+
         }).map(attr => attr.value)[0];
     }
 
@@ -158,17 +200,15 @@ export class SWSEItem extends Item {
             return getInheritableAttribute({
                 entity: this,
                 attributeKey: "firstLevelHitPoints",
-                
-                
-                
+
+
             }).map(attr => parseInt(attr.value))[0];
         }
         let attrs = getInheritableAttribute({
             entity: this,
             attributeKey: "rolledHp",
-            
-            
-            
+
+
         });
 
         if (attrs.length > 0) {
@@ -177,9 +217,8 @@ export class SWSEItem extends Item {
             let max = getInheritableAttribute({
                 entity: this,
                 attributeKey: "levelUpHitPoints",
-                
-                
-                
+
+
             }).map(attr => parseInt(attr.value.split("d")[1]))[0]
             return rolledHp > max ? max : rolledHp;
         }
@@ -192,14 +231,14 @@ export class SWSEItem extends Item {
             entity: this,
             attributeKey: "isFirstLevel",
             reduce: "AND"
-            
-            
+
+
         }) && getInheritableAttribute({
             entity: this,
             attributeKey: "isHeroic",
             reduce: "AND"
-            
-            
+
+
         });
     }
 
@@ -228,8 +267,8 @@ export class SWSEItem extends Item {
                 entity: this,
                 attributeKey: 'equipmentFortitudeDefenseBonus',
                 reduce: "MAX",
-                
-                
+
+
             })) - toNumber(this.getStripping("reduceDefensiveMaterial"));
         }
         return 0;
@@ -240,8 +279,8 @@ export class SWSEItem extends Item {
             entity: this,
             attributeKey: 'armorReflexDefenseBonus',
             reduce: "MAX",
-            
-            
+
+
         })) - toNumber(this.getStripping("reduceDefensiveMaterial"));
     }
 
@@ -257,9 +296,8 @@ export class SWSEItem extends Item {
         let maxDexBonuses = getInheritableAttribute({
             entity: this,
             attributeKey: 'maximumDexterityBonus',
-            
-            
-            
+
+
         });
         if (maxDexBonuses.length === 0) {
             return undefined;
@@ -280,9 +318,8 @@ export class SWSEItem extends Item {
         return getInheritableAttribute({
             entity: this,
             attributeKey: 'prefix',
-            
-            
-            
+
+
         })?.value;
     }
 
@@ -293,9 +330,8 @@ export class SWSEItem extends Item {
         return getInheritableAttribute({
             entity: this,
             attributeKey: 'suffix',
-            
-            
-            
+
+
         })?.value;
     }
 
@@ -333,9 +369,13 @@ export class SWSEItem extends Item {
         return size;
     }
 
-    get availability(){
-        let inheritableAttribute = getInheritableAttribute({entity: this, attributeKey: "availability", reduce: "FIRST"});
-        if(!inheritableAttribute){
+    get availability() {
+        let inheritableAttribute = getInheritableAttribute({
+            entity: this,
+            attributeKey: "availability",
+            reduce: "FIRST"
+        });
+        if (!inheritableAttribute) {
             return this.data.data.availability;
         }
         return inheritableAttribute
@@ -346,8 +386,8 @@ export class SWSEItem extends Item {
             entity: this,
             attributeKey: "armorType",
             reduce: "VALUES",
-            
-            
+
+
         }))[0] || this.subType;
 
         if (armorType === 'Heavy Armor' || this.getStripping("makeHeavy")?.value) {
@@ -379,8 +419,8 @@ export class SWSEItem extends Item {
             entity: this,
             attributeKey: "treatedAs",
             reduce: "VALUES",
-            
-            
+
+
         }))[0];
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
 
@@ -409,9 +449,8 @@ export class SWSEItem extends Item {
         let specials = getInheritableAttribute({
             entity: this,
             attributeKey: 'special',
-            
-            
-            
+
+
         })?.value;
         for (let special of specials ? specials : []) {
             if (special.toLowerCase().startsWith('inaccurate')) {
@@ -445,9 +484,8 @@ export class SWSEItem extends Item {
         for (let bonusDamageDie of getInheritableAttribute({
             entity: this,
             attributeKey: 'bonusDamageDieType',
-            
-            
-            
+
+
         })) {
             damageDie = increaseDieType(damageDie, parseInt(bonusDamageDie.value));
         }
@@ -500,9 +538,8 @@ export class SWSEItem extends Item {
         let damageDie = (getInheritableAttribute({
             entity: this,
             attributeKey: 'stunDamage',
-            
-            
-            
+
+
         }))[0]?.value;
         if (!damageDie || this.getStripping("stripStun")?.value) {
             return ""
@@ -513,9 +550,8 @@ export class SWSEItem extends Item {
         for (let bonusDamageDie of getInheritableAttribute({
             entity: this,
             attributeKey: 'bonusStunDamageDieSize',
-            
-            
-            
+
+
         })) {
             damageDie = increaseDieSize(damageDie, parseInt(bonusDamageDie.value));
         }
@@ -530,9 +566,8 @@ export class SWSEItem extends Item {
         let attributes = getInheritableAttribute({
             entity: this,
             attributeKey: 'damageType',
-            
-            
-            
+
+
         });
         return attributes.map(attribute => attribute.value).join(', ');
     }
@@ -635,23 +670,23 @@ export class SWSEItem extends Item {
                 entity: this,
                 attributeKey: "armorReflexDefenseBonus",
                 reduce: "MAX",
-                
-                
+
+
             }),
             getInheritableAttribute({
                 entity: this,
                 attributeKey: "equipmentFortitudeDefenseBonus",
                 reduce: "MAX",
-                
-                
+
+
             }));
 
         let jointProtection = getInheritableAttribute({
             entity: this,
             attributeKey: "maximumDexterityBonus",
             reduce: "MIN",
-            
-            
+
+
         });
 
         this.setStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
@@ -688,14 +723,14 @@ export class SWSEItem extends Item {
         this.data.data.sourceString = sourceString;
     }
 
-    setChoice(choice){
+    setChoice(choice) {
         this.data.data.selectedChoices = this.data.data.selectedChoices || [];
         this.data.data.selectedChoices.push(choice);
     }
 
     setPayload(payload, payloadString) {
         let pattern = "#payload#";
-        if(payloadString){
+        if (payloadString) {
             pattern = `#${payloadString}#`;
             pattern = pattern.replace(/##/g, "#")
         }
@@ -736,9 +771,9 @@ export class SWSEItem extends Item {
             attributeId++;
         }
 
-        for(let modifier of modifiers){
-            let existingAttribute = Object.values(attributes).find(attribute=> attribute.key === modifier.key);
-            if(existingAttribute && uniqueKey.includes(modifier.key)){
+        for (let modifier of modifiers) {
+            let existingAttribute = Object.values(attributes).find(attribute => attribute.key === modifier.key);
+            if (existingAttribute && uniqueKey.includes(modifier.key)) {
                 existingAttribute.value = modifier.value;
             } else {
                 attributes[attributeId] = modifier;
@@ -746,6 +781,7 @@ export class SWSEItem extends Item {
             }
         }
     }
+
     addProvidedItems(modifiers) {
         this.data.data.providedItems = this.data.data.providedItems || [];
         this.data.data.providedItems.push(...modifiers)
@@ -798,7 +834,7 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        if(data.modes) {
+        if (data.modes) {
             for (let mode of Object.values(data.modes) || []) {
                 this._crawlAttributes(mode, funct)
             }
@@ -884,7 +920,7 @@ export class SWSEItem extends Item {
     }
 
     async revokeOwnership(item) {
-        if(!item){
+        if (!item) {
             return;
         }
         let items = this.data.data.items?.filter(i => i._id !== item.data._id);
@@ -974,17 +1010,18 @@ export class SWSEItem extends Item {
         await this.update({"data.weapon.damage.attacks": attacks});
     }
 
-    increaseQuantity(){
+    increaseQuantity() {
         let current = this.data.data.quantity;
 
-        let quantity = current+1;
+        let quantity = current + 1;
         this.update({"data.quantity": quantity});
     }
-    decreaseQuantity(){
+
+    decreaseQuantity() {
 
         let current = this.data.data.quantity;
 
-        let quantity = Math.max(0,current-1);
+        let quantity = Math.max(0, current - 1);
         this.update({"data.quantity": quantity});
     }
 
@@ -1019,6 +1056,7 @@ export class SWSEItem extends Item {
     rollItem(actor, context) {
 
     }
+
     static getItemDialogue(attack, actor) {
         let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
@@ -1112,8 +1150,9 @@ export class SWSEItem extends Item {
         }
         return items;
     }
+
     static getActiveModesFromItemData(itemData) {
-        if(itemData.data?.data?.modes){
+        if (itemData.data?.data?.modes) {
             itemData = itemData.data;
         }
         return Object.values(itemData.data?.modes || [])?.filter(mode => mode && mode.isActive) || [];
@@ -1125,10 +1164,10 @@ export class SWSEItem extends Item {
     }
 
     static getModesFromItem(itemData) {
-        if(!itemData){
+        if (!itemData) {
             return [];
         }
-        if(itemData.data?.data?.modes){
+        if (itemData.data?.data?.modes) {
             itemData = itemData.data;
         }
         let modes = Object.values(itemData.data.modes || []).filter(mode => !!mode);
@@ -1214,7 +1253,7 @@ export class SWSEItem extends Item {
     }
 }
 
-export function reduceWeaponRange(range){
+export function reduceWeaponRange(range) {
     let ranges = ["Melee", "Thrown", "Pistols", "Rifles", "Heavy Weapons"];
     let index = ranges.indexOf(range === 'Simple Ranged Weapon' ? "Pistols" : (range === 'Grenades' ? "Thrown" : range));
     return ranges[index - 1];

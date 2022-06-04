@@ -106,7 +106,8 @@ function getAttributesFromSizeArray(entity, data) {
         return [];
     }
 
-    let attributes = SIZE_ATTRIBUTES[resolvedSize]?.attributes || []
+    let sizeAttribute = SIZE_ATTRIBUTES[resolvedSize] || SIZE_ATTRIBUTES[0];
+    let attributes = sizeAttribute?.attributes || []
 
     let vals = [];
 
@@ -131,12 +132,11 @@ export function getInheritableAttribute(data = {}) {
     data.attributeFilter = data.attributeFilter || (() => true);
     data.itemFilter = data.itemFilter || (() => true)
 
-
-    let values = [];
-    if (!data.attributeKey || !data.entity) {
+    if(!data.attributeKey || !data.entity) {
         return [];
     }
 
+    let values = [];
     if(Array.isArray(data.attributeKey)){
         for(let subKey of data.attributeKey){
             let subData = JSON.parse(JSON.stringify(data))
@@ -162,6 +162,10 @@ export function getInheritableAttribute(data = {}) {
         let entity = data.entity;
         if (entity instanceof SWSEActor || entity instanceof SWSEItem || entity instanceof UnarmedAttack) {
             entity = entity.data;
+        }
+
+        if(!entity){
+            return values;
         }
 
         if (entity.type) {
