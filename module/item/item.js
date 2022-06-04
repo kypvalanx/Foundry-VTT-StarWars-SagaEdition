@@ -1,5 +1,5 @@
 import {increaseDieSize, increaseDieType, toNumber} from "../util.js";
-import {uniqueKey} from "../constants.js";
+import {SIZE_ATTRIBUTES, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 
@@ -83,6 +83,22 @@ export class SWSEItem extends Item {
         }
         let id = itemData._id;
         let finalName = itemData.name;
+
+        if(itemData.document){
+            let sizeIndex = getInheritableAttribute({entity: itemData, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"});
+            if(sizeIndex.length > 0){
+                sizeIndex = sizeIndex.reduce((a, b) => a+b, 0)
+
+                let sizeBonus = toNumber(getInheritableAttribute({entity: itemData.document.parent, attributeKey: "sizeBonus", reduce:"SUM"}))
+
+                sizeIndex = sizeIndex + sizeBonus;
+
+                let resolvedSize = SIZE_ATTRIBUTES[sizeIndex].name;
+                if(resolvedSize !== finalName){
+                    finalName = `${finalName} (adjusted to ${resolvedSize})`
+                }
+            }
+        }
 
         let modifiers = (itemData.data?.selectedChoices || []).join(", ");
         if(modifiers){
