@@ -22,6 +22,12 @@
           "max": 10,
           "condition": 0
         },
+        "shields": {
+          "value": 0,
+          "min": 0,
+          "max": 0,
+          "shieldDamage": 0
+        },
         "description": "",
         "credits": 0,
         "classes": [],

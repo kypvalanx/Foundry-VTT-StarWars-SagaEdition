@@ -1,9 +1,18 @@
 {{!-- Darkside Block --}}
-<div class="dark-side-block panel">
-    <h1 class="resource-label">Dark Side</h1>
-    <div class="flex flex-row flex-wrap">
-        {{#each data.data.darkSideArray as | value|}}
-        <div class="dark-side-button button{{#if value.active}} active{{/if}}" data-value="{{value.value}}">{{value.value}}</div>
-        {{/each}}
+<div class="shield-block panel flex flex-col">
+    <div>
+        <h1 class="resource-label">Shields</h1>
+    </div>
+    <div class="flex flex-row">
+        <div class="resource-block"><h3><label>Total</label><div class="plain input static">{{data.data.shields.max}}</div></h3></div>
+        <div class="resource-block"><label class="top">Current</label>
+            <input class="plain small" type="number" name="data.shields.value" value="{{data.data.shields.value}}" data-dtype="Number"/>
+        </div>
+        <div title="Toggle Shield {{#if data.data.shields.active}}Off{{else}}On{{/if}}"><a data-action="shield" data-action-type="toggle" class="{{#if data.data.shields.active}}cursor{{/if}}"><i class="fas fa-shield-virus"></i></a></div>
+        <div title="Shield +5"><a data-action="shield" data-action-type="plus"><i class="fas fa-plus"></i></a></div>
+        <div title="Shield -5"><a data-action="shield" data-action-type="minus"><i class="fas fa-minus"></i></a></div>
+        {{#if data.data.shields.failureChance}}
+            <div class="resource-block"><h3><label>Failure Chance</label><div class="plain input static">{{data.data.shields.failureChance}}</div></h3></div>
+        {{/if}}
     </div>
 </div>

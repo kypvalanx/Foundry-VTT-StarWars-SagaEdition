@@ -97,5 +97,10 @@ CONFIG.statusEffects.push(...[
         label: "EFFECT.StatusConditionHelpless",
         icon: "systems/swse/icon/status/helpless.png",
         changes: [{key: "condition", value:"OUT"}, {key: "dexterityMax", value: "0"}, {key: "dexterityMaxBonus", value: "0"}]
+    },
+    {
+        id: "shield",
+        label: "EFFECT.StatusShield",
+        icon: "icons/svg/shield.svg"
     }
 ])

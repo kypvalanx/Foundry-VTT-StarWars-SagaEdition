@@ -64,6 +64,7 @@ Hooks.once('init', async function() {
     'systems/swse/templates/actor/parts/actor-skills.hbs',
     'systems/swse/templates/actor/parts/actor-attributes.hbs',
     'systems/swse/templates/actor/parts/actor-health.hbs',
+    'systems/swse/templates/actor/parts/actor-shields.hbs',
     'systems/swse/templates/actor/parts/actor-condition.hbs',
     'systems/swse/templates/actor/parts/actor-portrait.hbs',
     'systems/swse/templates/actor/parts/actor-darkside.hbs',

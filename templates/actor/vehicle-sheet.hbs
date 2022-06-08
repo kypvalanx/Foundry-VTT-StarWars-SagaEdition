@@ -31,6 +31,8 @@
                     <div class="flex-grow">
                         <!--health-->
                         {{> 'systems/swse/templates/actor/vehicle/vehicle-health.hbs'}}
+                        <!--Shields-->
+                        {{> 'systems/swse/templates/actor/parts/actor-shields.hbs'}}
                     </div>
                     <div class="flex flex-col">
                         <!--portrait-->
@@ -76,6 +78,7 @@
                 <div class="grid-2col">
                     <div>
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true}}
                     </div>
                     <div>
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true}}
