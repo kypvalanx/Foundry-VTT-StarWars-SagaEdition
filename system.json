@@ -145,7 +145,7 @@
   "gridDistance": 1,
   "gridUnits": "squares",
   "primaryTokenAttribute": "health",
-  "secondaryTokenAttribute": "power",
+  "secondaryTokenAttribute": "shields",
   "url": "https://github.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",
   "manifest": "https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/main/system.json",
   "download": "https://github.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/archive/refs/tags/0.5.26.zip",

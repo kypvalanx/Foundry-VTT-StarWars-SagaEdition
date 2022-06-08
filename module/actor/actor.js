@@ -1,4 +1,4 @@
-import {resolveHealth} from "./health.js";
+import {resolveHealth, resolveShield} from "./health.js";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
 import {resolveOffense} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
@@ -315,6 +315,7 @@ export class SWSEActor extends Actor {
         generateSkills(this);
 
         actorData.data.health = resolveHealth(this);
+        actorData.data.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
         actorData.data.defense = defense;
         actorData.data.armors = armors;
@@ -421,6 +422,7 @@ export class SWSEActor extends Actor {
         this._reduceProvidedItemsByExistingItems(actorData);
 
         actorData.data.health = resolveHealth(this);
+        actorData.data.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
         actorData.data.defense = defense;
         actorData.data.armors = armors;
@@ -981,13 +983,13 @@ export class SWSEActor extends Actor {
         return this.data.inactiveProvidedFeats;
     }
 
-    get shield() {
-        return getInheritableAttribute({
-            entity: this,
-            attributeKey: "shieldRating",
-            reduce: "MAX"
-        })
-    }
+    // get shield() {
+    //     return getInheritableAttribute({
+    //         entity: this,
+    //         attributeKey: "shieldRating",
+    //         reduce: "MAX"
+    //     })
+    // }
 
     /**
      *
@@ -1445,6 +1447,10 @@ export class SWSEActor extends Actor {
 
     set credits(credits) {
         this.update({'data.credits': credits})
+    }
+
+    set shields(shields) {
+        this.update({'data.shields.value': shields < 0 ? 0 : shields})
     }
 
     setAge(age) {

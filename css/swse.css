@@ -278,6 +278,10 @@
   text-transform: uppercase;
 }
 
+.swse .resource-block {
+  padding: 3px;
+}
+
 .swse .center {
   text-align: center;
   margin: auto;
@@ -662,7 +666,7 @@
   grid-area: 2 / 4 / 3 / 6;
 }
 
-.swse .attack-block .critical {
+.swse .attack-block .critical-multiplier {
   grid-area: 2 / 6 / 3 / 7;
 }
 

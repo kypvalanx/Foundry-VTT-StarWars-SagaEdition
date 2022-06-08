@@ -792,6 +792,9 @@ export class SWSEItem extends Item {
      * @param parent {SWSEItem}
      */
     setParent(parent) {
+        if(Array.isArray(parent)){
+            parent = parent[0];
+        }
         this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
                 prerequisite.requirement = prerequisite.requirement.replace(/#parent#/g, parent.name);

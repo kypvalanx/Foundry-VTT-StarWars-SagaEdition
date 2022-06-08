@@ -210,6 +210,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
         html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));
+        html.find('[data-action="shield"]').click(this._onShield.bind(this));
         html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
         html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
         html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
@@ -257,7 +258,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
     }
-    
+
     _onCredit(event) {
         let element = $(event.currentTarget);
         let type = element.data("action-type")
@@ -267,6 +268,25 @@ export class SWSEActorSheet extends ActorSheet {
         }
         if ('transfer' === type) {
             transferCredits(actor, type);
+        }
+    }
+
+    _onShield(event) {
+        let element = $(event.currentTarget);
+        let type = element.data("action-type")
+        let actor = this.actor;
+        switch(type){
+            case 'plus':
+                actor.shields = actor.data.data.shields.value + 5
+                break;
+            case 'minus':
+                actor.shields = actor.data.data.shields.value - 5
+                break;
+            case 'toggle':
+                let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                tokens.forEach(token => token.toggleEffect(statusEffect))
+                break;
         }
     }
 
