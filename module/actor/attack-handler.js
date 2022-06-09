@@ -24,7 +24,7 @@ export function generateVehicleAttacks(actor) {
     let attacks = [];
     attacks.push(...actor.getAvailableItemsFromRelationships()
         .filter(item => item.data.subtype && item.data.subtype.toLowerCase() === 'weapon systems')
-        .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId)));
+        .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId, {actor})));
         //.map(weapon => generateAttackFromShipWeapon(weapon, map[weapon._id])));
     return attacks;
 }
@@ -52,11 +52,11 @@ export function generateAttacks(actor) {
         .map(item => item.id)
     weaponIds.push("Unarmed Attack")
 
-    let attacks = weaponIds.map(id => new Attack(actor.id, id));
+    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, {actor}));
 
     let items = actor.getAvailableItemsFromRelationships()
 
-    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId)))
+    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, {actor})))
     return attacks;
 }
 
