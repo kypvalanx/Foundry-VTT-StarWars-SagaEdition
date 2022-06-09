@@ -139,6 +139,10 @@ export class Attack {
         let items = actor.items?._source || actor.items;
         let find = items.find(item => item._id === this.itemId);
 
+        if(!find){
+            find = this.options.actor.items.get(this.itemId)
+        }
+
         if (find instanceof SWSEItem) {
             return find.data;
         }
