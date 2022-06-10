@@ -791,7 +791,7 @@ export class SWSEItem extends Item {
      *
      * @param parent {SWSEItem}
      */
-    setParent(parent) {
+    setParent(parent, unlocked) {
         if(Array.isArray(parent)){
             parent = parent[0];
         }
@@ -815,7 +815,8 @@ export class SWSEItem extends Item {
         this.data.data.supplier = {
             id: parent.id,
             name: parent.name,
-            type: parent.data.type
+            type: parent.data.type,
+            unlocked
         }
     }
 

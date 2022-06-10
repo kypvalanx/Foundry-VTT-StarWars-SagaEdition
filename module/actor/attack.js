@@ -140,7 +140,7 @@ export class Attack {
         let find = items.find(item => item._id === this.itemId);
 
         if(!find){
-            find = this.options.actor.items.get(this.itemId)
+            find = this.options.items?.get(this.itemId)
         }
 
         if (find instanceof SWSEItem) {

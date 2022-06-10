@@ -1720,6 +1720,7 @@ export class SWSEActor extends Actor {
             let modifications = provided.modifications;
             let namedCrew = provided.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
             let equip = provided.equip;
+            let unlocked = provided.unlocked;
             let {index, pack} = await getIndexAndPack(indices, type);
             let {entry, payload, itemName} = await this.getIndexEntryByName(item, index);
 
@@ -1767,7 +1768,7 @@ export class SWSEActor extends Actor {
                 entity.setPayload(payload);
             }
             if (!!parent) {
-                entity.setParent(parent);
+                entity.setParent(parent, unlocked);
             }
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`

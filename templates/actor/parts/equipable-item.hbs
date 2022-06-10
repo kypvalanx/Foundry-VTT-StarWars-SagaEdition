@@ -16,6 +16,12 @@
                 <a class="item-control item-delete" title="Delete Item"><i
                         class="fas fa-trash"></i></a>
             {{/unless}}
+            {{#if item.data.data.supplier.id}}
+                {{#if item.data.data.supplier.unlocked}}
+                    <a class="item-control item-delete" title="Delete Item"><i
+                            class="fas fa-trash"></i></a>
+                {{/if}}
+            {{/if}}
         {{/ifEquals}}
         {{#ifEquals delete 'always'}}
                 <a class="item-control item-delete" title="Delete Item"><i
