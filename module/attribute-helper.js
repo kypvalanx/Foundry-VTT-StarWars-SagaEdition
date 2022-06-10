@@ -223,7 +223,7 @@ export function extractEffectChange(changes, attributeKey, entity) {
 export function extractModeAttributes(entity, activeModes, attributeKey) {
     let values = [];
     for (let mode of activeModes) {
-        for (let attribute of Object.values(mode.attributes).filter(attr => attr.key === attributeKey) || []) {
+        for (let attribute of Object.values(mode.attributes).filter(attr => attr && attr.key === attributeKey) || []) {
             values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.name));
         }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
