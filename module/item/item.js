@@ -1,5 +1,5 @@
 import {increaseDieSize, increaseDieType, toNumber} from "../util.js";
-import {SIZE_ATTRIBUTES, uniqueKey} from "../constants.js";
+import {DROID_APPENDAGE_DATA, SIZE_ATTRIBUTES, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 
@@ -86,7 +86,7 @@ export class SWSEItem extends Item {
         let id = itemData._id;
         let finalName = itemData.name;
 
-        finalName = this.addSizeAdjustmentPrefix(itemData, finalName);
+        finalName = this.addSizeAdjustmentSuffix(itemData, finalName);
 
 
         let modifiers = (itemData.data?.selectedChoices || []).join(", ");
@@ -114,11 +114,11 @@ export class SWSEItem extends Item {
         return finalName;
     }
 
-    static addSizeAdjustmentPrefix(itemData, finalName) {
+    static addSizeAdjustmentSuffix(itemData, finalName) {
         if (!itemData.document) {
             return finalName;
         }
-        let resolvedSizeIndex = this.getResolvedSizeIndex(itemData);
+        let resolvedSizeIndex = this.getResolvedSizeIndexForSizeProvider(itemData);
 
         if(resolvedSizeIndex) {
             let sizeattribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
@@ -131,7 +131,7 @@ export class SWSEItem extends Item {
         return finalName;
     }
 
-    static getResolvedSizeIndex(itemData) {
+    static getResolvedSizeIndexForSizeProvider(itemData) {
         let checkIfThisProvidesSize = getInheritableAttribute({
             entity: itemData,
             attributeKey: "sizeIndex",
@@ -141,7 +141,10 @@ export class SWSEItem extends Item {
         if (checkIfThisProvidesSize.length === 0) {
             return undefined;
         }
+        return this.getResolvedSizeIndex(itemData);
+    }
 
+    static getResolvedSizeIndex(itemData) {
         let sizeIndex = getInheritableAttribute({
             entity: itemData.document.parent,
             attributeKey: "sizeIndex",
@@ -160,11 +163,25 @@ export class SWSEItem extends Item {
     }
 
     get generatedAttributes(){
-        let resolvedSizeIndex = SWSEItem.getResolvedSizeIndex(this.data)
+        let attributes = [];
+        let resolvedSizeIndex = SWSEItem.getResolvedSizeIndexForSizeProvider(this.data)
         if(resolvedSizeIndex){
             let sizeAttribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
-            return sizeAttribute.attributes;
+            attributes.push(... sizeAttribute.attributes);
         }
+
+        let appendageType = getInheritableAttribute({entity: this, attributeKey: "appendageType", reduce: "FIRST"})
+
+        if(appendageType){
+            let sizeIndex = SWSEItem.getResolvedSizeIndex(this.data)
+            let appendage = DROID_APPENDAGE_DATA[appendageType];
+            if(appendage){
+                let sizedAppendage = appendage[sizeIndex] || appendage[0];
+                attributes.push(... sizedAppendage.attributes);
+            }
+        }
+
+        return attributes;
     }
 
 

@@ -1,4 +1,4 @@
-import {getInheritableAttribute} from "../attribute-helper";
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 export function warningsFromActor(actor) {
     let warnings = [];
