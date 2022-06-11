@@ -650,9 +650,14 @@ function getDiceTermsFromString(dieString) {
  * @returns {String}
  */
 function resolveUnarmedDamageDie(actor) {
+    let isDroid = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "isDroid",
+        reduce: "OR"
+    });
     let damageDie = getInheritableAttribute({
         entity: actor,
-        attributeKey: ["unarmedDamage", "unarmedDamageDie"],
+        attributeKey: isDroid ? "droidUnarmedDamage" : ["unarmedDamage", "unarmedDamageDie"],
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({
