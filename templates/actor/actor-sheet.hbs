@@ -14,6 +14,14 @@
             {{#each actor.inactiveProvidedFeats as |feat id|}}
                 <span class="warning">The {{feat.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
             {{/each}}
+
+
+            {{#each actor.warnings as |warning id|}}
+                <span class="warning">{{warning}}</span><br/>
+            {{/each}}
+            {{#each actor.errors as |error id|}}
+                <span class="error">{{error}}</span><br/>
+            {{/each}}
         </div>
         <div class="flex-grow1">
             {{!-- Sheet Tab Navigation --}}

@@ -5,7 +5,8 @@ import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getIndexAndPack, resolveExpression,
+    getIndexAndPack,
+    resolveExpression,
     resolveValueArray,
     toShortAttribute,
     unique
@@ -20,6 +21,7 @@ import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
+import {errorsFromActor, warningsFromActor} from "./warnings.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -369,9 +371,10 @@ export class SWSEActor extends Actor {
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
 
-        let {level, classSummary} = this._generateClassData(actorData);
+        let {level, classSummary, classLevels} = this._generateClassData(actorData);
         actorData.levelSummary = level;
         actorData.classSummary = classSummary;
+        actorData.classLevels = classLevels;
 
         this.inheritableItems.push(...this.traits)
         this.inheritableItems.push(...this.talents)
@@ -1017,7 +1020,7 @@ export class SWSEActor extends Actor {
 
         let classSummary = Object.entries(classLevels).map((entity) => `${entity[0]} ${entity[1]}`).join(' / ');
 
-        return {level: this.classes.length, classSummary};
+        return {level: this.classes.length, classSummary, classLevels};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -1789,6 +1792,14 @@ export class SWSEActor extends Actor {
             return addedItems;
         }
         return notificationMessage;
+    }
+
+    get warnings(){
+        return warningsFromActor(this);
+    }
+
+    get errors(){
+        return errorsFromActor(this);
     }
 
 
