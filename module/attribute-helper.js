@@ -3,13 +3,16 @@ import {SWSEItem} from "./item/item.js";
 import {SWSEActor} from "./actor/actor.js";
 import {UnarmedAttack} from "./actor/unarmed-attack.js";
 import {meetsPrerequisites} from "./prerequisite.js";
-import {SIZE_ATTRIBUTES} from "./constants.js";
+import {DROID_APPENDAGE_DATA, SIZE_ATTRIBUTES} from "./constants.js";
+
+
+const BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST = ["appendageType", "sizeIndex", "sizeBonus", "damageThresholdEffectiveSize"];
 
 function equippedItems(entity) {
     if(entity.items) {
         let equippedIds = entity.data.equippedIds.map(equipped => equipped.id)
         //let values = Object.values(entity.items);
-        return entity.items.filter(item => equippedIds.includes(item.id));
+        return entity.items.filter(item => equippedIds.includes(item.id || item._id));
     }
     if(entity.data?.items){
         //items attached to items
@@ -76,7 +79,8 @@ function getAttributesFromClass(data, entity) {
 function getAttributesFromEmbeddedItems(entity, data) {
     let vals = [];
     let names = [];
-    for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
+    let it = inheritableItems(entity, data.attributeKey).filter(data.itemFilter);
+    for (let item of it) {
         names.push(item.name);
         let duplicates = names.filter(name => name === item.name).length;
         vals.push(...getInheritableAttribute({
@@ -89,18 +93,20 @@ function getAttributesFromEmbeddedItems(entity, data) {
     return vals;
 }
 function getAttributesFromSizeArray(entity, data) {
-    if(["sizeIndex", "sizeBonus", "damageThresholdEffectiveSize"].includes(data.attributeKey)){
+    if(BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST.includes(data.attributeKey)){
         return [];
     }
 
-    let sizeIndex = getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"})
-    if(sizeIndex.length === 0){
+    let sizeIndices = getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"})
+    if(sizeIndices.length === 0){
         return [];
     }
-    sizeIndex = sizeIndex.reduce((a, b) => a+b, 0)
-    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
+    let resolvedSize = getResolvedSize(entity)
+
+
     let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
-    let resolvedSize = sizeIndex + sizeBonus + (["damageThresholdSizeModifier"].includes(data.attributeKey) ? damageThresholdEffectiveSize : 0);
+    resolvedSize = resolvedSize + (["damageThresholdSizeModifier"].includes(data.attributeKey) ? damageThresholdEffectiveSize : 0);
+
 
     if(isNaN(resolvedSize)){
         return [];
@@ -108,6 +114,40 @@ function getAttributesFromSizeArray(entity, data) {
 
     let sizeAttribute = SIZE_ATTRIBUTES[resolvedSize] || SIZE_ATTRIBUTES[0];
     let attributes = sizeAttribute?.attributes || []
+
+    let vals = [];
+
+    for (let attribute of attributes.filter(attr => attr && attr.key === data.attributeKey)) {
+        vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
+    }
+    return vals;
+}
+
+function getResolvedSize(entity) {
+    if(entity.document && entity.document instanceof SWSEItem){
+        entity = entity.document.parent;
+    }
+    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"MAX"}))
+    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
+    return sizeIndex + sizeBonus
+}
+
+
+function getAttributesFromDroidAppendages(entity, data) {
+    if(BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST.includes(data.attributeKey)){
+        return [];
+    }
+    let appendageType = getInheritableAttribute({entity, attributeKey: "appendageType", reduce:"FIRST"})
+
+    if(!appendageType){
+        return [];
+    }
+
+    let resolvedSize = getResolvedSize(entity);
+
+    let appendage = DROID_APPENDAGE_DATA[appendageType][resolvedSize] || DROID_APPENDAGE_DATA[appendageType][0]
+
+    let attributes = appendage?.attributes || []
 
     let vals = [];
 
@@ -175,6 +215,7 @@ export function getInheritableAttribute(data = {}) {
             }
             values.push(...(getAttributesFromEmbeddedItems(entity, data)))
             values.push(...(getAttributesFromSizeArray(entity, data)))
+            values.push(...(getAttributesFromDroidAppendages(entity, data)))
 
             if (entity.type === 'class') {
                 values.push(... (getAttributesFromClass(data, entity)))
