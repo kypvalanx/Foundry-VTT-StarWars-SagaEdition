@@ -914,6 +914,7 @@ export class SWSEActorSheet extends ActorSheet {
             case "template":
             case "upgrade":
             case "trait":
+            case "beastAttack":
                 await this.addItem(item);
                 break;
 
@@ -937,7 +938,7 @@ export class SWSEActorSheet extends ActorSheet {
                 "forceTechnique",
                 "forceSecret",
                 "forceRegimen",
-                "trait", "template", "background", "destiny"].includes(type)
+                "trait", "template", "background", "destiny", "beastAttack"].includes(type)
         } else if (vehicleActorTypes.includes(this.actor.data.type)) {
             return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
         }

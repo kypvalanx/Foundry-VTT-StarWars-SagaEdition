@@ -1,4 +1,4 @@
-import {getBonusString, increaseDieSize, resolveValueArray, toShortAttribute} from "../util.js";
+import {getBonusString, resolveValueArray, toShortAttribute} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {appendNumericTerm, Attack} from "./attack.js";
 import {d20} from "../constants.js";
@@ -47,10 +47,20 @@ export function generateVehicleAttacks(actor) {
  * @returns {Promise<void>}
  */
 export function generateAttacks(actor) {
-    let weaponIds = actor.getEquippedItems()
-        .filter(item => item.type === 'weapon')
+    let equippedItems = actor.getEquippedItems();
+    let weaponIds = equippedItems
+        .filter(item => 'weapon' === item.type)
         .map(item => item.id)
-    weaponIds.push("Unarmed Attack")
+
+    let beastAttackIds = equippedItems
+        .filter(item => 'beastAttack' === item.type)
+        .map(item => item.id);
+
+    if(beastAttackIds.length > 0){
+        weaponIds.push(...beastAttackIds)
+    } else {
+        weaponIds.push("Unarmed Attack")
+    }
 
     let attacks = weaponIds.map(id => new Attack(actor.id, id, null, {actor: actor.items}));
 

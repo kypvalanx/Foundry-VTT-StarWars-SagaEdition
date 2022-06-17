@@ -637,6 +637,7 @@ function getDiceTermsFromString(dieString) {
     if(!dieString){
         return [];
     }
+    dieString = `${dieString}`
     if (dieString === "0") {
         return [new NumericTerm({number: 0})];
     }
@@ -682,7 +683,7 @@ function resolveUnarmedDamageDie(actor) {
 }
 
 function attackOption(attack, id) {
-    let attackString = attack.toJSONString()
+    let attackString = attack.toJSONString
     return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
 }
 
@@ -807,6 +808,7 @@ function attackDialogue(context) {
         let doubleAttackBonus = 0;
         let tripleAttackBonus = 0;
         let availableWeapons = 0
+        let beastAttacks = 0;
         for (let item of equippedItems) {
             availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
             //TODO support exotic weapons
@@ -817,8 +819,11 @@ function attackDialogue(context) {
             if (tripleAttack.includes(subtype)) {
                 tripleAttackBonus = 1;
             }
+            if(item.type === "beastAttack"){
+                beastAttacks++;
+            }
         }
-        availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
+        availableAttacks = Math.max(availableWeapons + doubleAttackBonus + tripleAttackBonus, beastAttacks)
 
 
         //how many attacks?
