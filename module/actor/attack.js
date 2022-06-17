@@ -709,7 +709,11 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
         }
 
         let clonedAttack = attack.clone();
-        clonedAttack.options.standardAttack = true;
+        if(source.type === "beastAttack"){
+            clonedAttack.options.beastAttack = true;
+        } else {
+            clonedAttack.options.standardAttack = true;
+        }
         resolvedAttacks.push(attackOption(clonedAttack, id++))
 
         let additionalDamageDice = attack.additionalDamageDice
@@ -961,6 +965,7 @@ function getAttackMods(selects, dualWeaponModifier) {
     let isDoubleAttack = false;
     let isTripleAttack = false;
     let standardAttacks = 0;
+    let beastAttacks = 0;
     for (let select of selects) {
         if (select.value === "--") {
             continue;
@@ -976,6 +981,9 @@ function getAttackMods(selects, dualWeaponModifier) {
         if (options.standardAttack) {
             standardAttacks++;
         }
+        if (options.beastAttack) {
+            beastAttacks++;
+        }
     }
 
 
@@ -986,7 +994,7 @@ function getAttackMods(selects, dualWeaponModifier) {
         attackMods.push({value: -5, source: "Triple Attack"});
     }
 
-    if (standardAttacks > 1) {
+    if (standardAttacks > 1 || (standardAttacks > 0 && beastAttacks > 0)) {
         attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
     }
     attackMods.forEach(attack => attack.type = "attack");
