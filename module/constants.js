@@ -107,6 +107,7 @@ export const SIZE_ATTRIBUTES = {
         ]}
 }
 
+//TODO this can probably be optimised
 export const DROID_APPENDAGE_DATA = {
     Probe: {
         0: {name:"Fine", sizeIndex:0, attributes:[

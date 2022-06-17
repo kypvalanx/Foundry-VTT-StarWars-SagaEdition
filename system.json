@@ -128,6 +128,13 @@
       "system": "swse"
     },
     {
+      "name": "beast components",
+      "label": "Beast Components",
+      "path": "packs/swse-beast components.db",
+      "type": "Item",
+      "system": "swse"
+    },
+    {
       "name": "vehicles",
       "label": "Vehicles",
       "path": "packs/swse-vehicles.db",

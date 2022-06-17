@@ -88,7 +88,6 @@ Hooks.once('init', async function() {
     'systems/swse/templates/item/parts/prerequisite.hbs',
     'systems/swse/templates/item/parts/attribute.hbs',
     'systems/swse/templates/item/parts/attributes.hbs',
-    'systems/swse/templates/item/parts/generated-attributes.hbs',
     'systems/swse/templates/item/parts/mode.hbs',
     'systems/swse/templates/actor/vehicle/crew-quality.hbs',
     'systems/swse/templates/actor/vehicle/vehicle-template.hbs',

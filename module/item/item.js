@@ -162,29 +162,6 @@ export class SWSEItem extends Item {
         return sizeIndex + sizeBonus;
     }
 
-    get generatedAttributes(){
-        let attributes = [];
-        let resolvedSizeIndex = SWSEItem.getResolvedSizeIndexForSizeProvider(this.data)
-        if(resolvedSizeIndex){
-            let sizeAttribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
-            attributes.push(... sizeAttribute.attributes);
-        }
-
-        let appendageType = getInheritableAttribute({entity: this, attributeKey: "appendageType", reduce: "FIRST"})
-
-        if(appendageType){
-            let sizeIndex = SWSEItem.getResolvedSizeIndex(this.data)
-            let appendage = DROID_APPENDAGE_DATA[appendageType];
-            if(appendage){
-                let sizedAppendage = appendage[sizeIndex] || appendage[0];
-                attributes.push(... sizedAppendage.attributes);
-            }
-        }
-
-        return attributes;
-    }
-
-
     get baseName() {
         return this.data.name ?? null;
     }

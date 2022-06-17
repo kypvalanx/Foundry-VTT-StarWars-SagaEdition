@@ -511,7 +511,8 @@
       "vehicleBaseType",
       "language",
       "background",
-      "destiny"
+      "destiny",
+      "beastAttack"
     ],
     "templates": {
       "base": {
@@ -575,6 +576,16 @@
         "mode"
       ],
       "weapon": {}
+    },
+    "beastAttack": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source",
+        "mode"
+      ]
     },
     "armor": {
       "templates": [

@@ -1,12 +1,8 @@
-import {extractAttributeValues, filterItemsByType, reduceArray, toNumber} from "./util.js";
+import {extractAttributeValues, filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEActor} from "./actor/actor.js";
 import {UnarmedAttack} from "./actor/unarmed-attack.js";
 import {meetsPrerequisites} from "./prerequisite.js";
-import {DROID_APPENDAGE_DATA, SIZE_ATTRIBUTES} from "./constants.js";
-
-
-const BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST = ["appendageType", "sizeIndex", "sizeBonus", "damageThresholdEffectiveSize"];
 
 function equippedItems(entity) {
     if(entity.items) {
@@ -92,70 +88,21 @@ function getAttributesFromEmbeddedItems(entity, data) {
     }
     return vals;
 }
-function getAttributesFromSizeArray(entity, data) {
-    if(BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST.includes(data.attributeKey)){
-        return [];
-    }
 
-    let sizeIndices = getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"})
-    if(sizeIndices.length === 0){
-        return [];
-    }
-    let resolvedSize = getResolvedSize(entity)
-
-
-    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
-    resolvedSize = resolvedSize + (["damageThresholdSizeModifier"].includes(data.attributeKey) ? damageThresholdEffectiveSize : 0);
-
-
-    if(isNaN(resolvedSize)){
-        return [];
-    }
-
-    let sizeAttribute = SIZE_ATTRIBUTES[resolvedSize] || SIZE_ATTRIBUTES[0];
-    let attributes = sizeAttribute?.attributes || []
-
-    let vals = [];
-
-    for (let attribute of attributes.filter(attr => attr && attr.key === data.attributeKey)) {
-        vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
-    }
-    return vals;
-}
-
-function getResolvedSize(entity) {
+export function getResolvedSize(entity, options) {
     if(entity.document && entity.document instanceof SWSEItem){
         entity = entity.document.parent;
     }
     let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"MAX"}))
     let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
-    return sizeIndex + sizeBonus
+
+
+    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
+    let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
+
+    return sizeIndex + sizeBonus + miscBonus;
 }
 
-
-function getAttributesFromDroidAppendages(entity, data) {
-    if(BANNED_FROM_PROGRAMMATIC_ATTRIBUTE_LIST.includes(data.attributeKey)){
-        return [];
-    }
-    let appendageType = getInheritableAttribute({entity, attributeKey: "appendageType", reduce:"FIRST"})
-
-    if(!appendageType){
-        return [];
-    }
-
-    let resolvedSize = getResolvedSize(entity);
-
-    let appendage = DROID_APPENDAGE_DATA[appendageType][resolvedSize] || DROID_APPENDAGE_DATA[appendageType][0]
-
-    let attributes = appendage?.attributes || []
-
-    let vals = [];
-
-    for (let attribute of attributes.filter(attr => attr && attr.key === data.attributeKey)) {
-        vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
-    }
-    return vals;
-}
 
 /**
  *
@@ -214,8 +161,6 @@ export function getInheritableAttribute(data = {}) {
                 values.push(...extractAttributeValues(attribute, entity._id, entity.name));
             }
             values.push(...(getAttributesFromEmbeddedItems(entity, data)))
-            values.push(...(getAttributesFromSizeArray(entity, data)))
-            values.push(...(getAttributesFromDroidAppendages(entity, data)))
 
             if (entity.type === 'class') {
                 values.push(... (getAttributesFromClass(data, entity)))
@@ -231,7 +176,10 @@ export function getInheritableAttribute(data = {}) {
 
         if(!data.recursive) {
             values = values.filter(attr => {
-                if(attr.parentPrerequisite && meetsPrerequisites(data.parent, attr.parentPrerequisite).doesFail){
+                let parentId = getItemParentId(attr.source)
+                let parent = game.data.actors.find(actor => actor._id === parentId)
+
+                if(attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail){
                     return false;
                 }
 

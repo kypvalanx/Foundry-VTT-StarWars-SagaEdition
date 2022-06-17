@@ -832,3 +832,10 @@ export function getItems(target) {
 //     }
 //     return target.items;
 // }
+
+
+export function getItemParentId(id){
+    let actors = game.data.actors;
+    let actor = actors.find(actor => actor.items.find(item => item._id === id))
+    return !actor? undefined : actor._id;
+}
