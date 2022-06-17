@@ -1,157 +1,6 @@
 export const dieSize = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "2d6", "2d8", "3d6", "3d8"];
 export const dieType = ["1", "2", "3", "4", "6", "8", "10", "12"];
 export const sizeArray = ["Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)"];
-
-//TODO this can probably be optimised
-export const DROID_APPENDAGE_DATA = {
-    Probe: {
-        0: {name:"Fine", sizeIndex:0, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        1: {name:"Diminutive", sizeIndex:1, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        2: {name:"Tiny", sizeIndex:2, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        3: {name:"Small", sizeIndex:3, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        4: {name:"Medium", sizeIndex:4, attributes:[
-                {key: "droidUnarmedDamage", value: "1"}
-            ]},
-        5: {name:"Large", sizeIndex:5, attributes:[
-                {key: "droidUnarmedDamage", value: "1d2"}
-            ]},
-        6: {name:"Huge", sizeIndex:6, attributes:[
-                {key: "droidUnarmedDamage", value: "1d3"}
-            ]},
-        7: {name:"Gargantuan", sizeIndex:7, attributes:[
-                {key: "droidUnarmedDamage", value: "1d4"}
-            ]},
-        8: {name:"Colossal", sizeIndex:8, attributes:[
-                {key: "droidUnarmedDamage", value: "1d6"}
-            ]}
-    },
-    Instrument: {
-        0: {name:"Fine", sizeIndex:0, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        1: {name:"Diminutive", sizeIndex:1, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        2: {name:"Tiny", sizeIndex:2, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        3: {name:"Small", sizeIndex:3, attributes:[
-                {key: "droidUnarmedDamage", value: "1"}
-            ]},
-        4: {name:"Medium", sizeIndex:4, attributes:[
-                {key: "droidUnarmedDamage", value: "1d2"}
-            ]},
-        5: {name:"Large", sizeIndex:5, attributes:[
-                {key: "droidUnarmedDamage", value: "1d3"}
-            ]},
-        6: {name:"Huge", sizeIndex:6, attributes:[
-                {key: "droidUnarmedDamage", value: "1d4"}
-            ]},
-        7: {name:"Gargantuan", sizeIndex:7, attributes:[
-                {key: "droidUnarmedDamage", value: "1d6"}
-            ]},
-        8: {name:"Colossal", sizeIndex:8, attributes:[
-                {key: "droidUnarmedDamage", value: "1d8"}
-            ]}
-    },
-    Tool: {
-        0: {name:"Fine", sizeIndex:0, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        1: {name:"Diminutive", sizeIndex:1, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        2: {name:"Tiny", sizeIndex:2, attributes:[
-                {key: "droidUnarmedDamage", value: "1"}
-            ]},
-        3: {name:"Small", sizeIndex:3, attributes:[
-                {key: "droidUnarmedDamage", value: "1d2"}
-            ]},
-        4: {name:"Medium", sizeIndex:4, attributes:[
-                {key: "droidUnarmedDamage", value: "1d3"}
-            ]},
-        5: {name:"Large", sizeIndex:5, attributes:[
-                {key: "droidUnarmedDamage", value: "1d4"}
-            ]},
-        6: {name:"Huge", sizeIndex:6, attributes:[
-                {key: "droidUnarmedDamage", value: "1d6"}
-            ]},
-        7: {name:"Gargantuan", sizeIndex:7, attributes:[
-                {key: "droidUnarmedDamage", value: "1d8"}
-            ]},
-        8: {name:"Colossal", sizeIndex:8, attributes:[
-                {key: "droidUnarmedDamage", value: "2d6"}
-            ]}
-    },
-    Claw: {
-        0: {name:"Fine", sizeIndex:0, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        1: {name:"Diminutive", sizeIndex:1, attributes:[
-                {key: "droidUnarmedDamage", value: "1"}
-            ]},
-        2: {name:"Tiny", sizeIndex:2, attributes:[
-                {key: "droidUnarmedDamage", value: "1d2"}
-            ]},
-        3: {name:"Small", sizeIndex:3, attributes:[
-                {key: "droidUnarmedDamage", value: "1d3"}
-            ]},
-        4: {name:"Medium", sizeIndex:4, attributes:[
-                {key: "droidUnarmedDamage", value: "1d4"}
-            ]},
-        5: {name:"Large", sizeIndex:5, attributes:[
-                {key: "droidUnarmedDamage", value: "1d6"}
-            ]},
-        6: {name:"Huge", sizeIndex:6, attributes:[
-                {key: "droidUnarmedDamage", value: "1d8"}
-            ]},
-        7: {name:"Gargantuan", sizeIndex:7, attributes:[
-                {key: "droidUnarmedDamage", value: "2d6"}
-            ]},
-        8: {name:"Colossal", sizeIndex:8, attributes:[
-                {key: "droidUnarmedDamage", value: "2d8"}
-            ]}
-    },
-    Hand: {
-        0: {name:"Fine", sizeIndex:0, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        1: {name:"Diminutive", sizeIndex:1, attributes:[
-                {key: "droidUnarmedDamage", value: "0"}
-            ]},
-        2: {name:"Tiny", sizeIndex:2, attributes:[
-                {key: "droidUnarmedDamage", value: "1"}
-            ]},
-        3: {name:"Small", sizeIndex:3, attributes:[
-                {key: "droidUnarmedDamage", value: "1d2"}
-            ]},
-        4: {name:"Medium", sizeIndex:4, attributes:[
-                {key: "droidUnarmedDamage", value: "1d3"}
-            ]},
-        5: {name:"Large", sizeIndex:5, attributes:[
-                {key: "droidUnarmedDamage", value: "1d4"}
-            ]},
-        6: {name:"Huge", sizeIndex:6, attributes:[
-                {key: "droidUnarmedDamage", value: "1d6"}
-            ]},
-        7: {name:"Gargantuan", sizeIndex:7, attributes:[
-                {key: "droidUnarmedDamage", value: "1d8"}
-            ]},
-        8: {name:"Colossal", sizeIndex:8, attributes:[
-                {key: "droidUnarmedDamage", value: "2d6"}
-            ]}
-    }
-}
-
-
 export const d20 = "1d20";
 export const skills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
     "Knowledge (Bureaucracy)", "Knowledge (Galactic Lore)", "Knowledge (Life Sciences)", "Knowledge (Physical Sciences)",
@@ -182,14 +31,14 @@ export const crewQuality = {
     "Skilled":  {"Attack Bonus": 2, "Check Modifier": 6, "CL Modifier": 1},
     "Expert":   {"Attack Bonus": 5, "Check Modifier": 8, "CL Modifier": 2},
     "Ace":      {"Attack Bonus":10, "Check Modifier":12, "CL Modifier": 4}
-}
+};
 
-export const uniqueKey = ["damage", "stunDamage"]
+export const uniqueKey = ["damage", "stunDamage"];
 
 export const weaponGroup = {
     "Ranged Weapons":["Heavy Weapons", "Pistols", "Rifles", "Simple Ranged Weapons", "Exotic Ranged Weapons"],
     "Melee Weapons":["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons"]
-}
+};
 
 
 export const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
