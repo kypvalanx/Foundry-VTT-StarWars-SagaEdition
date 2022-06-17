@@ -1,5 +1,5 @@
 import {increaseDieSize, increaseDieType, toNumber} from "../util.js";
-import {DROID_APPENDAGE_DATA, SIZE_ATTRIBUTES, uniqueKey} from "../constants.js";
+import {sizeArray, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 
@@ -121,10 +121,9 @@ export class SWSEItem extends Item {
         let resolvedSizeIndex = this.getResolvedSizeIndexForSizeProvider(itemData);
 
         if(resolvedSizeIndex) {
-            let sizeattribute = SIZE_ATTRIBUTES[resolvedSizeIndex] || SIZE_ATTRIBUTES[0];
-            let resolvedSize = sizeattribute.name;
+            let resolvedSize = sizeArray[resolvedSizeIndex] || sizeArray[0];
             if (resolvedSize !== finalName) {
-                finalName = `${finalName} (adjusted to ${resolvedSize})`
+                finalName = `${finalName} (adjusted to ${resolvedSize})`;
             }
         }
 
