@@ -1913,7 +1913,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onActivateItem(ev) {
         let elem = ev.currentTarget;
-        let attacks = JSON.parse(elem.dataset.attacks);
+        let attacks = Attack.fromJSON(elem.dataset.attacks);
 
         this.actor.attack(ev, {type: "singleAttack", attacks});
         return undefined;

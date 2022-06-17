@@ -65,12 +65,24 @@ export class Attack {
     }
 
     get toJSONString() {
-        return JSON.stringify(this.toJSON);
+        let s = JSON.stringify(this.toJSON);
+        let s1 = s.replaceAll("&", "&amp;").replaceAll("'", "&apos;").replaceAll("\"", "&quot;");
+        return s1;
     }
 
     static fromJSON(json) {
         if (typeof json === "string") {
+            let s = json.replaceAll("&quot;", "\"");
+            let s1 = s.replaceAll( "&apos;", "'");
+            json = s1.replaceAll("&amp;", "&" );
             json = JSON.parse(json);
+        }
+        if(Array.isArray(json)){
+            let attks = [];
+            for(let atk of json){
+                attks.push( new Attack(atk.actorId, atk.itemId, atk.providerId, atk.options))
+            }
+            return attks;
         }
         return new Attack(json.actorId, json.itemId, json.providerId, json.options)
     }
@@ -670,7 +682,7 @@ function resolveUnarmedDamageDie(actor) {
 }
 
 function attackOption(attack, id) {
-    let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
+    let attackString = attack.toJSONString()
     return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
 }
 
@@ -844,7 +856,7 @@ function attackDialogue(context) {
         let attack = suppliedAttacks.length > i ? suppliedAttacks[i] : undefined;
         let select;
         if (!!attack) {
-            select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
+            select = `<span class="attack-id" data-value="${attack.toJSONString}">${attack.name}</span>`
         } else {
             select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
         }
