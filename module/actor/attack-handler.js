@@ -109,7 +109,7 @@ export function getPossibleProficiencies(actor, weapon) {
 
     let exoticWeaponTypes = getInheritableAttribute({entity: weapon, attributeKey: "exoticWeapon", reduce: "VALUES"})
 
-    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.data.subtype];
+    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.data.subtype, weapon.type];
     let explodedDescriptors = [];
 
     for (let descriptor of descriptors) {
@@ -228,7 +228,7 @@ export function getProficiencyBonus(actor, weaponDescriptors) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     });
     let proficiencies = explodeProficiencies(rawProficiencies);
-    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack").length > 0) {
+    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack"|| wd === "beastAttack").length > 0) {
         return []
     }
 
