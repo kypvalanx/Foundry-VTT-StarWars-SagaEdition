@@ -24,3 +24,8 @@ export function resolveOffense(actor) {
         actor.update(data);
     }
 }
+
+
+export function resolveGrapple(actor){
+    return actor.data.data.offense.bab + Math.max(actor.data.data.attributes.str.mod, actor.data.data.attributes.dex.mod) + getInheritableAttribute({entity: actor, attributeKey: "grappleSizeModifier", reduce: "SUM"})
+}

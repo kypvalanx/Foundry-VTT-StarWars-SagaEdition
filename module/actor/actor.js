@@ -1,6 +1,7 @@
 import {resolveHealth, resolveShield} from "./health.js";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
-import {resolveOffense} from "./offense.js";
+import {resolveOffense,
+    resolveGrapple} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
@@ -429,6 +430,7 @@ export class SWSEActor extends Actor {
         let {defense, armors} = resolveDefenses(this);
         actorData.data.defense = defense;
         actorData.data.armors = armors;
+        actorData.data.grapple = resolveGrapple(this);
 
         this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
         actorData.data.attacks = generateAttacks(this);
