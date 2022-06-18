@@ -513,7 +513,8 @@
       "background",
       "destiny",
       "beastAttack",
-      "beastSense"
+      "beastSense",
+      "beastType"
     ],
     "templates": {
       "base": {
@@ -568,6 +569,14 @@
       ]
     },
     "beastSense": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
+    },
+    "beastType": {
       "templates": [
         "base",
         "categories",
