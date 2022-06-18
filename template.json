@@ -512,7 +512,8 @@
       "language",
       "background",
       "destiny",
-      "beastAttack"
+      "beastAttack",
+      "beastSense"
     ],
     "templates": {
       "base": {
@@ -559,6 +560,14 @@
       }
     },
     "trait": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
+    },
+    "beastSense": {
       "templates": [
         "base",
         "categories",
