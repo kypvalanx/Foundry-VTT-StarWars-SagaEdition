@@ -16,8 +16,20 @@
         <div class="resource-block"><label>Damage Reduction</label><div class="plain input static">{{data.data.defense.damageReduction}}</div></div>
     </div>
     <div class="flex flex-row">
-        <div class="resource-block"><label>Base Attack</label><div class="plain input static">{{data.data.offense.bab}}</div></div>
-        <div class="resource-block"><label>Grapple Bonus</label><div class="plain input static">{{data.data.grapple}}</div></div>
+        <div class="resource-block">
+            <label>Base Attack</label>
+            <div class="plain input static">
+                <a class="rollable" title="Roll 1d20 + {{data.data.offense.bab}}" data-roll="1d20 + {{data.data.offense.bab}}"><i
+                        class="fas fa-dice-d20"></i>{{data.data.offense.bab}}</a>
+            </div>
+        </div>
+        <div class="resource-block">
+            <label>Grapple Bonus</label>
+            <div class="plain input static">
+                <a class="rollable" title="Roll 1d20 + {{data.data.grapple}}" data-roll="1d20 + {{data.data.grapple}}"><i
+                        class="fas fa-dice-d20"></i>{{data.data.grapple}}</a>
+            </div>
+        </div>
         <div class="resource-block"><label>Speed</label><div class="plain input static">{{actor.speed}}</div></div>
     </div>
     <div class="flex flex-row">
