@@ -515,7 +515,7 @@
       "beastAttack",
       "beastSense",
       "beastType",
-      "beastQualities"
+      "beastQuality"
     ],
     "templates": {
       "base": {
@@ -585,12 +585,22 @@
         "prerequisites"
       ]
     },
-    "beastQualities": {
+    "beastQuality": {
       "templates": [
         "base",
         "categories",
         "source",
         "prerequisites"
+      ]
+    },
+    "beastAttack": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source",
+        "mode"
       ]
     },
     "weapon": {
@@ -603,16 +613,6 @@
         "mode"
       ],
       "weapon": {}
-    },
-    "beastAttack": {
-      "templates": [
-        "base",
-        "item",
-        "categories",
-        "modifiable",
-        "source",
-        "mode"
-      ]
     },
     "armor": {
       "templates": [

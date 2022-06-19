@@ -52,7 +52,7 @@ export function generateAttacks(actor) {
         .filter(item => 'weapon' === item.type)
         .map(item => item.id)
 
-    let beastAttackIds = equippedItems
+    let beastAttackIds = actor.naturalWeapons
         .filter(item => 'beastAttack' === item.type)
         .map(item => item.id);
 

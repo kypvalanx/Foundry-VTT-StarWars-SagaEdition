@@ -130,6 +130,54 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     }
                 }
                 break;
+            case 'SPECIAL_QUALITY':
+                let filteredSpecialQualities = filterItemsByType(getItems(target), "beastQuality")
+                    .filter(feat => feat.data.finalName === prereq.requirement);
+                if (filteredSpecialQualities.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredSpecialQualities) {
+                        if (!meetsPrerequisites(target, filteredTrait.data.data.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
+            case 'SPECIES_TYPE':
+                let filteredSpeciesTypes = filterItemsByType(getItems(target), "beastType")
+                    .filter(feat => feat.data.finalName === prereq.requirement);
+                if (filteredSpeciesTypes.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredSpeciesTypes) {
+                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
+            case 'BEAST_ATTACK':
+                let filteredBeastAttacks = filterItemsByType(getItems(target), "beastAttack")
+                    .filter(feat => feat.name === prereq.requirement);
+                if (filteredBeastAttacks.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredBeastAttacks) {
+                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
             case 'PROFICIENCY':
                 let proficiencies = getInheritableAttribute({entity:target, attributeKey:["weaponProficiency", "armorProficiency"], reduce:"VALUES_TO_LOWERCASE"})
                 if (proficiencies.includes(prereq.requirement.toLowerCase())) {
@@ -217,6 +265,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                         }
                     } else if(toks[1].startsWith("=")){
                         if(val === check){
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                    } else {
+                        if(val === toks[1]){
                             successList.push({prereq, count: 1});
                             continue;
                         }

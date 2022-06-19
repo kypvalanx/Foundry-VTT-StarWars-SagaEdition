@@ -371,6 +371,15 @@ export class SWSEActor extends Actor {
         this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
+        this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
+        this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
+        this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
+        this.specialQualities = filterItemsByType(this.items.values(), "beastQuality");
+
+        this.isBeast = !!this.classes.find(c => c.data.name === "Beast") || this.naturalWeapons.length > 0
+            || this.specialSenses.length > 0
+            || this.speciesTypes.length > 0
+            || this.specialQualities.length > 0;
 
         let {level, classSummary, classLevels} = this._generateClassData(actorData);
         actorData.levelSummary = level;
@@ -384,6 +393,10 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.techniques)
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
+        this.inheritableItems.push(...this.naturalWeapons)
+        this.inheritableItems.push(...this.specialSenses)
+        this.inheritableItems.push(...this.speciesTypes)
+        this.inheritableItems.push(...this.specialQualities)
         if (this.background) {
             this.inheritableItems.push(this.background)
         }
@@ -1150,7 +1163,7 @@ export class SWSEActor extends Actor {
     }
 
     static getInventoryItems(items) {
-        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
+        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation", "beastAttack", "beastSense", "beastType", "beastQuality")
             .filter(item => !item.data.data.hasItemOwner);
     }
 

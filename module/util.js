@@ -405,7 +405,7 @@ export function toNumber(value) {
 
     let number = parseInt(value);
     if (isNaN(number)) {
-        return 0;
+        return value;
     }
 
     return number;
@@ -671,7 +671,7 @@ export function reduceArray(reduce, values) {
 
     switch (reduce) {
         case "SUM":
-            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a + b, 0);
+            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a===0 && isNaN(b)? b : a + b, 0);
         case "AND":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a && b, true);
         case "OR":
@@ -818,6 +818,9 @@ test();
 export function getItems(target) {
     if(!target.items ){
         console.log("unknown target", target)
+    }
+    if(Array.isArray(target.items)){
+        return target.items;
     }
     return target.items.values();
 }

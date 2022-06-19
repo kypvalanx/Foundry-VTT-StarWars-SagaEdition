@@ -915,6 +915,9 @@ export class SWSEActorSheet extends ActorSheet {
             case "upgrade":
             case "trait":
             case "beastAttack":
+            case "beastSense":
+            case "beastType":
+            case "beastQuality":
                 await this.addItem(item);
                 break;
 
@@ -938,7 +941,14 @@ export class SWSEActorSheet extends ActorSheet {
                 "forceTechnique",
                 "forceSecret",
                 "forceRegimen",
-                "trait", "template", "background", "destiny", "beastAttack"].includes(type)
+                "trait",
+                "template",
+                "background",
+                "destiny",
+                "beastAttack",
+                "beastSense",
+                "beastType",
+                "beastQuality"].includes(type)
         } else if (vehicleActorTypes.includes(this.actor.data.type)) {
             return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
         }
@@ -1141,33 +1151,8 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addItem(item) {
-        //let entities = [];
         let context = {actor:this.actor};
-        //TODO might return future items
-        let choices = await activateChoices(item, context);
-        if (!choices.success) {
-            return [];
-        }
-        let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
-
-
-        let providedItems = item.getProvidedItems() || {};
-        let providedItemCursor = 0;
-        (choices.items || []).forEach(item => {
-            while(providedItems[providedItemCursor]){
-                providedItemCursor++;
-            }
-            providedItems[providedItemCursor] = item;
-        })
-
-        await this.actor.addItems(providedItems, mainItem);
-
-        // entities.forEach(item => item.data.supplier = {
-        //     id: mainItem[0].id,
-        //     name: mainItem[0].name,
-        //     type: mainItem[0].data.type
-        // })
-
+        return await this.actor.checkPrerequisitesAndResolveOptions(item, context);
     }
 
     async addBackgroundOrDestiny(item) {
