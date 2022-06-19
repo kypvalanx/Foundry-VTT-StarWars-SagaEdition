@@ -65,12 +65,24 @@ export class Attack {
     }
 
     get toJSONString() {
-        return JSON.stringify(this.toJSON);
+        let s = JSON.stringify(this.toJSON);
+        let s1 = s.replaceAll("&", "&amp;").replaceAll("'", "&apos;").replaceAll("\"", "&quot;");
+        return s1;
     }
 
     static fromJSON(json) {
         if (typeof json === "string") {
+            let s = json.replaceAll("&quot;", "\"");
+            let s1 = s.replaceAll( "&apos;", "'");
+            json = s1.replaceAll("&amp;", "&" );
             json = JSON.parse(json);
+        }
+        if(Array.isArray(json)){
+            let attks = [];
+            for(let atk of json){
+                attks.push( new Attack(atk.actorId, atk.itemId, atk.providerId, atk.options))
+            }
+            return attks;
         }
         return new Attack(json.actorId, json.itemId, json.providerId, json.options)
     }
@@ -625,6 +637,7 @@ function getDiceTermsFromString(dieString) {
     if(!dieString){
         return [];
     }
+    dieString = `${dieString}`
     if (dieString === "0") {
         return [new NumericTerm({number: 0})];
     }
@@ -670,7 +683,7 @@ function resolveUnarmedDamageDie(actor) {
 }
 
 function attackOption(attack, id) {
-    let attackString = JSON.stringify(attack).replaceAll("\"", "&quot;");
+    let attackString = attack.toJSONString
     return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
 }
 
@@ -696,7 +709,11 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
         }
 
         let clonedAttack = attack.clone();
-        clonedAttack.options.standardAttack = true;
+        if(source.type === "beastAttack"){
+            clonedAttack.options.beastAttack = true;
+        } else {
+            clonedAttack.options.standardAttack = true;
+        }
         resolvedAttacks.push(attackOption(clonedAttack, id++))
 
         let additionalDamageDice = attack.additionalDamageDice
@@ -795,6 +812,7 @@ function attackDialogue(context) {
         let doubleAttackBonus = 0;
         let tripleAttackBonus = 0;
         let availableWeapons = 0
+        let beastAttacks = 0;
         for (let item of equippedItems) {
             availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
             //TODO support exotic weapons
@@ -805,8 +823,11 @@ function attackDialogue(context) {
             if (tripleAttack.includes(subtype)) {
                 tripleAttackBonus = 1;
             }
+            if(item.type === "beastAttack"){
+                beastAttacks++;
+            }
         }
-        availableAttacks = availableWeapons + doubleAttackBonus + tripleAttackBonus
+        availableAttacks = Math.max(availableWeapons + doubleAttackBonus + tripleAttackBonus, beastAttacks)
 
 
         //how many attacks?
@@ -844,7 +865,7 @@ function attackDialogue(context) {
         let attack = suppliedAttacks.length > i ? suppliedAttacks[i] : undefined;
         let select;
         if (!!attack) {
-            select = `<span class="attack-id" data-value="${JSON.stringify(attack).replaceAll("\"", "&quot;")}">${attack.name}</span>`
+            select = `<span class="attack-id" data-value="${attack.toJSONString}">${attack.name}</span>`
         } else {
             select = `<select class="attack-id" id="attack-${i}"><option> -- </option>${resolvedAttacks.join("")}</select>`
         }
@@ -944,6 +965,7 @@ function getAttackMods(selects, dualWeaponModifier) {
     let isDoubleAttack = false;
     let isTripleAttack = false;
     let standardAttacks = 0;
+    let beastAttacks = 0;
     for (let select of selects) {
         if (select.value === "--") {
             continue;
@@ -959,6 +981,9 @@ function getAttackMods(selects, dualWeaponModifier) {
         if (options.standardAttack) {
             standardAttacks++;
         }
+        if (options.beastAttack) {
+            beastAttacks++;
+        }
     }
 
 
@@ -969,7 +994,7 @@ function getAttackMods(selects, dualWeaponModifier) {
         attackMods.push({value: -5, source: "Triple Attack"});
     }
 
-    if (standardAttacks > 1) {
+    if (standardAttacks > 1 || (standardAttacks > 0 && beastAttacks > 0)) {
         attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
     }
     attackMods.forEach(attack => attack.type = "attack");

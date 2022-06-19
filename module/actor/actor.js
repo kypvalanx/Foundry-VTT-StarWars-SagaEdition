@@ -1,11 +1,13 @@
 import {resolveHealth, resolveShield} from "./health.js";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
-import {resolveOffense} from "./offense.js";
+import {resolveOffense,
+    resolveGrapple} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getIndexAndPack, resolveExpression,
+    getIndexAndPack,
+    resolveExpression,
     resolveValueArray,
     toShortAttribute,
     unique
@@ -20,6 +22,7 @@ import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
+import {errorsFromActor, warningsFromActor} from "./warnings.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -368,10 +371,20 @@ export class SWSEActor extends Actor {
         this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
         this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
         this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
+        this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
+        this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
+        this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
+        this.specialQualities = filterItemsByType(this.items.values(), "beastQuality");
 
-        let {level, classSummary} = this._generateClassData(actorData);
+        this.isBeast = !!this.classes.find(c => c.data.name === "Beast") || this.naturalWeapons.length > 0
+            || this.specialSenses.length > 0
+            || this.speciesTypes.length > 0
+            || this.specialQualities.length > 0;
+
+        let {level, classSummary, classLevels} = this._generateClassData(actorData);
         actorData.levelSummary = level;
         actorData.classSummary = classSummary;
+        actorData.classLevels = classLevels;
 
         this.inheritableItems.push(...this.traits)
         this.inheritableItems.push(...this.talents)
@@ -380,6 +393,10 @@ export class SWSEActor extends Actor {
         this.inheritableItems.push(...this.techniques)
         this.inheritableItems.push(...this.affiliations)
         this.inheritableItems.push(...this.regimens)
+        this.inheritableItems.push(...this.naturalWeapons)
+        this.inheritableItems.push(...this.specialSenses)
+        this.inheritableItems.push(...this.speciesTypes)
+        this.inheritableItems.push(...this.specialQualities)
         if (this.background) {
             this.inheritableItems.push(this.background)
         }
@@ -426,6 +443,7 @@ export class SWSEActor extends Actor {
         let {defense, armors} = resolveDefenses(this);
         actorData.data.defense = defense;
         actorData.data.armors = armors;
+        actorData.data.grapple = resolveGrapple(this);
 
         this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
         actorData.data.attacks = generateAttacks(this);
@@ -1017,7 +1035,7 @@ export class SWSEActor extends Actor {
 
         let classSummary = Object.entries(classLevels).map((entity) => `${entity[0]} ${entity[1]}`).join(' / ');
 
-        return {level: this.classes.length, classSummary};
+        return {level: this.classes.length, classSummary, classLevels};
     }
 
     handleLeveBasedAttributeBonuses(actorData) {
@@ -1145,7 +1163,7 @@ export class SWSEActor extends Actor {
     }
 
     static getInventoryItems(items) {
-        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation")
+        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation", "beastAttack", "beastSense", "beastType", "beastQuality")
             .filter(item => !item.data.data.hasItemOwner);
     }
 
@@ -1789,6 +1807,14 @@ export class SWSEActor extends Actor {
             return addedItems;
         }
         return notificationMessage;
+    }
+
+    get warnings(){
+        return warningsFromActor(this);
+    }
+
+    get errors(){
+        return errorsFromActor(this);
     }
 
 

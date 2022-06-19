@@ -1,6 +1,6 @@
 import {filterItemsByType, getItems, resolveExpression, resolveValueArray, toNumber} from "./util.js";
-import {weaponGroup} from "./constants.js";
-import {getInheritableAttribute} from "./attribute-helper.js";
+import {sizeArray, weaponGroup} from "./constants.js";
+import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.js";
 import {getEquippedItems, SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 
@@ -15,7 +15,7 @@ import {SWSEItem} from "./item/item.js";
  * @param {Object[]} prereqs[].children available on AND and OR
  * @returns {{failureList: [], doesFail: boolean, silentFail: []}}
  */
-export function meetsPrerequisites(target, prereqs) {
+export function meetsPrerequisites(target, prereqs, options = {}) {
     //TODO add links to failures to upen up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
     let failureList = [];
@@ -41,6 +41,14 @@ export function meetsPrerequisites(target, prereqs) {
             case 'AGE':
                 let age = toNumber(target.age) || toNumber(target.data.age);
                 if (!age || toNumber(prereq.low) > age || (prereq.high && toNumber(prereq.high) < age)) {
+                    failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
+                    continue;
+                }
+                successList.push({prereq, count: 1});
+                continue;
+            case 'SIZE':
+                let resolvedSize = getResolvedSize(target, options)
+                if(sizeArray[resolvedSize] !== prereq.requirement){
                     failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                     continue;
                 }
@@ -113,6 +121,54 @@ export function meetsPrerequisites(target, prereqs) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredTraits) {
                         if (!meetsPrerequisites(target, filteredTrait.data.data.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
+            case 'SPECIAL_QUALITY':
+                let filteredSpecialQualities = filterItemsByType(getItems(target), "beastQuality")
+                    .filter(feat => feat.data.finalName === prereq.requirement);
+                if (filteredSpecialQualities.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredSpecialQualities) {
+                        if (!meetsPrerequisites(target, filteredTrait.data.data.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
+            case 'SPECIES_TYPE':
+                let filteredSpeciesTypes = filterItemsByType(getItems(target), "beastType")
+                    .filter(feat => feat.data.finalName === prereq.requirement);
+                if (filteredSpeciesTypes.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredSpeciesTypes) {
+                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
+                            successList.push({prereq, count: 1});
+                            parentsMeetPrequisites = true;
+                        }
+                    }
+                    if (parentsMeetPrequisites) {
+                        continue;
+                    }
+                }
+                break;
+            case 'BEAST_ATTACK':
+                let filteredBeastAttacks = filterItemsByType(getItems(target), "beastAttack")
+                    .filter(feat => feat.name === prereq.requirement);
+                if (filteredBeastAttacks.length > 0) {
+                    let parentsMeetPrequisites = false;
+                    for (let filteredTrait of filteredBeastAttacks) {
+                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -209,6 +265,11 @@ export function meetsPrerequisites(target, prereqs) {
                         }
                     } else if(toks[1].startsWith("=")){
                         if(val === check){
+                            successList.push({prereq, count: 1});
+                            continue;
+                        }
+                    } else {
+                        if(val === toks[1]){
                             successList.push({prereq, count: 1});
                             continue;
                         }

@@ -1,15 +1,14 @@
-import {extractAttributeValues, filterItemsByType, reduceArray, toNumber} from "./util.js";
+import {extractAttributeValues, filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEActor} from "./actor/actor.js";
 import {UnarmedAttack} from "./actor/unarmed-attack.js";
 import {meetsPrerequisites} from "./prerequisite.js";
-import {SIZE_ATTRIBUTES} from "./constants.js";
 
 function equippedItems(entity) {
     if(entity.items) {
         let equippedIds = entity.data.equippedIds.map(equipped => equipped.id)
         //let values = Object.values(entity.items);
-        return entity.items.filter(item => equippedIds.includes(item.id));
+        return entity.items.filter(item => equippedIds.includes(item.id || item._id));
     }
     if(entity.data?.items){
         //items attached to items
@@ -20,7 +19,10 @@ function equippedItems(entity) {
 
 function inheritableItems(entity, attributeKey) {
     let items = entity.items || [];
-    let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType"]);
+    let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+        "beastSense",
+        "beastType",
+        "beastQuality"]);
 
     let activeTraits = [];
     possibleInheritableItems.push(...equippedItems(entity))
@@ -76,7 +78,8 @@ function getAttributesFromClass(data, entity) {
 function getAttributesFromEmbeddedItems(entity, data) {
     let vals = [];
     let names = [];
-    for (let item of inheritableItems(entity, data.attributeKey).filter(data.itemFilter)) {
+    let it = inheritableItems(entity, data.attributeKey).filter(data.itemFilter);
+    for (let item of it) {
         names.push(item.name);
         let duplicates = names.filter(name => name === item.name).length;
         vals.push(...getInheritableAttribute({
@@ -88,34 +91,21 @@ function getAttributesFromEmbeddedItems(entity, data) {
     }
     return vals;
 }
-function getAttributesFromSizeArray(entity, data) {
-    if(["sizeIndex", "sizeBonus", "damageThresholdEffectiveSize"].includes(data.attributeKey)){
-        return [];
-    }
 
-    let sizeIndex = getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"NUMERIC_VALUES"})
-    if(sizeIndex.length === 0){
-        return [];
+export function getResolvedSize(entity, options) {
+    if(entity.document && entity.document instanceof SWSEItem){
+        entity = entity.document.parent;
     }
-    sizeIndex = sizeIndex.reduce((a, b) => a+b, 0)
+    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"MAX"}))
     let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
+
+
     let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
-    let resolvedSize = sizeIndex + sizeBonus + (["damageThresholdSizeModifier"].includes(data.attributeKey) ? damageThresholdEffectiveSize : 0);
+    let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
 
-    if(isNaN(resolvedSize)){
-        return [];
-    }
-
-    let sizeAttribute = SIZE_ATTRIBUTES[resolvedSize] || SIZE_ATTRIBUTES[0];
-    let attributes = sizeAttribute?.attributes || []
-
-    let vals = [];
-
-    for (let attribute of attributes.filter(attr => attr && attr.key === data.attributeKey)) {
-        vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
-    }
-    return vals;
+    return sizeIndex + sizeBonus + miscBonus;
 }
+
 
 /**
  *
@@ -174,7 +164,6 @@ export function getInheritableAttribute(data = {}) {
                 values.push(...extractAttributeValues(attribute, entity._id, entity.name));
             }
             values.push(...(getAttributesFromEmbeddedItems(entity, data)))
-            values.push(...(getAttributesFromSizeArray(entity, data)))
 
             if (entity.type === 'class') {
                 values.push(... (getAttributesFromClass(data, entity)))
@@ -190,7 +179,10 @@ export function getInheritableAttribute(data = {}) {
 
         if(!data.recursive) {
             values = values.filter(attr => {
-                if(attr.parentPrerequisite && meetsPrerequisites(data.parent, attr.parentPrerequisite).doesFail){
+                let parentId = getItemParentId(attr.source)
+                let parent = game.data.actors.find(actor => actor._id === parentId)
+
+                if(attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail){
                     return false;
                 }
 

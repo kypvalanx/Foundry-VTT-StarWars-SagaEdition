@@ -122,6 +122,8 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
         await importCompendium("systems/swse/raw_export/Talents.json", 'SWSE Talents', "Item", forceRefresh);
 
         await importCompendium("systems/swse/raw_export/templates.json", 'SWSE Templates', "Item", forceRefresh);
+
+        await importCompendium("systems/swse/raw_export/beast components.json", 'SWSE Beast Components', "Item", forceRefresh);
     }
     console.log("End Generation")
 }

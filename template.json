@@ -511,7 +511,11 @@
       "vehicleBaseType",
       "language",
       "background",
-      "destiny"
+      "destiny",
+      "beastAttack",
+      "beastSense",
+      "beastType",
+      "beastQuality"
     ],
     "templates": {
       "base": {
@@ -563,6 +567,40 @@
         "categories",
         "source",
         "prerequisites"
+      ]
+    },
+    "beastSense": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
+    },
+    "beastType": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
+    },
+    "beastQuality": {
+      "templates": [
+        "base",
+        "categories",
+        "source",
+        "prerequisites"
+      ]
+    },
+    "beastAttack": {
+      "templates": [
+        "base",
+        "item",
+        "categories",
+        "modifiable",
+        "source",
+        "mode"
       ]
     },
     "weapon": {

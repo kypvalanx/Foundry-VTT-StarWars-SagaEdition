@@ -86,4 +86,3 @@ function resolveAttributeMod(actor, ignoreCon) {
     }
     return actor.data.data.attributes.con.mod;
 }
-

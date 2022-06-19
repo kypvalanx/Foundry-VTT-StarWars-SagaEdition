@@ -139,7 +139,6 @@
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
-            {{> 'systems/swse/templates/item/parts/generated-attributes.hbs' item=item}}
             {{> 'systems/swse/templates/item/parts/attributes.hbs' data=item.data}}
         </div>
 
@@ -150,7 +149,6 @@
 
         {{!-- Prerequisites Tab --}}
         <div class="tab" data-group="primary" data-tab="prerequisites">
-            {{log item.data._source.data.prerequisite}}
             {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=item.data._source.data.prerequisite path=(concat 'data.prerequisite')}}
 
         </div>

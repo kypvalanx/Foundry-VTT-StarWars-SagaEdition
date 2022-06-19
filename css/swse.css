@@ -350,6 +350,12 @@
   background-color: yellow;
 }
 
+.swse .error {
+  opacity: 90%;
+  background-color: red;
+  color: white;
+}
+
 .swse .shrink {
   resize: both;
   display: inline-block;

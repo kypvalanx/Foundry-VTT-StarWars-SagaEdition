@@ -1,4 +1,4 @@
-import {getBonusString, increaseDieSize, resolveValueArray, toShortAttribute} from "../util.js";
+import {getBonusString, resolveValueArray, toShortAttribute} from "../util.js";
 import {SWSEItem} from "../item/item.js";
 import {appendNumericTerm, Attack} from "./attack.js";
 import {d20} from "../constants.js";
@@ -47,10 +47,20 @@ export function generateVehicleAttacks(actor) {
  * @returns {Promise<void>}
  */
 export function generateAttacks(actor) {
-    let weaponIds = actor.getEquippedItems()
-        .filter(item => item.type === 'weapon')
+    let equippedItems = actor.getEquippedItems();
+    let weaponIds = equippedItems
+        .filter(item => 'weapon' === item.type)
         .map(item => item.id)
-    weaponIds.push("Unarmed Attack")
+
+    let beastAttackIds = actor.naturalWeapons
+        .filter(item => 'beastAttack' === item.type)
+        .map(item => item.id);
+
+    if(beastAttackIds.length > 0){
+        weaponIds.push(...beastAttackIds)
+    } else {
+        weaponIds.push("Unarmed Attack")
+    }
 
     let attacks = weaponIds.map(id => new Attack(actor.id, id, null, {actor: actor.items}));
 
@@ -99,7 +109,7 @@ export function getPossibleProficiencies(actor, weapon) {
 
     let exoticWeaponTypes = getInheritableAttribute({entity: weapon, attributeKey: "exoticWeapon", reduce: "VALUES"})
 
-    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.data.subtype];
+    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.data.subtype, weapon.type];
     let explodedDescriptors = [];
 
     for (let descriptor of descriptors) {
@@ -218,7 +228,7 @@ export function getProficiencyBonus(actor, weaponDescriptors) {
         reduce: ["VALUES_TO_LOWERCASE", "UNIQUE"]
     });
     let proficiencies = explodeProficiencies(rawProficiencies);
-    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack").length > 0) {
+    if (weaponDescriptors.filter(wd => proficiencies.includes(wd.toLowerCase()) || wd === "Unarmed Attack"|| wd === "beastAttack").length > 0) {
         return []
     }
 

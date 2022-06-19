@@ -208,6 +208,12 @@ function _resolveRef(actor, conditionBonus) {
         reduce: "SUM",
         attributeFilter: attr => !attr.modifier
     })
+    let naturalArmorBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "naturalArmorReflexDefenseBonus",
+        reduce: "SUM",
+        attributeFilter: attr => !attr.modifier
+    })
     let miscBonusTip = getInheritableAttribute({
         entity: actor,
         attributeKey: "reflexDefenseBonus",
@@ -234,7 +240,8 @@ function _resolveRef(actor, conditionBonus) {
     miscBonusTip += `Condition: ${conditionBonus};  `
     total.push(dodgeBonus);
     total.push(conditionBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus])
+    total.push(naturalArmorBonus);
+    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus])
     let defenseModifiers = [_resolveFFRef(actor, conditionBonus)]
     return {
         total: resolveValueArray(total, actor),
