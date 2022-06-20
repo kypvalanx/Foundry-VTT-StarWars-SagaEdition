@@ -36,8 +36,8 @@ export const crewQuality = {
 export const uniqueKey = ["damage", "stunDamage"];
 
 export const weaponGroup = {
-    "Ranged Weapons":["Heavy Weapons", "Pistols", "Rifles", "Simple Ranged Weapons", "Exotic Ranged Weapons"],
-    "Melee Weapons":["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons"]
+    "Ranged Weapons":["Heavy Weapons", "Pistols", "Rifles", "Simple Ranged Weapons", "Exotic Ranged Weapons", "Ranged Natural Weapons"],
+    "Melee Weapons":["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons", "Melee Natural Weapons"]
 };
 
 
@@ -55,7 +55,8 @@ export const SUBTYPES = {
     "vehicleSystem": ["Starship Accessories", "Weapon Systems", "Defense Systems", "Movement Systems", "Droid Accessories (Droid Stations)"],
     "background": ["event", "occupation", "planet of origin"],
     "class": ["Nonheroic", "Heroic", "Prestige"],
-    "species": ["Organic", "Droid"]
+    "species": ["Organic", "Droid"],
+    "beastattack": ["Melee Natural Weapons", "Ranged Natural Weapons"]
 }
 
 export const GM_BONUSES = [
