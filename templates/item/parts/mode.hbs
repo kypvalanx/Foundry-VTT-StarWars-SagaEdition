@@ -13,18 +13,8 @@
             <ul>
                 {{#each mode.attributes as |attr akey|}}
                     {{#if attr}}
-                        <li class="attribute flexrow">
-                            <div class="attribute-indent-graphic">|</div>
-                            <label class="attribute-indent-key" type="text"
-                                   name="{{../modePath}}.attributes.{{akey}}.key" value="{{key}}">{{attr.key}}</label>
-                            <input class="attribute-indent-value" name="{{../modePath}}.attributes.{{akey}}.value"
-                                   type="text" value="{{attr.value}}" placeholder="" title=""/>
-                            <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-                            <input class="attribute-override" name="{{../modePath}}.attributes.{{akey}}.override" type="checkbox" {{#if attr.override}}checked{{/if}} title="attributes with this enabled will override other attributes by the same name rather than both being active">
+                        {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level  path=(concat ../modePath '.attributes.' akey)}}
 
-                            <a class="attribute-delete" data-mode-id="{{../mkey}}" data-attribute-id="{{akey}}" data-level="{{level}}"><i
-                                    class="fas fa-trash"></i></a>
-                        </li>
                     {{/if}}
                 {{/each}}
                 {{#if active}}
