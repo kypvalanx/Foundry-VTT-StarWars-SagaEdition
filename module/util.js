@@ -392,7 +392,7 @@ export function toNumber(value) {
     if (typeof value === "undefined") {
         return 0;
     }
-    if (value.value) {
+    if (!isNaN(value.value)) {
         return toNumber(value.value)
     }
     if (typeof value === "boolean") {
