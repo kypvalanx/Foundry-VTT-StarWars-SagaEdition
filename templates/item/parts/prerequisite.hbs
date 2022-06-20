@@ -1,6 +1,6 @@
 {{#if prerequisite}}
     <div class="prerequisite flex flex-col flex-grow">
-        <div>Prerequisite:</div>
+        <div>{{#if titleOverride}}{{{titleOverride}}}{{else}}Prerequisite:{{/if}}</div>
         <div class="flex flex-row">
             <label>
                 Type:<br/>
@@ -26,9 +26,12 @@
                         <option value="NOT">NOT</option>
                         <option value="OR">OR</option>
                         <option value="PROFICIENCY">PROFICIENCY</option>
+                        <option value="SIZE">SIZE</option>
                         <option value="SOURCE">SOURCE</option>
                         <option value="SPECIAL">SPECIAL</option>
                         <option value="SPECIES">SPECIES</option>
+                        <option value="SPECIES_TYPE">SPECIES_TYPE</option>
+                        <option value="BEAST_ATTACK">BEAST_ATTACK</option>
                         <option value="SUBTYPE">SUBTYPE</option>
                         <option value="TALENT">TALENT</option>
                         <option value="TEMPLATE">TEMPLATE</option>
@@ -81,7 +84,7 @@
                 </label>
             {{/ifEquals}}
 
-            {{#ifEquals prerequisite.type (arr "ARMOR_TYPE" "ATTRIBUTE" "BASE ATTACK BONUS" "CHARACTER LEVEL" "CLASS" "CONDITION" "DAMAGE_TYPE" "DARK SIDE SCORE" "EQUIPPED" "FEAT" "FORCE POWER" "FORCE SECRET" "FORCE TECHNIQUE" "LANGUAGE" "MODE" "PROFICIENCY" "SOURCE" "SPECIAL" "SPECIES" "SUBTYPE" "TALENT" "TEMPLATE" "TRADITION" "TRAINED SKILL" "TRAIT" "TYPE" "WEAPON_GROUP" "WEAPON_SIZE")}}
+            {{#ifEquals prerequisite.type (arr "ARMOR_TYPE" "ATTRIBUTE" "BASE ATTACK BONUS" "CHARACTER LEVEL" "CLASS" "CONDITION" "DAMAGE_TYPE" "DARK SIDE SCORE" "EQUIPPED" "FEAT" "FORCE POWER" "FORCE SECRET" "FORCE TECHNIQUE" "LANGUAGE" "MODE" "PROFICIENCY" "SOURCE" "SPECIAL" "SPECIES" "SUBTYPE" "TALENT" "TEMPLATE" "TRADITION" "TRAINED SKILL" "TRAIT" "TYPE" "WEAPON_GROUP" "WEAPON_SIZE" "SIZE")}}
                 <label class="flex-grow">
                     Requirement:<br/>
                     <input type="text" value="{{prerequisite.requirement}}" name="{{path}}.requirement">
@@ -113,4 +116,11 @@
             {{/if}}
         {{/ifEquals}}
     </div>
+    {{else}}
+    {{#if @root.editable}}
+        {{#unless hideAdd}}
+        <a data-action="prerequisite-control" data-type="add-child-prerequisite"
+           data-path="{{path}}" title="add child prerequisite attribute-add-prerequisite"><i class="fas fa-plus">Add Prerequisite</i></a>
+        {{/unless}}
+    {{/if}}
 {{/if}}

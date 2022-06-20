@@ -4,6 +4,7 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.js";
+import {toNumber} from "../util.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -29,19 +30,6 @@ export class SWSEItemSheet extends ItemSheet {
     /** @override */
     get template() {
         const path = "systems/swse/templates/item";
-        // Return a single sheet for all item types.
-        //return `${path}/item-sheet.hbs`;
-        // Alternatively, you could use the following return statement to do a
-        // unique item sheet by type, like `weapon-sheet.html`.
-
-        let type = this.item.data.type;
-        if (type === 'feat') {
-            return `${path}/feat-sheet.hbs`;
-        }
-        if (type === 'talent') {
-            return `${path}/talent-sheet.hbs`;
-        }
-
         return `${path}/item-sheet.hbs`;
     }
 
@@ -576,7 +564,7 @@ export class SWSEItemSheet extends ItemSheet {
                 updateData[path] = null;
                 break;
             case 'add-child-prerequisite':
-                let maxKey = Math.max(...Object.keys(data))+1
+                let maxKey = (Math.max(...Object.keys(data).map(k => toNumber(k))) || 0) +1
                 let selectedKey = maxKey;
                 for(let i = 0; i <=maxKey; i++){
                     if(data[i] === undefined || data[i] === null){
