@@ -828,7 +828,7 @@
 
 .swse .attribute {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(11, 1fr);
   grid-template-rows: 1fr;
   grid-column-gap: 0px;
   grid-row-gap: 0px;
@@ -907,7 +907,11 @@
 }
 
 .swse .attribute-delete {
-  grid-area: 1 / 10 / 2 / 11;
+  grid-area: 1 / 11 / 2 / 12;
+}
+
+.swse .attribute-controls {
+  grid-area: 1 / 10 / 2 / 12;
 }
 
 .swse .attribute-add {

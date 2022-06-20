@@ -23,7 +23,7 @@
 
             <div class="tab" data-group="levels" data-tab="{{id}}">
                 <h2>Level {{id}}</h2>
-                {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+                {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id path=(concat 'data.levels.' id '.data.attributes')}}
             </div>
             {{/each}}
         {{else}}
@@ -31,7 +31,7 @@
             {{#each item.data._source.data.levels as |level id|}}
                 <div class="tab" data-group="levels" data-tab="{{id}}">
                     <h2>Level {{id}}</h2>
-                    {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id}}
+                    {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id path=(concat 'data.levels.' id '.data.attributes')}}
                 </div>
             {{/each}}
         {{/if}}

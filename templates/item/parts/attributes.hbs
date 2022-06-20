@@ -22,7 +22,7 @@
     {{#if data.data.attributes}}
         {{#each data.data.attributes as |attr key|}}
             {{#if attr}}
-                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level}}
+                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level path=(concat ../path '.' key)}}
             {{/if}}
         {{/each}}
         <li class="attribute flexrow subtle"><a class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
@@ -43,7 +43,7 @@
     {{else}}
         {{#each data._source.data.attributes as |attr key|}}
             {{#if attr}}
-                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level}}
+                {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level  path=(concat ../path '.' key)}}
             {{/if}}
         {{/each}}
 
