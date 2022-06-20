@@ -254,7 +254,8 @@ function explodeProficiencies(proficiencies) {
 }
 
 export function resolveFinesseBonus(actor, finesseStats) {
-    return Math.max(finesseStats.map(stat => getCharacterAttribute(actor, stat).mod))
+    let values = finesseStats.map(stat => getCharacterAttribute(actor, stat).mod);
+    return Math.max(...values)
 }
 
 /**

@@ -30,12 +30,15 @@ function generateArmorBlock(actor, armor) {
     let speed = actor.speed
 
 
+    let refDefense = armor.armorReflexDefenseBonus || 0;
+    let fortDefense = armor.fortitudeDefenseBonus || 0;
+    let maxDex = armor.maximumDexterityBonus || 0;
     return {
         name: armor.name,
         speed: speed,
-        refDefense: armor.armorReflexDefenseBonus ? armor.armorReflexDefenseBonus : 0,
-        fortDefense: armor.fortitudeDefenseBonus ? armor.fortitudeDefenseBonus : 0,
-        maxDex: armor.maximumDexterityBonus ? armor.maximumDexterityBonus : 0,
+        refDefense,
+        fortDefense,
+        maxDex,
         notes: attributes.join(", "),
         type: armor.armorType
     };

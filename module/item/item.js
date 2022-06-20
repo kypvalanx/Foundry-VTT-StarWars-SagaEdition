@@ -268,13 +268,15 @@ export class SWSEItem extends Item {
     }
 
     get armorReflexDefenseBonus() {
-        return toNumber(getInheritableAttribute({
+        let ardb = toNumber(getInheritableAttribute({
             entity: this,
             attributeKey: 'armorReflexDefenseBonus',
             reduce: "MAX",
 
 
-        })) - toNumber(this.getStripping("reduceDefensiveMaterial"));
+        }));
+        let rdm = toNumber(this.getStripping("reduceDefensiveMaterial"));
+        return ardb - rdm;
     }
 
     _parentIsProficientWithArmor() {

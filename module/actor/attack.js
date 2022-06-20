@@ -1,6 +1,6 @@
 import {UnarmedAttack} from "./unarmed-attack.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
-import {crewQuality, LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
+import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
 import {compareSizes, getSize} from "./size.js";
 import {
     canFinesse,
@@ -193,7 +193,11 @@ export class Attack {
      */
     isMelee(item) {
         let data = item.data.data || item.data;
-        return weaponGroup['Melee Weapons'].includes(data.subtype);
+        let subtype = data.subtype;
+        if(!subtype && item.type === 'beastAttack'){
+            subtype = "Melee Natural Weapons"
+        }
+        return weaponGroup['Melee Weapons'].includes(subtype);
     }
 
     /**
@@ -257,7 +261,7 @@ export class Attack {
         let attributeStats = []
         if (this.isRanged(item)) {
             attributeStats.push("DEX")
-        } else if(this.isMelee(item)){
+        } else{
             attributeStats.push("STR")
             if (canFinesse(getSize(actor), item, isFocus(actor, weaponTypes))) {
                 attributeStats.push(...(getInheritableAttribute({
@@ -353,7 +357,13 @@ export class Attack {
         }))
         let halfHeroicLevel = Math.floor(heroicClassLevels.length / 2)
 
+        let beastClassLevels = (actor?.items || []).filter(item => item.type === 'class' && item.name === "Beast")
+        let halfBeastLevel = Math.floor(beastClassLevels.length / 2)
+
         terms.push(...appendNumericTerm(halfHeroicLevel, "Half Heroic Level"));
+        if(item.type === 'beastAttack') {
+            terms.push(...appendNumericTerm(halfBeastLevel, "Half Beast Level"));
+        }
         terms.push(...getInheritableAttribute({
             entity: item,
             attributeKey: "bonusDamage",
