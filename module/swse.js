@@ -4,12 +4,13 @@ import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
-import {registerSystemSettings} from "./settings/system.js";
+import {refreshActors, registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
 import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
 import {runTests} from "../module_test/runTests.js";
 import {makeAttack} from "./actor/attack.js";
+import {measureDistances} from "./measure.js";
 
 
 Hooks.once('init', async function() {
@@ -21,8 +22,10 @@ Hooks.once('init', async function() {
     rollItem,
     makeAttack,
     generateCompendiums, deleteEmptyCompendiums,
-    runTests
+    runTests,
+    refreshActors
   };
+
 
 
   /**
@@ -124,6 +127,11 @@ Hooks.on("ready", function() {
       });
     }})
 });
+
+Hooks.on("canvasInit", function () {
+  canvas.grid.diagonalRule = game.settings.get("swse", "enable5105Measurement");
+  SquareGrid.prototype.measureDistances = measureDistances;
+})
 
 
 if(!Map.prototype.computeIfAbsent){

@@ -921,8 +921,12 @@ export class SWSEActor extends Actor {
         return attribute.total;
     }
 
-    getHalfCharacterLevel() {
-        return Math.floor(this.characterLevel / 2);
+    getHalfCharacterLevel(round = "down") {
+        if(round === "down") {
+            return Math.floor(this.characterLevel / 2);
+        } else if(round === "up"){
+            return Math.ceil(this.characterLevel / 2);
+        }
     }
 
     get halfHeroicLevel() {
