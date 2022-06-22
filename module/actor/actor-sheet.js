@@ -876,7 +876,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         if (!this.isPermittedForActorType(item.data.type)) {
             new Dialog({
-                title: "Innapropriate Item",
+                title: "Inappropriate Item",
                 content: `You can't add a ${item.data.type} to a ${this.actor.data.type}.`,
                 buttons: {
                     ok: {
