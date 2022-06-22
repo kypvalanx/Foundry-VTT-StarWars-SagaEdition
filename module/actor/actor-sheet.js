@@ -294,9 +294,10 @@ export class SWSEActorSheet extends ActorSheet {
     _onDuplicate(event) {
         const li = $(event.currentTarget).parents(".item");
         let itemToDuplicate = this.actor.items.get(li.data("itemId"));
-        let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
+        let data = {item: itemToDuplicate, duplicate:true}
+        //let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
 
-        this._onDropItem(event, {id, pack, 'type': 'Item'})
+        this._onDropItem(event, data)
     }
 
     /** @inheritdoc */
@@ -860,11 +861,17 @@ export class SWSEActorSheet extends ActorSheet {
                 await sourceActor.removeItem(data.itemId)
             }
         }
+        let item
+        if(data.pack) {
+            //the dropped item is from a compendium
+            const compendiumItem = await Item.implementation.fromDropData(data);
+             item = compendiumItem.clone();
+        } else if(data.duplicate){
+            item = data.item.clone();
+            //item = data
+        }
 
-        //the dropped item is from a compendium
-        const compendiumItem = await Item.implementation.fromDropData(data);
 
-        let item = compendiumItem.clone();
         item.prepareData();
 
         if (!this.isPermittedForActorType(item.data.type)) {
@@ -1138,11 +1145,18 @@ export class SWSEActorSheet extends ActorSheet {
         if (!choices.success) {
             return;
         }
-        item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
-            type: "Boolean",
-            value: context.isFirstLevel,
-            key: "isFirstLevel"
-        };
+
+        let firstLevelAttribute = Object.values(item.data.data.attributes).find(v => v.key === "isFirstLevel");
+
+        if(firstLevelAttribute){
+            firstLevelAttribute.value = context.isFirstLevel;
+        } else {
+            item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
+                type: "Boolean",
+                value: context.isFirstLevel,
+                key: "isFirstLevel"
+            };
+        }
         let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
         await this.actor.addItems(choices.items, mainItem[0])
