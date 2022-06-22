@@ -10,6 +10,7 @@ import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generati
 import {getInheritableAttribute} from "./attribute-helper.js";
 import {runTests} from "../module_test/runTests.js";
 import {makeAttack} from "./actor/attack.js";
+import {measureDistances} from "./measure.js";
 
 
 Hooks.once('init', async function() {
@@ -124,6 +125,11 @@ Hooks.on("ready", function() {
       });
     }})
 });
+
+Hooks.on("canvasInit", function () {
+  canvas.grid.diagonalRule = game.settings.get("swse", "enable5105Measurement");
+  SquareGrid.prototype.measureDistances = measureDistances;
+})
 
 
 if(!Map.prototype.computeIfAbsent){
