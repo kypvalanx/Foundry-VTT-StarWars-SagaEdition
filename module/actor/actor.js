@@ -1447,6 +1447,8 @@ export class SWSEActor extends Actor {
             "data.isNPC": true
         }, {updateChanges: false});
 
+        data.data.attributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType");
+
         // if (userId === game.user._id) {
         //     await updateChanges.call(this);
         // }
