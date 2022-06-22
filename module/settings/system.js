@@ -1,4 +1,23 @@
 
+
+
+export function refreshActors(options = { renderOnly: false, renderForEveryone: false }) {
+    game.actors.contents.forEach((o) => {
+        if (!options.renderOnly) o.prepareData();
+        if (o.sheet != null && o.sheet._state > 0) o.sheet.render();
+    });
+    Object.values(game.actors.tokens).forEach((o) => {
+        if (o) {
+            if (!options.renderOnly) o.prepareData();
+            if (o.sheet != null && o.sheet._state > 0) o.sheet.render();
+        }
+    });
+
+    if (options.renderForEveryone) {
+        game.socket.emit("swse", "refreshActorSheets");
+    }
+}
+
 export const registerSystemSettings = function () {
 
     // game.settings.register("swse", "mergePointBlankShotAndPreciseShot", {
@@ -30,5 +49,21 @@ export const registerSystemSettings = function () {
             5105: "Alternating double distance diagonals"
         },
         onChange: (rule) => (canvas.grid.diagonalRule = rule)
+    });
+
+    game.settings.register("swse", "skillFocusCalculation", {
+        name: "Enable homebrew alternate skill focus rules",
+        hint: "default is a flat +5 from Skill Focus",
+        scope: "world",
+        config: true,
+        default: "default",
+        type: String,
+        choices: {
+            default: "+5 to a skill",
+            charLevelUp: "half character level rounded up",
+            charLevelDown: "half character level rounded down"
+        },
+        onChange: () => game.swse.refreshActors({ renderForEveryone: true })
+
     });
 }

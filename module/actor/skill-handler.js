@@ -28,6 +28,17 @@ export function getAvailableTrainedSkillCount(actor) {
     return resolveValueArray([classSkills, otherSkills]);
 }
 
+function getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel) {
+    let skillFocus = 5;
+    let skillFocusCalculationOption = game.settings.get("swse", "skillFocusCalculation");
+    if (skillFocusCalculationOption === "charLevelUp") {
+        skillFocus = halfCharacterLevelRoundedUp;
+    } else if (skillFocusCalculationOption === "charLevelDown") {
+        skillFocus = halfCharacterLevel;
+    }
+    return skillFocus;
+}
+
 /**
  *
  * @param actor
@@ -37,7 +48,6 @@ export function generateSkills(actor) {
     let prerequisites = actor.data.prerequisites;
     prerequisites.trainedSkills = [];
     let classSkills = actor._getClassSkills();
-    let halfCharacterLevel = actor.getHalfCharacterLevel();
 
     let conditionBonus = getInheritableAttribute({
         entity: actor,
@@ -60,6 +70,9 @@ export function generateSkills(actor) {
         reduce: "SUM"
     });
 
+    let halfCharacterLevel = actor.getHalfCharacterLevel();
+    let halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
+    let skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
     for (let [key, skill] of Object.entries(actor.data.data.skills)) {
         skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
 
@@ -104,8 +117,7 @@ Condition Modifier: ${conditionBonus}`;
             skill.title += `
 Armor Class Penalty: ${acPenalty}`;
         }
-
-        let skillFocusBonus = skillFocuses.includes(key) ? 5 : 0;
+        let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
         if(skillFocusBonus !== 0) {
             skillBonuses.push(skillFocusBonus);
             skill.title += `

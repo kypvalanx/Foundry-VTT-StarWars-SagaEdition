@@ -4,7 +4,7 @@ import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
-import {registerSystemSettings} from "./settings/system.js";
+import {refreshActors, registerSystemSettings} from "./settings/system.js";
 import {registerHandlebarsHelpers} from "./settings/helpers.js";
 import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.js";
 import {getInheritableAttribute} from "./attribute-helper.js";
@@ -22,8 +22,10 @@ Hooks.once('init', async function() {
     rollItem,
     makeAttack,
     generateCompendiums, deleteEmptyCompendiums,
-    runTests
+    runTests,
+    refreshActors
   };
+
 
 
   /**
