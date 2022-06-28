@@ -66,4 +66,19 @@ export const registerSystemSettings = function () {
         onChange: () => game.swse.refreshActors({ renderForEveryone: true })
 
     });
+
+    game.settings.register("swse", "defaultAttributeGenerationType", {
+        name: "Select the default method that new characters will use to select attributes.",
+        hint: "This can be overridden on each sheet.",
+        scope: "world",
+        config: true,
+        default: "Point Buy",
+        type: String,
+        choices: {
+            "Roll": "Roll Dice and Assign",
+            "Standard Array": "Assign a Standard Array",
+            "Point Buy": "Generate with Point Buy",
+            "Manual": "Manual Input"
+        }
+    });
 }
