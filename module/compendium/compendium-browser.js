@@ -1,5 +1,3 @@
-import {getInheritableAttribute} from "../attribute-helper.js";
-
 export const naturalSort = function (arr, propertyKey = "") {
     return arr.sort((a, b) => {
         const propA = propertyKey ? getProperty(a, propertyKey) : a;
@@ -85,21 +83,6 @@ export class SWSECompendiumBrowser extends Application {
          */
         {
             this._savedItems = [];
-            // const cacheVersions = game.settings.get("pf1", "compendiumSaveVersions");
-            // const thisVersion = SemanticVersion.fromString(cacheVersions[this.type] || "0.0.1");
-            // const needVersion = SemanticVersion.fromString(NEED_NEW_VERSION[this.type]);
-            // if (needVersion.isHigherThan(thisVersion)) {
-            //     game.settings.set(
-            //         "pf1",
-            //         "compendiumSaveVersions",
-            //         mergeObject(cacheVersions, { [this.type]: game.system.data.version })
-            //     );
-            // } else {
-            //     const settings = game.settings.get("pf1", "compendiumItems");
-            //     if (settings[this.type]) {
-            //         this._savedItems = settings[this.type];
-            //     }
-            // }
         }
     }
 
@@ -120,20 +103,6 @@ export class SWSECompendiumBrowser extends Application {
         if (!this._currentCompendiums) {
             this.updateForceRefreshData();
         }
-
-       // const forceRefreshData = game.settings.get("pf1", "compendiumForceRefresh");
-        //const diff = getProperty(forceRefreshData, `diff.${this.type}`);
-
-        // Determine difference in used compendiums
-        // if (!diff) {
-        //     result = true;
-        // } else {
-        //     let diffCompendiums = [];
-        //     for (let o of [...this._currentCompendiums, ...diff]) {
-        //         if (!diff.includes(o) || !this._currentCompendiums.includes(o)) diffCompendiums.push(o);
-        //     }
-        //     if (diffCompendiums.length > 0) result = true;
-        // }
 
         return result;
     }
@@ -228,6 +197,70 @@ export class SWSECompendiumBrowser extends Application {
         });
     }
 
+    async _onDrop(event) {
+        const data = TextEditor.getDragEventData(event);
+        if ( !data.type ) throw new Error("You must define the type of document data being dropped");
+
+        let collection = this.getCollection();
+
+        if(!collection) return false;
+
+
+        if ( data.pack === collection.collection ) return false; // Prevent drop on self
+
+        // Import the dropped Document
+        const cls = collection.documentClass;
+        const document = await cls.fromDropData(data);
+        let importDocument = collection.importDocument(document);
+        this.refresh()
+        return importDocument;
+    }
+
+    _contextMenu(html) {
+        ContextMenu.create(this, html, ".directory-item", this._getEntryContextOptions());
+    }
+
+    /* -------------------------------------------- */
+
+    /**
+     * Get Compendium entry context options
+     * @returns {object[]}  The Compendium entry context options
+     * @private
+     */
+    _getEntryContextOptions() {
+        return [
+            {
+                name: "COMPENDIUM.ImportEntry",
+                icon: '<i class="fas fa-download"></i>',
+                condition: () => {
+                    let collection = this.getCollection();
+                    return !!collection && collection.documentClass.canUserCreate(game.user)
+                },
+                callback: li => {
+                    let collection = this.getCollection();
+                    const id = li.data("document-id");
+                    return collection.importFromCompendium(this.collection, id, {}, {renderSheet: true});
+                }
+            },
+            {
+                name: "COMPENDIUM.DeleteEntry",
+                icon: '<i class="fas fa-trash"></i>',
+                condition: () => game.user.isGM && !!this.getCollection(),
+                callback: async li => {
+                    const id = li.data("entry-id");
+                    const document = await this.getCollection().getDocument(id);
+                    return Dialog.confirm({
+                        title: `${game.i18n.localize("COMPENDIUM.DeleteEntry")} ${document.name}`,
+                        content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.localize("COMPENDIUM.DeleteEntryWarning")}</p>`,
+                        yes: () => {document.delete()
+                        this.refresh()
+                        }
+                    });
+                }
+            }
+        ];
+    }
+
     async loadData() {
         return new Promise((resolve) => {
             let promise = this._data.promise;
@@ -240,7 +273,7 @@ export class SWSECompendiumBrowser extends Application {
                 this._data.loaded = true;
                 this._data.promise = null;
                 try {
-                    await this.saveEntries();
+                    //await this.saveEntries();
                 } catch (err) {
                     console.error(err);
                     await this.clearEntries();
@@ -271,32 +304,12 @@ export class SWSECompendiumBrowser extends Application {
         };
     }
 
-    get typeName() {
-        switch (this.type) {
-            case "spells":
-                return game.i18n.localize("PF1.Spells");
-            case "items":
-                return game.i18n.localize("PF1.Items");
-            case "feats":
-                return game.i18n.localize("PF1.Features");
-            case "bestiary":
-                return game.i18n.localize("PF1.Creatures");
-            case "classes":
-                return game.i18n.localize("PF1.Classes");
-            case "races":
-                return game.i18n.localize("PF1.Races");
-            case "buffs":
-                return game.i18n.localize("PF1.Buffs");
-        }
-        return this.type;
-    }
-
     get type() {
         return this.options.type;
     }
 
     get title() {
-        return [this.typeName, "Browser"].join(" ");
+        return [this.type, "Browser"].join(" ");
     }
 
     get entityType() {
@@ -333,11 +346,11 @@ export class SWSECompendiumBrowser extends Application {
     async loadCompendium(p, filters = [null]) {
         const progress = this._data.progress;
 
-        if (p.metadata.system !== "swse") {
-            console.warn(p.metadata.label + " is incompatible with this browser and has been skipped.");
-            this._onProgress(progress);
-            return;
-        }
+        // if (p.metadata.system !== "swse") {
+        //     console.warn(p.metadata.label + " is incompatible with this browser and has been skipped.");
+        //     this._onProgress(progress);
+        //     return;
+        // }
 
         // Retrieve compendium contents
         let items = [];
@@ -427,197 +440,6 @@ export class SWSECompendiumBrowser extends Application {
     /* ------------------------------------- */
     /*  Mapping Functions                    */
     /* ------------------------------------- */
-    _mapFeats(result, item) {
-        this.extraFilters = this.extraFilters || {
-            tags: {},
-            associations: {
-                class: {},
-            },
-        };
-
-        result.item.tags = (item.data.tags || []).reduce((cur, o) => {
-            this.extraFilters.tags[o[0]] = true;
-            cur.push(o[0]);
-            return cur;
-        }, []);
-
-        result.item.assocations = {
-            class: (item.data.featType === "classFeat" ? getProperty(item.data, "associations.classes") || [] : []).reduce(
-                (cur, o) => {
-                    this.extraFilters.associations.class[o[0]] = true;
-                    cur.push(o[0]);
-                    return cur;
-                },
-                []
-            ),
-        };
-    }
-
-    _mapBestiary(result, item) {
-        this.extraFilters = this.extraFilters || {
-            "data.details.cr.total": {},
-            subTypes: {},
-        };
-        result.item.creatureType = "";
-        result.item.subTypes = [];
-
-        // Add CR filters
-        if (item.type === "npc") {
-            const cr = getProperty(item, "data.details.cr.total");
-            if (cr && !this.extraFilters["data.details.cr.total"][cr]) this.extraFilters["data.details.cr.total"][cr] = true;
-        }
-        // Get creature (sub)type
-        if (item.items) {
-            const race = item.items.filter((o) => o.type === "race")[0];
-            if (race != null) {
-                result.item.creatureType = race.data.data.creatureType;
-                result.item.subTypes = race.data.data.subTypes?.map((o) => {
-                    this.extraFilters.subTypes[o[0]] = true;
-                    return o[0];
-                });
-            }
-        } else {
-            item.subTypes?.forEach((o) => {
-                this.extraFilters.subTypes[o] = true;
-            });
-            result.item.creatureType = item.creatureType;
-            result.item.subTypes = item.subTypes;
-        }
-    }
-
-    _mapItems(result, item) {
-        this.extraFilters = this.extraFilters || {};
-
-        result.item.weaponProps = Object.entries(getProperty(item.data, "data.properties") || []).reduce((cur, o) => {
-            if (o[1]) cur.push(o[0]);
-            return cur;
-        }, []);
-    }
-
-    _mapSpells(result, item) {
-        this.extraFilters = this.extraFilters || {
-            "learnedAt.class": [],
-            "learnedAt.domain": [],
-            "learnedAt.subDomain": [],
-            "learnedAt.elementalSchool": [],
-            "learnedAt.bloodline": [],
-            "data.subschool": [],
-            spellTypes: [],
-        };
-
-        result.item.allSpellLevels = [];
-
-        // Add class/domain/etc filters
-        result.item.learnedAt = {
-            class: (getProperty(item, "data.learnedAt.class") || []).reduce((cur, o) => {
-                this.extraFilters["learnedAt.class"][o[0]] = true;
-                if (!result.item.allSpellLevels.includes(o[1])) result.item.allSpellLevels.push(o[1]);
-                cur.push(o[0]);
-                return cur;
-            }, []),
-            domain: (getProperty(item, "data.learnedAt.domain") || []).reduce((cur, o) => {
-                this.extraFilters["learnedAt.domain"][o[0]] = true;
-                if (!result.item.allSpellLevels.includes(o[1])) result.item.allSpellLevels.push(o[1]);
-                cur.push(o[0]);
-                return cur;
-            }, []),
-            subDomain: (getProperty(item, "data.learnedAt.subDomain") || []).reduce((cur, o) => {
-                this.extraFilters["learnedAt.subDomain"][o[0]] = true;
-                if (!result.item.allSpellLevels.includes(o[1])) result.item.allSpellLevels.push(o[1]);
-                cur.push(o[0]);
-                return cur;
-            }, []),
-            elementalSchool: (getProperty(item, "data.learnedAt.elementalSchool") || []).reduce((cur, o) => {
-                this.extraFilters["learnedAt.elementalSchool"][o[0]] = true;
-                if (!result.item.allSpellLevels.includes(o[1])) result.item.allSpellLevels.push(o[1]);
-                cur.push(o[0]);
-                return cur;
-            }, []),
-            bloodline: (getProperty(item, "data.learnedAt.bloodline") || []).reduce((cur, o) => {
-                this.extraFilters["learnedAt.bloodline"][o[0]] = true;
-                if (!result.item.allSpellLevels.includes(o[1])) result.item.allSpellLevels.push(o[1]);
-                cur.push(o[0]);
-                return cur;
-            }, []),
-            spellLevel: {
-                class: (getProperty(item, "data.learnedAt.class") || []).reduce((cur, o) => {
-                    cur[o[0]] = o[1];
-                    return cur;
-                }, {}),
-                domain: (getProperty(item, "data.learnedAt.domain") || []).reduce((cur, o) => {
-                    cur[o[0]] = o[1];
-                    return cur;
-                }, {}),
-                subDomain: (getProperty(item, "data.learnedAt.subDomain") || []).reduce((cur, o) => {
-                    cur[o[0]] = o[1];
-                    return cur;
-                }, {}),
-                // "elementalSchool": (getProperty(item, "data.learnedAt.elementalSchool") || []).reduce((cur, o) => {
-                //   cur[o[0]] = o[1];
-                //   return cur;
-                // }, {}),
-                bloodline: (getProperty(item, "data.learnedAt.bloodline") || []).reduce((cur, o) => {
-                    cur[o[0]] = o[1];
-                    return cur;
-                }, {}),
-            },
-        };
-
-        // Add subschools
-        {
-            const subschool = item.data.subschool;
-            if (subschool) this.extraFilters["data.subschool"][subschool] = true;
-        }
-        // Add spell types
-        {
-            const spellTypes = item.data.types ? item.data.types.split(CONFIG.PF1.re.traitSeparator) : [];
-            result.item.spellTypes = spellTypes;
-            for (let st of spellTypes) {
-                this.extraFilters["spellTypes"][st] = true;
-            }
-        }
-    }
-
-    _mapClasses(result, item) {
-        this.extraFilters = this.extraFilters || {
-            "data.hd": {},
-            "data.skillsPerLevel": {},
-        };
-
-        // Add HD
-        {
-            const hd = item.data.hd;
-            if (hd) this.extraFilters["data.hd"][hd] = true;
-        }
-        // Add skills per level
-        {
-            const s = item.data.skillsPerLevel;
-            if (s) this.extraFilters["data.skillsPerLevel"][s] = true;
-        }
-    }
-
-    _mapRaces(result, item) {
-        this.extraFilters = this.extraFilters || {
-            subTypes: {},
-        };
-        result.item.subTypes = [];
-
-        // Get subtypes
-        result.item.subTypes = item.data.subTypes.map((o) => {
-            this.extraFilters.subTypes[o[0]] = true;
-            return o[0];
-        });
-    }
-
-    _mapBuffs(result, item) {
-        this.extraFilters = this.extraFilters || {
-            types: {},
-        };
-
-        // Get types
-        this.extraFilters.types[item.data.buffType] = true;
-    }
-
     _mapEntry(pack, item) {
         const result = {
             collection: {
@@ -637,30 +459,6 @@ export class SWSECompendiumBrowser extends Application {
                 isExotic: item._source?.data?.subtype?.toLowerCase().includes("exotic")
             },
         };
-
-        // switch (this.type) {
-        //     case "feats":
-        //         this._mapFeats(result, item);
-        //         break;
-        //     case "bestiary":
-        //         this._mapBestiary(result, item);
-        //         break;
-        //     case "items":
-        //         this._mapItems(result, item);
-        //         break;
-        //     case "spells":
-        //         this._mapSpells(result, item);
-        //         break;
-        //     case "classes":
-        //         this._mapClasses(result, item);
-        //         break;
-        //     case "races":
-        //         this._mapRaces(result, item);
-        //         break;
-        //     case "buffs":
-        //         this._mapBuffs(result, item);
-        //         break;
-        // }
 
         return result;
     }
@@ -697,12 +495,17 @@ export class SWSECompendiumBrowser extends Application {
         search.keyup(this._onFilterResults.bind(this));
         search.val(this.defaultString)
 
+        html.each((i, li) => {
+            li.addEventListener("drop", (ev) => this._onDrop(ev));
+        });
+
         html.find('.filter input[type="checkbox"]').change(this._onActivateBooleanFilter.bind(this));
 
         html.find(".filter h3").click(this._toggleFilterVisibility.bind(this));
 
         html.find("button.refresh").click(this.refresh.bind(this));
 
+        this._contextMenu(html)
         // Lazy load
         this._initLazyLoad();
     }
@@ -795,6 +598,58 @@ export class SWSECompendiumBrowser extends Application {
             this._filterTimeout = null;
         }
         this._filterTimeout = setTimeout(() => filter(query), 100);
+    }
+
+
+    generateFilters(filterStrings) {
+        return filterStrings.map(filterString => this.generateFilter(filterString))
+    }
+
+    generateFilter(filterString){
+        if(filterString.startsWith("-type")) {
+            let s = filterString.split(":")[1]
+
+            if (s) {
+                return {
+                    type: 'type',
+                    test: (item) => {
+                        return new RegExp(RegExp.escape(s), "i").test(item.type)
+                    }
+                }
+            }
+        }
+        else if(filterString.startsWith("-subtype")){
+            let s = filterString.split(":")[1]
+
+            if(s) {
+                return {
+                    type: 'subtype',
+                    test: (item) => {
+                        return new RegExp(RegExp.escape(s), "i").test(item.subType)
+                    }
+                }
+            }
+        }
+        else if(filterString.startsWith("-pack")){
+            let s = filterString.split(":")[1]
+
+            if(s) {
+                return {
+                    type: 'pack',
+                    test: (item) => {
+                        let regExp = new RegExp(RegExp.escape(s), "i");
+                        return regExp.test(item.pack) || regExp.test(item.pack.replace(" ", "_"))
+                    }
+                }
+            }
+        } else if(filterString.startsWith("-exotic")){
+            return {
+                type: 'exotic',
+                test: (item) => {
+                    return !!item.isExotic
+                }
+            }
+        }
     }
 
     _onActivateBooleanFilter(event) {
@@ -898,53 +753,6 @@ export class SWSECompendiumBrowser extends Application {
 
         let propKeys = ["_id", "name", "img"];
 
-        switch (this.type) {
-            case "spells":
-                propKeys.push(
-                    "data.learnedAt.class",
-                    "data.learnedAt.domain",
-                    "data.learnedAt.subDomain",
-                    "data.learnedAt.elementalSchool",
-                    "data.learnedAt.bloodline",
-                    "data.school",
-                    "data.subschool",
-                    "data.types"
-                );
-                break;
-            case "items":
-                propKeys.push(
-                    "type",
-                    "data.properties",
-                    "data.weaponType",
-                    "data.weaponSubtype",
-                    "data.equipmentType",
-                    "data.equipmentSubtype",
-                    "data.slot",
-                    "data.consumableType",
-                    "data.subType"
-                );
-                break;
-            case "feats":
-                propKeys.push("data.featType", "data.associations.classes", "data.tags");
-                break;
-            case "bestiary":
-                propKeys.push("data.details.cr.total");
-                break;
-            case "classes":
-                propKeys.push(
-                    "data.classType",
-                    "data.bab",
-                    "data.hd",
-                    "data.skillsPerLevel",
-                    "data.savingThrows.fort.value",
-                    "data.savingThrows.ref.value",
-                    "data.savingThrows.will.value"
-                );
-                break;
-            case "races":
-                propKeys.push("data.creatureType", "data.subTypes");
-                break;
-        }
 
         for (let i of this.items) {
             let resultObj = {
@@ -988,54 +796,28 @@ export class SWSECompendiumBrowser extends Application {
         return false//game.settings.set("pf1", "compendiumItems", settings);
     }
 
-    generateFilters(filterStrings) {
-        return filterStrings.map(filterString => this.generateFilter(filterString))
-    }
+    getCollection() {
+        let search = this.element.find(`input[name="search"]`)[0];
+        let values = search.value.split(" ");
 
-    generateFilter(filterString){
-        if(filterString.startsWith("-type")) {
-            let s = filterString.split(":")[1]
+        let compendium;
 
-            if (s) {
-                return {
-                    type: 'type',
-                    test: (item) => {
-                        return new RegExp(RegExp.escape(s), "i").test(item.type)
+        for(let value of values){
+            if(!value) continue;
+            if(value.startsWith("-pack")){
+                if(!compendium){
+                    let compendiumName = value.split(":")[1];
+                    compendium = game.packs.get(compendiumName);
+                    if(!compendium){
+
+                        compendium = game.packs.get(compendiumName.replace("_", " "));
                     }
+                } else {
+                    //throw ui exception
                 }
             }
         }
-        else if(filterString.startsWith("-subtype")){
-            let s = filterString.split(":")[1]
 
-            if(s) {
-                return {
-                    type: 'subtype',
-                    test: (item) => {
-                        return new RegExp(RegExp.escape(s), "i").test(item.subType)
-                    }
-                }
-            }
-        }
-        else if(filterString.startsWith("-pack")){
-            let s = filterString.split(":")[1]
-
-            if(s) {
-                return {
-                    type: 'pack',
-                    test: (item) => {
-                        let regExp = new RegExp(RegExp.escape(s), "i");
-                        return regExp.test(item.pack) || regExp.test(item.pack.replace(" ", "_"))
-                    }
-                }
-            }
-        } else if(filterString.startsWith("-exotic")){
-                return {
-                    type: 'exotic',
-                    test: (item) => {
-                        return !!item.isExotic
-                    }
-                }
-        }
+        return compendium;
     }
 }

@@ -1,6 +1,6 @@
 <div class="swse compendium-browser flex flex-col" data-type="{{type}}">
   <header class="header">
-    <div class="search">
+    <div class="search flex flex-row">
       <i class="fas fa-search"></i>
       <input type="text" name="search" value="{{searchString}}" placeholder="Search" autocomplete="off" />
     </div>
@@ -8,8 +8,9 @@
 
   <div class="directory-container">
       <div class="top flex-row">
-          <span data-type="itemCount">{{labels.itemCount}}</span>
           <span data-type="filterItemCount">{{labels.filteredItemCount}}</span>
+          <span> of </span>
+          <span data-type="itemCount">{{labels.itemCount}}</span>
       </div>
       <ol class="directory-list">
       </ol>

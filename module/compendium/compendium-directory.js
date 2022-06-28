@@ -12,6 +12,11 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
         super.activateListeners(html);
 
         html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
+        //html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
+    }
+
+    _contextMenu(html) {
+        ContextMenu.create(this, html, ".compendium-filter", this._getEntryContextOptions());
     }
 
     static viewCompendiumItemsByFilter(event){
