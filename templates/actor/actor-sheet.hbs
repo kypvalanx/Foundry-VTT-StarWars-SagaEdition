@@ -3,7 +3,7 @@
         <div>
             {{#unless data.data.attributeGenerationType}}
                 <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
-            {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-action-target="swse.species">Please Select a Species</span></a><br/>{{/unless}}
+            {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-type="Item" data-filter="-type:species">Please Select a Species</span></a><br/>{{/unless}}
             {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
             {{#if actor.remainingSkills}}
                 <span class="warning">Remaining Trained Skills: {{actor.remainingSkills}}</span><br/>{{/if}}

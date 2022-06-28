@@ -7,10 +7,9 @@
         </div>
     </header>
 
-    <!-- replace this with filters -->
+<!--    <div class="directory-container">-->
     <ol class="directory-list">
         {{#each packs as |pack label|}}
-            {{log pack}}
             <li class="compendium-type">
                 <h3>{{label}}</h3>
                 <ol class="compendium-list">
@@ -33,6 +32,7 @@
             </li>
         {{/each}}
     </ol>
+<!--    </div>-->
 
     <footer class="directory-footer">
         <div class="compendium-footer flexcol">

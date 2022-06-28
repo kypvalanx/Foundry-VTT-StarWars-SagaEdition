@@ -1042,3 +1042,16 @@
 .swse .selectable {
   cursor: pointer;
 }
+
+.swse .directory-list {
+  overflow: auto;
+  height: 99%;
+}
+
+.swse .compendium-browser {
+  height: 100%;
+}
+
+.swse .directory-container {
+  height: 90%;
+}

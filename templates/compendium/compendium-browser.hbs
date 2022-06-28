@@ -1,39 +1,18 @@
-<div class="compendium-browser flex flex-col" data-type="{{type}}">
+<div class="swse compendium-browser flex flex-col" data-type="{{type}}">
   <header class="header">
-    <div class="search">
+    <div class="search flex flex-row">
       <i class="fas fa-search"></i>
       <input type="text" name="search" value="{{searchString}}" placeholder="Search" autocomplete="off" />
     </div>
-
-<!--    <div class="filter-container">-->
-<!--      {{#each filters as |filter|}}-->
-<!--      <div class="filter" data-path="{{filter.path}}">-->
-<!--        <h3 class="rollable">{{filter.label}}</h3>-->
-<!--        <div class="filter-content">-->
-<!--          {{#each filter.items as |i|}}-->
-<!--          <div class="checkbox">-->
-<!--            <input type="checkbox" name="{{i.key}}" id="{{filter.path}}_{{i.key}}" {{checked (lookup filter.active i.key)}} />-->
-<!--            <label type="checkbox" for="{{filter.path}}_{{i.key}}">-->
-<!--              {{i.name}}-->
-<!--            </label>-->
-<!--          </div>-->
-<!--          {{/each}}-->
-<!--        </div>-->
-<!--      </div>-->
-<!--      {{/each}}-->
-<!--    </div>-->
-
-<!--    <div class="flexcol">-->
-<!--      <button class="refresh">{{localize "PF1.Refresh"}}</button>-->
-<!--    </div>-->
   </header>
 
-  <div class="directory-container flexcol">
-    <div class="top flexrow">
-      <span data-type="itemCount">{{labels.itemCount}}</span>
-      <span data-type="filterItemCount">{{labels.filteredItemCount}}</span>
-    </div>
-    <ol class="directory-list">
-    </ol>
+  <div class="directory-container">
+      <div class="top flex-row">
+          <span data-type="filterItemCount">{{labels.filteredItemCount}}</span>
+          <span> of </span>
+          <span data-type="itemCount">{{labels.itemCount}}</span>
+      </div>
+      <ol class="directory-list">
+      </ol>
   </div>
 </div>
