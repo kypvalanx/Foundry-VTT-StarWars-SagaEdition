@@ -1,5 +1,14 @@
 import {getInheritableAttribute} from "../attribute-helper.js";
 
+export const naturalSort = function (arr, propertyKey = "") {
+    return arr.sort((a, b) => {
+        const propA = propertyKey ? getProperty(a, propertyKey) : a;
+        const propB = propertyKey ? getProperty(b, propertyKey) : b;
+        return new Intl.Collator(game.settings.get("core", "language"), { numeric: true }).compare(propA, propB);
+    });
+};
+
+
 export class SWSECompendiumBrowser extends Application {
     constructor(...args) {
         super(...args);
@@ -384,7 +393,7 @@ export class SWSECompendiumBrowser extends Application {
             }
 
             // Sort items
-            //this.items = naturalSort(this.items, "item.name");
+            this.items = naturalSort(this.items, "item.name");
 
             // Return if no appropriate items were found
             if (this.items.length === 0) {
@@ -629,29 +638,29 @@ export class SWSECompendiumBrowser extends Application {
             },
         };
 
-        switch (this.type) {
-            case "feats":
-                this._mapFeats(result, item);
-                break;
-            case "bestiary":
-                this._mapBestiary(result, item);
-                break;
-            case "items":
-                this._mapItems(result, item);
-                break;
-            case "spells":
-                this._mapSpells(result, item);
-                break;
-            case "classes":
-                this._mapClasses(result, item);
-                break;
-            case "races":
-                this._mapRaces(result, item);
-                break;
-            case "buffs":
-                this._mapBuffs(result, item);
-                break;
-        }
+        // switch (this.type) {
+        //     case "feats":
+        //         this._mapFeats(result, item);
+        //         break;
+        //     case "bestiary":
+        //         this._mapBestiary(result, item);
+        //         break;
+        //     case "items":
+        //         this._mapItems(result, item);
+        //         break;
+        //     case "spells":
+        //         this._mapSpells(result, item);
+        //         break;
+        //     case "classes":
+        //         this._mapClasses(result, item);
+        //         break;
+        //     case "races":
+        //         this._mapRaces(result, item);
+        //         break;
+        //     case "buffs":
+        //         this._mapBuffs(result, item);
+        //         break;
+        // }
 
         return result;
     }
