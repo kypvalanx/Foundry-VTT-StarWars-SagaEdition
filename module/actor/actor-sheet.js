@@ -1506,7 +1506,6 @@ export class SWSEActorSheet extends ActorSheet {
         event.preventDefault();
         const a = event.currentTarget;
         const target = a.dataset.actionTarget;
-//TODO change this when compendiums are part of the game system
         let newVar = game.packs.filter(pack => pack.collection.startsWith(target))[0];
         //console.log(newVar)
         newVar.render(true);

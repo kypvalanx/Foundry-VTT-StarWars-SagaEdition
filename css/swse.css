@@ -1011,3 +1011,34 @@
 .swse .vehicle-summary-header .vehicleSpeed {
   grid-area: 5 / 3 / 6 / 5;
 }
+
+.swse .directory-item {
+  border-bottom: thin solid #7a7971;
+}
+
+.swse .directory-item div {
+  padding: 3px;
+}
+
+.swse .compendium-filter {
+  position: relative;
+  padding: 4px 6px;
+  line-height: 24px;
+  border-bottom: thin solid #7a7971;
+}
+
+.swse .compendium-filter .status-icons {
+  position: absolute;
+  font-weight: normal;
+  color: var(--color-text-dark-inactive);
+  text-align: right;
+  right: 0;
+}
+
+.swse .selectable:hover {
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
+.swse .selectable {
+  cursor: pointer;
+}

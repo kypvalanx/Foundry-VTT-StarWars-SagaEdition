@@ -1,0 +1,15 @@
+<li class="directory-item flex flex-row" data-collection="{{collection._id}}" data-entry-id="{{item._id}}">
+    <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="48"
+                                 height="48" alt="{{item.name}}"/></div>
+    <div class="flex flex-col">
+        <div class="flex flex-row">
+            <div><h3 class="entry-name"><a>{{item.name}}</a></h3></div>
+            <div><span class="entry-source">Type: {{item.type}}</span></div>
+
+            {{#if item.subType}}<div><span class="entry-source">SubType: {{item.subType}}</span></div>{{/if}}
+        </div>
+        {{#if item.talentTree}}
+            <div>{{item.talentTree}}</div>
+        {{/if}}
+    </div>
+</li>
