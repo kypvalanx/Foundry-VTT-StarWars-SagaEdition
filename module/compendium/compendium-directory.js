@@ -11,18 +11,14 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
     activateListeners(html) {
         super.activateListeners(html);
 
-        html.find('[data-action="compendium"]').click(this._onSelectFilter.bind(this));
+        html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
     }
 
-    _onSelectFilter(event){
+    static viewCompendiumItemsByFilter(event){
         let element = $(event.currentTarget);
         let filterString = element.data("filter")
         let type = element.data("type")
         let pack = element.data("pack")
-        this._onBrowseCompendium({filterString, type, pack});
-    }
-
-    _onBrowseCompendium(data={}){
-        new SWSECompendiumBrowser(data)._render(true);
+        new SWSECompendiumBrowser({filterString, type, pack})._render(true);
     }
 }

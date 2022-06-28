@@ -7,6 +7,7 @@ import {getInheritableAttribute} from "../attribute-helper.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
 import {activateChoices} from "../choice/choice.js";
+import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -206,7 +207,8 @@ export class SWSEActorSheet extends ActorSheet {
         // Rollable abilities.
         html.find('.rollable').click(this._onRoll.bind(this));
 
-        html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        //html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
+        html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
         html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));

@@ -62,7 +62,7 @@ export class SWSECompendiumBrowser extends Application {
          * @property
          */
         this.filterQuery = /.*/;
-        let split = args[0].filterString.split(" ");
+        let split = args[0].filterString?.split(" ") || [];
         if(args[0].pack) {
             split.push(("-pack:" + args[0].pack).replace(" ", "_"));
         }
