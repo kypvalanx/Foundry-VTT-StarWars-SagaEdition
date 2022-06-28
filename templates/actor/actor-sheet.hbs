@@ -106,7 +106,7 @@
                             <th>Total HP</th>
                             <!--                  <th>First Level Class</th> -->
                             <th>
-                                <a data-action="compendium" data-action-target="swse.classes"
+                                <a data-action="compendium" data-type="Item" data-filter="-type:class"
                                    title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a></th>
                         </tr>
                         </thead>
@@ -169,8 +169,7 @@
                 {{!-- Beast Page --}}
                 <div class="tab beast" data-group="primary" data-tab="beast">
                     <h2><label class="resource-label">Beast
-                        <a data-action="compendium"
-                           data-action-target="swse.beast components"
+                        <a data-action="compendium" data-type="Item" data-pack="swse.beast components"
                            title="Beast"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="natural-weapons" label="Natural Weapons" items=actor.naturalWeapons draggable=false quantity=false delete="always"}}
@@ -190,11 +189,11 @@
                 <div class="tab items" data-group="primary" data-tab="equipment">
                     <div>
                         <h2><label class="resource-label">Equipment
-                            <a data-action="compendium"
+                            <a data-action="compendium" data-type="Item" data-pack="swse.items"
                                data-action-target="swse.items"
                                title="Items"><i
                                     class="fas fa-folder-plus"></i></a>
-                            <a data-action="compendium"
+                            <a data-action="compendium" data-type="Item" data-pack="swse.templates"
                                data-action-target="swse.templates"
                                title="Templates"><i
                                     class="fas fa-folder-plus"></i></a></label></h2>
@@ -218,8 +217,7 @@
                 {{!-- Owned Feats Tab --}}
                 <div class="tab items" data-group="primary" data-tab="feats">
                     <div>
-                        <h2><label class="resource-label">Feats <a data-action="compendium"
-                                                                   data-action-target="swse.feats"
+                        <h2><label class="resource-label">Feats <a data-action="compendium" data-type="Item" data-filter="-type:feat"
                                                                    title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -248,8 +246,7 @@
                 {{!-- Owned Talents Tab --}}
                 <div class="tab items" data-group="primary" data-tab="talents">
                     <div>
-                        <h2><label class="resource-label">Talents <a data-action="compendium"
-                                                                     data-action-target="swse.talents"
+                        <h2><label class="resource-label">Talents <a data-action="compendium" data-type="Item" data-filter="-type:talent"
                                                                      title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -278,8 +275,7 @@
                 {{!-- Owned Traits Tab --}}
                 <div class="tab items" data-group="primary" data-tab="traits">
                     <div>
-                        <h2><label class="resource-label">Traits <a data-action="compendium"
-                                                                    data-action-target="swse.traits"
+                        <h2><label class="resource-label">Traits <a data-action="compendium" data-type="Item" data-filter="-type:trait"
                                                                     title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -290,8 +286,7 @@
                 {{!-- Owned Powers Tab --}}
                 <div class="tab items" data-group="primary" data-tab="force">
                     <div>
-                        <h2><label class="resource-label">Force Powers <a data-action="compendium"
-                                                                          data-action-target="swse.force powers"
+                        <h2><label class="resource-label">Force Powers <a data-action="compendium" data-type="Item" data-filter="-type:forcePower"
                                                                           title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -310,8 +305,7 @@
                     </ol>
                     <br/>
                     <div>
-                        <h2><label class="resource-label">Force Secrets <a data-action="compendium"
-                                                                           data-action-target="swse.force secrets"
+                        <h2><label class="resource-label">Force Secrets <a data-action="compendium" data-type="Item" data-filter="-type:forceSecret"
                                                                            title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -329,8 +323,7 @@
                     </ol>
                     <br/>
                     <div>
-                        <h2><label class="resource-label">Force Techniques <a data-action="compendium"
-                                                                              data-action-target="swse.force techniques"
+                        <h2><label class="resource-label">Force Techniques <a data-action="compendium" data-type="Item" data-filter="-type:forceTechnique"
                                                                               title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>
@@ -348,8 +341,7 @@
                     </ol>
                     <br/>
                     <div>
-                        <h2><label class="resource-label">Force Regimens <a data-action="compendium"
-                                                                            data-action-target="swse.force regimens"
+                        <h2><label class="resource-label">Force Regimens <a data-action="compendium" data-type="Item" data-filter="-type:forceRegimen"
                                                                             title="{{localize "Open Compendium"}}"><i
                                 class="fas fa-folder-plus"></i></a></label></h2>
                     </div>

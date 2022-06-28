@@ -31,11 +31,11 @@
                 </div>
             {{/if}}
             {{#unless actor.species}}
-                <div class="plain input flex-grow rollable" data-action="compendium" data-action-target="swse.species">
+                <div class="plain input flex-grow rollable" data-action="compendium" data-type="Item" data-filter="-type:species">
                     Add Species
                 </div>
                 <div class="species-controls flex-col">
-                    <a data-action="compendium" data-action-target="swse.species"
+                    <a data-action="compendium" data-type="Item" data-filter="-type:species"
                        title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
                 </div>
             {{/unless}}
@@ -101,11 +101,11 @@
                 <div class="flex item">
                     <div class="plain input flex-grow">Select a Destiny or a Background</div>
                     <div class="species-controls flex-col">
-                        <a data-action="compendium" data-action-target="swse.destiny"
+                        <a data-action="compendium" data-type="Item" data-filter="-type:destiny"
                            title="{{localize "Open Destiny Compendium"}}"><i class="fas fa-folder-plus"></i></a>
                     </div>
                     <div class="species-controls flex-col">
-                        <a data-action="compendium" data-action-target="swse.background"
+                        <a data-action="compendium" data-type="Item" data-filter="-type:background"
                            title="{{localize "Open Background Compendium"}}"><i class="fas fa-folder-plus"></i></a>
                     </div>
                 </div>

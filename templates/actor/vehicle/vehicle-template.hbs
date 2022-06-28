@@ -15,11 +15,10 @@
             </div>
         {{/if}}
         {{#unless actor.vehicleTemplate}}
-            <div class="plain input flex-grow rollable" data-action="compendium"
-                 data-action-target="swse.vehicle base types">Add Vehicle Template
+            <div class="plain input flex-grow rollable" data-action="compendium" data-type="Item" data-filter="-type:vehicleBaseType">Add Vehicle Template
             </div>
             <div class="species-controls flex-col">
-                <a data-action="compendium" data-action-target="swse.vehicle base types"
+                <a data-action="compendium" data-type="Item" data-filter="-type:vehicleBaseType"
                    title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
             </div>
         {{/unless}}
