@@ -234,12 +234,12 @@ export class SWSECompendiumBrowser extends Application {
                 icon: '<i class="fas fa-download"></i>',
                 condition: () => {
                     let collection = this.getCollection();
-                    return !!collection && collection.documentClass.canUserCreate(game.user)
+                    return false && !!collection && collection.documentClass.canUserCreate(game.user)
                 },
                 callback: li => {
                     let collection = this.getCollection();
-                    const id = li.data("document-id");
-                    return collection.importFromCompendium(this.collection, id, {}, {renderSheet: true});
+                    const id = li.data("entry-id");
+                    return collection.importFromCompendium(collection, id, {}, {renderSheet: true});
                 }
             },
             {
