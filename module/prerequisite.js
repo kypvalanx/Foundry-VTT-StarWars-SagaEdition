@@ -10,7 +10,7 @@ function ensureArray(array) {
     } else if (!!array[0]){
         return Object.values(array)
     }
-    return array;
+    return [array];
 }
 
 /**
