@@ -4,6 +4,15 @@ import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.js";
 import {getEquippedItems, SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 
+function ensureArray(array) {
+    if(Array.isArray(array)){
+        return array;
+    } else if (!!array[0]){
+        return Object.values(array)
+    }
+    return [array];
+}
+
 /**
  *
  * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
@@ -30,9 +39,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
     let data = target.data.data || target.data;
 
-    if (!Array.isArray(prereqs)) {
-        prereqs = [prereqs];
-    }
+    prereqs = ensureArray(prereqs)
 
     for (let prereq of prereqs) {
         switch (prereq.type.toUpperCase()) {

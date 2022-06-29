@@ -113,3 +113,6 @@ export const GM_BONUSES = [
     {display: "Trained Skills", key:"trainedSkills", value:"#integer#"},
     {display: "Vanguard Talent Trees", key:"provides", value:"Vanguard Talent Trees:#integer#"}
 ]
+
+export const NEW_LINE = `
+`;
