@@ -180,7 +180,7 @@ export function getInheritableAttribute(data = {}) {
         if(!data.recursive) {
             values = values.filter(attr => {
                 let parentId = getItemParentId(attr.source)
-                let parent = game.data.actors.find(actor => actor._id === parentId)
+                let parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
 
                 if(attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail){
                     return false;

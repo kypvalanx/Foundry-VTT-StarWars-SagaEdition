@@ -9,7 +9,7 @@ export function warningsFromActor(actor) {
         reduce: "SUM",
         attributeFilter: attr => !attr.modifier
     })
-    let beastClassLevels = actor.data.classLevels['Beast'];
+    let beastClassLevels = actor.data.classLevels?.Beast || 0;
     if (beastClassLevels > 0 && naturalArmorBonus > beastClassLevels) {
         warnings.push(`Natural Armor Bonus (${naturalArmorBonus}) should not exceed Beast Level (${beastClassLevels}).`)
     }
