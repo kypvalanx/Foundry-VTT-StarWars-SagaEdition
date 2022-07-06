@@ -86,7 +86,8 @@ function getAttributesFromEmbeddedItems(entity, data) {
             entity: item,
             attributeKey: data.attributeKey,
             duplicates,
-            recursive: true
+            recursive: true,
+            parent: entity
         }));
     }
     return vals;
@@ -177,11 +178,14 @@ export function getInheritableAttribute(data = {}) {
         }
 
 
-        if(!data.recursive) {
+        if(!data.recursive || data.parent) {
             values = values.filter(attr => {
-                let parentId = getItemParentId(attr.source)
-                let parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
+                let parent = data.parent;
 
+                if(!parent) {
+                    let parentId = getItemParentId(attr.source)
+                    parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
+                }
                 if(attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail){
                     return false;
                 }

@@ -265,7 +265,11 @@ export function resolveFinesseBonus(actor, finesseStats) {
  */
 function getCharacterAttribute(actor, attributeName) {
     let data = actor.data.data || actor.data
-    return data.attributes[toShortAttribute(attributeName).toLowerCase()];
+    let attributes = data.attributes;
+    if(!!attributes) {
+        return attributes[toShortAttribute(attributeName).toLowerCase()];
+    }
+    return {mod:0}
 }
 
 

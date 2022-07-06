@@ -77,7 +77,7 @@ export function generateSkills(actor) {
 
         bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
 
-        let nonZeroBonuses = bonuses.filter(bonus => bonus.value > 0);
+        let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
         skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
         skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
         skill.key = key;
