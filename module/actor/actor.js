@@ -59,6 +59,15 @@ export class SWSEActor extends Actor {
      */
     prepareData() {
         super.prepareData();
+		
+		//check if user has permission to modify selected actor
+		//if not jump out of the function, all the hard lifting
+		//has already been done. 
+		if(!this.canUserModify(game.user, 'update')){
+			
+			return false;
+		}
+		
         const actorData = this.data;
         actorData.data.description = actorData.data.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
