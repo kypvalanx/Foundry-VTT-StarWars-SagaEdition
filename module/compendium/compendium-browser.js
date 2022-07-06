@@ -112,7 +112,7 @@ export class SWSECompendiumBrowser extends Application {
         if (options.refresh) {
             this._currentCompendiums = game.packs
                 .filter((o) => {
-                    if (o.metadata.entity !== this.entityType) return false;
+                    if (o.documentName !== this.entityType) return false;
 
                     if (this.shouldSkip(o)) return false;
 
@@ -327,7 +327,7 @@ export class SWSECompendiumBrowser extends Application {
     shouldSkip(p) {
         // Check disabled status
         const config = game.settings.get("core", "compendiumConfiguration")[p.collection];
-        const disabled = getProperty(config, "pf1.disabled") === true;
+        const disabled = getProperty(config, "swse.disabled") === true;
         if (disabled) return true;
 
         // Skip if set to private and the user is not a GM
@@ -339,47 +339,36 @@ export class SWSECompendiumBrowser extends Application {
 
     _onProgress(progress) {
         progress.loaded++;
-        progress.pct = Math.round((progress.loaded * 10) / progress.total) * 10;
-        ///SceneNavigation._onLoadProgress(progress.message, progress.pct);
+        progress.pct = Math.round((progress.loaded * 100) / progress.total);
+        SceneNavigation.displayProgressBar({label: progress.message, pct: progress.pct});
     }
 
     async loadCompendium(p, filters = [null]) {
         const progress = this._data.progress;
 
-        // if (p.metadata.system !== "swse") {
-        //     console.warn(p.metadata.label + " is incompatible with this browser and has been skipped.");
-        //     this._onProgress(progress);
-        //     return;
-        // }
-
-        // Retrieve compendium contents
-        let items = [];
-        for (let filter of filters) {
-            items.push(...(await p.getDocuments(filter)));
-        }
-
-        if (p.translated) {
-            items = items.map((item) => p.translate(item));
-        }
-
         // Flush full compendium contents from memory
-        p.clear();
 
-        for (let i of items) {
-            if (!this._filterItems(i)) continue;
-            this.packs[p.collection] = p;
-            this.items.push(this._mapEntry(p, i.data));
+        let items = [];
+        p.clear();
+        for (let filter of filters) {
+            let values = await p.getDocuments(filter)
+                for (let i of values) {
+                    this.packs[p.collection] = p;
+                    items.push(this._mapEntry(p, i.data));
+                }
         }
+
         this._onProgress(progress);
+        return items;
     }
 
     async _fetchMetadata() {
         this.items = [];
 
-        if (this.shouldForceRefresh() || this._savedItems.length === 0) {
+       // if (this.shouldForceRefresh() || this._savedItems.length === 0) {
             // Initialize progress bar
             let packs = [];
-            const progress = { pct: 0, message: game.i18n.localize("PF1.LoadingCompendiumBrowser"), loaded: -1, total: 0 };
+            const progress = { pct: 0, message: game.i18n.localize("SWSE.LoadingCompendiumBrowser"), loaded: -1, total: 0 };
             for (let p of game.packs.values()) {
                 if (p.documentClass.documentName === this.entityType && !this.shouldSkip(p)) {
                     progress.total++;
@@ -401,42 +390,38 @@ export class SWSECompendiumBrowser extends Application {
             this._onProgress(progress);
 
             // Load compendiums
+            let promises = [];
             for (let p of packs) {
-                await this.loadCompendium(p, this.getBasicFilters());
+                promises.push(this.loadCompendium(p, this.getBasicFilters()));
             }
 
-            // Sort items
-            this.items = naturalSort(this.items, "item.name");
+            Promise.all(promises).then(response => {
+                response.forEach(items => this.items.push(...items))
+                // Sort items
+                this.items = naturalSort(this.items, "item.name");
+
+                // Gather filter data
+                this._fetchGeneralFilters();
+                // Lazy load
+                this._initLazyLoad();
+            })
+
 
             // Return if no appropriate items were found
-            if (this.items.length === 0) {
-                return;
-            }
-        } else {
-            for (let i of this._savedItems) {
-                const p = game.packs.get(i.collection._id);
-                if (p) {
-                    this.items.push(this._mapEntry(p, i.item));
-                    this.packs[i.collection._id] = p;
-                }
-            }
-            this._savedItems = [];
-        }
-
-        // Gather filter data
-        this._fetchGeneralFilters();
+            // if (this.items.length === 0) {
+            //     return;
+            // }
+        // } else {
+        //     for (let i of this._savedItems) {
+        //         const p = game.packs.get(i.collection._id);
+        //         if (p) {
+        //             this.items.push(this._mapEntry(p, i.item));
+        //             this.packs[i.collection._id] = p;
+        //         }
+        //     }
+        //     this._savedItems = [];
+        // }
     }
-
-    _filterItems(item) {
-        // if (this.type === "spells" && item.type !== "spell") return false;
-        // if (this.type === "items" && !ItemPF.isInventoryItem(item.type)) return false;
-        // if (this.type === "feats" && item.type !== "feat") return false;
-        // if (this.type === "classes" && item.type !== "class") return false;
-        // if (this.type === "races" && item.type !== "race") return false;
-        // if (this.type === "buffs" && item.type !== "buff") return false;
-         return true;
-    }
-
     /* ------------------------------------- */
     /*  Mapping Functions                    */
     /* ------------------------------------- */
@@ -506,8 +491,6 @@ export class SWSECompendiumBrowser extends Application {
         html.find("button.refresh").click(this.refresh.bind(this));
 
         this._contextMenu(html)
-        // Lazy load
-        this._initLazyLoad();
     }
 
     /**

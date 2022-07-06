@@ -112,7 +112,7 @@ Hooks.on("ready", function () {
     game.generated.exoticWeapons = [];
 
     game.packs.forEach(pack => {
-        console.log(pack)
+        //console.log(pack)
         pack.getIndex().then(index => {
             index.forEach(i => pack.getDocument(i._id)
                 .then(entity => {
