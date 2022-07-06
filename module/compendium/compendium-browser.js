@@ -2,7 +2,7 @@ export const naturalSort = function (arr, propertyKey = "") {
     return arr.sort((a, b) => {
         const propA = propertyKey ? getProperty(a, propertyKey) : a;
         const propB = propertyKey ? getProperty(b, propertyKey) : b;
-        return new Intl.Collator(game.settings.get("core", "language"), { numeric: true }).compare(propA, propB);
+        return new Intl.Collator(game.settings.get("core", "language"), {numeric: true}).compare(propA, propB);
     });
 };
 
@@ -70,7 +70,7 @@ export class SWSECompendiumBrowser extends Application {
          */
         this.filterQuery = /.*/;
         let split = args[0].filterString?.split(" ") || [];
-        if(args[0].pack) {
+        if (args[0].pack) {
             split.push(("-pack:" + args[0].pack).replace(" ", "_"));
         }
         this.defaultString = split.join(" ")
@@ -107,7 +107,7 @@ export class SWSECompendiumBrowser extends Application {
         return result;
     }
 
-    updateForceRefreshData(options = { save: false, refresh: true }) {
+    updateForceRefreshData(options = {save: false, refresh: true}) {
         // Generate list of usable compendiums
         if (options.refresh) {
             this._currentCompendiums = game.packs
@@ -145,6 +145,7 @@ export class SWSECompendiumBrowser extends Application {
             await this._addEntryElement(item);
         }
     }
+
     async _addEntryElement(item) {
         const elem = $(await renderTemplate("systems/swse/templates/compendium/compendium-browser_entry.hbs", item));
         const rootElem = this.element.find(".directory-list");
@@ -153,6 +154,7 @@ export class SWSECompendiumBrowser extends Application {
 
         return elem;
     }
+
     _clearEntryElements() {
         this.element.find(".directory-list").empty();
     }
@@ -199,14 +201,14 @@ export class SWSECompendiumBrowser extends Application {
 
     async _onDrop(event) {
         const data = TextEditor.getDragEventData(event);
-        if ( !data.type ) throw new Error("You must define the type of document data being dropped");
+        if (!data.type) throw new Error("You must define the type of document data being dropped");
 
         let collection = this.getCollection();
 
-        if(!collection) return false;
+        if (!collection) return false;
 
 
-        if ( data.pack === collection.collection ) return false; // Prevent drop on self
+        if (data.pack === collection.collection) return false; // Prevent drop on self
 
         // Import the dropped Document
         const cls = collection.documentClass;
@@ -252,8 +254,9 @@ export class SWSECompendiumBrowser extends Application {
                     return Dialog.confirm({
                         title: `${game.i18n.localize("COMPENDIUM.DeleteEntry")} ${document.name}`,
                         content: `<h4>${game.i18n.localize("AreYouSure")}</h4><p>${game.i18n.localize("COMPENDIUM.DeleteEntryWarning")}</p>`,
-                        yes: () => {document.delete()
-                        this.refresh()
+                        yes: () => {
+                            document.delete()
+                            this.refresh()
                         }
                     });
                 }
@@ -352,10 +355,10 @@ export class SWSECompendiumBrowser extends Application {
         p.clear();
         for (let filter of filters) {
             let values = await p.getDocuments(filter)
-                for (let i of values) {
-                    this.packs[p.collection] = p;
-                    items.push(this._mapEntry(p, i.data));
-                }
+            for (let i of values) {
+                this.packs[p.collection] = p;
+                items.push(this._mapEntry(p, i.data));
+            }
         }
 
         this._onProgress(progress);
@@ -364,66 +367,50 @@ export class SWSECompendiumBrowser extends Application {
 
     async _fetchMetadata() {
         this.items = [];
-
-       // if (this.shouldForceRefresh() || this._savedItems.length === 0) {
-            // Initialize progress bar
-            let packs = [];
-            const progress = { pct: 0, message: game.i18n.localize("SWSE.LoadingCompendiumBrowser"), loaded: -1, total: 0 };
-            for (let p of game.packs.values()) {
-                if (p.documentClass.documentName === this.entityType && !this.shouldSkip(p)) {
-                    progress.total++;
-                    packs.push(p);
-                } else {
-                    if (Object.hasOwnProperty.call(this.packs, p.collection)) {
-                        delete this.packs[p.collection];
-                    }
+        // Initialize progress bar
+        let packs = [];
+        const progress = {pct: 0, message: game.i18n.localize("SWSE.LoadingCompendiumBrowser"), loaded: -1, total: 0};
+        for (let p of game.packs.values()) {
+            if (p.documentClass.documentName === this.entityType && !this.shouldSkip(p)) {
+                progress.total++;
+                packs.push(p);
+            } else {
+                if (Object.hasOwnProperty.call(this.packs, p.collection)) {
+                    delete this.packs[p.collection];
                 }
             }
+        }
 
-            // Clear filters without applicable packs
-            if (packs.length === 0) {
-                this.filters = [];
-                return;
-            }
+        // Clear filters without applicable packs
+        if (packs.length === 0) {
+            this.filters = [];
+            return;
+        }
 
-            this._data.progress = progress;
-            this._onProgress(progress);
+        this._data.progress = progress;
+        this._onProgress(progress);
 
-            // Load compendiums
-            let promises = [];
-            for (let p of packs) {
-                promises.push(this.loadCompendium(p, this.getBasicFilters()));
-            }
+        // Load compendiums
+        let promises = [];
+        for (let p of packs) {
+            promises.push(this.loadCompendium(p, this.getBasicFilters()));
+        }
 
-            Promise.all(promises).then(response => {
-                response.forEach(items => this.items.push(...items))
-                // Sort items
-                this.items = naturalSort(this.items, "item.name");
+        Promise.all(promises).then(response => {
+            response.forEach(items => this.items.push(...items))
+            // Sort items
+            this.items = naturalSort(this.items, "item.name");
 
-                // Gather filter data
-                this._fetchGeneralFilters();
-                // Lazy load
-                this._initLazyLoad();
-            })
-
-
-            // Return if no appropriate items were found
-            // if (this.items.length === 0) {
-            //     return;
-            // }
-        // } else {
-        //     for (let i of this._savedItems) {
-        //         const p = game.packs.get(i.collection._id);
-        //         if (p) {
-        //             this.items.push(this._mapEntry(p, i.item));
-        //             this.packs[i.collection._id] = p;
-        //         }
-        //     }
-        //     this._savedItems = [];
-        // }
+            // Gather filter data
+            this._fetchGeneralFilters();
+            // Lazy load
+            this._initLazyLoad();
+        })
     }
+
     /* ------------------------------------- */
     /*  Mapping Functions                    */
+
     /* ------------------------------------- */
     _mapEntry(pack, item) {
         const result = {
@@ -451,7 +438,7 @@ export class SWSECompendiumBrowser extends Application {
     async getData() {
         this.updateForceRefreshData();
         if (this.shouldForceRefresh() || !this._data.loaded) await this.loadData();
-        await this.updateForceRefreshData({ save: true, refresh: false });
+        await this.updateForceRefreshData({save: true, refresh: false});
 
         const data = duplicate(this._data.data);
         data.searchString = this.searchString;
@@ -467,6 +454,7 @@ export class SWSECompendiumBrowser extends Application {
     _fetchGeneralFilters() {
         this.filters = [];
     }
+
     async _render(force, ...args) {
         await super._render(force, ...args);
 
@@ -588,8 +576,8 @@ export class SWSECompendiumBrowser extends Application {
         return filterStrings.map(filterString => this.generateFilter(filterString))
     }
 
-    generateFilter(filterString){
-        if(filterString.startsWith("-type")) {
+    generateFilter(filterString) {
+        if (filterString.startsWith("-type")) {
             let s = filterString.split(":")[1]
 
             if (s) {
@@ -600,11 +588,10 @@ export class SWSECompendiumBrowser extends Application {
                     }
                 }
             }
-        }
-        else if(filterString.startsWith("-subtype")){
+        } else if (filterString.startsWith("-subtype")) {
             let s = filterString.split(":")[1]
 
-            if(s) {
+            if (s) {
                 return {
                     type: 'subtype',
                     test: (item) => {
@@ -612,11 +599,10 @@ export class SWSECompendiumBrowser extends Application {
                     }
                 }
             }
-        }
-        else if(filterString.startsWith("-pack")){
+        } else if (filterString.startsWith("-pack")) {
             let s = filterString.split(":")[1]
 
-            if(s) {
+            if (s) {
                 return {
                     type: 'pack',
                     test: (item) => {
@@ -625,7 +611,7 @@ export class SWSECompendiumBrowser extends Application {
                     }
                 }
             }
-        } else if(filterString.startsWith("-exotic")){
+        } else if (filterString.startsWith("-exotic")) {
             return {
                 type: 'exotic',
                 test: (item) => {
@@ -678,7 +664,7 @@ export class SWSECompendiumBrowser extends Application {
 
         // Scroll up
         const rootElem = this.element.find(".directory-list")[0];
-        if(rootElem) {
+        if (rootElem) {
             rootElem.scrollTop = 0;
         }
 
@@ -713,19 +699,18 @@ export class SWSECompendiumBrowser extends Application {
             && !this.filterQuery.test(item.talentTree)
             && !this.filterQuery.test(item.type)
             && !this.filterQuery.test(item.subType)
-        && !matchesProviderGroup) return false;
+            && !matchesProviderGroup) return false;
 
         let groupedFilters = {};
         this.postFilters.forEach(f => {
-            if(!f) return;
+            if (!f) return;
             groupedFilters[f.type] = groupedFilters[f.type] || []
             groupedFilters[f.type].push(f)
         });
 
-        for(let key of Object.keys(groupedFilters)){
-            if(!groupedFilters[key].map(f => f.test(item)).reduce((previous, next) => previous || next, false)) return false;
+        for (let key of Object.keys(groupedFilters)) {
+            if (!groupedFilters[key].map(f => f.test(item)).reduce((previous, next) => previous || next, false)) return false;
         }
-
 
 
         return true;
@@ -785,13 +770,13 @@ export class SWSECompendiumBrowser extends Application {
 
         let compendium;
 
-        for(let value of values){
-            if(!value) continue;
-            if(value.startsWith("-pack")){
-                if(!compendium){
+        for (let value of values) {
+            if (!value) continue;
+            if (value.startsWith("-pack")) {
+                if (!compendium) {
                     let compendiumName = value.split(":")[1];
                     compendium = game.packs.get(compendiumName);
-                    if(!compendium){
+                    if (!compendium) {
 
                         compendium = game.packs.get(compendiumName.replace("_", " "));
                     }
