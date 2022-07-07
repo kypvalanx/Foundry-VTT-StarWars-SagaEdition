@@ -24,6 +24,25 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
         let filterString = element.data("filter")
         let type = element.data("type")
         let pack = element.data("pack")
-        new SWSECompendiumBrowser({filterString, type, pack})._render(true);
+
+        if(game.settings.get("swse", "enableAdvancedCompendium")) {
+            new SWSECompendiumBrowser({filterString, type, pack})._render(true);
+        } else {
+            let packName
+            if(pack){
+                packName = pack.split(".")[1]
+            }
+            if(!packName && filterString){
+                packName = filterString.split(":")[1]
+            }
+
+            let found = game.packs.find(p => p.metadata.name.includes(packName));
+            if(found){
+
+                found.render(true);
+            } else {
+                console.warn("could not find appropriate pack " + packName)
+            }
+        }
     }
 }

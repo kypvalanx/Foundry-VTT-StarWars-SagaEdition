@@ -46,10 +46,12 @@ Hooks.once('init', async function () {
     CONFIG.SWSE = SWSE;
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
-    CONFIG.ui.compendium = SWSECompendiumDirectory;
 
     registerSystemSettings();
     registerHandlebarsHelpers();
+    if(game.settings.get("swse", "enableAdvancedCompendium")){
+        CONFIG.ui.compendium = SWSECompendiumDirectory;
+    }
 
     // Create compendium browsers
     // game.swse.compendiums = {
@@ -112,7 +114,7 @@ Hooks.on("ready", function () {
     game.generated.exoticWeapons = [];
 
     game.packs.forEach(pack => {
-        console.log(pack)
+        //console.log(pack)
         pack.getIndex().then(index => {
             index.forEach(i => pack.getDocument(i._id)
                 .then(entity => {

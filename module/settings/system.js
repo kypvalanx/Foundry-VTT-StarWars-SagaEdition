@@ -81,4 +81,13 @@ export const registerSystemSettings = function () {
             "Manual": "Manual Input"
         }
     });
+
+    game.settings.register("swse", "enableAdvancedCompendium", {
+        name: "Enable Advanced Compendium Browser.",
+        hint: "this may cause performance issues on slower browsers.",
+        scope: "world",
+        config: true,
+        default: true,
+        type: Boolean
+    });
 }
