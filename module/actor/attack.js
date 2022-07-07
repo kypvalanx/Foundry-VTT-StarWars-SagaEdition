@@ -711,39 +711,43 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
             continue;
         }
 
-        let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
+        let quantity = source.data.quantity || 1
 
-        existingWeaponNames.push(attack.name)
-        if (duplicateCount > 0) {
-            attack.options.duplicateCount = duplicateCount;
-        }
+        for(let i = 0; i < quantity; i++){
+            let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
 
-        let clonedAttack = attack.clone();
-        if(source.type === "beastAttack"){
-            clonedAttack.options.beastAttack = true;
-        } else {
-            clonedAttack.options.standardAttack = true;
-        }
-        resolvedAttacks.push(attackOption(clonedAttack, id++))
+            existingWeaponNames.push(attack.name)
+            if (duplicateCount > 0) {
+                attack.options.duplicateCount = duplicateCount;
+            }
 
-        let additionalDamageDice = attack.additionalDamageDice
-
-        for (let i = 0; i < additionalDamageDice.length; i++) {
             let clonedAttack = attack.clone();
-            clonedAttack.options.additionalAttack = i + 1;
-            clonedAttack.options.standardAttack = true;
+            if(source.type === "beastAttack"){
+                clonedAttack.options.beastAttack = true;
+            } else {
+                clonedAttack.options.standardAttack = true;
+            }
             resolvedAttacks.push(attackOption(clonedAttack, id++))
-        }
 
-        if (doubleAttack.includes(source.data.subtype)) {
-            let clonedAttack = attack.clone();
-            clonedAttack.options.doubleAttack = true;
-            resolvedAttacks.push(attackOption(clonedAttack, id++))
-        }
-        if (tripleAttack.includes(source.data.subtype)) {
-            let clonedAttack = attack.clone();
-            clonedAttack.options.tripleAttack = true;
-            resolvedAttacks.push(attackOption(clonedAttack, id++))
+            let additionalDamageDice = attack.additionalDamageDice
+
+            for (let i = 0; i < additionalDamageDice.length; i++) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.additionalAttack = i + 1;
+                clonedAttack.options.standardAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
+
+            if (doubleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.doubleAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
+            if (tripleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.tripleAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
         }
     }
     return resolvedAttacks;
