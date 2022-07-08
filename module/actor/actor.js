@@ -1,7 +1,9 @@
 import {resolveHealth, resolveShield} from "./health.js";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
-import {resolveOffense,
-    resolveGrapple} from "./offense.js";
+import {
+    resolveOffense,
+    resolveGrapple
+} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
@@ -44,9 +46,9 @@ export class SWSEActor extends Actor {
     _onCreateEmbeddedDocuments(embeddedName, ...args) {
         super._onCreateEmbeddedDocuments(embeddedName, ...args);
 
-        if("ActiveEffect" === embeddedName){
+        if ("ActiveEffect" === embeddedName) {
             let activeEffect = args[0][0];
-            if(activeEffect.data?.flags?.core?.statusId?.startsWith("condition")) {
+            if (activeEffect.data?.flags?.core?.statusId?.startsWith("condition")) {
                 this.effects
                     .filter(effect => effect !== activeEffect && effect.data?.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
@@ -67,6 +69,7 @@ export class SWSEActor extends Actor {
         this.data.prerequisites = {};
         this.inheritableItems = [];
         this.resolvedVariables = new Map();
+        this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
 
         if (this.id && actorData.type === "npc") {
@@ -84,7 +87,7 @@ export class SWSEActor extends Actor {
             this.data.data.condition = 0;
             let conditionEffect = this.effects.find(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
 
-            if(conditionEffect){
+            if (conditionEffect) {
                 this.data.data.condition = conditionEffect.data.changes.find(change => change.key === "condition").value
             }
 
@@ -658,16 +661,16 @@ export class SWSEActor extends Actor {
 
     applyConditionSpeedPenalty(speed) {
         let multipliers = getInheritableAttribute({
-            entity : this,
+            entity: this,
             attributeKey: "speedMultiplier",
-            reduce:"VALUES"
+            reduce: "VALUES"
         })
 
         let result = /([\w\s]*)\s(\d*)/.exec(speed);
 
         let number = parseInt(result[2]);
 
-        multipliers.forEach(m=> number = parseFloat(m) * number)
+        multipliers.forEach(m => number = parseFloat(m) * number)
         return `${result[1]} ${Math.floor(number)}`
     }
 
@@ -922,9 +925,9 @@ export class SWSEActor extends Actor {
     }
 
     getHalfCharacterLevel(round = "down") {
-        if(round === "down") {
+        if (round === "down") {
             return Math.floor(this.characterLevel / 2);
-        } else if(round === "up"){
+        } else if (round === "up") {
             return Math.ceil(this.characterLevel / 2);
         }
     }
@@ -1380,7 +1383,8 @@ export class SWSEActor extends Actor {
     rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
-        label = label ? `${this.name} rolls for ${label}!` : '';
+        let notes = this.resolvedNotes.get(variable);
+        let flavor = label ? `${this.name} rolls for ${label}!` : '';
 
         if (variable.startsWith('@Initiative')) {
             this.rollInitiative({createCombatants: true, rerollInitiative: true, initiativeOptions: {formula: rollStr}})
@@ -1388,11 +1392,65 @@ export class SWSEActor extends Actor {
         }
 
         let roll = new Roll(rollStr);
+        roll.roll({async: false})
 
-        roll.toMessage({
-            speaker: ChatMessage.getSpeaker({actor: this}),
-            flavor: label
-        });
+        let tooltipSections = this.getTooltipSections(roll)
+
+
+        let content = `<div class="message-content">
+        <div class="dice-roll">
+            <div class="dice-result">
+                <div class="dice-formula">${rollStr}</div>
+                <div class="dice-tooltip">${tooltipSections}</div>
+                <h4 class="dice-total">${roll.total}</h4>
+            </div>
+        </div>
+        <div>${notes.map(note => `<div>${note}</div>`).join("")}</div>
+    </div>`
+
+
+        let speaker = ChatMessage.getSpeaker({actor: this.actor});
+        let messageData = {
+            user: game.user.id,
+            speaker,
+            flavor,
+            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            content,
+            sound: CONFIG.sounds.dice,
+            roll
+        }
+
+        let cls = getDocumentClass("ChatMessage");
+        let msg = new cls(messageData);
+        let rollMode = false;
+        // if (rollMode) msg.applyRollMode(rollMode);
+
+        return cls.create(msg.data, {rollMode});
+
+        // roll.toMessage({
+        //     speaker: ChatMessage.getSpeaker({actor: this}),
+        //     flavor: label
+        // });
+    }
+
+    getTooltipSections(roll) {
+        let sections = [];
+
+        for(let term of roll.terms){
+            if(term instanceof Die){
+                let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
+                let partTotal = `<span class="part-total">${term.total}</span>`
+                let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
+                let diceRolls = [];
+                for(let result of term.results){
+                    diceRolls.push(`<li class="roll die d20">${result.result}</li>`)
+                }
+
+                sections.push(`<section class="tooltip-part"><div class="dice">${partHeader}<ol class="dice-rolls">${diceRolls.join("")}</ol></div></section>`)
+            }
+        }
+
+        return sections.join("");
     }
 
     /**
@@ -1559,6 +1617,7 @@ export class SWSEActor extends Actor {
         context.actor = this.data;
         await makeAttack(context);
     }
+
     resolveSlots(availableSlots, crew, type, cover) {
         let slots = [];
         for (let i = 0; i < availableSlots; i++) {
@@ -1707,7 +1766,7 @@ export class SWSEActor extends Actor {
         let providedItems = item.getProvidedItems() || {};
         let providedItemCursor = 0;
         (choices.items || []).forEach(item => {
-            while(providedItems[providedItemCursor]){
+            while (providedItems[providedItemCursor]) {
                 providedItemCursor++;
             }
             providedItems[providedItemCursor] = item;
@@ -1815,11 +1874,11 @@ export class SWSEActor extends Actor {
         return notificationMessage;
     }
 
-    get warnings(){
+    get warnings() {
         return warningsFromActor(this);
     }
 
-    get errors(){
+    get errors() {
         return errorsFromActor(this);
     }
 
@@ -1862,6 +1921,7 @@ export class SWSEActor extends Actor {
     cleanItemName(feat) {
         return feat.replace("*", "").trim();
     }
+
     async equipItem(itemId, equipType, options) {
         let item = this.items.get(itemId);
 

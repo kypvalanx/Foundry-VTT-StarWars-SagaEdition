@@ -1461,10 +1461,28 @@ export class SWSEActorSheet extends ActorSheet {
                 update[dataset.name] = roll.total;
                 updateCandidate.update(update);
             } else {
-                roll.toMessage({
-                    speaker: ChatMessage.getSpeaker({actor: this.actor}),
-                    flavor: label
-                });
+                let speaker = ChatMessage.getSpeaker({actor: this.actor});
+                // roll.toMessage({
+                //     speaker: speaker,
+                //     flavor: label, flags: {f1: "thing"}
+                // });
+
+
+                let messageData = {
+                    user: game.user.id,
+                    speaker: speaker,
+                    flavor: label,
+                    type: CONST.CHAT_MESSAGE_TYPES.ROLL,
+                    content: roll.total,
+                    sound: CONFIG.sounds.dice,
+                    roll
+                }
+
+                let cls = getDocumentClass("ChatMessage");
+                let msg = new cls(messageData);
+               // if (rollMode) msg.applyRollMode(rollMode);
+
+                return cls.create(msg.data, {rollMode});
             }
         }
     }

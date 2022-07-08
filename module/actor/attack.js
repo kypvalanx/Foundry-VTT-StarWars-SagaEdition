@@ -1182,7 +1182,6 @@ function resolveAttack(attack) {
 }
 
 export function rollAttacks(attacks, rollMode) {
-    let cls = getDocumentClass("ChatMessage");
 
     let attackRows = [];
     let roll;
@@ -1212,6 +1211,7 @@ export function rollAttacks(attacks, rollMode) {
         roll
     }
 
+    let cls = getDocumentClass("ChatMessage");
     let msg = new cls(messageData);
     if (rollMode) msg.applyRollMode(rollMode);
 
