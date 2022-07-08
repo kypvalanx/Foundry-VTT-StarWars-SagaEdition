@@ -711,39 +711,43 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
             continue;
         }
 
-        let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
+        let quantity = source.data.quantity || 1
 
-        existingWeaponNames.push(attack.name)
-        if (duplicateCount > 0) {
-            attack.options.duplicateCount = duplicateCount;
-        }
+        for(let i = 0; i < quantity; i++){
+            let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
 
-        let clonedAttack = attack.clone();
-        if(source.type === "beastAttack"){
-            clonedAttack.options.beastAttack = true;
-        } else {
-            clonedAttack.options.standardAttack = true;
-        }
-        resolvedAttacks.push(attackOption(clonedAttack, id++))
+            existingWeaponNames.push(attack.name)
+            if (duplicateCount > 0) {
+                attack.options.duplicateCount = duplicateCount;
+            }
 
-        let additionalDamageDice = attack.additionalDamageDice
-
-        for (let i = 0; i < additionalDamageDice.length; i++) {
             let clonedAttack = attack.clone();
-            clonedAttack.options.additionalAttack = i + 1;
-            clonedAttack.options.standardAttack = true;
+            if(source.type === "beastAttack"){
+                clonedAttack.options.beastAttack = true;
+            } else {
+                clonedAttack.options.standardAttack = true;
+            }
             resolvedAttacks.push(attackOption(clonedAttack, id++))
-        }
 
-        if (doubleAttack.includes(source.data.subtype)) {
-            let clonedAttack = attack.clone();
-            clonedAttack.options.doubleAttack = true;
-            resolvedAttacks.push(attackOption(clonedAttack, id++))
-        }
-        if (tripleAttack.includes(source.data.subtype)) {
-            let clonedAttack = attack.clone();
-            clonedAttack.options.tripleAttack = true;
-            resolvedAttacks.push(attackOption(clonedAttack, id++))
+            let additionalDamageDice = attack.additionalDamageDice
+
+            for (let i = 0; i < additionalDamageDice.length; i++) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.additionalAttack = i + 1;
+                clonedAttack.options.standardAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
+
+            if (doubleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.doubleAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
+            if (tripleAttack.includes(source.data.subtype)) {
+                let clonedAttack = attack.clone();
+                clonedAttack.options.tripleAttack = true;
+                resolvedAttacks.push(attackOption(clonedAttack, id++))
+            }
         }
     }
     return resolvedAttacks;
@@ -1090,12 +1094,14 @@ function generateAttackCard(resolvedAttacks, attack) {
             classes.push("fail")
             modifiers.push(`<i class="fas fa-trash">`)
         }
-        attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total} ${modifiers.join(" ")}</td>`
+        //attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total} ${modifiers.join(" ")}</td>`
+        attackRolls += `<td>[[${resolvedAttack.attackRollFunction}]] ${modifiers.join(" ")}</td>`
         let damageType = "";
         if(resolvedAttack.damageType){
             damageType = ` (${resolvedAttack.damageType}) `;
         }
-        damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total}${damageType}</td>`
+        //damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total}${damageType}</td>`
+        damageRolls += `<td>[[${resolvedAttack.damageRollFunction}]]${damageType}</td>`
     }
 
     return `<table class="swse">
@@ -1116,7 +1122,8 @@ ${damageRolls}
 }
 
 function resolveAttack(attack) {
-    let attackRollResult = attack.attackRoll.roll.roll({async: false});
+    let attackRoll = attack.attackRoll.roll;
+    let attackRollResult = attackRoll.roll({async: false});
 
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
@@ -1164,7 +1171,9 @@ function resolveAttack(attack) {
     let damage = damageRoll.roll({async: false});
     return {
         attack: attackRollResult,
+        attackRollFunction: attackRoll.formula,
         damage: damage,
+        damageRollFunction: damageRoll.formula,
         damageType: attack.type,
         notes: attack.notes,
         critical,
@@ -1173,7 +1182,6 @@ function resolveAttack(attack) {
 }
 
 export function rollAttacks(attacks, rollMode) {
-    let cls = getDocumentClass("ChatMessage");
 
     let attackRows = [];
     let roll;
@@ -1203,6 +1211,7 @@ export function rollAttacks(attacks, rollMode) {
         roll
     }
 
+    let cls = getDocumentClass("ChatMessage");
     let msg = new cls(messageData);
     if (rollMode) msg.applyRollMode(rollMode);
 

@@ -417,14 +417,16 @@ export function toNumber(value) {
  * @param attribute.value {*}
  * @param source {String}
  * @param sourceString {String}
+ * @param sourceDescription {String}
  * @returns {Array.<{source: String, value: String}>}
  */
-export function extractAttributeValues(attribute, source, sourceString) {
+export function extractAttributeValues(attribute, source, sourceString, sourceDescription) {
     let values = [];
     let value = attribute.value;
     if (value !== undefined && value !== null) {
         attribute.source = source;
         attribute.sourceString = sourceString;
+        attribute.sourceDescription = sourceDescription;
         values.push(attribute)
     }
     return values

@@ -84,7 +84,7 @@ export const registerSystemSettings = function () {
 
     game.settings.register("swse", "enableAdvancedCompendium", {
         name: "Enable Advanced Compendium Browser.",
-        hint: "this may cause performance issues on slower browsers.",
+        hint: "This may cause performance issues on slower browsers.  A refresh is required for this option to take effect.",
         scope: "world",
         config: true,
         default: true,

@@ -69,7 +69,7 @@ function getAttributesFromClass(data, entity) {
     if (classLevel > 0) {
         let level = entity.data.levels[classLevel];
         for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-            vals.push(...extractAttributeValues(attribute, entity._id, entity.name));
+            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.data.description));
         }
     }
     return vals;
@@ -162,7 +162,7 @@ export function getInheritableAttribute(data = {}) {
         if (entity.type) {
             let itemAttributes = Object.entries(entity.data?.attributes || entity._source?.data?.attributes || []).filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0])).map(entry => entry[1]);
             for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
-                values.push(...extractAttributeValues(attribute, entity._id, entity.name));
+                values.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.data?.description || entity._source?.data.description));
             }
             values.push(...(getAttributesFromEmbeddedItems(entity, data)))
 
@@ -210,7 +210,7 @@ export function getInheritableAttribute(data = {}) {
 export function extractEffectChange(changes, attributeKey, entity) {
     let values = [];
         for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data?._id || entity._id, entity.data?.label || entity.label));
+            values.push(...extractAttributeValues(attribute, entity.data?._id || entity._id, entity.data?.label || entity.label, entity.data.description || entity.data.data.description));
         }
 
     return values;
@@ -220,7 +220,7 @@ export function extractModeAttributes(entity, activeModes, attributeKey) {
     let values = [];
     for (let mode of activeModes) {
         for (let attribute of Object.values(mode.attributes).filter(attr => attr && attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.name));
+            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.name, entity.data.data?.description ||entity.data?.description));
         }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
     }
