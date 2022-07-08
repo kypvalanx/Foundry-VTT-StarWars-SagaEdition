@@ -95,7 +95,6 @@ export function generateSkills(actor) {
         skill.notes = []
         for (let reroll of applicableRerolls) {
             skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
-            skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
         }
         actor.resolvedNotes.set(`@${actor.cleanSkillName(key)}`, skill.notes)
 
