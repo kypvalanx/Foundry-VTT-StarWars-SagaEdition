@@ -31,10 +31,10 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     let silentFail = [];
     let successList = [];
     if (!prereqs) {
-        return {doesFail: false, failureList, silentFail: silentFail, successList};
+        return {doesFail: false, failureList, silentFail, successList};
     }
     if(!target){
-        return {doesFail: true, failureList, silentFail: silentFail, successList};
+        return {doesFail: true, failureList, silentFail, successList};
     }
 
     let data = target.data.data || target.data;
@@ -367,7 +367,12 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     continue;
                 } else if (prereq.requirement === 'is part of a military') {
                     if(filterItemsByType(getItems(target), "affiliation").length > 0) {
-                        successList.push({prereq, count: 1});
+                        successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
+                        continue;
+                    }
+                } else if (prereq.requirement === 'is part of a major interstellar corporation') {
+                    if(filterItemsByType(getItems(target), "affiliation").length > 0) {
+                        successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
                         continue;
                     }
                 }
