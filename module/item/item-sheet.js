@@ -341,8 +341,8 @@ export class SWSEItemSheet extends ItemSheet {
 
         let ownedItem = actor.items.get(droppedItem.data._id);
 
-        let isItemMod = Object.values(droppedItem.data.data.attributes).find(attr => attr.key === "itemMod");
-        if (isItemMod?.value === "true") {
+        let isItemMod = (droppedItem.data.type === "upgrade") ? "true" : "false";
+        if (isItemMod === "true") {
             let meetsPrereqs = meetsPrerequisites(this.object, droppedItem.data.data.prerequisite)
 
             if (meetsPrereqs.doesFail) {
