@@ -177,6 +177,10 @@ export class SWSEActorSheet extends ActorSheet {
             let modePath = $(event.currentTarget).data("modePath");
             let data = $(event.currentTarget).data("itemId");
             let item = this.actor.items.get(data);
+            //if(this.actor.data.data.isNPC === true){
+                //let npcItem = this.actor.equipped.find(val => val.id === data);
+                //npcItem.activateMode(modePath)
+            //}
             item.activateMode(modePath)
         })
 
@@ -864,11 +868,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
         let item
-        if(data.pack) {
-            //the dropped item is from a compendium
-            const compendiumItem = await Item.implementation.fromDropData(data);
-             item = compendiumItem.clone();
-        } else if(data.duplicate){
+        if(data.duplicate){
             item = data.item.clone();
             //item = data
         }
