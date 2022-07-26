@@ -623,8 +623,15 @@ export class SWSEItem extends Item {
 
         if (itemData.data.items && itemData.data.items.length > 0) {
             for (let mod of itemData.data.items ? itemData.data.items : []) {
-                if (mod.data.upgrade?.pointCost !== undefined) {
-                    itemData.data.upgradePoints -= mod.data.upgrade.pointCost;
+
+                let upgradePointCost = getInheritableAttribute({
+                    entity: mod,
+                    attributeKey: "upgradePointCost"
+                });
+
+                if (upgradePointCost !== undefined) {
+
+                    itemData.data.upgradePoints -= toNumber(upgradePointCost);
                 }
             }
         }
@@ -634,7 +641,7 @@ export class SWSEItem extends Item {
         this.data.data.stripping[key] = this.data.data.stripping[key] || {};
         this.data.data.stripping[key].label = label;
         this.data.data.stripping[key].enabled = enabled;
-        this.data.data.stripping[key].value = enabled ? (this.data.data.stripping[key].value || (type === 'boolean' ? false : (type === 'number' ? 0 : ""))) : false;
+        this.data.data.stripping[key].value = enabled ? (this.data.data.stripping[key].value || (type === 'boolean' ? false : (type === 'string' ? "" : 0))) : false;
         this.data.data.stripping[key].type = type ? type : "boolean"
         this.data.data.stripping[key].low = low;
         this.data.data.stripping[key].high = high;
@@ -1213,6 +1220,7 @@ export class SWSEItem extends Item {
                 groups.forEach(group => {
                     Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
                         data.modes[parseInt(entity[0])] = {};
+                        
                         data.modes[parseInt(entity[0])].isActive = entity[1].name === mode;
                     })
                 })

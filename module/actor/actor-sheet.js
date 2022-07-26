@@ -864,13 +864,13 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
         let item
-        if(data.pack) {
-            //the dropped item is from a compendium
-            const compendiumItem = await Item.implementation.fromDropData(data);
-             item = compendiumItem.clone();
-        } else if(data.duplicate){
+        if(data.duplicate){
             item = data.item.clone();
             //item = data
+        }
+        else{
+            const customItem = await Item.implementation.fromDropData(data);
+            item = customItem.clone();
         }
 
 
@@ -1480,9 +1480,9 @@ export class SWSEActorSheet extends ActorSheet {
 
                 let cls = getDocumentClass("ChatMessage");
                 let msg = new cls(messageData);
-               // if (rollMode) msg.applyRollMode(rollMode);
+                //if (rollMode) msg.applyRollMode(rollMode);
 
-                return cls.create(msg.data, {rollMode});
+                return cls.create(msg.data);
             }
         }
     }
