@@ -927,6 +927,7 @@ export class SWSEActorSheet extends ActorSheet {
             case "beastSense":
             case "beastType":
             case "beastQuality":
+                //this.actor.addItems([data])
                 await this.addItem(item);
                 break;
 

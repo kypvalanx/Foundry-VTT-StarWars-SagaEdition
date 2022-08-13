@@ -593,7 +593,7 @@ export class SWSEItem extends Item {
     }
 
     prepareWeapon(itemData) {
-        itemData.data.upgradePoints = this.getBaseUpgradePoints(itemData.name);
+        itemData.data.upgradePoints = toNumber(this.getBaseUpgradePoints(itemData.name));
 
         itemData.data.stripping = itemData.data.stripping || {};
 
@@ -1151,10 +1151,27 @@ export class SWSEItem extends Item {
     // }
     getProvidedItems(filter) {
         let items = this.data.data.providedItems;
+
+        if(!!items && !Array.isArray(items)){
+            items = Object.values(items);
+        }
+
         if (!!filter) {
             return items.filter(filter);
         }
-        return items;
+        return items || [];
+    }
+    getModifications(filter) {
+        let items = this.data.data.modifications;
+
+        if(!!items && !Array.isArray(items)){
+            items = Object.values(items);
+        }
+
+        if (!!filter) {
+            return items.filter(filter);
+        }
+        return items || [];
     }
 
     static getActiveModesFromItemData(itemData) {

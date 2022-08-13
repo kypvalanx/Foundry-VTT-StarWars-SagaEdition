@@ -1720,22 +1720,23 @@ export class SWSEActor extends Actor {
         }
 
         if (options.type !== "provided") {
-            let takeMultipleTimes = getInheritableAttribute({
-                entity: item,
-                attributeKey: "takeMultipleTimes",
 
+            //inventory items should not be limited to one.
+            if(!["armor", "weapon", "equipment", "upgrade", "trait", "template"].includes(item.type)){
+                let takeMultipleTimes = getInheritableAttribute({
+                    entity: item,
+                    attributeKey: "takeMultipleTimes"
+                }).map(a => a.value === "true").reduce((a, b) => a || b, false);
 
-            })
-                .map(a => a.value === "true").reduce((a, b) => a || b, false);
-
-            if (this.hasItem(item) && !takeMultipleTimes) {
-                await Dialog.prompt({
-                    title: `You already have this ${options.type}`,
-                    content: `You have already taken the ${item.data.finalName} ${options.type}`,
-                    callback: () => {
-                    }
-                })
-                return [];
+                if (this.hasItem(item) && !takeMultipleTimes) {
+                    await Dialog.prompt({
+                        title: `You already have this ${options.type}`,
+                        content: `You have already taken the ${item.data.finalName} ${options.type}`,
+                        callback: () => {
+                        }
+                    })
+                    return [];
+                }
             }
 
             let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
@@ -1772,17 +1773,26 @@ export class SWSEActor extends Actor {
 
         let mainItem = await this.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
-        let providedItems = item.getProvidedItems() || {};
-        let providedItemCursor = 0;
-        (choices.items || []).forEach(item => {
-            while (providedItems[providedItemCursor]) {
-                providedItemCursor++;
-            }
-            providedItems[providedItemCursor] = item;
-        })
+        let providedItems = item.getProvidedItems() || [];
+        //let providedItemCursor = 0;
+        // (choices.items || []).forEach(item => {
+        //     while (providedItems[providedItemCursor]) {
+        //         providedItemCursor++;
+        //     }
+        //     providedItems[providedItemCursor] = item;
+        // })
+
+        providedItems.push(...choices.items);
 
 
         await this.addItems(providedItems, mainItem[0], options);
+
+        let  modifications = item.getModifications()
+
+        modifications.forEach(mod => mod.equipToParent = true)
+
+        await this.addItems(modifications, mainItem[0], options);
+
         return mainItem[0];
     }
 
@@ -1875,7 +1885,9 @@ export class SWSEActor extends Actor {
             if (!!equip) {
                 await this.equipItem(addedItem.data._id, equip, options)
             }
-            //entities.push(entity.data.toObject(false));
+            if(provided.equipToParent){
+                await parent.takeOwnership(addedItem);
+            }
         }
         if (options.returnAdded) {
             return addedItems;
