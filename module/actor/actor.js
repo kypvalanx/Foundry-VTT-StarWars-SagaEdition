@@ -1722,7 +1722,7 @@ export class SWSEActor extends Actor {
         if (options.type !== "provided") {
 
             //inventory items should not be limited to one.
-            if(!["armor", "weapon", "equipment", "upgrade", "trait", "template"].includes(item.type)){
+            if(!["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"].includes(item.type)){
                 let takeMultipleTimes = getInheritableAttribute({
                     entity: item,
                     attributeKey: "takeMultipleTimes"
