@@ -1234,7 +1234,7 @@ export class SWSEActorSheet extends ActorSheet {
             let equipType = equipTypes.find(x => targetItemContainer.classList.contains(x));
 
             let weaponSystemOnlyTypes = ["pilotInstalled"];
-            weaponSystemOnlyTypes.push(...this.actor.data.data.equippedIds.filter(e => !!e.type).map(e => e.type).filter(t => t.startsWith("gunnerInstalled")).filter(unique));
+            weaponSystemOnlyTypes.push(...this.actor.gunnerPositions.filter(e => !!e.id).map(e => e.id).filter(unique));
             let weaponSystemOnlyType = weaponSystemOnlyTypes.find(x => targetItemContainer.classList.contains(x));
 
             let unequipTypes = ["unequipped", "uninstalled"];
@@ -1245,11 +1245,11 @@ export class SWSEActorSheet extends ActorSheet {
                 if (item.data.data.subtype.toLowerCase() === "weapon systems") {
                     this.onlyAllowsWeaponsDialog(false);
                 } else {
-                    await this.actor.equipItem(itemId, equipType, ev);
+                    await this.actor.equipItem(itemId, equipType, {event:ev});
                 }
             } else if (weaponSystemOnlyType) {
                 if (item.data.data.subtype.toLowerCase() === "weapon systems") {
-                    await this.actor.equipItem(itemId, weaponSystemOnlyType, ev);
+                    await this.actor.equipItem(itemId, weaponSystemOnlyType, {event:ev, offerOverride:true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
                 }
@@ -1257,14 +1257,15 @@ export class SWSEActorSheet extends ActorSheet {
                 await this.actor.unequipItem(itemId, ev);
             } else if (specialType === "new-gunner") {
                 if (item.data.data.subtype.toLowerCase() === "weapon systems") {
-                    let types = this.actor.data.data.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => parseInt(e.type.replace("gunnerInstalled", "")));
+                    let types = this.actor.data.data.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
                     let equipType;
                     for (let i = 0; i <= types.length; i++) {
                         if (!types.includes(i)) {
                             equipType = `gunnerInstalled${i}`;
+                            break;
                         }
                     }
-                    await this.actor.equipItem(itemId, equipType, ev);
+                    await this.actor.equipItem(itemId, equipType, {event:ev, offerOverride:true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
                 }

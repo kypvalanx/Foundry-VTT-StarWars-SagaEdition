@@ -19,7 +19,7 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js";
 import {SWSEItem} from "../item/item.js";
-import {crewPositions, crewQuality, sizeArray, skills} from "../constants.js";
+import {crewPositions, crewQuality, equipableTypes, sizeArray, skills} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
@@ -1153,7 +1153,7 @@ export class SWSEActor extends Actor {
         let positions = [];
 
         for (let gunnerSlot of gunnerSlots) {
-            let gunnerItemReferences = this.data.data.equippedIds.filter(id => id.type === `gunnerInstalled` && id.slot === gunnerSlot)
+            let gunnerItemReferences = this.data.data.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
             let gunnerItems = []
             for (let item of items) {
                 let find = gunnerItemReferences?.find(e => e.id === item.data._id);
@@ -1166,11 +1166,11 @@ export class SWSEActor extends Actor {
             positions.push({
                 id: `gunnerInstalled${gunnerSlot}`,
                 numericId: gunnerSlot,
-                installed: gunnerItems.map(item => item.data)
+                installed: gunnerItems.map(item => {return {name: item.data.name, id:item.data._id, img: item.data.img}})
             });
         }
 
-        return positions;
+        return positions.sort((a,b) => a.numericId > b.numericId ? 1 : -1);
     }
 
 
@@ -1722,7 +1722,7 @@ export class SWSEActor extends Actor {
         if (options.type !== "provided") {
 
             //inventory items should not be limited to one.
-            if(!["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"].includes(item.type)){
+            if(!equipableTypes.includes(item.type)){
                 let takeMultipleTimes = getInheritableAttribute({
                     entity: item,
                     attributeKey: "takeMultipleTimes"
@@ -1741,20 +1741,39 @@ export class SWSEActor extends Actor {
 
             let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
 
-            if (meetsPrereqs.failureList.length > 0) {
+            if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
                 if (meetsPrereqs.doesFail) {
-                    new Dialog({
-                        title: "You Don't Meet the Prerequisites!",
-                        content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
+                    if(!!options.offerOverride){
+                        await new Dialog({
+                            title: "You Don't Meet the Prerequisites!",
+                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok'
+                                },
+                                override: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Override',
+                                    callback: () => this.resolveAddItem(item, choices, options)
+                                }
                             }
-                        }
-                    }).render(true);
+                        }).render(true);
+                        return;
+                    } else {
+                        new Dialog({
+                            title: "You Don't Meet the Prerequisites!",
+                            content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok'
+                                }
+                            }
+                        }).render(true);
 
-                    return [];
+                        return [];
+                    }
 
                 } else {
                     new Dialog({
@@ -1770,7 +1789,11 @@ export class SWSEActor extends Actor {
                 }
             }
         }
+        return await this.resolveAddItem(item, choices, options);
+    }
 
+
+    async resolveAddItem(item, choices, options) {
         let mainItem = await this.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
         let providedItems = item.getProvidedItems() || [];
@@ -1787,7 +1810,7 @@ export class SWSEActor extends Actor {
 
         await this.addItems(providedItems, mainItem[0], options);
 
-        let  modifications = item.getModifications()
+        let modifications = item.getModifications()
 
         modifications.forEach(mod => mod.equipToParent = true)
 
@@ -1795,7 +1818,6 @@ export class SWSEActor extends Actor {
 
         return mainItem[0];
     }
-
 
     /**
      *
@@ -1946,9 +1968,32 @@ export class SWSEActor extends Actor {
     async equipItem(itemId, equipType, options) {
         let item = this.items.get(itemId);
 
-        let {slot, position} = this.parseSlotAndPosition(equipType);
+        let {slot, position, newEquipType} = this.parseSlotAndPosition(equipType);
 
-        if (!options.skipPrerequisite) {
+        if(newEquipType === "gunnerInstalled"){
+            equipType = newEquipType;
+        }
+        if (!!options.offerOverride) {
+            let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+            if (meetsPrereqs.doesFail) {
+                await new Dialog({
+                    title: "You Don't Meet the Prerequisites!",
+                    content: `You do not meet the prerequisites for equipping ${item.data.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        },
+                        override: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Override',
+                            callback: () => this.resolveUpdate(itemId, equipType, slot, position)
+                        }
+                    }
+                }).render(true);
+                return;
+            }
+        } else if (!options.skipPrerequisite) {
             let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
             if (meetsPrereqs.doesFail) {
                 new Dialog({
@@ -1964,14 +2009,18 @@ export class SWSEActor extends Actor {
                 return;
             }
         }
+        await this.resolveUpdate(itemId, equipType, slot, position);
+
+    }
+
+
+    async resolveUpdate(itemId, equipType, slot, position) {
         let update = {};
         update['data.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
             .concat(this.data.data.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
 
         await this.update(update);
-
     }
-
 
     async unequipItem(itemId) {
         let update = {};
@@ -1984,10 +2033,10 @@ export class SWSEActor extends Actor {
         let slot = 0;
         let toks = type.split('Installed');
         let position = toks[0];
-        if (toks.length > 2) {
-            slot = toks[2];
+        if (toks.length > 1) {
+            slot = toks[1];
         }
-        return {slot, position};
+        return {slot, position, equipType: position + "Installed"};
     }
 
 

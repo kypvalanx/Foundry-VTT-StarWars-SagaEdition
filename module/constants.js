@@ -40,6 +40,8 @@ export const weaponGroup = {
     "Melee Weapons":["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons", "Melee Natural Weapons"]
 };
 
+export const equipableTypes=["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"];
+
 
 export const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
     "heavy weapons", "simple ranged weapons"];
