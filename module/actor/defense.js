@@ -63,6 +63,9 @@ export function resolveDefenses(actor) {
         conditionBonus = "0";
     }
 
+    //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
+
+
     let fortitude = _resolveFort(actor, conditionBonus);
     let will = _resolveWill(actor, conditionBonus);
     let reflex = _resolveRef(actor, conditionBonus);
@@ -89,7 +92,7 @@ export function resolveDefenses(actor) {
  *
  * @param actor {SWSEActor}
  * @param conditionBonus {number}
- * @returns {number}
+ * @returns
  * @private
  */
 function _resolveFort(actor, conditionBonus) {
@@ -169,10 +172,42 @@ function _resolveWill(actor, conditionBonus) {
 
         attributeFilter: attr => !attr.modifier
     })
+
+    let miscBonuses = [otherBonus, conditionBonus];
+
+    for(let val of getInheritableAttribute({entity:actor, attributeKey: "applyBonusTo", reduce:"VALUES"})){
+        if(val.toLowerCase().endsWith(":will")){
+            let toks = val.split(":");
+            let attributeKey = toks[0];
+
+            if(attributeKey === "equipmentFortitudeDefenseBonus"){
+                let equipmentFortBonus = _getEquipmentFortBonus(actor);
+                miscBonuses.push(equipmentFortBonus)
+                miscBonusTip += "Equipment Fort Bonus: " + equipmentFortBonus
+            } else {
+
+                miscBonuses.push(getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: attributeKey,
+                    reduce: "SUM",
+
+                    attributeFilter: attr => !attr.modifier
+                }))
+                miscBonusTip += getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: attributeKey,
+                    reduce: "SUMMARY",
+
+                    attributeFilter: attr => !attr.modifier
+                })
+            }
+        }
+    }
+
+
     miscBonusTip += `Condition: ${conditionBonus};  `
-    total.push(otherBonus);
-    total.push(conditionBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus])
+    let miscBonus = resolveValueArray(miscBonuses)
+    total.push(miscBonus);
     let armorBonus = resolveValueArray([heroicLevel]);
     return {total: resolveValueArray(total, actor), abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip, name: 'Will', defenseBlock:true}
 }

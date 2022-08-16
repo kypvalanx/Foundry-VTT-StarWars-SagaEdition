@@ -37,6 +37,10 @@ function inheritableItems(entity, attributeKey) {
                 for(let level of Object.values(item.data?.levels || {})){
                     attrs.push(...Object.values(level.data.attributes))
                 }
+                for(let entity of item.data.items || []){
+                    let inheritableAttribute = getInheritableAttribute({entity, attributeKey});
+                    attrs.push(...inheritableAttribute)
+                }
                 return attrs.map(attr => !!attr ? attr.key : "").includes(attributeKey) //||
                     //Object.values(item.data)
             })

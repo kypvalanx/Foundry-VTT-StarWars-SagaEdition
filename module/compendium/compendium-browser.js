@@ -561,7 +561,7 @@ export class SWSECompendiumBrowser extends Application {
 
         this.postFilters = this.generateFilters(filterStrings);
 
-        let groomedString = searchTerms.join(" ");
+        let groomedString = searchTerms.join(" ").trim();
         let query = new RegExp(RegExp.escape(groomedString), "i");
         this.searchString = groomedString;
         if (this._filterTimeout) {
