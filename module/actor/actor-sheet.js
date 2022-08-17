@@ -1234,7 +1234,8 @@ export class SWSEActorSheet extends ActorSheet {
             let equipType = equipTypes.find(x => targetItemContainer.classList.contains(x));
 
             let weaponSystemOnlyTypes = ["pilotInstalled"];
-            weaponSystemOnlyTypes.push(...this.actor.gunnerPositions.filter(e => !!e.id).map(e => e.id).filter(unique));
+            let gunnerPositions = this.actor.gunnerPositions || [];
+            weaponSystemOnlyTypes.push(...gunnerPositions.filter(e => !!e.id).map(e => e.id).filter(unique));
             let weaponSystemOnlyType = weaponSystemOnlyTypes.find(x => targetItemContainer.classList.contains(x));
 
             let unequipTypes = ["unequipped", "uninstalled"];
