@@ -89,9 +89,13 @@ export class SWSEActor extends Actor {
                 "data.isNPC": true
             }, {updateChanges: false});
         } else if (this.id && actorData.data.isNPC && actorData.token.actorLink) {
-            this.update({"token.actorLink": false})
+            let children = canvas.tokens.objects?.children || [];
+            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            this.setActorLinkOnActorAndTokens(documents, false);
         } else if (this.id && !actorData.data.isNPC && !actorData.token.actorLink) {
-            this.update({"token.actorLink": true})
+            let children = canvas.tokens.objects?.children || [];
+            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            this.setActorLinkOnActorAndTokens(documents, true);
         } else {
             this.data.data.condition = 0;
             let conditionEffect = this.effects.find(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
@@ -109,6 +113,13 @@ export class SWSEActor extends Actor {
 
         }
         //console.warn(this.data.prerequisites)
+    }
+
+    async setActorLinkOnActorAndTokens(documents, val) {
+        for (let document of documents) {
+            await document.update({'actorLink': val});
+        }
+        await this.update({"token.actorLink": val})
     }
 
     /**

@@ -24,7 +24,7 @@ export function generateVehicleAttacks(actor) {
     let attacks = [];
     attacks.push(...actor.getAvailableItemsFromRelationships()
         .filter(item => item.data.subtype && item.data.subtype.toLowerCase() === 'weapon systems')
-        .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId, {actor: actor.items})));
+        .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items})));
         //.map(weapon => generateAttackFromShipWeapon(weapon, map[weapon._id])));
     return attacks;
 }
@@ -62,11 +62,11 @@ export function generateAttacks(actor) {
         weaponIds.push("Unarmed Attack")
     }
 
-    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, {actor: actor.items}));
+    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, actor.parent?.id, {actor: actor.items}));
 
     let items = actor.getAvailableItemsFromRelationships()
 
-    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, {actor: actor.items})))
+    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, actor.parent?.id, {actor: actor.items})))
     return attacks;
 }
 
@@ -273,41 +273,3 @@ function getCharacterAttribute(actor, attributeName) {
 }
 
 
-export function generateAttackFromShipWeapon(weapon, actor) {
-    let parent = weapon.document?.parent;
-    if (!parent) {
-        parent = game.data.actors.find(actor => actor._id === weapon.parentId)
-    }
-
-    if (!actor) {
-        let equippedId = parent.data.data.equippedIds.find(id => id.id === weapon._id)
-        actor = parent.getCrewByPosition(equippedId.position, equippedId.slot);
-    }
-
-    let offense = actor.data?.offense;
-
-    let atkBonuses = [];
-    atkBonuses.push(offense?.bab)
-    atkBonuses.push(parent.data?.attributes?.int?.mod || parent.data?.data.attributes.int.mod)
-    //trained pilots get a bonus to hit when using weapons in the pilot slot
-    if (weapon.position === 'pilot' && actor.data.skills.pilot.trained) {
-        atkBonuses.push("2")
-    }
-
-    let notes = [`Weapon Emplacement on ${parent.name}`];
-
-    let th = d20 + getBonusString(resolveValueArray(atkBonuses));
-
-    let dam = Object.values(weapon.data?.attributes || weapon.data.data.attributes).filter(x => x.key === 'damage').map(attr => attr.value).join(' + ')
-    return new Attack({
-        name: weapon.name,
-        attackRoll: th,
-        attackRollBreakDown: atkBonuses.join(" + "),
-        damage: dam,
-        notes: notes.join(', '),
-        range: "Vehicle Weapon",
-        itemId: weapon._id,
-        actorId: actor.data._id,
-        provider: parent._id
-    });
-}
