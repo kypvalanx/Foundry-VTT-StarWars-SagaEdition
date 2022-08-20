@@ -61,7 +61,7 @@ export function appendNumericTerm(value, flavor) {
 export class Attack {
 
     get toJSON() {
-        return {actorId: this.actorId, itemId: this.itemId, providerId: this.providerId, options: this.options};
+        return {actorId: this.actorId, itemId: this.itemId, providerId: this.providerId, parentId: this.parentId, options: this.options};
     }
 
     get toJSONString() {
@@ -80,17 +80,18 @@ export class Attack {
         if(Array.isArray(json)){
             let attks = [];
             for(let atk of json){
-                attks.push( new Attack(atk.actorId, atk.itemId, atk.providerId, atk.options))
+                attks.push( new Attack(atk.actorId, atk.itemId, atk.providerId, atk.parentId, atk.options))
             }
             return attks;
         }
-        return new Attack(json.actorId, json.itemId, json.providerId, json.options)
+        return new Attack(json.actorId, json.itemId, json.providerId, json.parentId, json.options)
     }
 
-    constructor(actorId, itemId, providerId, options) {
+    constructor(actorId, itemId, providerId, parentId, options) {
         this.actorId = actorId;
         this.itemId = itemId;
         this.providerId = providerId;
+        this.parentId = parentId;
         this.options = options || {};
     }
 
@@ -100,7 +101,11 @@ export class Attack {
      */
     get actor() {
         let find;
-        if(this.actorId) {
+        if(this.parentId){
+            let tokens = canvas.tokens.objects?.children || [];
+            let token = tokens.find(token => token.id === this.parentId);
+            return token.document.actor.data
+        } else if(this.actorId) {
             find = game.data.actors.find(actor => actor._id === this.actorId);
             if (find instanceof SWSEActor) {
                 return find.data;
@@ -632,7 +637,7 @@ export class Attack {
     }
 
     clone(){
-        return new Attack(this.actorId, this.itemId, this.providerId, JSON.parse(JSON.stringify(this.options)))
+        return new Attack(this.actorId, this.itemId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
     }
 }
 
