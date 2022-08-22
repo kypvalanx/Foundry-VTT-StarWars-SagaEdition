@@ -66,16 +66,12 @@ export class Attack {
 
     get toJSONString() {
         let s = JSON.stringify(this.toJSON);
-        let s1 = s.replaceAll("&", "&amp;").replaceAll("'", "&apos;").replaceAll("\"", "&quot;");
-        return s1;
+        return escape(s);
     }
 
     static fromJSON(json) {
         if (typeof json === "string") {
-            let s = json.replaceAll("&quot;", "\"");
-            let s1 = s.replaceAll( "&apos;", "'");
-            json = s1.replaceAll("&amp;", "&" );
-            json = JSON.parse(json);
+            json = JSON.parse(unescape(json));
         }
         if(Array.isArray(json)){
             let attks = [];
@@ -989,7 +985,7 @@ function getAttackMods(selects, dualWeaponModifier) {
         if (select.value === "--") {
             continue;
         }
-        let attack = JSON.parse(select.value);
+        let attack = JSON.parse(unescape(select.value));
         let options = attack.options
         if (options.doubleAttack) {
             isDoubleAttack = true;
@@ -1098,13 +1094,13 @@ async function generateAttackCard(resolvedAttacks, attack) {
             classes.push("fail")
             modifiers.push(`<i class="fas fa-trash">`)
         }
-        attackRolls += `<td><a class="inline-roll inline-result ${classes.join(" ")}" title="${resolvedAttack.attack._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.attack.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.attack.total}</a></td>`
+        attackRolls += `<td><a class="inline-roll inline-result inline-dsn-hidden ${classes.join(" ")}" title="${resolvedAttack.attack._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.attack.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.attack.total}</a></td>`
 
         let damageType = "";
         if(resolvedAttack.damageType){
             damageType = ` (${resolvedAttack.damageType})`;
         }
-        damageRolls += `<td><a class="inline-roll inline-result ${classes.join(" ")}" title="${resolvedAttack.damage._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.damage.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.damage.total}${damageType}</a></td>`
+        damageRolls += `<td><a class="inline-roll inline-result inline-dsn-hidden ${classes.join(" ")}" title="${resolvedAttack.damage._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.damage.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.damage.total}${damageType}</a></td>`
     }
 
     return `<table class="swse">
@@ -1187,10 +1183,15 @@ function resolveAttack(attack) {
 export async function rollAttacks(attacks, rollMode) {
 
     let attackRows = [];
-    let roll;
+    let rolls = [];
+    let rollOrder = 1;
     for (let attack of attacks) {
         let resolvedAttack = resolveAttack(attack);
-        roll = resolvedAttack.attack;
+        resolvedAttack.attack.dice.forEach(die => die.options.rollOrder = rollOrder);
+        rolls.push(resolvedAttack.attack)
+        resolvedAttack.damage.dice.forEach(die => die.options.rollOrder = rollOrder);
+        rolls.push(resolvedAttack.damage)
+        rollOrder++
         attackRows.push(await generateAttackCard([resolvedAttack], attack))
     }
 
@@ -1202,6 +1203,8 @@ export async function rollAttacks(attacks, rollMode) {
     if (attacks.length > 1) {
         flavor = "Full Attack " + flavor;
     }
+    const pool = PoolTerm.fromRolls(rolls);
+    let roll = Roll.fromTerms([pool]);
 
 
     let messageData = {
@@ -1211,7 +1214,8 @@ export async function rollAttacks(attacks, rollMode) {
         type: CONST.CHAT_MESSAGE_TYPES.ROLL,
         content,
         sound: CONFIG.sounds.dice,
-        roll
+        roll,
+        rolls
     }
 
     let cls = getDocumentClass("ChatMessage");

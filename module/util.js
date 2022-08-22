@@ -493,7 +493,7 @@ export function handleAttackSelect(selects) {
         if (select.value) {
             selectedValuesBySelect[select.id] = select.value;
             if(select.value !== "--") {
-                let selected = JSON.parse(select.value)
+                let selected = JSON.parse(unescape(select.value))
 
                 if(selected.options.standardAttack){
                     hasStandard = true;
@@ -519,10 +519,10 @@ export function handleAttackSelect(selects) {
             }
         }
 
-        let selectValue = select.value !== "--"? JSON.parse(select.value): {options:{}};
+        let selectValue = select.value !== "--"? JSON.parse(unescape(select.value)): {options:{}};
         for (let o of select.options) {
             if(o.value !== "--" && !o.selected){
-                let selected = JSON.parse(o.value);
+                let selected = JSON.parse(unescape(o.value));
 
                 //disable this doubleattack option if no standard attacks have been selected or we already have a double attack and it's not the current selection of this select box
                 if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))){
