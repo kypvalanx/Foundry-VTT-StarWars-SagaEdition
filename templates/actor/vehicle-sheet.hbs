@@ -84,7 +84,6 @@
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true}}
 
                         {{#each actor.gunnerPositions as |position id|}}
-                            {{log position.installed}}
                             {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true}}
                         {{/each}}
                         <div class="subtle item-container new-gunner"

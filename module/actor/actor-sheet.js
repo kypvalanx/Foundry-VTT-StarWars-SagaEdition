@@ -814,7 +814,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async removeCrew(actorId, position, ev, delay = false) {
         let crew = getActorFromId(actorId);
-        await crew.removeCrew(this.actor.id, position)
+        await crew?.removeCrew(this.actor.id, position)
         await this.actor.removeCrew(actorId, position)
     }
 
