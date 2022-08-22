@@ -1082,8 +1082,7 @@ function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
 
     return attack;
 }
-
-function generateAttackCard(resolvedAttacks, attack) {
+async function generateAttackCard(resolvedAttacks, attack) {
     let attackRolls = '<th>Attack:</th>';
     let damageRolls = '<th>Damage:</th>';
 
@@ -1099,14 +1098,13 @@ function generateAttackCard(resolvedAttacks, attack) {
             classes.push("fail")
             modifiers.push(`<i class="fas fa-trash">`)
         }
-        //attackRolls += `<td class="${classes.join(" ")}" title="${resolvedAttack.attack.result}">${resolvedAttack.attack.total} ${modifiers.join(" ")}</td>`
-        attackRolls += `<td>[[${resolvedAttack.attackRollFunction}]] ${modifiers.join(" ")}</td>`
+        attackRolls += `<td><a class="inline-roll inline-result ${classes.join(" ")}" title="${resolvedAttack.attack._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.attack.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.attack.total}</a></td>`
+
         let damageType = "";
         if(resolvedAttack.damageType){
-            damageType = ` (${resolvedAttack.damageType}) `;
+            damageType = ` (${resolvedAttack.damageType})`;
         }
-        //damageRolls += `<td title="${resolvedAttack.damage.result}">${resolvedAttack.damage.total}${damageType}</td>`
-        damageRolls += `<td>[[${resolvedAttack.damageRollFunction}]]${damageType}</td>`
+        damageRolls += `<td><a class="inline-roll inline-result ${classes.join(" ")}" title="${resolvedAttack.damage._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.damage.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.damage.total}${damageType}</a></td>`
     }
 
     return `<table class="swse">
@@ -1186,14 +1184,14 @@ function resolveAttack(attack) {
     };
 }
 
-export function rollAttacks(attacks, rollMode) {
+export async function rollAttacks(attacks, rollMode) {
 
     let attackRows = [];
     let roll;
     for (let attack of attacks) {
         let resolvedAttack = resolveAttack(attack);
         roll = resolvedAttack.attack;
-        attackRows.push(generateAttackCard([resolvedAttack], attack))
+        attackRows.push(await generateAttackCard([resolvedAttack], attack))
     }
 
     let content = `${attackRows.join("<br>")}`;
