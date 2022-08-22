@@ -88,7 +88,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'SPECIES':
-                let filteredSpecies = [target.species].filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredSpecies = [target.species].filter(feat => feat?.data?.finalName === prereq.requirement);
                 if (filteredSpecies.length > 0) {
                     successList.push({prereq, count: 1});
                     continue;
