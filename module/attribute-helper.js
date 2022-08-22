@@ -33,11 +33,12 @@ function inheritableItems(entity, attributeKey) {
     if(attributeKey){
         possibleInheritableItems = possibleInheritableItems
             .filter(item => {
-                let attrs = Object.values(item.data.attributes);
-                for(let level of Object.values(item.data?.levels || {})){
+                let data = item.data || item._source.data;
+                let attrs = Object.values(data.attributes);
+                for(let level of Object.values(data?.levels || {})){
                     attrs.push(...Object.values(level.data.attributes))
                 }
-                for(let entity of item.data.items || []){
+                for(let entity of data.items || []){
                     let inheritableAttribute = getInheritableAttribute({entity, attributeKey});
                     attrs.push(...inheritableAttribute)
                 }
