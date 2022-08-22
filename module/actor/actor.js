@@ -235,7 +235,7 @@ export class SWSEActor extends Actor {
         }
 
 
-        if (!this.data.data.crewQuality || this.data.data.crewQuality.quality === "-" || this.data.data.crewQuality.quality === undefined) {
+        if (!this.data.data.crewQuality || this.data.data.crewQuality.quality === undefined) {
             let quality = getInheritableAttribute({
                 entity: this,
                 attributeKey: "crewQuality",
