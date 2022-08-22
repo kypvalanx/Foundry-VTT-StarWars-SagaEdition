@@ -910,6 +910,7 @@ export class SWSEActorSheet extends ActorSheet {
             case "forceSecret":
             case "forceTechnique":
             case "forcePower":
+            case "forceRegimen":
             case "affiliation":
                 await this.addForceItem(item);
                 break;
