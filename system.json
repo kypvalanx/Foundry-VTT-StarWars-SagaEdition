@@ -135,6 +135,13 @@
       "system": "swse"
     },
     {
+      "name": "languages",
+      "label": "Languages",
+      "path": "packs/swse-languages.db",
+      "type": "Item",
+      "system": "swse"
+    },
+    {
       "name": "vehicles",
       "label": "Vehicles",
       "path": "packs/swse-vehicles.db",

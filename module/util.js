@@ -754,6 +754,24 @@ export function getCompendium(type) {
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
             return game.packs.find(pack => pack.collection.startsWith("swse.templates"));
+        case 'affiliation':
+            return game.packs.find(pack => pack.collection.startsWith("swse.affiliations"));
+        case 'class':
+            return game.packs.find(pack => pack.collection.startsWith("swse.classes"));
+        case 'forceregimen':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force regimens"));
+        case 'forcepower':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force powers"));
+        case 'forcesecret':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force secrets"));
+        case 'forcetechnique':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force techniques"));
+        case 'beasttype':
+            return game.packs.find(pack => pack.collection.startsWith("swse.beast components"));
+        case 'background':
+            return game.packs.find(pack => pack.collection.startsWith("swse.background"));
+        case 'language':
+            return game.packs.find(pack => pack.collection.startsWith("swse.languages"));
     }
 }
 

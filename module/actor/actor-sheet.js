@@ -891,6 +891,7 @@ export class SWSEActorSheet extends ActorSheet {
         }
 
         let context = {};
+        context.newFromCompendium = true;
 
         switch (item.data.type) {
             case "background":
@@ -903,6 +904,7 @@ export class SWSEActorSheet extends ActorSheet {
                 break;
             case "class":
                 await this.addClass(item, context);
+                //await this.actor.addItems([{name: item.data.name, type: item.data.type}], undefined, context);
                 break;
             case "feat":
                 await this.addFeat(item);

@@ -49,21 +49,48 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
             promises.push(collection.importDocument(item));
         }
     } else if('Actor' === entity){
-        let actors = await SWSEActor.create(content.entries);
+        // let actors = await SWSEActor.create(content.entries);
+        // for(let actor of actors) {
+        //     let choiceAnswers = [];
+        //     choiceAnswers.push(actor.data.data.size);
+        //
+        //     let providedItems = actor.data.data.providedItems;
+        //     delete actor.data.data.providedItems;
+        //
+        //     await actor.addItems(providedItems, null, {skipPrerequisite:true, generalAnswers:choiceAnswers});
+        //
+        //     await collection.importDocument(actor);
+        // }
+
+        for(let actorData of content.entries){
+
+
+        let actors = await SWSEActor.create([actorData]);
         for(let actor of actors) {
+            let choiceAnswers = [];
+            choiceAnswers.push(actor.data.data.size);
+
             let providedItems = actor.data.data.providedItems;
             delete actor.data.data.providedItems;
 
-            await actor.addItems(providedItems, null, {skipPrerequisite:true})
+            actor.skipPrepare = true;
 
-            promises.push(collection.importDocument(actor));
+            await actor.addItems(providedItems, null, {skipPrerequisite:true, generalAnswers:choiceAnswers});
+
+            actor.skipPrepare = false;
+
+            actor.prepareData();
+            await collection.importDocument(actor);
+
+
+        }
         }
     }
         // await pack.createEntity(content.entries);
-    Promise.all(promises).then(() => {
+    //Promise.all(promises).then(() => {
         console.log(`Done Generating ${compendiumName}... ${content.entries.length} entries`);
     ui.notifications.info(`Done Updating ${compendiumName}... ${content.entries.length} entries`);
-});
+//});
 }
 
 export const deleteEmptyCompendiums = async function(){
@@ -89,6 +116,8 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
 
     if(type.toLowerCase() === "actor") {
         await importCompendium("systems/swse/raw_export/Vehicles.json", 'SWSE Vehicles', "Actor", forceRefresh);
+
+        await importCompendium("systems/swse/raw_export/Units CL 0.json", 'SWSE Units CL 0', "Actor", forceRefresh);
     }
     if(type.toLowerCase() === "item") {
         await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);
@@ -124,6 +153,8 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
         await importCompendium("systems/swse/raw_export/templates.json", 'SWSE Templates', "Item", forceRefresh);
 
         await importCompendium("systems/swse/raw_export/beast components.json", 'SWSE Beast Components', "Item", forceRefresh);
+
+        await importCompendium("systems/swse/raw_export/languages.json", 'SWSE Languages', "Item", forceRefresh);
     }
     console.log("End Generation")
 }

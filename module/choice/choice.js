@@ -7,6 +7,40 @@ function skipFirstLevelChoice(choice, context) {
 }
 
 
+function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
+    let items = [];
+    if (choice.showSelectionInName) {
+        item.setChoice(choiceAnswer)
+    }
+    if (choice.type === 'INTEGER') {
+        item.setPayload(choiceAnswer, choice.payload);
+    } else {
+        let selectedChoice = options.find(option => option.name === choiceAnswer);
+        if (selectedChoice) {
+            if (selectedChoice.payload) {
+                selectedChoice.payloads = selectedChoice.payloads || {};
+                selectedChoice.payloads["payload"] = selectedChoice.payload;
+            }
+
+            if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
+                Object.entries(selectedChoice.payloads).forEach(payload => {
+                    item.setPayload(payload[1], payload[0]);
+                })
+            }
+            if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
+                items = selectedChoice.providedItems
+            }
+            if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
+                Object.values(selectedChoice.attributes).forEach(attr => {
+                    let index = Math.max(Object.keys(item.data.data.attributes)) + 1
+                    item.data.data.attributes[index] = attr;
+                })
+            }
+        }
+    }
+    return items;
+}
+
 /**
  * if no choices exist > success empty item array
  * if no choices can be run > success empty array
@@ -32,13 +66,23 @@ export async function activateChoices(item, context) {
         let greetingString;
         let content;
         let options;
-        let payload = choice.payload;
         if ('INTEGER' === choice.type) {
             greetingString = choice.description;
             content = `<p>${greetingString}</p>`;
             content += `<input class="choice" type="number" data-option-key="">`
         } else {
             options = explodeOptions(choice.options, actor);
+
+            let preprogrammedAnswer = options.find(o => context.itemAnswers && (context.itemAnswers.includes(o.name) || context.itemAnswers.includes(o.value)))
+            if(!preprogrammedAnswer) {
+                preprogrammedAnswer = options.find(o => context.generalAnswers && (context.generalAnswers.includes(o.name) || context.generalAnswers.includes(o.value)))
+            }
+            if(preprogrammedAnswer){
+                items.push(...resolveActionsFromChoice(choice, item, preprogrammedAnswer.name, options));
+                continue;
+            }else{
+                console.log(choice.options, context, item);
+            }
 
             let optionString = "";
             if (options.length === 0) {
@@ -82,41 +126,10 @@ export async function activateChoices(item, context) {
                         return;
                     }
                     let elementValue = foundElement.value || foundElement.innerText;
-
-                    if (choice.showSelectionInName) {
-                        item.setChoice(elementValue)
-                    }
-                    if (choice.type === 'INTEGER') {
-                        item.setPayload(elementValue, payload);
-                    } else {
-                        let selectedChoice = options.find(option => option.name === elementValue);
-                        if (!selectedChoice) {
-                            return;
-                        }
-                        if (selectedChoice.payload) {
-                            selectedChoice.payloads = selectedChoice.payloads || {};
-                            selectedChoice.payloads["payload"] = selectedChoice.payload;
-                        }
-
-
-                        if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
-                            Object.entries(selectedChoice.payloads).forEach(payload => {
-                                item.setPayload(payload[1], payload[0]);
-                            })
-                        }
-                        if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                            items = selectedChoice.providedItems
-                        }
-                        if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
-                            Object.values(selectedChoice.attributes).forEach(attr => {
-                                let index = Math.max(Object.keys(item.data.data.attributes)) + 1
-                                item.data.data.attributes[index] = attr;
-                            })
-                        }
-                    }
+                    items.push(...resolveActionsFromChoice(choice, item, elementValue, options));
                 }
 
-                return {success: true, items: items}
+                return {success: true, items}
             }
         });
 

@@ -60,6 +60,9 @@ export class SWSEActor extends Actor {
      * Augment the basic actor data with additional dynamic data.
      */
     prepareData() {
+        if(this.skipPrepare){
+            return;
+        }
         super.prepareData();
 		
 		//check if user has permission to modify selected actor
@@ -1725,7 +1728,8 @@ export class SWSEActor extends Actor {
      * @param type
      */
     async checkPrerequisitesAndResolveOptions(item, options) {
-        let choices = await activateChoices(item, {actor: this});
+        options.actor = this;
+        let choices = await activateChoices(item, options);
         if (!choices.success) {
             return [];
         }
@@ -1843,21 +1847,21 @@ export class SWSEActor extends Actor {
         let indices = {};
         let notificationMessage = "";
         let addedItems = [];
-        for (let provided of items.filter(item => !!item && !!item.name && !!item.type)) {
-            let item = provided.name;
+        for (let providedItem of items.filter(item => !!item && !!item.name && !!item.type)) {
+            let rawItemName = providedItem.name;
             let prerequisite;
             if (!options.skipPrerequisite) {
-                prerequisite = provided.prerequisite;
+                prerequisite = providedItem.prerequisite;
             }
-            let type = provided.type;
-            let attributes = provided.attributes;
-            let providedItems = provided.providedItems;
-            let modifications = provided.modifications;
-            let namedCrew = provided.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
-            let equip = provided.equip;
-            let unlocked = provided.unlocked;
+            let type = providedItem.type;
+            let attributes = providedItem.attributes;
+            let providedItems = providedItem.providedItems;
+            let modifications = providedItem.modifications;
+            let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
+            let equip = providedItem.equip;
+            let unlocked = providedItem.unlocked;
             let {index, pack} = await getIndexAndPack(indices, type);
-            let {entry, payload, itemName} = await this.getIndexEntryByName(item, index);
+            let {entry, payload, itemName} = await this.getIndexEntryByName(rawItemName, index);
 
             if (!entry) {
                 console.warn(`attempted to add ${itemName}`, arguments)
@@ -1902,13 +1906,22 @@ export class SWSEActor extends Actor {
                 entity.setChoice(payload)
                 entity.setPayload(payload);
             }
+
+            for(let payload of Object.entries(providedItem.payloads || {})){
+                entity.setChoice(payload[1]);
+                entity.setPayload(payload[1], payload[0]);
+            }
+
             if (!!parent) {
                 entity.setParent(parent, unlocked);
             }
             entity.setTextDescription();
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
-            options.type = "provided";
-            let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, options);
+            let childOptions = JSON.parse(JSON.stringify(options))
+            childOptions.type = "provided";
+            childOptions.skipPrerequisite = false;
+            childOptions.itemAnswers = providedItem.answers;
+            let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
             if (addedModifications.length > 0) {
                 for (let addedModification of addedModifications) {
                     await addedItem.takeOwnership(addedModification)
@@ -1918,7 +1931,7 @@ export class SWSEActor extends Actor {
             if (!!equip) {
                 await this.equipItem(addedItem.data._id, equip, options)
             }
-            if(provided.equipToParent){
+            if(providedItem.equipToParent){
                 await parent.takeOwnership(addedItem);
             }
         }

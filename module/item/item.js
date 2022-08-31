@@ -58,7 +58,7 @@ export class SWSEItem extends Item {
     }
 
     get hasPrerequisites() {
-        return ['feat', 'talent', 'class'].includes(this.type)
+        return ['feat', 'talent', 'class', 'trait'].includes(this.type)
     }
 
     get modifiable() {
@@ -852,7 +852,7 @@ export class SWSEItem extends Item {
         if (!data) {
             return;
         }
-        for (let attribute of Object.values(data.providedItems) || []) {
+        for (let attribute of Object.values(data.providedItems || {})) {
             funct(attribute)
         }
         if (data.levels) {
@@ -865,7 +865,7 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        for (let mode of Object.values(data.modes) || []) {
+        for (let mode of Object.values(data.modes || {})) {
             this._crawlProvidedItems(mode, funct)
         }
 

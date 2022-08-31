@@ -1,4 +1,4 @@
-import {getLongKey, resolveValueArray} from "../util.js";
+import {getLongKey, resolveValueArray, toNumber} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 
 /**
@@ -17,6 +17,9 @@ export function generateAttributes(actor) {
     prerequisites.attributes = {};
     for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
         let longKey = getLongKey(key);
+        if(!longKey){
+            continue;
+        }
         let attributeBonuses = getInheritableAttribute({
             entity: actor,
             attributeKey: `${longKey}Bonus`
@@ -61,9 +64,20 @@ export function generateAttributes(actor) {
             attribute.bonus = Math.min(attribute.bonus, attributeMaxBonus);
         }
 
+
+
+
         let oldTotal = attribute.total;
         attribute.total = attribute.skip ? 10 : resolveValueArray([attribute.base, attribute.bonus], actor);
 
+        if(attribute.estimate){
+            let estimate = toNumber(attribute.estimate);
+            let difference = estimate - attribute.total
+            attribute.total = estimate;
+
+            data[`data.attributes.${key}.base`] = attribute.base + difference;
+            data[`data.attributes.${key}.estimate`] = null;
+        }
 
         if(attribute.total !== oldTotal){
             data[`data.attributes.${key}.total`] = attribute.total;

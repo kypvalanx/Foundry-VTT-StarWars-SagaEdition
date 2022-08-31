@@ -103,6 +103,16 @@ export class Attack {
             return token.document.actor.data
         } else if(this.actorId) {
             find = game.data.actors.find(actor => actor._id === this.actorId);
+            if(!find){
+                let values = [...game.packs.values()];
+                for(let pack of values.filter(pack => pack.documentClass.documentName === "Actor")){
+                    find = pack.get(this.actorId)
+
+                    if(find){
+                        break;
+                    }
+                }
+            }
             if (find instanceof SWSEActor) {
                 return find.data;
             }
