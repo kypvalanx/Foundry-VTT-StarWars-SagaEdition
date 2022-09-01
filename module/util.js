@@ -734,8 +734,11 @@ export function reduceArray(reduce, values) {
  * @param type
  * @returns {CompendiumCollection}
  */
-export function getCompendium(type) {
-    switch (type.toLowerCase()) {
+export function getCompendium(item) {
+    if(item.pack){
+        return game.packs.find(pack => pack.collection.startsWith(item.pack));
+    }
+    switch (item.type.toLowerCase()) {
         case 'item':
             return game.packs.find(pack => pack.collection.startsWith("swse.items"));
         case 'trait':
@@ -776,16 +779,17 @@ export function getCompendium(type) {
 }
 
 
-export async function getIndexAndPack(indices, type) {
-    let index = indices[type];
-    let pack = getCompendium(type);
+export async function getIndexAndPack(indices, item) {
+
+    let index = indices[item.pack || item.type];
+    let pack = getCompendium(item);
     if(!pack){
         console.error(`${type} compendium not defined`)
         return {}
     }
     if (!index) {
         index = await pack.getIndex();
-        indices[type] = index;
+        indices[item.pack || item.type] = index;
     }
     return {index, pack};
 }

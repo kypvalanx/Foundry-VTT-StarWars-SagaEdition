@@ -892,6 +892,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         let context = {};
         context.newFromCompendium = true;
+        //context.duplicate = data.duplicate;
 
         switch (item.data.type) {
             case "background":
@@ -903,8 +904,8 @@ export class SWSEActorSheet extends ActorSheet {
                 await this.addItemWithOneItemRestriction(item);
                 break;
             case "class":
-                await this.addClass(item, context);
-                //await this.actor.addItems([{name: item.data.name, type: item.data.type}], undefined, context);
+                //await this.addClass(item, context);
+                await this.actor.addItems([data], undefined, context);
                 break;
             case "feat":
                 await this.addFeat(item);
@@ -1092,82 +1093,17 @@ export class SWSEActorSheet extends ActorSheet {
 
     async addClass(item) {
 
-        let meetsPrereqs = meetsPrerequisites(this.actor, item.data.data.prerequisite);
-        if (meetsPrereqs.doesFail) {
-            new Dialog({
-                title: "You Don't Meet the Prerequisites!",
-                content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return [];
-        }
-        if (meetsPrereqs.failureList.length > 0) {
-            new Dialog({
-                title: "You MAY Meet the Prerequisites!",
-                content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-        }
-        let context = {};
-        context.isFirstLevel = this.actor.classes.length === 0;
-        if (item.name === "Beast" && !context.isFirstLevel && this.actor.classes.filter(clazz => clazz.name === "Beast").length === 0) {
-            new Dialog({
-                title: "The Beast class is not allowed at this time",
-                content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return [];
-        }
-        if (item.name !== "Beast" && this.actor.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.actor.getAttribute("INT") < 3) {
-            new Dialog({
-                title: "The Beast class is not allowed to multiclass at this time",
-                content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return [];
-        }
+
         context.actor = this.actor;
         let choices = await activateChoices(item, context);
         if (!choices.success) {
             return;
         }
 
-        let firstLevelAttribute = Object.values(item.data.data.attributes).find(v => v.key === "isFirstLevel");
 
-        if(firstLevelAttribute){
-            firstLevelAttribute.value = context.isFirstLevel;
-        } else {
-            item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
-                type: "Boolean",
-                value: context.isFirstLevel,
-                key: "isFirstLevel"
-            };
-        }
         let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
         await this.actor.addItems(choices.items, mainItem[0])
-
-        await this.addClassFeats(mainItem[0], context);
     }
 
     async addItem(item) {
@@ -1286,114 +1222,6 @@ export class SWSEActorSheet extends ActorSheet {
         return cursor;
     }
 
-
-    /**
-     * Adds Feats provided by a class and provides choices to the player when one is available
-     * @param item {SWSEItem}
-     * @param context
-     * @returns {Promise<[]>}
-     */
-    async addClassFeats(item, context) {
-        let feats = getInheritableAttribute({
-            entity: item,
-            attributeKey: "classFeat",
-
-
-        }).map(attr => attr.value);
-        let availableClassFeats = getInheritableAttribute({
-            entity: item,
-            attributeKey: "availableClassFeats",
-            reduce: "SUM",
-
-
-        });
-        if (feats.length === 0) {
-            return [];
-        }
-        feats = feats.map(feat => this.actor.cleanItemName(feat))
-        if (context.isFirstLevel) {
-            if (availableClassFeats > 0 && availableClassFeats < feats.length) {
-                let selectedFeats = [];
-                for (let i = 0; i < availableClassFeats; i++) {
-                    let options = "";
-
-                    for (let feat of this._explodeFeatNames(feats)) {
-                        let owned = "";
-                        let ownedFeats = this.actor.feats.filter(f => f.finalName === feat);
-                        ownedFeats.push(...selectedFeats.filter(f => f === feat))
-                        if (ownedFeats.length > 0) {
-                            owned = "<i>(you already have this feat)</i>"
-                        }
-
-                        options += `<option value="${feat}">${feat}${owned}</option>`
-                    }
-
-                    await Dialog.prompt({
-                        title: "Select a Starting feat from this class",
-                        content: `<p>Select a Starting feat from this class</p>
-                        <div><select id='feat'>${options}</select> 
-                        </div>`,
-                        callback: async (html) => {
-                            let feat = html.find("#feat")[0].value;
-                            selectedFeats.push(feat);
-                            await this.actor.addItems([{
-                                type: 'TRAIT',
-                                name: `Bonus Feat (${feat})`
-                            }, {
-                                type: 'FEAT',
-                                name: feat
-                            }], item);
-                        }
-                    });
-                }
-            } else {
-                await this.actor.addItems(feats.map(feat => {
-                    return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                }), item);
-                let featString = await this.actor.addItems(feats.map(feat => {
-                    return {type: 'FEAT', name: feat}
-                }), item);
-
-
-                new Dialog({
-                    title: "Adding Class Starting Feats",
-                    content: `Adding class starting feats: <ul>${featString}</ul>`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-            }
-        } else if (this._isFirstLevelOfClass(item.data.name)) {
-            let options = "";
-            for (let feat of feats) {
-                let owned = "";
-                let ownedFeats = this.actor.feats.filter(f => f.finalName === feat);
-                if (ownedFeats.length > 0) {
-                    owned = "<i>(you already have this feat)</i>"
-                }
-
-                options += `<option value="${feat}">${feat}${owned}</option>`
-            }
-
-            await Dialog.prompt({
-                title: "Select a Starting feat from this class",
-                content: `<p>Select a Starting feat from this class</p>
-                        <div><select id='feat'>${options}</select> 
-                        </div>`,
-                callback: async (html) => {
-                    let feat = html.find("#feat")[0].value;
-                    await this.actor.addItems({
-                        type: 'TRAIT',
-                        name: `Bonus Feat (${feat})`
-                    }, item);
-                    await this.actor.addItems({type: 'FEAT', name: feat}, item);
-                }
-            });
-        }
-    }
 
     /* -------------------------------------------- */
 
@@ -1593,30 +1421,6 @@ export class SWSEActorSheet extends ActorSheet {
         const item = this.actor.items.get(li.dataset.itemId);
         item.increaseQuantity();
     }
-
-
-    _isFirstLevelOfClass(name) {
-        let items = this.actor.items.filter(i => i.data.name === name);
-        return items.length === 1;
-    }
-
-    _explodeFeatNames(feats) {
-        let explode = [];
-        for (let feat of feats) {
-            if ("Skill Focus" === feat) {
-                skills.forEach(skill => {
-                    console.log("skill", skill)
-                    if (skill && !this.actor.focusSkills.includes(skill.toLowerCase())) {
-                        explode.push(`${feat} (${skill})`);
-                    }
-                })
-            } else {
-                explode.push(feat)
-            }
-        }
-        return explode;
-    }
-
 
     /**
      *

@@ -726,6 +726,9 @@ export class SWSEItem extends Item {
     }
 
     setChoice(choice) {
+        if(!choice){
+            return;
+        }
         this.data.data.selectedChoices = this.data.data.selectedChoices || [];
         this.data.data.selectedChoices.push(choice);
     }
@@ -767,6 +770,10 @@ export class SWSEItem extends Item {
 
 
     addItemAttributes(modifiers) {
+        if(!modifiers){
+            return;
+        }
+
         let attributes = this.data.data.attributes
         let attributeId = 0;
         while (attributes[attributeId]) {
@@ -785,6 +792,9 @@ export class SWSEItem extends Item {
     }
 
     addProvidedItems(modifiers) {
+        if(!modifiers){
+            return;
+        }
         this.data.data.providedItems = this.data.data.providedItems || [];
         this.data.data.providedItems.push(...modifiers)
     }
@@ -794,6 +804,10 @@ export class SWSEItem extends Item {
      * @param parent {SWSEItem}
      */
     setParent(parent, unlocked) {
+        if(!parent){
+            return;
+        }
+
         if(Array.isArray(parent)){
             parent = parent[0];
         }
@@ -887,6 +901,10 @@ export class SWSEItem extends Item {
     }
 
     setPrerequisite(prerequisite) {
+        if(!prerequisite){
+            return;
+        }
+
         this.data.data.prerequisite = prerequisite;
     }
 
