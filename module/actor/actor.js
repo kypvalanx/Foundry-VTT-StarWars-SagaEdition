@@ -1333,8 +1333,8 @@ export class SWSEActor extends Actor {
             .map(i => i.data.finalName)
             .includes(item.data.finalName);
     }
+    _reduceProvidedItemsByExistingItems(actorData) {
 
-    resolveClassFeatures() {
         let provides = getInheritableAttribute({
             entity: this,
             attributeKey: "provides"
@@ -1342,6 +1342,8 @@ export class SWSEActor extends Actor {
         this.data.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
         this.data.bonuses = {};
         this.data.activeFeatures = [];
+        let dynamicGroups = {};
+
         for (let provided of provides) {
             let key = provided.value;
             let value = 1;
@@ -1350,17 +1352,22 @@ export class SWSEActor extends Actor {
                 key = toks[0];
                 value = resolveExpression(toks[1], this)
             }
+
+            if(key.endsWith("Starting Feats")){
+                //this means we need to check the source of the provision to figure out what feats are included
+                let providingItem = this.items.get(provided.source);
+
+                dynamicGroups[key] = getInheritableAttribute({
+                    entity: providingItem,
+                    attributeKey: "classFeat",
+                    reduce: "VALUES"
+                });
+            }
             this.data.availableItems[key] = this.data.availableItems[key] ? this.data.availableItems[key] + value : value;
         }
 
         let classLevel = this.classes?.length;
         this.data.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.data.availableItems['General Feats'] ? this.data.availableItems['General Feats'] : 0);
-
-    }
-
-    _reduceProvidedItemsByExistingItems(actorData) {
-
-        this.resolveClassFeatures([])
 
 
         for (let talent of this.talents || []) {
@@ -1373,8 +1380,14 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            if (feat.data.bonusFeatCategories && feat.data.bonusFeatCategories.length > 0) {
+            if (feat.data.bonusFeatCategories && feat.data.bonusFeatCategories.length === 1) {
                 type = feat.data.bonusFeatCategories[0].value
+            } else{
+                for(let entry of Object.entries(dynamicGroups)){
+                    if(entry[1].includes(feat.finalName)){
+                        type = entry[0];
+                    }
+                }
             }
             this.reduceAvailableItem(actorData, type);
         }
@@ -1732,58 +1745,63 @@ export class SWSEActor extends Actor {
         }
 
         if(item.data.type === "class"){
-            let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+            let values = this.data.items._source || [];
+            let classes = values.filter(item => item.type === "class");
+            context.isFirstLevel = classes.length === 0;
+            if(!context.skipPrerequisite){
+                let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+                if (meetsPrereqs.doesFail) {
+                    new Dialog({
+                        title: "You Don't Meet the Prerequisites!",
+                        content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
-                return [];
-            }
-            if (meetsPrereqs.failureList.length > 0) {
-                new Dialog({
-                    title: "You MAY Meet the Prerequisites!",
-                    content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+                    }).render(true);
+                    return [];
+                }
+                if (meetsPrereqs.failureList.length > 0) {
+                    new Dialog({
+                        title: "You MAY Meet the Prerequisites!",
+                        content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
-            }
-            context.isFirstLevel = this.classes.length === 0;
-            if (item.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
-                new Dialog({
-                    title: "The Beast class is not allowed at this time",
-                    content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+                    }).render(true);
+                }
+
+                if (item.name === "Beast" && !context.isFirstLevel && classes.filter(clazz => clazz.name === "Beast").length === 0) {
+                    new Dialog({
+                        title: "The Beast class is not allowed at this time",
+                        content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
-                return [];
-            }
-            if (item.name !== "Beast" && this.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
-                new Dialog({
-                    title: "The Beast class is not allowed to multiclass at this time",
-                    content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+                    }).render(true);
+                    return [];
+                }
+                if (item.name !== "Beast" && classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
+                    new Dialog({
+                        title: "The Beast class is not allowed to multiclass at this time",
+                        content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
-                return [];
+                    }).render(true);
+                    return [];
+                }
             }
 
             let firstLevelAttribute = Object.values(item.data.data.attributes).find(v => v.key === "isFirstLevel");
@@ -1818,31 +1836,47 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+            if(!context.skipPrerequisite){
+                let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
 
-            if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
-                if (meetsPrereqs.doesFail) {
-                    if(!!context.offerOverride){
-                        await new Dialog({
-                            title: "You Don't Meet the Prerequisites!",
-                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok'
-                                },
-                                override: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Override',
-                                    callback: () => this.resolveAddItem(item, choices, context)
+                if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
+                    if (meetsPrereqs.doesFail) {
+                        if(!!context.offerOverride){
+                            await new Dialog({
+                                title: "You Don't Meet the Prerequisites!",
+                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                                buttons: {
+                                    ok: {
+                                        icon: '<i class="fas fa-check"></i>',
+                                        label: 'Ok'
+                                    },
+                                    override: {
+                                        icon: '<i class="fas fa-check"></i>',
+                                        label: 'Override',
+                                        callback: () => this.resolveAddItem(item, choices, context)
+                                    }
                                 }
-                            }
-                        }).render(true);
-                        return;
+                            }).render(true);
+                            return;
+                        } else {
+                            new Dialog({
+                                title: "You Don't Meet the Prerequisites!",
+                                content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                                buttons: {
+                                    ok: {
+                                        icon: '<i class="fas fa-check"></i>',
+                                        label: 'Ok'
+                                    }
+                                }
+                            }).render(true);
+
+                            return [];
+                        }
+
                     } else {
                         new Dialog({
-                            title: "You Don't Meet the Prerequisites!",
-                            content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                            title: "You MAY Meet the Prerequisites!",
+                            content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
                             buttons: {
                                 ok: {
                                     icon: '<i class="fas fa-check"></i>',
@@ -1850,29 +1884,17 @@ export class SWSEActor extends Actor {
                                 }
                             }
                         }).render(true);
-
-                        return [];
                     }
-
-                } else {
-                    new Dialog({
-                        title: "You MAY Meet the Prerequisites!",
-                        content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
                 }
             }
+
         }
         return await this.resolveAddItem(item, choices, context);
     }
 
 
     async resolveAddItem(item, choices, context) {
+        context.skipPrerequisite = false;
         let mainItem = await this.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
 
         let providedItems = item.getProvidedItems() || [];
@@ -1905,102 +1927,111 @@ export class SWSEActor extends Actor {
         let feats = getInheritableAttribute({
             entity: item,
             attributeKey: "classFeat",
-
-
-        }).map(attr => attr.value);
+            reduce: "VALUES"
+        }).map(feat => this.cleanItemName(feat));
         let availableClassFeats = getInheritableAttribute({
             entity: item,
             attributeKey: "availableClassFeats",
-            reduce: "SUM",
-
-
+            reduce: "SUM"
         });
+
         if (feats.length === 0) {
             return [];
         }
-        feats = feats.map(feat => this.cleanItemName(feat))
-        if (context.isFirstLevel) {
-            if (availableClassFeats > 0 && availableClassFeats < feats.length) {
-                let selectedFeats = [];
-                for (let i = 0; i < availableClassFeats; i++) {
-                    let options = "";
 
-                    for (let feat of this._explodeFeatNames(feats)) {
-                        let owned = "";
-                        let ownedFeats = this.feats.filter(f => f.finalName === feat);
-                        ownedFeats.push(...selectedFeats.filter(f => f === feat))
-                        if (ownedFeats.length > 0) {
-                            owned = "<i>(you already have this feat)</i>"
+        let feats1 = Object.values(this.data.items || {}).filter(item => item.type === "feat");
+        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.data.name);
+        if(!context.isUpload){
+            if (context.isFirstLevel) {
+                if (availableClassFeats > 0 && availableClassFeats < feats.length) {
+                    let selectedFeats = [];
+                    for (let i = 0; i < availableClassFeats; i++) {
+                        let options = "";
+
+                        for (let feat of this._explodeFeatNames(feats)) {
+                            let owned = "";
+                            let ownedFeats = feats1.filter(f => f.finalName === feat);
+                            ownedFeats.push(...selectedFeats.filter(f => f === feat))
+                            if (ownedFeats.length > 0) {
+                                owned = "<i>(you already have this feat)</i>"
+                            }
+
+                            options += `<option value="${feat}">${feat}${owned}</option>`
                         }
 
-                        options += `<option value="${feat}">${feat}${owned}</option>`
-                    }
-
-                    await Dialog.prompt({
-                        title: "Select a Starting feat from this class",
-                        content: `<p>Select a Starting feat from this class</p>
+                        await Dialog.prompt({
+                            title: `Select a Starting feat from this class`,
+                            content: `<p>Select a Starting feat from this class</p>
                         <div><select id='feat'>${options}</select> 
                         </div>`,
-                        callback: async (html) => {
-                            let feat = html.find("#feat")[0].value;
-                            selectedFeats.push(feat);
-                            await this.addItems([{
-                                type: 'TRAIT',
-                                name: `Bonus Feat (${feat})`
-                            }, {
-                                type: 'FEAT',
-                                name: feat
-                            }], item);
-                        }
-                    });
-                }
-            } else {
-                await this.addItems(feats.map(feat => {
-                    return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                }), item);
-                let featString = await this.addItems(feats.map(feat => {
-                    return {type: 'FEAT', name: feat}
-                }), item);
-
-
-                new Dialog({
-                    title: "Adding Class Starting Feats",
-                    content: `Adding class starting feats: <ul>${featString}</ul>`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
+                            callback: async (html) => {
+                                let feat = html.find("#feat")[0].value;
+                                selectedFeats.push(feat);
+                                await this.addItems([{
+                                    type: 'TRAIT',
+                                    name: `Bonus Feat (${feat})`
+                                }, {
+                                    type: 'FEAT',
+                                    name: feat
+                                }], item);
+                            }
+                        });
                     }
-                }).render(true);
-            }
-        } else if (this._isFirstLevelOfClass(item.data.name)) {
-            let options = "";
-            for (let feat of feats) {
-                let owned = "";
-                let ownedFeats = this.feats.filter(f => f.finalName === feat);
-                if (ownedFeats.length > 0) {
-                    owned = "<i>(you already have this feat)</i>"
+                } else {
+                    await this.addItems(feats.map(feat => {
+                        return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
+                    }), item);
+                    let featString = await this.addItems(feats.map(feat => {
+                        return {type: 'FEAT', name: feat}
+                    }), item);
+
+
+                    new Dialog({
+                        title: "Adding Class Starting Feats",
+                        content: `Adding class starting feats: <ul>${featString}</ul>`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                }
+            } else if (isFirstLevelOfClass) {
+                let options = "";
+                for (let feat of feats) {
+                    let owned = "";
+                    let ownedFeats = feats1.filter(f => f.finalName === feat);
+                    if (ownedFeats.length > 0) {
+                        owned = "<i>(you already have this feat)</i>"
+                    }
+
+                    options += `<option value="${feat}">${feat}${owned}</option>`
                 }
 
-                options += `<option value="${feat}">${feat}${owned}</option>`
-            }
-
-            await Dialog.prompt({
-                title: "Select a Starting feat from this class",
-                content: `<p>Select a Starting feat from this class</p>
+                await Dialog.prompt({
+                    title: "Select a Starting feat from this class",
+                    content: `<p>Select a Starting feat from this class</p>
                         <div><select id='feat'>${options}</select> 
                         </div>`,
-                callback: async (html) => {
-                    let feat = html.find("#feat")[0].value;
-                    await this.addItems({
-                        type: 'TRAIT',
-                        name: `Bonus Feat (${feat})`
-                    }, item);
-                    await this.addItems({type: 'FEAT', name: feat}, item);
-                }
-            });
+                    callback: async (html) => {
+                        let feat = html.find("#feat")[0].value;
+                        await this.addItems({
+                            type: 'TRAIT',
+                            name: `Bonus Feat (${feat})`
+                        }, item);
+                        await this.addItems({type: 'FEAT', name: feat}, item);
+                    }
+                });
+            }
+        } else {
+            if(context.isFirstLevel){
+                item.addAttribute({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
+            } else if(isFirstLevelOfClass){
+                item.addAttribute({key: "provides", value: `${item.name} Starting Feats`})
+            }
         }
+
     }
 
     _isFirstLevelOfClass(name) {
@@ -2014,8 +2045,7 @@ export class SWSEActor extends Actor {
         for (let feat of feats) {
             if ("Skill Focus" === feat) {
                 skills.forEach(skill => {
-                    console.log("skill", skill)
-                    if (skill && !this.actor.focusSkills.includes(skill.toLowerCase())) {
+                    if (skill && !this.focusSkills.includes(skill.toLowerCase())) {
                         explode.push(`${feat} (${skill})`);
                     }
                 })
@@ -2083,7 +2113,7 @@ export class SWSEActor extends Actor {
             notificationMessage = notificationMessage + `<li>${entity.name.titleCase()}</li>`
             let childOptions = JSON.parse(JSON.stringify(options))
             //childOptions.type = "provided";
-            childOptions.skipPrerequisite = false;
+            //childOptions.skipPrerequisite = false;
             childOptions.itemAnswers = providedItem.answers;
             let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 

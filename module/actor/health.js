@@ -1,6 +1,7 @@
 import {resolveValueArray} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {SWSEActor} from "./actor.js";
+import {SWSEItem} from "../item/item.js";
 
 /**
  *
@@ -37,6 +38,35 @@ export function resolveHealth(actor) {
     let max = resolveValueArray(health, actor);
     let dr = actorData.data.health.dr;
     let sr = actorData.data.health.sr;
+
+
+    let targetMaxHitPoints = actorData.data.hitPoints;
+    if(targetMaxHitPoints && targetMaxHitPoints !== -1){
+        let undestributedHitPoints = targetMaxHitPoints - max;
+        if(undestributedHitPoints !== 0){
+            for (let charClass of actor.classes || []) {
+                if(charClass.actAsFirstLevel){
+                    continue;
+                }
+                let maxHPThisLevel = getInheritableAttribute({entity: charClass, attributeKey: "levelUpHitPoints"}).map(attr => parseInt(attr.value.split("d")[1]))[0]
+                let rolledHp = getInheritableAttribute({entity: charClass, attributeKey: "rolledHp", reduce: "SUM"});
+                let newHPThisLevel = Math.min(undestributedHitPoints + rolledHp, maxHPThisLevel)
+
+                if(maxHPThisLevel === rolledHp || newHPThisLevel === rolledHp){
+                    continue;
+                }
+                charClass.setAttribute("rolledHp", newHPThisLevel);
+                break;
+            }
+        } else{
+            let data = {};
+            data['data.hitPoints'] = -1;
+            data._id = actor.data._id
+            actor.update(data)
+        }
+    }
+
+
     return {value, temp, other, max, dr, sr};
 }
 

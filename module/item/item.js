@@ -199,9 +199,7 @@ export class SWSEItem extends Item {
         }
         let attrs = getInheritableAttribute({
             entity: this,
-            attributeKey: "rolledHp",
-
-
+            attributeKey: "rolledHp"
         });
 
         if (attrs.length > 0) {
@@ -209,9 +207,7 @@ export class SWSEItem extends Item {
 
             let max = getInheritableAttribute({
                 entity: this,
-                attributeKey: "levelUpHitPoints",
-
-
+                attributeKey: "levelUpHitPoints"
             }).map(attr => parseInt(attr.value.split("d")[1]))[0]
             return rolledHp > max ? max : rolledHp;
         }
@@ -1111,7 +1107,12 @@ export class SWSEItem extends Item {
         })
     }
 
-    setAttribute(attribute, value) {
+    setAttribute(attribute, value, options={}) {
+        let update = this.getUpdateObjectForUpdatingAttribute(attribute, value);
+        return this.update(update, options);
+    }
+
+    getUpdateObjectForUpdatingAttribute(attribute, value) {
         let attributesForUpdate = this.getAttributesForUpdate(attribute);
         if (Object.keys(attributesForUpdate).length > 0) {
             for (let attribute of Object.values(attributesForUpdate)) {
@@ -1125,7 +1126,8 @@ export class SWSEItem extends Item {
                 attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value: value, key: attribute};
             }
         }
-        this.setAttributes(attributesForUpdate)
+        let update = this.buildUpdateObjectForAttributes(attributesForUpdate);
+        return update;
     }
 
     getAttributesForUpdate(attribute) {
@@ -1138,11 +1140,17 @@ export class SWSEItem extends Item {
         return attributes;
     }
 
-    setAttributes(attributes) {
+    setAttributes(attributes, options={}) {
+        let update = this.buildUpdateObjectForAttributes(attributes);
+        return this.update(update, options);
+    }
+
+    buildUpdateObjectForAttributes(attributes) {
         let update = {};
+        update._id = this.data._id
         update.data = {};
         update.data.attributes = attributes;
-        this.update(update);
+        return update;
     }
 
     setModeAttributes(modeIndex, attributes) {
