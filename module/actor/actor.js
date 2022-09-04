@@ -1748,7 +1748,7 @@ export class SWSEActor extends Actor {
             let values = this.data.items._source || [];
             let classes = values.filter(item => item.type === "class");
             context.isFirstLevel = classes.length === 0;
-            if(!context.skipPrerequisite){
+            if(!context.skipPrerequisite && !context.isUpload){
                 let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
                 if (meetsPrereqs.doesFail) {
                     new Dialog({
@@ -1826,17 +1826,19 @@ export class SWSEActor extends Actor {
                 }).map(a => a.value === "true").reduce((a, b) => a || b, false);
 
                 if (this.hasItem(item) && !takeMultipleTimes) {
-                    await Dialog.prompt({
-                        title: `You already have this ${context.type}`,
-                        content: `You have already taken the ${item.data.finalName} ${context.type}`,
-                        callback: () => {
-                        }
-                    })
+                    if(!context.isUpload){
+                        await Dialog.prompt({
+                            title: `You already have this ${context.type}`,
+                            content: `You have already taken the ${item.data.finalName} ${context.type}`,
+                            callback: () => {
+                            }
+                        })
+                    }
                     return [];
                 }
             }
 
-            if(!context.skipPrerequisite){
+            if(!context.skipPrerequisite && !context.isUpload){
                 let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
 
                 if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
