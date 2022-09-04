@@ -126,7 +126,9 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
     if (type.toLowerCase() === "actor") {
         await importCompendium("systems/swse/raw_export/Vehicles.json", 'SWSE Vehicles', "Actor", forceRefresh);
 
-        await importCompendium("systems/swse/raw_export/Units CL 0.json", 'SWSE Units CL 0', "Actor", forceRefresh);
+        for(let i = 0; i < 21; i++){
+            await importCompendium(`systems/swse/raw_export/Units CL ${i}.json`, `SWSE Units CL ${i}`, "Actor", forceRefresh);
+        }
     }
     if (type.toLowerCase() === "item") {
         await importCompendium("systems/swse/raw_export/Traits.json", 'SWSE Traits', "Item", forceRefresh);

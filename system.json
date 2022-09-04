@@ -149,9 +149,149 @@
       "system": "swse"
     },
     {
-      "name": "units cl 0",
-      "label": "Units CL 0",
+      "name": "units cl  0",
+      "label": "Units CL  0",
       "path": "packs/swse-units cl 0.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  1",
+      "label": "Units CL  1",
+      "path": "packs/swse-units cl 1.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  2",
+      "label": "Units CL  2",
+      "path": "packs/swse-units cl 2.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  3",
+      "label": "Units CL  3",
+      "path": "packs/swse-units cl 3.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  4",
+      "label": "Units CL  4",
+      "path": "packs/swse-units cl 4.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  5",
+      "label": "Units CL  5",
+      "path": "packs/swse-units cl 5.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  6",
+      "label": "Units CL  6",
+      "path": "packs/swse-units cl 6.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  7",
+      "label": "Units CL  7",
+      "path": "packs/swse-units cl 7.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  8",
+      "label": "Units CL  8",
+      "path": "packs/swse-units cl 8.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl  9",
+      "label": "Units CL  9",
+      "path": "packs/swse-units cl 9.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 10",
+      "label": "Units CL 10",
+      "path": "packs/swse-units cl 10.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 11",
+      "label": "Units CL 11",
+      "path": "packs/swse-units cl 11.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 12",
+      "label": "Units CL 12",
+      "path": "packs/swse-units cl 12.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 13",
+      "label": "Units CL 13",
+      "path": "packs/swse-units cl 13.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 14",
+      "label": "Units CL 14",
+      "path": "packs/swse-units cl 14.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 15",
+      "label": "Units CL 15",
+      "path": "packs/swse-units cl 15.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 16",
+      "label": "Units CL 16",
+      "path": "packs/swse-units cl 16.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 17",
+      "label": "Units CL 17",
+      "path": "packs/swse-units cl 17.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 18",
+      "label": "Units CL 18",
+      "path": "packs/swse-units cl 18.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 19",
+      "label": "Units CL 19",
+      "path": "packs/swse-units cl 19.db",
+      "type": "Actor",
+      "system": "swse"
+    },
+    {
+      "name": "units cl 20",
+      "label": "Units CL 20",
+      "path": "packs/swse-units cl 20.db",
       "type": "Actor",
       "system": "swse"
     }
