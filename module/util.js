@@ -493,7 +493,7 @@ export function handleAttackSelect(selects) {
         if (select.value) {
             selectedValuesBySelect[select.id] = select.value;
             if(select.value !== "--") {
-                let selected = JSON.parse(select.value)
+                let selected = JSON.parse(unescape(select.value))
 
                 if(selected.options.standardAttack){
                     hasStandard = true;
@@ -519,10 +519,10 @@ export function handleAttackSelect(selects) {
             }
         }
 
-        let selectValue = select.value !== "--"? JSON.parse(select.value): {options:{}};
+        let selectValue = select.value !== "--"? JSON.parse(unescape(select.value)): {options:{}};
         for (let o of select.options) {
             if(o.value !== "--" && !o.selected){
-                let selected = JSON.parse(o.value);
+                let selected = JSON.parse(unescape(o.value));
 
                 //disable this doubleattack option if no standard attacks have been selected or we already have a double attack and it's not the current selection of this select box
                 if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))){
@@ -734,8 +734,11 @@ export function reduceArray(reduce, values) {
  * @param type
  * @returns {CompendiumCollection}
  */
-export function getCompendium(type) {
-    switch (type.toLowerCase()) {
+export function getCompendium(item) {
+    if(item.pack){
+        return game.packs.find(pack => pack.collection.startsWith(item.pack));
+    }
+    switch (item.type.toLowerCase()) {
         case 'item':
             return game.packs.find(pack => pack.collection.startsWith("swse.items"));
         case 'trait':
@@ -754,20 +757,39 @@ export function getCompendium(type) {
             return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
             return game.packs.find(pack => pack.collection.startsWith("swse.templates"));
+        case 'affiliation':
+            return game.packs.find(pack => pack.collection.startsWith("swse.affiliations"));
+        case 'class':
+            return game.packs.find(pack => pack.collection.startsWith("swse.classes"));
+        case 'forceregimen':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force regimens"));
+        case 'forcepower':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force powers"));
+        case 'forcesecret':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force secrets"));
+        case 'forcetechnique':
+            return game.packs.find(pack => pack.collection.startsWith("swse.force techniques"));
+        case 'beasttype':
+            return game.packs.find(pack => pack.collection.startsWith("swse.beast components"));
+        case 'background':
+            return game.packs.find(pack => pack.collection.startsWith("swse.background"));
+        case 'language':
+            return game.packs.find(pack => pack.collection.startsWith("swse.languages"));
     }
 }
 
 
-export async function getIndexAndPack(indices, type) {
-    let index = indices[type];
-    let pack = getCompendium(type);
+export async function getIndexAndPack(indices, item) {
+
+    let index = indices[item.pack || item.type];
+    let pack = getCompendium(item);
     if(!pack){
         console.error(`${type} compendium not defined`)
         return {}
     }
     if (!index) {
         index = await pack.getIndex();
-        indices[type] = index;
+        indices[item.pack || item.type] = index;
     }
     return {index, pack};
 }

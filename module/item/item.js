@@ -58,7 +58,7 @@ export class SWSEItem extends Item {
     }
 
     get hasPrerequisites() {
-        return ['feat', 'talent', 'class'].includes(this.type)
+        return ['feat', 'talent', 'class', 'trait'].includes(this.type)
     }
 
     get modifiable() {
@@ -199,9 +199,7 @@ export class SWSEItem extends Item {
         }
         let attrs = getInheritableAttribute({
             entity: this,
-            attributeKey: "rolledHp",
-
-
+            attributeKey: "rolledHp"
         });
 
         if (attrs.length > 0) {
@@ -209,9 +207,7 @@ export class SWSEItem extends Item {
 
             let max = getInheritableAttribute({
                 entity: this,
-                attributeKey: "levelUpHitPoints",
-
-
+                attributeKey: "levelUpHitPoints"
             }).map(attr => parseInt(attr.value.split("d")[1]))[0]
             return rolledHp > max ? max : rolledHp;
         }
@@ -726,6 +722,9 @@ export class SWSEItem extends Item {
     }
 
     setChoice(choice) {
+        if(!choice){
+            return;
+        }
         this.data.data.selectedChoices = this.data.data.selectedChoices || [];
         this.data.data.selectedChoices.push(choice);
     }
@@ -767,6 +766,10 @@ export class SWSEItem extends Item {
 
 
     addItemAttributes(modifiers) {
+        if(!modifiers){
+            return;
+        }
+
         let attributes = this.data.data.attributes
         let attributeId = 0;
         while (attributes[attributeId]) {
@@ -785,6 +788,9 @@ export class SWSEItem extends Item {
     }
 
     addProvidedItems(modifiers) {
+        if(!modifiers){
+            return;
+        }
         this.data.data.providedItems = this.data.data.providedItems || [];
         this.data.data.providedItems.push(...modifiers)
     }
@@ -794,6 +800,10 @@ export class SWSEItem extends Item {
      * @param parent {SWSEItem}
      */
     setParent(parent, unlocked) {
+        if(!parent){
+            return;
+        }
+
         if(Array.isArray(parent)){
             parent = parent[0];
         }
@@ -852,7 +862,7 @@ export class SWSEItem extends Item {
         if (!data) {
             return;
         }
-        for (let attribute of Object.values(data.providedItems) || []) {
+        for (let attribute of Object.values(data.providedItems || {})) {
             funct(attribute)
         }
         if (data.levels) {
@@ -865,7 +875,7 @@ export class SWSEItem extends Item {
             }
         }
         //funct(data);
-        for (let mode of Object.values(data.modes) || []) {
+        for (let mode of Object.values(data.modes || {})) {
             this._crawlProvidedItems(mode, funct)
         }
 
@@ -887,6 +897,10 @@ export class SWSEItem extends Item {
     }
 
     setPrerequisite(prerequisite) {
+        if(!prerequisite){
+            return;
+        }
+
         this.data.data.prerequisite = prerequisite;
     }
 
@@ -1093,7 +1107,12 @@ export class SWSEItem extends Item {
         })
     }
 
-    setAttribute(attribute, value) {
+    setAttribute(attribute, value, options={}) {
+        let update = this.getUpdateObjectForUpdatingAttribute(attribute, value);
+        return this.update(update, options);
+    }
+
+    getUpdateObjectForUpdatingAttribute(attribute, value) {
         let attributesForUpdate = this.getAttributesForUpdate(attribute);
         if (Object.keys(attributesForUpdate).length > 0) {
             for (let attribute of Object.values(attributesForUpdate)) {
@@ -1107,7 +1126,8 @@ export class SWSEItem extends Item {
                 attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value: value, key: attribute};
             }
         }
-        this.setAttributes(attributesForUpdate)
+        let update = this.buildUpdateObjectForAttributes(attributesForUpdate);
+        return update;
     }
 
     getAttributesForUpdate(attribute) {
@@ -1120,11 +1140,17 @@ export class SWSEItem extends Item {
         return attributes;
     }
 
-    setAttributes(attributes) {
+    setAttributes(attributes, options={}) {
+        let update = this.buildUpdateObjectForAttributes(attributes);
+        return this.update(update, options);
+    }
+
+    buildUpdateObjectForAttributes(attributes) {
         let update = {};
+        update._id = this.data._id
         update.data = {};
         update.data.attributes = attributes;
-        this.update(update);
+        return update;
     }
 
     setModeAttributes(modeIndex, attributes) {
