@@ -55,6 +55,7 @@ export function resolveHealth(actor) {
                 if(maxHPThisLevel === rolledHp || newHPThisLevel === rolledHp){
                     continue;
                 }
+                console.debug("updating hitpoints for " + actor.name)
                 charClass.setAttribute("rolledHp", newHPThisLevel);
                 break;
             }
@@ -63,6 +64,7 @@ export function resolveHealth(actor) {
             data['data.hitPoints'] = -1;
             data._id = actor.data._id
             actor.update(data)
+            console.debug("completed updating hitpoints for " + actor.name)
         }
     }
 

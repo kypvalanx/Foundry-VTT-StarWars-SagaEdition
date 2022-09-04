@@ -147,6 +147,13 @@
       "path": "packs/swse-vehicles.db",
       "type": "Actor",
       "system": "swse"
+    },
+    {
+      "name": "units cl 0",
+      "label": "Units CL 0",
+      "path": "packs/swse-units cl 0.db",
+      "type": "Actor",
+      "system": "swse"
     }
   ],
   "languages": [

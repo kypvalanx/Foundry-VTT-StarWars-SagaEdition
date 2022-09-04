@@ -2121,7 +2121,7 @@ export class SWSEActor extends Actor {
             let modifications = providedItem.modifications;
             if (!!modifications) {
                 let addedModifications = [];
-                addedModifications = await this.addItems(modifications, null, {returnAdded: true});
+                addedModifications = await this.addItems(modifications, null, {returnAdded: true, actor: options.actor});
                 for (let addedModification of addedModifications) {
                     await addedItem.takeOwnership(addedModification)
                 }
