@@ -781,15 +781,16 @@ export function getCompendium(item) {
 
 export async function getIndexAndPack(indices, item) {
 
-    let index = indices[item.pack || item.type];
+    let compendiumReference = item.pack || item.type;
+    let index = indices[compendiumReference];
     let pack = getCompendium(item);
     if(!pack){
-        console.error(`${type} compendium not defined`)
+        console.error(`${compendiumReference} compendium not defined`)
         return {}
     }
     if (!index) {
         index = await pack.getIndex();
-        indices[item.pack || item.type] = index;
+        indices[compendiumReference] = index;
     }
     return {index, pack};
 }
