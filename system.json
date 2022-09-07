@@ -4,9 +4,20 @@
   "description": "The Star Wars: Saga Edition system for FoundryVTT!",
   "version": "0.5.42",
   "minimumCoreVersion": "9.245",
-  "compatibleCoreVersion": "9",
+  "compatibility": {
+    "minimum": 10,
+    "verified": 10,
+    "maximum": 10
+  },
   "templateVersion": 2,
-  "author": "Andy Lijewski",
+  "authors": [
+    {
+      "name": "Andy Lijewski",
+      "email": "lijewskirocks@gmail.com",
+      "discord": "AndyL#7253",
+      "url": "https://github.com/kypvalanx"
+    }
+  ],
   "esmodules": [
     "module/swse.js"
   ],
