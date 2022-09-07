@@ -13,7 +13,7 @@ import {getInheritableAttribute} from "../attribute-helper.js";
  */
 export function generateVehicleAttacks(actor) {
     let map = {}
-    actor.data.data.equippedIds.forEach(
+    actor.system.equippedIds.forEach(
         equippedId => {
 
             map[equippedId.id] =
@@ -23,7 +23,7 @@ export function generateVehicleAttacks(actor) {
 
     let attacks = [];
     attacks.push(...actor.getAvailableItemsFromRelationships()
-        .filter(item => item.data.subtype && item.data.subtype.toLowerCase() === 'weapon systems')
+        .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems')
         .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items})));
         //.map(weapon => generateAttackFromShipWeapon(weapon, map[weapon._id])));
     return attacks;
@@ -260,11 +260,11 @@ export function resolveFinesseBonus(actor, finesseStats) {
 
 /**
  *
- * @param {object} actor
+ * @param {SWSEActor} actor
  * @param {string} attributeName
  */
 function getCharacterAttribute(actor, attributeName) {
-    let data = actor.data.data || actor.data
+    let data = actor.system
     let attributes = data.attributes;
     if(!!attributes) {
         return attributes[toShortAttribute(attributeName).toLowerCase()];

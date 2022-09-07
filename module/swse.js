@@ -116,13 +116,12 @@ Hooks.on("ready", function () {
     game.generated.exoticRangedWeapons = [];
 
     game.packs.forEach(pack => {
-        //console.log(pack)
         pack.getIndex().then(index => {
             index.forEach(i => pack.getDocument(i._id)
                 .then(entity => {
                     ///list all exotic weapons
-                    if (entity.data.type === 'weapon') {
-                        let subTypeKey = entity.data._source.data.subtype.toLowerCase();
+                    if (entity.type === 'weapon') {
+                        let subTypeKey = entity._source.system.subtype.toLowerCase();
                         if (subTypeKey.includes('exotic')) {
                             game.generated.exoticWeapons.push(entity.name);
                             if(subTypeKey.includes('melee')){
@@ -131,7 +130,7 @@ Hooks.on("ready", function () {
                                 game.generated.exoticRangedWeapons.push(entity.name);
                             }
                         }
-                    } else if (entity.data.type === 'template') {
+                    } else if (entity.type === 'template') {
                         let exoticWeaponTypes = getInheritableAttribute({
                             entity,
                             attributeKey: "exoticWeapon",
@@ -139,10 +138,6 @@ Hooks.on("ready", function () {
                         })
                         game.generated.exoticWeapons.push(...exoticWeaponTypes);
                     }
-
-                    ///
-
-
                 }))
         });
     });

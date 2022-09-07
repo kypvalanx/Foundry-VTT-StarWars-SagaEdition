@@ -6,16 +6,14 @@ import {getInheritableAttribute} from "../attribute-helper.js";
  * @param actor {SWSEActor}
  */
 export function generateAttributes(actor) {
-    let actorData = actor.data;
+    let system = actor.system;
 
-    actorData.data.lockAttributes = actor.shouldLockAttributes
-    actorData.data.isBeast = actor.classes?.filter(clazz => clazz.name === "Beast").length > 0
+    system.lockAttributes = actor.shouldLockAttributes
+    system.isBeast = actor.classes?.filter(clazz => clazz.name === "Beast").length > 0
 
     let data = {};
 
-    let prerequisites = actorData.prerequisites;
-    prerequisites.attributes = {};
-    for (let [key, attribute] of Object.entries(actorData.data.attributes)) {
+    for (let [key, attribute] of Object.entries(system.attributes)) {
         let longKey = getLongKey(key);
         if(!longKey){
             continue;
@@ -45,14 +43,13 @@ export function generateAttributes(actor) {
             bonuses.push(bonusAttribute.value)
         }
 
-        let attributeBonus = actorData.data.levelAttributeBonus;
+        let attributeBonus = system.levelAttributeBonus;
         for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {
             bonuses.push(levelAttributeBonus[key])
         }
 
         // Calculate the modifier using d20 rules.
         attribute.bonus = resolveValueArray(bonuses, actor);
-
 
         let attributeMaxBonus = getInheritableAttribute({
             entity: actor,
@@ -63,9 +60,6 @@ export function generateAttributes(actor) {
         if (!isNaN(attributeMaxBonus)) {
             attribute.bonus = Math.min(attribute.bonus, attributeMaxBonus);
         }
-
-
-
 
         let oldTotal = attribute.total;
         attribute.total = attribute.skip ? 10 : resolveValueArray([attribute.base, attribute.bonus], actor);
@@ -109,11 +103,6 @@ export function generateAttributes(actor) {
         actor.resolvedLabels.set("@" + attribute.label + "MOD", attribute.label);
         actor.resolvedVariables.set("@" + attribute.label + "TOTAL", attribute.total);
         actor.resolvedLabels.set("@" + attribute.label + "TOTAL", attribute.label);
-
-        prerequisites.attributes[key] = {};
-        prerequisites.attributes[key].value = attribute.total;
-        prerequisites.attributes[longKey] = {};
-        prerequisites.attributes[longKey].value = attribute.total;
     }
 
 

@@ -32,7 +32,7 @@ import {errorsFromActor, warningsFromActor} from "./warnings.js";
 export class SWSEActor extends Actor {
     _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
-        for (let crewMember of this.data.data.crew) {
+        for (let crewMember of this.system.crew) {
             let linkedActor = getActorFromId(crewMember.id)
             if (!!linkedActor) {
                 linkedActor.prepareData()
@@ -70,49 +70,47 @@ export class SWSEActor extends Actor {
 			return false;
 		}
 		
-        const actorData = this.data;
-        actorData.data.description = actorData.data.description || ""
+        const system = this.system;
+        system.description = system.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 
-        this.data.prerequisites = {};
         this.inheritableItems = [];
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
 
-        if (this.id && actorData.type === "npc") {
+        if (this.id && this.type === "npc") {
             this.update({"type": "character", "data.isNPC": true}, {updateChanges: false});
-        } else if (this.id && actorData.type === "npc-vehicle") {
+        } else if (this.id && this.type === "npc-vehicle") {
             this.update({
                 "type": "vehicle",
                 "data.isNPC": true
             }, {updateChanges: false});
-        } else if (this.id && actorData.data.isNPC && actorData.token.actorLink) {
+        } else if (this.id && system.isNPC && this.prototypeToken.actorLink) {
             let children = canvas.tokens.objects?.children || [];
             let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, false);
-        } else if (this.id && !actorData.data.isNPC && !actorData.token.actorLink) {
+        } else if (this.id && !system.isNPC && !this.prototypeToken.actorLink) {
             let children = canvas.tokens.objects?.children || [];
             let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, true);
         } else {
-            this.data.data.condition = 0;
+            system.condition = 0;
             let conditionEffect = this.effects.find(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
 
             if (conditionEffect) {
-                this.data.data.condition = conditionEffect.data.changes.find(change => change.key === "condition").value
+                system.condition = conditionEffect.system.changes.find(change => change.key === "condition").value
             }
 
-            if (actorData.type === 'character') this._prepareCharacterData(actorData);
-            if (actorData.type === 'npc') this._prepareCharacterData(actorData);
-            if (actorData.type === 'computer') this._prepareComputerData(actorData);
-            if (actorData.type === 'vehicle') this._prepareVehicleData(actorData);
-            if (actorData.type === 'npc-vehicle') this._prepareVehicleData(actorData);
+            if (this.type === 'character') this._prepareCharacterData(system);
+            if (this.type === 'npc') this._prepareCharacterData(system);
+            if (this.type === 'computer') this._prepareComputerData(system);
+            if (this.type === 'vehicle') this._prepareVehicleData(system);
+            if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
 
         }
-        //console.warn(this.data.prerequisites)
     }
 
     async setActorLinkOnActorAndTokens(documents, val) {
@@ -124,32 +122,32 @@ export class SWSEActor extends Actor {
 
     /**
      * Prepare Vehicle type specific data
-     * @param actorData
+     * @param system
      * @private
      */
-    _prepareVehicleData(actorData) {
+    _prepareVehicleData(system) {
         let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
         this.vehicleTemplate = (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
 
         if (this.vehicleTemplate) {
-            this.inheritableItems.push(this.vehicleTemplate.data)
+            this.inheritableItems.push(this.vehicleTemplate.system)
         }
 
         this.uninstalled = this.getUninstalledSystems();
         this.installed = this.getInstalledSystems('installed');
-        this.inheritableItems.push(...this.installed.map(item => item.data))
+        this.inheritableItems.push(...this.installed.map(item => item.system))
         this.pilotInstalled = this.getInstalledSystems('pilotInstalled');
         this.gunnerPositions = this.getGunnerPositions()
         //this.inheritableItems.push(...this.systems)
-        //this.uninstalled = this.getUnequippedItems().map(item => item.data);
-        this.cargo = this.getNonequippableItems().map(item => item.data);
-        this.traits = this.getTraits().map(trait => trait.data);
+        //this.uninstalled = this.getUnequippedItems().map(item => item.system);
+        this.cargo = this.getNonequippableItems().map(item => item.system);
+        this.traits = this.getTraits().map(item => item.system);
 
         this.inheritableItems.push(...this.traits)
-        this.data.data.attributeGenerationType = "Manual"
-        this.data.data.disableAttributeGenerationChange = true;
+        this.system.attributeGenerationType = "Manual"
+        this.system.disableAttributeGenerationChange = true;
 
-        this.data.crew = getInheritableAttribute({
+        this.system.crewCount = getInheritableAttribute({
             entity: this,
             attributeKey: "crew",
             reduce: "SUM"
@@ -184,11 +182,11 @@ export class SWSEActor extends Actor {
 
 
         crewPositions.forEach(position => {
-            let crewMember = this.data.data.crew.filter(crewMember => crewMember.position === position);
+            let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
             let positionCover;
 
-            if (this.data.data.crewCover) {
-                positionCover = this.data.data.crewCover[position]
+            if (this.system.crewCover) {
+                positionCover = this.system.crewCover[position]
             }
 
             if (!positionCover) {
@@ -202,12 +200,12 @@ export class SWSEActor extends Actor {
             } else {
                 let crewSlot = crewSlotResolution[position];
                 if (crewSlot) {
-                    this.crewSlots.push(...this.resolveSlots(crewSlot(this.data.crew), crewMember, position, positionCover));
+                    this.crewSlots.push(...this.resolveSlots(crewSlot(this.system.crew), crewMember, position, positionCover));
                 }
             }
         });
 
-        this.data.hasAstromechSlot = false;
+        this.system.hasAstromechSlot = false;
         let providedSlots = getInheritableAttribute({
             entity: this,
             attributeKey: "providesSlot",
@@ -217,8 +215,8 @@ export class SWSEActor extends Actor {
             let count = providedSlots.filter(s => s === position).length
             let positionCover;
 
-            if (this.data.data.crewCover) {
-                positionCover = this.data.data.crewCover[position]
+            if (this.system.crewCover) {
+                positionCover = this.system.crewCover[position]
             }
 
             if (!positionCover) {
@@ -228,42 +226,42 @@ export class SWSEActor extends Actor {
                 positionCover = coverMap["default"];
             }
             if (position === "Astromech Droid") {
-                this.data.hasAstromechSlot = true;
+                this.hasAstromechSlot = true;
             }
-            this.data.crew += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
-            this.crewSlots.push(...this.resolveSlots(count, this.data.data.crew.filter(crewMember => crewMember.position === position), position, positionCover));
+            this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
+            this.crewSlots.push(...this.resolveSlots(count, this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover));
         }
 
 
-        if (!this.data.data.crewQuality || this.data.data.crewQuality.quality === undefined) {
+        if (!this.system.crewQuality || this.system.crewQuality.quality === undefined) {
             let quality = getInheritableAttribute({
                 entity: this,
                 attributeKey: "crewQuality",
                 reduce: "FIRST"
             });
             if (quality) {
-                this.data.data.crewQuality = {quality: quality.titleCase()}
+                this.system.crewQuality = {quality: quality.titleCase()}
             }
         }
 
-        this.data.passengers = getInheritableAttribute({
+        this.system.passengers = getInheritableAttribute({
             entity: this,
             attributeKey: "passengers",
             reduce: "SUM"
         })
-        this.data.subType = getInheritableAttribute({
+        this.system.subType = getInheritableAttribute({
             entity: this,
             attributeKey: "vehicleSubType",
             reduce: "FIRST"
         })
-        this.data.maximumVelocity = getInheritableAttribute({
+        this.system.maximumVelocity = getInheritableAttribute({
             entity: this,
             attributeKey: "maximumVelocity",
             reduce: "FIRST"
         })
 
         //TODO make the summation reduce function handle units?
-        this.data.cargo =
+        this.system.cargo =
             {
                 value: getInheritableAttribute({
                     entity: this,
@@ -277,12 +275,12 @@ export class SWSEActor extends Actor {
                 }))}`
             }
 
-        this.data.consumables = getInheritableAttribute({
+        this.system.consumables = getInheritableAttribute({
             entity: this,
             attributeKey: "consumables",
             reduce: "FIRST"
         })
-        this.data.grapple = resolveValueArray([this.pilot.data.offense?.bab, this.data.data.attributes.str.mod, getInheritableAttribute({
+        this.system.grapple = resolveValueArray([this.pilot.data.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
             entity: this,
             attributeKey: "grappleSizeModifier",
             reduce: "SUM"
@@ -304,12 +302,12 @@ export class SWSEActor extends Actor {
         if (primary === `Class undefined`) {
             primary = undefined;
         }
-        this.data.hyperdrive = {
+        this.system.hyperdrive = {
             primary: primary,
             backup: backup
         }
 
-        this.data.speed = {
+        this.system.speed = {
             vehicle: getInheritableAttribute({
                 entity: this,
                 attributeKey: "speedStarshipScale",
@@ -332,7 +330,7 @@ export class SWSEActor extends Actor {
             attributeKey: "characterFightingSpace",
             reduce: "MAX"
         });
-        this.data.fightingSpace = {
+        this.system.fightingSpace = {
             vehicle: vehicleFightingSpace,
             character: characterFightingSpace
         }
@@ -340,13 +338,13 @@ export class SWSEActor extends Actor {
         generateAttributes(this);
         generateSkills(this);
 
-        actorData.data.health = resolveHealth(this);
-        actorData.data.shields = resolveShield(this);
+        system.health = resolveHealth(this);
+        system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
-        actorData.data.defense = defense;
-        actorData.data.armors = armors;
+        system.defense = defense;
+        system.armors = armors;
 
-        actorData.data.attacks = generateVehicleAttacks(this);
+        system.attacks = generateVehicleAttacks(this);
     }
 
     /**
@@ -381,19 +379,19 @@ export class SWSEActor extends Actor {
 
         this.classes = filterItemsByType(this.items.values(), "class");
 
-        this.inheritableItems.push(...this.classes.map(item => item.data));
+        this.inheritableItems.push(...this.classes.map(item => item.system));
         this.traits = this.getTraits()//.map(trait => trait.data);
         this.talents = this.getTalents().map(talent => talent.data);
-        this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.data);
+        this.powers = filterItemsByType(this.items.values(), "forcePower").map(item => item.system);
         this.languages = filterItemsByType(this.items.values(), "language");
         let backgrounds = filterItemsByType(this.items.values(), "background");
         this.background = (backgrounds.length > 0 ? backgrounds[0] : null);
         let destinies = filterItemsByType(this.items.values(), "destiny");
         this.destiny = (destinies.length > 0 ? destinies[0] : null);
-        this.secrets = filterItemsByType(this.items.values(), "forceSecret").map(item => item.data);
-        this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.data);
-        this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.data);
-        this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.data);
+        this.secrets = filterItemsByType(this.items.values(), "forceSecret").map(item => item.system);
+        this.techniques = filterItemsByType(this.items.values(), "forceTechnique").map(item => item.system);
+        this.affiliations = filterItemsByType(this.items.values(), "affiliation").map(item => item.system);
+        this.regimens = filterItemsByType(this.items.values(), "forceRegimen").map(item => item.system);
         this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
         this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
         this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
@@ -427,10 +425,10 @@ export class SWSEActor extends Actor {
             this.inheritableItems.push(this.destiny)
         }
 
-        this.equipped = this.getEquippedItems()//.map(item => item.data);
+        this.equipped = this.getEquippedItems()//.map(item => item.system);
         this.inheritableItems.push(...this.equipped)
-        this.unequipped = this.getUnequippedItems()//.map(item => item.data);
-        this.inventory = this.getNonequippableItems()//.map(item => item.data);
+        this.unequipped = this.getUnequippedItems()//.map(item => item.system);
+        this.inventory = this.getNonequippableItems()//.map(item => item.system);
 
         generateAttributes(this);
 
@@ -488,7 +486,7 @@ export class SWSEActor extends Actor {
     }
 
     async removeSuppliedItems(id) {
-        return this.items.filter(item => item.data.data.supplier?.id === id).map(item => item.id) || []
+        return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
     handleDarksideArray(actorData) {
@@ -508,10 +506,10 @@ export class SWSEActor extends Actor {
     }
 
     get hasCrew() {
-        if (!["vehicle", "npc-vehicle"].includes(this.data.type)) {
+        if (!["vehicle", "npc-vehicle"].includes(this.type)) {
             return false;
         }
-        return 0 < this.data.data.crew.length
+        return 0 < this.system.crew.length
     }
 
 
@@ -554,78 +552,78 @@ export class SWSEActor extends Actor {
             case "Gunner":
                 return this.gunner(slot)
         }
-        return SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+        return SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
     }
 
     get pilot() {
-        let pilot = this.getActor(this.data.data.crew.find(c => c.position === 'Pilot')?.id);
+        let pilot = this.getActor(this.system.crew.find(c => c.position === 'Pilot')?.id);
         if (!pilot) {
             pilot = this.astromech;
         }
         if (!pilot) {
-            pilot = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            pilot = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
         return pilot;
     }
 
     get copilot() {
-        let copilot = this.getActor(this.data.data.crew.find(c => c.position === 'Copilot')?.id);
+        let copilot = this.getActor(this.system.crew.find(c => c.position === 'Copilot')?.id);
         if (!copilot) {
             copilot = this.astromech;
         }
         if (!copilot) {
-            copilot = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            copilot = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
         return copilot;
     }
 
     gunner(index) {
-        let actor = this.getActor(this.data.data.crew.find(c => c.position === 'Gunner' && c.slot === (index || 0))?.id);
+        let actor = this.getActor(this.system.crew.find(c => c.position === 'Gunner' && c.slot === (index || 0))?.id);
 
         if (!actor) {
-            actor = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
 
         return actor;
     }
 
     get commander() {
-        let commander = this.getActor(this.data.data.crew.find(c => c.position === 'Commander')?.id);
+        let commander = this.getActor(this.system.crew.find(c => c.position === 'Commander')?.id);
         if (!commander) {
             commander = this.pilot;
         }
         if (!commander) {
-            commander = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            commander = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
         return commander;
     }
 
     get systemsOperator() {
-        let systemsOperator = this.getActor(this.data.data.crew.find(c => c.position === 'Systems Operator')?.id);
+        let systemsOperator = this.getActor(this.system.crew.find(c => c.position === 'Systems Operator')?.id);
         if (!systemsOperator) {
             systemsOperator = this.astromech;
         }
         if (!systemsOperator) {
-            systemsOperator = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            systemsOperator = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
         return systemsOperator;
     }
 
     get engineer() {
-        let engineer = this.getActor(this.data.data.crew.find(c => c.position === 'Engineer')?.id);
+        let engineer = this.getActor(this.system.crew.find(c => c.position === 'Engineer')?.id);
         if (!engineer) {
             engineer = this.astromech;
         }
         if (!engineer) {
-            engineer = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+            engineer = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
         return engineer;
     }
 
     get astromech() {
-        let actor = this.getActor(this.data.data.crew.find(c => c.position === 'Astromech Droid')?.id);
-        if (!actor && this.data.data.hasAstromech && this.data.hasAstromechSlot) {
-            actor = SWSEActor.getCrewByQuality(this.data.data.crewQuality.quality);
+        let actor = this.getActor(this.system.crew.find(c => c.position === 'Astromech Droid')?.id);
+        if (!actor && this.system.hasAstromech && this.system.hasAstromechSlot) {
+            actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
             //TODO figure out if this is consistent on different ships with droid sockets
 
             actor.data.skills['mechanics'].value = 13;
@@ -639,11 +637,11 @@ export class SWSEActor extends Actor {
     }
 
     get age() {
-        return this.data.data.age;
+        return this.system.age;
     }
 
     get sex() {
-        return this.data.data.sex;
+        return this.system.sex;
     }
 
     get speed() {
@@ -703,7 +701,7 @@ export class SWSEActor extends Actor {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleTraits) {
-                if (!meetsPrerequisites(this, possible.data.data.prerequisite).doesFail) {
+                if (!meetsPrerequisites(this, possible.system.prerequisite).doesFail) {
                     activeTraits.push(possible);
                     shouldRetry = true;
                 }
@@ -712,8 +710,8 @@ export class SWSEActor extends Actor {
         }
 
         return activeTraits.sort((a, b) => {
-            let x = a.data.finalName.toLowerCase();
-            let y = b.data.finalName.toLowerCase();
+            let x = a.finalName?.toLowerCase();
+            let y = b.finalName?.toLowerCase();
             if (x < y) {
                 return -1;
             }
@@ -726,62 +724,19 @@ export class SWSEActor extends Actor {
 
     getEquippedItems() {
         let items = this.items;
-        return SWSEActor._getEquippedItems(this.data, SWSEActor.getInventoryItems(items.values()), "equipped");
+        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped");
     }
 
     getInstalledWeapons() {
         let items = this.items;
-        return SWSEActor._getEquippedItems(this.data, SWSEActor.getInventoryItems(items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
+        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
     }
 
     getTalents() {
-        let filterItemsByType1 = filterItemsByType(this.items.values(), "talent");
-        let prerequisites = this.data.prerequisites;
-
-        prerequisites.talentTrees = {}
-        prerequisites.talents = [];
-        prerequisites.forceTalentTreesCount = 0;
-        for (let talent of filterItemsByType1) {
-            prerequisites.talents.push(talent.name.toLowerCase());
-            let talentTree = talent.data.data.talentTree.toLowerCase();
-            if (prerequisites.talentTrees[talentTree]) {
-                prerequisites.talentTrees[talentTree]++;
-            } else {
-                prerequisites.talentTrees[talentTree] = 1;
-            }
-
-            if (talent.talentTrees?.includes("Force Talent Trees")) {
-                prerequisites.forceTalentTreesCount++;
-            }
-            if (!talentTree) {
-                console.log(talent)
-            }
-        }
-
-        return filterItemsByType1;
+        return filterItemsByType(this.items.values(), "talent");
     }
 
     resolveFeats() {
-        //TODO remove unneeded proficiencies and prereqs
-        let actorData = this.data;
-        actorData.proficiency = {};
-        actorData.proficiency.weapon = [];
-        actorData.proficiency.armor = [];
-        actorData.proficiency.focus = [];
-        actorData.proficiency.doubleAttack = [];
-        actorData.proficiency.tripleAttack = [];
-        actorData.proficiency.savageAttack = [];
-        actorData.proficiency.relentlessAttack = [];
-        actorData.proficiency.autofireSweep = [];
-        actorData.proficiency.autofireAssault = [];
-        actorData.proficiency.halt = [];
-        actorData.proficiency.returnFire = [];
-        actorData.proficiency.criticalStrike = [];
-        let prerequisites = this.data.prerequisites;
-        prerequisites.feats = [];
-        prerequisites.focusSkills = [];
-        prerequisites.masterSkills = [];
-        prerequisites.isForceTrained = false;
         let feats = filterItemsByType(this.items.values(), "feat");
         let activeFeats = [];
         let removeFeats = [];
@@ -791,72 +746,14 @@ export class SWSEActor extends Actor {
             let doesFail = prereqResponse.doesFail;
             if (!doesFail) {
                 activeFeats.push(feat.data)
-                prerequisites.feats.push(feat.name.toLowerCase());
-                this.checkForForceTraining(feat, prerequisites);
-                this.checkIsSkillFocus(feat, prerequisites);
-                this.checkIsSkillMastery(feat, prerequisites);
-                this.checkForProficiencies(feat, actorData);
             } else if (doesFail && !feat.data.data.supplier) {
                 removeFeats.push(feat.data);
             } else if (prereqResponse.failureList.length > 0) {
-
                 inactiveProvidedFeats.push(feat.data);
             }
         }
 
         return {activeFeats, removeFeats, inactiveProvidedFeats};
-    }
-
-    checkForForceTraining(feat, prerequisites) {
-        if ('force training' === feat.name.toLowerCase()) {
-            prerequisites.isForceTrained = true;
-        }
-    }
-
-    checkForProficiencies(feat, actorData) {
-        let result = /(Weapon Proficiency|Armor Proficiency|Weapon Focus|Double Attack|Triple Attack|Savage Attack|Relentless Attack|Autofire Sweep|Autofire Assault|Halt|Return Fire|Critical Strike) \(([\w\s]*)\)/g.exec(feat.data.finalName);
-        if (result === null) {
-            return;
-        }
-        if (result[1] === 'Weapon Proficiency') {
-            actorData.proficiency.weapon.push(result[2].toLowerCase());
-        } else if (result[1] === 'Armor Proficiency') {
-            actorData.proficiency.armor.push(result[2].toLowerCase());
-        } else if (result[1] === 'Weapon Focus') {
-            actorData.proficiency.focus.push(result[2].toLowerCase());
-        } else if (result[1] === 'Double Attack') {
-            actorData.proficiency.doubleAttack.push(result[2].toLowerCase());
-        } else if (result[1] === 'Triple Attack') {
-            actorData.proficiency.tripleAttack.push(result[2].toLowerCase());
-        } else if (result[1] === 'Savage Attack') {
-            actorData.proficiency.savageAttack.push(result[2].toLowerCase());
-        } else if (result[1] === 'Relentless Attack') {
-            actorData.proficiency.relentlessAttack.push(result[2].toLowerCase());
-        } else if (result[1] === 'Autofire Sweep') {
-            actorData.proficiency.autofireSweep.push(result[2].toLowerCase());
-        } else if (result[1] === 'Autofire Assault') {
-            actorData.proficiency.autofireAssault.push(result[2].toLowerCase());
-        } else if (result[1] === 'Halt') {
-            actorData.proficiency.halt.push(result[2].toLowerCase());
-        } else if (result[1] === 'Return Fire') {
-            actorData.proficiency.returnFire.push(result[2].toLowerCase());
-        } else if (result[1] === 'Critical Strike') {
-            actorData.proficiency.criticalStrike.push(result[2].toLowerCase());
-        }
-    }
-
-    checkIsSkillMastery(feat, prerequisites) {
-        let proficiency = /Skill Mastery \(([\w\s]*)\)/g.exec(feat.data.finalName);
-        if (proficiency) {
-            prerequisites.masterSkills.push(proficiency[1].toLowerCase());
-        }
-    }
-
-    checkIsSkillFocus(feat, prerequisites) {
-        let proficiency = /Skill Focus \(([\w\s]*)\)/g.exec(feat.data.finalName);
-        if (proficiency) {
-            prerequisites.focusSkills.push(proficiency[1].toLowerCase());
-        }
     }
 
     getVariable(variableName) {
@@ -865,7 +762,7 @@ export class SWSEActor extends Actor {
     }
 
     get conditionBonus() {
-        return this.data.data.condition;
+        return this.system.condition;
     }
 
 
@@ -879,13 +776,13 @@ export class SWSEActor extends Actor {
 
 
     getAttributes() {
-        return this.data.data.attributes;
+        return this.system.attributes;
     }
 
 
     getAttributeBases() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
+        for (let [key, attribute] of Object.entries(this.system.attributes)) {
             response[key] = attribute.base;
         }
         return response;
@@ -893,7 +790,7 @@ export class SWSEActor extends Actor {
 
     getAttributeBonuses() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.data.data.attributes)) {
+        for (let [key, attribute] of Object.entries(this.system.attributes)) {
             response[key] = attribute.bonus;
         }
         return response;
@@ -907,7 +804,7 @@ export class SWSEActor extends Actor {
      */
     async addCrew(actor, position, slot) {
         let update = {};
-        update['data.crew'] = [{actor: actor.data, id: actor.id, position, slot}].concat(this.data.data.crew);
+        update['data.crew'] = [{actor: actor.data, id: actor.id, position, slot}].concat(this.system.crew);
 
         await this.update(update);
     }
@@ -915,13 +812,13 @@ export class SWSEActor extends Actor {
     async removeCrew(actorId, position) {
         let update = {};
         if (!!actorId && !!position) {
-            update['data.crew'] = this.data.data.crew.filter(c => c.id !== actorId || c.position !== position)
+            update['data.crew'] = this.system.crew.filter(c => c.id !== actorId || c.position !== position)
         } else if (!!actorId) {
 
-            update['data.crew'] = this.data.data.crew.filter(c => c.id !== actorId)
+            update['data.crew'] = this.system.crew.filter(c => c.id !== actorId)
         } else if (!!position) {
 
-            update['data.crew'] = this.data.data.crew.filter(c => c.position !== position)
+            update['data.crew'] = this.system.crew.filter(c => c.position !== position)
         }
 
         await this.update(update);
@@ -1013,7 +910,7 @@ export class SWSEActor extends Actor {
     }
 
     get skills() {
-        return Object.values(this.data.data.skills);
+        return Object.values(this.system.skills);
     }
 
     get focusSkills() {
@@ -1025,7 +922,7 @@ export class SWSEActor extends Actor {
     }
 
     get inactiveProvidedFeats() {
-        return this.data.inactiveProvidedFeats;
+        return this.system.inactiveProvidedFeats;
     }
 
     // get shield() {
@@ -1112,44 +1009,44 @@ export class SWSEActor extends Actor {
     }
 
     ignoreCon() {
-        let skip = this.data.data.attributes.con?.skip;
+        let skip = this.system.attributes.con?.skip;
         return skip === undefined ? true : skip;
     }
 
 
-    static _getEquippedItems(actorData, items, equipTypes) {
+    static _getEquippedItems(system, items, equipTypes) {
         equipTypes = Array.isArray(equipTypes) ? equipTypes : [equipTypes];
 
-        let equippedIds = actorData.data.equippedIds || [];
+        let equippedIds = system.equippedIds || [];
         if (equipTypes.length > 0) {
             equippedIds = equippedIds.filter(id => equipTypes.includes(id.type))
         }
         equippedIds = equippedIds.map(id => id.id);
 
-        return items.filter(item => equippedIds.includes(item.data._id))
+        return items.filter(item => equippedIds.includes(item.system._id))
     }
 
     getUnequippedItems() {
         let items = this._getEquipable(SWSEActor.getInventoryItems(this.items.values()));
 
-        let equippedIds = (this.data.data.equippedIds || []).map(id => id.id);
+        let equippedIds = (this.system.equippedIds || []).map(id => id.id);
 
-        return items.filter(item => !equippedIds.includes(item.data._id))
+        return items.filter(item => !equippedIds.includes(item.system._id))
     }
 
     getUninstalledSystems() {
         let items = filterItemsByType(this.items.values(), "vehicleSystem");
 
-        let equippedIds = (this.data.data.equippedIds || []).map(id => id.id);
+        let equippedIds = (this.system.equippedIds || []).map(id => id.id);
 
-        return items.filter(item => !equippedIds.includes(item.data._id)).filter(item => !item.data.data.hasItemOwner);
+        return items.filter(item => !equippedIds.includes(item.system._id)).filter(item => !item.system.hasItemOwner);
     }
 
     getInstalledSystems(installationType) {
         let items = filterItemsByType(this.items.values(), "vehicleSystem");
         let installed = [];
         for (let item of items) {
-            let find = this.data.data.equippedIds?.find(e => e.id === item.data._id && e.type === installationType);
+            let find = this.system.equippedIds?.find(e => e.id === item.system._id && e.type === installationType);
             if (find) {
                 installed.push(item);
             }
@@ -1159,15 +1056,15 @@ export class SWSEActor extends Actor {
 
     getGunnerPositions() {
         let items = filterItemsByType(this.items.values(), "vehicleSystem");
-        let gunnerSlots = this.data.data.equippedIds.filter(id => !!id.type && id.type.startsWith("gunnerInstalled")).map(id => parseInt(id.slot)).filter(unique)
+        let gunnerSlots = this.system.equippedIds.filter(id => !!id.type && id.type.startsWith("gunnerInstalled")).map(id => parseInt(id.slot)).filter(unique)
 
         let positions = [];
 
         for (let gunnerSlot of gunnerSlots) {
-            let gunnerItemReferences = this.data.data.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
+            let gunnerItemReferences = this.system.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
             let gunnerItems = []
             for (let item of items) {
-                let find = gunnerItemReferences?.find(e => e.id === item.data._id);
+                let find = gunnerItemReferences?.find(e => e.id === item.system._id);
                 if (find) {
                     gunnerItems.push(item);
                 }
@@ -1177,7 +1074,7 @@ export class SWSEActor extends Actor {
             positions.push({
                 id: `gunnerInstalled${gunnerSlot}`,
                 numericId: gunnerSlot,
-                installed: gunnerItems.map(item => {return {name: item.data.name, id:item.data._id, img: item.data.img}})
+                installed: gunnerItems.map(item => {return {name: item.system.name, id:item.system._id, img: item.system.img}})
             });
         }
 
@@ -1186,12 +1083,12 @@ export class SWSEActor extends Actor {
 
 
     getNonequippableItems() {
-        return this._getUnequipableItems(SWSEActor.getInventoryItems(this.items.values())).filter(i => !i.data.hasItemOwner);
+        return this._getUnequipableItems(SWSEActor.getInventoryItems(this.items.values())).filter(i => !i.system.hasItemOwner);
     }
 
     static getInventoryItems(items) {
         return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation", "beastAttack", "beastSense", "beastType", "beastQuality")
-            .filter(item => !item.data.data.hasItemOwner);
+            .filter(item => !item.system.hasItemOwner);
     }
 
     _uppercaseFirstLetters(s) {
@@ -1237,7 +1134,7 @@ export class SWSEActor extends Actor {
      * @returns {*}
      */
     getAttributeMod(ability) {
-        return this.data.data.attributes[ability.toLowerCase()].mod;
+        return this.system.attributes[ability.toLowerCase()].mod;
     }
 
     /**
@@ -1262,7 +1159,7 @@ export class SWSEActor extends Actor {
         let removal = [];
         removeFeats.forEach(f => removal.push(f._id))
         for (let item of actorData.items) {
-            let itemData = item.data.data;
+            let itemData = item.system;
             if (itemData.isSupplied) {
                 //console.log(itemIds, itemData.supplier)
                 if (!itemIds.includes(itemData.supplier.id) || !itemData.supplier) {
@@ -1304,7 +1201,7 @@ export class SWSEActor extends Actor {
 
     getActiveModes(itemId) {
         let item = this.items.get(itemId);
-        return SWSEItem.getActiveModesFromItemData(item.data);
+        return SWSEItem.getActiveModesFromItemData(item.system);
     }
 
     getAbilitySkillBonus(skill) {
@@ -1331,7 +1228,7 @@ export class SWSEActor extends Actor {
     hasItem(item) {
         return Array.from(this.items.values())
             .map(i => i.data.finalName)
-            .includes(item.data.finalName);
+            .includes(item.system.finalName);
     }
     _reduceProvidedItemsByExistingItems(actorData) {
 
@@ -1339,9 +1236,9 @@ export class SWSEActor extends Actor {
             entity: this,
             attributeKey: "provides"
         });
-        this.data.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
-        this.data.bonuses = {};
-        this.data.activeFeatures = [];
+        this.system.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
+        this.system.bonuses = {};
+        this.system.activeFeatures = [];
         let dynamicGroups = {};
 
         for (let provided of provides) {
@@ -1363,11 +1260,11 @@ export class SWSEActor extends Actor {
                     reduce: "VALUES"
                 });
             }
-            this.data.availableItems[key] = this.data.availableItems[key] ? this.data.availableItems[key] + value : value;
+            this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] + value : value;
         }
 
         let classLevel = this.classes?.length;
-        this.data.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.data.availableItems['General Feats'] ? this.data.availableItems['General Feats'] : 0);
+        this.system.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.system.availableItems['General Feats'] ? this.system.availableItems['General Feats'] : 0);
 
 
         for (let talent of this.talents || []) {
@@ -1507,7 +1404,7 @@ export class SWSEActor extends Actor {
             items.push(actor.items.get(itemId.id));
         }
 
-        items = items.filter(item => !!item && item.type !== "weapon" && item.data.data.subtype !== "weapon systems");
+        items = items.filter(item => !!item && item.type !== "weapon" && item.system.subtype !== "weapon systems");
 
         //let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
 
@@ -1549,7 +1446,7 @@ export class SWSEActor extends Actor {
 
 
     getAttributeGenerationType() {
-        return this.data.data.attributeGenerationType;
+        return this.system.attributeGenerationType;
     }
 
     setAttributeGenerationType(attributeGenerationType) {
@@ -1557,7 +1454,7 @@ export class SWSEActor extends Actor {
     }
 
     get credits() {
-        return this.data.data.credits || 0;
+        return this.system.credits || 0;
     }
 
     set credits(credits) {
@@ -1578,8 +1475,8 @@ export class SWSEActor extends Actor {
 
 
     getAttributeLevelBonus(level) {
-        console.log(this.data)
-        return this.data.data.levelAttributeBonus[level];
+        console.log(this.system)
+        return this.system.levelAttributeBonus[level];
     }
 
     setAttributeLevelBonus(level, attributeLevelBonus) {
@@ -1595,7 +1492,7 @@ export class SWSEActor extends Actor {
     get isForceSensitive() {
         let hasForceSensativity = false;
         for (let item of this.items.values()) {
-            if (item.data.finalName === 'Force Sensitivity') {
+            if (item.system.finalName === 'Force Sensitivity') {
                 hasForceSensativity = true;
             }
         }
@@ -1603,11 +1500,11 @@ export class SWSEActor extends Actor {
     }
 
     get baseAttackBonus() {
-        return this.data.data.offense.bab;
+        return this.system.offense.bab;
     }
 
     get darkSideScore() {
-        return this.data.data.finalDarksideScore;
+        return this.system.finalDarksideScore;
     }
 
     set darkSideScore(score) {
@@ -1647,7 +1544,7 @@ export class SWSEActor extends Actor {
      * @returns {Promise<void>}
      */
     async attack(event, context) {
-        context.actor = this.data;
+        context.actor = this.system;
         await makeAttack(context);
     }
 
@@ -1697,12 +1594,12 @@ export class SWSEActor extends Actor {
     getAvailableItemsFromRelationships() {
         if (['vehicle', 'npc-vehicle'].includes(this.type)) {
             let availableItems = []
-            let itemIds = this.data.data.equippedIds
+            let itemIds = this.system.equippedIds
 
             for (let itemId of itemIds) {
-                let item = this.items.map(i => i.data).find(item => item._id === itemId.id);
+                let item = this.items.find(item => item._id === itemId.id);
                 if (item) {
-                    item.parentId = this.data._id
+                    item.parentId = this._id
                     item.position = itemId.position;
                     availableItems.push(item)
                 }
@@ -1711,7 +1608,7 @@ export class SWSEActor extends Actor {
         }
         if (['character', 'npc'].includes(this.type)) {
             let availableItems = []
-            for (let crew of this.data.data.crew) {
+            for (let crew of this.system.crew) {
                 let vehicle = game.data.actors.find(actor => actor._id === crew.id);
                 if (vehicle) {
                     let itemIds = vehicle.data.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
@@ -1744,16 +1641,16 @@ export class SWSEActor extends Actor {
             return [];
         }
 
-        if(item.data.type === "class"){
-            let values = this.data.items._source || [];
+        if(item.type === "class"){
+            let values = this.items._source || [];
             let classes = values.filter(item => item.type === "class");
             context.isFirstLevel = classes.length === 0;
             if(!context.skipPrerequisite && !context.isUpload){
-                let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+                let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
                 if (meetsPrereqs.doesFail) {
                     new Dialog({
                         title: "You Don't Meet the Prerequisites!",
-                        content: `You do not meet the prerequisites for the ${item.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                        content: `You do not meet the prerequisites for the ${item.system.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                         buttons: {
                             ok: {
                                 icon: '<i class="fas fa-check"></i>',
@@ -1804,12 +1701,12 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            let firstLevelAttribute = Object.values(item.data.data.attributes).find(v => v.key === "isFirstLevel");
+            let firstLevelAttribute = Object.values(item.system.attributes).find(v => v.key === "isFirstLevel");
 
             if(firstLevelAttribute){
                 firstLevelAttribute.value = context.isFirstLevel;
             } else {
-                item.data.data.attributes[Object.keys(item.data.data.attributes).length] = {
+                item.system.attributes[Object.keys(item.system.attributes).length] = {
                     type: "Boolean",
                     value: context.isFirstLevel,
                     key: "isFirstLevel"
@@ -1829,7 +1726,7 @@ export class SWSEActor extends Actor {
                     if(!context.isUpload){
                         await Dialog.prompt({
                             title: `You already have this ${context.type}`,
-                            content: `You have already taken the ${item.data.finalName} ${context.type}`,
+                            content: `You have already taken the ${item.finalName} ${context.type}`,
                             callback: () => {
                             }
                         })
@@ -1839,7 +1736,7 @@ export class SWSEActor extends Actor {
             }
 
             if(!context.skipPrerequisite && !context.isUpload){
-                let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+                let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
 
                 if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
                     if (meetsPrereqs.doesFail) {
@@ -1897,7 +1794,7 @@ export class SWSEActor extends Actor {
 
     async resolveAddItem(item, choices, context) {
         context.skipPrerequisite = false;
-        let mainItem = await this.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
+        let mainItem = await this.createEmbeddedDocuments("Item", [item.system.toObject(false)]);
 
         let providedItems = item.getProvidedItems() || [];
 
@@ -1911,7 +1808,7 @@ export class SWSEActor extends Actor {
 
         await this.addItems(modifications, mainItem[0], context);
 
-        if(item.data.type === "class"){
+        if(item.type === "class"){
             await this.addClassFeats(mainItem[0], context);
         }
 
@@ -1941,8 +1838,8 @@ export class SWSEActor extends Actor {
             return [];
         }
 
-        let feats1 = Object.values(this.data.items || {}).filter(item => item.type === "feat");
-        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.data.name);
+        let feats1 = Object.values(this.items || {}).filter(item => item.type === "feat");
+        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.system.name);
         if(!context.isUpload){
             if (context.isFirstLevel) {
                 if (availableClassFeats > 0 && availableClassFeats < feats.length) {
@@ -2132,7 +2029,7 @@ export class SWSEActor extends Actor {
 
             let equip = providedItem.equip;
             if (equip) {
-                await this.equipItem(addedItem.data._id, equip, options)
+                await this.equipItem(addedItem._id, equip, options)
             }
             if(providedItem.equipToParent){
                 await parent.takeOwnership(addedItem);
@@ -2176,7 +2073,7 @@ export class SWSEActor extends Actor {
         }
 
 
-        return {payload, itemName: itemName || entity.data.name, entity};
+        return {payload, itemName: itemName || entity?.name, entity};
     }
 
     get warnings() {
@@ -2236,11 +2133,11 @@ export class SWSEActor extends Actor {
             equipType = newEquipType;
         }
         if (!!options.offerOverride) {
-            let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
             if (meetsPrereqs.doesFail) {
                 await new Dialog({
                     title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for equipping ${item.data.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    content: `You do not meet the prerequisites for equipping ${v.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                     buttons: {
                         ok: {
                             icon: '<i class="fas fa-check"></i>',
@@ -2256,11 +2153,11 @@ export class SWSEActor extends Actor {
                 return;
             }
         } else if (!options.skipPrerequisite) {
-            let meetsPrereqs = meetsPrerequisites(this, item.data.data.prerequisite);
+            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
             if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for equipping ${item.data.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    content: `You do not meet the prerequisites for equipping ${item.system.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                     buttons: {
                         ok: {
                             icon: '<i class="fas fa-check"></i>',
@@ -2279,14 +2176,14 @@ export class SWSEActor extends Actor {
     async resolveUpdate(itemId, equipType, slot, position) {
         let update = {};
         update['data.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
-            .concat(this.data.data.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
+            .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
 
         await this.update(update);
     }
 
     async unequipItem(itemId) {
         let update = {};
-        update['data.equippedIds'] = this.data.data.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
+        update['data.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
 
         await this.update(update);
     }
@@ -2319,19 +2216,16 @@ export class SWSEActor extends Actor {
 /**
  *
  *
- * @param actorData {ActorData}
+ * @param actor {SWSEActor}
  */
-export function getEquippedItems(actorData) {
-    if (!actorData) {
+export function getEquippedItems(actor) {
+    if (!actor) {
         return [];
     }
-    if (actorData instanceof SWSEActor) {
-        actorData = actorData.data;
-    }
 
-    let equippedIds = actorData?.data?.data?.equippedIds || actorData?.data?.equippedIds || actorData?._source?.data?.equippedIds || [];
+    let equippedIds = actor.system?.equippedIds || actor._source?.system?.equippedIds || [];
     equippedIds = equippedIds.map(id => id.id)
-    let items = actorData?.items?._source || actorData.items || []
+    let items = actor.items?._source || actor.items || []
 
     return items.filter(item => equippedIds.includes(item._id));
 }

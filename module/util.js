@@ -243,7 +243,7 @@ export function filterItemsByType(items, type) {
     }
     let filtered = [];
     for (let item of items) {
-        if (types.includes(item.type) || types.includes(item.data.type)) {
+        if (types.includes(item.type)){// || types.includes(item.data.type)) {
             filtered.push(item);
         }
     }

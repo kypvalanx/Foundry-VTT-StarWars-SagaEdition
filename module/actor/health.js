@@ -9,10 +9,10 @@ import {SWSEItem} from "../item/item.js";
  * @returns {{temp, other: number, max: number, value: *, dr, sr}}
  */
 export function resolveHealth(actor) {
-    if (!actor || !actor.data) {
+    if (!actor || !actor) {
         return;
     }
-    let actorData = actor.data;
+    let system = actor.system;
     let ignoreCon = actor.ignoreCon();
     let health = [];
     for (let charClass of actor.classes || []) {
@@ -33,14 +33,14 @@ export function resolveHealth(actor) {
     let other = resolveValueArray(others, actor);
 
     //TODO add traits and stuff that boost HP
-    let value = Array.isArray(actorData.data.health.value)? actorData.data.health.value[0]: actorData.data.health.value;
-    let temp = actorData.data.health.temp;
+    let value = Array.isArray(system.health.value)? system.health.value[0]: system.health.value;
+    let temp = system.health.temp;
     let max = resolveValueArray(health, actor);
-    let dr = actorData.data.health.dr;
-    let sr = actorData.data.health.sr;
+    let dr = system.health.dr;
+    let sr = system.health.sr;
 
 
-    let targetMaxHitPoints = actorData.data.hitPoints;
+    let targetMaxHitPoints = system.hitPoints;
     if(targetMaxHitPoints && targetMaxHitPoints !== -1){
         let undestributedHitPoints = targetMaxHitPoints - max;
         if(undestributedHitPoints !== 0){
@@ -78,10 +78,10 @@ export function resolveHealth(actor) {
  * @returns {{value: number, max: number}}
  */
 export function resolveShield(actor) {
-    if (!actor || !actor.data) {
+    if (!actor) {
         return;
     }
-    let actorData = actor.data;
+    let system = actor.system;
     let shieldRating = getInheritableAttribute({
         entity: actor,
         attributeKey: 'shieldRating',
@@ -101,7 +101,7 @@ export function resolveShield(actor) {
             shieldRating = shieldRating + advancedShieldRating;
         }
     }
-    let value = Array.isArray(actorData.data?.shields?.value)? actorData.data?.shields?.value[0]: actorData.data?.shields?.value || 0;
+    let value = Array.isArray(system.shields?.value)? system.shields?.value[0]: system.shields?.value || 0;
     let max = resolveValueArray(shieldRating, actor);
     let failureChance = getInheritableAttribute({
         entity: actor,
