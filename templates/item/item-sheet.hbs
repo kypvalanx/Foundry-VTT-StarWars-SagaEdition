@@ -26,7 +26,7 @@
                             <label class="resource-label">Type</label><br/>
                             <label>
                                 <select name="type">
-                                    {{#select item.data.type}}
+                                    {{#select item.type}}
                                         {{{options 'type'}}}
                                     {{/select}}
                                 </select>
@@ -36,13 +36,13 @@
                             <label class="resource-label">Subtype</label><br/>
                             <label>
                                 <select name="data.subtype">
-                                    {{#if item.data.data}}
-                                        {{#select item.data.data.subtype}}
-                                            {{{options 'subtype' item.data.type}}}
+                                    {{#if item.system}}
+                                        {{#select item.system.subtype}}
+                                            {{{options 'subtype' item.type}}}
                                         {{/select}}
                                     {{else}}
-                                        {{#select item.data._source.data.subtype}}
-                                            {{{options 'subtype' item.data.type}}}
+                                        {{#select item._source.system.subtype}}
+                                            {{{options 'subtype' item.type}}}
                                         {{/select}}
                                     {{/if}}
                                 </select>
@@ -77,9 +77,9 @@
         <div class="tab stripping" data-group="primary" data-tab="stripping">
             <div class="resource flex-group-center">
                 <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{data.data.upgradePoints}}</label>
+                <label class="attribute-value">{{system.upgradePoints}}</label>
                 <table>
-                    {{#each data.data.stripping as |stripping id|}}
+                    {{#each system.stripping as |stripping id|}}
                         {{#if stripping.enabled}}
                             <tr>
                                 <th><label>{{stripping.label}}</label></th>
@@ -120,14 +120,14 @@
         <div class="tab items" data-group="primary" data-tab="modifications">
             <div class="resource flex-group-center">
                 <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{data.data.upgradePoints}}</label>
+                <label class="attribute-value">{{item.system.upgradePoints}}</label>
             </div>
             <ol class="items-list">
-                {{#each data.data.items as |item id|}}
-                    <li class="item flexrow draggable" data-item-id="{{item._id}}">
-                        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24" height="24"/>
+                {{#each item.system.items as |modification id|}}
+                    <li class="item flexrow draggable" data-item-id="{{modification._id}}">
+                        <div class="item-image"><img src="{{modification.img}}" title="{{modification.name}}" width="24" height="24"/>
                         </div>
-                        <h4 class="item-name">{{item.name}}</h4>
+                        <h4 class="item-name">{{modification.name}}</h4>
                         <div class="item-controls">
                             <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
                             <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
@@ -139,7 +139,7 @@
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="attributes">
-            {{> 'systems/swse/templates/item/parts/attributes.hbs' data=item.data path='data.attributes'}}
+            {{> 'systems/swse/templates/item/parts/attributes.hbs' system=item.system item=item path='attributes'}}
         </div>
 
         {{!-- Provided Tab --}}
@@ -149,11 +149,12 @@
 
         {{!-- Prerequisites Tab --}}
         <div class="tab" data-group="primary" data-tab="prerequisites">
-            {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=item.data._source.data.prerequisite path=(concat 'data.prerequisite')}}
+            {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=item._source.system.prerequisite path=(concat 'prerequisite')}}
 
         </div>
 
 
+        {{!-- Levels Tab --}}
         <div class="tab" data-group="primary" data-tab="levels">
             {{> 'systems/swse/templates/item/parts/levels.hbs'}}
         </div>

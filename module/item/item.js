@@ -162,7 +162,7 @@ export class SWSEItem extends Item {
     }
 
     get baseName() {
-        return this.data.name ?? null;
+        return this.name ?? null;
     }
 
     get sizeMod() {

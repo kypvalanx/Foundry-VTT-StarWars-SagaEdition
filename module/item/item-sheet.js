@@ -81,7 +81,7 @@ export class SWSEItemSheet extends ItemSheet {
             // Delete Inventory Item
             html.find('.item-delete').click(ev => {
                 const li = $(ev.currentTarget).parents(".item");
-                let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
+                let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
                 let ownedItem = this.item.actor.items.get(itemToDelete._id);
                 this.item.revokeOwnership(ownedItem);
             });

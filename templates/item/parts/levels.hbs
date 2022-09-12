@@ -1,16 +1,15 @@
 <div class="level-body">
     <nav class="level-tabs tabs" data-group="levels">
-        {{log this}}
-        {{#if item.data.data}}
-            {{#each item.data.data.levels as |level id|}}
-                {{#if level.level}}
+        {{#if item.system}}
+            {{#each item.system.levels as |levelDef id|}}
+                {{#if levelDef.level}}
                     <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
                 {{/if}}
             {{/each}}
         {{else}}
 
-            {{#each item.data._source.data.levels as |level id|}}
-                {{#if level.level}}
+            {{#each item._source.system.levels as |levelDef id|}}
+                {{#if levelDef.level}}
                     <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
                 {{/if}}
             {{/each}}
@@ -19,20 +18,19 @@
         <a data-type="remove-level" data-action="class-control" title="Subtract Level"><i class="fas fa-minus"></i></a>
     </nav>
     <section class="level-content">
-        {{#if item.data.data}}
-            {{#each item.data.data.levels as |level id|}}
-
+        {{#if item.system}}
+            {{#each item.system.levels as |level id|}}
             <div class="tab" data-group="levels" data-tab="{{id}}">
                 <h2>Level {{id}}</h2>
-                {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id path=(concat 'data.levels.' id '.data.attributes')}}
+                {{log level}}
+                {{> 'systems/swse/templates/item/parts/attributes.hbs' attributes=level.data.attributes level=id path=(concat 'levels.' id '.data.attributes')}}
             </div>
             {{/each}}
         {{else}}
-
-            {{#each item.data._source.data.levels as |level id|}}
+            {{#each item._source.system.levels as |level id|}}
                 <div class="tab" data-group="levels" data-tab="{{id}}">
                     <h2>Level {{id}}</h2>
-                    {{> 'systems/swse/templates/item/parts/attributes.hbs' data=level level=id path=(concat 'data.levels.' id '.data.attributes')}}
+                    {{> 'systems/swse/templates/item/parts/attributes.hbs' attributes=level.data.attributes level=id path=(concat 'levels.' id '.data.attributes')}}
                 </div>
             {{/each}}
         {{/if}}
