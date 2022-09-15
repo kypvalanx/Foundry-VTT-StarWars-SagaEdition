@@ -368,7 +368,7 @@ export class SWSEActor extends Actor {
     /**
      * Prepare Character type specific data
      */
-    _prepareCharacterData(actorData) {
+    _prepareCharacterData(system) {
         let speciesList = filterItemsByType(this.items.values(), "species");
         this.species = (speciesList.length > 0 ? speciesList[0] : null);
 
@@ -402,10 +402,10 @@ export class SWSEActor extends Actor {
             || this.speciesTypes.length > 0
             || this.specialQualities.length > 0;
 
-        let {level, classSummary, classLevels} = this._generateClassData(actorData);
-        actorData.levelSummary = level;
-        actorData.classSummary = classSummary;
-        actorData.classLevels = classLevels;
+        let {level, classSummary, classLevels} = this._generateClassData(system);
+        system.levelSummary = level;
+        system.classSummary = classSummary;
+        system.classLevels = classLevels;
 
         this.inheritableItems.push(...this.traits)
         this.inheritableItems.push(...this.talents)
@@ -432,7 +432,7 @@ export class SWSEActor extends Actor {
 
         generateAttributes(this);
 
-        this.handleDarksideArray(actorData);
+        this.handleDarksideArray(system);
 
         resolveOffense(this);
         let feats = this.resolveFeats();
@@ -453,21 +453,21 @@ export class SWSEActor extends Actor {
         });
 
 
-        actorData.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
+        system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
-        actorData.inactiveProvidedFeats = feats.inactiveProvidedFeats
+        system.inactiveProvidedFeats = feats.inactiveProvidedFeats
 
-        this._reduceProvidedItemsByExistingItems(actorData);
+        this._reduceProvidedItemsByExistingItems(system);
 
-        actorData.data.health = resolveHealth(this);
-        actorData.data.shields = resolveShield(this);
+        system.health = resolveHealth(this);
+        system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
-        actorData.data.defense = defense;
-        actorData.data.armors = armors;
-        actorData.data.grapple = resolveGrapple(this);
+        system.defense = defense;
+        system.armors = armors;
+        system.grapple = resolveGrapple(this);
 
-        this._manageAutomaticItems(actorData, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(actorData));
-        actorData.data.attacks = generateAttacks(this);
+        this._manageAutomaticItems(this, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(system));
+        system.attacks = generateAttacks(this);
     }
 
     async removeItem(itemId) {
@@ -489,20 +489,20 @@ export class SWSEActor extends Actor {
         return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
-    handleDarksideArray(actorData) {
-        for (let i = 0; i <= actorData.data.attributes.wis.total; i++) {
-            actorData.data.darkSideArray = actorData.data.darkSideArray || [];
+    handleDarksideArray(system) {
+        for (let i = 0; i <= system.attributes.wis.total; i++) {
+            system.darkSideArray = system.darkSideArray || [];
 
-            if (actorData.data.darkSideScore < i) {
-                actorData.data.darkSideArray.push({value: i, active: false})
+            if (system.darkSideScore < i) {
+                system.darkSideArray.push({value: i, active: false})
             } else {
-                actorData.data.darkSideArray.push({value: i, active: true})
+                system.darkSideArray.push({value: i, active: true})
             }
         }
 
-        let darkSideTaint = getInheritableAttribute({entity: actorData, attributeKey: "darksideTaint", reduce: "SUM"})
+        let darkSideTaint = getInheritableAttribute({entity: system, attributeKey: "darksideTaint", reduce: "SUM"})
 
-        actorData.data.finalDarksideScore = actorData.data.darkSideScore + darkSideTaint
+        system.finalDarksideScore = system.darkSideScore + darkSideTaint
     }
 
     get hasCrew() {
@@ -962,7 +962,7 @@ export class SWSEActor extends Actor {
         return {level: this.classes.length, classSummary, classLevels};
     }
 
-    handleLeveBasedAttributeBonuses(actorData) {
+    handleLeveBasedAttributeBonuses(system) {
 
         let isHeroic = getInheritableAttribute({
             entity: this,
@@ -975,35 +975,35 @@ export class SWSEActor extends Actor {
         }
 
         let hasUpdate = false;
-        if (!actorData.data.levelAttributeBonus) {
-            actorData.data.levelAttributeBonus = {};
+        if (!system.levelAttributeBonus) {
+            system.levelAttributeBonus = {};
             hasUpdate = true;
         }
 
         for (let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel += 4) {
             if (bonusAttributeLevel > characterLevel) {
-                if (actorData.data.levelAttributeBonus[bonusAttributeLevel]) {
-                    actorData.data.levelAttributeBonus[bonusAttributeLevel] = null;
+                if (system.levelAttributeBonus[bonusAttributeLevel]) {
+                    system.levelAttributeBonus[bonusAttributeLevel] = null;
                     hasUpdate = true;
                 }
             } else {
-                if (!actorData.data.levelAttributeBonus[bonusAttributeLevel]) {
-                    actorData.data.levelAttributeBonus[bonusAttributeLevel] = {};
+                if (!system.levelAttributeBonus[bonusAttributeLevel]) {
+                    system.levelAttributeBonus[bonusAttributeLevel] = {};
                     hasUpdate = true;
                 } else {
-                    let total = (actorData.data.levelAttributeBonus[bonusAttributeLevel].str || 0)
-                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].dex || 0)
-                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].con || 0)
-                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].int || 0)
-                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].wis || 0)
-                        + (actorData.data.levelAttributeBonus[bonusAttributeLevel].cha || 0)
-                    actorData.data.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
+                    let total = (system.levelAttributeBonus[bonusAttributeLevel].str || 0)
+                        + (system.levelAttributeBonus[bonusAttributeLevel].dex || 0)
+                        + (system.levelAttributeBonus[bonusAttributeLevel].con || 0)
+                        + (system.levelAttributeBonus[bonusAttributeLevel].int || 0)
+                        + (system.levelAttributeBonus[bonusAttributeLevel].wis || 0)
+                        + (system.levelAttributeBonus[bonusAttributeLevel].cha || 0)
+                    system.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
                 }
             }
         }
 
         if (hasUpdate && this.id) {
-            return this.update({_id: this.id, 'data.levelAttributeBonus': actorData.data.levelAttributeBonus});
+            return this.update({_id: this.id, 'data.levelAttributeBonus': system.levelAttributeBonus});
         }
         return undefined;
     }
@@ -1153,20 +1153,20 @@ export class SWSEActor extends Actor {
         return undefined;
     }
 
-    async _manageAutomaticItems(actorData, removeFeats) {
-        let itemIds = Array.from(actorData.items.values()).flatMap(i => [i.id, i.data.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
+    async _manageAutomaticItems(actor, removeFeats) {
+        let itemIds = Array.from(actor.items.values()).flatMap(i => [i.id, i.data.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
 
         let removal = [];
         removeFeats.forEach(f => removal.push(f._id))
-        for (let item of actorData.items) {
-            let itemData = item.system;
-            if (itemData.isSupplied) {
+        for (let item of actor.items) {
+            let itemSystem = item.system;
+            if (itemSystem.isSupplied) {
                 //console.log(itemIds, itemData.supplier)
-                if (!itemIds.includes(itemData.supplier.id) || !itemData.supplier) {
+                if (!itemIds.includes(itemSystem.supplier.id) || !itemSystem.supplier) {
                     removal.push(item._id)
                 }
 
-                if (item.name === 'Precise Shot' && itemData.supplier.name === 'Point-Blank Shot' && !game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
+                if (item.name === 'Precise Shot' && itemSystem.supplier.name === 'Point-Blank Shot' && !game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
                     removal.push(item._id);
                 }
             }
