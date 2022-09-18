@@ -79,24 +79,24 @@ export class SWSEItem extends Item {
     //     return SWSEItem.buildItemName(itemData);
     // }
 
-    static buildItemName(itemData) {
-        if (!itemData) {
+    static buildItemName(item) {
+        if (!item) {
             return "";
         }
-        let id = itemData._id;
-        let finalName = itemData.name;
+        let id = item._id;
+        let finalName = item.name;
 
-        finalName = this.addSizeAdjustmentSuffix(itemData, finalName);
+        finalName = this.addSizeAdjustmentSuffix(item, finalName);
 
 
-        let modifiers = (itemData.data?.selectedChoices || []).join(", ");
+        let modifiers = (item.system?.selectedChoices || []).join(", ");
         if (modifiers) {
             finalName = `${finalName} (${modifiers})`
         }
 
 
         for (let prefix of getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "prefix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
@@ -104,7 +104,7 @@ export class SWSEItem extends Item {
             finalName = `${prefix} ${finalName}`;
         }
         for (let suffix of getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "suffix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
@@ -1217,17 +1217,14 @@ export class SWSEItem extends Item {
         return SWSEItem.getModesFromItem(itemData);
     }
 
-    static getModesFromItem(itemData) {
-        if (!itemData) {
+    static getModesFromItem(item) {
+        if (!item) {
             return [];
         }
-        if (itemData.data?.data?.modes) {
-            itemData = itemData.data;
-        }
-        let modes = Object.values(itemData.data.modes || []).filter(mode => !!mode);
+        let modes = Object.values(item.system.modes || []).filter(mode => !!mode);
 
         modes.forEach(mode => mode.modePath = mode.name);
-        let activeModes = SWSEItem.getActiveModesFromItemData(itemData);
+        let activeModes = SWSEItem.getActiveModesFromItemData(item);
         let childModes = SWSEItem.getChildModes(activeModes, "");
 
         modes.push(...childModes);

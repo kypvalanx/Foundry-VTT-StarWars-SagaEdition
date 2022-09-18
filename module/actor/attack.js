@@ -190,20 +190,20 @@ export class Attack {
 
     /**
      *
-     * @param item
+     * @param item {SWSEItem}
      * @returns {boolean}
      */
     isRanged(item) {
-        let data = item.data.data || item.data;
+        let data = item.system;
         return weaponGroup['Ranged Weapons'].includes(data.subtype);
     }
     /**
      *
-     * @param item
+     * @param item {SWSEItem}
      * @returns {boolean}
      */
     isMelee(item) {
-        let data = item.data.data || item.data;
+        let data = item.system;
         let subtype = data.subtype;
         if(!subtype && item.type === 'beastAttack'){
             subtype = "Melee Natural Weapons"
@@ -387,7 +387,7 @@ export class Attack {
         }
 
         if (this.isMelee(item)) {
-            let strMod = parseInt(actor.data.attributes.str.mod);
+            let strMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
             terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
         }
@@ -490,17 +490,17 @@ export class Attack {
     }
 
     get range() {
-        let itemData = this.item;
+        let item = this.item;
         let treatedAsForRange = getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "treatedAs",
             reduce: "FIRST"
         });
 
-        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : itemData.data.subtype;
+        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : item.system.subtype;
 
 
-        if (getItemStripping(itemData, "reduceRange")?.value) {
+        if (getItemStripping(item, "reduceRange")?.value) {
             resolvedSubtype = reduceWeaponRange(resolvedSubtype);
         }
 
@@ -547,8 +547,8 @@ export class Attack {
     }
 
     get modes() {
-        let itemData = this.item;
-        let modes = SWSEItem.getModesFromItem(itemData);
+        let item = this.item;
+        let modes = SWSEItem.getModesFromItem(item);
         let groupedModes = {}
         for (let mode of Object.values(modes).filter(m => !!m)) {
             if (!groupedModes[mode.group]) {
@@ -680,8 +680,8 @@ function getDiceTermsFromString(dieString) {
 
 /**
  * Resolves the die to be thrown when making an unarmed attack
- * @param {ActorData} actor
- * @returns {String}
+ * @param {SWSEActor} actor
+ * @returns
  */
 function resolveUnarmedDamageDie(actor) {
     let isDroid = getInheritableAttribute({

@@ -1,26 +1,14 @@
 <form class="{{cssClass}}" autocomplete="off">
     <div class="flex flex-col" style="height:100%">
         <div>
-            {{#unless data.data.attributeGenerationType}}
-                <a><span class="warning generationType">Please Select an attribute generation type</span></a><br/>{{/unless}}
-            {{#unless actor.species}}<a><span class="warning" data-action="compendium" data-type="Item" data-filter="-type:species">Please Select a Species</span></a><br/>{{/unless}}
-            {{#unless actor.classes}}<span class="warning">Please Select a Class</span><br/>{{/unless}}
-            {{#if actor.remainingSkills}}
-                <span class="warning">Remaining Trained Skills: {{actor.remainingSkills}}</span><br/>{{/if}}
-            {{#if actor.tooManySkills}}
-                <span class="warning">Too Many Skills Selected: {{actor.tooManySkills}}</span><br/>{{/if}}
-            {{#each actor.data.availableItems as |item id|}}
-                <span class="warning">Items from {{id}} remaining: {{item}}</span><br/>{{/each}}
-            {{#each actor.inactiveProvidedFeats as |feat id|}}
-                <span class="warning">The {{feat.finalName}} feat is provided but cannot be added because of missing prerequisites: {{feat.data.prerequisite.text}}</span><br/>
-            {{/each}}
+
 
 
             {{#each actor.warnings as |warning id|}}
-                <span class="warning">{{warning}}</span><br/>
+                <span class="warning">{{{warning}}}</span><br/>
             {{/each}}
             {{#each actor.errors as |error id|}}
-                <span class="error">{{error}}</span><br/>
+                <span class="error">{{{error}}}</span><br/>
             {{/each}}
         </div>
         <div class="flex-grow1">

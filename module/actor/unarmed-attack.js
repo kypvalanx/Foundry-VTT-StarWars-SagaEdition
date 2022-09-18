@@ -15,7 +15,7 @@ export class UnarmedAttack {
         return "Unarmed Attack";
     }
 
-    get data(){
+    get system(){
         return this;
     }
 

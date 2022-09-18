@@ -43,15 +43,15 @@ export function changeSize(size, modifier) {
     return sizeArray[index];
 }
 
-export function getSize(data) {
-    if(data.items) {
-        for (let item of data.items || []) {
+export function getSize(actor) {
+    if(actor.items) {
+        for (let item of actor.items || []) {
             if (sizeArray.includes(item.name)) {
                 return item.name;
             }
         }
-    } else if(data.data.stripping){
-        let strippings = Object.values(data.data.stripping).filter(stripping => stripping.enabled).map(stripping => stripping.label)
+    } else if(actor.system.stripping){
+        let strippings = Object.values(actor.system.stripping).filter(stripping => stripping.enabled).map(stripping => stripping.label)
 
         if(strippings.includes("Make Weapon Colossal")){
             return "Colossal";
@@ -74,7 +74,7 @@ export function getSize(data) {
         if(strippings.includes("Make Weapon Tiny")){
             return "Tiny";
         }
-        return data.data.size
+        return actor.system.size
     }
     return undefined;
 }

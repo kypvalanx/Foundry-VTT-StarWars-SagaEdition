@@ -50,7 +50,7 @@ export class SWSEActorSheet extends ActorSheet {
     get template() {
         const path = "systems/swse/templates/actor";
 
-        let type = this.actor.data.type;
+        let type = this.actor.type;
         if (type === 'character') {
             return `${path}/actor-sheet.hbs`;
         }

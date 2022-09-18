@@ -109,7 +109,7 @@ export function getPossibleProficiencies(actor, weapon) {
 
     let exoticWeaponTypes = getInheritableAttribute({entity: weapon, attributeKey: "exoticWeapon", reduce: "VALUES"})
 
-    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.data.subtype, weapon.type];
+    let descriptors = exoticWeaponTypes.length>0 ? exoticWeaponTypes : [weapon.name, weapon.system.subtype, weapon.type];
     let explodedDescriptors = [];
 
     for (let descriptor of descriptors) {
@@ -134,9 +134,13 @@ function isRanged(weapon) {
     return RANGED_WEAPON_TYPES.includes(weapon.data.data.subtype.toLowerCase());
 }
 
-
+/**
+ *
+ * @param weapon {SWSEItem}
+ * @returns {boolean}
+ */
 function isLightsaber(weapon) {
-    let itemData = weapon.data.data || weapon.data;
+    let itemData = weapon.system;
     return LIGHTSABER_WEAPON_TYPES.includes(itemData.subtype.toLowerCase());
 }
 
