@@ -45,9 +45,9 @@ export class SWSEActor extends Actor {
 
         if ("ActiveEffect" === embeddedName) {
             let activeEffect = args[0][0];
-            if (activeEffect.data?.flags?.core?.statusId?.startsWith("condition")) {
+            if (activeEffect.flags?.core?.statusId?.startsWith("condition")) {
                 this.effects
-                    .filter(effect => effect !== activeEffect && effect.data?.flags?.core?.statusId?.startsWith("condition"))
+                    .filter(effect => effect !== activeEffect && effect.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             }
         }
@@ -1193,11 +1193,15 @@ export class SWSEActor extends Actor {
     }
 
 
-//TODO evaluate this.  do we need it?
+    /**
+     *
+     * @param item {SWSEItem}
+     * @returns {boolean}
+     */
     hasItem(item) {
         return Array.from(this.items.values())
-            .map(i => i.data.finalName)
-            .includes(item.system.finalName);
+            .map(i => i.finalName)
+            .includes(item.finalName);
     }
     _reduceProvidedItemsByExistingItems(actorData) {
 
@@ -2035,14 +2039,14 @@ export class SWSEActor extends Actor {
         if(item.duplicate){
             entity = item.item.clone();
         } else {
-            game.indices = game.indices || {};
-
-            let {index, pack} = await getIndexAndPack(game.indices, item);
 
             if (item.uuid) {
                 entity = await Item.implementation.fromDropData(item);
                 itemName = entity.name;
             } else {
+                game.indices = game.indices || {};
+
+                let {index, pack} = await getIndexAndPack(game.indices, item);
                 let response = await this.getIndexEntryByName(item.name, index);
 
                 let entry = response.entry;
@@ -2053,8 +2057,8 @@ export class SWSEActor extends Actor {
                  * @type {SWSEItem}
                  */
 
-                if (entry) {
-                    entity = await Item.implementation.fromDropData(await pack.getDocument(entry._id));
+                if (entry && entry._id) {
+                    entity = await Item.implementation.fromDropData({type: 'Item', uuid: `Compendium.${pack.metadata.id}.${entry._id}`});
                 }
             }
         }

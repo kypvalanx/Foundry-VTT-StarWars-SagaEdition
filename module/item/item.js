@@ -710,8 +710,7 @@ export class SWSEItem extends Item {
     }
 
     setTextDescription() {
-        let itemData = this.data;
-        itemData.data.textDescription = this.stripHTML(itemData.data.description);
+        this.system.textDescription = this.stripHTML(this.system.description);
     }
 
     setSourceString() {
@@ -830,7 +829,7 @@ export class SWSEItem extends Item {
         this.system.supplier = {
             id: parent.id,
             name: parent.name,
-            type: parent.data.type,
+            type: parent.type,
             unlocked
         }
     }
