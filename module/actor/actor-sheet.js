@@ -863,113 +863,71 @@ export class SWSEActorSheet extends ActorSheet {
                 await sourceActor.removeItem(data.itemId)
             }
         }
-        let item
-        if(data.duplicate){
-            item = data.item.clone();
-            //item = data
-        }
-        else{
-            const customItem = await Item.implementation.fromDropData(data);
-            item = customItem.clone();
-        }
+        // let item
+        // if(data.duplicate){
+        //     item = data.item.clone();
+        //     //item = data
+        // }
+        // else{
+        //     const customItem = await Item.implementation.fromDropData(data);
+        //     item = customItem.clone();
+        // }
 
 
-        item.prepareData();
+        //item.prepareData();
 
-        if (!this.isPermittedForActorType(item.data.type)) {
-            new Dialog({
-                title: "Inappropriate Item",
-                content: `You can't add a ${item.data.type} to a ${this.actor.data.type}.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
+
 
         let context = {};
         context.newFromCompendium = true;
         //context.duplicate = data.duplicate;
 
-        switch (item.data.type) {
-            case "background":
-            case "destiny":
-                await this.addBackgroundOrDestiny(item);
-                break;
-            case "vehicleBaseType":
-            case "species":
-                await this.addItemWithOneItemRestriction(item);
-                break;
-            case "class":
-                //await this.addClass(item, context);
-                await this.actor.addItems([data], undefined, context);
-                break;
-            case "feat":
-                await this.addFeat(item);
-                break;
-            case "forceSecret":
-            case "forceTechnique":
-            case "forcePower":
-            case "forceRegimen":
-            case "affiliation":
-                await this.addForceItem(item);
-                break;
-            case "talent":
-                await this.addTalent(item);
-                break;
-            case "weapon":
-            case "vehicleSystem":
-            case "armor":
-            case "equipment":
-            case "template":
-            case "upgrade":
-            case "trait":
-            case "beastAttack":
-            case "beastSense":
-            case "beastType":
-            case "beastQuality":
-                //this.actor.addItems([data])
-                await this.addItem(item);
-                break;
-
-        }
+        await this.actor.addItems([data], undefined, context);
+        // switch (item.data.type) {
+        //     case "background":
+        //     case "destiny":
+        //         await this.addBackgroundOrDestiny(item);
+        //         break;
+        //     case "vehicleBaseType":
+        //     case "species":
+        //         await this.addItemWithOneItemRestriction(item);
+        //         break;
+        //     case "class":
+        //         //await this.addClass(item, context);
+        //         await this.actor.addItems([data], undefined, context);
+        //         break;
+        //     case "feat":
+        //         await this.addFeat(item);
+        //         break;
+        //     case "forceSecret":
+        //     case "forceTechnique":
+        //     case "forcePower":
+        //     case "forceRegimen":
+        //     case "affiliation":
+        //         await this.addForceItem(item);
+        //         break;
+        //     case "talent":
+        //         await this.addTalent(item);
+        //         break;
+        //     case "weapon":
+        //     case "vehicleSystem":
+        //     case "armor":
+        //     case "equipment":
+        //     case "template":
+        //     case "upgrade":
+        //     case "trait":
+        //     case "beastAttack":
+        //     case "beastSense":
+        //     case "beastType":
+        //     case "beastQuality":
+        //         //this.actor.addItems([data])
+        //         await this.addItem(item);
+        //         break;
+        //
+        // }
 
 
     }
-
-    isPermittedForActorType(type) {
-        if (["character", "npc"].includes(this.actor.data.type)) {
-            return ["weapon",
-                "armor",
-                "equipment",
-                "feat",
-                "talent",
-                "species",
-                "class",
-                "upgrade",
-                "forcePower",
-                "affiliation",
-                "forceTechnique",
-                "forceSecret",
-                "forceRegimen",
-                "trait",
-                "template",
-                "background",
-                "destiny",
-                "beastAttack",
-                "beastSense",
-                "beastType",
-                "beastQuality"].includes(type)
-        } else if (vehicleActorTypes.includes(this.actor.data.type)) {
-            return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
-        }
-
-        return false;
-    }
-
 
     async addTalent(item) {
         //TODO this should be a tighter system with less regex

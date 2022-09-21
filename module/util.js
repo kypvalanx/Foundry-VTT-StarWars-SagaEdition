@@ -863,10 +863,10 @@ export function getItems(target) {
 
 
 export function getItemParentId(id){
-    let a = game.data.actors || []
+    let a = []//game.data.actors || []
     let b = game.actors?.values() || []
 
     let actors = [...a, ...b];
-    let actor = actors.find(actor => actor.items.find(item => item._id === id || item.data._id === id))
-    return !actor? undefined : actor._id || actor.data._id;
+    let actor = actors.find(actor => actor.items.find(item => item._id === id))
+    return !actor? undefined : actor._id// || actor.data._id;
 }

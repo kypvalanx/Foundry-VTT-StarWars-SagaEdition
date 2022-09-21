@@ -108,7 +108,7 @@ export function resolveShield(actor) {
         attributeKey: 'shieldFailureChance',
         reduce: "MAX"
     });
-    let active = !!actor.effects.find(effect => effect.data?.flags?.core?.statusId === 'shield');
+    let active = !!actor.effects.find(effect => effect.flags?.core?.statusId === 'shield');
     return {value, max, failureChance, active};
 }
 
@@ -116,5 +116,5 @@ function resolveAttributeMod(actor, ignoreCon) {
     if(ignoreCon){
         return 0;
     }
-    return actor.data.data.attributes.con.mod;
+    return actor.system.attributes.con.mod;
 }

@@ -37,7 +37,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
         return {doesFail: true, failureList, silentFail, successList};
     }
 
-    let data = target.data.data || target.data;
+    let system = target.system;
 
     prereqs = ensureArray(prereqs)
 
@@ -95,7 +95,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'TRAINED SKILL':
-                if (Object.entries(data.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
+                if (Object.entries(system.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -388,7 +388,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'GENDER':
-                if (data.sex && data.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
+                if (system.sex && system.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -410,7 +410,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     })
 
 
-                    return item.name === req || item.data.finalName === req || data?.subtype === req || actsAs.includes(req)
+                    return item.name === req || item.data.finalName === req || system?.subtype === req || actsAs.includes(req)
                 });
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
@@ -425,26 +425,26 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case "SUBTYPE":
-                if (data.subtype && data.subtype.toLowerCase() === prereq.requirement.toLowerCase()) {
+                if (system.subtype && system.subtype.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "WEAPON_GROUP":
-                if (weaponGroup[ prereq.requirement].includes(data.subtype)) {
+                if (weaponGroup[ prereq.requirement].includes(system.subtype)) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "TEMPLATE":
-                let templates = data.items.filter(item => item.type === "template").map(item => item.name)
+                let templates = system.items.filter(item => item.type === "template").map(item => item.name)
                 if (templates.includes(prereq.requirement)) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "MODE":
-                let modes = Object.values(data.modes).map(item => item.name.toLowerCase());
+                let modes = Object.values(system.modes).map(item => item.name.toLowerCase());
                 if (modes.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     continue;

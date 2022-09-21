@@ -9,13 +9,11 @@ import {changeSize} from "../actor/size.js";
  * @extends {Item}
  */
 export class SWSEItem extends Item {
-    // constructor(...args) {
-    //     super(...args);
-    //     let {data, parent} = args;
-    //     this.data.data = data;
-    //     this.items = this.items || [];
-    //     this.hasItemOwner = this.hasItemOwner || false;
-    // }
+    constructor(...args) {
+        super(...args);
+        this.items = this.items || [];
+        this.hasItemOwner = this.hasItemOwner || false;
+    }
 
 
     static get config() {
@@ -564,7 +562,7 @@ export class SWSEItem extends Item {
     }
 
     get finalName(){
-        return SWSEItem.buildItemName(this.system)
+        return SWSEItem.buildItemName(this)
     }
 
     get isEquipable() {
@@ -654,7 +652,7 @@ export class SWSEItem extends Item {
     }
 
     static getItemStripping(swseItem, key) {
-        let stripping = swseItem.data.stripping || swseItem.data.data.stripping;
+        let stripping = swseItem.system.stripping;
         if (stripping) {
             return stripping[key];
         }

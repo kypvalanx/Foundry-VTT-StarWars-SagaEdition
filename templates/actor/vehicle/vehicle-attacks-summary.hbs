@@ -1,6 +1,6 @@
 <div class="flex flex-col weapon-summary-header swse flex-grow">
     <div><button id="fullAttack">Full Attack</button></div>
-    {{#each data.data.armors as |armor id|}}
+    {{#each actor.system.armors as |armor id|}}
         {{#unless armor.hide}}
             <div class="resource armor panel">
                 <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}} ({{armor.type}})</div></div>
@@ -12,7 +12,7 @@
             </div>
         {{/unless}}
     {{/each}}
-    {{#each data.data.attacks as |attack id|}}
+    {{#each actor.system.attacks as |attack id|}}
         {{#if attack}}
             {{> 'systems/swse/templates/actor/parts/attack/weapon-block.hbs' attack = attack}}
         {{/if}}

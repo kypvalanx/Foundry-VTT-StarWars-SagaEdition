@@ -5,38 +5,38 @@
         <div class="temp"><h3>Temp</h3></div>
         <div class="mod"><h3>Mod</h3></div>
     </div>
-    {{#each data.data.attributes as |attribute id|}}
+    {{#each actor.system.attributes as |attribute id|}}
         {{#unless attribute.skip}}
             <div class="ability-score draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability">
                 <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
                      data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3></div>
                 <div class="score input"><span class="center" title="">{{attribute.total}}</span></div>
                 <div class="temp input"><span class="center text-box direct tiny min-width-15"
-                                              name="data.attributes.{{id}}.customBonus"
+                                              name="system.attributes.{{id}}.customBonus"
                                               data-dtype="Number">{{attribute.customBonus}}</span></div>
                 <div class="mod input"><span class="center">{{attribute.roll}}</span></div>
             </div>
         {{/unless}}
     {{/each}}
-    {{#unless data.data.lockAttributes}}
+    {{#unless actor.system.lockAttributes}}
         <div class="flex flex-row">
-            {{#unless data.data.disableAttributeGenerationChange}}
+            {{#unless actor.system.disableAttributeGenerationChange}}
                 <div class="generationType" title="Select Ability Generation Type"><a><i
-                        class="fas fa-cog{{#unless data.data.attributeGenerationType}} warning{{/unless}}"></i></a></div>
+                        class="fas fa-cog{{#unless actor.system.attributeGenerationType}} warning{{/unless}}"></i></a></div>
             {{/unless}}
-            {{#ifEquals data.data.attributeGenerationType "Roll"}}
+            {{#ifEquals actor.system.attributeGenerationType "Roll"}}
                 <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.data.attributeGenerationType "Standard Array"}}
+            {{#ifEquals actor.system.attributeGenerationType "Standard Array"}}
                 <div class="assignStandardArray" title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.data.attributeGenerationType "Point Buy"}}
+            {{#ifEquals actor.system.attributeGenerationType "Point Buy"}}
                 <div class="assignAttributePoints" title="Assign Ability Points"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#ifEquals data.data.attributeGenerationType "Manual"}}
+            {{#ifEquals actor.system.attributeGenerationType "Manual"}}
                 <div class="assignManual"  title="Assign Ability Scores"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
-            {{#each data.data.levelAttributeBonus as |bonus key|}}
+            {{#each actor.system.levelAttributeBonus as |bonus key|}}
                 {{#if bonus}}
                     <div class="leveledAttributeBonus  {{#if bonus.warn}}warning{{/if}}" data-level="{{key}}" title="Select Level Up Attribute Bonus for Level {{key}}"><a><i class="fas fa-exclamation"></i></a></div>
                 {{/if}}

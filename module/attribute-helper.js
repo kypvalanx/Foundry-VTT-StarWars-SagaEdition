@@ -69,9 +69,9 @@ function getAttributesFromClass(data, entity) {
     let vals = [];
     let classLevel = data.duplicates || 0;
     if (classLevel > 0) {
-        let level = entity.data.levels[classLevel];
+        let level = entity.system.levels[classLevel];
         for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.data.description));
+            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description));
         }
     }
     return vals;
@@ -174,7 +174,7 @@ export function getInheritableAttribute(data = {}) {
         }
 
         if(document.effects){
-            document.effects.filter(effect => effect.data?.disabled !== false || effect.disabled !== false).forEach(e =>  values.push(...extractEffectChange(e.data?.changes || e.changes || [], data.attributeKey, e)))
+            document.effects.filter(effect => effect.disabled !== false).forEach(effect =>  values.push(...extractEffectChange(effect.changes || [], data.attributeKey, effect)))
         }
 
 

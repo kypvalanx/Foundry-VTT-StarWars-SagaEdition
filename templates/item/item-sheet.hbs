@@ -35,7 +35,7 @@
                         <div class="flex-grow resource">
                             <label class="resource-label">Subtype</label><br/>
                             <label>
-                                <select name="data.subtype">
+                                <select name="system.subtype">
                                     {{#if item.system}}
                                         {{#select item.system.subtype}}
                                             {{{options 'subtype' item.type}}}
@@ -85,7 +85,7 @@
                                 <th><label>{{stripping.label}}</label></th>
                                 {{#ifEquals stripping.type "boolean"}}
                                     <td><label class="attribute-value checkbox">
-                                        <input type="checkbox" name="data.stripping.{{id}}.value" {{checked
+                                        <input type="checkbox" name="system.stripping.{{id}}.value" {{checked
                                                 stripping.value}}/></label>
                                     </td>
                                 {{/ifEquals}}
@@ -93,17 +93,17 @@
                                     <td>
                                         <div class="value grid grid-3col">
                                             <div><a class="item-control value-minus"
-                                                    name="data.stripping.{{id}}.value" data-low="{{stripping.low}}"><i
+                                                    name="system.stripping.{{id}}.value" data-low="{{stripping.low}}"><i
                                                     class="fas fa-minus"></i></a></div>
 
                                             <div><label class="attribute-value checkbox">
                                                 <input class="value" type="number"
-                                                       name="data.stripping.{{id}}.value"
+                                                       name="system.stripping.{{id}}.value"
                                                        value="{{stripping.value}}">
                                             </label></div>
 
                                             <div><a class="item-control value-plus"
-                                                    name="data.stripping.{{id}}.value" data-high="{{stripping.high}}"><i
+                                                    name="system.stripping.{{id}}.value" data-high="{{stripping.high}}"><i
                                                     class="fas fa-plus"></i></a>
                                             </div>
                                         </div>

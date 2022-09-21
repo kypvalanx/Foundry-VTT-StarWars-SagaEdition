@@ -1,8 +1,8 @@
 <div class="crew-quality">
     <h2>
         <label for="crew-quality">Crew Quality
-            <select name="data.crewQuality.quality">
-                {{#select actor.data.data.crewQuality.quality}}
+            <select name="system.crewQuality.quality">
+                {{#select actor.system.crewQuality.quality}}
                     <option value="-">-</option>
                     <option value="Untrained">Untrained</option>
                     <option value="Normal">Normal</option>
@@ -13,10 +13,10 @@
             </select>
         </label>
     </h2>
-    {{#if actor.data.hasAstromechSlot}}
+    {{#if actor.system.hasAstromechSlot}}
         <h2>
             <label for="crew-quality">Includes Astromech
-                <input type="checkbox" name="data.hasAstromech" {{#if actor.data.data.hasAstromech}}
+                <input type="checkbox" name="system.hasAstromech" {{#if actor.system.hasAstromech}}
                        checked="isChecked"{{/if}}/>
             </label>
         </h2>

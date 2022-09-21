@@ -7,7 +7,7 @@
         <div class="defense-misc"><h3>Misc</h3></div>
         <div class="defense-header resource-label"><h1>Defenses</h1></div>
     </div>
-    {{#each data.data.defense as |def id|}}
+    {{#each actor.system.defense as |def id|}}
         {{#unless def.skip}}
             {{#if def.defenseBlock}}
                 {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=def}}
@@ -17,7 +17,7 @@
 
 
 
-    {{#each data.data.defense.situationalBonuses as |bonus id|}}
+    {{#each actor.system.defense.situationalBonuses as |bonus id|}}
         <div class="panel">{{bonus}}</div>
     {{/each}}
 </div>
