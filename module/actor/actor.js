@@ -75,7 +75,6 @@ export class SWSEActor extends Actor {
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 
-        this.inheritableItems = [];
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
@@ -129,21 +128,13 @@ export class SWSEActor extends Actor {
         let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
         this.vehicleTemplate = (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
 
-        if (this.vehicleTemplate) {
-            this.inheritableItems.push(this.vehicleTemplate.system)
-        }
-
         this.uninstalled = this.getUninstalledSystems();
         this.installed = this.getInstalledSystems('installed');
-        this.inheritableItems.push(...this.installed.map(item => item.system))
         this.pilotInstalled = this.getInstalledSystems('pilotInstalled');
         this.gunnerPositions = this.getGunnerPositions()
-        //this.inheritableItems.push(...this.systems)
-        //this.uninstalled = this.getUnequippedItems().map(item => item.system);
-        this.cargo = this.getNonequippableItems().map(item => item.system);
-        this.traits = this.getTraits().map(item => item.system);
+        this.cargo = this.getNonequippableItems();
+        this.traits = this.getTraits();
 
-        this.inheritableItems.push(...this.traits)
         this.system.attributeGenerationType = "Manual"
         this.system.disableAttributeGenerationChange = true;
 
@@ -372,14 +363,10 @@ export class SWSEActor extends Actor {
         let speciesList = filterItemsByType(this.items.values(), "species");
         this.species = (speciesList.length > 0 ? speciesList[0] : null);
 
-        if (this.species) {
-            this.inheritableItems.push(this.species)
-        }
         generateSpeciesData(this);
 
         this.classes = filterItemsByType(this.items.values(), "class");
 
-        this.inheritableItems.push(...this.classes);
         this.traits = this.getTraits();
         this.talents = this.getTalents();
         this.powers = filterItemsByType(this.items.values(), "forcePower");
@@ -407,26 +394,8 @@ export class SWSEActor extends Actor {
         system.classSummary = classSummary;
         system.classLevels = classLevels;
 
-        this.inheritableItems.push(...this.traits)
-        this.inheritableItems.push(...this.talents)
-        this.inheritableItems.push(...this.powers)
-        this.inheritableItems.push(...this.secrets)
-        this.inheritableItems.push(...this.techniques)
-        this.inheritableItems.push(...this.affiliations)
-        this.inheritableItems.push(...this.regimens)
-        this.inheritableItems.push(...this.naturalWeapons)
-        this.inheritableItems.push(...this.specialSenses)
-        this.inheritableItems.push(...this.speciesTypes)
-        this.inheritableItems.push(...this.specialQualities)
-        if (this.background) {
-            this.inheritableItems.push(this.background)
-        }
-        if (this.destiny) {
-            this.inheritableItems.push(this.destiny)
-        }
 
         this.equipped = this.getEquippedItems();
-        this.inheritableItems.push(...this.equipped)
         this.unequipped = this.getUnequippedItems();
         this.inventory = this.getNonequippableItems();
 
@@ -437,8 +406,7 @@ export class SWSEActor extends Actor {
         resolveOffense(this);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
-        this.system.feats = this.feats;
-        this.inheritableItems.push(...this.feats)
+        this.system.feats = feats.activeFeats;
         generateSkills(this);
 
 

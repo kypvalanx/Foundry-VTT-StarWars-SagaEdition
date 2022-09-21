@@ -14,7 +14,7 @@ function equippedItems(entity) {
     return [];
 }
 
-function inheritableItems(entity, attributeKey) {
+export function inheritableItems(entity, attributeKey) {
     let items = entity.items || [];
     let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
         "beastSense",
