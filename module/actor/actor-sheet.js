@@ -579,7 +579,7 @@ export class SWSEActorSheet extends ActorSheet {
                 if (el.dataset.dtype === "Number") value = Number(value);
                 else if (el.dataset.dtype === "Boolean") value = Boolean(value);
 
-                if (getProperty(this.actor.data, name) !== value) {
+                if (getProperty(this.actor, name) !== value) {
                     changedData[name] = value;
                 }
             }
@@ -930,6 +930,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async addTalent(item) {
+        //TODO this tree system is unused but should be used
         //TODO this should be a tighter system with less regex
         let possibleTalentTrees = new Set();
         let allTreesOnTalent = new Set();

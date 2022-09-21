@@ -100,7 +100,7 @@ export class Attack {
         if(this.parentId){
             let tokens = canvas.tokens.objects?.children || [];
             let token = tokens.find(token => token.id === this.parentId);
-            return token.document.actor.data
+            return token.document.actor
         } else if(this.actorId) {
             find = game.data.actors.find(actor => actor._id === this.actorId);
             if(!find){
@@ -113,12 +113,9 @@ export class Attack {
                     }
                 }
             }
-            if (find instanceof SWSEActor) {
-                return find.data;
-            }
         } else if(this.providerId){
             let provider = this.provider;
-            let quality = provider?.data?.crewQuality?.quality;
+            let quality = provider?.system?.crewQuality?.quality;
             return SWSEActor.getCrewByQuality(quality);
         }
         return find;
@@ -266,7 +263,7 @@ export class Attack {
             return;
         }
 
-        let actorData = actor?.data;
+        let actorSystem = actor.system;
         //let providerData = provider.data;
         let weaponTypes = getPossibleProficiencies(actor, item);
         let attributeStats = []
@@ -294,7 +291,7 @@ export class Attack {
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
         }
 
-        terms.push(...appendNumericTerm(actorData?.offense?.bab, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(actorSystem?.offense?.bab, "Base Attack Bonus"));
 
         if(!provider) {
 
