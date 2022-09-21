@@ -15,7 +15,7 @@ export function warningsFromActor(actor) {
     }
 
     if(!actor.system.attributeGenerationType){
-        warnings.push(`<span class="attributeGenerationTypePlease Select an attribute generation type"></span>`)
+        warnings.push(`<span class="attributeGenerationType">Please Select an attribute generation type</span>`)
     }
 
     if(!actor.species){

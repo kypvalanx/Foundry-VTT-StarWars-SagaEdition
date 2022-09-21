@@ -1979,9 +1979,9 @@ export class SWSEActor extends Actor {
             entity.addProvidedItems(providedItem.providedItems);
             entity.setParent(parent, providedItem.unlocked);
 
-            if (!options.skipPrerequisite) {
+           // if (!options.skipPrerequisite) {
                 entity.setPrerequisite(providedItem.prerequisite);
-            }
+            //}
 
             //TODO payload should be deprecated in favor of payloads
             if (!!payload) {
