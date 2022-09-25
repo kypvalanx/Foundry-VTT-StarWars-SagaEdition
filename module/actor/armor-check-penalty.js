@@ -27,13 +27,13 @@ export function generateArmorCheckPenalties(actor) {
     let wearingHeavy = false;
 
     for(let armor of filterItemsByType(getEquippedItems(actor), "armor")){
-        if('Heavy Armor' === armor.data.subtype){
+        if('Heavy Armor' === armor.system.subtype){
             wearingHeavy = true;
         }
-        if('Medium Armor' === armor.data.subtype){
+        if('Medium Armor' === armor.system.subtype){
             wearingMedium = true;
         }
-        if('Light Armor' === armor.data.subtype){
+        if('Light Armor' === armor.system.subtype){
             wearingLight = true;
         }
     }

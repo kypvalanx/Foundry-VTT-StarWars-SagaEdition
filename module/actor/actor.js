@@ -99,7 +99,7 @@ export class SWSEActor extends Actor {
             let conditionEffect = this.effects.find(effect => effect.flags?.core?.statusId?.startsWith("condition"))
 
             if (conditionEffect) {
-                system.condition = conditionEffect.system.changes.find(change => change.key === "condition").value
+                system.condition = conditionEffect.changes.find(change => change.key === "condition").value
             }
 
             if (this.type === 'character') this._prepareCharacterData(system);
@@ -2035,6 +2035,7 @@ export class SWSEActor extends Actor {
     }
 
     async itemTypeSpecificChecks(entity) {
+        let response = {fail:false};
         if (entity.type === 'talent') {
             let possibleTalentTrees = new Set();
             let allTreesOnTalent = new Set();
@@ -2071,6 +2072,7 @@ export class SWSEActor extends Actor {
                     callback: () => {
                     }
                 });
+                response.fail = true;
             } else if (possibleTalentTrees.size > 1) {
                 let content = `<p>Select an unused talent source.</p>
                         <div><select id='choice'>${optionString}</select> 
@@ -2093,14 +2095,23 @@ export class SWSEActor extends Actor {
             let possibleFeatTypes = [];
 
             let optionString = "";
-            for (let category of entity.system.bonusFeatCategories) {
+            let bonusFeatCategories = entity.system.bonusFeatCategories;
+            for (let category of bonusFeatCategories) {
                 if (this.system.availableItems[category.value] > 0) {
                     possibleFeatTypes.push(category);
                     optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
                 }
             }
 
-            if (possibleFeatTypes.length > 1) {
+            if (possibleFeatTypes.length === 0) {
+                await Dialog.prompt({
+                    title: "You don't have more feats available of these types",
+                    content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(bonusFeatCategories).join("</li><li>") + "</li></ul>",
+                    callback: () => {
+                    }
+                });
+                response.fail = true;
+            } else if (possibleFeatTypes.length > 1) {
                 let content = `<p>Select an unused feat type.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
@@ -2117,6 +2128,63 @@ export class SWSEActor extends Actor {
 
             entity.system.categories = possibleFeatTypes;
         }
+
+        if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
+            let viewable
+            if (entity.type === 'forcePower') {
+                viewable = 'Force Powers'
+            }
+            if (entity.type === 'forceTechnique') {
+                viewable = 'Force Technique'
+            }
+            if (entity.type === 'forceSecret') {
+                viewable = 'Force Secret'
+            }
+            if (!this.actor.data.availableItems[viewable] && entity.type !== 'affiliation') {
+                await Dialog.prompt({
+                    title: `You can't take any more ${viewable.titleCase()}`,
+                    content: `You can't take any more ${viewable.titleCase()}`,
+                    callback: () => {
+                    }
+                });
+            }
+        }
+
+        if(entity.type === "background" || entity.type === "destiny"){
+            if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
+                new Dialog({
+                    title: `${entity.type.titleCase()} Selection`,
+                    content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+                response.fail = true;
+            }
+        }
+
+        if(entity.type === "vehicleBaseType" || entity.type === "species"){
+            let type = entity.type;
+            let viewable = type.replace(/([A-Z])/g, " $1");
+            if (filterItemsByType(this.items.values(), type).length > 0) {
+                new Dialog({
+                    title: `${viewable.titleCase()} Selection`,
+                    content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+                response.fail = true;
+            }
+        }
+
+        return response;
     }
 
     async resolveEntity(item) {

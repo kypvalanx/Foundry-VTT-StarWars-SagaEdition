@@ -253,9 +253,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     }
                 }
 
-                let filteredForcePowers = ownedForcePowers.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredForcePowers = ownedForcePowers.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredForcePowers.length > 0) {
-                    if (!meetsPrerequisites(target, filteredForcePowers[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredForcePowers[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -410,7 +410,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     })
 
 
-                    return item.name === req || item.data.finalName === req || system?.subtype === req || actsAs.includes(req)
+                    return item.name === req || item.finalName === req || system?.subtype === req || actsAs.includes(req)
                 });
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {

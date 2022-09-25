@@ -106,7 +106,7 @@ export function generateAttributes(actor) {
     }
 
 
-    if(Object.values(data).length > 0 && !!actor.data._id){
+    if(Object.values(data).length > 0 && !!actor._id){
         actor.update(data);
     }
 }

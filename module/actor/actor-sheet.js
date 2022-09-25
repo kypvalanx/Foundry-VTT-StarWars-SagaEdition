@@ -162,11 +162,11 @@ export class SWSEActorSheet extends ActorSheet {
             event.stopPropagation();
             if("0" === event.currentTarget.value){
                 this.actor.effects
-                    .filter(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
+                    .filter(effect => effect.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             } else {
                 let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
-                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
                 tokens.forEach(token => token.toggleEffect(statusEffect))
             }
         })
@@ -279,10 +279,10 @@ export class SWSEActorSheet extends ActorSheet {
         let actor = this.actor;
         switch(type){
             case 'plus':
-                actor.shields = actor.data.data.shields.value + 5
+                actor.shields = actor.system.shields.value + 5
                 break;
             case 'minus':
-                actor.shields = actor.data.data.shields.value - 5
+                actor.shields = actor.system.shields.value - 5
                 break;
             case 'toggle':
                 let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
@@ -869,71 +869,6 @@ export class SWSEActorSheet extends ActorSheet {
 
         await this.actor.addItems([data], undefined, context);
 
-    }
-
-    async addForceItem(item) {
-        let itemType = item.data.type;
-        if (itemType === 'forcePower') {
-            itemType = 'Force Powers'
-        }
-        if (itemType === 'forceTechnique') {
-            itemType = 'Force Technique'
-        }
-        if (itemType === 'forceSecret') {
-            itemType = 'Force Secret'
-        }
-        let viewable = itemType;//.replace(/([A-Z])/g, " $1");
-        if (!this.actor.data.availableItems[itemType] && itemType !== 'affiliation') {
-            await Dialog.prompt({
-                title: `You can't take any more ${viewable.titleCase()}`,
-                content: `You can't take any more ${viewable.titleCase()}`,
-                callback: () => {
-                }
-            });
-            return [];
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: itemType});
-    }
-
-
-
-
-    async addBackgroundOrDestiny(item) {
-        let type = item.data.type;
-        let viewable = type.replace(/([A-Z])/g, " $1");
-        if (filterItemsByType(this.actor.items.values(), ["background", "destiny"]).length > 0) {
-            new Dialog({
-                title: `${viewable.titleCase()} Selection`,
-                content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
-    }
-
-    async addItemWithOneItemRestriction(item) {
-        let type = item.data.type;
-        let viewable = type.replace(/([A-Z])/g, " $1");
-        if (filterItemsByType(this.actor.items.values(), type).length > 0) {
-            new Dialog({
-                title: `${viewable.titleCase()} Selection`,
-                content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
     }
 
     async moveExistingItemWithinActor(data, ev) {
