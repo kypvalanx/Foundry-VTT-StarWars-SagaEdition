@@ -1967,11 +1967,13 @@ export class SWSEActor extends Actor {
                     }).render(true);
                     return;
                 }
+                await this.itemTypeSpecificChecks(entity);
             }
 
 
+            //TODO weird spot for this.  maybe this can leverage the newer payload system
             if (itemName === "Bonus Feat" && payload) {
-                for (let attr of Object.values(entity.data.data.attributes)) {
+                for (let attr of Object.values(entity.system.attributes)) {
                     if (attr.key === "provides") {
                         attr.key = "bonusFeat";
                         attr.value = payload;
@@ -2030,6 +2032,91 @@ export class SWSEActor extends Actor {
             return addedItems;
         }
         return notificationMessage;
+    }
+
+    async itemTypeSpecificChecks(entity) {
+        if (entity.type === 'talent') {
+            let possibleTalentTrees = new Set();
+            let allTreesOnTalent = new Set();
+            let optionString = "";
+
+            let actorsBonusTrees = getInheritableAttribute({
+                entity: this,
+                attributeKey: 'bonusTalentTree',
+                reduce: "VALUES"
+            });
+            if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
+                for (let [id, item] of Object.entries(this.system.availableItems)) {
+                    if (id.includes("Talent") && !id.includes("Force") && item > 0) {
+                        optionString += `<option value="${id}">${id}</option>`
+                        possibleTalentTrees.add(id);
+                    }
+                }
+            } else {
+                for (let talentTree of entity.system.possibleProviders.filter(unique)) {
+                    allTreesOnTalent.add(talentTree);
+                    let count = this.system.availableItems[talentTree];
+                    if (count && count > 0) {
+                        optionString += `<option value="${talentTree}">${talentTree}</option>`
+                        possibleTalentTrees.add(talentTree);
+                    }
+                }
+            }
+
+
+            if (possibleTalentTrees.size === 0) {
+                await Dialog.prompt({
+                    title: "You don't have more talents available of these types",
+                    content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
+                    callback: () => {
+                    }
+                });
+            } else if (possibleTalentTrees.size > 1) {
+                let content = `<p>Select an unused talent source.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+                await Dialog.prompt({
+                    title: "Select an unused talent source.",
+                    content: content,
+                    callback: async (html) => {
+                        let key = html.find("#choice")[0].value;
+                        possibleTalentTrees = new Set();
+                        possibleTalentTrees.add(key);
+                    }
+                });
+                entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
+            }
+
+        }
+        if (entity.type === 'feat') {
+            let possibleFeatTypes = [];
+
+            let optionString = "";
+            for (let category of entity.system.bonusFeatCategories) {
+                if (this.system.availableItems[category.value] > 0) {
+                    possibleFeatTypes.push(category);
+                    optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
+                }
+            }
+
+            if (possibleFeatTypes.length > 1) {
+                let content = `<p>Select an unused feat type.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+                await Dialog.prompt({
+                    title: "Select an unused feat source.",
+                    content: content,
+                    callback: async (html) => {
+                        let key = html.find("#choice")[0].value;
+                        possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
+                    }
+                });
+            }
+
+            entity.system.categories = possibleFeatTypes;
+        }
     }
 
     async resolveEntity(item) {

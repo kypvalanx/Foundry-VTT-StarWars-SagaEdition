@@ -863,129 +863,12 @@ export class SWSEActorSheet extends ActorSheet {
                 await sourceActor.removeItem(data.itemId)
             }
         }
-        // let item
-        // if(data.duplicate){
-        //     item = data.item.clone();
-        //     //item = data
-        // }
-        // else{
-        //     const customItem = await Item.implementation.fromDropData(data);
-        //     item = customItem.clone();
-        // }
-
-
-        //item.prepareData();
-
-
 
         let context = {};
         context.newFromCompendium = true;
-        //context.duplicate = data.duplicate;
 
         await this.actor.addItems([data], undefined, context);
-        // switch (item.data.type) {
-        //     case "background":
-        //     case "destiny":
-        //         await this.addBackgroundOrDestiny(item);
-        //         break;
-        //     case "vehicleBaseType":
-        //     case "species":
-        //         await this.addItemWithOneItemRestriction(item);
-        //         break;
-        //     case "class":
-        //         //await this.addClass(item, context);
-        //         await this.actor.addItems([data], undefined, context);
-        //         break;
-        //     case "feat":
-        //         await this.addFeat(item);
-        //         break;
-        //     case "forceSecret":
-        //     case "forceTechnique":
-        //     case "forcePower":
-        //     case "forceRegimen":
-        //     case "affiliation":
-        //         await this.addForceItem(item);
-        //         break;
-        //     case "talent":
-        //         await this.addTalent(item);
-        //         break;
-        //     case "weapon":
-        //     case "vehicleSystem":
-        //     case "armor":
-        //     case "equipment":
-        //     case "template":
-        //     case "upgrade":
-        //     case "trait":
-        //     case "beastAttack":
-        //     case "beastSense":
-        //     case "beastType":
-        //     case "beastQuality":
-        //         //this.actor.addItems([data])
-        //         await this.addItem(item);
-        //         break;
-        //
-        // }
 
-
-    }
-
-    async addTalent(item) {
-        //TODO this tree system is unused but should be used
-        //TODO this should be a tighter system with less regex
-        let possibleTalentTrees = new Set();
-        let allTreesOnTalent = new Set();
-        let optionString = "";
-
-        let actorsBonusTrees = getInheritableAttribute({
-            entity: this.actor,
-            attributeKey: 'bonusTalentTree',
-            reduce: "VALUES"
-        });
-        if (actorsBonusTrees.includes(item.data.data.bonusTalentTree)) {
-            for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
-                if (id.includes("Talent") && !id.includes("Force") && item > 0) {
-                    optionString += `<option value="${id}">${id}</option>`
-                    possibleTalentTrees.add(id);
-                }
-            }
-        } else {
-            for (let talentTree of item.data.data.possibleProviders.filter(unique)) {
-                allTreesOnTalent.add(talentTree);
-                let count = this.actor.data.availableItems[talentTree];
-                if (count && count > 0) {
-                    optionString += `<option value="${talentTree}">${talentTree}</option>`
-                    possibleTalentTrees.add(talentTree);
-                }
-            }
-        }
-
-        if (possibleTalentTrees.size === 0) {
-            await Dialog.prompt({
-                title: "You don't have more talents available of these types",
-                content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
-                callback: () => {
-                }
-            });
-            return [];
-        } else if (possibleTalentTrees.size > 1) {
-            let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-            await Dialog.prompt({
-                title: "Select an unused talent source.",
-                content: content,
-                callback: async (html) => {
-                    let key = html.find("#choice")[0].value;
-                    possibleTalentTrees = new Set();
-                    possibleTalentTrees.add(key);
-                }
-            });
-        }
-
-        item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
-
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Talent"});
     }
 
     async addForceItem(item) {
@@ -1013,62 +896,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-    async addFeat(item) {
-        let possibleFeatTypes = [];
 
-        let optionString = "";
-        for (let category of item.data.data.bonusFeatCategories) {
-            if (this.actor.data.availableItems[category.value] > 0) {
-                possibleFeatTypes.push(category);
-                optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
-            }
-        }
-
-        if (possibleFeatTypes.length > 1) {
-            let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-            await Dialog.prompt({
-                title: "Select an unused feat source.",
-                content: content,
-                callback: async (html) => {
-                    let key = html.find("#choice")[0].value;
-                    possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
-                }
-            });
-        }
-
-        // for (let category of item.data.data.categories) {
-        //     if (!category.value.endsWith(" Bonus Feats")) {
-        //         possibleFeatTypes.push(category);
-        //     }
-        // }
-
-        item.data.data.categories = possibleFeatTypes;
-
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Feat"});
-    }
-
-    async addClass(item) {
-
-
-        context.actor = this.actor;
-        let choices = await activateChoices(item, context);
-        if (!choices.success) {
-            return;
-        }
-
-
-        let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
-
-        await this.actor.addItems(choices.items, mainItem[0])
-    }
-
-    async addItem(item) {
-        let context = {actor:this.actor};
-        return await this.actor.checkPrerequisitesAndResolveOptions(item, context);
-    }
 
     async addBackgroundOrDestiny(item) {
         let type = item.data.type;
