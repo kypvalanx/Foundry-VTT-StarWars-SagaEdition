@@ -88,11 +88,11 @@ export class SWSEActor extends Actor {
             }, {updateChanges: false});
         } else if (this.id && system.isNPC && this.prototypeToken.actorLink) {
             let children = canvas.tokens.objects?.children || [];
-            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, false);
         } else if (this.id && !system.isNPC && !this.prototypeToken.actorLink) {
             let children = canvas.tokens.objects?.children || [];
-            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, true);
         } else {
             system.condition = 0;
