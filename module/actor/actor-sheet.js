@@ -286,7 +286,7 @@ export class SWSEActorSheet extends ActorSheet {
                 break;
             case 'toggle':
                 let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
                 tokens.forEach(token => token.toggleEffect(statusEffect))
                 break;
         }

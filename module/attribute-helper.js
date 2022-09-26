@@ -174,7 +174,7 @@ export function getInheritableAttribute(data = {}) {
         }
 
         if(document.effects){
-            document.effects.filter(effect => effect.disabled !== false).forEach(effect =>  values.push(...extractEffectChange(effect.changes || [], data.attributeKey, effect)))
+            document.effects.filter(effect => effect.disabled === false).forEach(effect =>  values.push(...extractEffectChange(effect.changes || [], data.attributeKey, effect)))
         }
 
 

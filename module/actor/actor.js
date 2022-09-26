@@ -69,7 +69,7 @@ export class SWSEActor extends Actor {
 			
 			return false;
 		}
-		
+
         const system = this.system;
         system.description = system.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
@@ -1967,7 +1967,10 @@ export class SWSEActor extends Actor {
                     }).render(true);
                     return;
                 }
-                await this.itemTypeSpecificChecks(entity);
+                let response = await this.itemTypeSpecificChecks(entity);
+                if(response.fail){
+                    break;
+                }
             }
 
 
