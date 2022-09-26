@@ -14,7 +14,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
     }
     const content = await response.json();
 
-    let pack = await game.packs.find(p => p.metadata.label === compendiumName);
+    let pack = await game.packs.get(`world.${compendiumName.toLowerCase()}`);
 
     let toks = pack?.metadata.name.split("-");
     let version = toks ? toks[toks?.length - 1] : 0;
@@ -27,14 +27,14 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
     }
 
     let collection = await CompendiumCollection.createCompendium({
-        label: compendiumName,
+        label: compendiumName.toLowerCase(),
         name: compendiumName.toLowerCase().replace(" ", "-"),
         type: entity,
         version: content.version
     });
 
     // await new Compendium(collection, {label: compendiumName, entity: entity, version: content.version})
-    pack = await game.packs.find(p => p.metadata.label === compendiumName);
+    pack = await game.packs.get(`world.${compendiumName.toLowerCase()}`);
     //pack.metadata.version = content.version;
 
     if (!pack) {
