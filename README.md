@@ -3,7 +3,9 @@ Community content is available under [CC-BY-SA](https://www.fandom.com/licensing
 
 0.4.X -> v8.9 (no longer supported)
 
-0.5.X -> v9
+0.5.X -> v9 (bug fixes only.  no new features at this time)
+
+0.6.X -> V10
 
 join the community [discord](https://discord.gg/tGpxsrH9Em) 
 
