@@ -177,6 +177,8 @@ function explodeOptions(options, actor) {
             resolvedOptions.push(...(resolveOptions(actor, "weaponSpecialization", "weaponFocus")));
         } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
             resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponSpecialization", ["greaterWeaponFocus", "weaponSpecialization"])));
+        } else if (key === 'AVAILABLE_DISARMING_ATTACK') {
+            resolvedOptions.push(...(resolveOptions(actor, "disarmingAttack", "weaponSpecialization")));
         } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
             resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponFocus", "weaponProficiency")));
         } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {

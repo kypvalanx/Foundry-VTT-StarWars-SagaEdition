@@ -201,7 +201,9 @@
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
-    },
+    }
+  ],
+  "disabledPacks": [
     {
       "name": "units cl  3",
       "label": "Units CL  3",

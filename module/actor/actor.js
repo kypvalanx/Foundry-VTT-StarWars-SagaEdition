@@ -87,12 +87,12 @@ export class SWSEActor extends Actor {
                 "data.isNPC": true
             }, {updateChanges: false});
         } else if (this.id && system.isNPC && this.prototypeToken.actorLink) {
-            let children = canvas.tokens.objects?.children || [];
-            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            let children = canvas.tokens?.objects?.children || [];
+            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, false);
         } else if (this.id && !system.isNPC && !this.prototypeToken.actorLink) {
-            let children = canvas.tokens.objects?.children || [];
-            let documents = children.filter(token => token.data.actorId === (this.id)).map(token => token.document)
+            let children = canvas.tokens?.objects?.children || [];
+            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
             this.setActorLinkOnActorAndTokens(documents, true);
         } else {
             system.condition = 0;
@@ -132,7 +132,8 @@ export class SWSEActor extends Actor {
         this.installed = this.getInstalledSystems('installed');
         this.pilotInstalled = this.getInstalledSystems('pilotInstalled');
         this.gunnerPositions = this.getGunnerPositions()
-        this.cargo = this.getNonequippableItems();
+        this.cargo = filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"])
+            .filter(item => !item.system.hasItemOwner);
         this.traits = this.getTraits();
 
         this.system.attributeGenerationType = "Manual"
@@ -271,7 +272,7 @@ export class SWSEActor extends Actor {
             attributeKey: "consumables",
             reduce: "FIRST"
         })
-        this.system.grapple = resolveValueArray([this.pilot.data.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
+        this.system.grapple = resolveValueArray([this.pilot.system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
             entity: this,
             attributeKey: "grappleSizeModifier",
             reduce: "SUM"
@@ -448,7 +449,7 @@ export class SWSEActor extends Actor {
 
     async removeChildItems(itemId) {
         let itemToDelete = this.items.get(itemId);
-        for (let childItem of itemToDelete.data?.data?.items || []) {
+        for (let childItem of itemToDelete.system.items || []) {
             let ownedItem = this.items.get(childItem._id);
             await itemToDelete.revokeOwnership(ownedItem);
         }
@@ -494,7 +495,7 @@ export class SWSEActor extends Actor {
         let resolvedSkills = {}
         skills.forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
         return {
-            data: {
+            system: {
                 offense: {
                     bab: attackBonus
                 },
@@ -1400,22 +1401,22 @@ export class SWSEActor extends Actor {
         });
     }
 
-    async _onCreate(data, options, userId) {
-        if (data.type === "character") await this.update({"token.actorLink": true}, {updateChanges: false});
-        if (data.type === "npc") await this.update({"type": "character", "data.isNPC": true}, {updateChanges: false});
-        if (data.type === "vehicle") await this.update({"token.actorLink": true}, {updateChanges: false});
-        if (data.type === "npc-vehicle") await this.update({
+    async _onCreate(item, options, userId) {
+        if (item.type === "character") await this.update({"token.actorLink": true}, {updateChanges: false});
+        if (item.type === "npc") await this.update({"type": "character", "data.isNPC": true}, {updateChanges: false});
+        if (item.type === "vehicle") await this.update({"token.actorLink": true}, {updateChanges: false});
+        if (item.type === "npc-vehicle") await this.update({
             "type": "vehicle",
             "data.isNPC": true
         }, {updateChanges: false});
 
-        data.data.attributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType");
+        item.system.attributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType");
 
         // if (userId === game.user._id) {
         //     await updateChanges.call(this);
         // }
 
-        super._onCreate(data, options, userId);
+        super._onCreate(item, options, userId);
     }
 
 
@@ -2098,18 +2099,18 @@ export class SWSEActor extends Actor {
             let possibleFeatTypes = [];
 
             let optionString = "";
-            let bonusFeatCategories = entity.system.bonusFeatCategories;
-            for (let category of bonusFeatCategories) {
-                if (this.system.availableItems[category.value] > 0) {
-                    possibleFeatTypes.push(category);
-                    optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
+            let possibleProviders = entity.system.possibleProviders;
+            for (let provider of possibleProviders) {
+                if (this.system.availableItems[provider] > 0) {
+                    possibleFeatTypes.push(provider);
+                    optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
                 }
             }
 
             if (possibleFeatTypes.length === 0) {
                 await Dialog.prompt({
                     title: "You don't have more feats available of these types",
-                    content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(bonusFeatCategories).join("</li><li>") + "</li></ul>",
+                    content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(possibleProviders).join("</li><li>") + "</li></ul>",
                     callback: () => {
                     }
                 });
@@ -2222,7 +2223,7 @@ export class SWSEActor extends Actor {
         }
 
 
-        return {payload, itemName: itemName || entity?.name, entity};
+        return {payload, itemName: itemName || entity?.name, entity: entity.clone()};
     }
 
     get warnings() {
@@ -2385,7 +2386,13 @@ export class SWSEActor extends Actor {
                 "beastType",
                 "beastQuality"].includes(type)
         } else if (vehicleActorTypes.includes(this.type)) {
-            return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
+            return ["weapon",
+                "armor",
+                "equipment",
+                "upgrade",
+                "vehicleBaseType",
+                "vehicleSystem",
+                "template"].includes(type)
         }
 
         return false;

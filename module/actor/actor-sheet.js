@@ -1106,7 +1106,7 @@ export class SWSEActorSheet extends ActorSheet {
         } else {
             button.disabled = true;
 
-            let title = `Are you sure you want to delete ${itemToDelete.data.finalName}`;
+            let title = `Are you sure you want to delete ${itemToDelete.finalName}`;
             await Dialog.confirm({
                 title: title,
                 content: title,
