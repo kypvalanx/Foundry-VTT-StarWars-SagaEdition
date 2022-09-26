@@ -449,7 +449,7 @@ export class SWSEActor extends Actor {
 
     async removeChildItems(itemId) {
         let itemToDelete = this.items.get(itemId);
-        for (let childItem of itemToDelete.data?.data?.items || []) {
+        for (let childItem of itemToDelete.system.items || []) {
             let ownedItem = this.items.get(childItem._id);
             await itemToDelete.revokeOwnership(ownedItem);
         }

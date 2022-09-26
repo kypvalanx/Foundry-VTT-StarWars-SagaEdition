@@ -103,7 +103,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             case 'FEAT':
                 let ownedFeats = filterItemsByType(getItems(target), "feat");
                 let filteredFeats;
-                if(prereq.requirement.includes("(Exotic Melee Weapons)")){
+                if(prereq.requirement.toLowerCase().includes("(any)")){
+                    let req = prereq.requirement.replace(" (any)", "").replace(" (Any)", "");
+
+                    filteredFeats = ownedFeats.filter(feat => SWSEItem.buildItemName(feat).startsWith(req));
+                } else if(prereq.requirement.includes("(Exotic Melee Weapons)")){
                     let exoticMeleeWeapons = game.generated?.exoticMeleeWeapons || [];
                     let possibleFeats = exoticMeleeWeapons?.map(w => prereq.requirement.replace("(Exotic Melee Weapons)", `(${w})`))
 
