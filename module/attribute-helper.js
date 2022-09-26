@@ -210,7 +210,7 @@ export function getInheritableAttribute(data = {}) {
 export function extractEffectChange(changes, attributeKey, entity) {
     let values = [];
         for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data?._id || entity._id, entity.data?.label || entity.label, entity.label || entity.data?.label || entity.data?.data?.label));
+            values.push(...extractAttributeValues(attribute, entity._id, entity.label, entity.label));
         }
 
     return values;
