@@ -11,8 +11,6 @@ import {changeSize} from "../actor/size.js";
 export class SWSEItem extends Item {
     constructor(...args) {
         super(...args);
-        let {data, parent} = args;
-        this.data.data = data;
         this.items = this.items || [];
         this.hasItemOwner = this.hasItemOwner || false;
     }
@@ -34,24 +32,24 @@ export class SWSEItem extends Item {
         super.prepareData();
         this._pendingUpdate = {};
         // Get the Item's data
-        const itemData = this.data;
-        itemData.finalName = this.name;
+        const system = this.system;
+        //itemData.finalName = this.name;
 
-        this.data.data.quantity = Number.isInteger(this.data.data.quantity) ? this.data.data.quantity : 1;
+        this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
-        if (this.type === "vehicleTemplate") this.data.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
-        if (this.type === "weapon") this.prepareWeapon(itemData);
-        if (this.type === "armor") this.prepareArmor(itemData);
-        if (this.type === "feat") this.prepareFeatData(itemData);
+        if (this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
+        if (this.type === "weapon") this.prepareWeapon(system);
+        if (this.type === "armor") this.prepareArmor(system);
+        if (this.type === "feat") this.prepareFeatData(system);
     }
-
-    set type(type) {
-        this.data.type = type;
-    }
-
-    get type() {
-        return this.data.type;
-    }
+    //
+    // set type(type) {
+    //     this.data.type = type;
+    // }
+    //
+    // get type() {
+    //     return this.data.type;
+    // }
 
     get strippable() {
         return ['armor', 'weapon'].includes(this.type)
@@ -74,29 +72,29 @@ export class SWSEItem extends Item {
         this.prepareData();
     }
 
-    get name() {
-        let itemData = this.data;
-        return SWSEItem.buildItemName(itemData);
-    }
+    // get name() {
+    //     let itemData = this.data;
+    //     return SWSEItem.buildItemName(itemData);
+    // }
 
-    static buildItemName(itemData) {
-        if (!itemData) {
+    static buildItemName(item) {
+        if (!item) {
             return "";
         }
-        let id = itemData._id;
-        let finalName = itemData.name;
+        let id = item._id;
+        let finalName = item.name;
 
-        finalName = this.addSizeAdjustmentSuffix(itemData, finalName);
+        finalName = this.addSizeAdjustmentSuffix(item, finalName);
 
 
-        let modifiers = (itemData.data?.selectedChoices || []).join(", ");
+        let modifiers = (item.system?.selectedChoices || []).join(", ");
         if (modifiers) {
             finalName = `${finalName} (${modifiers})`
         }
 
 
         for (let prefix of getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "prefix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
@@ -104,7 +102,7 @@ export class SWSEItem extends Item {
             finalName = `${prefix} ${finalName}`;
         }
         for (let suffix of getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "suffix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
@@ -162,7 +160,7 @@ export class SWSEItem extends Item {
     }
 
     get baseName() {
-        return this.data.name ?? null;
+        return this.name ?? null;
     }
 
     get sizeMod() {
@@ -302,7 +300,7 @@ export class SWSEItem extends Item {
             return [];
         }
 
-        return this.data.data.items?.map(item => actor.items.get(item._id)) || [];
+        return this.items?.map(item => actor.items.get(item._id)) || [];
     }
 
     get prefix() {
@@ -367,7 +365,7 @@ export class SWSEItem extends Item {
             reduce: "FIRST"
         });
         if (!inheritableAttribute) {
-            return this.data.data.availability;
+            return this.system.availability;
         }
         return inheritableAttribute
     }
@@ -394,11 +392,11 @@ export class SWSEItem extends Item {
     }
 
     get subType() {
-        return this.data.data.treatedAsSubtype ? this.data.data.treatedAsSubtype : this.data.data.subtype;
+        return this.system.treatedAsSubtype ? this.system.treatedAsSubtype : this.system.subtype;
     }
 
     get modSubType() {
-        if (this.data.data.items?.filter(item => item.name === 'Bayonet Ring').length > 0) {
+        if (this.items?.filter(item => item.name === 'Bayonet Ring').length > 0) {
             return 'Weapons Upgrade'
         }
 
@@ -413,7 +411,7 @@ export class SWSEItem extends Item {
 
 
         }))[0];
-        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.data.data.subtype;
+        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : this.system.subtype;
 
         if (this.getStripping("reduceRange")?.value) {
             resolvedSubtype = this.reduceRange(resolvedSubtype);
@@ -563,6 +561,9 @@ export class SWSEItem extends Item {
         return attributes.map(attribute => attribute.value).join(', ');
     }
 
+    get finalName(){
+        return SWSEItem.buildItemName(this)
+    }
 
     get isEquipable() {
         return ["weapon", "armor"].includes(this.type) && !this.isBioPart && !this.isDroidPart;
@@ -581,29 +582,29 @@ export class SWSEItem extends Item {
             || this.subType === "Appendages" || this.subType?.startsWith("Droid Accessories")
     }
 
-    prepareFeatData(itemData) {
-        if (itemData.data.categories) {
-            itemData.data.bonusFeatCategories = itemData.data.categories.filter(cat => cat.value?.toLowerCase().includes("bonus feats"));
-            itemData.data.hasBonusFeatCategories = itemData.data.bonusFeatCategories.length > 0;
+    prepareFeatData(system) {
+        if (system.categories) {
+            system.bonusFeatCategories = system.categories.filter(cat => cat.value?.toLowerCase().includes("bonus feats"));
+            system.hasBonusFeatCategories = system.bonusFeatCategories.length > 0;
         }
     }
 
-    prepareWeapon(itemData) {
-        itemData.data.upgradePoints = toNumber(this.getBaseUpgradePoints(itemData.name));
+    prepareWeapon(system) {
+        system.upgradePoints = toNumber(this.getBaseUpgradePoints(system.name));
 
-        itemData.data.stripping = itemData.data.stripping || {};
+        system.stripping = system.stripping || {};
 
         this.setStripping('reduceRange', "Reduce Range", this.canReduceRange());
 
         this.setStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire());
 
         this.setStripping('stripStun', "Strip Stun", this.canStripStun());
-        itemData.data.isBaseExotic = this.isExotic();
-        this.setStripping('stripDesign', "Make Exotic", !itemData.data.isBaseExotic);
+        system.isBaseExotic = this.isExotic();
+        this.setStripping('stripDesign', "Make Exotic", !system.isBaseExotic);
 
-        let size = itemData.data.size;
+        let size = system.size;
 
-        itemData.data.resolvedSize = itemData.data.size;
+        system.resolvedSize = system.size;
 
         this.setStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
         this.setStripping('makeSmall', "Make Weapon Small", size === 'Tiny');
@@ -613,12 +614,12 @@ export class SWSEItem extends Item {
         this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge');
         this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan');
 
-        for (let stripped of Object.values(itemData.data.stripping)) {
-            itemData.data.upgradePoints += stripped.value ? 1 : 0;
+        for (let stripped of Object.values(system.stripping)) {
+            system.upgradePoints += stripped.value ? 1 : 0;
         }
 
-        if (itemData.data.items && itemData.data.items.length > 0) {
-            for (let mod of itemData.data.items ? itemData.data.items : []) {
+        if (system.items && system.items.length > 0) {
+            for (let mod of system.items ? system.items : []) {
 
                 let upgradePointCost = getInheritableAttribute({
                     entity: mod,
@@ -627,21 +628,22 @@ export class SWSEItem extends Item {
 
                 if (upgradePointCost !== undefined) {
 
-                    itemData.data.upgradePoints -= toNumber(upgradePointCost);
+                    system.upgradePoints -= toNumber(upgradePointCost);
                 }
             }
         }
     }
 
     setStripping(key, label, enabled, type, low, high) {
-        this.data.data.stripping[key] = this.data.data.stripping[key] || {};
-        this.data.data.stripping[key].label = label;
-        this.data.data.stripping[key].enabled = enabled;
-        this.data.data.stripping[key].value = enabled ? (this.data.data.stripping[key].value || (type === 'boolean' ? false : (type === 'string' ? "" : 0))) : false;
-        this.data.data.stripping[key].type = type ? type : "boolean"
-        this.data.data.stripping[key].low = low;
-        this.data.data.stripping[key].high = high;
-        return this.data.data.stripping[key].value;
+        this.system.stripping[key] = this.system.stripping[key] || {};
+        this.system.stripping[key].label = label;
+        this.system.stripping[key].enabled = enabled;
+        this.system.stripping[key].value =
+            enabled ? (this.system.stripping[key].value || (type === 'boolean' ? false : (type === 'string' ? "" : 0))) : false;
+        this.system.stripping[key].type = type ? type : "boolean"
+        this.system.stripping[key].low = low;
+        this.system.stripping[key].high = high;
+        return this.system.stripping[key].value;
     }
 
     getStripping(key) {
@@ -650,19 +652,19 @@ export class SWSEItem extends Item {
     }
 
     static getItemStripping(swseItem, key) {
-        let stripping = swseItem.data.stripping || swseItem.data.data.stripping;
+        let stripping = swseItem.system.stripping;
         if (stripping) {
             return stripping[key];
         }
     }
 
-    prepareArmor(itemData) {
-        itemData.data.upgradePoints = this.getBaseUpgradePoints(itemData.name);
+    prepareArmor(system) {
+        system.upgradePoints = this.getBaseUpgradePoints(system.name);
 
-        itemData.data.stripping = itemData.data.stripping || {};
+        system.stripping = system.stripping || {};
 
-        let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", itemData.data.subtype === 'Light Armor');
-        this.setStripping('makeHeavy', "Make Armor Heavy", itemData.data.subtype === 'Medium Armor' || makeMedium);
+        let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", system.subtype === 'Light Armor');
+        this.setStripping('makeHeavy', "Make Armor Heavy", system.subtype === 'Medium Armor' || makeMedium);
 
         let defensiveMaterial = Math.min(getInheritableAttribute({
                 entity: this,
@@ -691,14 +693,14 @@ export class SWSEItem extends Item {
         this.setStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
 
 
-        for (let stripped of Object.values(itemData.data.stripping)) {
-            itemData.data.upgradePoints += toNumber(stripped.value);
+        for (let stripped of Object.values(system.stripping)) {
+            system.upgradePoints += toNumber(stripped.value);
         }
         try {
-            if (itemData.data.items && itemData.data.items.length > 0) {
-                for (let mod of itemData.data.items) {
+            if (system.items && system.items.length > 0) {
+                for (let mod of system.items) {
                     if (mod.data.upgrade?.pointCost !== undefined) {
-                        itemData.data.upgradePoints -= mod.data.upgrade.pointCost;
+                        system.upgradePoints -= mod.data.upgrade.pointCost;
                     }
                 }
             }
@@ -708,25 +710,25 @@ export class SWSEItem extends Item {
     }
 
     setTextDescription() {
-        let itemData = this.data;
-        itemData.data.textDescription = this.stripHTML(itemData.data.description);
+        this.system.textDescription = this.stripHTML(this.system.description);
     }
 
     setSourceString() {
         let sourceString = '';
 
-        if (this.data.data.supplier && this.data.data.supplier.type && this.data.data.supplier.name) {
-            sourceString = `${this.data.data.supplier.type}, ${this.data.data.supplier.name}`;
+        let supplier = this.system.supplier;
+        if (supplier && supplier.type && supplier.name) {
+            sourceString = `${supplier.type}, ${supplier.name}`;
         }
-        this.data.data.sourceString = sourceString;
+        this.system.sourceString = sourceString;
     }
 
     setChoice(choice) {
         if(!choice){
             return;
         }
-        this.data.data.selectedChoices = this.data.data.selectedChoices || [];
-        this.data.data.selectedChoices.push(choice);
+        this.system.selectedChoices = this.system.selectedChoices || [];
+        this.system.selectedChoices.push(choice);
     }
 
     setPayload(payload, payloadString) {
@@ -737,8 +739,8 @@ export class SWSEItem extends Item {
         }
 
         let regExp = new RegExp(pattern, "g");
-        this.data.data.description = this.data.data.description.replace(regExp, payload)
-        this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
+        this.system.description = this.system.description.replace(regExp, payload)
+        this.crawlPrerequisiteTree(this.system.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
                 prerequisite.requirement = prerequisite.requirement.replace(regExp, payload);
             }
@@ -746,7 +748,7 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace(regExp, payload);
             }
         });
-        this._crawlAttributes(this.data.data, (attribute) => {
+        this._crawlAttributes(this.system, (attribute) => {
             if (attribute.value) {
                 attribute.key = attribute.key.replace(regExp, payload);
                 if (Array.isArray(attribute.value)) {
@@ -756,12 +758,12 @@ export class SWSEItem extends Item {
                 }
             }
         });
-        this._crawlProvidedItems(this.data.data, (providedItem) => {
+        this._crawlProvidedItems(this.system, (providedItem) => {
             if (providedItem.name) {
                 providedItem.name = providedItem.name.replace(regExp, payload);
             }
         });
-        this.data.data.choices = [];
+        this.system.choices = [];
     }
 
 
@@ -770,7 +772,7 @@ export class SWSEItem extends Item {
             return;
         }
 
-        let attributes = this.data.data.attributes
+        let attributes = this.system.attributes
         let attributeId = 0;
         while (attributes[attributeId]) {
             attributeId++;
@@ -791,8 +793,8 @@ export class SWSEItem extends Item {
         if(!modifiers){
             return;
         }
-        this.data.data.providedItems = this.data.data.providedItems || [];
-        this.data.data.providedItems.push(...modifiers)
+        this.system.providedItems = this.system.providedItems || [];
+        this.system.providedItems.push(...modifiers)
     }
 
     /**
@@ -807,7 +809,7 @@ export class SWSEItem extends Item {
         if(Array.isArray(parent)){
             parent = parent[0];
         }
-        this.crawlPrerequisiteTree(this.data.data.prerequisite, (prerequisite) => {
+        this.crawlPrerequisiteTree(this.system.prerequisite, (prerequisite) => {
             if (prerequisite.requirement) {
                 prerequisite.requirement = prerequisite.requirement.replace(/#parent#/g, parent.name);
             }
@@ -815,7 +817,7 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace(/#parent#/g, parent.name);
             }
         });
-        this._crawlAttributes(this.data.data, (attribute) => {
+        this._crawlAttributes(this.system, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
                     attribute.value = attribute.value.replace("#parent#", parent.name);
@@ -824,10 +826,10 @@ export class SWSEItem extends Item {
                 }
             }
         });
-        this.data.data.supplier = {
+        this.system.supplier = {
             id: parent.id,
             name: parent.name,
-            type: parent.data.type,
+            type: parent.type,
             unlocked
         }
     }
@@ -901,12 +903,12 @@ export class SWSEItem extends Item {
             return;
         }
 
-        this.data.data.prerequisite = prerequisite;
+        this.system.prerequisite = prerequisite;
     }
 
     setParentItem(parentItem) {
-        this.data.data.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
-        this.data.data.isSupplied = true;
+        this.system.supplier = {id: parentItem.id, name: parentItem.name, type: parentItem.data.type};
+        this.system.isSupplied = true;
     }
 
     //TODO MOVE ME
@@ -922,7 +924,7 @@ export class SWSEItem extends Item {
      * @returns {Promise<void>}
      */
     async takeOwnership(item) {
-        let items = this.data.data?.items || [];
+        let items = this.items || [];
         items.push(item)
         let filteredItems = [];
         let foundIds = [];
@@ -943,19 +945,19 @@ export class SWSEItem extends Item {
         if (!item) {
             return;
         }
-        let items = this.data.data.items?.filter(i => i._id !== item.data._id);
+        let items = this.items?.filter(i => i._id !== item.data._id);
         await this.update({"data.items": items});
         await item.update({"data.hasItemOwner": false});
     }
 
     canReduceRange() {
         let subtypes = ["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"];
-        return subtypes.includes(this.data.data.subtype?.toLowerCase()) || subtypes.includes(this.data.data.attributes?.treatedAsForRange?.toLowerCase())
+        return subtypes.includes(this.system.subtype?.toLowerCase()) || subtypes.includes(this.system.attributes?.treatedAsForRange?.toLowerCase())
     }
 
     addAttribute(attribute) {
         let data = {};
-        let attributes = this.data.data.attributes
+        let attributes = this.system.attributes
         let attributeId = 0;
         while (attributes[attributeId]) {
             attributeId++;
@@ -985,7 +987,7 @@ export class SWSEItem extends Item {
             }
         }
         return af && ss;
-        //return this.data.data.attributes.ratesOfFire && this.data.data.attributes.ratesOfFire.value.includes("Single-Shot") && this.data.data.attributes.ratesOfFire.value.includes("Autofire");
+        //return this.system.attributes.ratesOfFire && this.system.attributes.ratesOfFire.value.includes("Single-Shot") && this.system.attributes.ratesOfFire.value.includes("Autofire");
     }
 
     canStripStun() {
@@ -1003,7 +1005,7 @@ export class SWSEItem extends Item {
     }
 
     async removeCategory(index) {
-        let attacks = this.data.data.weapon.damage.attacks;
+        let attacks = this.system.weapon.damage.attacks;
         if (!Array.isArray(attacks)) {
             let temp = [];
             for (let attack of Object.values(attacks)) {
@@ -1017,7 +1019,7 @@ export class SWSEItem extends Item {
     }
 
     async addCategory() {
-        let attacks = this.data.data.weapon.damage.attacks;
+        let attacks = this.system.weapon.damage.attacks;
         if (!Array.isArray(attacks)) {
             let temp = [];
             for (let attack of Object.values(attacks)) {
@@ -1031,7 +1033,7 @@ export class SWSEItem extends Item {
     }
 
     increaseQuantity() {
-        let current = this.data.data.quantity;
+        let current = this.system.quantity;
 
         let quantity = current + 1;
         this.update({"data.quantity": quantity});
@@ -1039,7 +1041,7 @@ export class SWSEItem extends Item {
 
     decreaseQuantity() {
 
-        let current = this.data.data.quantity;
+        let current = this.system.quantity;
 
         let quantity = Math.max(0, current - 1);
         this.update({"data.quantity": quantity});
@@ -1119,11 +1121,11 @@ export class SWSEItem extends Item {
                 attribute.value = value;
             }
         } else {
-            let nullEntry = Object.entries(this.data.data.attributes).find(entry => entry[1] === null)
+            let nullEntry = Object.entries(this.system.attributes).find(entry => entry[1] === null)
             if (nullEntry) {
                 attributesForUpdate[nullEntry[0]] = {value: value, key: attribute};
             } else {
-                attributesForUpdate[Object.entries(this.data.data.attributes).length] = {value: value, key: attribute};
+                attributesForUpdate[Object.entries(this.system.attributes).length] = {value: value, key: attribute};
             }
         }
         let update = this.buildUpdateObjectForAttributes(attributesForUpdate);
@@ -1132,7 +1134,7 @@ export class SWSEItem extends Item {
 
     getAttributesForUpdate(attribute) {
         let attributes = {};
-        for (let entry of Object.entries(this.data.data.attributes)) {
+        for (let entry of Object.entries(this.system.attributes)) {
             if (entry[1]?.key === attribute) {
                 attributes[entry[0]] = entry[1];
             }
@@ -1176,7 +1178,7 @@ export class SWSEItem extends Item {
     //     this.updateData(data);
     // }
     getProvidedItems(filter) {
-        let items = this.data.data.providedItems;
+        let items = this.system.providedItems;
 
         if(!!items && !Array.isArray(items)){
             items = Object.values(items);
@@ -1188,7 +1190,7 @@ export class SWSEItem extends Item {
         return items || [];
     }
     getModifications(filter) {
-        let items = this.data.data.modifications;
+        let items = this.system.modifications;
 
         if(!!items && !Array.isArray(items)){
             items = Object.values(items);
@@ -1201,10 +1203,7 @@ export class SWSEItem extends Item {
     }
 
     static getActiveModesFromItemData(itemData) {
-        if (itemData.data?.data?.modes) {
-            itemData = itemData.data;
-        }
-        return Object.values(itemData.data?.modes || [])?.filter(mode => mode && mode.isActive) || [];
+        return Object.values(itemData.system.modes || [])?.filter(mode => mode && mode.isActive) || [];
     }
 
     get modes() {
@@ -1212,17 +1211,14 @@ export class SWSEItem extends Item {
         return SWSEItem.getModesFromItem(itemData);
     }
 
-    static getModesFromItem(itemData) {
-        if (!itemData) {
+    static getModesFromItem(item) {
+        if (!item) {
             return [];
         }
-        if (itemData.data?.data?.modes) {
-            itemData = itemData.data;
-        }
-        let modes = Object.values(itemData.data.modes || []).filter(mode => !!mode);
+        let modes = Object.values(item.system.modes || []).filter(mode => !!mode);
 
         modes.forEach(mode => mode.modePath = mode.name);
-        let activeModes = SWSEItem.getActiveModesFromItemData(itemData);
+        let activeModes = SWSEItem.getActiveModesFromItemData(item);
         let childModes = SWSEItem.getChildModes(activeModes, "");
 
         modes.push(...childModes);
@@ -1243,7 +1239,7 @@ export class SWSEItem extends Item {
     }
 
     activateMode(mode) {
-        let modes = this.data.data.modes;
+        let modes = this.system.modes;
         let update = {};
 
         update.data = {};
@@ -1289,7 +1285,7 @@ export class SWSEItem extends Item {
     deactivateMode(mode) {
         let update = {};
         update.data = {};
-        update.data.activeModes = this.data.data.activeModes.filter(activeMode => activeMode.toLowerCase() !== mode.toLowerCase());
+        update.data.activeModes = this.system.activeModes.filter(activeMode => activeMode.toLowerCase() !== mode.toLowerCase());
         this.update(update);
     }
 

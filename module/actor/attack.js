@@ -100,7 +100,7 @@ export class Attack {
         if(this.parentId){
             let tokens = canvas.tokens.objects?.children || [];
             let token = tokens.find(token => token.id === this.parentId);
-            return token.document.actor.data
+            return token.document.actor
         } else if(this.actorId) {
             find = game.data.actors.find(actor => actor._id === this.actorId);
             if(!find){
@@ -113,12 +113,9 @@ export class Attack {
                     }
                 }
             }
-            if (find instanceof SWSEActor) {
-                return find.data;
-            }
         } else if(this.providerId){
             let provider = this.provider;
-            let quality = provider?.data?.crewQuality?.quality;
+            let quality = provider?.system?.crewQuality?.quality;
             return SWSEActor.getCrewByQuality(quality);
         }
         return find;
@@ -190,20 +187,20 @@ export class Attack {
 
     /**
      *
-     * @param item
+     * @param item {SWSEItem}
      * @returns {boolean}
      */
     isRanged(item) {
-        let data = item.data.data || item.data;
+        let data = item.system;
         return weaponGroup['Ranged Weapons'].includes(data.subtype);
     }
     /**
      *
-     * @param item
+     * @param item {SWSEItem}
      * @returns {boolean}
      */
     isMelee(item) {
-        let data = item.data.data || item.data;
+        let data = item.system;
         let subtype = data.subtype;
         if(!subtype && item.type === 'beastAttack'){
             subtype = "Melee Natural Weapons"
@@ -266,7 +263,7 @@ export class Attack {
             return;
         }
 
-        let actorData = actor?.data;
+        let actorSystem = actor.system;
         //let providerData = provider.data;
         let weaponTypes = getPossibleProficiencies(actor, item);
         let attributeStats = []
@@ -294,7 +291,7 @@ export class Attack {
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
         }
 
-        terms.push(...appendNumericTerm(actorData?.offense?.bab, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(actorSystem?.offense?.bab, "Base Attack Bonus"));
 
         if(!provider) {
 
@@ -387,7 +384,7 @@ export class Attack {
         }
 
         if (this.isMelee(item)) {
-            let strMod = parseInt(actor.data.attributes.str.mod);
+            let strMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
             terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
         }
@@ -490,17 +487,17 @@ export class Attack {
     }
 
     get range() {
-        let itemData = this.item;
+        let item = this.item;
         let treatedAsForRange = getInheritableAttribute({
-            entity: itemData,
+            entity: item,
             attributeKey: "treatedAs",
             reduce: "FIRST"
         });
 
-        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : itemData.data.subtype;
+        let resolvedSubtype = treatedAsForRange ? treatedAsForRange : item.system.subtype;
 
 
-        if (getItemStripping(itemData, "reduceRange")?.value) {
+        if (getItemStripping(item, "reduceRange")?.value) {
             resolvedSubtype = reduceWeaponRange(resolvedSubtype);
         }
 
@@ -547,8 +544,8 @@ export class Attack {
     }
 
     get modes() {
-        let itemData = this.item;
-        let modes = SWSEItem.getModesFromItem(itemData);
+        let item = this.item;
+        let modes = SWSEItem.getModesFromItem(item);
         let groupedModes = {}
         for (let mode of Object.values(modes).filter(m => !!m)) {
             if (!groupedModes[mode.group]) {
@@ -647,9 +644,9 @@ export class Attack {
     }
 }
 
-function getItemStripping(itemData, key) {
-    if (itemData?.data?.stripping) {
-        return itemData.data.stripping[key];
+function getItemStripping(item, key) {
+    if (item && item.system.stripping) {
+        return item.system.stripping[key];
     }
     return undefined;
 }
@@ -680,8 +677,8 @@ function getDiceTermsFromString(dieString) {
 
 /**
  * Resolves the die to be thrown when making an unarmed attack
- * @param {ActorData} actor
- * @returns {String}
+ * @param {SWSEActor} actor
+ * @returns
  */
 function resolveUnarmedDamageDie(actor) {
     let isDroid = getInheritableAttribute({

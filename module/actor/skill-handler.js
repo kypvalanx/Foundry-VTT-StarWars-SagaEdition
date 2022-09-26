@@ -10,8 +10,7 @@ import {NEW_LINE} from "../constants.js";
  */
 export function generateSkills(actor) {
     let data = {};
-    let prerequisites = actor.data.prerequisites;
-    prerequisites.trainedSkills = [];
+
     let classSkills = actor._getClassSkills();
 
     let conditionBonus = getInheritableAttribute({
@@ -48,7 +47,7 @@ export function generateSkills(actor) {
     let halfCharacterLevel = actor.getHalfCharacterLevel();
     let halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
     let skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
-    for (let [key, skill] of Object.entries(actor.data.data.skills)) {
+    for (let [key, skill] of Object.entries(actor.system.skills)) {
         let dirtyKey = key.toLowerCase()
             .replace(" ", "").trim()
         skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
@@ -70,7 +69,7 @@ export function generateSkills(actor) {
 
         bonuses.push({value: parseInt(conditionBonus), description: `Condition Modifier: ${conditionBonus}`})
 
-        let acPenalty = skill.acp ? generateArmorCheckPenalties(actor.data) : 0;
+        let acPenalty = skill.acp ? generateArmorCheckPenalties(actor) : 0;
         bonuses.push({value: acPenalty, description: `Armor Class Penalty: ${acPenalty}`})
 
         let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
@@ -106,9 +105,8 @@ export function generateSkills(actor) {
         if (skill.value !== old) {
             data[`data.skills.${key}.value`] = skill.value;
         }
-        prerequisites.trainedSkills.push(key.toLowerCase());
     }
-    if (Object.values(data).length > 0 && !!actor.data._id && !actor.pack) {
+    if (Object.values(data).length > 0 && !!actor._id && !actor.pack) {
         actor.update(data);
     }
 }

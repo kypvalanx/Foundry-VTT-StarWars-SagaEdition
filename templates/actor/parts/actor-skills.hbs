@@ -13,7 +13,7 @@
         </tr>
         </thead>
         <tbody>
-        {{#each data.data.skills as |skill id|}}
+        {{#each actor.system.skills as |skill id|}}
             {{#unless skill.hide}}
                 <tr class="draggable" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
                     <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
@@ -27,7 +27,7 @@
                         <label title="trained skills get an additional +5"><input class="skill"
                                                                                   type="checkbox"
                                                                                   data-id="{{id}}"
-                                                                                  data-name="data.skills.{{id}}.trained"
+                                                                                  data-name="system.skills.{{id}}.trained"
                                                                                   {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
                     </td>
                 </tr>

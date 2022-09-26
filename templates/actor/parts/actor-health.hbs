@@ -2,42 +2,42 @@
 <div class="health-block panel flex flex-col">
     <div><h1 class="resource-label">Hit Points</h1></div>
     <div class="flex flex-row">
-        <div class="resource-block"><h3><label>Total</label><div class="plain input static">{{data.data.health.max}}</div></h3></div>
+        <div class="resource-block"><h3><label>Total</label><div class="plain input static">{{actor.system.health.max}}</div></h3></div>
         <div class="resource-block"><label class="top">Current</label>
-            <input class="plain small" type="number" name="data.health.value" value="{{data.data.health.value}}" data-dtype="Number"/>
+            <input class="plain small" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
         </div>
     </div>
     <div class="flex flex-row panel">
-        <div class="resource-block"><label>Damage Threshold</label><div class="plain input static">{{data.data.defense.damageThreshold.total}}</div></div>
-        <div class="resource-block"><label>Fort</label><div class="plain input static">{{data.data.defense.fortitude.total}}</div></div>
+        <div class="resource-block"><label>Damage Threshold</label><div class="plain input static">{{actor.system.defense.damageThreshold.total}}</div></div>
+        <div class="resource-block"><label>Fort</label><div class="plain input static">{{actor.system.defense.fortitude.total}}</div></div>
         <div class="resource-block"><label>Misc</label><div class="plain input static"></div></div>
     </div>
     <div class="flex flex-row">
-        <div class="resource-block"><label>Damage Reduction</label><div class="plain input static">{{data.data.defense.damageReduction}}</div></div>
+        <div class="resource-block"><label>Damage Reduction</label><div class="plain input static">{{actor.system.defense.damageReduction}}</div></div>
     </div>
     <div class="flex flex-row">
         <div class="resource-block">
             <label>Base Attack</label>
             <div class="plain input static">
-                <a class="rollable" title="Roll 1d20 + {{data.data.offense.bab}}" data-roll="1d20 + {{data.data.offense.bab}}"><i
-                        class="fas fa-dice-d20"></i>{{data.data.offense.bab}}</a>
+                <a class="rollable" title="Roll 1d20 + {{actor.system.offense.bab}}" data-roll="1d20 + {{actor.system.offense.bab}}"><i
+                        class="fas fa-dice-d20"></i>{{actor.system.offense.bab}}</a>
             </div>
         </div>
         <div class="resource-block">
             <label>Grapple Bonus</label>
             <div class="plain input static">
-                <a class="rollable" title="Roll 1d20 + {{data.data.grapple}}" data-roll="1d20 + {{data.data.grapple}}"><i
-                        class="fas fa-dice-d20"></i>{{data.data.grapple}}</a>
+                <a class="rollable" title="Roll 1d20 + {{actor.system.grapple}}" data-roll="1d20 + {{actor.system.grapple}}"><i
+                        class="fas fa-dice-d20"></i>{{actor.system.grapple}}</a>
             </div>
         </div>
         <div class="resource-block"><label>Speed</label><div class="plain input static">{{actor.speed}}</div></div>
     </div>
     <div class="flex flex-row">
         <div class="resource-block"><label class="top">Force Points</label>
-            <input class="plain small" type="number" name="data.forcePoints" value="{{data.data.forcePoints}}" data-dtype="Number"/>
+            <input class="plain small" type="number" name="system.forcePoints" value="{{actor.system.forcePoints}}" data-dtype="Number"/>
         </div>
         <div class="resource-block"><label class="top">Destiny Points</label>
-            <input class="plain small" type="number" name="data.destinyPoints" value="{{data.data.destinyPoints}}" data-dtype="Number"/>
+            <input class="plain small" type="number" name="system.destinyPoints" value="{{actor.system.destinyPoints}}" data-dtype="Number"/>
         </div>
     </div>
 </div>

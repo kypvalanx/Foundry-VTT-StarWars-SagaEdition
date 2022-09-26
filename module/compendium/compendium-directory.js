@@ -33,7 +33,7 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
                 packName = pack.split(".")[1]
             }
             if(!packName && filterString){
-                packName = filterString.split(":")[1]
+                packName = filterString.split(":")[1].split(/(?=[A-Z])/).join(" ").toLowerCase()
             }
 
             let found = game.packs.find(p => p.metadata.name.includes(packName));

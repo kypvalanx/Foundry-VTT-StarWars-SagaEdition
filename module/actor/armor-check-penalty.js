@@ -4,12 +4,12 @@ import {getEquippedItems} from "./actor.js";
 
 /**
  *
- * @param actorData {ActorData}
+ * @param actor {SWSEActor}
  * @returns {number}
  */
-export function generateArmorCheckPenalties(actorData) {
+export function generateArmorCheckPenalties(actor) {
     let armorProficiencies = getInheritableAttribute({
-        entity: actorData,
+        entity: actor,
         attributeKey: "armorProficiency",
         reduce: "VALUES"
     });
@@ -26,14 +26,14 @@ export function generateArmorCheckPenalties(actorData) {
     let wearingMedium = false;
     let wearingHeavy = false;
 
-    for(let armor of filterItemsByType(getEquippedItems(actorData), "armor")){
-        if('Heavy Armor' === armor.data.subtype){
+    for(let armor of filterItemsByType(getEquippedItems(actor), "armor")){
+        if('Heavy Armor' === armor.system.subtype){
             wearingHeavy = true;
         }
-        if('Medium Armor' === armor.data.subtype){
+        if('Medium Armor' === armor.system.subtype){
             wearingMedium = true;
         }
-        if('Light Armor' === armor.data.subtype){
+        if('Light Armor' === armor.system.subtype){
             wearingLight = true;
         }
     }

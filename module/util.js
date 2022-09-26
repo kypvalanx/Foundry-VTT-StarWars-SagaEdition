@@ -243,7 +243,7 @@ export function filterItemsByType(items, type) {
     }
     let filtered = [];
     for (let item of items) {
-        if (types.includes(item.type) || types.includes(item.data.type)) {
+        if (types.includes(item.type)){// || types.includes(item.data.type)) {
             filtered.push(item);
         }
     }
@@ -781,15 +781,16 @@ export function getCompendium(item) {
 
 export async function getIndexAndPack(indices, item) {
 
-    let index = indices[item.pack || item.type];
+    let compendiumReference = item.pack || item.type;
+    let index = indices[compendiumReference];
     let pack = getCompendium(item);
     if(!pack){
-        console.error(`${type} compendium not defined`)
+        console.error(`${compendiumReference} compendium not defined`)
         return {}
     }
     if (!index) {
         index = await pack.getIndex();
-        indices[item.pack || item.type] = index;
+        indices[compendiumReference] = index;
     }
     return {index, pack};
 }
@@ -862,10 +863,10 @@ export function getItems(target) {
 
 
 export function getItemParentId(id){
-    let a = game.data.actors || []
+    let a = []//game.data.actors || []
     let b = game.actors?.values() || []
 
     let actors = [...a, ...b];
-    let actor = actors.find(actor => actor.items.find(item => item._id === id || item.data._id === id))
-    return !actor? undefined : actor._id || actor.data._id;
+    let actor = actors.find(actor => actor.items.find(item => item._id === id))
+    return !actor? undefined : actor._id// || actor.data._id;
 }

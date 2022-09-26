@@ -32,8 +32,8 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
             }
             if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
                 Object.values(selectedChoice.attributes).forEach(attr => {
-                    let index = Math.max(Object.keys(item.data.data.attributes)) + 1
-                    item.data.data.attributes[index] = attr;
+                    let index = Math.max(Object.keys(item.system.attributes)) + 1
+                    item.system.attributes[index] = attr;
                 })
             }
         }
@@ -53,7 +53,7 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
  */
 export async function activateChoices(item, context) {
     let actor = context.actor;
-    let choices = item.data.data.choices;
+    let choices = item.system.choices;
     if (choices?.length === 0) {
         return {success: true, items: []};
     }

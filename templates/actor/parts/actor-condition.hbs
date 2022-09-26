@@ -14,13 +14,13 @@
         </thead>
         <tbody>
         <tr>
-            {{#radio actor.data.data.condition}}
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="0"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="-1"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="-2"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="-5"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="-10"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor._id}}" value="OUT"/></label></td>
+            {{#radio actor.system.condition}}
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="0"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-1"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-2"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-5"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-10"/></label></td>
+            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="OUT"/></label></td>
             {{/radio}}
         </tr>
         </tbody>

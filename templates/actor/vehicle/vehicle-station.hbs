@@ -10,7 +10,7 @@
     {{#unless crew.id}}{{crew.type}} slot{{/unless}}
 
     <div class="crewCover"><label for="crewCover">Crew Cover
-        <select name="data.crewCover.{{crew.type}}">
+        <select name="system.crewCover.{{crew.type}}">
             {{#select crew.cover}}
                 <option value="None">None</option>
                 <option value="+5 Cover Bonus">+5 Cover Bonus</option>

@@ -2,8 +2,8 @@
     data-item-name="{{item.name}}">
     <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                  height="24" alt=""/></div>
-    <h4 class="item-name {{#ifLT item.data.data.quantity 1 }}strikethrough{{/ifLT}}">{{item.name}}
-        {{#if quantity}}{{#ifGT item.data.data.quantity 1 }}({{item.data.data.quantity}}){{/ifGT}}{{/if}}</h4>
+    <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">{{item.finalName}}
+        {{#if quantity}}{{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}{{/if}}</h4>
     <div class="item-controls">
         {{#if quantity}}
             <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i class="fas fa-plus"></i></a>
@@ -12,12 +12,12 @@
         <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
 
         {{#ifEquals delete 'unSupplied'}}
-            {{#unless item.data.data.supplier.id}}
+            {{#unless item.system.supplier.id}}
                 <a class="item-control item-delete" title="Delete Item"><i
                         class="fas fa-trash"></i></a>
             {{/unless}}
-            {{#if item.data.data.supplier.id}}
-                {{#if item.data.data.supplier.unlocked}}
+            {{#if item.system.supplier.id}}
+                {{#if item.system.supplier.unlocked}}
                     <a class="item-control item-delete" title="Delete Item"><i
                             class="fas fa-trash"></i></a>
                 {{/if}}

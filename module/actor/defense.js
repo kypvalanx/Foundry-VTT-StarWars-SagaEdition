@@ -1,6 +1,6 @@
 import {SWSEActor} from "./actor.js";
 import {resolveValueArray, toNumber} from "../util.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
+import {getInheritableAttribute, inheritableItems} from "../attribute-helper.js";
 
 
 function reduceSpeedForArmorType(speed, armorType) {
@@ -144,13 +144,13 @@ function _resolveFort(actor, conditionBonus) {
  * @private
  */
 function _resolveWill(actor, conditionBonus) {
-    let actorData = actor.data
-    let skip = ['vehicle', 'npc-vehicle'].includes(actorData.type);
+    let system = actor.system
+    let skip = ['vehicle', 'npc-vehicle'].includes(actor.type);
     let total = [];
     total.push(10);
     let heroicLevel = actor.heroicLevel;
     total.push(heroicLevel);
-    let abilityBonus = _getWisMod(actorData);
+    let abilityBonus = _getWisMod(actor);
     total.push(abilityBonus);
     let classBonus = getInheritableAttribute({
         entity: actor,
@@ -220,25 +220,12 @@ function _resolveWill(actor, conditionBonus) {
  * @private
  */
 function _resolveRef(actor, conditionBonus) {
-    let actorData = actor.data
     let total = [];
     total.push(10);
-    let armorBonus;
-    if (["vehicle", "npc-vehicle"].includes(actor.data.type)) {
-        if (actor.pilot) {
-            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
-            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
-            if (armorReflexDefenseBonus) {
-                armorBonus = Math.max(armorBonus, armorReflexDefenseBonus);
-            }
-        } else {
-            armorBonus = getArmorReflexDefenseBonus(actor) || 0;
-        }
-    } else {
-        armorBonus = _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
-    }
+
+    let armorBonus = getArmorBonus(actor);
     total.push(armorBonus);
-    let abilityBonus = Math.min(_getDexMod(actorData), _getEquipmentMaxDexBonus(actor));
+    let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     total.push(abilityBonus);
     let otherBonus = getInheritableAttribute({
         entity: actor,
@@ -296,6 +283,23 @@ function _resolveRef(actor, conditionBonus) {
 }
 
 
+function getArmorBonus(actor) {
+    let armorBonus;
+    if (["vehicle", "npc-vehicle"].includes(actor.type)) {
+        if (actor.pilot) {
+            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
+            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
+            if (armorReflexDefenseBonus) {
+                return Math.max(armorBonus, armorReflexDefenseBonus);
+            }
+        } else {
+            return getArmorReflexDefenseBonus(actor) || 0;
+        }
+    } else {
+        return _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+    }
+}
+
 /**
  *
  * @param actor {SWSEActor}
@@ -307,25 +311,11 @@ function _resolveFFRef(actor, conditionBonus) {
     let total = [];
     total.push(10);
 
-    let abilityBonus = Math.min(_getDexMod(actor.data), _getEquipmentMaxDexBonus(actor));
+    let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     if(abilityBonus < 0) {
         total.push(abilityBonus);
     }
-
-    let armorBonus;
-    if (["vehicle", "npc-vehicle"].includes(actor.data.type)) {
-        if (actor.pilot) {
-            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
-            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
-            if (armorReflexDefenseBonus) {
-                armorBonus = Math.max(armorBonus, armorReflexDefenseBonus);
-            }
-        } else {
-            armorBonus = getArmorReflexDefenseBonus(actor) || 0;
-        }
-    } else {
-        armorBonus = _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
-    }
+    let armorBonus = getArmorBonus(actor);
     total.push(armorBonus);
     let otherBonus = getInheritableAttribute({
         entity: actor,
@@ -475,16 +465,16 @@ function _selectRefBonus(actor, heroicLevel, armorBonus) {
     return heroicLevel;
 }
 
-function _getDexMod(actorData) {
-    return actorData.data.attributes.dex.mod;
+function _getDexMod(actor) {
+    return actor.system.attributes.dex.mod;
 }
 
-function _getWisMod(actorData) {
-    return actorData.data.attributes.wis?.mod || 0;
+function _getWisMod(actor) {
+    return actor.system.attributes.wis?.mod || 0;
 }
 
 function _getFortStatMod(actor) {
-    let attributes = actor.data.data.attributes;
+    let attributes = actor.system.attributes;
     return actor.ignoreCon() ? attributes.str.mod : attributes.con.mod;
 }
 
@@ -507,7 +497,7 @@ function _getEquipmentFortBonus(actor) {
 }
 
 function getArmorReflexDefenseBonus(actor) {
-    let bonuses = actor.inheritableItems.map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
+    let bonuses = inheritableItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
 
     if (bonuses.length === 0) {
         return undefined;

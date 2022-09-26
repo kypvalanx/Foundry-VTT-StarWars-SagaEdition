@@ -1,10 +1,10 @@
 <ul>
-    {{#if item.data.data}}
-        {{#each item.data.data.providedItems as |providedItem id|}}
+    {{#if item.system}}
+        {{#each item.system.providedItems as |providedItem id|}}
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
         {{/each}}
     {{else}}
-        {{#each item.data._source.data.providedItems as |providedItem id|}}
+        {{#each item._source.system.providedItems as |providedItem id|}}
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
         {{/each}}
     {{/if}}

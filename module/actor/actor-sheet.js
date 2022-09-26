@@ -50,7 +50,7 @@ export class SWSEActorSheet extends ActorSheet {
     get template() {
         const path = "systems/swse/templates/actor";
 
-        let type = this.actor.data.type;
+        let type = this.actor.type;
         if (type === 'character') {
             return `${path}/actor-sheet.hbs`;
         }
@@ -162,11 +162,11 @@ export class SWSEActorSheet extends ActorSheet {
             event.stopPropagation();
             if("0" === event.currentTarget.value){
                 this.actor.effects
-                    .filter(effect => effect.data?.flags?.core?.statusId?.startsWith("condition"))
+                    .filter(effect => effect.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             } else {
                 let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
-                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
                 tokens.forEach(token => token.toggleEffect(statusEffect))
             }
         })
@@ -279,14 +279,14 @@ export class SWSEActorSheet extends ActorSheet {
         let actor = this.actor;
         switch(type){
             case 'plus':
-                actor.shields = actor.data.data.shields.value + 5
+                actor.shields = actor.system.shields.value + 5
                 break;
             case 'minus':
-                actor.shields = actor.data.data.shields.value - 5
+                actor.shields = actor.system.shields.value - 5
                 break;
             case 'toggle':
                 let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.data.actorId === (this.actor.id))
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
                 tokens.forEach(token => token.toggleEffect(statusEffect))
                 break;
         }
@@ -579,7 +579,7 @@ export class SWSEActorSheet extends ActorSheet {
                 if (el.dataset.dtype === "Number") value = Number(value);
                 else if (el.dataset.dtype === "Boolean") value = Boolean(value);
 
-                if (getProperty(this.actor.data, name) !== value) {
+                if (getProperty(this.actor, name) !== value) {
                     changedData[name] = value;
                 }
             }
@@ -863,290 +863,12 @@ export class SWSEActorSheet extends ActorSheet {
                 await sourceActor.removeItem(data.itemId)
             }
         }
-        let item
-        if(data.duplicate){
-            item = data.item.clone();
-            //item = data
-        }
-        else{
-            const customItem = await Item.implementation.fromDropData(data);
-            item = customItem.clone();
-        }
-
-
-        item.prepareData();
-
-        if (!this.isPermittedForActorType(item.data.type)) {
-            new Dialog({
-                title: "Inappropriate Item",
-                content: `You can't add a ${item.data.type} to a ${this.actor.data.type}.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
 
         let context = {};
         context.newFromCompendium = true;
-        //context.duplicate = data.duplicate;
 
-        switch (item.data.type) {
-            case "background":
-            case "destiny":
-                await this.addBackgroundOrDestiny(item);
-                break;
-            case "vehicleBaseType":
-            case "species":
-                await this.addItemWithOneItemRestriction(item);
-                break;
-            case "class":
-                //await this.addClass(item, context);
-                await this.actor.addItems([data], undefined, context);
-                break;
-            case "feat":
-                await this.addFeat(item);
-                break;
-            case "forceSecret":
-            case "forceTechnique":
-            case "forcePower":
-            case "forceRegimen":
-            case "affiliation":
-                await this.addForceItem(item);
-                break;
-            case "talent":
-                await this.addTalent(item);
-                break;
-            case "weapon":
-            case "vehicleSystem":
-            case "armor":
-            case "equipment":
-            case "template":
-            case "upgrade":
-            case "trait":
-            case "beastAttack":
-            case "beastSense":
-            case "beastType":
-            case "beastQuality":
-                //this.actor.addItems([data])
-                await this.addItem(item);
-                break;
+        await this.actor.addItems([data], undefined, context);
 
-        }
-
-
-    }
-
-    isPermittedForActorType(type) {
-        if (["character", "npc"].includes(this.actor.data.type)) {
-            return ["weapon",
-                "armor",
-                "equipment",
-                "feat",
-                "talent",
-                "species",
-                "class",
-                "upgrade",
-                "forcePower",
-                "affiliation",
-                "forceTechnique",
-                "forceSecret",
-                "forceRegimen",
-                "trait",
-                "template",
-                "background",
-                "destiny",
-                "beastAttack",
-                "beastSense",
-                "beastType",
-                "beastQuality"].includes(type)
-        } else if (vehicleActorTypes.includes(this.actor.data.type)) {
-            return ["vehicleBaseType", "vehicleSystem", "template"].includes(type)
-        }
-
-        return false;
-    }
-
-
-    async addTalent(item) {
-        //TODO this should be a tighter system with less regex
-        let possibleTalentTrees = new Set();
-        let allTreesOnTalent = new Set();
-        let optionString = "";
-
-        let actorsBonusTrees = getInheritableAttribute({
-            entity: this.actor,
-            attributeKey: 'bonusTalentTree',
-            reduce: "VALUES"
-        });
-        if (actorsBonusTrees.includes(item.data.data.bonusTalentTree)) {
-            for (let [id, item] of Object.entries(this.actor.data.availableItems)) {
-                if (id.includes("Talent") && !id.includes("Force") && item > 0) {
-                    optionString += `<option value="${id}">${id}</option>`
-                    possibleTalentTrees.add(id);
-                }
-            }
-        } else {
-            for (let talentTree of item.data.data.possibleProviders.filter(unique)) {
-                allTreesOnTalent.add(talentTree);
-                let count = this.actor.data.availableItems[talentTree];
-                if (count && count > 0) {
-                    optionString += `<option value="${talentTree}">${talentTree}</option>`
-                    possibleTalentTrees.add(talentTree);
-                }
-            }
-        }
-
-        if (possibleTalentTrees.size === 0) {
-            await Dialog.prompt({
-                title: "You don't have more talents available of these types",
-                content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
-                callback: () => {
-                }
-            });
-            return [];
-        } else if (possibleTalentTrees.size > 1) {
-            let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-            await Dialog.prompt({
-                title: "Select an unused talent source.",
-                content: content,
-                callback: async (html) => {
-                    let key = html.find("#choice")[0].value;
-                    possibleTalentTrees = new Set();
-                    possibleTalentTrees.add(key);
-                }
-            });
-        }
-
-        item.data.data.talentTreeSource = Array.from(possibleTalentTrees)[0];
-
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Talent"});
-    }
-
-    async addForceItem(item) {
-        let itemType = item.data.type;
-        if (itemType === 'forcePower') {
-            itemType = 'Force Powers'
-        }
-        if (itemType === 'forceTechnique') {
-            itemType = 'Force Technique'
-        }
-        if (itemType === 'forceSecret') {
-            itemType = 'Force Secret'
-        }
-        let viewable = itemType;//.replace(/([A-Z])/g, " $1");
-        if (!this.actor.data.availableItems[itemType] && itemType !== 'affiliation') {
-            await Dialog.prompt({
-                title: `You can't take any more ${viewable.titleCase()}`,
-                content: `You can't take any more ${viewable.titleCase()}`,
-                callback: () => {
-                }
-            });
-            return [];
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: itemType});
-    }
-
-
-    async addFeat(item) {
-        let possibleFeatTypes = [];
-
-        let optionString = "";
-        for (let category of item.data.data.bonusFeatCategories) {
-            if (this.actor.data.availableItems[category.value] > 0) {
-                possibleFeatTypes.push(category);
-                optionString += `<option value="${JSON.stringify(category).replace(/"/g, '&quot;')}">${category.value}</option>`;
-            }
-        }
-
-        if (possibleFeatTypes.length > 1) {
-            let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-            await Dialog.prompt({
-                title: "Select an unused feat source.",
-                content: content,
-                callback: async (html) => {
-                    let key = html.find("#choice")[0].value;
-                    possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
-                }
-            });
-        }
-
-        // for (let category of item.data.data.categories) {
-        //     if (!category.value.endsWith(" Bonus Feats")) {
-        //         possibleFeatTypes.push(category);
-        //     }
-        // }
-
-        item.data.data.categories = possibleFeatTypes;
-
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: "Feat"});
-    }
-
-    async addClass(item) {
-
-
-        context.actor = this.actor;
-        let choices = await activateChoices(item, context);
-        if (!choices.success) {
-            return;
-        }
-
-
-        let mainItem = await this.actor.createEmbeddedDocuments("Item", [item.data.toObject(false)]);
-
-        await this.actor.addItems(choices.items, mainItem[0])
-    }
-
-    async addItem(item) {
-        let context = {actor:this.actor};
-        return await this.actor.checkPrerequisitesAndResolveOptions(item, context);
-    }
-
-    async addBackgroundOrDestiny(item) {
-        let type = item.data.type;
-        let viewable = type.replace(/([A-Z])/g, " $1");
-        if (filterItemsByType(this.actor.items.values(), ["background", "destiny"]).length > 0) {
-            new Dialog({
-                title: `${viewable.titleCase()} Selection`,
-                content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
-    }
-
-    async addItemWithOneItemRestriction(item) {
-        let type = item.data.type;
-        let viewable = type.replace(/([A-Z])/g, " $1");
-        if (filterItemsByType(this.actor.items.values(), type).length > 0) {
-            new Dialog({
-                title: `${viewable.titleCase()} Selection`,
-                content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
-                buttons: {
-                    ok: {
-                        icon: '<i class="fas fa-check"></i>',
-                        label: 'Ok'
-                    }
-                }
-            }).render(true);
-            return;
-        }
-        await this.actor.checkPrerequisitesAndResolveOptions(item, {type: type.titleCase()})
     }
 
     async moveExistingItemWithinActor(data, ev) {
@@ -1161,7 +883,7 @@ export class SWSEActorSheet extends ActorSheet {
             if (targetItemContainer == null) {
                 return;
             }
-            let itemId = data.data._id;
+            let itemId = data.itemId;
 
 
             //TODO clean this up. the design was good when it was a few lists, but with 4 lists it's clunky  maybe a map to rules?
@@ -1182,13 +904,13 @@ export class SWSEActorSheet extends ActorSheet {
 
             let item = this.actor.items.get(itemId);
             if (equipType) {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
                     this.onlyAllowsWeaponsDialog(false);
                 } else {
                     await this.actor.equipItem(itemId, equipType, {event:ev});
                 }
             } else if (weaponSystemOnlyType) {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
                     await this.actor.equipItem(itemId, weaponSystemOnlyType, {event:ev, offerOverride:true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
@@ -1196,8 +918,8 @@ export class SWSEActorSheet extends ActorSheet {
             } else if (unequipType) {
                 await this.actor.unequipItem(itemId, ev);
             } else if (specialType === "new-gunner") {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
-                    let types = this.actor.data.data.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
+                    let types = this.actor.system.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
                     let equipType;
                     for (let i = 0; i <= types.length; i++) {
                         if (!types.includes(i)) {

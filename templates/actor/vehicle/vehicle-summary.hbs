@@ -1,24 +1,24 @@
 <div class="vehicle-summary-header swse">
 
     <div class="name"><h2><label for="name">Vehicle Name<input class="plain" name="name" type="text"
-                                                               value="{{actor.data.name}}"
+                                                               value="{{actor.system.name}}"
                                                                placeholder=""/></label></h2></div>
 
     <div class="type"><label for="type">Vehicle Type</label>
-        <div class="plain input static">{{actor.data.subType}}</div>
+        <div class="plain input static">{{actor.system.subType}}</div>
     </div>
 
 
-    <div class="captain"><label for="captain">Captain<input class="plain" name="data.captain" type="text"
-                                                            value="{{actor.data.data.captain}}"
+    <div class="captain"><label for="captain">Captain<input class="plain" name="system.captain" type="text"
+                                                            value="{{actor.system.captain}}"
                                                             placeholder=""/></label></div>
 
     <div class="crew"><label for="crew">Crew</label>
-        <div class="plain input static">{{actor.data.crew}}</div>
+        <div class="plain input static">{{actor.system.crew}}</div>
     </div>
 
     <div class="passengers"><label for="passengers">Passengers</label>
-        <div class="plain input static">{{actor.data.passengers}}</div>
+        <div class="plain input static">{{actor.system.passengers}}</div>
     </div>
 
     <div class="size flex flex-row">
@@ -32,29 +32,29 @@
 
     <div class="cargoCapacity">
         <label for="cargo">Cargo Capacity
-            <div class="plain input static">{{tons actor.data.cargo.value}}/{{tons actor.data.cargo.capacity}}</div>
+            <div class="plain input static">{{tons actor.system.cargo.value}}/{{tons actor.system.cargo.capacity}}</div>
         </label>
     </div>
     <div class="consumables"><label for="consumables">Consumables
-        <div class="plain input static">{{actor.data.consumables}}</div>
+        <div class="plain input static">{{actor.system.consumables}}</div>
     </label></div>
 
     <div class="cost"><label for="cost">Cost
-        <div class="plain input static">{{actor.data.cost}}</div>
+        <div class="plain input static">{{actor.system.cost}}</div>
     </label></div>
 
 
     <div class="hyperdrive flex flex-row">
         <label class="flex-grow" for="hyperdrive">Hyperdrive
-            <div class="plain input static">{{actor.data.hyperdrive.primary}}</div>
+            <div class="plain input static">{{actor.system.hyperdrive.primary}}</div>
         </label>
         <label class="flex-grow" for="backupHyperdrive">Backup
-            <div class="plain input static">{{actor.data.hyperdrive.backup}}</div>
+            <div class="plain input static">{{actor.system.hyperdrive.backup}}</div>
         </label>
     </div>
-    <!--    <div class="armorBonus"><label for="armorBonus">Armor Bonus</label><div class="plain input static">{{actor.data.type}}</div></div>-->
+    <!--    <div class="armorBonus"><label for="armorBonus">Armor Bonus</label><div class="plain input static">{{actor.system.type}}</div></div>-->
     <div class="maxVelocity"><label for="maxVelocity">Maximum Velocity</label>
-        <div class="plain input static">{{actor.data.maximumVelocity}} km/h</div>
+        <div class="plain input static">{{actor.system.maximumVelocity}} km/h</div>
     </div>
 
 
@@ -63,10 +63,10 @@
     </label>
         <div class="flex flex-row">
             <label class="flex-grow" for="vehicleSpeed">Character Scale
-                <div class="plain input static">{{actor.data.fightingSpace.character}} sq.</div>
+                <div class="plain input static">{{actor.system.fightingSpace.character}} sq.</div>
             </label>
             <label class="flex-grow" for="vehicleSpeed">Vehicle Scale
-                <div class="plain input static">{{actor.data.fightingSpace.vehicle}} sq.</div>
+                <div class="plain input static">{{actor.system.fightingSpace.vehicle}} sq.</div>
             </label>
         </div>
     </div>
@@ -76,10 +76,10 @@
     </label>
         <div class="flex flex-row">
             <label class="flex-grow" for="vehicleSpeed">Character Scale
-                <div class="plain input static">{{actor.data.speed.character}} sq.</div>
+                <div class="plain input static">{{actor.system.speed.character}} sq.</div>
             </label>
             <label class="flex-grow" for="vehicleSpeed">Vehicle Scale
-                <div class="plain input static">{{actor.data.speed.vehicle}} sq.</div>
+                <div class="plain input static">{{actor.system.speed.vehicle}} sq.</div>
             </label>
         </div>
     </div>

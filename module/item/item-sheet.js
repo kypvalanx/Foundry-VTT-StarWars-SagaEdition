@@ -81,7 +81,7 @@ export class SWSEItemSheet extends ItemSheet {
             // Delete Inventory Item
             html.find('.item-delete').click(ev => {
                 const li = $(ev.currentTarget).parents(".item");
-                let itemToDelete = this.item.data.data.items.filter(item => item._id === li.data("itemId"))[0];
+                let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
                 let ownedItem = this.item.actor.items.get(itemToDelete._id);
                 this.item.revokeOwnership(ownedItem);
             });
@@ -550,11 +550,11 @@ export class SWSEItemSheet extends ItemSheet {
         let element = $(event.currentTarget);
         let path = element.data("path");
 
-        let data = this.item.data.data || this.item.data._source.data
+        let system = this.item.system || this.item._source.system
 
         for(let tok of path.substring(5).split(".")){
-            if(!!data[tok]) {
-                data = data[tok];
+            if(!!system[tok]) {
+                system = system[tok];
             }
         }
 
@@ -564,10 +564,10 @@ export class SWSEItemSheet extends ItemSheet {
                 updateData[path] = null;
                 break;
             case 'add-child-prerequisite':
-                let maxKey = (Math.max(...Object.keys(data).map(k => toNumber(k))) || 0) +1
+                let maxKey = (Math.max(...Object.keys(system).map(k => toNumber(k))) || 0) +1
                 let selectedKey = maxKey;
                 for(let i = 0; i <=maxKey; i++){
-                    if(data[i] === undefined || data[i] === null){
+                    if(system[i] === undefined || system[i] === null){
                         selectedKey = i;
                     }
                 }
@@ -585,8 +585,8 @@ export class SWSEItemSheet extends ItemSheet {
     _onClassControl(event) {
         let element = $(event.currentTarget);
 
-        let data = this.item.data.data || this.item.data._source.data
-        let levelKeys = Object.values(data.levels).filter(i => !!i).map(i => parseInt(i.level));
+        let system = this.item.system || this.item._source.system
+        let levelKeys = Object.values(system.levels).filter(i => !!i).map(i => parseInt(i.level));
         let updateData = {};
         switch (element.data("type")){
             case "add-level":
@@ -607,21 +607,21 @@ export class SWSEItemSheet extends ItemSheet {
     _onProvidedItemControl(event) {
         let element = $(event.currentTarget);
 
-        let data = this.item.data.data || this.item.data._source.data
+        let system = this.item.system || this.item._source.system
         let entityId = element.data("entityId")
         let updateData = {};
         switch (element.data("type")){
             case "delete-item":
                 updateData.providedItems = {};
-                if(Array.isArray(data.providedItems)){
-                    data.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
+                if(Array.isArray(system.providedItems)){
+                    system.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
                 }
                 updateData.providedItems[entityId] = null;
                 break;
             case "add-item":
                 // updateData.providedItems = {};
-                // if(Array.isArray(data.providedItems)){
-                //     data.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
+                // if(Array.isArray(system.providedItems)){
+                //     system.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
                 // }
                 // updateData.providedItems[entityId] = null; TODO work on this tomorrow
                 break;

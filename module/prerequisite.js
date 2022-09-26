@@ -37,7 +37,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
         return {doesFail: true, failureList, silentFail, successList};
     }
 
-    let data = target.data.data || target.data;
+    let system = target.system;
 
     prereqs = ensureArray(prereqs)
 
@@ -46,7 +46,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             case undefined:
                 continue;
             case 'AGE':
-                let age = toNumber(target.age) || toNumber(target.data.age);
+                let age = toNumber(target.age) || toNumber(target.system.age);
                 if (!age || toNumber(prereq.low) > age || (prereq.high && toNumber(prereq.high) < age)) {
                     failureList.push({fail: true, message: `${prereq.type}: ${prereq.text}`});
                     continue;
@@ -81,21 +81,21 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'ITEM':
                 let ownedItem = SWSEActor.getInventoryItems(getItems(target));
-                let filteredItem = ownedItem.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredItem = ownedItem.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case 'SPECIES':
-                let filteredSpecies = [target.species].filter(feat => feat?.data?.finalName === prereq.requirement);
+                let filteredSpecies = [target.species].filter(feat => feat?.finalName === prereq.requirement);
                 if (filteredSpecies.length > 0) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case 'TRAINED SKILL':
-                if (Object.entries(data.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
+                if (Object.entries(system.skills).filter(skill => skill[0].toLowerCase() === prereq.requirement.toLowerCase() && skill[1].trained).length === 1) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -114,7 +114,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
 
                 if (filteredFeats.length > 0) {
-                    let prereqs1 = filteredFeats[0].data?.prerequisite || filteredFeats[0].data?.data?.prerequisite;
+                    let prereqs1 = filteredFeats[0].system?.prerequisite;
                     if (!meetsPrerequisites(target, prereqs1).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
@@ -123,9 +123,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'CLASS':
                 let ownedClasses = filterItemsByType(getItems(target), "class");
-                let filteredClasses = ownedClasses.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredClasses = ownedClasses.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredClasses.length > 0) {
-                    if (!meetsPrerequisites(target, filteredClasses[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredClasses[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -133,11 +133,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'TRAIT':
                 let filteredTraits = filterItemsByType(getItems(target), "trait")
-                    .filter(feat => feat.data.finalName === prereq.requirement);
+                    .filter(feat => feat.finalName === prereq.requirement);
                 if (filteredTraits.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredTraits) {
-                        if (!meetsPrerequisites(target, filteredTrait.data.data.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -149,11 +149,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'SPECIAL_QUALITY':
                 let filteredSpecialQualities = filterItemsByType(getItems(target), "beastQuality")
-                    .filter(feat => feat.data.finalName === prereq.requirement);
+                    .filter(feat => feat.finalName === prereq.requirement);
                 if (filteredSpecialQualities.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpecialQualities) {
-                        if (!meetsPrerequisites(target, filteredTrait.data.data.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -165,11 +165,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'SPECIES_TYPE':
                 let filteredSpeciesTypes = filterItemsByType(getItems(target), "beastType")
-                    .filter(feat => feat.data.finalName === prereq.requirement);
+                    .filter(feat => feat.finalName === prereq.requirement);
                 if (filteredSpeciesTypes.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpeciesTypes) {
-                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -185,7 +185,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 if (filteredBeastAttacks.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredBeastAttacks) {
-                        if (!meetsPrerequisites(target, filteredTrait?.data?.data?.prerequisite || filteredTrait?.data?.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -205,12 +205,12 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             case 'TALENT':
                 let ownedTalents = filterItemsByType(getItems(target), "talent");
                 let filteredTalents = ownedTalents.filter(talent => {
-                    return talent.data.finalName === prereq.requirement ||
-                        talent.data.data.possibleProviders.includes(prereq.requirement) ||
-                        talent.data.data.talentTree === prereq.requirement
+                    return talent.finalName === prereq.requirement ||
+                        talent.system.possibleProviders.includes(prereq.requirement) ||
+                        talent.system.talentTree === prereq.requirement
                 });
                 if (filteredTalents.length > 0) {
-                    if (!meetsPrerequisites(target, filteredTalents[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredTalents[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: filteredTalents.length});
                         continue;
                     }
@@ -219,9 +219,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case 'TRADITION':
                 let ownedTraditions = filterItemsByType(getItems(target), "affiliation");
-                let filteredTraditions = ownedTraditions.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredTraditions = ownedTraditions.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredTraditions.length > 0) {
-                    if (!meetsPrerequisites(target, filteredTraditions[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredTraditions[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -253,9 +253,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     }
                 }
 
-                let filteredForcePowers = ownedForcePowers.filter(feat => feat.data.finalName === prereq.requirement);
+                let filteredForcePowers = ownedForcePowers.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredForcePowers.length > 0) {
-                    if (!meetsPrerequisites(target, filteredForcePowers[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredForcePowers[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -388,7 +388,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'GENDER':
-                if (data.sex && data.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
+                if (system.sex && system.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
@@ -410,7 +410,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     })
 
 
-                    return item.name === req || item.data.finalName === req || data?.subtype === req || actsAs.includes(req)
+                    return item.name === req || item.finalName === req || system?.subtype === req || actsAs.includes(req)
                 });
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
@@ -425,26 +425,26 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case "SUBTYPE":
-                if (data.subtype && data.subtype.toLowerCase() === prereq.requirement.toLowerCase()) {
+                if (system.subtype && system.subtype.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "WEAPON_GROUP":
-                if (weaponGroup[ prereq.requirement].includes(data.subtype)) {
+                if (weaponGroup[ prereq.requirement].includes(system.subtype)) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "TEMPLATE":
-                let templates = data.items.filter(item => item.type === "template").map(item => item.name)
+                let templates = system.items.filter(item => item.type === "template").map(item => item.name)
                 if (templates.includes(prereq.requirement)) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case "MODE":
-                let modes = Object.values(data.modes).map(item => item.name.toLowerCase());
+                let modes = Object.values(system.modes).map(item => item.name.toLowerCase());
                 if (modes.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     continue;

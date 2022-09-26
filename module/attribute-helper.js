@@ -1,23 +1,20 @@
 import {extractAttributeValues, filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
-import {SWSEActor} from "./actor/actor.js";
-import {UnarmedAttack} from "./actor/unarmed-attack.js";
 import {meetsPrerequisites} from "./prerequisite.js";
 
 function equippedItems(entity) {
     if(entity.items) {
-        let equippedIds = entity.data.equippedIds.map(equipped => equipped.id)
-        //let values = Object.values(entity.items);
+        let equippedIds = entity.equippedIds?.map(equipped => equipped.id) || []
         return entity.items.filter(item => equippedIds.includes(item.id || item._id));
     }
-    if(entity.data?.items){
-        //items attached to items
-        return entity.data.items;
-    }
+    // if(entity.data?.items){
+    //     //items attached to items
+    //     return entity.data.items;
+    // }
     return [];
 }
 
-function inheritableItems(entity, attributeKey) {
+export function inheritableItems(entity, attributeKey) {
     let items = entity.items || [];
     let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
         "beastSense",
@@ -26,19 +23,19 @@ function inheritableItems(entity, attributeKey) {
 
     let activeTraits = [];
     possibleInheritableItems.push(...equippedItems(entity))
-    
-    possibleInheritableItems = possibleInheritableItems
-        .map(item => item instanceof SWSEItem ? item.data : item)
+    //
+    // possibleInheritableItems = possibleInheritableItems
+    //     .map(item => item instanceof SWSEItem ? item.data : item)
     
     if(attributeKey){
         possibleInheritableItems = possibleInheritableItems
             .filter(item => {
-                let data = item.data || item._source.data;
-                let attrs = Object.values(data.attributes);
-                for(let level of Object.values(data?.levels || {})){
+                let system = item.system || item._source.system;
+                let attrs = Object.values(system.attributes);
+                for(let level of Object.values(system?.levels || {})){
                     attrs.push(...Object.values(level.data.attributes))
                 }
-                for(let entity of data.items || []){
+                for(let entity of item.items || []){
                     let inheritableAttribute = getInheritableAttribute({entity, attributeKey});
                     attrs.push(...inheritableAttribute)
                 }
@@ -56,7 +53,7 @@ function inheritableItems(entity, attributeKey) {
     while (shouldRetry) {
         shouldRetry = false;
         for (let possible of possibleInheritableItems) {
-            if (!meetsPrerequisites(entity, possible.data.prerequisite).doesFail) {
+            if (!meetsPrerequisites(entity, possible.system.prerequisite).doesFail) {
                 activeTraits.push(possible);
                 shouldRetry = true;
             }
@@ -72,30 +69,29 @@ function getAttributesFromClass(data, entity) {
     let vals = [];
     let classLevel = data.duplicates || 0;
     if (classLevel > 0) {
-        let level = entity.data.levels[classLevel];
+        let level = entity.system.levels[classLevel];
         for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.data.description));
+            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description));
         }
     }
     return vals;
 }
 
-function getAttributesFromEmbeddedItems(entity, data) {
-    let vals = [];
+function getAttributesFromEmbeddedItems(entity, attributeKey, predicate) {
+    let values = [];
     let names = [];
-    let it = inheritableItems(entity, data.attributeKey).filter(data.itemFilter);
-    for (let item of it) {
+    for (let item of inheritableItems(entity, attributeKey).filter(predicate)) {
         names.push(item.name);
         let duplicates = names.filter(name => name === item.name).length;
-        vals.push(...getInheritableAttribute({
+        values.push(...getInheritableAttribute({
             entity: item,
-            attributeKey: data.attributeKey,
+            attributeKey: attributeKey,
             duplicates,
             recursive: true,
             parent: entity
         }));
     }
-    return vals;
+    return values;
 }
 
 export function getResolvedSize(entity, options) {
@@ -154,32 +150,31 @@ export function getInheritableAttribute(data = {}) {
         }
 
     } else {
+        let document = data.entity;
 
-        let entity = data.entity;
-        if (entity instanceof SWSEActor || entity instanceof SWSEItem || entity instanceof UnarmedAttack) {
-            entity = entity.data;
-        }
-
-        if(!entity){
+        if(!document){
             return values;
         }
 
-        if (entity.type) {
-            let itemAttributes = Object.entries(entity.data?.attributes || entity._source?.data?.attributes || []).filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0])).map(entry => entry[1]);
+        if (document.type) {
+            let itemAttributes = Object.entries(document.system?.attributes || document._source.system?.attributes || [])
+                .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
+                .map(entry => entry[1]);
             for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
-                values.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.data?.description || entity._source?.data.description));
+                values.push(...extractAttributeValues(attribute, document._id, document.name, document.system?.description || document._source?.system.description));
             }
-            values.push(...(getAttributesFromEmbeddedItems(entity, data)))
 
-            if (entity.type === 'class') {
-                values.push(... (getAttributesFromClass(data, entity)))
+            values.push(...(getAttributesFromEmbeddedItems(document, data.attributeKey, data.itemFilter)))
+
+            if (document.type === 'class') {
+                values.push(... (getAttributesFromClass(data, document)))
             }
-            values.push(...(extractModeAttributes(entity, Object.values(entity.data?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
+            values.push(...(extractModeAttributes(document, Object.values(document.system?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
 
         }
 
-        if(entity.effects){
-            entity.effects.filter(effect => effect.data?.disabled !== false || effect.disabled !== false).forEach(e =>  values.push(...extractEffectChange(e.data?.changes || e.changes || [], data.attributeKey, e)))
+        if(document.effects){
+            document.effects.filter(effect => effect.disabled === false).forEach(effect =>  values.push(...extractEffectChange(effect.changes || [], data.attributeKey, effect)))
         }
 
 
@@ -195,7 +190,7 @@ export function getInheritableAttribute(data = {}) {
                     return false;
                 }
 
-                return !meetsPrerequisites(entity, attr.prerequisite).doesFail
+                return !meetsPrerequisites(document, attr.prerequisite).doesFail
             });
         }
     }
@@ -215,7 +210,7 @@ export function getInheritableAttribute(data = {}) {
 export function extractEffectChange(changes, attributeKey, entity) {
     let values = [];
         for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data?._id || entity._id, entity.data?.label || entity.label, entity.label || entity.data?.label || entity.data?.data?.label));
+            values.push(...extractAttributeValues(attribute, entity._id, entity.label, entity.label));
         }
 
     return values;
@@ -225,7 +220,7 @@ export function extractModeAttributes(entity, activeModes, attributeKey) {
     let values = [];
     for (let mode of activeModes) {
         for (let attribute of Object.values(mode.attributes).filter(attr => attr && attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.name, entity.data.data?.description ||entity.data?.description));
+            values.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description ));
         }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
     }

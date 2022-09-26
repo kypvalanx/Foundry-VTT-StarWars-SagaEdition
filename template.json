@@ -527,7 +527,8 @@
         "choices": [],
         "modes": [],
         "providedItems": {},
-        "payload": ""
+        "payload": "",
+        "buildInstructions": []
       },
       "item": {
         "cost": "",
@@ -559,6 +560,9 @@
       "mode": {
         "modes": [],
         "activeModes": []
+      },
+      "levels": {
+        "levels": []
       }
     },
     "trait": {
@@ -726,7 +730,8 @@
       "templates": [
         "base",
         "prerequisites",
-        "health"
+        "health",
+        "levels"
       ]
     },
     "classFeature": {

@@ -1,16 +1,16 @@
 <!--TODO find a spot for the portrait -->
 <div class="summary-header swse">
     <div class="name"><label for="name">Name</label>
-        <h2><input class="plain" name="name" type="text" value="{{actor.data.name}}"
+        <h2><input class="plain" name="name" type="text" value="{{actor.name}}"
                    placeholder=""/></h2></div>
     <div class="player"><label for="player">Player</label>
-        <h2><input class="plain" name="data.player" type="text"
-                   value="{{actor.data.data.player}}" placeholder=""/></h2></div>
+        <h2><input class="plain" name="system.player" type="text"
+                   value="{{actor.system.player}}" placeholder=""/></h2></div>
     <div class="classes"><label for="classes">Classes</label>
-        <div class="plain input static">{{actor.data.classSummary}}</div>
+        <div class="plain input static">{{actor.system.classSummary}}</div>
     </div>
     <div class="level"><label for="level">Level</label>
-        <div class="plain input static">{{actor.data.levelSummary}}</div>
+        <div class="plain input static">{{actor.system.levelSummary}}</div>
     </div>
 
     <div class="species">
@@ -46,9 +46,9 @@
         <label for="gender">Gender</label>
         <div id="selectGender">
             <div class="plain input rollable">{{#if
-                    actor.data.data.gender}}{{actor.data.data.gender}}{{/if}}{{#unless
-                    actor.data.data.gender}}{{#if
-                    actor.data.data.sex}}{{actor.data.data.sex}}{{/if}}{{#unless actor.data.data.sex}}
+                    actor.system.gender}}{{actor.system.gender}}{{/if}}{{#unless
+                    actor.system.gender}}{{#if
+                    actor.system.sex}}{{actor.system.sex}}{{/if}}{{#unless actor.system.sex}}
                 Select Gender{{/unless}}{{/unless}}</div>
         </div>
 
@@ -57,16 +57,16 @@
         <label for="age">Age</label>
         <div id="selectAge">
             <div class="plain input rollable">{{#if
-                    actor.data.data.age}}{{actor.data.data.age}} years{{/if}}{{#unless actor.data.data.age}}
+                    actor.system.age}}{{actor.system.age}} years{{/if}}{{#unless actor.system.age}}
                 Select Age{{/unless}}</div>
         </div>
     </div>
     <div class="height"><label for="height">Height</label>
-        <h2><input class="plain" name="data.height" type="text"
-                   value="{{actor.data.data.height}}" placeholder="Height"/></h2></div>
+        <h2><input class="plain" name="system.height" type="text"
+                   value="{{actor.system.height}}" placeholder="Height"/></h2></div>
     <div class="weight"><label for="weight">Weight</label>
-        <h2><input class="plain" name="data.weight" type="text"
-                   value="{{actor.data.data.weight}}" placeholder="Weight"/></h2></div>
+        <h2><input class="plain" name="system.weight" type="text"
+                   value="{{actor.system.weight}}" placeholder="Weight"/></h2></div>
     <div class="destiny">
         {{#if actor.destiny}}
             <label>Destiny</label>
@@ -114,7 +114,7 @@
 
     </div>
     <div class="experience"><label for="experience">XP</label>
-        <h2><input class="plain" name="data.experience" type="text"
-                   value="{{actor.data.data.experience}}" placeholder="0"/></h2>
+        <h2><input class="plain" name="system.experience" type="text"
+                   value="{{actor.system.experience}}" placeholder="0"/></h2>
     </div>
 </div>
