@@ -106,7 +106,7 @@ export function generateSkills(actor) {
             data[`data.skills.${key}.value`] = skill.value;
         }
     }
-    if (Object.values(data).length > 0 && !!actor._id && !actor.pack) {
+    if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
         actor.update(data);
     }
 }
@@ -183,7 +183,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
     applicableReRolls.push(...reRollSkills.filter(reroll => reroll.value.toLowerCase() === positionlessKey || reroll.value.toLowerCase() === "any"))
 
     if (key === "pilot (pilot)") {
-        let pilotSkillBonus = crew.data.skills.pilot?.value || 0;
+        let pilotSkillBonus = crew.system.skills.pilot?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Pilot Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -192,7 +192,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
     }
     if (key === "initiative (pilot)") {
 
-        let pilotSkillBonus = Math.max(crew.data.skills.pilot?.value || 0, crew.data.skills.initiative?.value || 0);
+        let pilotSkillBonus = Math.max(crew.system.skills.pilot?.value || 0, crew.system.skills.initiative?.value || 0);
         bonuses.push({
             value: pilotSkillBonus,
             description: `Pilot Initiative Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -200,7 +200,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
         bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
     }
     if (key === "pilot (copilot)") {
-        let pilotSkillBonus = crew.data.skills.pilot?.value || 0;
+        let pilotSkillBonus = crew.system.skills.pilot?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Copilot Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -208,7 +208,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     }
     if (key === "use computer (commander)") {
-        let pilotSkillBonus = crew.data.skills['use computer']?.value || 0;
+        let pilotSkillBonus = crew.system.skills['use computer']?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Commander Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -216,7 +216,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     }
     if (key === "knowledge (tactics) (commander)") {
-        let pilotSkillBonus = crew.data.skills['knowledge (tactics)']?.value || 0;
+        let pilotSkillBonus = crew.system.skills['knowledge (tactics)']?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Commander Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -226,7 +226,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
 
     if (key === "use computer (system operator)") {
-        let pilotSkillBonus = crew.data.skills['use computer']?.value || 0;
+        let pilotSkillBonus = crew.system.skills['use computer']?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Systems Operator Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -234,7 +234,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     }
     if (key === "mechanics (system operator)") {
-        let pilotSkillBonus = crew.data.skills.mechanics?.value || 0;
+        let pilotSkillBonus = crew.system.skills.mechanics?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Systems Operator Skill Bonus (${crew.name}): ${pilotSkillBonus}`
@@ -242,7 +242,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     }
     if (key === "mechanics (engineer)") {
-        let pilotSkillBonus = crew.data.skills.mechanics?.value || 0;
+        let pilotSkillBonus = crew.system.skills.mechanics?.value || 0;
         bonuses.push({
             value: pilotSkillBonus,
             description: `Engineer Skill Bonus (${crew.name}): ${pilotSkillBonus}`

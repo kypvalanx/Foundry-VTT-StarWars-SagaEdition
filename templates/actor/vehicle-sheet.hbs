@@ -5,7 +5,7 @@
             <a class="item" data-tab="summary">Summary</a>
             <a class="item" data-tab="systems">Systems</a>
             <a class="item" data-tab="stations">Stations</a>
-            <a class="item" data-tab="inventory">Inventory</a>
+            <a class="item" data-tab="cargo">Cargo</a>
             <a class="item" data-tab="traits">Traits</a>
             <a class="item" data-tab="notes">Notes</a>
         </nav>
@@ -61,7 +61,7 @@
 
             {{!-- Biography Tab --}}
             <div class="tab biography" data-group="primary" data-tab="notes">
-                {{editor content=actor.system.biography target="system.biography" button=true owner=owner editable=editable}}
+                {{editor actor.system.biography target="biography" button=true owner=owner editable=editable}}
             </div>
 
 
@@ -95,15 +95,15 @@
             </div>
 
             {{!-- Owned Equipment Tab --}}
-            <div class="tab items" data-group="primary" data-tab="inventory">
+            <div class="tab items" data-group="primary" data-tab="cargo">
                 <div>
-                    <h2><label class="resource-label">Equipment <a data-action="compendium" data-type="Item" data-pack="swse.items"
+                    <h2><label class="resource-label">Cargo <a data-action="compendium" data-type="Item" data-pack="swse.items"
                                                                    title="{{localize "Open Compendium"}}"><i
                             class="fas fa-folder-plus"></i></a></label></h2>
                 </div>
 
 
-                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="Cargo" items=actor.inventory draggable=false}}
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="Cargo" items=actor.cargo draggable=false delete="always"}}
 
 
             </div>
@@ -117,19 +117,19 @@
                 </div>
                 <ol class="items-list">
                     {{#each actor.traits as |trait id|}}
-                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.data.textDescription}}">
+                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.system.textDescription}}">
                             <div class="flexrow">
                                 <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
-                                <h4 class="item-name">Source: {{trait.data.supplier.type}}
-                                    , {{trait.data.supplier.name}}</h4>
+                                <h4 class="item-name">Source: {{trait.system.supplier.type}}
+                                    , {{trait.system.supplier.name}}</h4>
                                     <!--                            <h4 class="item-name">{{#if
-                                    trait.data.prerequisites}}-->
-                                    <!--                                <b>Prerequisites:</b> {{trait.data.prerequisites}}{{/if}}</h4>-->
+                                    trait.system.prerequisites}}-->
+                                    <!--                                <b>Prerequisites:</b> {{trait.system.prerequisites}}{{/if}}</h4>-->
                                 <div class="item-controls">
                                     <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
                                 </div>
                             </div>
-                            <!--<div>{{trait.data.textDescription}}</div>-->
+                            <!--<div>{{trait.system.textDescription}}</div>-->
                         </li>
                     {{/each}}
                 </ol>

@@ -126,11 +126,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get provider() {
-        let actor = this.getActor(this.providerId)
-            if (actor instanceof SWSEActor) {
-                return actor.data;
-            }
-            return actor;
+        return this.getActor(this.providerId);
     }
 
     getActor(actorId) {
@@ -283,7 +279,7 @@ export class Attack {
         let terms = getDiceTermsFromString("1d20");
 
         if(!!provider){
-            terms.push(...appendNumericTerm(provider.data.attributes.int.mod, "Vehicle Computer Bonus"))
+            terms.push(...appendNumericTerm(provider.system.attributes.int.mod, "Vehicle Computer Bonus"))
 
             if (item.position === 'pilot' && actor.data.skills.pilot.trained) {
                 terms.push(...appendNumericTerm(2, "Trained Pilot Bonus"))
