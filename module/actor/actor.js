@@ -992,7 +992,7 @@ export class SWSEActor extends Actor {
         }
         equippedIds = equippedIds.map(id => id.id);
 
-        return items.filter(item => equippedIds.includes(item.system._id))
+        return items.filter(item => equippedIds.includes(item._id))
     }
 
     getUnequippedItems() {
@@ -1000,7 +1000,7 @@ export class SWSEActor extends Actor {
 
         let equippedIds = (this.system.equippedIds || []).map(id => id.id);
 
-        return items.filter(item => !equippedIds.includes(item.system._id))
+        return items.filter(item => !equippedIds.includes(item._id))
     }
 
     getUninstalledSystems() {
@@ -1170,7 +1170,7 @@ export class SWSEActor extends Actor {
 
     getActiveModes(itemId) {
         let item = this.items.get(itemId);
-        return SWSEItem.getActiveModesFromItemData(item.system);
+        return SWSEItem.getActiveModesFromItemData(item);
     }
 
     getAbilitySkillBonus(skill) {
@@ -2324,7 +2324,7 @@ export class SWSEActor extends Actor {
 
     async resolveUpdate(itemId, equipType, slot, position) {
         let update = {};
-        update['data.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
+        update['equippedIds'] = [{id: itemId, type: equipType, slot, position}]
             .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
 
         await this.update(update);
@@ -2332,7 +2332,7 @@ export class SWSEActor extends Actor {
 
     async unequipItem(itemId) {
         let update = {};
-        update['data.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
+        update['equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
 
         await this.update(update);
     }

@@ -220,7 +220,7 @@ export function extractModeAttributes(entity, activeModes, attributeKey) {
     let values = [];
     for (let mode of activeModes) {
         for (let attribute of Object.values(mode.attributes).filter(attr => attr && attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity.data._id, entity.data.name, entity.data.data?.description ||entity.data?.description));
+            values.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description ));
         }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
     }

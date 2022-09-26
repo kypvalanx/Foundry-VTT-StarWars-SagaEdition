@@ -883,7 +883,7 @@ export class SWSEActorSheet extends ActorSheet {
             if (targetItemContainer == null) {
                 return;
             }
-            let itemId = data.data._id;
+            let itemId = data.itemId;
 
 
             //TODO clean this up. the design was good when it was a few lists, but with 4 lists it's clunky  maybe a map to rules?
@@ -904,13 +904,13 @@ export class SWSEActorSheet extends ActorSheet {
 
             let item = this.actor.items.get(itemId);
             if (equipType) {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
                     this.onlyAllowsWeaponsDialog(false);
                 } else {
                     await this.actor.equipItem(itemId, equipType, {event:ev});
                 }
             } else if (weaponSystemOnlyType) {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
                     await this.actor.equipItem(itemId, weaponSystemOnlyType, {event:ev, offerOverride:true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
@@ -918,8 +918,8 @@ export class SWSEActorSheet extends ActorSheet {
             } else if (unequipType) {
                 await this.actor.unequipItem(itemId, ev);
             } else if (specialType === "new-gunner") {
-                if (item.data.data.subtype.toLowerCase() === "weapon systems") {
-                    let types = this.actor.data.data.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
+                if (item.system.subtype.toLowerCase() === "weapon systems") {
+                    let types = this.actor.system.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
                     let equipType;
                     for (let i = 0; i <= types.length; i++) {
                         if (!types.includes(i)) {

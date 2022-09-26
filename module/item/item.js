@@ -1203,10 +1203,7 @@ export class SWSEItem extends Item {
     }
 
     static getActiveModesFromItemData(itemData) {
-        if (itemData.data?.data?.modes) {
-            itemData = itemData.data;
-        }
-        return Object.values(itemData.data?.modes || [])?.filter(mode => mode && mode.isActive) || [];
+        return Object.values(itemData.system.modes || [])?.filter(mode => mode && mode.isActive) || [];
     }
 
     get modes() {

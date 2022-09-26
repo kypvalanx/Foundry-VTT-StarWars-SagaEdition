@@ -644,9 +644,9 @@ export class Attack {
     }
 }
 
-function getItemStripping(itemData, key) {
-    if (itemData?.data?.stripping) {
-        return itemData.data.stripping[key];
+function getItemStripping(item, key) {
+    if (item && item.system.stripping) {
+        return item.system.stripping[key];
     }
     return undefined;
 }
