@@ -35,6 +35,8 @@ export class SWSEItem extends Item {
         const system = this.system;
         //itemData.finalName = this.name;
 
+        system.displayName = SWSEItem.buildItemName(this);
+
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
         if (this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
@@ -562,7 +564,7 @@ export class SWSEItem extends Item {
     }
 
     get finalName(){
-        return SWSEItem.buildItemName(this)
+        return this.system.displayName;
     }
 
     get isEquipable() {

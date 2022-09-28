@@ -284,19 +284,16 @@ function _resolveRef(actor, conditionBonus) {
 
 
 function getArmorBonus(actor) {
-    let armorBonus;
+    let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor) || 0;
     if (["vehicle", "npc-vehicle"].includes(actor.type)) {
         if (actor.pilot) {
-            armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
-            let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor);
-            if (armorReflexDefenseBonus) {
-                return Math.max(armorBonus, armorReflexDefenseBonus);
-            }
+            let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
+            return Math.max(armorBonus, armorReflexDefenseBonus);
         } else {
-            return getArmorReflexDefenseBonus(actor) || 0;
+            return armorReflexDefenseBonus;
         }
     } else {
-        return _selectRefBonus(actor, actor.heroicLevel, getArmorReflexDefenseBonus(actor));
+        return _selectRefBonus(actor, actor.heroicLevel, armorReflexDefenseBonus);
     }
 }
 

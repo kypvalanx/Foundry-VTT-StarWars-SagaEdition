@@ -15,18 +15,20 @@ function equippedItems(entity) {
 }
 
 export function inheritableItems(entity, attributeKey) {
-    let items = entity.items || [];
-    let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
-        "beastSense",
-        "beastType",
-        "beastQuality"]);
+    let possibleInheritableItems
+    if(!entity.system.possibleInheritableItems){
+        let items = entity.items || [];
+        possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+            "beastSense",
+            "beastType",
+            "beastQuality"]);
 
-    let activeTraits = [];
-    possibleInheritableItems.push(...equippedItems(entity))
-    //
-    // possibleInheritableItems = possibleInheritableItems
-    //     .map(item => item instanceof SWSEItem ? item.data : item)
-    
+        possibleInheritableItems.push(...equippedItems(entity))
+        entity.system.possibleInheritableItems = possibleInheritableItems;
+    } else {
+        possibleInheritableItems = entity.system.possibleInheritableItems;
+    }
+
     if(attributeKey){
         possibleInheritableItems = possibleInheritableItems
             .filter(item => {
@@ -49,6 +51,7 @@ export function inheritableItems(entity, attributeKey) {
         return possibleInheritableItems;
     }
 
+    let activeTraits = [];
     let shouldRetry = possibleInheritableItems.length > 0;
     while (shouldRetry) {
         shouldRetry = false;
