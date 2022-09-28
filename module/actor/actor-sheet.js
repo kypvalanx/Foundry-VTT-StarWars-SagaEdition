@@ -617,7 +617,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
             let data = {};
             data[name] = value;
-            updateTarget.update(data);
+            updateTarget.safeUpdate(data);
         }
 
         // Update on lose focus
@@ -1015,7 +1015,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 let update = {};
                 update[dataset.name] = roll.total;
-                updateCandidate.update(update);
+                updateCandidate.safeUpdate(update);
             } else {
                 let speaker = ChatMessage.getSpeaker({actor: this.actor});
                 // roll.toMessage({

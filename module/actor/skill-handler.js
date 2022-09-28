@@ -116,7 +116,7 @@ export function generateSkills(actor) {
         }
     }
     if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
-        actor.update(data);
+        actor.safeUpdate(data);
     }
 }
 

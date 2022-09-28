@@ -21,7 +21,7 @@ export function resolveOffense(actor) {
     }
 
     if(Object.values(data).length > 0 && !actor.pack && !actor.flags.core?.sourceId.includes(actor._id)){
-        actor.update(data);
+        actor.safeUpdate(data);
     }
 }
 

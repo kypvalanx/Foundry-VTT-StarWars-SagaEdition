@@ -217,7 +217,7 @@ export class SWSEItemSheet extends ItemSheet {
             if (typeof target.data("high") === "number") {
                 update[name] = Math.min(update[name], target.data("high"));
             }
-            this.object.update(update);
+            this.object.safeUpdate(update);
         });
 // TODO switch to data action
         html.find('.value-minus').click(ev => {
@@ -233,7 +233,7 @@ export class SWSEItemSheet extends ItemSheet {
             if (typeof target.data("low") === "number") {
                 update[name] = Math.max(update[name], target.data("low"));
             }
-            this.object.update(update);
+            this.object.safeUpdate(update);
         });
 
         // Add general text box (span) handler
@@ -579,7 +579,7 @@ export class SWSEItemSheet extends ItemSheet {
                 }
                 break;
         }
-        this.item.update(updateData);
+        this.item.safeUpdate(updateData);
     }
 
     _onClassControl(event) {

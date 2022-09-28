@@ -44,14 +44,13 @@ export class SWSEItem extends Item {
         if (this.type === "armor") this.prepareArmor(system);
         if (this.type === "feat") this.prepareFeatData(system);
     }
-    //
-    // set type(type) {
-    //     this.data.type = type;
-    // }
-    //
-    // get type() {
-    //     return this.data.type;
-    // }
+
+
+    async safeUpdate(data={}, context={}) {
+        if(this.canUserModify(game.user, 'update')){
+            this.update(data, context);
+        }
+    }
 
     get strippable() {
         return ['armor', 'weapon'].includes(this.type)
@@ -939,8 +938,8 @@ export class SWSEItem extends Item {
         }
 
 
-        await this.update({"data.items": [...filteredItems]});
-        await item.update({"data.hasItemOwner": true});
+        await this.safeUpdate({"data.items": [...filteredItems]});
+        await item.safeUpdate({"data.hasItemOwner": true});
     }
 
     async revokeOwnership(item) {
@@ -948,8 +947,8 @@ export class SWSEItem extends Item {
             return;
         }
         let items = this.items?.filter(i => i._id !== item.data._id);
-        await this.update({"data.items": items});
-        await item.update({"data.hasItemOwner": false});
+        await this.safeUpdate({"data.items": items});
+        await item.safeUpdate({"data.hasItemOwner": false});
     }
 
     canReduceRange() {
@@ -1017,7 +1016,7 @@ export class SWSEItem extends Item {
         }
         console.log(attacks);
         attacks.splice(index, 1);
-        await this.update({"data.weapon.damage.attacks": attacks});
+        await this.safeUpdate({"data.weapon.damage.attacks": attacks});
     }
 
     async addCategory() {
@@ -1031,14 +1030,14 @@ export class SWSEItem extends Item {
         }
         console.log(attacks);
         attacks.push({key: "", value: "", dtype: "String"});
-        await this.update({"data.weapon.damage.attacks": attacks});
+        await this.safeUpdate({"data.weapon.damage.attacks": attacks});
     }
 
     increaseQuantity() {
         let current = this.system.quantity;
 
         let quantity = current + 1;
-        this.update({"data.quantity": quantity});
+        this.safeUpdate({"data.quantity": quantity});
     }
 
     decreaseQuantity() {
@@ -1046,7 +1045,7 @@ export class SWSEItem extends Item {
         let current = this.system.quantity;
 
         let quantity = Math.max(0, current - 1);
-        this.update({"data.quantity": quantity});
+        this.safeUpdate({"data.quantity": quantity});
     }
 
     getBaseUpgradePoints(ogName) {
@@ -1113,7 +1112,7 @@ export class SWSEItem extends Item {
 
     setAttribute(attribute, value, options={}) {
         let update = this.getUpdateObjectForUpdatingAttribute(attribute, value);
-        return this.update(update, options);
+        return this.safeUpdate(update, options);
     }
 
     getUpdateObjectForUpdatingAttribute(attribute, value) {
@@ -1146,7 +1145,7 @@ export class SWSEItem extends Item {
 
     setAttributes(attributes, options={}) {
         let update = this.buildUpdateObjectForAttributes(attributes);
-        return this.update(update, options);
+        return this.safeUpdate(update, options);
     }
 
     buildUpdateObjectForAttributes(attributes) {
@@ -1163,13 +1162,13 @@ export class SWSEItem extends Item {
         update.data.modes = {};
         update.data.modes[modeIndex] = {};
         update.data.modes[modeIndex].attributes = attributes;
-        this.update(update);
+        this.safeUpdate(update);
     }
 
     updateData(data) {
         let update = {};
         update.data = data;
-        this.update(update);
+        this.safeUpdate(update);
     }
 
 
@@ -1247,7 +1246,7 @@ export class SWSEItem extends Item {
         update.data = {};
         this._activateMode(modes, mode, update.data);
 
-        this.update(update);
+        this.safeUpdate(update);
     }
 
     _activateMode(modes, mode, data) {
@@ -1288,7 +1287,7 @@ export class SWSEItem extends Item {
         let update = {};
         update.data = {};
         update.data.activeModes = this.system.activeModes.filter(activeMode => activeMode.toLowerCase() !== mode.toLowerCase());
-        this.update(update);
+        this.safeUpdate(update);
     }
 
     getClassLevel() {

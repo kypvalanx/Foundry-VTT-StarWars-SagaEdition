@@ -65,10 +65,10 @@ export class SWSEActor extends Actor {
 		//check if user has permission to modify selected actor
 		//if not jump out of the function, all the hard lifting
 		//has already been done. 
-		if(!this.canUserModify(game.user, 'update')){
-			
-			return false;
-		}
+		// if(!this.canUserModify(game.user, 'update')){
+		//
+		// 	return false;
+		// }
 
         const system = this.system;
         system.description = system.description || ""
@@ -80,9 +80,9 @@ export class SWSEActor extends Actor {
         this.resolvedLabels = new Map();
 
         if (this.id && this.type === "npc") {
-            this.update({"type": "character", "data.isNPC": true}, {updateChanges: false});
+            this.safeUpdate({"type": "character", "data.isNPC": true}, {updateChanges: false});
         } else if (this.id && this.type === "npc-vehicle") {
-            this.update({
+            this.safeUpdate({
                 "type": "vehicle",
                 "data.isNPC": true
             }, {updateChanges: false});
@@ -112,11 +112,17 @@ export class SWSEActor extends Actor {
         }
     }
 
+    async safeUpdate(data={}, context={}) {
+        if(this.canUserModify(game.user, 'update')){
+            this.update(data, context);
+        }
+    }
+
     async setActorLinkOnActorAndTokens(documents, val) {
         for (let document of documents) {
-            await document.update({'actorLink': val});
+            await document.safeUpdate({'actorLink': val});
         }
-        await this.update({"token.actorLink": val})
+        await this.safeUpdate({"token.actorLink": val})
     }
 
     /**
@@ -742,7 +748,7 @@ export class SWSEActor extends Actor {
         for (let [key, ability] of Object.entries(attributes)) {
             update[`data.attributes.${key}.base`] = ability;
         }
-        this.update(update);
+        this.safeUpdate(update);
     }
 
 
@@ -777,7 +783,7 @@ export class SWSEActor extends Actor {
         let update = {};
         update['data.crew'] = [{actor: actor.data, id: actor.id, position, slot}].concat(this.system.crew);
 
-        await this.update(update);
+        await this.safeUpdate(update);
     }
 
     async removeCrew(actorId, position) {
@@ -792,7 +798,7 @@ export class SWSEActor extends Actor {
             update['data.crew'] = this.system.crew.filter(c => c.position !== position)
         }
 
-        await this.update(update);
+        await this.safeUpdate(update);
     }
 
     /**
@@ -974,7 +980,7 @@ export class SWSEActor extends Actor {
         }
 
         if (hasUpdate && this.id) {
-            return this.update({_id: this.id, 'data.levelAttributeBonus': system.levelAttributeBonus});
+            return this.safeUpdate({_id: this.id, 'data.levelAttributeBonus': system.levelAttributeBonus});
         }
         return undefined;
     }
@@ -1403,10 +1409,10 @@ export class SWSEActor extends Actor {
     }
 
     async _onCreate(item, options, userId) {
-        if (item.type === "character") await this.update({"token.actorLink": true}, {updateChanges: false});
-        if (item.type === "npc") await this.update({"type": "character", "data.isNPC": true}, {updateChanges: false});
-        if (item.type === "vehicle") await this.update({"token.actorLink": true}, {updateChanges: false});
-        if (item.type === "npc-vehicle") await this.update({
+        if (item.type === "character") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
+        if (item.type === "npc") await this.safeUpdate({"type": "character", "data.isNPC": true}, {updateChanges: false});
+        if (item.type === "vehicle") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
+        if (item.type === "npc-vehicle") await this.safeUpdate({
             "type": "vehicle",
             "data.isNPC": true
         }, {updateChanges: false});
@@ -1426,7 +1432,7 @@ export class SWSEActor extends Actor {
     }
 
     setAttributeGenerationType(attributeGenerationType) {
-        this.update({'data.attributeGenerationType': attributeGenerationType})
+        this.safeUpdate({'data.attributeGenerationType': attributeGenerationType})
     }
 
     get credits() {
@@ -1434,19 +1440,19 @@ export class SWSEActor extends Actor {
     }
 
     set credits(credits) {
-        this.update({'data.credits': credits})
+        this.safeUpdate({'data.credits': credits})
     }
 
     set shields(shields) {
-        this.update({'data.shields.value': shields < 0 ? 0 : shields})
+        this.safeUpdate({'data.shields.value': shields < 0 ? 0 : shields})
     }
 
     setAge(age) {
-        this.update({'data.age': age})
+        this.safeUpdate({'data.age': age})
     }
 
     setGender(sex, gender) {
-        this.update({'data.sex': sex, 'data.gender': gender})
+        this.safeUpdate({'data.sex': sex, 'data.gender': gender})
     }
 
 
@@ -1458,7 +1464,7 @@ export class SWSEActor extends Actor {
     setAttributeLevelBonus(level, attributeLevelBonus) {
         let data = {};
         data[`data.levelAttributeBonus.${level}`] = attributeLevelBonus;
-        this.update(data)
+        this.safeUpdate(data)
     }
 
     get shouldLockAttributes() {
@@ -1484,7 +1490,7 @@ export class SWSEActor extends Actor {
     }
 
     set darkSideScore(score) {
-        this.update({'data.darkSideScore': score})
+        this.safeUpdate({'data.darkSideScore': score})
     }
 
     /**
@@ -2329,14 +2335,14 @@ export class SWSEActor extends Actor {
         update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
             .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
 
-        await this.update(update);
+        await this.safeUpdate(update);
     }
 
     async unequipItem(itemId) {
         let update = {};
         update['system.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
 
-        await this.update(update);
+        await this.safeUpdate(update);
     }
 
     parseSlotAndPosition(type) {

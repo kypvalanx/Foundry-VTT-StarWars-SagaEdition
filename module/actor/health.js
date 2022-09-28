@@ -63,7 +63,7 @@ export function resolveHealth(actor) {
             let data = {};
             data['data.hitPoints'] = -1;
             data._id = actor.data._id
-            actor.update(data)
+            actor.safeUpdate(data)
             console.debug("completed updating hitpoints for " + actor.name)
         }
     }
