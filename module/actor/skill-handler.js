@@ -29,6 +29,12 @@ export function generateSkills(actor) {
         reduce: "VALUES"
     }).map(skill => (skill?.replace(" ", "") || "").toLowerCase())
 
+    let untrainedSkillBonuses = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "untrainedSkillBonus",
+        reduce: "VALUES"
+    }).map(skill => (skill || "").toLowerCase())
+
     let skillFocuses = getInheritableAttribute({
         entity: actor,
         attributeKey: "skillFocus",
@@ -63,6 +69,9 @@ export function generateSkills(actor) {
 
         let trainedSkillBonus = skill.trained === true ? 5 : 0;
         bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
+
+        let untrainedSkillBonus = !skill.trained && untrainedSkillBonuses.includes(key) ? 2 : 0;
+        bonuses.push({value: untrainedSkillBonus, description: `Untrained Skill Bonus: ${untrainedSkillBonus}`})
 
         let getAbilitySkillBonus = actor.getAbilitySkillBonus(key);
         bonuses.push({value: getAbilitySkillBonus, description: `Ability Skill Modifier: ${getAbilitySkillBonus}`})
