@@ -402,7 +402,7 @@ export class SWSEActor extends Actor {
 
         generateAttributes(this);
 
-        this.handleDarksideArray(system);
+        this.handleDarksideArray(this);
 
         resolveOffense(this);
         let feats = this.resolveFeats();
@@ -459,7 +459,8 @@ export class SWSEActor extends Actor {
         return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
-    handleDarksideArray(system) {
+    handleDarksideArray(item) {
+        let system = item.system;
         for (let i = 0; i <= system.attributes.wis.total; i++) {
             system.darkSideArray = system.darkSideArray || [];
 
@@ -470,7 +471,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        let darkSideTaint = getInheritableAttribute({entity: system, attributeKey: "darksideTaint", reduce: "SUM"})
+        let darkSideTaint = getInheritableAttribute({entity: item, attributeKey: "darksideTaint", reduce: "SUM"})
 
         system.finalDarksideScore = system.darkSideScore + darkSideTaint
     }
@@ -1475,7 +1476,7 @@ export class SWSEActor extends Actor {
     }
 
     get baseAttackBonus() {
-        return this.system.offense.bab;
+        return this.system.offense?.bab;
     }
 
     get darkSideScore() {
@@ -2325,7 +2326,7 @@ export class SWSEActor extends Actor {
 
     async resolveUpdate(itemId, equipType, slot, position) {
         let update = {};
-        update['equippedIds'] = [{id: itemId, type: equipType, slot, position}]
+        update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
             .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
 
         await this.update(update);
@@ -2333,7 +2334,7 @@ export class SWSEActor extends Actor {
 
     async unequipItem(itemId) {
         let update = {};
-        update['equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
+        update['system.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
 
         await this.update(update);
     }
@@ -2414,7 +2415,13 @@ export function getEquippedItems(actor) {
 
     let equippedIds = actor.system?.equippedIds || actor._source?.system?.equippedIds || [];
     equippedIds = equippedIds.map(id => id.id)
-    let items = actor.items?._source || actor.items || []
+    let items = actor.items.values() || []
+    let filtered = [];
+    for(let item of items){
+        if(equippedIds.includes(item._id)){
+            filtered.push(item)
+        }
+    }
 
-    return items.filter(item => equippedIds.includes(item._id));
+    return filtered;
 }

@@ -17,10 +17,10 @@ export function resolveOffense(actor) {
 
     let data = {};
     if (old !== offense.bab) {
-        data[`offense.bab`] = offense.bab;
+        data[`system.offense.bab`] = offense.bab;
     }
 
-    if(Object.values(data).length > 0 && !!actor._id){
+    if(Object.values(data).length > 0 && !actor.pack && !actor.flags.core?.sourceId.includes(actor._id)){
         actor.update(data);
     }
 }
