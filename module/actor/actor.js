@@ -16,7 +16,15 @@ import {resolveDefenses} from "./defense.js";
 import {generateAttributes} from "./attribute-handler.js";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js";
 import {SWSEItem} from "../item/item.js";
-import {crewPositions, crewQuality, equipableTypes, sizeArray, skills, vehicleActorTypes} from "../constants.js";
+import {
+    crewPositions,
+    crewQuality,
+    equipableTypes,
+    LIMITED_TO_ONE_TYPES,
+    sizeArray,
+    skills,
+    vehicleActorTypes
+} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
@@ -119,8 +127,10 @@ export class SWSEActor extends Actor {
     }
 
     async setActorLinkOnActorAndTokens(documents, val) {
-        for (let document of documents) {
-            await document.safeUpdate({'actorLink': val});
+        if(this.canUserModify(game.user, 'update')){
+            for (let document of documents) {
+                await document.update({'actorLink': val});
+            }
         }
         await this.safeUpdate({"token.actorLink": val})
     }
@@ -1612,103 +1622,43 @@ export class SWSEActor extends Actor {
 
 
     /**
-     * Checks prerequisites of an item and offers available options
-     * @param item {SWSEItem}
-     * @param type
+     * Checks prerequisites of an entity and offers available context
+     * @param entity {SWSEItem}
+     * @param context {Object}
      */
-    async checkPrerequisitesAndResolveOptions(item, context) {
+    async checkPrerequisitesAndResolveOptions(entity, context) {
         context.actor = this;
-        let choices = await activateChoices(item, context);
+        let choices = await activateChoices(entity, context);
         if (!choices.success) {
             return [];
         }
 
-        if(item.type === "class"){
-            let values = this.items._source || [];
-            let classes = values.filter(item => item.type === "class");
-            context.isFirstLevel = classes.length === 0;
-            if(!context.skipPrerequisite && !context.isUpload){
-                let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
-                if (meetsPrereqs.doesFail) {
-                    new Dialog({
-                        title: "You Don't Meet the Prerequisites!",
-                        content: `You do not meet the prerequisites for the ${item.system.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
+        if(context.newFromCompendium){
+            if (!this.isPermittedForActorType(entity.type)) {
+                new Dialog({
+                    title: "Inappropriate Item",
+                    content: `You can't add a ${entity.type} to a ${this.type}.`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
                         }
-                    }).render(true);
-                    return [];
-                }
-                if (meetsPrereqs.failureList.length > 0) {
-                    new Dialog({
-                        title: "You MAY Meet the Prerequisites!",
-                        content: `You MAY meet the prerequisites for this class. Check the remaining reqs:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                }
-
-                if (item.name === "Beast" && !context.isFirstLevel && classes.filter(clazz => clazz.name === "Beast").length === 0) {
-                    new Dialog({
-                        title: "The Beast class is not allowed at this time",
-                        content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                    return [];
-                }
-                if (item.name !== "Beast" && classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
-                    new Dialog({
-                        title: "The Beast class is not allowed to multiclass at this time",
-                        content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                    return [];
-                }
+                    }
+                }).render(true);
+                return;
             }
 
-            let firstLevelAttribute = Object.values(item.system.attributes).find(v => v.key === "isFirstLevel");
-
-            if(firstLevelAttribute){
-                firstLevelAttribute.value = context.isFirstLevel;
-            } else {
-                item.system.attributes[Object.keys(item.system.attributes).length] = {
-                    type: "Boolean",
-                    value: context.isFirstLevel,
-                    key: "isFirstLevel"
-                };
-            }
-
-        } else if (context.type !== "provided") {
-
-            //inventory items should not be limited to one.
-            if(!equipableTypes.includes(item.type)){
+            if(LIMITED_TO_ONE_TYPES.includes(entity.type)){
                 let takeMultipleTimes = getInheritableAttribute({
-                    entity: item,
+                    entity: entity,
                     attributeKey: "takeMultipleTimes"
                 }).map(a => a.value === "true").reduce((a, b) => a || b, false);
 
-                if (this.hasItem(item) && !takeMultipleTimes) {
-                    if(!context.isUpload){
+                if (this.hasItem(entity) && !takeMultipleTimes) {
+                    if(!context.skipPrerequisite && !context.isUpload){
                         await Dialog.prompt({
                             title: `You already have this ${context.type}`,
-                            content: `You have already taken the ${item.finalName} ${context.type}`,
+                            content: `You have already taken the ${entity.finalName} ${context.type}`,
                             callback: () => {
                             }
                         })
@@ -1718,46 +1668,209 @@ export class SWSEActor extends Actor {
             }
 
             if(!context.skipPrerequisite && !context.isUpload){
-                let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
+                let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
 
-                if (meetsPrereqs.failureList.length > 0 && !equipableTypes.includes(item.type)) {
+                //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
+                if (!equipableTypes.includes(entity.type)) {
                     if (meetsPrereqs.doesFail) {
-                        if(!!context.offerOverride){
-                            await new Dialog({
+                        if(context.offerOverride){
+                            let override = await Dialog.wait({
                                 title: "You Don't Meet the Prerequisites!",
                                 content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                                 buttons: {
                                     ok: {
                                         icon: '<i class="fas fa-check"></i>',
-                                        label: 'Ok'
+                                        label: 'Ok',
+                                        callback: () => {return false}
                                     },
                                     override: {
                                         icon: '<i class="fas fa-check"></i>',
                                         label: 'Override',
-                                        callback: () => this.resolveAddItem(item, choices, context)
+                                        callback: () => {return true}
                                     }
                                 }
-                            }).render(true);
-                            return;
+                            });
+                            if(!override){
+                                return [];
+                            }
                         } else {
-                            new Dialog({
+                            await Dialog.prompt({
                                 title: "You Don't Meet the Prerequisites!",
                                 content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                                buttons: {
-                                    ok: {
-                                        icon: '<i class="fas fa-check"></i>',
-                                        label: 'Ok'
-                                    }
-                                }
-                            }).render(true);
+                                callback:()=>{}
+                            });
 
                             return [];
                         }
 
-                    } else {
-                        new Dialog({
+                    } else if(meetsPrereqs.failureList.length > 0){
+                        await Dialog.prompt({
                             title: "You MAY Meet the Prerequisites!",
                             content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                            callback:()=>{}
+                        }
+                        );
+                    }
+                }
+            }
+
+            if (entity.type === 'talent') {
+                let possibleTalentTrees = new Set();
+                let allTreesOnTalent = new Set();
+                let optionString = "";
+
+                let actorsBonusTrees = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: 'bonusTalentTree',
+                    reduce: "VALUES"
+                });
+                if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
+                    for (let [id, item] of Object.entries(this.system.availableItems)) {
+                        if (id.includes("Talent") && !id.includes("Force") && item > 0) {
+                            optionString += `<option value="${id}">${id}</option>`
+                            possibleTalentTrees.add(id);
+                        }
+                    }
+                } else {
+                    for (let talentTree of entity.system.possibleProviders.filter(unique)) {
+                        allTreesOnTalent.add(talentTree);
+                        let count = this.system.availableItems[talentTree];
+                        if (count && count > 0) {
+                            optionString += `<option value="${talentTree}">${talentTree}</option>`
+                            possibleTalentTrees.add(talentTree);
+                        }
+                    }
+                }
+
+
+                if (possibleTalentTrees.size === 0) {
+                    await Dialog.prompt({
+                        title: "You don't have more talents available of these types",
+                        content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
+                        callback: () => {
+                        }
+                    });
+                    return [];
+                } else if (possibleTalentTrees.size > 1) {
+                    let content = `<p>Select an unused talent source.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+                    await Dialog.prompt({
+                        title: "Select an unused talent source.",
+                        content: content,
+                        callback: async (html) => {
+                            let key = html.find("#choice")[0].value;
+                            possibleTalentTrees = new Set();
+                            possibleTalentTrees.add(key);
+                        }
+                    });
+                    entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
+                }
+
+            }
+
+            if (entity.type === 'feat') {
+                let possibleFeatTypes = [];
+
+                let optionString = "";
+                let possibleProviders = entity.system.possibleProviders;
+                for (let provider of possibleProviders) {
+                    if (this.system.availableItems[provider] > 0) {
+                        possibleFeatTypes.push(provider);
+                        optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
+                    }
+                }
+
+                if (possibleFeatTypes.length === 0) {
+                    await Dialog.prompt({
+                        title: "You don't have more feats available of these types",
+                        content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(possibleProviders).join("</li><li>") + "</li></ul>",
+                        callback: () => {
+                        }
+                    });
+                    return [];
+                } else if (possibleFeatTypes.length > 1) {
+                    let content = `<p>Select an unused feat type.</p>
+                        <div><select id='choice'>${optionString}</select> 
+                        </div>`;
+
+                    await Dialog.prompt({
+                        title: "Select an unused feat source.",
+                        content: content,
+                        callback: async (html) => {
+                            let key = html.find("#choice")[0].value;
+                            possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
+                        }
+                    });
+                }
+
+                entity.system.categories = possibleFeatTypes;
+            }
+
+            if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
+                let viewable
+                if (entity.type === 'forcePower') {
+                    viewable = 'Force Powers'
+                }
+                if (entity.type === 'forceTechnique') {
+                    viewable = 'Force Technique'
+                }
+                if (entity.type === 'forceSecret') {
+                    viewable = 'Force Secret'
+                }
+                if (!this.system.availableItems[viewable] && entity.type !== 'affiliation') {
+                    await Dialog.prompt({
+                        title: `You can't take any more ${viewable.titleCase()}`,
+                        content: `You can't take any more ${viewable.titleCase()}`,
+                        callback: () => {
+                        }
+                    });
+                }
+            }
+
+            if(entity.type === "background" || entity.type === "destiny"){
+                if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
+                    new Dialog({
+                        title: `${entity.type.titleCase()} Selection`,
+                        content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                    response.fail = true;
+                }
+            }
+
+            if(entity.type === "vehicleBaseType" || entity.type === "species"){
+                let type = entity.type;
+                let viewable = type.replace(/([A-Z])/g, " $1");
+                if (filterItemsByType(this.items.values(), type).length > 0) {
+                    new Dialog({
+                        title: `${viewable.titleCase()} Selection`,
+                        content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                    response.fail = true;
+                }
+            }
+
+            if(entity.type === "class"){
+                context.isFirstLevel = this.classes.length === 0;
+                if(!context.skipPrerequisite && !context.isUpload){
+
+                    if (entity.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
+                        new Dialog({
+                            title: "The Beast class is not allowed at this time",
+                            content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
                             buttons: {
                                 ok: {
                                     icon: '<i class="fas fa-check"></i>',
@@ -1765,12 +1878,45 @@ export class SWSEActor extends Actor {
                                 }
                             }
                         }).render(true);
+                        return [];
                     }
+                    if (entity.name !== "Beast" && this.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
+                        new Dialog({
+                            title: "The Beast class is not allowed to multiclass at this time",
+                            content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok'
+                                }
+                            }
+                        }).render(true);
+                        return [];
+                    }
+                }
+
+                let firstLevelAttribute = Object.values(entity.system.attributes).find(v => v.key === "isFirstLevel");
+
+                if(firstLevelAttribute){
+                    firstLevelAttribute.value = context.isFirstLevel;
+                } else {
+                    entity.system.attributes[Object.keys(entity.system.attributes).length] = {
+                        type: "Boolean",
+                        value: context.isFirstLevel,
+                        key: "isFirstLevel"
+                    };
                 }
             }
 
+
+
+
+            await {fail: false, context: {}};
+
         }
-        return await this.resolveAddItem(item, choices, context);
+
+
+        return await this.resolveAddItem(entity, choices, context);
     }
 
 
@@ -1820,8 +1966,8 @@ export class SWSEActor extends Actor {
             return [];
         }
 
-        let feats1 = Object.values(this.items || {}).filter(item => item.type === "feat");
-        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.system.name);
+        let feats1 = this.feats
+        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
         if(!context.isUpload){
             if (context.isFirstLevel) {
                 if (availableClassFeats > 0 && availableClassFeats < feats.length) {
@@ -1880,7 +2026,17 @@ export class SWSEActor extends Actor {
                 }
             } else if (isFirstLevelOfClass) {
                 let options = "";
-                for (let feat of feats) {
+
+                let allFeats = [];
+                allFeats.push(...feats)
+                let multiclassFeats = getInheritableAttribute({
+                    entity: item,
+                    attributeKey: "multiclassFeat",
+                    reduce: "VALUES"
+                }).map(feat => this.cleanItemName(feat));
+                allFeats.push(...multiclassFeats)
+
+                for (let feat of allFeats) {
                     let owned = "";
                     let ownedFeats = feats1.filter(f => f.finalName === feat);
                     if (ownedFeats.length > 0) {
@@ -1916,7 +2072,7 @@ export class SWSEActor extends Actor {
     }
 
     _isFirstLevelOfClass(name) {
-        let items = this.items.filter(i => i.data.name === name);
+        let items = this.items.filter(i => i.name === name);
         return items.length === 1;
     }
 
@@ -1961,25 +2117,6 @@ export class SWSEActor extends Actor {
 
             entity.prepareData();
 
-            if(options.newFromCompendium){
-                if (!this.isPermittedForActorType(entity.type)) {
-                    new Dialog({
-                        title: "Inappropriate Item",
-                        content: `You can't add a ${entity.type} to a ${this.type}.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                    return;
-                }
-                let response = await this.itemTypeSpecificChecks(entity);
-                if(response.fail){
-                    break;
-                }
-            }
 
 
             //TODO weird spot for this.  maybe this can leverage the newer payload system
@@ -1996,9 +2133,7 @@ export class SWSEActor extends Actor {
             entity.addProvidedItems(providedItem.providedItems);
             entity.setParent(parent, providedItem.unlocked);
 
-           // if (!options.skipPrerequisite) {
                 entity.setPrerequisite(providedItem.prerequisite);
-            //}
 
             //TODO payload should be deprecated in favor of payloads
             if (!!payload) {
@@ -2017,7 +2152,7 @@ export class SWSEActor extends Actor {
             //childOptions.type = "provided";
             //childOptions.skipPrerequisite = false;
             childOptions.itemAnswers = providedItem.answers;
-            childOptions.newFromCompendium = false;
+            //childOptions.newFromCompendium = false;
             let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
             //do stuff based on type of item
@@ -2045,158 +2180,6 @@ export class SWSEActor extends Actor {
         return notificationMessage;
     }
 
-    async itemTypeSpecificChecks(entity) {
-        let response = {fail:false};
-        if (entity.type === 'talent') {
-            let possibleTalentTrees = new Set();
-            let allTreesOnTalent = new Set();
-            let optionString = "";
-
-            let actorsBonusTrees = getInheritableAttribute({
-                entity: this,
-                attributeKey: 'bonusTalentTree',
-                reduce: "VALUES"
-            });
-            if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
-                for (let [id, item] of Object.entries(this.system.availableItems)) {
-                    if (id.includes("Talent") && !id.includes("Force") && item > 0) {
-                        optionString += `<option value="${id}">${id}</option>`
-                        possibleTalentTrees.add(id);
-                    }
-                }
-            } else {
-                for (let talentTree of entity.system.possibleProviders.filter(unique)) {
-                    allTreesOnTalent.add(talentTree);
-                    let count = this.system.availableItems[talentTree];
-                    if (count && count > 0) {
-                        optionString += `<option value="${talentTree}">${talentTree}</option>`
-                        possibleTalentTrees.add(talentTree);
-                    }
-                }
-            }
-
-
-            if (possibleTalentTrees.size === 0) {
-                await Dialog.prompt({
-                    title: "You don't have more talents available of these types",
-                    content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
-                    callback: () => {
-                    }
-                });
-                response.fail = true;
-            } else if (possibleTalentTrees.size > 1) {
-                let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused talent source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleTalentTrees = new Set();
-                        possibleTalentTrees.add(key);
-                    }
-                });
-                entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
-            }
-
-        }
-        if (entity.type === 'feat') {
-            let possibleFeatTypes = [];
-
-            let optionString = "";
-            let possibleProviders = entity.system.possibleProviders;
-            for (let provider of possibleProviders) {
-                if (this.system.availableItems[provider] > 0) {
-                    possibleFeatTypes.push(provider);
-                    optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
-                }
-            }
-
-            if (possibleFeatTypes.length === 0) {
-                await Dialog.prompt({
-                    title: "You don't have more feats available of these types",
-                    content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(possibleProviders).join("</li><li>") + "</li></ul>",
-                    callback: () => {
-                    }
-                });
-                response.fail = true;
-            } else if (possibleFeatTypes.length > 1) {
-                let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                await Dialog.prompt({
-                    title: "Select an unused feat source.",
-                    content: content,
-                    callback: async (html) => {
-                        let key = html.find("#choice")[0].value;
-                        possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
-                    }
-                });
-            }
-
-            entity.system.categories = possibleFeatTypes;
-        }
-
-        if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
-            let viewable
-            if (entity.type === 'forcePower') {
-                viewable = 'Force Powers'
-            }
-            if (entity.type === 'forceTechnique') {
-                viewable = 'Force Technique'
-            }
-            if (entity.type === 'forceSecret') {
-                viewable = 'Force Secret'
-            }
-            if (!this.actor.data.availableItems[viewable] && entity.type !== 'affiliation') {
-                await Dialog.prompt({
-                    title: `You can't take any more ${viewable.titleCase()}`,
-                    content: `You can't take any more ${viewable.titleCase()}`,
-                    callback: () => {
-                    }
-                });
-            }
-        }
-
-        if(entity.type === "background" || entity.type === "destiny"){
-            if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
-                new Dialog({
-                    title: `${entity.type.titleCase()} Selection`,
-                    content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                response.fail = true;
-            }
-        }
-
-        if(entity.type === "vehicleBaseType" || entity.type === "species"){
-            let type = entity.type;
-            let viewable = type.replace(/([A-Z])/g, " $1");
-            if (filterItemsByType(this.items.values(), type).length > 0) {
-                new Dialog({
-                    title: `${viewable.titleCase()} Selection`,
-                    content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                response.fail = true;
-            }
-        }
-
-        return response;
-    }
 
     async resolveEntity(item) {
         let entity = undefined
