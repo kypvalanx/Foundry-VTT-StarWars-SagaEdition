@@ -998,7 +998,7 @@ export class SWSEActorSheet extends ActorSheet {
             rolls = dataset.roll.split(",");
         }
         for (let rollStr of rolls) {
-            let roll = new Roll(rollStr, this.actor.data.data);
+            let roll = new Roll(rollStr, this.actor.system);
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
             roll = roll.roll({async: false});
             let item = dataset.item;

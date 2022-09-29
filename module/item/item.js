@@ -1150,18 +1150,18 @@ export class SWSEItem extends Item {
 
     buildUpdateObjectForAttributes(attributes) {
         let update = {};
-        update._id = this.data._id
-        update.data = {};
-        update.data.attributes = attributes;
+        update._id = this._id
+        update.system = {};
+        update.system.attributes = attributes;
         return update;
     }
 
     setModeAttributes(modeIndex, attributes) {
         let update = {};
-        update.data = {};
-        update.data.modes = {};
-        update.data.modes[modeIndex] = {};
-        update.data.modes[modeIndex].attributes = attributes;
+        update.system = {};
+        update.system.modes = {};
+        update.system.modes[modeIndex] = {};
+        update.system.modes[modeIndex].attributes = attributes;
         this.safeUpdate(update);
     }
 
