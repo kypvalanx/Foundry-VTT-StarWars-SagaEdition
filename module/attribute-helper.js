@@ -100,14 +100,14 @@ export function getResolvedSize(entity, options) {
     if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
-    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX"}))
-    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM"}))
+    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX", recursive: true}))
+    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM", recursive: true}))
 
 
     let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
         entity,
         attributeKey: "damageThresholdEffectiveSize",
-        reduce: "SUM"
+        reduce: "SUM", recursive: true
     }))
     let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
 
@@ -176,12 +176,16 @@ export function getInheritableAttribute(data = {}) {
             document.effects.filter(effect => effect.disabled === false)
                 .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
         }
-        values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey))
+        if(data.attributeKey){
+            values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey))
+        } else {
+            values.push(...unfilteredAttributes)
+        }
     }
 
 
 
-    if (!data.recursive || data.parent) {
+    if (!data.recursive && data.parent) {
         values = values.filter(attr => {
             let parent = data.parent;
 
