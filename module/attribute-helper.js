@@ -1,9 +1,9 @@
-import {extractAttributeValues, filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
+import {filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
 
 function equippedItems(entity) {
-    if(entity.items) {
+    if (entity.items) {
         let equippedIds = entity.equippedIds?.map(equipped => equipped.id) || []
         return entity.items.filter(item => equippedIds.includes(item.id || item._id));
     }
@@ -14,95 +14,101 @@ function equippedItems(entity) {
     return [];
 }
 
-export function inheritableItems(entity, attributeKey) {
-    let items = entity.items || [];
-    let possibleInheritableItems = filterItemsByType(items, ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
-        "beastSense",
-        "beastType",
-        "beastQuality"]);
-
-    let activeTraits = [];
-    possibleInheritableItems.push(...equippedItems(entity))
-    //
-    // possibleInheritableItems = possibleInheritableItems
-    //     .map(item => item instanceof SWSEItem ? item.data : item)
-    
-    if(attributeKey){
-        possibleInheritableItems = possibleInheritableItems
-            .filter(item => {
-                let system = item.system || item._source.system;
-                let attrs = Object.values(system.attributes);
-                for(let level of Object.values(system?.levels || {})){
-                    attrs.push(...Object.values(level.data.attributes))
-                }
-                for(let entity of item.items || []){
-                    let inheritableAttribute = getInheritableAttribute({entity, attributeKey});
-                    attrs.push(...inheritableAttribute)
-                }
-                return attrs.map(attr => !!attr ? attr.key : "").includes(attributeKey) //||
-                    //Object.values(item.data)
-            })
+export function inheritableItems(entity) {
+    if (!!entity.system.inheritableItems) {
+        return entity.system.inheritableItems;
     }
 
-    if(!entity.items){
-        //this means it's an item, skip validation
+    let possibleInheritableItems = equippedItems(entity);
+
+    if (entity instanceof SWSEItem) {
+        entity.system.inheritableItems = possibleInheritableItems
         return possibleInheritableItems;
     }
 
+    possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+        "beastSense",
+        "beastType",
+        "beastQuality"]));
+
+
+    entity.system.inheritableItems = [];
     let shouldRetry = possibleInheritableItems.length > 0;
     while (shouldRetry) {
         shouldRetry = false;
         for (let possible of possibleInheritableItems) {
             if (!meetsPrerequisites(entity, possible.system.prerequisite).doesFail) {
-                activeTraits.push(possible);
+                entity.system.inheritableItems.push(possible);
                 shouldRetry = true;
             }
         }
-        possibleInheritableItems = possibleInheritableItems.filter(possible => !activeTraits.includes(possible));
+        possibleInheritableItems = possibleInheritableItems.filter(possible => !entity.system.inheritableItems.includes(possible));
     }
 
 
-    return activeTraits;
+    return entity.system.inheritableItems;
 }
 
-function getAttributesFromClass(data, entity) {
-    let vals = [];
-    let classLevel = data.duplicates || 0;
+/**
+ * appends source meta to a given attribute
+ * @param attribute {Object}
+ * @param attribute.value {*}
+ * @param source {String}
+ * @param sourceString {String}
+ * @param sourceDescription {String}
+ * @returns {value, source, sourceString, sourceDescription}
+ */
+export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
+    attribute.source = source;
+    attribute.sourceString = sourceString;
+    attribute.sourceDescription = sourceDescription;
+    return attribute
+}
+
+function getAttributesFromClassLevel(entity, classLevel) {
+    let attributes = [];
     if (classLevel > 0) {
         let level = entity.system.levels[classLevel];
-        for (let attribute of Object.values(level.data.attributes).filter(attr => attr && attr.key === data.attributeKey)) {
-            vals.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description));
+        for (let attribute of Object.values(level.data.attributes)) {
+            attributes.push(appendSourceMeta(attribute, entity._id, entity.name, `${entity.name} level ${classLevel}`));
         }
     }
-    return vals;
+    return attributes;
 }
 
-function getAttributesFromEmbeddedItems(entity, attributeKey, predicate) {
-    let values = [];
-    let names = [];
-    for (let item of inheritableItems(entity, attributeKey).filter(predicate)) {
-        names.push(item.name);
-        let duplicates = names.filter(name => name === item.name).length;
-        values.push(...getInheritableAttribute({
+function getAttributesFromEmbeddedItems(entity, predicate) {
+    let attributes = [];
+    let names = {};
+    let items = inheritableItems(entity);
+    if (predicate) {
+        items = items.filter(predicate)
+    }
+    for (let item of items) {
+        let duplicates = (names[item.name] || 0) + 1;
+        names[item.name] = duplicates;
+        attributes.push(...getInheritableAttribute({
             entity: item,
-            attributeKey: attributeKey,
             duplicates,
             recursive: true,
             parent: entity
         }));
     }
-    return values;
+    return attributes;
 }
 
 export function getResolvedSize(entity, options) {
-    if(entity.document && entity.document instanceof SWSEItem){
+    if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
-    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce:"MAX"}))
-    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce:"SUM"}))
+    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX", recursive: true}))
+    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM", recursive: true}))
 
 
-    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({entity, attributeKey: "damageThresholdEffectiveSize", reduce:"SUM"}))
+    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
+        entity,
+        attributeKey: "damageThresholdEffectiveSize",
+        reduce: "SUM", recursive: true
+    }))
     let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
 
     return sizeIndex + sizeBonus + miscBonus;
@@ -118,111 +124,111 @@ export function getResolvedSize(entity, options) {
  * @param data.itemFilter {function} filters out child items based on a filter
  * @param data.duplicates {number}
  * @param data.reduce {string}
+ * @param data.recursive {boolean}
  * @returns {*|string|[]|*[]}
  */
 export function getInheritableAttribute(data = {}) {
-    data.attributeFilter = data.attributeFilter || (() => true);
-    data.itemFilter = data.itemFilter || (() => true)
+    let document = data.entity;
 
-    if(!data.attributeKey || !data.entity) {
+    if (!document) {
         return [];
     }
-
     let values = [];
-    if(Array.isArray(data.attributeKey)){
-        for(let subKey of data.attributeKey){
-            let subData = JSON.parse(JSON.stringify(data))
-            subData.attributeKey = subKey;
-            subData.attributeFilter = data.attributeFilter
-            subData.itemFilter = data.itemFilter
-            delete subData.reduce
-            values.push(...getInheritableAttribute(subData))
+    if (Array.isArray(data.attributeKey)) {
+        for (let subKey of data.attributeKey) {
+            values.push(...getInheritableAttribute({
+                entity: document,
+                attributeKey: subKey,
+                itemFilter: data.itemFilter,
+                duplicates: data.duplicates,
+                recursive: data.recursive
+            }))
         }
-
-    }  else if(Array.isArray(data.entity)){
-        for(let entity of data.entity){
-            let subData = JSON.parse(JSON.stringify(data))
-            subData.entity = entity;
-            subData.attributeFilter = data.attributeFilter
-            subData.itemFilter = data.itemFilter
-            delete subData.reduce
-            values.push(...getInheritableAttribute(subData))
+    } else if (Array.isArray(document)) {
+        for (let entity of document) {
+            values.push(...getInheritableAttribute({
+                entity: entity,
+                attributeKey: data.attributeKey,
+                itemFilter: data.itemFilter,
+                duplicates: data.duplicates,
+                recursive: data.recursive
+            }))
         }
-
     } else {
-        let document = data.entity;
 
-        if(!document){
-            return values;
+
+        let unfilteredAttributes = Object.entries(document.system?.attributes || document._source?.system?.attributes || {})
+            .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
+            .map(entry => appendSourceMeta(entry[1], entry[1]._id, entry[1].name, entry[1].name));
+
+        if (document.type === 'class') {
+            unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
         }
 
-        if (document.type) {
-            let itemAttributes = Object.entries(document.system?.attributes || document._source.system?.attributes || [])
-                .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
-                .map(entry => entry[1]);
-            for (let attribute of itemAttributes.filter(attr => attr && attr.key === data.attributeKey)) {
-                values.push(...extractAttributeValues(attribute, document._id, document.name, document.system?.description || document._source?.system.description));
-            }
+        unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
 
-            values.push(...(getAttributesFromEmbeddedItems(document, data.attributeKey, data.itemFilter)))
-
-            if (document.type === 'class') {
-                values.push(... (getAttributesFromClass(data, document)))
-            }
-            values.push(...(extractModeAttributes(document, Object.values(document.system?.modes || {}).filter(mode => mode && mode.isActive) || [], data.attributeKey)));
-
-        }
-
-        if(document.effects){
-            document.effects.filter(effect => effect.disabled === false).forEach(effect =>  values.push(...extractEffectChange(effect.changes || [], data.attributeKey, effect)))
+        if (document.system?.modes) {
+            unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
         }
 
 
-        if(!data.recursive || data.parent) {
-            values = values.filter(attr => {
-                let parent = data.parent;
-
-                if(!parent) {
-                    let parentId = getItemParentId(attr.source)
-                    parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
-                }
-                if(attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail){
-                    return false;
-                }
-
-                return !meetsPrerequisites(document, attr.prerequisite).doesFail
-            });
+        if (document.effects) {
+            document.effects.filter(effect => effect.disabled === false)
+                .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
+        }
+        if(data.attributeKey){
+            values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey))
+        } else {
+            values.push(...unfilteredAttributes)
         }
     }
 
-    values = values.filter(data.attributeFilter);
+
+
+    if (!data.recursive && data.parent) {
+        values = values.filter(attr => {
+            let parent = data.parent;
+
+            if (!parent) {
+                let parentId = getItemParentId(attr.source)
+                parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
+            }
+            if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail) {
+                return false;
+            }
+
+            return !meetsPrerequisites(document, attr.prerequisite).doesFail
+        });
+    }
+
+    if (data.attributeFilter) {
+
+        values = values.filter(data.attributeFilter);
+    }
 
 
     let overrides = values.filter(attr => attr.override)
 
-    if(overrides.length > 0){
+    if (overrides.length > 0) {
         values = overrides;
     }
     return reduceArray(data.reduce, values);
 }
 
 //TODO evaluate if we want to add attributes to a custom event class rather than using changes
-export function extractEffectChange(changes, attributeKey, entity) {
+export function extractEffectChange(changes, entity) {
     let values = [];
-        for (let attribute of Object.values(changes).filter(attr => attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity._id, entity.label, entity.label));
-        }
-
+    for (let attribute of Object.values(changes || {})) {
+        values.push(appendSourceMeta(attribute, entity._id, entity.label, entity.label));
+    }
     return values;
 }
 
-export function extractModeAttributes(entity, activeModes, attributeKey) {
+export function extractModeAttributes(entity, activeModes) {
     let values = [];
     for (let mode of activeModes) {
-        for (let attribute of Object.values(mode.attributes).filter(attr => attr && attr.key === attributeKey) || []) {
-            values.push(...extractAttributeValues(attribute, entity._id, entity.name, entity.system.description ));
-        }
-        values.push(...extractModeAttributes(entity, Object.values(mode.modes || []).filter(mode => mode && mode.isActive), attributeKey) || []);
+        values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
+        values.push(...extractModeAttributes(entity, Object.values(mode.modes || {}).filter(mode => mode && mode.isActive) || []));
     }
     return values;
 }

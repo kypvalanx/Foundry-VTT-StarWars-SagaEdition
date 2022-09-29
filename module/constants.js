@@ -41,6 +41,7 @@ export const weaponGroup = {
 };
 
 export const equipableTypes=["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"];
+export const LIMITED_TO_ONE_TYPES=["feat", "talent"]
 
 
 export const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",

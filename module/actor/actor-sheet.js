@@ -617,7 +617,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
             let data = {};
             data[name] = value;
-            updateTarget.update(data);
+            updateTarget.safeUpdate(data);
         }
 
         // Update on lose focus
@@ -998,7 +998,7 @@ export class SWSEActorSheet extends ActorSheet {
             rolls = dataset.roll.split(",");
         }
         for (let rollStr of rolls) {
-            let roll = new Roll(rollStr, this.actor.data.data);
+            let roll = new Roll(rollStr, this.actor.system);
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
             roll = roll.roll({async: false});
             let item = dataset.item;
@@ -1015,7 +1015,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 let update = {};
                 update[dataset.name] = roll.total;
-                updateCandidate.update(update);
+                updateCandidate.safeUpdate(update);
             } else {
                 let speaker = ChatMessage.getSpeaker({actor: this.actor});
                 // roll.toMessage({

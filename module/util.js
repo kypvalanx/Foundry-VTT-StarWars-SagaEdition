@@ -411,27 +411,6 @@ export function toNumber(value) {
     return number;
 }
 
-/**
- * returns a list of attribute values from a given attribute
- * @param attribute {Object}
- * @param attribute.value {*}
- * @param source {String}
- * @param sourceString {String}
- * @param sourceDescription {String}
- * @returns {Array.<{source: String, value: String}>}
- */
-export function extractAttributeValues(attribute, source, sourceString, sourceDescription) {
-    let values = [];
-    let value = attribute.value;
-    if (value !== undefined && value !== null) {
-        attribute.source = source;
-        attribute.sourceString = sourceString;
-        attribute.sourceDescription = sourceDescription;
-        values.push(attribute)
-    }
-    return values
-}
-
 export function resolveAttackRange(effectiveRange, distance, accurate, inaccurate){
     let range = SWSE.Combat.range[effectiveRange];
     if(!range){
