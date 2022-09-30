@@ -7,7 +7,7 @@
                        title="modes in groups are exclusive to each other">Group: {{mode.group}}</label>
             {{/if}}
             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-            <a class="attribute-delete" data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-trash"></i></a>
+            <a data-action="attribute-control" data-type="remove-attribute" class="attribute-delete" data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-trash"></i></a>
         </div>
         <div>
             <ul>
@@ -25,7 +25,7 @@
                 {{#unlessEquals depth 2}}
 
                     {{#if active}}
-                        <li class="attribute flexrow subtle"><a class="mode-add attribute-indent-graphic"
+                        <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add" class="mode-add attribute-indent-graphic"
                                                                 data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-plus"></i> add
                             a new mode to this mode.</a></li>
                     {{/if}}
