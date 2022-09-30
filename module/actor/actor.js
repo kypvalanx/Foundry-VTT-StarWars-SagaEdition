@@ -82,7 +82,7 @@ export class SWSEActor extends Actor {
         system.description = system.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
-
+        this.system.inheritableItems = null;
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
@@ -118,6 +118,12 @@ export class SWSEActor extends Actor {
 
 
         }
+    }
+
+    setResolvedVariable(key, variable, label, note) {
+        this.resolvedVariables.set(key, variable);
+        this.resolvedLabels.set(key, label);
+        this.resolvedNotes.set(key, note);
     }
 
     async safeUpdate(data={}, context={}) {
