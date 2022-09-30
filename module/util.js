@@ -403,6 +403,7 @@ export function toNumber(value) {
         return value;
     }
 
+
     let number = parseInt(value);
     if (isNaN(number)) {
         return value;
@@ -632,7 +633,7 @@ export function getRangeModifierBlock(range, accurate, innacurate, id, defaultVa
     return table;
 }
 
-export function reduceArray(reduce, values) {
+export function reduceArray(reduce, values, actor) {
     if (!reduce) {
         return values;
     }
@@ -641,7 +642,7 @@ export function reduceArray(reduce, values) {
     }
     if(Array.isArray(reduce)){
         for(let r of reduce){
-            values = reduceArray(r, values);
+            values = reduceArray(r, values, actor);
         }
         return values;
     }
@@ -652,7 +653,7 @@ export function reduceArray(reduce, values) {
 
     switch (reduce) {
         case "SUM":
-            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a===0 && isNaN(b)? b : a + b, 0);
+            return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => a===0 && isNaN(b)? b : a + b, 0);
         case "AND":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a && b, true);
         case "OR":

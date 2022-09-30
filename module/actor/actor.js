@@ -82,7 +82,7 @@ export class SWSEActor extends Actor {
         system.description = system.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
-
+        this.system.inheritableItems = null;
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
@@ -118,6 +118,12 @@ export class SWSEActor extends Actor {
 
 
         }
+    }
+
+    setResolvedVariable(key, variable, label, note) {
+        this.resolvedVariables.set(key, variable);
+        this.resolvedLabels.set(key, label);
+        this.resolvedNotes.set(key, note);
     }
 
     async safeUpdate(data={}, context={}) {
@@ -252,10 +258,11 @@ export class SWSEActor extends Actor {
             }
         }
 
+        //TODO this has () in it and breaks things.  switched to FIRST reduce for now
         this.system.passengers = getInheritableAttribute({
             entity: this,
             attributeKey: "passengers",
-            reduce: "SUM"
+            reduce: "FIRST"
         })
         this.system.subType = getInheritableAttribute({
             entity: this,
@@ -1482,12 +1489,11 @@ export class SWSEActor extends Actor {
     }
 
     get isForceSensitive() {
-        let hasForceSensativity = false;
-        for (let item of this.items.values()) {
-            if (item.system.finalName === 'Force Sensitivity') {
-                hasForceSensativity = true;
-            }
-        }
+        let hasForceSensativity = getInheritableAttribute({
+            entity: this,
+            attributeKey: "forceSensitivity",
+            reduce: "OR"
+        });
         return hasForceSensativity && !this.isDroid;
     }
 
@@ -1765,12 +1771,12 @@ export class SWSEActor extends Actor {
                             possibleTalentTrees.add(key);
                         }
                     });
-                    entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
                 }
+                entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
 
             }
 
-            if (entity.type === 'feat') {
+            if (entity.type === 'feat' && !context.provided) {
                 let possibleFeatTypes = [];
 
                 let optionString = "";
@@ -1907,12 +1913,6 @@ export class SWSEActor extends Actor {
                     };
                 }
             }
-
-
-
-
-            await {fail: false, context: {}};
-
         }
 
 
@@ -1928,7 +1928,10 @@ export class SWSEActor extends Actor {
 
         providedItems.push(...choices.items);
 
-        await this.addItems(providedItems, mainItem[0], context);
+        let providedItemContext = Object.assign({}, context);
+        providedItemContext.newFromCompendium = false;
+        providedItemContext.provided = true;
+        await this.addItems(providedItems, mainItem[0], providedItemContext);
 
         let modifications = item.getModifications()
 
@@ -2213,7 +2216,7 @@ export class SWSEActor extends Actor {
         }
 
 
-        return {payload, itemName: itemName || entity?.name, entity: entity.clone()};
+        return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null};
     }
 
     get warnings() {

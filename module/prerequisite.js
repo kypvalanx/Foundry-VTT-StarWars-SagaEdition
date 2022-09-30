@@ -209,9 +209,11 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             case 'TALENT':
                 let ownedTalents = filterItemsByType(getItems(target), "talent");
                 let filteredTalents = ownedTalents.filter(talent => {
+                    let actsAs = getInheritableAttribute({entity: talent, recursive:true, attributeKey: "actsAs",reduce: "VALUES"}) || []
+
                     return talent.finalName === prereq.requirement ||
                         talent.system.possibleProviders.includes(prereq.requirement) ||
-                        talent.system.talentTree === prereq.requirement
+                        talent.system.talentTree === prereq.requirement || actsAs.includes(prereq.requirement)
                 });
                 if (filteredTalents.length > 0) {
                     if (!meetsPrerequisites(target, filteredTalents[0].system.prerequisite).doesFail) {
@@ -409,7 +411,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 let filteredEquippedItems = equippedItems.filter(item => {
                     let actsAs = getInheritableAttribute({
                         entity: item,
-                        attributeKey: "actsAsForProficiency",
+                        attributeKey: ["actsAsForProficiency", "actsAs"],
                         reduce: "VALUES"
                     })
 

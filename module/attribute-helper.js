@@ -159,7 +159,7 @@ export function getInheritableAttribute(data = {}) {
 
         let unfilteredAttributes = Object.entries(document.system?.attributes || document._source?.system?.attributes || {})
             .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
-            .map(entry => appendSourceMeta(entry[1], entry[1]._id, entry[1].name, entry[1].name));
+            .map(entry => appendSourceMeta(entry[1], document._id, document.name, document.name));
 
         if (document.type === 'class') {
             unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
@@ -201,6 +201,10 @@ export function getInheritableAttribute(data = {}) {
         });
     }
 
+    if(document.type === "character" || document.type === "npc"){
+        values = values.filter(value => !meetsPrerequisites(document, value.parentPrerequisite).doesFail);
+    }
+
     if (data.attributeFilter) {
 
         values = values.filter(data.attributeFilter);
@@ -212,7 +216,7 @@ export function getInheritableAttribute(data = {}) {
     if (overrides.length > 0) {
         values = overrides;
     }
-    return reduceArray(data.reduce, values);
+    return reduceArray(data.reduce, values, document);
 }
 
 //TODO evaluate if we want to add attributes to a custom event class rather than using changes

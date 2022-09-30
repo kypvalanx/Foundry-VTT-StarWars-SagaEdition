@@ -1,6 +1,8 @@
 import {getLongKey, resolveValueArray, toNumber} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 
+
+
 /**
  *
  * @param actor {SWSEActor}
@@ -97,12 +99,9 @@ export function generateAttributes(actor) {
         attribute.roll = attribute.mod + parseInt(conditionBonus);
         attribute.label = key.toUpperCase();
         attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.type))
-        actor.resolvedVariables.set("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll);
-        actor.resolvedLabels.set("@" + attribute.label + "ROLL", attribute.label);
-        actor.resolvedVariables.set("@" + attribute.label + "MOD", attribute.roll);
-        actor.resolvedLabels.set("@" + attribute.label + "MOD", attribute.label);
-        actor.resolvedVariables.set("@" + attribute.label + "TOTAL", attribute.total);
-        actor.resolvedLabels.set("@" + attribute.label + "TOTAL", attribute.label);
+        actor.setResolvedVariable("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll, attribute.label, attribute.label);
+        actor.setResolvedVariable("@" + attribute.label + "MOD", attribute.roll, attribute.label, attribute.label);
+        actor.setResolvedVariable("@" + attribute.label + "TOTAL", attribute.total, attribute.label, attribute.label);
     }
 
 
