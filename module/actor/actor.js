@@ -1542,7 +1542,7 @@ export class SWSEActor extends Actor {
      * @returns {Promise<void>}
      */
     async attack(event, context) {
-        context.actor = this.system;
+        context.actor = this;
         await makeAttack(context);
     }
 
