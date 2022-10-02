@@ -233,7 +233,9 @@ export function extractEffectChange(changes, entity) {
 export function extractModeAttributes(entity, activeModes) {
     let values = [];
     for (let mode of activeModes) {
-        values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
+        for(let attribute of Object.values(mode.attributes)){
+            values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
+        }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || {}).filter(mode => mode && mode.isActive) || []));
     }
     return values;
