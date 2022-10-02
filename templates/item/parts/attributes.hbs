@@ -1,6 +1,5 @@
 
     <!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
-    {{log item system}}
     {{#each item.items as |child key|}}
         {{#if child.system.attributes}}
             <h3>Inherited Attributes</h3>
@@ -26,13 +25,13 @@
                     {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level path=(concat ../path '.' key)}}
                 {{/if}}
             {{/each}}
-            <li class="attribute flexrow subtle"><a class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+            <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add" class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
                 add a new
                 attribute.</a></li>
 
             <!--not supporting modes in levels at this time-->
             {{#unless level}}
-                <li class="attribute flexrow subtle"><a class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+                <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add" class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i>
                     add a new mode.</a></li>
 
                 {{#each item.system.modes as |mode mkey|}}
@@ -65,7 +64,7 @@
                     {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level path=(concat ../path '.' key)}}
                 {{/if}}
             {{/each}}
-            <li class="attribute flexrow subtle"><a class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+            <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add" class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
                 add a new
                 attribute.</a></li>
         {{/if}}

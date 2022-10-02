@@ -17,7 +17,7 @@
                         <a data-action="prerequisite-control" data-type="add-child-prerequisite"
                            data-path="{{path}}.parentPrerequisite" title="add parent prerequisite"><i class="fas fa-plus"></i></a>
                     {{/unless}}
-                    <a data-attribute-id="{{key}}"><i class="fas fa-trash"></i></a>
+                    <a data-action="attribute-control" data-type="remove-attribute" data-attribute-id="{{key}}"data-level="{{level}}"><i class="fas fa-trash"></i></a>
                 {{/if}}
             </div>
         </div>

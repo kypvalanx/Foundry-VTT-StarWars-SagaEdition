@@ -22,7 +22,6 @@
             {{#each item.system.levels as |level id|}}
             <div class="tab" data-group="levels" data-tab="{{id}}">
                 <h2>Level {{id}}</h2>
-                {{log level}}
                 {{> 'systems/swse/templates/item/parts/attributes.hbs' attributes=level.data.attributes level=id path=(concat 'levels.' id '.data.attributes')}}
             </div>
             {{/each}}

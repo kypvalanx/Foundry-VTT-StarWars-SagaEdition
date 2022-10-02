@@ -59,9 +59,11 @@ export function inheritableItems(entity) {
  * @returns {value, source, sourceString, sourceDescription}
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
-    attribute.source = source;
-    attribute.sourceString = sourceString;
-    attribute.sourceDescription = sourceDescription;
+    if(attribute){
+        attribute.source = source;
+        attribute.sourceString = sourceString;
+        attribute.sourceDescription = sourceDescription;
+    }
     return attribute
 }
 
@@ -211,7 +213,7 @@ export function getInheritableAttribute(data = {}) {
     }
 
 
-    let overrides = values.filter(attr => attr.override)
+    let overrides = values.filter(attr =>  attr && attr.override)
 
     if (overrides.length > 0) {
         values = overrides;

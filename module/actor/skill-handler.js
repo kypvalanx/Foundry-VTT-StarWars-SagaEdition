@@ -132,7 +132,7 @@ export function getAvailableTrainedSkillCount(actor) {
         attributeKey: "trainedSkillsFirstLevel",
         reduce: "SUM",
         itemFilter: item => getInheritableAttribute({
-            entity: item.document,
+            entity: item,
             attributeKey: "isFirstLevel",
             reduce: "OR"
         })
