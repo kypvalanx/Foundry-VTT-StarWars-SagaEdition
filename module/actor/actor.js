@@ -1732,7 +1732,7 @@ export class SWSEActor extends Actor {
                 });
                 if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
                     for (let [id, item] of Object.entries(this.system.availableItems)) {
-                        if (id.includes("Talent") && !id.includes("Force") && item > 0) {
+                        if (id.includes("Talent") && item > 0) {
                             optionString += `<option value="${id}">${id}</option>`
                             possibleTalentTrees.add(id);
                         }

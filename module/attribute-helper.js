@@ -71,7 +71,7 @@ function getAttributesFromClassLevel(entity, classLevel) {
     let attributes = [];
     if (classLevel > 0) {
         let level = entity.system.levels[classLevel];
-        for (let attribute of Object.values(level.data.attributes)) {
+        for (let attribute of Object.values(level.data?.attributes)) {
             attributes.push(appendSourceMeta(attribute, entity._id, entity.name, `${entity.name} level ${classLevel}`));
         }
     }
