@@ -71,7 +71,7 @@ function getAttributesFromClassLevel(entity, classLevel) {
     let attributes = [];
     if (classLevel > 0) {
         let level = entity.system.levels[classLevel];
-        for (let attribute of Object.values(level.data.attributes)) {
+        for (let attribute of Object.values(level.data?.attributes)) {
             attributes.push(appendSourceMeta(attribute, entity._id, entity.name, `${entity.name} level ${classLevel}`));
         }
     }
@@ -233,7 +233,9 @@ export function extractEffectChange(changes, entity) {
 export function extractModeAttributes(entity, activeModes) {
     let values = [];
     for (let mode of activeModes) {
-        values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
+        for(let attribute of Object.values(mode.attributes)){
+            values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
+        }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || {}).filter(mode => mode && mode.isActive) || []));
     }
     return values;

@@ -715,7 +715,7 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
             continue;
         }
 
-        let quantity = source.data.quantity || 1
+        let quantity = source.system.quantity || 1
 
         for(let i = 0; i < quantity; i++){
             let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
@@ -742,12 +742,12 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
                 resolvedAttacks.push(attackOption(clonedAttack, id++))
             }
 
-            if (doubleAttack.includes(source.data.subtype)) {
+            if (doubleAttack.includes(source.system.subtype)) {
                 let clonedAttack = attack.clone();
                 clonedAttack.options.doubleAttack = true;
                 resolvedAttacks.push(attackOption(clonedAttack, id++))
             }
-            if (tripleAttack.includes(source.data.subtype)) {
+            if (tripleAttack.includes(source.system.subtype)) {
                 let clonedAttack = attack.clone();
                 clonedAttack.options.tripleAttack = true;
                 resolvedAttacks.push(attackOption(clonedAttack, id++))
@@ -832,9 +832,9 @@ function attackDialogue(context) {
         let availableWeapons = 0
         let beastAttacks = 0;
         for (let item of equippedItems) {
-            availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1), 2);
+            availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1) + (item.system.quantity > 1 ? 2 : 1), 2);
             //TODO support exotic weapons
-            let subtype = item.data.subtype;
+            let subtype = item.system.subtype;
             if (doubleAttack.includes(subtype)) {
                 doubleAttackBonus = 1;
             }
@@ -845,7 +845,7 @@ function attackDialogue(context) {
                 beastAttacks++;
             }
         }
-        availableAttacks = Math.max(availableWeapons + doubleAttackBonus + tripleAttackBonus, beastAttacks)
+        availableAttacks = Math.max(availableWeapons + doubleAttackBonus + tripleAttackBonus, beastAttacks, 1)
 
 
         //how many attacks?
@@ -872,7 +872,7 @@ function attackDialogue(context) {
     let resolvedAttacks = [];
     if (suppliedAttacks.length < availableAttacks) {
         //CREATE OPTIONS
-        resolvedAttacks = attackOptions(actor.data.attacks, doubleAttack, tripleAttack);
+        resolvedAttacks = attackOptions(actor.system.attacks, doubleAttack, tripleAttack);
     }
 
 
@@ -1225,5 +1225,5 @@ export async function rollAttacks(attacks, rollMode) {
     let msg = new cls(messageData);
     if (rollMode) msg.applyRollMode(rollMode);
 
-    return cls.create(msg.data, {rollMode});
+    return cls.create(msg, {rollMode});
 }
