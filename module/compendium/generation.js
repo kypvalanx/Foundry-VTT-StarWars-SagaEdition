@@ -28,7 +28,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
 
     let collection = await CompendiumCollection.createCompendium({
         label: compendiumName.toLowerCase(),
-        name: compendiumName.toLowerCase().replace(" ", "-"),
+        name: compendiumName.toLowerCase(),
         type: entity,
         version: content.version
     });
@@ -73,17 +73,18 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
             let actors = await SWSEActor.create([actorData]);
             for (let actor of actors) {
                 let choiceAnswers = [];
-                choiceAnswers.push(actor.data.data.size);
+                choiceAnswers.push(actor.system.size);
 
-                let providedItems = actor.data.data.providedItems;
-                delete actor.data.data.providedItems;
+                let providedItems = actor.system.providedItems;
+                delete actor.system.providedItems;
 
                 actor.skipPrepare = true;
 
                 await actor.addItems(providedItems, null, {
                     skipPrerequisite: true,
                     generalAnswers: choiceAnswers,
-                    isUpload: true
+                    isUpload: true,
+                    suppressWarnings: true
                 });
 
                 actor.skipPrepare = false;

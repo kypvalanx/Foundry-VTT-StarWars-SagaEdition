@@ -2114,7 +2114,11 @@ export class SWSEActor extends Actor {
             let {payload, itemName, entity} = await this.resolveEntity(providedItem);
 
             if (!entity) {
-                console.warn(`attempted to add ${itemName}`, arguments)
+                if(options.suppressWarnings){
+                    console.debug(`attempted to add ${itemName}`, arguments)
+                } else {
+                    console.warn(`attempted to add ${itemName}`, arguments)
+                }
                 continue;
             }
 
@@ -2162,7 +2166,7 @@ export class SWSEActor extends Actor {
             let modifications = providedItem.modifications;
             if (!!modifications) {
                 let addedModifications = [];
-                addedModifications = await this.addItems(modifications, null, {returnAdded: true, actor: options.actor});
+                addedModifications = await this.addItems(modifications, null, {returnAdded: true, actor: options.actor, suppressWarnings: options.suppressWarnings});
                 for (let addedModification of addedModifications) {
                     await addedItem.takeOwnership(addedModification)
                 }

@@ -62,12 +62,12 @@ export function resolveHealth(actor) {
         } else{
             let data = {};
             data['data.hitPoints'] = -1;
-            data._id = actor.data._id
-            actor.safeUpdate(data)
-            console.debug("completed updating hitpoints for " + actor.name)
+            if(actor._id){
+                actor.safeUpdate(data)
+                console.debug("completed updating hitpoints for " + actor.name)
+            }
         }
     }
-
 
     return {value, temp, other, max, dr, sr};
 }

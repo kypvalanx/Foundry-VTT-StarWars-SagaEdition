@@ -753,6 +753,8 @@ export function getCompendium(item) {
             return game.packs.find(pack => pack.collection.startsWith("swse.beast components"));
         case 'background':
             return game.packs.find(pack => pack.collection.startsWith("swse.background"));
+        case 'destiny':
+            return game.packs.find(pack => pack.collection.startsWith("swse.destiny"));
         case 'language':
             return game.packs.find(pack => pack.collection.startsWith("swse.languages"));
     }
