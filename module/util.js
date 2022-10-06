@@ -30,30 +30,6 @@ export function resolveValueArray(values, actor) {
     return total * multiplier;
 }
 
-//test()
-
-function test(){
-    console.log("running tests...");
-
-    console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null))
-    console.log(12 === resolveValueArray(["2", 4, "*2"], null))
-    // console.log(5 === resolveExpression("MAX(1,5)", null))
-    // console.log(1 === resolveExpression("MIN(1,5)", null))
-    // console.log(8 === resolveExpression("MAX(1,5)+3", null))
-    // console.log(8 === resolveExpression("MAX(1,MAX(2,5))+3", null))
-    // console.log(1 === resolveExpression("1+2-3+5-4", null))
-    // console.log(-9 === resolveExpression("1+2-(3+5)-4", null))
-    // console.log(27 === resolveExpression("3*9", null))
-    // console.log(39 === resolveExpression("3+4*9", null))
-    // console.log(-24 === resolveExpression("-3*8", null))
-    // console.log(-24 === resolveExpression("3*-8", null))
-
-    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
-    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
-    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
-}
 
 
 function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
@@ -838,8 +814,6 @@ export function fullJoin(...args){
     return response;
 }
 
-test();
-
 /**
  *
  * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
@@ -854,17 +828,6 @@ export function getItems(target) {
     }
     return target.items.values();
 }
-//
-// {
-//
-//     if (SWSEActor === instanceOf target) {
-//     target = target.data;
-// }
-//     if (!Array.isArray(target.items)) {
-//         return Object.values(target.items);
-//     }
-//     return target.items;
-// }
 
 
 export function getItemParentId(id){
@@ -874,4 +837,31 @@ export function getItemParentId(id){
     let actors = [...a, ...b];
     let actor = actors.find(actor => actor.items.find(item => item._id === id))
     return !actor? undefined : actor._id// || actor.data._id;
+}
+
+
+//test()
+
+function test(){
+    console.log("running tests...");
+
+    //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null))
+    //console.log(12 === resolveValueArray(["2", 4, "*2"], null))
+    //console.log( 24 === resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
+    // console.log(5 === resolveExpression("MAX(1,5)", null))
+    // console.log(1 === resolveExpression("MIN(1,5)", null))
+    // console.log(8 === resolveExpression("MAX(1,5)+3", null))
+    // console.log(8 === resolveExpression("MAX(1,MAX(2,5))+3", null))
+    // console.log(1 === resolveExpression("1+2-3+5-4", null))
+    // console.log(-9 === resolveExpression("1+2-(3+5)-4", null))
+    // console.log(27 === resolveExpression("3*9", null))
+    // console.log(39 === resolveExpression("3+4*9", null))
+    // console.log(-24 === resolveExpression("-3*8", null))
+    // console.log(-24 === resolveExpression("3*-8", null))
+
+    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
+    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
+    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
 }
