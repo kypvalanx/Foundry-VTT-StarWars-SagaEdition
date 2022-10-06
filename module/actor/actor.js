@@ -5,7 +5,7 @@ import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getIndexAndPack,
+    getIndexAndPack, getVariableFromActorData,
     resolveExpression,
     resolveValueArray,
     toShortAttribute,
@@ -752,7 +752,7 @@ export class SWSEActor extends Actor {
 
     getVariable(variableName) {
         let swseActor = this;
-        return SWSEActor.getVariableFromActorData(swseActor, variableName);
+        return getVariableFromActorData(swseActor, variableName);
     }
 
     get conditionBonus() {
@@ -2346,17 +2346,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    static getVariableFromActorData(swseActor, variableName) {
-        if (!swseActor.resolvedVariables) {
-            swseActor = swseActor.document;
-        }
 
-        let value = swseActor.resolvedVariables?.get(variableName);
-        if (value === undefined) {
-            console.warn("could not find " + variableName, swseActor.resolvedVariables);
-        }
-        return value;
-    }
 
 
     isPermittedForActorType(type) {

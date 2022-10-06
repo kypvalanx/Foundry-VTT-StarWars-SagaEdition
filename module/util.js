@@ -14,19 +14,29 @@ export function resolveValueArray(values, actor) {
         values = [values];
     }
     let total = 0;
+    let multiplier = 1;
     for (let value of values) {
         if (!value) {
             continue;
         }
-        total += resolveExpression(value, actor);
+        if(`${value}`.startsWith("\*")){
+            multiplier *= resolveExpression(value.substring(1, value.length), actor)
+        } else if(`${value}`.startsWith("/")){
+            multiplier /= resolveExpression(value.substring(1, value.length), actor)
+        } else {
+            total += resolveExpression(value, actor);
+        }
     }
-    return total;
+    return total * multiplier;
 }
 
 //test()
 
 function test(){
     console.log("running tests...");
+
+    console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null))
+    console.log(12 === resolveValueArray(["2", 4, "*2"], null))
     // console.log(5 === resolveExpression("MAX(1,5)", null))
     // console.log(1 === resolveExpression("MIN(1,5)", null))
     // console.log(8 === resolveExpression("MAX(1,5)+3", null))
@@ -64,7 +74,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     let result;
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
-        if(result){
+        if(`${result}`){
             return result;
         }
     }
@@ -95,14 +105,15 @@ function resolveParensAndFunctions(expression, actor){
         }
     }
     let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
-    if(result){
+    if(`${result}`){
         return result;
     }
     // if(preceeding.endsWith("MIN")){
     //     let toks = expression.substring(deepestStart+1, deepestEnd).split(",").map(a => resolveExpression(a.trim(), actor));
     //     return Math.min(toks);
     // }
-    return resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart+1, deepestEnd), actor) + expression.substring(deepestEnd+1), actor);
+    let resolveExpression1 = resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart+1, deepestEnd), actor) + expression.substring(deepestEnd+1), actor);
+    return resolveExpression1;
 
 }
 
@@ -212,7 +223,7 @@ export function resolveExpression(expression, actor){
 
     if(typeof expression === "string"){
         if(expression.startsWith("@")){
-            let variable = SWSEActor.getVariableFromActorData(actor, expression);
+            let variable = getVariableFromActorData(actor, expression);
             if (variable !== undefined) {
                 return resolveExpression(variable, actor);
             }
@@ -221,6 +232,18 @@ export function resolveExpression(expression, actor){
         }
     }
 
+}
+
+export function getVariableFromActorData(swseActor, variableName) {
+    if (!swseActor?.resolvedVariables) {
+        return 0;
+    }
+
+    let value = swseActor.resolvedVariables?.get(variableName);
+    if (value === undefined) {
+        console.warn("could not find " + variableName, swseActor.resolvedVariables);
+    }
+    return value;
 }
 
 /**
