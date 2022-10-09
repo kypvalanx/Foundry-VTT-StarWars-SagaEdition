@@ -700,13 +700,13 @@ export class SWSEItem extends Item {
         try {
             if (system.items && system.items.length > 0) {
                 for (let mod of system.items) {
-                    if (mod.data.upgrade?.pointCost !== undefined) {
-                        system.upgradePoints -= mod.data.upgrade.pointCost;
+                    if (mod.system?.upgrade?.pointCost !== undefined) {
+                        system.upgradePoints -= mod.system.upgrade.pointCost;
                     }
                 }
             }
         } catch (e) {
-            console.log("mods may not be initialized", e)
+            console.warn("mods may not be initialized", e)
         }
     }
 
