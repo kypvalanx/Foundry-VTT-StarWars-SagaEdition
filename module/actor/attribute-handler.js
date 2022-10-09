@@ -106,6 +106,8 @@ export function generateAttributes(actor) {
 
 
     if(Object.values(data).length > 0 && !actor.pack && !actor.flags.core?.sourceId.includes(actor._id)){
-        actor.safeUpdate(data);
+        if(actor._id){
+            actor.safeUpdate(data);
+        }
     }
 }

@@ -315,7 +315,8 @@ export class SWSEActorSheet extends ActorSheet {
     /** @inheritdoc */
     _onDragStart(event) {
         super._onDragStart(event);
-        let dragData = JSON.parse(event.dataTransfer.getData("text/plain"));
+        let data = event.dataTransfer.getData("text/plain") || "{}";
+        let dragData = JSON.parse(data);
 
         const elem = event.currentTarget;
 

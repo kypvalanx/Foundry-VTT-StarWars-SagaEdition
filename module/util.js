@@ -14,36 +14,22 @@ export function resolveValueArray(values, actor) {
         values = [values];
     }
     let total = 0;
+    let multiplier = 1;
     for (let value of values) {
         if (!value) {
             continue;
         }
-        total += resolveExpression(value, actor);
+        if(`${value}`.startsWith("\*")){
+            multiplier *= resolveExpression(value.substring(1, value.length), actor)
+        } else if(`${value}`.startsWith("/")){
+            multiplier /= resolveExpression(value.substring(1, value.length), actor)
+        } else {
+            total += resolveExpression(value, actor);
+        }
     }
-    return total;
+    return total * multiplier;
 }
 
-//test()
-
-function test(){
-    console.log("running tests...");
-    // console.log(5 === resolveExpression("MAX(1,5)", null))
-    // console.log(1 === resolveExpression("MIN(1,5)", null))
-    // console.log(8 === resolveExpression("MAX(1,5)+3", null))
-    // console.log(8 === resolveExpression("MAX(1,MAX(2,5))+3", null))
-    // console.log(1 === resolveExpression("1+2-3+5-4", null))
-    // console.log(-9 === resolveExpression("1+2-(3+5)-4", null))
-    // console.log(27 === resolveExpression("3*9", null))
-    // console.log(39 === resolveExpression("3+4*9", null))
-    // console.log(-24 === resolveExpression("-3*8", null))
-    // console.log(-24 === resolveExpression("3*-8", null))
-
-    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
-    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
-    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
-}
 
 
 function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
@@ -64,7 +50,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     let result;
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
-        if(result){
+        if(`${result}`){
             return result;
         }
     }
@@ -95,14 +81,15 @@ function resolveParensAndFunctions(expression, actor){
         }
     }
     let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
-    if(result){
+    if(`${result}`){
         return result;
     }
     // if(preceeding.endsWith("MIN")){
     //     let toks = expression.substring(deepestStart+1, deepestEnd).split(",").map(a => resolveExpression(a.trim(), actor));
     //     return Math.min(toks);
     // }
-    return resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart+1, deepestEnd), actor) + expression.substring(deepestEnd+1), actor);
+    let resolveExpression1 = resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart+1, deepestEnd), actor) + expression.substring(deepestEnd+1), actor);
+    return resolveExpression1;
 
 }
 
@@ -212,7 +199,7 @@ export function resolveExpression(expression, actor){
 
     if(typeof expression === "string"){
         if(expression.startsWith("@")){
-            let variable = SWSEActor.getVariableFromActorData(actor, expression);
+            let variable = getVariableFromActorData(actor, expression);
             if (variable !== undefined) {
                 return resolveExpression(variable, actor);
             }
@@ -221,6 +208,18 @@ export function resolveExpression(expression, actor){
         }
     }
 
+}
+
+export function getVariableFromActorData(swseActor, variableName) {
+    if (!swseActor?.resolvedVariables) {
+        return 0;
+    }
+
+    let value = swseActor.resolvedVariables?.get(variableName);
+    if (value === undefined) {
+        console.warn("could not find " + variableName, swseActor.resolvedVariables);
+    }
+    return value;
 }
 
 /**
@@ -753,6 +752,8 @@ export function getCompendium(item) {
             return game.packs.find(pack => pack.collection.startsWith("swse.beast components"));
         case 'background':
             return game.packs.find(pack => pack.collection.startsWith("swse.background"));
+        case 'destiny':
+            return game.packs.find(pack => pack.collection.startsWith("swse.destiny"));
         case 'language':
             return game.packs.find(pack => pack.collection.startsWith("swse.languages"));
     }
@@ -813,8 +814,6 @@ export function fullJoin(...args){
     return response;
 }
 
-test();
-
 /**
  *
  * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
@@ -829,17 +828,6 @@ export function getItems(target) {
     }
     return target.items.values();
 }
-//
-// {
-//
-//     if (SWSEActor === instanceOf target) {
-//     target = target.data;
-// }
-//     if (!Array.isArray(target.items)) {
-//         return Object.values(target.items);
-//     }
-//     return target.items;
-// }
 
 
 export function getItemParentId(id){
@@ -849,4 +837,31 @@ export function getItemParentId(id){
     let actors = [...a, ...b];
     let actor = actors.find(actor => actor.items.find(item => item._id === id))
     return !actor? undefined : actor._id// || actor.data._id;
+}
+
+
+//test()
+
+function test(){
+    console.log("running tests...");
+
+    //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null))
+    //console.log(12 === resolveValueArray(["2", 4, "*2"], null))
+    //console.log( 24 === resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
+    // console.log(5 === resolveExpression("MAX(1,5)", null))
+    // console.log(1 === resolveExpression("MIN(1,5)", null))
+    // console.log(8 === resolveExpression("MAX(1,5)+3", null))
+    // console.log(8 === resolveExpression("MAX(1,MAX(2,5))+3", null))
+    // console.log(1 === resolveExpression("1+2-3+5-4", null))
+    // console.log(-9 === resolveExpression("1+2-(3+5)-4", null))
+    // console.log(27 === resolveExpression("3*9", null))
+    // console.log(39 === resolveExpression("3+4*9", null))
+    // console.log(-24 === resolveExpression("-3*8", null))
+    // console.log(-24 === resolveExpression("3*-8", null))
+
+    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
+    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
+    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
 }
