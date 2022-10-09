@@ -1912,6 +1912,19 @@ export class SWSEActor extends Actor {
                         key: "isFirstLevel"
                     };
                 }
+
+                if(context.isFirstLevel){
+                    let firstLevelHP = getInheritableAttribute({entity, attributeKey: "firstLevelHitPoints", reduce: "VALUES"})[0]
+                    entity.system.attributes[Object.keys(entity.system.attributes).length] = {
+                        value: firstLevelHP.includes('d') ? 1 : firstLevelHP,
+                        key: "rolledHP"
+                    };
+                } else {
+                    entity.system.attributes[Object.keys(entity.system.attributes).length] = {
+                        value: 1,
+                        key: "rolledHP"
+                    };
+                }
             }
         }
 

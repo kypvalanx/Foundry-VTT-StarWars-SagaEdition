@@ -1,5 +1,6 @@
 import {SWSEItem} from "../item/item.js";
 import {SWSEActor} from "../actor/actor.js";
+import {resolveTargetHP} from "../actor/health.js";
 
 async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
     let response;
@@ -54,22 +55,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
             promises.push(collection.importDocument(item));
         }
     } else if ('Actor' === entity) {
-        // let actors = await SWSEActor.create(content.entries);
-        // for(let actor of actors) {
-        //     let choiceAnswers = [];
-        //     choiceAnswers.push(actor.data.data.size);
-        //
-        //     let providedItems = actor.data.data.providedItems;
-        //     delete actor.data.data.providedItems;
-        //
-        //     await actor.addItems(providedItems, null, {skipPrerequisite:true, generalAnswers:choiceAnswers});
-        //
-        //     await collection.importDocument(actor);
-        // }
-
         for (let actorData of content.entries) {
-
-
             let actors = await SWSEActor.create([actorData]);
             for (let actor of actors) {
                 let choiceAnswers = [];
@@ -90,6 +76,9 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
                 actor.skipPrepare = false;
 
                 actor.prepareData();
+
+                resolveTargetHP(actor, actor.system.hitPoints)
+                delete actor.system.hitPoints;
                 await collection.importDocument(actor);
 
 
