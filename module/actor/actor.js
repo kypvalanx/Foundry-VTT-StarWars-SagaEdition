@@ -120,10 +120,10 @@ export class SWSEActor extends Actor {
         }
     }
 
-    setResolvedVariable(key, variable, label, note) {
+    setResolvedVariable(key, variable, label, notes) {
         this.resolvedVariables.set(key, variable);
         this.resolvedLabels.set(key, label);
-        this.resolvedNotes.set(key, note);
+        this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
 
     async safeUpdate(data={}, context={}) {
@@ -1312,7 +1312,7 @@ export class SWSEActor extends Actor {
     rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
-        let notes = this.resolvedNotes.get(variable);
+        let notes = this.resolvedNotes.get(variable) || [];
         let flavor = label ? `${this.name} rolls for ${label}!` : '';
 
         if (variable.startsWith('@Initiative')) {
@@ -1910,6 +1910,19 @@ export class SWSEActor extends Actor {
                         type: "Boolean",
                         value: context.isFirstLevel,
                         key: "isFirstLevel"
+                    };
+                }
+
+                if(context.isFirstLevel){
+                    let firstLevelHP = getInheritableAttribute({entity, attributeKey: "firstLevelHitPoints", reduce: "VALUES"})[0]
+                    entity.system.attributes[Object.keys(entity.system.attributes).length] = {
+                        value: firstLevelHP.includes('d') ? 1 : firstLevelHP,
+                        key: "rolledHP"
+                    };
+                } else {
+                    entity.system.attributes[Object.keys(entity.system.attributes).length] = {
+                        value: 1,
+                        key: "rolledHP"
                     };
                 }
             }

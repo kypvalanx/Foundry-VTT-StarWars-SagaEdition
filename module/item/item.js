@@ -48,7 +48,7 @@ export class SWSEItem extends Item {
 
     async safeUpdate(data={}, context={}) {
         if(this.canUserModify(game.user, 'update')){
-            this.update(data, context);
+            await this.update(data, context);
         }
     }
 
@@ -1110,9 +1110,9 @@ export class SWSEItem extends Item {
         })
     }
 
-    setAttribute(attribute, value, options={}) {
+    async setAttribute(attribute, value, options={}) {
         let update = this.getUpdateObjectForUpdatingAttribute(attribute, value);
-        return this.safeUpdate(update, options);
+        return await this.safeUpdate(update, options);
     }
 
     getUpdateObjectForUpdatingAttribute(attribute, value) {
