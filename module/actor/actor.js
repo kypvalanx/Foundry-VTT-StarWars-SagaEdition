@@ -120,10 +120,10 @@ export class SWSEActor extends Actor {
         }
     }
 
-    setResolvedVariable(key, variable, label, note) {
+    setResolvedVariable(key, variable, label, notes) {
         this.resolvedVariables.set(key, variable);
         this.resolvedLabels.set(key, label);
-        this.resolvedNotes.set(key, note);
+        this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
 
     async safeUpdate(data={}, context={}) {
@@ -1312,7 +1312,7 @@ export class SWSEActor extends Actor {
     rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
-        let notes = this.resolvedNotes.get(variable);
+        let notes = this.resolvedNotes.get(variable) || [];
         let flavor = label ? `${this.name} rolls for ${label}!` : '';
 
         if (variable.startsWith('@Initiative')) {
