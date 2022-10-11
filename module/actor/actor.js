@@ -1275,13 +1275,19 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            let bonusFeatCategories = feat.system.bonusFeatCategories;
-            if (bonusFeatCategories && bonusFeatCategories.length === 1) {
-                type = bonusFeatCategories[0].value
-            } else{
-                for(let entry of Object.entries(dynamicGroups)){
-                    if(entry[1].includes(feat.finalName)){
-                        type = entry[0];
+
+            let featCategory = feat.system.bonusFeatCategory;
+            if(featCategory){
+                type = featCategory;
+            }else{
+                let bonusFeatCategories = feat.system.bonusFeatCategories;
+                if (bonusFeatCategories && bonusFeatCategories.length === 1) {
+                    type = bonusFeatCategories[0].value
+                } else{
+                    for(let entry of Object.entries(dynamicGroups)){
+                        if(entry[1].includes(feat.finalName)){
+                            type = entry[0];
+                        }
                     }
                 }
             }
@@ -1806,12 +1812,12 @@ export class SWSEActor extends Actor {
                         content: content,
                         callback: async (html) => {
                             let key = html.find("#choice")[0].value;
-                            possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
+                            possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
                         }
                     });
                 }
 
-                entity.system.categories = possibleFeatTypes;
+                entity.system.bonusFeatCategory = possibleFeatTypes;
             }
 
             if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
@@ -1916,7 +1922,7 @@ export class SWSEActor extends Actor {
                 if(context.isFirstLevel){
                     let firstLevelHP = getInheritableAttribute({entity, attributeKey: "firstLevelHitPoints", reduce: "VALUES"})[0]
                     entity.system.attributes[Object.keys(entity.system.attributes).length] = {
-                        value: firstLevelHP.includes('d') ? 1 : firstLevelHP,
+                        value: `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP,
                         key: "rolledHP"
                     };
                 } else {
@@ -1953,7 +1959,7 @@ export class SWSEActor extends Actor {
         await this.addItems(modifications, mainItem[0], context);
 
         if(item.type === "class"){
-            await this.addClassFeats(mainItem[0], context);
+            await this.addClassFeats(mainItem[0], providedItemContext);
         }
 
         return mainItem[0];
@@ -2016,7 +2022,7 @@ export class SWSEActor extends Actor {
                                 }, {
                                     type: 'FEAT',
                                     name: feat
-                                }], item);
+                                }], item, context);
                             }
                         });
                     }
@@ -2152,8 +2158,7 @@ export class SWSEActor extends Actor {
             entity.addItemAttributes(providedItem.attributes);
             entity.addProvidedItems(providedItem.providedItems);
             entity.setParent(parent, providedItem.unlocked);
-
-                entity.setPrerequisite(providedItem.prerequisite);
+            entity.setPrerequisite(providedItem.prerequisite);
 
             //TODO payload should be deprecated in favor of payloads
             if (!!payload) {
