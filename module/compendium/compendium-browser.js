@@ -423,6 +423,8 @@ export class SWSECompendiumBrowser extends Application {
                 name: item.name,
                 type: item.type,
                 img: item.img,
+                data: item.data,
+                uuid: `Compendium.${pack.metadata.id}.${item._id}`,
                 pack: pack.collection,
                 talentTree: item.system?.talentTree,
                 groupTypes: item.system?.possibleProviders || [],
@@ -516,7 +518,8 @@ export class SWSECompendiumBrowser extends Application {
             JSON.stringify({
                 type: pack.documentClass.documentName,
                 pack: pack.collection,
-                id: li.getAttribute("data-entry-id"),
+                id: li.getAttribute("data-document-id"),
+                uuid: li.getAttribute("data-uuid")
             })
         );
     }
