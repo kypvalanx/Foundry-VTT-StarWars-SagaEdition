@@ -157,7 +157,8 @@ function explodeOptions(options, actor) {
         let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
         if (key === 'AVAILABLE_GM_BONUSES') {
             for (let bonus of GM_BONUSES) {
-                resolvedOptions.push({name: bonus.display, attributes: [bonus]});
+                let deepCopy = {key: bonus.key, value: bonus.value}
+                resolvedOptions.push({name: bonus.display, attributes: [deepCopy]});
             }
 
         } else if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
