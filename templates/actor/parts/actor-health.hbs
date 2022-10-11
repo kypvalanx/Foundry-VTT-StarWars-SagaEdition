@@ -2,7 +2,7 @@
 <div class="health-block panel flex flex-col">
     <div><h1 class="resource-label">Hit Points</h1></div>
     <div class="flex flex-row">
-        <div class="resource-block"><h3><label>Total</label><div class="plain input static">{{actor.system.health.max}}</div></h3></div>
+        <div class="resource-block max-health" data-override="{{actor.system.health.hitPointOverride}}"><h3><label>Total</label><div class="plain input">{{actor.system.health.max}}</div></h3></div>
         <div class="resource-block"><label class="top">Current</label>
             <input class="plain small" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
         </div>

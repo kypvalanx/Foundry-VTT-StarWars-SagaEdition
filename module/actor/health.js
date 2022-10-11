@@ -39,14 +39,16 @@ export function resolveHealth(actor) {
     //TODO add traits and stuff that boost HP
     let value = Array.isArray(system.health.value) ? system.health.value[0] : system.health.value;
     let temp = system.health.temp;
-    let max = resolveValueArray(health, actor);
+    let max = system.health.hitPointOverride ? system.health.hitPointOverride : resolveValueArray(health, actor);
     let dr = system.health.dr;
     let sr = system.health.sr;
+    let hitPointOverride = system.health.hitPointOverride
 
 
-    return {value, temp, other, max, dr, sr, multipliers};
+    return {value, temp, other, max, dr, sr, multipliers, hitPointOverride};
 }
 
+//TODO REMOVE.  currently unused in favor of override health
 export async function resolveTargetHP(actor, targetHP) {
     if (!targetHP) {
         return;

@@ -1,18 +1,11 @@
-import {filterItemsByType, toNumber, unique} from "../util.js";
-import {crewPositions, skills, vehicleActorTypes} from "../constants.js";
-import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
-import {SWSEItem} from "../item/item.js";
+import {filterItemsByType, unique} from "../util.js";
+import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
-import {activateChoices} from "../choice/choice.js";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
 
 // noinspection JSClosureCompilerSyntax
-
-
-
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -117,6 +110,8 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
+
+        new ContextMenu(html, ".max-health", getHealthOptions(this.actor))
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
@@ -1523,3 +1518,43 @@ export class SWSEActorSheet extends ActorSheet {
 
 }
 
+
+
+function getHealthOptions(actor) {
+    let options = [];
+        options.push({name: "Set Maximum Health Override",
+            icon: '<i class="fas fa-edit">',
+            callback: async element => {
+                let value = await Dialog.prompt({
+                    title: 'Set Maximum Health',
+                    content: `<p>Set Maximum Health</p><br/><input class="choice" type="number" data-option-key="">`,
+                    callback: html => {
+                        let find = html.find(".choice");
+
+                        for (let foundElement of find) {
+                            return foundElement.value;
+                        }
+                    }
+                })
+
+                let data = {};
+                data['system.health.hitPointOverride'] = value;
+                await actor.safeUpdate(data);
+            }})
+
+    options.push({name: "Remove Maximum Health Override",
+        icon: '<i class="fas fa-delete">',
+        callback: element =>{
+
+            let data = {};
+            data['system.health.hitPointOverride'] = null;
+            actor.safeUpdate(data);
+        },
+        condition: element => {
+        let override = element[0].dataset["override"]
+        return !!override
+        }
+    })
+
+    return options;
+}

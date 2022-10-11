@@ -77,7 +77,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
 
                 actor.prepareData();
 
-                resolveTargetHP(actor, actor.system.hitPoints)
+                //resolveTargetHP(actor, actor.system.hitPoints)
                 delete actor.system.hitPoints;
                 await collection.importDocument(actor);
 
