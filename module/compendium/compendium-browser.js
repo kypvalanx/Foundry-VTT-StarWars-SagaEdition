@@ -71,7 +71,7 @@ export class SWSECompendiumBrowser extends Application {
         this.filterQuery = /.*/;
         let split = args[0].filterString?.split(" ") || [];
         if (args[0].pack) {
-            split.push(("-pack:" + args[0].pack).replace(" ", "_"));
+            split.push(("-pack:" + args[0].pack).replace(/ /g, "_"));
         }
         this.defaultString = split.join(" ")
         this.selectedEntityType = args[0].type || "Item"
@@ -423,12 +423,11 @@ export class SWSECompendiumBrowser extends Application {
                 name: item.name,
                 type: item.type,
                 img: item.img,
-                data: item.data,
                 pack: pack.collection,
-                talentTree: item._source?.data?.talentTree,
-                groupTypes: item._source?.data?.possibleProviders || [],
-                subType: item._source?.data.subtype,
-                isExotic: item._source?.data?.subtype?.toLowerCase().includes("exotic")
+                talentTree: item.system?.talentTree,
+                groupTypes: item.system?.possibleProviders || [],
+                subType: item.system?.subtype,
+                isExotic: item.system?.subtype?.toLowerCase().includes("exotic")
             },
         };
 
@@ -603,11 +602,12 @@ export class SWSECompendiumBrowser extends Application {
             let s = filterString.split(":")[1]
 
             if (s) {
+                s = s.replace(/_/g, " ")
                 return {
                     type: 'pack',
                     test: (item) => {
                         let regExp = new RegExp(RegExp.escape(s), "i");
-                        return regExp.test(item.pack) || regExp.test(item.pack.replace(" ", "_"))
+                        return regExp.test(item.pack)
                     }
                 }
             }
