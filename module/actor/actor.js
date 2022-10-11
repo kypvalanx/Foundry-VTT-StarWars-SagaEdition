@@ -1275,13 +1275,19 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = 'General Feats';
-            let bonusFeatCategories = feat.system.bonusFeatCategories;
-            if (bonusFeatCategories && bonusFeatCategories.length === 1) {
-                type = bonusFeatCategories[0].value
-            } else{
-                for(let entry of Object.entries(dynamicGroups)){
-                    if(entry[1].includes(feat.finalName)){
-                        type = entry[0];
+
+            let featCategory = feat.system.bonusFeatCategory;
+            if(featCategory){
+                type = featCategory;
+            }else{
+                let bonusFeatCategories = feat.system.bonusFeatCategories;
+                if (bonusFeatCategories && bonusFeatCategories.length === 1) {
+                    type = bonusFeatCategories[0].value
+                } else{
+                    for(let entry of Object.entries(dynamicGroups)){
+                        if(entry[1].includes(feat.finalName)){
+                            type = entry[0];
+                        }
                     }
                 }
             }
@@ -1806,12 +1812,12 @@ export class SWSEActor extends Actor {
                         content: content,
                         callback: async (html) => {
                             let key = html.find("#choice")[0].value;
-                            possibleFeatTypes = [JSON.parse(key.replace(/&quot;/g, '"'))];
+                            possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
                         }
                     });
                 }
 
-                entity.system.categories = possibleFeatTypes;
+                entity.system.bonusFeatCategory = possibleFeatTypes;
             }
 
             if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
