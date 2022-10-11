@@ -1916,7 +1916,7 @@ export class SWSEActor extends Actor {
                 if(context.isFirstLevel){
                     let firstLevelHP = getInheritableAttribute({entity, attributeKey: "firstLevelHitPoints", reduce: "VALUES"})[0]
                     entity.system.attributes[Object.keys(entity.system.attributes).length] = {
-                        value: firstLevelHP.includes('d') ? 1 : firstLevelHP,
+                        value: `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP,
                         key: "rolledHP"
                     };
                 } else {
@@ -1953,7 +1953,7 @@ export class SWSEActor extends Actor {
         await this.addItems(modifications, mainItem[0], context);
 
         if(item.type === "class"){
-            await this.addClassFeats(mainItem[0], context);
+            await this.addClassFeats(mainItem[0], providedItemContext);
         }
 
         return mainItem[0];
@@ -2016,7 +2016,7 @@ export class SWSEActor extends Actor {
                                 }, {
                                     type: 'FEAT',
                                     name: feat
-                                }], item);
+                                }], item, context);
                             }
                         });
                     }
@@ -2152,8 +2152,7 @@ export class SWSEActor extends Actor {
             entity.addItemAttributes(providedItem.attributes);
             entity.addProvidedItems(providedItem.providedItems);
             entity.setParent(parent, providedItem.unlocked);
-
-                entity.setPrerequisite(providedItem.prerequisite);
+            entity.setPrerequisite(providedItem.prerequisite);
 
             //TODO payload should be deprecated in favor of payloads
             if (!!payload) {

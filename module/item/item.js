@@ -730,6 +730,8 @@ export class SWSEItem extends Item {
         }
         this.system.selectedChoices = this.system.selectedChoices || [];
         this.system.selectedChoices.push(choice);
+
+        this.system.displayName = SWSEItem.buildItemName(this);
     }
 
     setPayload(payload, payloadString) {
@@ -765,6 +767,8 @@ export class SWSEItem extends Item {
             }
         });
         this.system.choices = [];
+
+        this.system.displayName = SWSEItem.buildItemName(this);
     }
 
 
