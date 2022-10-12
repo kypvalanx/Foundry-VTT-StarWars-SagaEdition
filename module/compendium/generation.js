@@ -1,6 +1,5 @@
 import {SWSEItem} from "../item/item.js";
 import {SWSEActor} from "../actor/actor.js";
-import {resolveTargetHP} from "../actor/health.js";
 
 async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
     let response;

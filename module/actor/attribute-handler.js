@@ -75,6 +75,10 @@ export function generateAttributes(actor) {
             data[`data.attributes.${key}.estimate`] = null;
         }
 
+        if(attribute.override){
+            attribute.total = attribute.override;
+        }
+
         if(attribute.total !== oldTotal){
             data[`data.attributes.${key}.total`] = attribute.total;
         }
