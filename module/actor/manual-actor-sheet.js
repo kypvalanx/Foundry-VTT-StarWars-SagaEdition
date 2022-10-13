@@ -4,35 +4,16 @@ import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
+import {SWSEActorSheet} from "./actor-sheet.js";
 
 // noinspection JSClosureCompilerSyntax
-
-function getDefaultDataByType(itemType) {
-    switch (itemType) {
-        case "language":
-            return {
-                attributes: {
-                    0 : {key: "readable", value: true, override: false},
-                    1 : {key: "writable", value: true, override: false},
-                    2 : {key: "spoken", value: true, override: false},
-                    3 : {key: "characterReads", value: true, override: false},
-                    4 : {key: "characterWrites", value: true, override: false},
-                    5 : {key: "characterSpeaks", value: true, override: false},
-                    6 : {key: "silentCommunication", value: false, override: false},
-                    7 : {key: "visualCommunication", value: false, override: false}
-                }
-            }
-        default:
-            return {};
-    }
-}
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
 
-export class SWSEActorSheet extends ActorSheet {
+export class SWSEManualActorSheet extends SWSEActorSheet {
 
     /**
      * A convenience reference to the Actor entity
@@ -61,7 +42,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     get template() {
-        const path = "systems/swse/templates/actor";
+        const path = "systems/swse/templates/actor/manual";
 
         let type = this.actor.type;
         if (type === 'character') {
@@ -70,15 +51,15 @@ export class SWSEActorSheet extends ActorSheet {
         if (type === 'npc') {
             return `${path}/actor-sheet.hbs`;
         }
-        if (type === 'computer') {
-            return `${path}/computer-sheet.hbs`;
-        }
-        if (type === 'vehicle') {
-            return `${path}/vehicle-sheet.hbs`;
-        }
-        if (type === 'npc-vehicle') {
-            return `${path}/vehicle-sheet.hbs`;
-        }
+        // if (type === 'computer') {
+        //     return `${path}/computer-sheet.hbs`;
+        // }
+        // if (type === 'vehicle') {
+        //     return `${path}/vehicle-sheet.hbs`;
+        // }
+        // if (type === 'npc-vehicle') {
+        //     return `${path}/vehicle-sheet.hbs`;
+        // }
 
         return `${path}/actor-sheet.hbs`;
     }
@@ -94,153 +75,17 @@ export class SWSEActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-
-        html.find(".collapse-toggle").on("click", event => {
-            let down = "fa-minus";
-            let up = "fa-plus";
-            event.stopPropagation();
-            let button = $(event.currentTarget);
-
-            let children = button.find("i.fas");
-            children.each((i, e) =>{
-                if(e.classList.contains(down)){
-                    e.classList.remove(down);
-                    e.classList.add(up);
-                } else if(e.classList.contains(up)){
-                    e.classList.remove(up);
-                    e.classList.add(down);
-                }
-            })
-
-            let container = button.parents(".collapsible-container")
-            let collapsible = container.children(".collapsible")
-            collapsible.each((i, div) => {
-                if(div.style.display === "grid"){
-                    div.style.display = "none"
-                } else {
-                    div.style.display = "grid"
-                }
-            })
-        })
-
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
-        // html.find(".numeric-override").each((i, li)=>{
-        //
-        //     new ContextMenu($(li), ".numeric-override", getHealthOptions(this.actor))
-        // })
-        new ContextMenu(html, ".numeric-override", getHealthOptions(this.actor))
 
-        // Add general text box (span) handler
-        html.find("span.text-box.direct").on("click", (event) => {
-            this._onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
-        });
-
-        html.find("span.text-box.item-attribute").on("click", (event) => {
-            this._onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
-        });
-
-        html.find("input.plain").on("keypress", (event) => {
-            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-                event.stopPropagation();
-                //if (!changed) {
-                this._onSubmit(event);
-                //}
-            }
-        });
-
-        html.find("input.direct").on("click", (event) => {
-            this._pendingUpdates['data.classesfirst'] = event.target.value;
-        });
-
-        // Species controls
-        html.find(".species-control").click(this._onSpeciesControl.bind(this));
-        // crew controls
-        html.find(".crew-control").click(this._onCrewControl.bind(this));
-
-        // Item Dragging
-        html.find(".draggable").each((i, li) => {
-            if (li.classList.contains("inventory-header")) return;
-            li.setAttribute("draggable", true);
-            li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
-        });
-
-        html.find("div.attack").each((i, div) => {
-            div.setAttribute("draggable", true);
-            div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
-            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
-        });
-
-        html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
-
-        html.find('.mode-selector').on("click", async event => {
-            //event.preventDefault();
-            event.stopPropagation();
-            let modePath = $(event.currentTarget).data("modePath");
-            let data = $(event.currentTarget).data("itemId");
-            let item = this.actor.items.get(data);
-            item.activateMode(modePath)
-        })
-
-        html.find("#selectAge").on("click", event => this._selectAge(event, this));
-        html.find("#selectGender").on("click", event => this._selectGender(event, this));
-        html.find("#selectWeight").on("click", () => this._unavailable());
-        html.find("#selectHeight").on("click", () => this._unavailable());
-        html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
-
-
-        html.find(".generationType").on("click", event => this._selectAttributeGeneration(event, this));
-        html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
-        html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
-        html.find(".assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
-        html.find(".assignManual").on("click", async event => this._selectAttributesManually(event, this));
-        html.find(".leveledAttributeBonus").each((i, button) => {
-            button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
-        })
-
-        // Add Inventory Item
-        html.find('.item-create').click(this._onItemCreate.bind(this));
-
-        // Delete Inventory Item
-        html.find('.item-delete').click(this._onItemDelete.bind(this));
-
-        html.find('.item-duplicate').click(this._onDuplicate.bind(this))
-
-        // Rollable abilities.
-        html.find('.rollable').click(this._onRoll.bind(this));
-
-        //html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
-        html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
-        html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
-        html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
-        html.find('[data-action="credit"]').click(this._onCredit.bind(this));
-        html.find('[data-action="shield"]').click(this._onShield.bind(this));
-        html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
-        html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
-        html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
-        html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
-
-        html.find('.dark-side-button').click(ev => {
-            this.actor.darkSideScore = $(ev.currentTarget).data("value");
-        });
     }
 
-    _onCreateNewItem(event){
+
+
+    _onLanguage(event) {
         let element = $(event.currentTarget);
-        let itemType = element.data("action-type")
+        if(element.data("action-type") === "create"){
 
-        let itemData = {
-            name: `New ${itemType}`,
-            type: itemType,
-            data: getDefaultDataByType(itemType)
-        }
-
-        this.actor.createEmbeddedDocuments('Item', [itemData]);
-    }
-
-    _onQuickCreate(event) {
-        let element = $(event.currentTarget);
-        let itemType = element.data("action-type");
             if(event.code === "Enter" || event.code === "NumpadEnter"){
                 event.preventDefault();
                 let name = element[0].value;
@@ -252,13 +97,25 @@ export class SWSEActorSheet extends ActorSheet {
                 let itemData = names.map(name => {
                     return {
                         name: name,
-                        type: itemType,
-                        data: getDefaultDataByType(itemType)
+                        type: "language",
+                        data: {
+                            attributes: {
+                                0 : {key: "readable", value: true, override: false},
+                                1 : {key: "writable", value: true, override: false},
+                                2 : {key: "spoken", value: true, override: false},
+                                3 : {key: "characterReads", value: true, override: false},
+                                4 : {key: "characterWrites", value: true, override: false},
+                                5 : {key: "characterSpeaks", value: true, override: false},
+                                6 : {key: "silentCommunication", value: false, override: false},
+                                7 : {key: "visualCommunication", value: false, override: false}
+                            }
+                        }
                     }
                 })
 
                 this.actor.createEmbeddedDocuments('Item', itemData);
             }
+        }
 
     }
 
@@ -274,36 +131,11 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async _onConditionChange(event) {
-        event.stopPropagation();
-
-        let ids = this.actor.effects
-            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
-
-        await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
-        //this.actor.deleteEmbeddedDocuments("")
-
-        let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
-        await this.activateStatusEffect(statusEffect);
-    }
-
-    async activateStatusEffect(statusEffect) {
-        if (statusEffect) {
-            const createData = foundry.utils.deepClone(statusEffect);
-            createData.label = game.i18n.localize(statusEffect.label);
-            createData["flags.core.statusId"] = statusEffect.id;
-            //if ( overlay ) createData["flags.core.overlay"] = true;
-            delete createData.id;
-            const cls = getDocumentClass("ActiveEffect");
-            await cls.create(createData, {parent: this.actor});
-        }
-    }
-
-    async _onShield(event) {
+    _onShield(event) {
         let element = $(event.currentTarget);
         let type = element.data("action-type")
         let actor = this.actor;
-        switch (type) {
+        switch(type){
             case 'plus':
                 actor.shields = actor.system.shields.value + 5
                 break;
@@ -311,17 +143,9 @@ export class SWSEActorSheet extends ActorSheet {
                 actor.shields = actor.system.shields.value - 5
                 break;
             case 'toggle':
-
-                let ids = this.actor.effects
-                    .filter(effect => effect.icon?.includes("/shield.svg")).map(effect => effect.id)
-
-                await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
-
-                if(ids.length === 0){
-                    let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                    await this.activateStatusEffect(statusEffect);
-                }
-
+                let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
+                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
+                tokens.forEach(token => token.toggleEffect(statusEffect))
                 break;
         }
     }
@@ -1551,14 +1375,12 @@ export class SWSEActorSheet extends ActorSheet {
 
 function getHealthOptions(actor) {
     let options = [];
-    options.push({name: "Set Override",
+        options.push({name: "Set Maximum Health Override",
             icon: '<i class="fas fa-edit">',
             callback: async element => {
-                let overrideKey = element.data('override-key');
-                let overrideName = element.data('override-name');
                 let value = await Dialog.prompt({
-                    title: `Set ${overrideName}`,
-                    content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
+                    title: 'Set Maximum Health',
+                    content: `<p>Set Maximum Health</p><br/><input class="choice" type="number" data-option-key="">`,
                     callback: html => {
                         let find = html.find(".choice");
 
@@ -1569,17 +1391,16 @@ function getHealthOptions(actor) {
                 })
 
                 let data = {};
-                data[overrideKey] = value;
+                data['system.health.hitPointOverride'] = value;
                 await actor.safeUpdate(data);
             }})
 
-    options.push({name: `Remove Override`,
+    options.push({name: "Remove Maximum Health Override",
         icon: '<i class="fas fa-delete">',
         callback: element =>{
 
-            let overrideKey = element.data('override-key');
             let data = {};
-            data[overrideKey] = null;
+            data['system.health.hitPointOverride'] = null;
             actor.safeUpdate(data);
         },
         condition: element => {

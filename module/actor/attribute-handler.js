@@ -75,12 +75,16 @@ export function generateAttributes(actor) {
             data[`data.attributes.${key}.estimate`] = null;
         }
 
+        if(attribute.override){
+            attribute.total = attribute.override;
+        }
+
         if(attribute.total !== oldTotal){
             data[`data.attributes.${key}.total`] = attribute.total;
         }
 
         let old = attribute.mod;
-        attribute.mod = Math.floor((attribute.total - 10) / 2);
+        attribute.mod = Math.floor((toNumber(attribute.total) + toNumber(attribute.customBonus) - 10) / 2);
 
         if(attribute.mod !== old){
             data[`data.attributes.${key}.mod`] = attribute.mod;

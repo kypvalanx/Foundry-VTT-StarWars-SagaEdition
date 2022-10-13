@@ -1,6 +1,5 @@
 import {SWSEItem} from "../item/item.js";
 import {SWSEActor} from "../actor/actor.js";
-import {resolveTargetHP} from "../actor/health.js";
 
 async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
     let response;
@@ -77,7 +76,7 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
 
                 actor.prepareData();
 
-                resolveTargetHP(actor, actor.system.hitPoints)
+                //resolveTargetHP(actor, actor.system.hitPoints)
                 delete actor.system.hitPoints;
                 await collection.importDocument(actor);
 

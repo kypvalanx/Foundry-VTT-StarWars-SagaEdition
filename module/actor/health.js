@@ -39,75 +39,13 @@ export function resolveHealth(actor) {
     //TODO add traits and stuff that boost HP
     let value = Array.isArray(system.health.value) ? system.health.value[0] : system.health.value;
     let temp = system.health.temp;
-    let max = resolveValueArray(health, actor);
+    let max = system.health.hitPointOverride ? system.health.hitPointOverride : resolveValueArray(health, actor);
     let dr = system.health.dr;
     let sr = system.health.sr;
+    let hitPointOverride = system.health.hitPointOverride
 
 
-    return {value, temp, other, max, dr, sr, multipliers};
-}
-
-export async function resolveTargetHP(actor, targetHP) {
-    if (!targetHP) {
-        return;
-    }
-    while (true) {
-        let health = resolveHealth(actor);
-
-        let multipliers = health.multipliers
-        let targetHPArray = [targetHP];
-        let maxHPArray = [health.max];
-        for (let multiplier of multipliers) {
-            if (multiplier.startsWith("*")) {
-                let inverted = "/" + multiplier.substring(1, multiplier.length);
-                targetHPArray.push(inverted);
-                maxHPArray.push(inverted);
-            } else {
-                let inverted = "*" + multiplier.substring(1, multiplier.length);
-                targetHPArray.push(inverted);
-                maxHPArray.push(inverted);
-            }
-        }
-
-        let targetMaxHitPoints = Math.floor(resolveValueArray(targetHPArray, actor));
-
-        let max = Math.floor(resolveValueArray(maxHPArray, actor));
-        if (!targetMaxHitPoints || targetMaxHitPoints === -1) {
-            break;
-        }
-        let undestributedHitPoints = targetMaxHitPoints - max;
-        if (undestributedHitPoints === 0) {
-            break;
-        }
-        for (let charClass of actor.classes || []) {
-            if (charClass.actAsFirstLevel) {
-                continue;
-            }
-            let maxHPThisLevel = getInheritableAttribute({
-                entity: charClass,
-                attributeKey: "levelUpHitPoints"
-            }).map(attr => parseInt(attr.value.split("d")[1]))[0]
-            let rolledHp = getInheritableAttribute({entity: charClass, attributeKey: "rolledHp", reduce: "SUM"});
-            let newHPThisLevel = Math.max(Math.min(undestributedHitPoints + rolledHp, maxHPThisLevel), 1);
-
-            if (maxHPThisLevel === rolledHp || newHPThisLevel === rolledHp) {
-                continue;
-            }
-            console.debug("updating hitpoints for " + actor.name)
-            await charClass.setAttribute("rolledHp", newHPThisLevel);
-            break;
-        }
-
-        // else{
-        //     let data = {};
-        //     data['data.hitPoints'] = -1;
-        //     if(actor._id){
-        //         actor.safeUpdate(data)
-        //         console.debug("completed updating hitpoints for " + actor.name)
-        //     }
-        // }
-        //}
-    }
+    return {value, temp, other, max, dr, sr, multipliers, hitPointOverride};
 }
 
 /**

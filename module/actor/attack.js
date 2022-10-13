@@ -672,6 +672,8 @@ function getDiceTermsFromString(dieString) {
 }
 
 /**
+ * TODO move to unarmed attack object
+ *
  * Resolves the die to be thrown when making an unarmed attack
  * @param {SWSEActor} actor
  * @returns

@@ -2,6 +2,7 @@
 import {SWSE} from "./config.js";
 import {SWSEActor} from "./actor/actor.js";
 import {SWSEActorSheet} from "./actor/actor-sheet.js";
+import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.js";
 import {SWSEItem} from "./item/item.js";
 import {SWSEItemSheet} from "./item/item-sheet.js";
 import {refreshActors, registerSystemSettings} from "./settings/system.js";
@@ -61,11 +62,14 @@ Hooks.once('init', async function () {
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
     Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
+    Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
 
 
     await loadTemplates([
+        'systems/swse/templates/actor/manual/parts/actor-summary.hbs',
+        'systems/swse/templates/actor/manual/parts/actor-ability-scores.hbs',
         'systems/swse/templates/actor/parts/actor-affiliations.hbs',
         'systems/swse/templates/actor/parts/actor-summary.hbs',
         'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
@@ -100,7 +104,6 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/vehicle/crew-quality.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-template.hbs',
         'systems/swse/templates/actor/parts/actor-type.hbs',
-        'systems/swse/templates/actor/parts/languages.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-health.hbs',
         'systems/swse/templates/credits/credit-chip.hbs']);
 
