@@ -357,7 +357,7 @@ export class SWSECompendiumBrowser extends Application {
             let values = await p.getDocuments(filter)
             for (let i of values) {
                 this.packs[p.collection] = p;
-                items.push(this._mapEntry(p, i.data));
+                items.push(this._mapEntry(p, i));
             }
         }
 
@@ -423,7 +423,7 @@ export class SWSECompendiumBrowser extends Application {
                 name: item.name,
                 type: item.type,
                 img: item.img,
-                data: item.data,
+                data: item.system,
                 uuid: `Compendium.${pack.metadata.id}.${item._id}`,
                 pack: pack.collection,
                 talentTree: item.system?.talentTree,
