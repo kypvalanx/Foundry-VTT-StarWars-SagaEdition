@@ -171,28 +171,7 @@ export class SWSEActorSheet extends ActorSheet {
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
-        html.find('.condition-radio').on("click", async event => {
-            event.stopPropagation();
-
-            let ids = this.actor.effects
-                .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
-
-            await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
-            //this.actor.deleteEmbeddedDocuments("")
-
-            let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
-
-            if(statusEffect){
-                const createData = foundry.utils.deepClone(statusEffect);
-                createData.label = game.i18n.localize(statusEffect.label);
-                createData["flags.core.statusId"] = statusEffect.id;
-                //if ( overlay ) createData["flags.core.overlay"] = true;
-                delete createData.id;
-                const cls = getDocumentClass("ActiveEffect");
-                await cls.create(createData, {parent: this.actor});
-            }
-
-        })
+        html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
 
         html.find('.mode-selector').on("click", async event => {
             //event.preventDefault();
@@ -295,11 +274,36 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    _onShield(event) {
+    async _onConditionChange(event) {
+        event.stopPropagation();
+
+        let ids = this.actor.effects
+            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
+
+        await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
+        //this.actor.deleteEmbeddedDocuments("")
+
+        let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
+        await this.activateStatusEffect(statusEffect);
+    }
+
+    async activateStatusEffect(statusEffect) {
+        if (statusEffect) {
+            const createData = foundry.utils.deepClone(statusEffect);
+            createData.label = game.i18n.localize(statusEffect.label);
+            createData["flags.core.statusId"] = statusEffect.id;
+            //if ( overlay ) createData["flags.core.overlay"] = true;
+            delete createData.id;
+            const cls = getDocumentClass("ActiveEffect");
+            await cls.create(createData, {parent: this.actor});
+        }
+    }
+
+    async _onShield(event) {
         let element = $(event.currentTarget);
         let type = element.data("action-type")
         let actor = this.actor;
-        switch(type){
+        switch (type) {
             case 'plus':
                 actor.shields = actor.system.shields.value + 5
                 break;
@@ -307,9 +311,17 @@ export class SWSEActorSheet extends ActorSheet {
                 actor.shields = actor.system.shields.value - 5
                 break;
             case 'toggle':
-                let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                let tokens = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (this.actor.id))
-                tokens.forEach(token => token.toggleEffect(statusEffect))
+
+                let ids = this.actor.effects
+                    .filter(effect => effect.icon?.includes("/shield.svg")).map(effect => effect.id)
+
+                await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
+
+                if(ids.length === 0){
+                    let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
+                    await this.activateStatusEffect(statusEffect);
+                }
+
                 break;
         }
     }
