@@ -479,7 +479,6 @@
 }
 
 .swse .items-list .item {
-  height: 30px;
   line-height: 24px;
   padding: 3px 0;
   border-bottom: 1px solid #BBB;
@@ -494,6 +493,10 @@
 
 .swse .items-list .item img {
   display: block;
+}
+
+.swse .items-list .description {
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .swse .items-list .feat {

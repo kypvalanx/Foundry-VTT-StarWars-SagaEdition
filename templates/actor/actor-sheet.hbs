@@ -65,7 +65,8 @@
                             <!--darkside-->
                             {{> 'systems/swse/templates/actor/parts/actor-darkside.hbs'}}
 
-                            {{> 'systems/swse/templates/actor/parts/languages.hbs'}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="languages" label="Languages" items=actor.languages draggable=false delete="always" description="expandable" createNew='language'}}
+
                         </div>
                     </div>
                     <div class="flex flex-row">

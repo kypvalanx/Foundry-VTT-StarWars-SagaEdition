@@ -7,32 +7,12 @@ import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
 
 // noinspection JSClosureCompilerSyntax
 
-function getDefaultDataByType(itemType) {
-    switch (itemType) {
-        case "language":
-            return {
-                attributes: {
-                    0 : {key: "readable", value: true, override: false},
-                    1 : {key: "writable", value: true, override: false},
-                    2 : {key: "spoken", value: true, override: false},
-                    3 : {key: "characterReads", value: true, override: false},
-                    4 : {key: "characterWrites", value: true, override: false},
-                    5 : {key: "characterSpeaks", value: true, override: false},
-                    6 : {key: "silentCommunication", value: false, override: false},
-                    7 : {key: "visualCommunication", value: false, override: false}
-                }
-            }
-        default:
-            return {};
-    }
-}
-
 /**
  * Extend the basic ActorSheet with some very simple modifications
  * @extends {ActorSheet}
  */
 
-export class SWSEActorSheet extends ActorSheet {
+export class SWSEManualActorSheet extends ActorSheet {
 
     /**
      * A convenience reference to the Actor entity
@@ -101,12 +81,15 @@ export class SWSEActorSheet extends ActorSheet {
             event.stopPropagation();
             let button = $(event.currentTarget);
 
+            let hide = false;
+
             let children = button.find("i.fas");
             children.each((i, e) =>{
                 if(e.classList.contains(down)){
                     e.classList.remove(down);
                     e.classList.add(up);
-                } else if(e.classList.contains(up)){
+                    hide = true;
+                } else {
                     e.classList.remove(up);
                     e.classList.add(down);
                 }
@@ -115,10 +98,12 @@ export class SWSEActorSheet extends ActorSheet {
             let container = button.parents(".collapsible-container")
             let collapsible = container.children(".collapsible")
             collapsible.each((i, div) => {
-                if(div.style.display === "grid"){
+                if(hide){
                     div.style.display = "none"
+                    //div.classList.add("collapsed");
                 } else {
                     div.style.display = "grid"
+                    //div.classList.remove("collapsed");
                 }
             })
         })
@@ -236,25 +221,13 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
         html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
         html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
-        html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
     }
 
-    _onCreateNewItem(event){
-        let element = $(event.currentTarget);
-        let itemType = element.data("action-type")
 
-        let itemData = {
-            name: `New ${itemType}`,
-            type: itemType,
-            data: getDefaultDataByType(itemType)
-        }
-
-        this.actor.createEmbeddedDocuments('Item', [itemData]);
-    }
 
     _onLanguage(event) {
         let element = $(event.currentTarget);

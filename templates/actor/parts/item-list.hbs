@@ -1,12 +1,15 @@
-<div class="border item-container {{container}}">
-    {{#if label}}
+<div class="border item-container panel flexcol {{container}}">
     <div>
-        <label class="resource-label">{{label}}</label>
+        {{#if label}}
+                <label class="resource-label">{{label}}</label>
+        {{/if}}
+        {{#if createNew}}
+            <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}" title="add new {{createNew}}"></a>
+        {{/if}}
     </div>
-    {{/if}}
     <ol class="items-list">
         {{#each items as |item id|}}
-            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete}}
+            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description}}
         {{/each}}
     </ol>
 </div>
