@@ -6,6 +6,9 @@
         {{#if createNew}}
             <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}" title="add new {{createNew}}"></a>
         {{/if}}
+        {{#if quickCreate}}
+            <input type="text" data-action="quickCreate" data-action-type="{{quickCreate}}" placeholder="New {{quickCreate}}">
+        {{/if}}
     </div>
     <ol class="items-list">
         {{#each items as |item id|}}

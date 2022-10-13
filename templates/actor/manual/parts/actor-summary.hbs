@@ -1,0 +1,53 @@
+<!--TODO find a spot for the portrait -->
+<div class="summary-header swse">
+    <div class="name"><label for="name">Name</label>
+        <h2><input class="plain" name="name" type="text" value="{{actor.name}}"
+                   placeholder=""/></h2></div>
+    <div class="player"><label for="player">Player</label>
+        <h2><input class="plain" name="system.player" type="text"
+                   value="{{actor.system.player}}" placeholder=""/></h2></div>
+    <div class="classes"><label for="classes">Classes</label>
+        <input class="plain" name="system.classSummary" type="text" value="{{actor.system.classSummary}}"
+               placeholder=""/>
+    </div>
+    <div class="level"><label for="level">Level</label>
+        <input class="plain" name="system.levelSummary" type="number" value="{{actor.system.levelSummary}}"
+               placeholder=""/>
+    </div>
+
+    <div class="species">
+
+        <label for="species">Species</label>
+        <input class="plain" name="system.species" type="text" value="{{actor.system.species}}"
+               placeholder=""/>
+    </div>
+    <div class="sex">
+        <label for="gender">Gender</label>
+
+        <input class="plain" name="system.gender" type="text" value="{{actor.system.gender}}"
+               placeholder=""/>
+
+    </div>
+    <div class="age">
+        <label for="age">Age</label>
+
+        <input class="plain" name="system.age" type="text" value="{{actor.system.age}}"
+               placeholder=""/>
+    </div>
+    <div class="height"><label for="height">Height</label>
+        <h2><input class="plain" name="system.height" type="text"
+                   value="{{actor.system.height}}" placeholder="Height"/></h2></div>
+    <div class="weight"><label for="weight">Weight</label>
+        <h2><input class="plain" name="system.weight" type="text"
+                   value="{{actor.system.weight}}" placeholder="Weight"/></h2></div>
+    <div class="destiny">
+        <label>Destiny or Background</label>
+
+        <input class="plain" name="system.destiny" type="text" value="{{actor.system.destiny}}"
+               placeholder=""/>
+    </div>
+    <div class="experience"><label for="experience">XP</label>
+        <h2><input class="plain" name="system.experience" type="number"
+                   value="{{actor.system.experience}}" placeholder="0"/></h2>
+    </div>
+</div>

@@ -125,8 +125,11 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
-
-        new ContextMenu(html, ".max-health", getHealthOptions(this.actor))
+        // html.find(".numeric-override").each((i, li)=>{
+        //
+        //     new ContextMenu($(li), ".numeric-override", getHealthOptions(this.actor))
+        // })
+        new ContextMenu(html, ".numeric-override", getHealthOptions(this.actor))
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
@@ -233,10 +236,10 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));
         html.find('[data-action="shield"]').click(this._onShield.bind(this));
-        html.find('[data-action="language"]').on("keypress", this._onLanguage.bind(this));
         html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
         html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
+        html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
@@ -256,10 +259,9 @@ export class SWSEActorSheet extends ActorSheet {
         this.actor.createEmbeddedDocuments('Item', [itemData]);
     }
 
-    _onLanguage(event) {
+    _onQuickCreate(event) {
         let element = $(event.currentTarget);
-        if(element.data("action-type") === "create"){
-
+        let itemType = element.data("action-type");
             if(event.code === "Enter" || event.code === "NumpadEnter"){
                 event.preventDefault();
                 let name = element[0].value;
@@ -271,25 +273,13 @@ export class SWSEActorSheet extends ActorSheet {
                 let itemData = names.map(name => {
                     return {
                         name: name,
-                        type: "language",
-                        data: {
-                            attributes: {
-                                0 : {key: "readable", value: true, override: false},
-                                1 : {key: "writable", value: true, override: false},
-                                2 : {key: "spoken", value: true, override: false},
-                                3 : {key: "characterReads", value: true, override: false},
-                                4 : {key: "characterWrites", value: true, override: false},
-                                5 : {key: "characterSpeaks", value: true, override: false},
-                                6 : {key: "silentCommunication", value: false, override: false},
-                                7 : {key: "visualCommunication", value: false, override: false}
-                            }
-                        }
+                        type: itemType,
+                        data: getDefaultDataByType(itemType)
                     }
                 })
 
                 this.actor.createEmbeddedDocuments('Item', itemData);
             }
-        }
 
     }
 
@@ -1549,12 +1539,14 @@ export class SWSEActorSheet extends ActorSheet {
 
 function getHealthOptions(actor) {
     let options = [];
-        options.push({name: "Set Maximum Health Override",
+    options.push({name: "Set Override",
             icon: '<i class="fas fa-edit">',
             callback: async element => {
+                let overrideKey = element.data('override-key');
+                let overrideName = element.data('override-name');
                 let value = await Dialog.prompt({
-                    title: 'Set Maximum Health',
-                    content: `<p>Set Maximum Health</p><br/><input class="choice" type="number" data-option-key="">`,
+                    title: `Set ${overrideName}`,
+                    content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
                     callback: html => {
                         let find = html.find(".choice");
 
@@ -1565,16 +1557,17 @@ function getHealthOptions(actor) {
                 })
 
                 let data = {};
-                data['system.health.hitPointOverride'] = value;
+                data[overrideKey] = value;
                 await actor.safeUpdate(data);
             }})
 
-    options.push({name: "Remove Maximum Health Override",
+    options.push({name: `Remove Override`,
         icon: '<i class="fas fa-delete">',
         callback: element =>{
 
+            let overrideKey = element.data('override-key');
             let data = {};
-            data['system.health.hitPointOverride'] = null;
+            data[overrideKey] = null;
             actor.safeUpdate(data);
         },
         condition: element => {

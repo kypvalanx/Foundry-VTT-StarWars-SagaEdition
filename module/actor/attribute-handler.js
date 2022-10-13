@@ -84,7 +84,7 @@ export function generateAttributes(actor) {
         }
 
         let old = attribute.mod;
-        attribute.mod = Math.floor((attribute.total - 10) / 2);
+        attribute.mod = Math.floor((toNumber(attribute.total) + toNumber(attribute.customBonus) - 10) / 2);
 
         if(attribute.mod !== old){
             data[`data.attributes.${key}.mod`] = attribute.mod;

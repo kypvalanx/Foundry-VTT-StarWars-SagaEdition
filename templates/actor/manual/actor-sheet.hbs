@@ -1,7 +1,6 @@
 <form class="{{cssClass}}" autocomplete="off">
     <div class="flex flex-col" style="height:100%">
         <div>
-
             {{#each actor.warnings as |warning id|}}
                 <span class="warning">{{{warning}}}</span><br/>
             {{/each}}
@@ -13,17 +12,16 @@
             {{!-- Sheet Tab Navigation --}}
             <nav class="sheet-tabs tabs" data-group="primary">
                 <a class="item" data-tab="summary">Summary</a>
-                <a class="item" data-tab="charClass">Class</a>
-                {{#if actor.isBeast}}<a class="item" data-tab="beast">Beast</a>{{/if}}
-                <a class="item" data-tab="equipment">Equipment</a>
-                <!--        {{#if
-                        actor.system.isDroid}}<a class="item" data-tab="droid"><span>Droid Systems</span></a>{{/if}}-->
-                <a class="item" data-tab="feats">Feats</a>
-                <a class="item" data-tab="talents">Talents</a>
-                <a class="item" data-tab="traits">Traits</a>
-                {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
-                <a class="item" data-tab="affiliations">Affiliations</a>
-                <a class="item" data-tab="description">Notes</a>
+<!--                <a class="item" data-tab="charClass">Class</a>-->
+<!--                {{#if actor.isBeast}}<a class="item" data-tab="beast">Beast</a>{{/if}}-->
+<!--                <a class="item" data-tab="equipment">Equipment</a>-->
+<!--                &lt;!&ndash;        {{#if actor.system.isDroid}}<a class="item" data-tab="droid"><span>Droid Systems</span></a>{{/if}}&ndash;&gt;-->
+<!--                <a class="item" data-tab="feats">Feats</a>-->
+<!--                <a class="item" data-tab="talents">Talents</a>-->
+<!--                <a class="item" data-tab="traits">Traits</a>-->
+<!--                {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}-->
+<!--                <a class="item" data-tab="affiliations">Affiliations</a>-->
+<!--                <a class="item" data-tab="description">Notes</a>-->
 
             </nav>
 
@@ -33,13 +31,13 @@
                 <div class="tab summary flex-col" data-group="primary" data-tab="summary">
                     <div>
                         <!--summary-->
-                        {{> 'systems/swse/templates/actor/parts/actor-summary.hbs'}}
+                        {{> 'systems/swse/templates/actor/manual/parts/actor-summary.hbs'}}
                     </div>
                     <div class="flex flex-row">
                         <div class="flex flex-col">
                             <!--attributes-->
-                            {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}
-                            {{> 'systems/swse/templates/actor/parts/actor-attributes.hbs'}}
+<!--                            {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}-->
+                            {{> 'systems/swse/templates/actor/manual/parts/actor-ability-scores.hbs'}}
                         </div>
                         <div class="flex flex-col flex-grow">
                             <!--health-->
