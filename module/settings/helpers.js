@@ -85,17 +85,29 @@ export const registerHandlebarsHelpers = function () {
 
     Handlebars.registerHelper('options', function(arg1, arg2){
         let values = []
+        let selected;
+        if(Array.isArray(arg1)){
+            values = arg1;
+        }
         if('type' === arg1){
             values = game.system.template.Item.types;
         }
         if('subtype' === arg1){
             values = SUBTYPES[arg2.toLowerCase()] || [];
         }
+        if(Object.entries(arg1).length > 0){
+            selected = arg2.hash['selected']
+            values = Object.entries(arg1);
+        }
 
         let response = '';
 
         for(let value of values){
-            response += `<option value="${value}">${value}</option>`;
+            if(Array.isArray(value)){
+                response += `<option value="${value[0]}" ${value[0] === selected ? 'selected' : ""}>${value[1]}</option>`;
+            } else {
+                response += `<option value="${value}" ${value === selected ? 'selected' : ""}>${value}</option>`;
+            }
         }
         return response;
     });

@@ -388,10 +388,10 @@ export function toNumber(value) {
         return value.reduce((a, b) => toNumber(a) + toNumber(b), 0)
     }
 
-    if (typeof value === "undefined") {
+    if (typeof value === "undefined" || value === null) {
         return 0;
     }
-    if (!isNaN(value.value)) {
+    if (typeof value === "object") {
         return toNumber(value.value)
     }
     if (typeof value === "boolean") {

@@ -74,7 +74,7 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/parts/actor-summary.hbs',
         'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
         'systems/swse/templates/actor/parts/actor-skills.hbs',
-        'systems/swse/templates/actor/parts/actor-attributes.hbs',
+        'systems/swse/templates/actor/parts/actor-ability-scores.hbs',
         'systems/swse/templates/actor/parts/actor-health.hbs',
         'systems/swse/templates/actor/parts/actor-shields.hbs',
         'systems/swse/templates/actor/parts/actor-condition.hbs',
@@ -105,7 +105,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/vehicle/vehicle-template.hbs',
         'systems/swse/templates/actor/parts/actor-type.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-health.hbs',
-        'systems/swse/templates/credits/credit-chip.hbs']);
+        'systems/swse/templates/credits/credit-chip.hbs',
+        'systems/swse/templates/settings/setting.hbs']);
 
 });
 
