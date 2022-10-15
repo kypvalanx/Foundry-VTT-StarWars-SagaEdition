@@ -1,7 +1,6 @@
 import {resolveValueArray} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {SWSEActor} from "./actor.js";
-import {SWSEItem} from "../item/item.js";
 
 /**
  *
@@ -14,10 +13,10 @@ export function resolveHealth(actor) {
     }
     let system = actor.system;
     let ignoreCon = actor.ignoreCon();
-    let health = [];
+    let healthBonuses = [];
     for (let charClass of actor.classes || []) {
-        health.push(charClass.classLevelHealth)
-        health.push(resolveAttributeMod(actor, ignoreCon));
+        healthBonuses.push(charClass.classLevelHealth)
+        healthBonuses.push(resolveAttributeMod(actor, ignoreCon));
     }
     let others = [];
     let traitAttributes = getInheritableAttribute({
@@ -28,7 +27,7 @@ export function resolveHealth(actor) {
     for (let item of traitAttributes || []) {
         if (item) {
             others.push(item.value);
-            health.push(item.value);
+            healthBonuses.push(item.value);
             if (item.value && (item.value.startsWith("*") || item.value.startsWith("/"))) {
                 multipliers.push(item.value)
             }
@@ -37,15 +36,13 @@ export function resolveHealth(actor) {
     let other = resolveValueArray(others, actor);
 
     //TODO add traits and stuff that boost HP
-    let value = Array.isArray(system.health.value) ? system.health.value[0] : system.health.value;
-    let temp = system.health.temp;
-    let max = system.health.hitPointOverride ? system.health.hitPointOverride : resolveValueArray(health, actor);
-    let dr = system.health.dr;
-    let sr = system.health.sr;
-    let hitPointOverride = system.health.hitPointOverride
-
-
-    return {value, temp, other, max, dr, sr, multipliers, hitPointOverride};
+    let health = system.health;
+    health.value = Array.isArray(system.health.value) ? system.health.value[0] : system.health.value;
+    health.other = other;
+    health.max = system.health.override ? system.health.override : resolveValueArray(healthBonuses, actor);
+    health.multipliers = multipliers;
+    health.override = system.health.override;
+    return health;
 }
 
 /**

@@ -2,25 +2,36 @@
 <div class="health-block panel flex flex-col">
     <div><h1 class="resource-label">Hit Points</h1></div>
     <div class="flex flex-row">
-        <div class="resource-block max-health numeric-override" data-override="{{actor.system.health.hitPointOverride}}" data-override-name="Maximum Health" data-override-key="system.health.hitPointOverride"><h3><label>Total</label><div class="plain input">{{actor.system.health.max}}</div></h3></div>
+        <div class="resource-block">
+            <label>Total</label>
+                <input class="plain small" type="number" name="system.health.manual" value="{{actor.system.health.manual}}" data-dtype="Number"/>
+            </div>
         <div class="resource-block"><label class="top">Current</label>
             <input class="plain small" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
         </div>
     </div>
     <div class="flex flex-row panel">
-        <div class="resource-block"><label>Damage Threshold</label><div class="plain input static">{{actor.system.defense.damageThreshold.total}}</div></div>
-        <div class="resource-block"><label>Fort</label><div class="plain input static">{{actor.system.defense.fortitude.total}}</div></div>
-        <div class="resource-block"><label>Misc</label><div class="plain input static"></div></div>
+        <div class="resource-block"><label>Damage Threshold</label>
+            <input class="plain small" type="number" name="system.defense.damageThreshold.manual" value="{{actor.system.defense.damageThreshold.manual}}" data-dtype="Number"/>
+        </div>
+        <div class="resource-block"><label>Fort</label><div class="plain input static">{{actor.system.defense.fortitude.manual}}</div></div>
+        <div class="resource-block"><label>Misc</label>
+            <input class="plain small" type="number" name="system.defense.damageThreshold.miscManual" value="{{actor.system.defense.damageThreshold.miscManual}}" data-dtype="Number"/>
+        </div>
     </div>
     <div class="flex flex-row">
-        <div class="resource-block"><label>Damage Reduction</label><div class="plain input static">{{actor.system.defense.damageReduction}}</div></div>
+        <div class="resource-block"><label>Damage Reduction</label>
+            <input class="plain small" type="number" name="system.defense.manualDamageReduction" value="{{actor.system.defense.manualDamageReduction}}" data-dtype="text"/>
+        </div>
     </div>
     <div class="flex flex-row">
         <div class="resource-block">
             <label>Base Attack</label>
             <div class="plain input static">
-                <a class="rollable" title="Roll 1d20 + {{actor.system.offense.bab}}" data-roll="1d20 + {{actor.system.offense.bab}}"><i
-                        class="fas fa-dice-d20"></i>{{actor.system.offense.bab}}</a>
+                <a class="rollable" title="Roll 1d20 + {{actor.system.offense.manualBab}}" data-roll="1d20 + {{actor.system.offense.manualBab}}"><i
+                        class="fas fa-dice-d20"></i>
+                    <input class="plain small" type="number" name="system.offense.manualBab" value="{{actor.system.offense.manualBab}}" data-dtype="Number"/>
+                </a>
             </div>
         </div>
         <div class="resource-block">
