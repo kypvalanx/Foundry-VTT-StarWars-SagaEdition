@@ -475,14 +475,26 @@ export class SWSEActor extends Actor {
 
         this._manageAutomaticItems(this, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(system));
         system.attacks = generateAttacks(this);
+        this.initializeCharacterSettings();
+    }
 
+    initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
-        this.system.settings.push({type:"boolean", path: "system.isNPC", label: "Is NPC", value:this.system.isNPC})
-        this.system.settings.push({type:"select",
+        this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
+        this.system.settings.push({type: "boolean", path: "system.ignorePrerequisites", label: "Ignore Prerequisites", value: this.system.ignorePrerequisites})
+        this.system.settings.push({
+            type: "select",
             path: "system.attributeGenerationType",
             label: "Attribute Generation Type",
-            value:this.system.attributeGenerationType || "Default",
-            options:{Default: "Default", Manual: "Manual", Roll: "Roll", "Point Buy": "Point Buy", "Standard Array": "Standard Array"}})
+            value: this.system.attributeGenerationType || "Default",
+            options: {
+                Default: "Default",
+                Manual: "Manual",
+                Roll: "Roll",
+                "Point Buy": "Point Buy",
+                "Standard Array": "Standard Array"
+            }
+        })
     }
 
     async removeItem(itemId) {
