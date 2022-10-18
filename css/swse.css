@@ -287,6 +287,22 @@
   margin: auto;
 }
 
+.swse .header-row {
+  height: 20px;
+  max-height: 20px;
+  min-height: 20px;
+}
+
+.swse .search-row {
+  height: 30px;
+  max-height: 30px;
+  min-height: 30px;
+}
+
+.swse .scroll-container {
+  overflow-y: scroll;
+}
+
 .swse table.fixed {
   table-layout: fixed;
 }
