@@ -84,8 +84,15 @@ export function resolveDefenses(actor) {
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
-
-    return {defense: {fortitude, will, reflex, damageThreshold, damageReduction, situationalBonuses, shield}, armors};
+    let defense = actor.system.defense;
+    defense.fortitude = fortitude;
+    defense.will = will;
+    defense.reflex = reflex;
+    defense.damageThreshold = damageThreshold;
+    defense.damageReduction = damageReduction;
+    defense.situationalBonuses = situationalBonuses;
+    defense.shield = shield;
+    return {defense, armors};
 }
 
 /**
@@ -137,7 +144,8 @@ function _resolveFort(actor, conditionBonus) {
     let name = 'Fortitude';
     let total = resolveValueArray(bonuses, actor);
     actor.setResolvedVariable("@FortDef", total, name, name);
-    return {total, abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip,  name, defenseBlock:true}
+    let fortitudeDefense = {total, abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip,  name, defenseBlock:true};
+    return fortitudeDefense
 }
 
 /**
@@ -396,7 +404,9 @@ function _resolveDt(actor, conditionBonus) {
         attributeKey: "damageThresholdBonus",
         reduce: "SUM"
     }));
-    return {total: resolveValueArray(total, actor)}
+    let damageThreshold = actor.system.defense.damageThreshold;
+    damageThreshold.total = resolveValueArray(total, actor);
+    return damageThreshold
 }
 
 /**
