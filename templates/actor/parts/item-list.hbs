@@ -1,18 +1,28 @@
-<div class="border item-container panel flexcol {{container}}">
-    <div>
+<div class="item-container panel flexcol {{container}}">
+    <div class="header-row">
         {{#if label}}
                 <label class="resource-label">{{label}}</label>
         {{/if}}
         {{#if createNew}}
             <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}" title="add new {{createNew}}"></a>
         {{/if}}
-        {{#if quickCreate}}
-            <input type="text" data-action="quickCreate" data-action-type="{{quickCreate}}" placeholder="New {{quickCreate}}">
-        {{/if}}
     </div>
-    <ol class="items-list">
-        {{#each items as |item id|}}
-            {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description}}
-        {{/each}}
-    </ol>
+    {{#if quickCreate}}
+    <div class="search-row">
+        <input type="text" data-action="quickCreate" data-action-type="{{quickCreate}}" placeholder="New {{quickCreate}}">
+    </div>
+    {{/if}}
+    {{#if searchable}}
+    <div class="search-row">
+        this is where the search funtionality would go, if i had any.
+    </div>
+    {{/if}}
+
+    <div class="scroll-container" style="{{#if max-height}}max-height: {{max-height}};{{/if}}{{#if min-height}} min-height: {{min-height}};{{/if}}">
+        <ol class="items-list" >
+            {{#each items as |item id|}}
+                {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description}}
+            {{/each}}
+        </ol>
+    </div>
 </div>

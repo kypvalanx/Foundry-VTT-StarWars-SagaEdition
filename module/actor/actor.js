@@ -5,7 +5,8 @@ import {generateSpeciesData} from "./species.js";
 import {
     excludeItemsByType,
     filterItemsByType,
-    getIndexAndPack, getVariableFromActorData,
+    getIndexAndPack,
+    getVariableFromActorData,
     resolveExpression,
     resolveValueArray,
     toShortAttribute,
@@ -30,6 +31,7 @@ import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
 import {errorsFromActor, warningsFromActor} from "./warnings.js";
+import {SWSEManualActorSheet} from "./manual-actor-sheet.js";
 
 
 // noinspection JSClosureCompilerSyntax
@@ -69,26 +71,26 @@ export class SWSEActor extends Actor {
             return;
         }
         super.prepareData();
-		
-		//check if user has permission to modify selected actor
-		//if not jump out of the function, all the hard lifting
-		//has already been done. 
-		// if(!this.canUserModify(game.user, 'update')){
-		//
-		// 	return false;
-		// }
+
+        // if(this.lock && this.system.lockSystem){
+        //     this.system = this.system.lockSystem;
+        //     return;
+        // } else if(!this.lock && this.system.lockSystem){
+        //     this.safeUpdate({"system.lockSystem":null})
+        // }
 
         const system = this.system;
         system.description = system.description || ""
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
+
         this.system.inheritableItems = null;
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
 
         if (this.id && this.type === "npc") {
-            this.safeUpdate({"type": "character", "data.isNPC": true}, {updateChanges: false});
+            this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
         } else if (this.id && this.type === "npc-vehicle") {
             this.safeUpdate({
                 "type": "vehicle",
@@ -110,6 +112,15 @@ export class SWSEActor extends Actor {
                 system.condition = conditionEffect.changes.find(change => change.key === "condition").value
             }
 
+            this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
+
+            if(this._sheet instanceof SWSEManualActorSheet){
+                this.system.finalAttributeGenerationType = "Manual";
+            } else if(!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() ==="default"){
+                this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
+            }
+
+
             if (this.type === 'character') this._prepareCharacterData(system);
             if (this.type === 'npc') this._prepareCharacterData(system);
             if (this.type === 'computer') this._prepareComputerData(system);
@@ -117,6 +128,9 @@ export class SWSEActor extends Actor {
             if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
 
+            // if(this.lock){
+            //     this.safeUpdate({"system.lockSystem":JSON.parse(JSON.stringify(this.system))})
+            // }
         }
     }
 
@@ -461,6 +475,26 @@ export class SWSEActor extends Actor {
 
         this._manageAutomaticItems(this, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(system));
         system.attacks = generateAttacks(this);
+        this.initializeCharacterSettings();
+    }
+
+    initializeCharacterSettings() {
+        this.system.settings = this.system.settings || [];
+        this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
+        this.system.settings.push({type: "boolean", path: "system.ignorePrerequisites", label: "Ignore Prerequisites", value: this.system.ignorePrerequisites})
+        this.system.settings.push({
+            type: "select",
+            path: "system.attributeGenerationType",
+            label: "Attribute Generation Type",
+            value: this.system.attributeGenerationType || "Default",
+            options: {
+                Default: "Default",
+                Manual: "Manual",
+                Roll: "Roll",
+                "Point Buy": "Point Buy",
+                "Standard Array": "Standard Array"
+            }
+        })
     }
 
     async removeItem(itemId) {
@@ -1440,7 +1474,6 @@ export class SWSEActor extends Actor {
             "data.isNPC": true
         }, {updateChanges: false});
 
-        item.system.attributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType");
 
         // if (userId === game.user._id) {
         //     await updateChanges.call(this);

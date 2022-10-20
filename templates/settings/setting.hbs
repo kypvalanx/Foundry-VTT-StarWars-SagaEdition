@@ -1,0 +1,13 @@
+<div class="panel">
+    <label>
+        {{setting.label}}
+    {{#ifEquals setting.type "boolean"}}
+            <input type="checkbox" name="{{setting.path}}" {{#if setting.value}}checked{{/if}}>
+    {{/ifEquals}}
+        {{#ifEquals setting.type "select"}}
+            <select name="{{setting.path}}">
+                {{{options setting.options selected=setting.value}}}
+            </select>
+        {{/ifEquals}}
+</label>
+</div>

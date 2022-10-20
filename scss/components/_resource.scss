@@ -9,6 +9,19 @@
   text-align: center;
   margin: auto;
 }
+.header-row{
+  height:20px;
+  max-height: 20px;
+  min-height: 20px;
+}
+.search-row{
+  height:30px;
+  max-height: 30px;
+  min-height: 30px;
+}
+.scroll-container{
+  overflow-y: scroll;
+}
 table.fixed{
   table-layout: fixed;
   tr {

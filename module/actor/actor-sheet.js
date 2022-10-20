@@ -188,8 +188,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("#selectHeight").on("click", () => this._unavailable());
         html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
 
-
-        html.find(".generationType").on("click", event => this._selectAttributeGeneration(event, this));
         html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
         html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
         html.find(".assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
@@ -223,6 +221,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
+
     }
 
     _onCreateNewItem(event){
@@ -528,33 +527,6 @@ export class SWSEActorSheet extends ActorSheet {
             return {low: parseInt(tok[0]), high: parseInt(tok[1])};
         }
         return {low: parseInt(range.replace("+", "")), high: -1};
-    }
-
-    async _selectAttributeGeneration(event, sheet) {
-        let genType = sheet.actor.getAttributeGenerationType();
-        let rollSelected = genType === 'Roll' ? 'selected' : '';
-        let arraySelected = genType === 'Standard Array' ? 'selected' : '';
-        let pointBuySelected = genType === 'Point Buy' ? 'selected' : '';
-        let manualSelected = genType === 'Manual' ? 'selected' : '';
-
-        let content = `<p>Select an Attribute Generation Type</p>
-                        <div>
-                          <select id='choice'>
-                            <option ${rollSelected}>Roll</option>
-                            <option ${arraySelected}>Standard Array</option>
-                            <option ${pointBuySelected}>Point Buy</option>
-                            <option ${manualSelected}>Manual</option>
-                          </select> 
-                        </div>`;
-
-        await Dialog.prompt({
-            title: "Select an Attribute Generation Type",
-            content: content,
-            callback: async (html) => {
-                let key = html.find("#choice")[0].value;
-                sheet.actor.setAttributeGenerationType(key);
-            }
-        });
     }
 
     getPointBuyTotal() {

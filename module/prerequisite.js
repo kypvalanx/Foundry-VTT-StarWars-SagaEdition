@@ -30,7 +30,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     let failureList = [];
     let silentFail = [];
     let successList = [];
-    if (!prereqs) {
+    if (!prereqs || target.system.ignorePrerequisites) {
         return {doesFail: false, failureList, silentFail, successList};
     }
     if(!target){
