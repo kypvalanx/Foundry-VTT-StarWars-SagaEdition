@@ -1,0 +1,29 @@
+{{!-- Darkside Block --}}
+<div class="shield-block panel flex flex-col">
+    <div>
+        <h1 class="resource-label">Shields</h1>
+    </div>
+    <div class="flex flex-row">
+        <div class="resource-block flex flex-col">
+            <label class="resource-label">Total</label>
+            <input class="plain small" type="number" name="system.shields.manual"
+                   value="{{actor.system.shields.manual}}" data-dtype="Number"/>
+        </div>
+        <div class="resource-block flex flex-col">
+            <label class="resource-label">Current</label>
+            <input class="plain small" type="number" name="system.shields.value" value="{{actor.system.shields.value}}"
+                   data-dtype="Number"/>
+        </div>
+        <div class="resource-block flex flex-col">
+            <label class="resource-label">Failure Chance</label>
+            <input class="plain small" type="text" name="system.shields.manualFailureChance"
+                   value="{{actor.system.shields.manualFailureChance}}"/>
+        </div>
+
+        <div title="Toggle Shield {{#if actor.system.shields.active}}Off{{else}}On{{/if}}">
+            <a data-action="shield" data-action-type="toggle" class="{{#if actor.system.shields.active}}cursor{{/if}}">
+                <i class="fas fa-shield-virus"></i>
+            </a>
+        </div>
+    </div>
+</div>

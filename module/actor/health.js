@@ -82,7 +82,12 @@ export function resolveShield(actor) {
         reduce: "MAX"
     });
     let active = !!actor.effects.find(effect => effect.flags?.core?.statusId === 'shield');
-    return {value, max, failureChance, active};
+    let shields = actor.system.shields
+    shields.value = value;
+    shields.max = max;
+    shields.failureChance = failureChance;
+    shields.active = active;
+    return shields;
 }
 
 function resolveAttributeMod(actor, ignoreCon) {

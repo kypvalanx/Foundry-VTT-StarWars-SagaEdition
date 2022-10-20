@@ -71,7 +71,6 @@ export function resolveDefenses(actor) {
     let reflex = _resolveRef(actor, conditionBonus);
     let damageThreshold = _resolveDt(actor, conditionBonus);
     let situationalBonuses = _getSituationalBonuses(actor);
-    let shield = _resolveShield(actor);
 
     let damageReduction = getInheritableAttribute({
         entity: actor,
@@ -84,14 +83,13 @@ export function resolveDefenses(actor) {
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
-    let defense = actor.system.defense;
+    let defense = actor.system.defense || {};
     defense.fortitude = fortitude;
     defense.will = will;
     defense.reflex = reflex;
     defense.damageThreshold = damageThreshold;
     defense.damageReduction = damageReduction;
     defense.situationalBonuses = situationalBonuses;
-    defense.shield = shield;
     return {defense, armors};
 }
 
@@ -404,26 +402,9 @@ function _resolveDt(actor, conditionBonus) {
         attributeKey: "damageThresholdBonus",
         reduce: "SUM"
     }));
-    let damageThreshold = actor.system.defense.damageThreshold;
+    let damageThreshold = actor.system.defense?.damageThreshold || {};
     damageThreshold.total = resolveValueArray(total, actor);
     return damageThreshold
-}
-
-/**
- *
- * @param actor {SWSEActor}
- * @param conditionBonus
- * @returns {{total: number}}
- * @private
- */
-function _resolveShield(actor, conditionBonus) {
-    let total = [];
-    total.push(...(getInheritableAttribute({
-        entity: actor,
-        attributeKey: "shieldRating",
-        reduce: "VALUES"
-    })));
-    return {total: resolveValueArray(total, actor), current: resolveValueArray(total, actor)}
 }
 
 function _getSituationalBonuses(actor) {
