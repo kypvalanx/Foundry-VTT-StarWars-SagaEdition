@@ -19,7 +19,7 @@ export const registerHandlebarsHelpers = function () {
     })
 
     Handlebars.registerHelper('toLowerCase', function(str) {
-        return str.toLowerCase();
+        return !!str ? str.toLowerCase() : str;
     });
     Handlebars.registerHelper('toTitleCase', function(str) {
         return str.titleCase();
@@ -96,7 +96,10 @@ export const registerHandlebarsHelpers = function () {
             values = SUBTYPES[arg2.toLowerCase()] || [];
         }
         if(Object.entries(arg1).length > 0){
-            selected = arg2.hash['selected']
+            let hash = arg2.hash;
+            if(hash){
+                selected = hash['selected']
+            }
             values = Object.entries(arg1);
         }
 

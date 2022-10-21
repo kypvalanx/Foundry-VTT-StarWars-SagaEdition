@@ -84,6 +84,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/parts/actor-darkside.hbs',
         'systems/swse/templates/actor/parts/actor-defenses.hbs',
         'systems/swse/templates/actor/parts/actor-defense-block.hbs',
+        'systems/swse/templates/actor/manual/parts/actor-defenses.hbs',
+        'systems/swse/templates/actor/manual/parts/actor-defense-block.hbs',
         'systems/swse/templates/actor/parts/equipable-item.hbs',
         'systems/swse/templates/actor/parts/item-list.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-summary.hbs',
