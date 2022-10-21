@@ -142,7 +142,15 @@ function _resolveFort(actor, conditionBonus) {
     let name = 'Fortitude';
     let total = resolveValueArray(bonuses, actor);
     actor.setResolvedVariable("@FortDef", total, name, name);
-    let fortitudeDefense = {total, abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip,  name, defenseBlock:true};
+    let fortitudeDefense = actor.system.defense?.fortitude || {};
+    fortitudeDefense.total = total;
+    fortitudeDefense.abilityBonus = abilityBonus;
+    fortitudeDefense.armorBonus = armorBonus;
+    fortitudeDefense.classBonus = classBonus;
+    fortitudeDefense.miscBonus = miscBonus;
+    fortitudeDefense.miscBonusTip = miscBonusTip;
+    fortitudeDefense.name = name;
+    fortitudeDefense.defenseBlock = true;
     return fortitudeDefense
 }
 
@@ -222,7 +230,17 @@ function _resolveWill(actor, conditionBonus) {
     let total = resolveValueArray(bonuses, actor);
     let name = 'Will';
     actor.setResolvedVariable("@WillDef", total, name, name);
-    return {total, abilityBonus, armorBonus, classBonus, miscBonus, miscBonusTip, skip, name, defenseBlock:true}
+    let willDefense = actor.system.defense?.will || {};
+    willDefense.total = total;
+    willDefense.abilityBonus = abilityBonus;
+    willDefense.armorBonus = armorBonus;
+    willDefense.classBonus = classBonus;
+    willDefense.miscBonus = miscBonus;
+    willDefense.miscBonusTip = miscBonusTip;
+    willDefense.name = name;
+    willDefense.skip = skip;
+    willDefense.defenseBlock = true;
+    return willDefense
 }
 
 /**
@@ -284,18 +302,31 @@ function _resolveRef(actor, conditionBonus) {
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex';
     actor.setResolvedVariable("@RefDef", total, name, name);
-    return {
-        total,
-        abilityBonus,
-        armorBonus,
-        classBonus,
-        miscBonus,
-        miscBonusTip,
-        skip: false,
-        name,
-        defenseBlock:true,
-        defenseModifiers
-    }
+    // return {
+    //     total,
+    //     abilityBonus,
+    //     armorBonus,
+    //     classBonus,
+    //     miscBonus,
+    //     miscBonusTip,
+    //     skip: false,
+    //     name,
+    //     defenseBlock:true,
+    //     defenseModifiers
+    // }
+
+    let reflexDefense = actor.system.defense?.reflex || {};
+    reflexDefense.total = total;
+    reflexDefense.abilityBonus = abilityBonus;
+    reflexDefense.armorBonus = armorBonus;
+    reflexDefense.classBonus = classBonus;
+    reflexDefense.miscBonus = miscBonus;
+    reflexDefense.miscBonusTip = miscBonusTip;
+    reflexDefense.name = name;
+    reflexDefense.skip = false;
+    reflexDefense.defenseBlock = true;
+    reflexDefense.defenseModifiers = defenseModifiers;
+    return reflexDefense
 }
 
 
@@ -356,17 +387,22 @@ function _resolveFFRef(actor, conditionBonus) {
     let name = 'Reflex (Flat-Footed)';
 
     actor.setResolvedVariable("@RefFFDef", total, name, name);
-    return {
-        total,
-        abilityBonus:0,
-        armorBonus,
-        classBonus,
-        miscBonus,
-        miscBonusTip,
-        skip: false,
-        name,
-        defenseBlock:true
+
+    let ffReflexDefense =  {};
+    let defenseModifiers = actor.system.defense?.reflex?.defenseModifiers
+    if(defenseModifiers){
+        ffReflexDefense = defenseModifiers['reflex (flat-footed)'] || {};
     }
+    ffReflexDefense.total = total;
+    ffReflexDefense.abilityBonus = 0;
+    ffReflexDefense.armorBonus = armorBonus;
+    ffReflexDefense.classBonus = classBonus;
+    ffReflexDefense.miscBonus = miscBonus;
+    ffReflexDefense.miscBonusTip = miscBonusTip;
+    ffReflexDefense.name = name;
+    ffReflexDefense.skip = false;
+    ffReflexDefense.defenseBlock = true;
+    return ffReflexDefense
 }
 
 /**

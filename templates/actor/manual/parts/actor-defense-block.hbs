@@ -1,0 +1,45 @@
+{{!-- Defense Block --}}
+<div class="collapsible-container">
+    <div class="defense">
+        <div class="defense-label plain input static flex flex-row">
+            <div>{{toTitleCase def.name}}</div>
+            {{#if def.defenseModifiers}}
+                <div class="collapse-toggle flex-float-right"><h3 class="plain input"><a data-action="hide"><i
+                        class="fas fa-plus"></i></a></h3></div>
+            {{/if}}
+        </div>
+        <div class="defense-total input">
+            <input class="plain input" type="number" name="system.defense.{{path}}{{toLowerCase def.name}}.manual"
+                   value="{{def.manual}}"
+                   data-dtype="Number"/>
+        </div>
+        <div class="defense-10 plain input static">10</div>
+        <div class="defense-level-armor plain input static">
+            <input class="plain input" type="number" name="system.defense.{{path}}{{toLowerCase def.name}}.manualArmorBonus"
+                   value="{{def.manualArmorBonus}}"
+                   data-dtype="Number"/>
+        </div>
+        <div class="defense-ability plain input static">
+            <input class="plain input" type="number" name="system.defense.{{path}}{{toLowerCase def.name}}.manualAbilityScore"
+                   value="{{def.manualAbilityScore}}"
+                   data-dtype="Number"/>
+        </div>
+        <div class="defense-class plain input static">
+            <input class="plain input" type="number" name="system.defense.{{path}}{{toLowerCase def.name}}.manualClassBonus"
+                   value="{{def.manualClassBonus}}"
+                   data-dtype="Number"/>
+        </div>
+        <div class="defense-misc plain input static" title="{{def.miscBonusTip}}">
+            <input class="plain input" type="number" name="system.defense.{{path}}{{toLowerCase def.name}}.manualMisc"
+                   value="{{def.manualMisc}}"
+                   data-dtype="Number"/>
+        </div>
+    </div>
+    <div class="collapsible" style="display: none">
+        {{#if def.defenseModifiers}}
+            {{#each def.defenseModifiers as |defenseModifier id|}}
+                {{> 'systems/swse/templates/actor/manual/parts/actor-defense-block.hbs'def=defenseModifier path=(concat (toLowerCase ../def.name) '.defenseModifiers.')}}
+            {{/each}}
+        {{/if}}
+    </div>
+</div>
