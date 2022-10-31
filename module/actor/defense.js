@@ -334,7 +334,7 @@ function getArmorBonus(actor) {
     let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor) || 0;
     if (["vehicle", "npc-vehicle"].includes(actor.type)) {
         if (actor.pilot) {
-            let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.data.attributes).find(a => a.key === "isHeroic").value).length;
+            let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.system.attributes).find(a => a.key === "isHeroic").value).length;
             return Math.max(armorBonus, armorReflexDefenseBonus);
         } else {
             return armorReflexDefenseBonus;
