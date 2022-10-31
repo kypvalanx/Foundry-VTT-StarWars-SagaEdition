@@ -1653,7 +1653,7 @@ export class SWSEActor extends Actor {
             for (let crew of this.system.crew) {
                 let vehicle = game.data.actors.find(actor => actor._id === crew.id);
                 if (vehicle) {
-                    let itemIds = vehicle.data.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
+                    let itemIds = vehicle.system.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
 
                     let items = itemIds.map(id => vehicle.items.find(item => item._id === id))
                     items.forEach(item => item.parentId = vehicle._id)
