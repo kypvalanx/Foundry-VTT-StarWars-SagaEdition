@@ -95,7 +95,7 @@ export const registerHandlebarsHelpers = function () {
         if('subtype' === arg1){
             values = SUBTYPES[arg2.toLowerCase()] || [];
         }
-        if(Object.entries(arg1).length > 0){
+        if(Object.entries(arg1).length > 0 && !values){
             let hash = arg2.hash;
             if(hash){
                 selected = hash['selected']
