@@ -195,66 +195,18 @@
 
                 {{!-- Owned Feats Tab --}}
                 <div class="tab items" data-group="primary" data-tab="feats">
-                    <div>
-                        <h2><label class="resource-label">Feats <a data-action="compendium" data-type="Item" data-filter="-type:feat"
-                                                                   title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.system.feats as |feat id|}}
-                            <li class="item feat flexrow " data-item-name="{{feat.finalName}}"
-                                data-item-id="{{feat.id}}">
-                                <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.finalName}}" width="24" height="24"/></div>-->
-                                <h4 class="item-name"><b>{{feat.finalName}}</b></h4>
-                                {{#if feat.system.prerequisite }}
-                                    <h4 class="item-name"><b>Prerequisites:</b> {{feat.system.prerequisite.text}}</h4>{{/if}}
-                                <!-- TODO maybe put the description here-->
-
-                                <div class="item-controls">
-                                    <!--                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>-->
-                                    {{#unless feat.system.supplier.id}}
-                                        <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                    {{/unless}}
-                                    <a data-action="view" class="item-control" title="View Item"><i class="fas fa-eye"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Feats" compendiumFilter="-type:feat" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.feats draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
 
                 {{!-- Owned Talents Tab --}}
                 <div class="tab items" data-group="primary" data-tab="talents">
-                    <div>
-                        <h2><label class="resource-label">Talents <a data-action="compendium" data-type="Item" data-filter="-type:talent"
-                                                                     title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.talents as |talent id|}}
-                            <li class="item flexrow" data-item-id="{{talent.id}}">
-                                <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
-                                <h4 class="item-name"><a
-                                        href="{{talent.system.talentTreeUrl}}"><b>{{talent.system.talentTree}}</b></a></h4>
-                                <h4 class="item-name">{{#if talent.system.prerequisites}}
-                                    <b>Prerequisites:</b> {{talent.system.prerequisites}}{{/if}}</h4>
-                                <!--                            <h4 class="item-name">-->
-                                <!--                                <b>Source:</b> {{talent.system.talentTreeSource}}</h4>-->
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    {{#unless talent.system.supplier.id}}
-                                        <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                    {{/unless}}
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
 
 
                 {{!-- Owned Traits Tab --}}
                 <div class="tab items" data-group="primary" data-tab="traits">
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied"}}
-
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
 
                 {{!-- Owned Powers Tab --}}

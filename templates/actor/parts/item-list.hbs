@@ -32,7 +32,7 @@
             min-height}} min-height: {{min-height}};{{/if}}">
         <ol class="items-list">
             {{#each items as |item id|}}
-                {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description}}
+                {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description overrideDelete=../overrideDelete}}
             {{/each}}
         </ol>
     </div>

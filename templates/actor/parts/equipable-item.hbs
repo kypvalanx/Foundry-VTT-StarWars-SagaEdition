@@ -1,40 +1,52 @@
-<li class="item flexcol {{#if draggable}}draggable{{/if}} {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}" data-item-id="{{item.id}}"
+<li class="item flexcol {{#if draggable}}draggable{{/if}} {{#ifEquals description
+                                                                      "expandable"}}collapsible-container{{/ifEquals}}"
+    data-item-id="{{item.id}}"
     data-item-name="{{item.name}}">
-    <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
-        <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
-                                     height="24" alt=""/></div>
-        <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">{{item.finalName}}
-            {{#if quantity}}{{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}{{/if}}</h4>
-        {{#ifContains fields "Prerequisites"}}
-            <h4 class="item-name">{{#if item.system.prerequisite}}
-                <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>
-        {{/ifContains}}
+    <div class="flexrow">
+        <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
+            <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
+                                         height="24" alt=""/></div>
+            <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">{{item.finalName}}
+                {{#if quantity}}{{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}{{/if}}</h4>
+            {{#ifContains fields "Prerequisites"}}
+                <h4 class="item-name">{{#if item.system.prerequisite}}
+                    <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>
+            {{/ifContains}}
 
+        </div>
         <div class="item-controls">
             {{#if quantity}}
-                <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i class="fas fa-plus"></i></a>
-                <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i class="fas fa-minus"></i></a>
+                <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i
+                        class="fas fa-plus"></i></a>
+                <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i
+                        class="fas fa-minus"></i></a>
             {{/if}}
             <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
 
-            {{#ifEquals delete 'unSupplied'}}
-                {{#unless item.system.supplier.id}}
-                    <a class="item-control item-delete" title="Delete Item"><i
-                            class="fas fa-trash"></i></a>
-                {{/unless}}
-                {{#if item.system.supplier.id}}
-                    {{#if item.system.supplier.unlocked}}
+            {{#if overrideDelete}}
+                <a class="item-control item-delete" title="Delete Item"><i
+                        class="fas fa-trash"></i></a>
+            {{else}}
+                {{#ifEquals delete 'unSupplied'}}
+                    {{#if item.system.supplier.id}}
+                        {{#if item.system.supplier.unlocked}}
+                            <a class="item-control item-delete" title="Delete Item"><i
+                                    class="fas fa-trash"></i></a>
+                        {{/if}}
+                    {{else}}
                         <a class="item-control item-delete" title="Delete Item"><i
                                 class="fas fa-trash"></i></a>
                     {{/if}}
-                {{/if}}
-            {{/ifEquals}}
-            {{#ifEquals delete 'always'}}
-                <a class="item-control item-delete" title="Delete Item"><i
-                        class="fas fa-trash"></i></a>
-            {{/ifEquals}}
+                {{/ifEquals}}
+                {{#ifEquals delete 'always'}}
+                    <a class="item-control item-delete" title="Delete Item"><i
+                            class="fas fa-trash"></i></a>
+                {{/ifEquals}}
+            {{/if}}
         </div>
-    </div>{{#ifEquals description 'expandable'}}
-    <div style="display: none" class="collapsible description">{{{item.system.description}}}</div>
+    </div>
+
+    {{#ifEquals description 'expandable'}}
+        <div style="display: none" class="collapsible description">{{{item.system.description}}}</div>
     {{/ifEquals}}
 </li>
