@@ -17,7 +17,7 @@
                         <span class="center" title="">{{attribute.total}}</span>
                     {{/unlessEquals}}
                     {{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}}
-                        <input class="plain tiny" name="system.attributes.{{id}}.manual" type="number"
+                        <input class="plain small" name="system.attributes.{{id}}.manual" type="number"
                                value="{{attribute.total}}" placeholder="0"/>
                     {{/ifEquals}}
                 </div>

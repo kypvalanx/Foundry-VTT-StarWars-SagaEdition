@@ -1,27 +1,38 @@
+{{#if bigLabel}}
+<div>
+    <h2><label class="resource-label">{{bigLabel}} <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
+                                                title="{{localize "Open Compendium"}}"><i
+            class="fas fa-folder-plus"></i></a></label></h2>
+</div>
+{{/if}}
+
 <div class="item-container panel flexcol {{container}}">
-    <div class="header-row">
-        {{#if label}}
-                <label class="resource-label">{{label}}</label>
-        {{/if}}
-        {{#if createNew}}
-            <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}" title="add new {{createNew}}"></a>
-        {{/if}}
-    </div>
+    {{#if label}}
+        <div class="header-row">
+            <label class="resource-label">{{label}}</label>
+            {{#if createNew}}
+                <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}"
+                   title="add new {{createNew}}"></a>
+            {{/if}}
+        </div>
+    {{/if}}
     {{#if quickCreate}}
-    <div class="search-row">
-        <input type="text" data-action="quickCreate" data-action-type="{{quickCreate}}" placeholder="New {{quickCreate}}">
-    </div>
+        <div class="search-row">
+            <input type="text" data-action="quickCreate" data-action-type="{{quickCreate}}"
+                   placeholder="New {{quickCreate}}">
+        </div>
     {{/if}}
     {{#if searchable}}
-    <div class="search-row">
-        this is where the search funtionality would go, if i had any.
-    </div>
+        <div class="search-row">
+            this is where the search funtionality would go, if i had any.
+        </div>
     {{/if}}
 
-    <div class="scroll-container" style="{{#if max-height}}max-height: {{max-height}};{{/if}}{{#if min-height}} min-height: {{min-height}};{{/if}}">
-        <ol class="items-list" >
+    <div class="scroll-container" style="{{#if max-height}}max-height: {{max-height}};{{/if}}{{#if
+            min-height}} min-height: {{min-height}};{{/if}}">
+        <ol class="items-list">
             {{#each items as |item id|}}
-                {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description}}
+                {{> 'systems/swse/templates/actor/parts/equipable-item.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description overrideDelete=../overrideDelete}}
             {{/each}}
         </ol>
     </div>

@@ -44,6 +44,17 @@ export const registerHandlebarsHelpers = function () {
         return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
     });
 
+    Handlebars.registerHelper('ifContains', function(arg1, arg2, options) {
+        if(Array.isArray(arg1)){
+            return arg1.includes(arg2) ? options.fn(this) : options.inverse(this);
+        }
+        if(Array.isArray(arg2)){
+            return arg2.includes(arg1) ? options.fn(this) : options.inverse(this);
+        }
+
+        return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
+    });
+
 
     Handlebars.registerHelper('ifGT', function(arg1, arg2, options) {
         return (arg1 > arg2) ? options.fn(this) : options.inverse(this);
@@ -95,7 +106,7 @@ export const registerHandlebarsHelpers = function () {
         if('subtype' === arg1){
             values = SUBTYPES[arg2.toLowerCase()] || [];
         }
-        if(Object.entries(arg1).length > 0){
+        if(Object.entries(arg1).length > 0 && !values){
             let hash = arg2.hash;
             if(hash){
                 selected = hash['selected']

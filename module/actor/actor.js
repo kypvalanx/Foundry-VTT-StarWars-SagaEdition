@@ -114,6 +114,11 @@ export class SWSEActor extends Actor {
 
             this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
 
+            if(Array.isArray(this.system.attributeGenerationType)){
+                this.safeUpdate({"system.attributeGenerationType":this.system.attributeGenerationType[0]})
+                return;
+            }
+
             if(this._sheet instanceof SWSEManualActorSheet){
                 this.system.finalAttributeGenerationType = "Manual";
             } else if(!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() ==="default"){
