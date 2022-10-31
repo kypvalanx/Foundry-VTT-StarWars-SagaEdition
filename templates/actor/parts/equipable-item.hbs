@@ -5,6 +5,11 @@
                                      height="24" alt=""/></div>
         <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">{{item.finalName}}
             {{#if quantity}}{{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}{{/if}}</h4>
+        {{#ifContains fields "Prerequisites"}}
+            <h4 class="item-name">{{#if item.system.prerequisite}}
+                <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>
+        {{/ifContains}}
+
         <div class="item-controls">
             {{#if quantity}}
                 <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i class="fas fa-plus"></i></a>

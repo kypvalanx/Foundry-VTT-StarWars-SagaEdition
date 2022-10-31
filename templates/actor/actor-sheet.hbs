@@ -253,12 +253,7 @@
 
                 {{!-- Owned Traits Tab --}}
                 <div class="tab items" data-group="primary" data-tab="traits">
-                    <div>
-                        <h2><label class="resource-label">Traits <a data-action="compendium" data-type="Item" data-filter="-type:trait"
-                                                                    title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="items-list" fields= (arr "Source") items=actor.traits draggable=false quantity=false delete="unSupplied"}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied"}}
 
                 </div>
 
