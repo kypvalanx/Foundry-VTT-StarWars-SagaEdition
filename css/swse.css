@@ -624,10 +624,14 @@
 }
 
 .swse .summary-header .classes {
-  grid-area: 2 / 1 / 3 / 7;
+  grid-area: 2 / 1 / 3 / 6;
 }
 
 .swse .summary-header .level {
+  grid-area: 2 / 6 / 3 / 7;
+}
+
+.swse .summary-header .challenge {
   grid-area: 2 / 7 / 3 / 8;
 }
 
