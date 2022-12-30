@@ -69,7 +69,7 @@ export function resolveDefenses(actor) {
     let fortitude = _resolveFort(actor, conditionBonus);
     let will = _resolveWill(actor, conditionBonus);
     let reflex = _resolveRef(actor, conditionBonus);
-    let damageThreshold = _resolveDt(actor, conditionBonus);
+    let damageThreshold = _resolveDt(actor, conditionBonus, fortitude.total);
     let situationalBonuses = _getSituationalBonuses(actor);
 
     let damageReduction = getInheritableAttribute({
@@ -388,12 +388,13 @@ function _getDamageThresholdSizeMod(actor) {
  *
  * @param actor {SWSEActor}
  * @param conditionBonus
+ * @param fortitudeTotal
  * @returns {{total: number}}
  * @private
  */
-function _resolveDt(actor, conditionBonus) {
+function _resolveDt(actor, conditionBonus, fortitudeTotal) {
     let total = [];
-    total.push(_resolveFort(actor, conditionBonus).total);
+    total.push(fortitudeTotal);
     total.push(_getDamageThresholdSizeMod(actor));
     total.push(getInheritableAttribute({
         entity: actor,
