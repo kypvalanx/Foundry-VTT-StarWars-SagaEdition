@@ -117,6 +117,8 @@ export function getResolvedSize(entity, options) {
 }
 
 
+const abilityScores = ["str", "dex", "con", "int", "cha", "wis"];
+
 /**
  *
  * @param data
@@ -157,11 +159,7 @@ export function getInheritableAttribute(data = {}) {
             }))
         }
     } else {
-
-
-        let unfilteredAttributes = Object.entries(document.system?.attributes || document._source?.system?.attributes || {})
-            .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
-            .map(entry => appendSourceMeta(entry[1], document._id, document.name, document.name));
+        let unfilteredAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
 
         if (document.type === 'class') {
             unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
@@ -179,10 +177,11 @@ export function getInheritableAttribute(data = {}) {
                 .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
         }
         if(data.attributeKey){
-            values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey))
+            values.push(...unfilteredAttributes.filter(attr => attr && attr.key && attr.key === data.attributeKey));
         } else {
-            values.push(...unfilteredAttributes)
+            values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
         }
+        values = values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
     }
 
 
