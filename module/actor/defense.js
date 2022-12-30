@@ -107,7 +107,7 @@ function _resolveFort(actor, conditionBonus) {
     bonuses.push(heroicLevel);
     let abilityBonus = _getFortStatMod(actor);
     bonuses.push(abilityBonus);
-    
+
     let fortitudeDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "fortitudeDefenseBonus",
@@ -283,7 +283,7 @@ function _resolveRef(actor, conditionBonus) {
     bonuses.push(conditionBonus);
     bonuses.push(naturalArmorBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus])
-    let defenseModifiers = [_resolveFFRef(actor, conditionBonus)]
+    let defenseModifiers = [_resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus)]
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex';
     actor.setResolvedVariable("@RefDef", total, name, name);
@@ -321,35 +321,26 @@ function getArmorBonus(actor) {
  *
  * @param actor {SWSEActor}
  * @param conditionBonus
+ * @param abilityBonus
+ * @param armorBonus
+ * @param reflexDefenseBonus
+ * @param classBonus
  * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
  * @private
  */
-function _resolveFFRef(actor, conditionBonus) {
+function _resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus) {
     let bonuses = [];
     bonuses.push(10);
 
-    let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     if(abilityBonus < 0) {
         bonuses.push(abilityBonus);
     }
-    let armorBonus = getArmorBonus(actor);
     bonuses.push(armorBonus);
 
-    let reflexDefenseBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "reflexDefenseBonus",
-        reduce: ["SUM", "SUMMARY"],
-        attributeFilter: attr => !attr.modifier
-    })
     let otherBonus = reflexDefenseBonus["SUM"];
     let miscBonusTip = reflexDefenseBonus["SUMMARY"];
 
     bonuses.push(otherBonus);
-    let classBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "classReflexDefenseBonus",
-        reduce: "MAX"
-    }) || 0;
     bonuses.push(classBonus);
     miscBonusTip += `Condition: ${conditionBonus};  `
     bonuses.push(conditionBonus);
