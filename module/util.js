@@ -650,6 +650,14 @@ export function reduceArray(reduce, values, actor) {
         reduce = reduce.toUpperCase();
     }
 
+    if(Array.isArray(reduce)){
+        let reduction = {};
+        for(let r of reduce){
+            reduction[r] = reduceArray(r, values, actor);
+        }
+        return reduction;
+    }
+
     switch (reduce) {
         case "SUM":
             return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => a===0 && isNaN(b)? b : a + b, 0);

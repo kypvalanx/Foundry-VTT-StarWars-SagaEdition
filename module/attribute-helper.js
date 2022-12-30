@@ -117,7 +117,39 @@ export function getResolvedSize(entity, options) {
 }
 
 
-const abilityScores = ["str", "dex", "con", "int", "cha", "wis"];
+
+function getAttributesFromDocument(document, data) {
+    let values = [];
+    let unfilteredAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
+
+    if (document.type === 'class') {
+        unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
+    }
+
+    unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
+
+    if (document.system?.modes) {
+        unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
+    }
+
+
+    if (document.effects) {
+        document.effects.filter(effect => effect.disabled === false)
+            .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
+    }
+    if (data.attributeKey) {
+        values.push(...unfilteredAttributes.filter(attr => attr && attr.key && attr.key === data.attributeKey));
+    } else {
+        values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
+    }
+    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+}
+
+function getCachedAttributesFromDocument(document, data) {
+    //let key = JSON.stringify({document: document.id, data});
+
+    return getAttributesFromDocument(document, data);
+}
 
 /**
  *
@@ -159,29 +191,7 @@ export function getInheritableAttribute(data = {}) {
             }))
         }
     } else {
-        let unfilteredAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
-
-        if (document.type === 'class') {
-            unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
-        }
-
-        unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
-
-        if (document.system?.modes) {
-            unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
-        }
-
-
-        if (document.effects) {
-            document.effects.filter(effect => effect.disabled === false)
-                .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
-        }
-        if(data.attributeKey){
-            values.push(...unfilteredAttributes.filter(attr => attr && attr.key && attr.key === data.attributeKey));
-        } else {
-            values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
-        }
-        values = values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+        values = getCachedAttributesFromDocument(document, data);
     }
 
 
