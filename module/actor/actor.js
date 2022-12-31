@@ -67,7 +67,7 @@ export class SWSEActor extends Actor {
      * Augment the basic actor data with additional dynamic data.
      */
     prepareData() {
-        if(this.skipPrepare){
+        if (this.skipPrepare) {
             return;
         }
         super.prepareData();
@@ -88,6 +88,7 @@ export class SWSEActor extends Actor {
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
+        this.lazyResolve = new Map();
 
         if (this.id && this.type === "npc") {
             this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
@@ -114,14 +115,14 @@ export class SWSEActor extends Actor {
 
             this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
 
-            if(Array.isArray(this.system.attributeGenerationType)){
-                this.safeUpdate({"system.attributeGenerationType":this.system.attributeGenerationType[0]})
+            if (Array.isArray(this.system.attributeGenerationType)) {
+                this.safeUpdate({"system.attributeGenerationType": this.system.attributeGenerationType[0]})
                 return;
             }
 
-            if(this._sheet instanceof SWSEManualActorSheet){
+            if (this._sheet instanceof SWSEManualActorSheet) {
                 this.system.finalAttributeGenerationType = "Manual";
-            } else if(!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() ==="default"){
+            } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
                 this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
             }
 
@@ -139,20 +140,29 @@ export class SWSEActor extends Actor {
         }
     }
 
+    getCached(key, fn) {
+        if (this.lazyResolve.has(key)) {
+            return this.lazyResolve.get(key);
+        }
+        let resolved = fn();
+        this.lazyResolve.set(key, resolved);
+        return resolved
+    }
+
     setResolvedVariable(key, variable, label, notes) {
         this.resolvedVariables.set(key, variable);
         this.resolvedLabels.set(key, label);
         this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
 
-    async safeUpdate(data={}, context={}) {
-        if(this.canUserModify(game.user, 'update')){
+    async safeUpdate(data = {}, context = {}) {
+        if (this.canUserModify(game.user, 'update')) {
             this.update(data, context);
         }
     }
 
     async setActorLinkOnActorAndTokens(documents, val) {
-        if(this.canUserModify(game.user, 'update')){
+        if (this.canUserModify(game.user, 'update')) {
             for (let document of documents) {
                 await document.update({'actorLink': val});
             }
@@ -486,7 +496,12 @@ export class SWSEActor extends Actor {
     initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
         this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
-        this.system.settings.push({type: "boolean", path: "system.ignorePrerequisites", label: "Ignore Prerequisites", value: this.system.ignorePrerequisites})
+        this.system.settings.push({
+            type: "boolean",
+            path: "system.ignorePrerequisites",
+            label: "Ignore Prerequisites",
+            value: this.system.ignorePrerequisites
+        })
         this.system.settings.push({
             type: "select",
             path: "system.attributeGenerationType",
@@ -678,6 +693,9 @@ export class SWSEActor extends Actor {
     }
 
     get speed() {
+        if (this.system.resolvedSpeed) {
+            return this.system.resolvedSpeed;
+        }
         if (!this.traits) {
             return;
         }
@@ -697,7 +715,8 @@ export class SWSEActor extends Actor {
                 armorType = armor.armorType;
             }
         }
-        return attributes.map(name => this.applyArmorSpeedPenalty(name, armorType)).map(name => this.applyConditionSpeedPenalty(name, armorType)).join("; ");
+        this.system.resolvedSpeed = attributes.map(name => this.applyArmorSpeedPenalty(name, armorType)).map(name => this.applyConditionSpeedPenalty(name, armorType)).join("; ");
+        return this.system.resolvedSpeed;
     }
 
 
@@ -888,58 +907,72 @@ export class SWSEActor extends Actor {
     }
 
     get characterLevel() {
-        if (this.classes) {
-            let charLevel = this.classes.length;
-            this.resolvedVariables.set("@charLevel", charLevel);
-            return charLevel;
-        }
-        return 0;
+        return this.getCached("characterLevel", () => {
+            if (this.classes) {
+                let charLevel = this.classes.length;
+                this.resolvedVariables.set("@charLevel", charLevel);
+                return charLevel;
+            }
+            return 0;
+        })
     }
 
     get heroicLevel() {
-        if (this.classes) {
-            let heroicLevel = this.classes.filter(c => getInheritableAttribute({
-                entity: c,
-                attributeKey: "isHeroic",
-                reduce: "OR"
-            })).length;
-            this.resolvedVariables.set("@heroicLevel", heroicLevel);
-            return heroicLevel;
-        }
-        return 0;
+        return this.getCached("heroicLevel", () => {
+            if (this.classes) {
+                let heroicLevel = this.classes.filter(c => getInheritableAttribute({
+                    entity: c,
+                    attributeKey: "isHeroic",
+                    reduce: "OR"
+                })).length;
+                this.resolvedVariables.set("@heroicLevel", heroicLevel);
+                return heroicLevel;
+            }
+            return 0;
+        })
     }
 
 
     _getEquipable(items) {
-        return items.filter(item => this.isEquipable(item))
+        return this.getCached("getEquipableItems", () => {
+            return items.filter(item => this.isEquipable(item))
+        })
     }
 
     _getUnequipableItems(items) {
-        return items.filter(item => !this.isEquipable(item))
+        return this.getCached("getUnequipableItems", () => {
+            return items.filter(item => !this.isEquipable(item))
+        })
     }
 
     get hideForce() {
-        return !getInheritableAttribute({
-            entity: this,
-            attributeKey: "forceSensitivity",
-            reduce: "OR"
-        });
+        return this.getCached("hideForce", () => {
+            return !getInheritableAttribute({
+                entity: this,
+                attributeKey: "forceSensitivity",
+                reduce: "OR"
+            });
+        })
     }
 
     get isDroid() {
-        if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
-            return false;
-        }
-
-        return getInheritableAttribute({
-            entity: this,
-            attributeKey: "isDroid",
-            reduce: "OR"
-        });
+        return this.getCached("isDroid", () => {
+            if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
+                return false;
+            } else {
+                return getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "isDroid",
+                    reduce: "OR"
+                });
+            }
+        })
     }
 
     get trainedSkills() {
-        return this.skills.filter(skill => skill && skill.trained);
+        return this.getCached("trainedSkills", () => {
+            return this.skills.filter(skill => skill && skill.trained);
+        })
     }
 
     get skills() {
@@ -947,10 +980,12 @@ export class SWSEActor extends Actor {
     }
 
     get focusSkills() {
-        return getInheritableAttribute({
-            entity: this,
-            attributeKey: "skillFocus",
-            reduce: "VALUES"
+        return this.getCached("focusSkills", () => {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "skillFocus",
+                reduce: "VALUES"
+            })
         })
     }
 
@@ -972,9 +1007,10 @@ export class SWSEActor extends Actor {
      * @returns {(function(*))|*|false}
      */
     isEquipable(item) {
+        let isDroid = this.isDroid;
         return item.isEquipable
-            || (this.isDroid && item.isDroidPart)
-            || (!this.isDroid && item.isBioPart);
+            || (isDroid && item.isDroidPart)
+            || (!isDroid && item.isBioPart);
     }
 
     /**
@@ -1107,11 +1143,13 @@ export class SWSEActor extends Actor {
             positions.push({
                 id: `gunnerInstalled${gunnerSlot}`,
                 numericId: gunnerSlot,
-                installed: gunnerItems.map(item => {return {name: item.system.name, id:item.system._id, img: item.system.img}})
+                installed: gunnerItems.map(item => {
+                    return {name: item.system.name, id: item.system._id, img: item.system.img}
+                })
             });
         }
 
-        return positions.sort((a,b) => a.numericId > b.numericId ? 1 : -1);
+        return positions.sort((a, b) => a.numericId > b.numericId ? 1 : -1);
     }
 
 
@@ -1267,6 +1305,7 @@ export class SWSEActor extends Actor {
             .map(i => i.finalName)
             .includes(item.finalName);
     }
+
     _reduceProvidedItemsByExistingItems(actorData) {
 
         let provides = getInheritableAttribute({
@@ -1287,7 +1326,7 @@ export class SWSEActor extends Actor {
                 value = resolveExpression(toks[1], this)
             }
 
-            if(key.endsWith("Starting Feats")){
+            if (key.endsWith("Starting Feats")) {
                 //this means we need to check the source of the provision to figure out what feats are included
                 let providingItem = this.items.get(provided.source);
 
@@ -1316,15 +1355,15 @@ export class SWSEActor extends Actor {
             let type = 'General Feats';
 
             let featCategory = feat.system.bonusFeatCategory;
-            if(featCategory){
+            if (featCategory) {
                 type = featCategory;
-            }else{
+            } else {
                 let bonusFeatCategories = feat.system.bonusFeatCategories;
                 if (bonusFeatCategories && bonusFeatCategories.length === 1) {
                     type = bonusFeatCategories[0].value
-                } else{
-                    for(let entry of Object.entries(dynamicGroups)){
-                        if(entry[1].includes(feat.finalName)){
+                } else {
+                    for (let entry of Object.entries(dynamicGroups)) {
+                        if (entry[1].includes(feat.finalName)) {
                             type = entry[0];
                         }
                     }
@@ -1410,13 +1449,13 @@ export class SWSEActor extends Actor {
     getTooltipSections(roll) {
         let sections = [];
 
-        for(let term of roll.terms){
-            if(term instanceof Die){
+        for (let term of roll.terms) {
+            if (term instanceof Die) {
                 let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
                 let partTotal = `<span class="part-total">${term.total}</span>`
                 let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
                 let diceRolls = [];
-                for(let result of term.results){
+                for (let result of term.results) {
                     diceRolls.push(`<li class="roll die d20">${result.result}</li>`)
                 }
 
@@ -1472,7 +1511,10 @@ export class SWSEActor extends Actor {
 
     async _onCreate(item, options, userId) {
         if (item.type === "character") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
-        if (item.type === "npc") await this.safeUpdate({"type": "character", "data.isNPC": true}, {updateChanges: false});
+        if (item.type === "npc") await this.safeUpdate({
+            "type": "character",
+            "data.isNPC": true
+        }, {updateChanges: false});
         if (item.type === "vehicle") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
         if (item.type === "npc-vehicle") await this.safeUpdate({
             "type": "vehicle",
@@ -1683,7 +1725,7 @@ export class SWSEActor extends Actor {
             return [];
         }
 
-        if(context.newFromCompendium){
+        if (context.newFromCompendium) {
             if (!this.isPermittedForActorType(entity.type)) {
                 new Dialog({
                     title: "Inappropriate Item",
@@ -1698,14 +1740,14 @@ export class SWSEActor extends Actor {
                 return;
             }
 
-            if(LIMITED_TO_ONE_TYPES.includes(entity.type)){
+            if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
                 let takeMultipleTimes = getInheritableAttribute({
                     entity: entity,
                     attributeKey: "takeMultipleTimes"
                 }).map(a => a.value === "true").reduce((a, b) => a || b, false);
 
                 if (this.hasItem(entity) && !takeMultipleTimes) {
-                    if(!context.skipPrerequisite && !context.isUpload){
+                    if (!context.skipPrerequisite && !context.isUpload) {
                         await Dialog.prompt({
                             title: `You already have this ${context.type}`,
                             content: `You have already taken the ${entity.finalName} ${context.type}`,
@@ -1717,13 +1759,13 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if(!context.skipPrerequisite && !context.isUpload){
+            if (!context.skipPrerequisite && !context.isUpload) {
                 let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
 
                 //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
                 if (!equipableTypes.includes(entity.type)) {
                     if (meetsPrereqs.doesFail) {
-                        if(context.offerOverride){
+                        if (context.offerOverride) {
                             let override = await Dialog.wait({
                                 title: "You Don't Meet the Prerequisites!",
                                 content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
@@ -1731,34 +1773,40 @@ export class SWSEActor extends Actor {
                                     ok: {
                                         icon: '<i class="fas fa-check"></i>',
                                         label: 'Ok',
-                                        callback: () => {return false}
+                                        callback: () => {
+                                            return false
+                                        }
                                     },
                                     override: {
                                         icon: '<i class="fas fa-check"></i>',
                                         label: 'Override',
-                                        callback: () => {return true}
+                                        callback: () => {
+                                            return true
+                                        }
                                     }
                                 }
                             });
-                            if(!override){
+                            if (!override) {
                                 return [];
                             }
                         } else {
                             await Dialog.prompt({
                                 title: "You Don't Meet the Prerequisites!",
                                 content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                                callback:()=>{}
+                                callback: () => {
+                                }
                             });
 
                             return [];
                         }
 
-                    } else if(meetsPrereqs.failureList.length > 0){
+                    } else if (meetsPrereqs.failureList.length > 0) {
                         await Dialog.prompt({
-                            title: "You MAY Meet the Prerequisites!",
-                            content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                            callback:()=>{}
-                        }
+                                title: "You MAY Meet the Prerequisites!",
+                                content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                                callback: () => {
+                                }
+                            }
                         );
                     }
                 }
@@ -1858,7 +1906,7 @@ export class SWSEActor extends Actor {
                 entity.system.bonusFeatCategory = possibleFeatTypes;
             }
 
-            if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret'){
+            if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret') {
                 let viewable
                 if (entity.type === 'forcePower') {
                     viewable = 'Force Powers'
@@ -1879,7 +1927,7 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if(entity.type === "background" || entity.type === "destiny"){
+            if (entity.type === "background" || entity.type === "destiny") {
                 if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
                     new Dialog({
                         title: `${entity.type.titleCase()} Selection`,
@@ -1895,7 +1943,7 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if(entity.type === "vehicleBaseType" || entity.type === "species"){
+            if (entity.type === "vehicleBaseType" || entity.type === "species") {
                 let type = entity.type;
                 let viewable = type.replace(/([A-Z])/g, " $1");
                 if (filterItemsByType(this.items.values(), type).length > 0) {
@@ -1913,9 +1961,9 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if(entity.type === "class"){
+            if (entity.type === "class") {
                 context.isFirstLevel = this.classes.length === 0;
-                if(!context.skipPrerequisite && !context.isUpload){
+                if (!context.skipPrerequisite && !context.isUpload) {
 
                     if (entity.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
                         new Dialog({
@@ -1947,7 +1995,7 @@ export class SWSEActor extends Actor {
 
                 let firstLevelAttribute = Object.values(entity.system.attributes).find(v => v.key === "isFirstLevel");
 
-                if(firstLevelAttribute){
+                if (firstLevelAttribute) {
                     firstLevelAttribute.value = context.isFirstLevel;
                 } else {
                     entity.system.attributes[Object.keys(entity.system.attributes).length] = {
@@ -1957,8 +2005,12 @@ export class SWSEActor extends Actor {
                     };
                 }
 
-                if(context.isFirstLevel){
-                    let firstLevelHP = getInheritableAttribute({entity, attributeKey: "firstLevelHitPoints", reduce: "VALUES"})[0]
+                if (context.isFirstLevel) {
+                    let firstLevelHP = getInheritableAttribute({
+                        entity,
+                        attributeKey: "firstLevelHitPoints",
+                        reduce: "VALUES"
+                    })[0]
                     entity.system.attributes[Object.keys(entity.system.attributes).length] = {
                         value: `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP,
                         key: "rolledHP"
@@ -1996,7 +2048,7 @@ export class SWSEActor extends Actor {
 
         await this.addItems(modifications, mainItem[0], context);
 
-        if(item.type === "class"){
+        if (item.type === "class") {
             await this.addClassFeats(mainItem[0], providedItemContext);
         }
 
@@ -2028,7 +2080,7 @@ export class SWSEActor extends Actor {
 
         let feats1 = this.feats
         let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
-        if(!context.isUpload){
+        if (!context.isUpload) {
             if (context.isFirstLevel) {
                 if (availableClassFeats > 0 && availableClassFeats < feats.length) {
                     let selectedFeats = [];
@@ -2122,9 +2174,9 @@ export class SWSEActor extends Actor {
                 });
             }
         } else {
-            if(context.isFirstLevel){
+            if (context.isFirstLevel) {
                 item.addAttribute({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
-            } else if(isFirstLevelOfClass){
+            } else if (isFirstLevelOfClass) {
                 item.addAttribute({key: "provides", value: `${item.name} Starting Feats`})
             }
         }
@@ -2171,7 +2223,7 @@ export class SWSEActor extends Actor {
             let {payload, itemName, entity} = await this.resolveEntity(providedItem);
 
             if (!entity) {
-                if(options.suppressWarnings){
+                if (options.suppressWarnings) {
                     console.debug(`attempted to add ${itemName}`, arguments)
                 } else {
                     console.warn(`attempted to add ${itemName}`, arguments)
@@ -2180,7 +2232,6 @@ export class SWSEActor extends Actor {
             }
 
             entity.prepareData();
-
 
 
             //TODO weird spot for this.  maybe this can leverage the newer payload system
@@ -2203,7 +2254,7 @@ export class SWSEActor extends Actor {
                 entity.setChoice(payload)
                 entity.setPayload(payload);
             }
-            for(let payload of Object.entries(providedItem.payloads || {})){
+            for (let payload of Object.entries(providedItem.payloads || {})) {
                 entity.setChoice(payload[1]);
                 entity.setPayload(payload[1], payload[0]);
             }
@@ -2222,7 +2273,11 @@ export class SWSEActor extends Actor {
             let modifications = providedItem.modifications;
             if (!!modifications) {
                 let addedModifications = [];
-                addedModifications = await this.addItems(modifications, null, {returnAdded: true, actor: options.actor, suppressWarnings: options.suppressWarnings});
+                addedModifications = await this.addItems(modifications, null, {
+                    returnAdded: true,
+                    actor: options.actor,
+                    suppressWarnings: options.suppressWarnings
+                });
                 for (let addedModification of addedModifications) {
                     await addedItem.takeOwnership(addedModification)
                 }
@@ -2233,7 +2288,7 @@ export class SWSEActor extends Actor {
             if (equip) {
                 await this.equipItem(addedItem._id, equip, options)
             }
-            if(providedItem.equipToParent){
+            if (providedItem.equipToParent) {
                 await parent.takeOwnership(addedItem);
             }
         }
@@ -2248,7 +2303,7 @@ export class SWSEActor extends Actor {
         let entity = undefined
         let itemName = undefined
         let payload = undefined
-        if(item.duplicate){
+        if (item.duplicate) {
             entity = item.item.clone();
         } else {
 
@@ -2270,7 +2325,10 @@ export class SWSEActor extends Actor {
                  */
 
                 if (entry && entry._id) {
-                    entity = await Item.implementation.fromDropData({type: 'Item', uuid: `Compendium.${pack.metadata.id}.${entry._id}`});
+                    entity = await Item.implementation.fromDropData({
+                        type: 'Item',
+                        uuid: `Compendium.${pack.metadata.id}.${entry._id}`
+                    });
                 }
             }
         }
@@ -2332,7 +2390,7 @@ export class SWSEActor extends Actor {
 
         let {slot, position, newEquipType} = this.parseSlotAndPosition(equipType);
 
-        if(newEquipType === "gunnerInstalled"){
+        if (newEquipType === "gunnerInstalled") {
             equipType = newEquipType;
         }
         if (!!options.offerOverride) {
@@ -2402,9 +2460,6 @@ export class SWSEActor extends Actor {
     }
 
 
-
-
-
     isPermittedForActorType(type) {
         if (["character", "npc"].includes(this.type)) {
             return ["weapon",
@@ -2442,7 +2497,6 @@ export class SWSEActor extends Actor {
     }
 
 
-
 }
 
 /**
@@ -2459,8 +2513,8 @@ export function getEquippedItems(actor) {
     equippedIds = equippedIds.map(id => id.id)
     let items = actor.items.values() || []
     let filtered = [];
-    for(let item of items){
-        if(equippedIds.includes(item._id)){
+    for (let item of items) {
+        if (equippedIds.includes(item._id)) {
             filtered.push(item)
         }
     }

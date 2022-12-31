@@ -567,7 +567,7 @@ export class SWSEItem extends Item {
     }
 
     get isEquipable() {
-        return ["weapon", "armor"].includes(this.type) && !this.isBioPart && !this.isDroidPart;
+        return (this.type === "weapon" || this.type === "armor") && !this.isBioPart && !this.isDroidPart;
     }
 
     get isModification() {

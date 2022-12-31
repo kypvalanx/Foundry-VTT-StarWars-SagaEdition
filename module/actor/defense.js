@@ -65,14 +65,15 @@ export function resolveDefenses(actor) {
 
     //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 
+    let defense = actor.system.defense || {};
 
-    let fortitude = _resolveFort(actor, conditionBonus);
-    let will = _resolveWill(actor, conditionBonus);
-    let reflex = _resolveRef(actor, conditionBonus);
-    let damageThreshold = _resolveDt(actor, conditionBonus);
-    let situationalBonuses = _getSituationalBonuses(actor);
+    defense.fortitude = _resolveFort(actor, conditionBonus);
+    defense.will = _resolveWill(actor, conditionBonus);
+    defense.reflex = _resolveRef(actor, conditionBonus);
+    defense.damageThreshold = _resolveDt(actor, conditionBonus, defense.fortitude.total);
+    defense.situationalBonuses = _getSituationalBonuses(actor);
 
-    let damageReduction = getInheritableAttribute({
+    defense.damageReduction = getInheritableAttribute({
         entity: actor,
         attributeKey: "damageReduction",
         reduce: "SUM"
@@ -83,13 +84,6 @@ export function resolveDefenses(actor) {
     for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
         armors.push(generateArmorBlock(actor, armor));
     }
-    let defense = actor.system.defense || {};
-    defense.fortitude = fortitude;
-    defense.will = will;
-    defense.reflex = reflex;
-    defense.damageThreshold = damageThreshold;
-    defense.damageReduction = damageReduction;
-    defense.situationalBonuses = situationalBonuses;
     return {defense, armors};
 }
 
@@ -107,21 +101,16 @@ function _resolveFort(actor, conditionBonus) {
     bonuses.push(heroicLevel);
     let abilityBonus = _getFortStatMod(actor);
     bonuses.push(abilityBonus);
-    let otherBonus = getInheritableAttribute({
+
+    let fortitudeDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "fortitudeDefenseBonus",
-        reduce: "SUM",
-
+        reduce: ["SUM", "SUMMARY"],
         attributeFilter: attr => !attr.modifier
     })
+    let otherBonus = fortitudeDefenseBonus["SUM"];
+    let miscBonusTip = fortitudeDefenseBonus["SUMMARY"];
 
-    let miscBonusTip = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "fortitudeDefenseBonus",
-        reduce: "SUMMARY",
-
-        attributeFilter: attr => !attr.modifier
-    })
     miscBonusTip += `Condition: ${conditionBonus};  `
     bonuses.push(otherBonus);
     let classBonus = getInheritableAttribute({
@@ -162,7 +151,6 @@ function _resolveFort(actor, conditionBonus) {
  * @private
  */
 function _resolveWill(actor, conditionBonus) {
-    let system = actor.system
     let skip = ['vehicle', 'npc-vehicle'].includes(actor.type);
     let bonuses = [];
     bonuses.push(10);
@@ -176,20 +164,15 @@ function _resolveWill(actor, conditionBonus) {
         reduce: "MAX"
     }) || 0;
     bonuses.push(classBonus);
-    let otherBonus = getInheritableAttribute({
+
+    let willDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "willDefenseBonus",
-        reduce: "SUM",
-
+        reduce: ["SUM", "SUMMARY"],
         attributeFilter: attr => !attr.modifier
     })
-    let miscBonusTip = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "willDefenseBonus",
-        reduce: "SUMMARY",
-
-        attributeFilter: attr => !attr.modifier
-    })
+    let otherBonus = willDefenseBonus["SUM"];
+    let miscBonusTip = willDefenseBonus["SUMMARY"];
 
     let miscBonuses = [otherBonus, conditionBonus];
 
@@ -204,20 +187,16 @@ function _resolveWill(actor, conditionBonus) {
                 miscBonusTip += "Equipment Fort Bonus: " + equipmentFortBonus
             } else {
 
-                miscBonuses.push(getInheritableAttribute({
+                let inheritableAttribute = getInheritableAttribute({
                     entity: actor,
                     attributeKey: attributeKey,
-                    reduce: "SUM",
-
-                    attributeFilter: attr => !attr.modifier
-                }))
-                miscBonusTip += getInheritableAttribute({
-                    entity: actor,
-                    attributeKey: attributeKey,
-                    reduce: "SUMMARY",
+                    reduce: ["SUM", "SUMMARY"],
 
                     attributeFilter: attr => !attr.modifier
                 })
+
+                miscBonuses.push(inheritableAttribute["SUM"])
+                miscBonusTip += inheritableAttribute["SUMMARY"]
             }
         }
     }
@@ -258,24 +237,23 @@ function _resolveRef(actor, conditionBonus) {
     bonuses.push(armorBonus);
     let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     bonuses.push(abilityBonus);
-    let otherBonus = getInheritableAttribute({
+
+    let reflexDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "reflexDefenseBonus",
-        reduce: "SUM",
+        reduce: ["SUM", "SUMMARY"],
         attributeFilter: attr => !attr.modifier
     })
+    let otherBonus = reflexDefenseBonus["SUM"];
+    let miscBonusTip = reflexDefenseBonus["SUMMARY"];
+
     let naturalArmorBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "naturalArmorReflexDefenseBonus",
         reduce: "SUM",
         attributeFilter: attr => !attr.modifier
     })
-    let miscBonusTip = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "reflexDefenseBonus",
-        reduce: "SUMMARY",
-        attributeFilter: attr => !attr.modifier
-    })
+
     bonuses.push(otherBonus);
     let classBonus = getInheritableAttribute({
         entity: actor,
@@ -283,37 +261,26 @@ function _resolveRef(actor, conditionBonus) {
         reduce: "MAX"
     }) || 0;
     bonuses.push(classBonus);
-    let dodgeBonus = getInheritableAttribute({
+
+
+    let bonusDodgeReflexDefense = getInheritableAttribute({
         entity: actor,
         attributeKey: "bonusDodgeReflexDefense",
-        reduce: "SUM"
-    });
-    miscBonusTip += getInheritableAttribute({
-        entity: actor,
-        attributeKey: "bonusDodgeReflexDefense",
-        reduce: "SUMMARY"
-    });
+        reduce: ["SUM", "SUMMARY"],
+        attributeFilter: attr => !attr.modifier
+    })
+
+    let dodgeBonus = bonusDodgeReflexDefense["SUM"]
+    miscBonusTip += bonusDodgeReflexDefense["SUMMARY"]
     miscBonusTip += `Condition: ${conditionBonus};  `
     bonuses.push(dodgeBonus);
     bonuses.push(conditionBonus);
     bonuses.push(naturalArmorBonus);
     let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus])
-    let defenseModifiers = [_resolveFFRef(actor, conditionBonus)]
+    let defenseModifiers = [_resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus)]
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex';
     actor.setResolvedVariable("@RefDef", total, name, name);
-    // return {
-    //     total,
-    //     abilityBonus,
-    //     armorBonus,
-    //     classBonus,
-    //     miscBonus,
-    //     miscBonusTip,
-    //     skip: false,
-    //     name,
-    //     defenseBlock:true,
-    //     defenseModifiers
-    // }
 
     let reflexDefense = actor.system.defense?.reflex || {};
     reflexDefense.total = total;
@@ -348,37 +315,26 @@ function getArmorBonus(actor) {
  *
  * @param actor {SWSEActor}
  * @param conditionBonus
+ * @param abilityBonus
+ * @param armorBonus
+ * @param reflexDefenseBonus
+ * @param classBonus
  * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
  * @private
  */
-function _resolveFFRef(actor, conditionBonus) {
+function _resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus) {
     let bonuses = [];
     bonuses.push(10);
 
-    let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     if(abilityBonus < 0) {
         bonuses.push(abilityBonus);
     }
-    let armorBonus = getArmorBonus(actor);
     bonuses.push(armorBonus);
-    let otherBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "reflexDefenseBonus",
-        reduce: "SUM",
-        attributeFilter: attr => !attr.modifier
-    })
-    let miscBonusTip = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "reflexDefenseBonus",
-        reduce: "SUMMARY",
-        attributeFilter: attr => !attr.modifier
-    })
+
+    let otherBonus = reflexDefenseBonus["SUM"];
+    let miscBonusTip = reflexDefenseBonus["SUMMARY"];
+
     bonuses.push(otherBonus);
-    let classBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "classReflexDefenseBonus",
-        reduce: "MAX"
-    }) || 0;
     bonuses.push(classBonus);
     miscBonusTip += `Condition: ${conditionBonus};  `
     bonuses.push(conditionBonus);
@@ -426,12 +382,13 @@ function _getDamageThresholdSizeMod(actor) {
  *
  * @param actor {SWSEActor}
  * @param conditionBonus
+ * @param fortitudeTotal
  * @returns {{total: number}}
  * @private
  */
-function _resolveDt(actor, conditionBonus) {
+function _resolveDt(actor, conditionBonus, fortitudeTotal) {
     let total = [];
-    total.push(_resolveFort(actor, conditionBonus).total);
+    total.push(fortitudeTotal);
     total.push(_getDamageThresholdSizeMod(actor));
     total.push(getInheritableAttribute({
         entity: actor,

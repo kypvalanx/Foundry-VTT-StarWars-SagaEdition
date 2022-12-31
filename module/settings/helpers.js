@@ -95,7 +95,7 @@ export const registerHandlebarsHelpers = function () {
     });
 
     Handlebars.registerHelper('options', function(arg1, arg2){
-        let values = []
+        let values = undefined
         let selected;
         if(Array.isArray(arg1)){
             values = arg1;
@@ -106,7 +106,8 @@ export const registerHandlebarsHelpers = function () {
         if('subtype' === arg1){
             values = SUBTYPES[arg2.toLowerCase()] || [];
         }
-        if(Object.entries(arg1).length > 0 && values.length === 0){
+        if(Object.entries(arg1).length > 0 && !values){
+            values = []
             let hash = arg2.hash;
             if(hash){
                 selected = hash['selected']

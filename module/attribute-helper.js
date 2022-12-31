@@ -102,6 +102,9 @@ export function getResolvedSize(entity, options) {
     if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
+    if(entity.system.resolvedSize){
+        return entity.system.resolvedSize;
+    }
     let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX", recursive: true}))
     let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM", recursive: true}))
 
@@ -112,10 +115,79 @@ export function getResolvedSize(entity, options) {
         reduce: "SUM", recursive: true
     }))
     let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
-
-    return sizeIndex + sizeBonus + miscBonus;
+    entity.system.resolvedSize = sizeIndex + sizeBonus + miscBonus;
+    return entity.system.resolvedSize;
 }
 
+
+
+function getAttributesFromDocument(data) {
+    let document = data.entity;
+    let unfilteredAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
+
+    if (document.type === 'class') {
+        unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
+    }
+
+    unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
+
+    if (document.system?.modes) {
+        unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
+    }
+
+    if (document.effects) {
+        document.effects.filter(effect => effect.disabled === false)
+            .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
+    }
+
+    let values = [];
+    if (data.attributeKey && !Array.isArray(data.attributeKey)) {
+        values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
+    }else if (data.attributeKey) {
+        values.push(...unfilteredAttributes.filter(attr => attr && data.attributeKey.includes(attr.key)));
+    } else {
+        values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
+    }
+    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+}
+
+function functionString(fn) {
+    if(fn){
+        return fn.toLocaleString();
+    }
+}
+
+function getCachedAttributesFromDocument(data) {
+    let key = JSON.stringify({
+        id: data.entity.id,
+        attributeKey: data.attributeKey,
+        itemFilter: functionString(data.itemFilter),
+        attributeFilter: functionString(data.attributeFilter),
+        duplicates: data.duplicates
+    });
+    if(data.entity.getCached){
+        return data.entity.getCached(key, () => getAttributesFromDocument(data))
+    }
+    return getAttributesFromDocument(data);
+}
+
+function getInheritableValues(data) {
+    let values = [];
+    if (Array.isArray(data.entity)) {
+        for (let entity of data.entity) {
+            values.push(...getInheritableValues({
+                entity: entity,
+                attributeKey: data.attributeKey,
+                itemFilter: data.itemFilter,
+                duplicates: data.duplicates,
+                recursive: data.recursive
+            }))
+        }
+    } else {
+        return getCachedAttributesFromDocument(data);
+    }
+    return values;
+}
 
 /**
  *
@@ -130,61 +202,10 @@ export function getResolvedSize(entity, options) {
  * @returns {*|string|[]|*[]}
  */
 export function getInheritableAttribute(data = {}) {
-    let document = data.entity;
-
-    if (!document) {
+    if (!data.entity) {
         return [];
     }
-    let values = [];
-    if (Array.isArray(data.attributeKey)) {
-        for (let subKey of data.attributeKey) {
-            values.push(...getInheritableAttribute({
-                entity: document,
-                attributeKey: subKey,
-                itemFilter: data.itemFilter,
-                duplicates: data.duplicates,
-                recursive: data.recursive
-            }))
-        }
-    } else if (Array.isArray(document)) {
-        for (let entity of document) {
-            values.push(...getInheritableAttribute({
-                entity: entity,
-                attributeKey: data.attributeKey,
-                itemFilter: data.itemFilter,
-                duplicates: data.duplicates,
-                recursive: data.recursive
-            }))
-        }
-    } else {
-
-
-        let unfilteredAttributes = Object.entries(document.system?.attributes || document._source?.system?.attributes || {})
-            .filter(entry => !["str", "dex", "con", "int", "cha", "wis"].includes(entry[0]))
-            .map(entry => appendSourceMeta(entry[1], document._id, document.name, document.name));
-
-        if (document.type === 'class') {
-            unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
-        }
-
-        unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
-
-        if (document.system?.modes) {
-            unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
-        }
-
-
-        if (document.effects) {
-            document.effects.filter(effect => effect.disabled === false)
-                .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
-        }
-        if(data.attributeKey){
-            values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey))
-        } else {
-            values.push(...unfilteredAttributes)
-        }
-    }
-
+    let values = getInheritableValues(data);
 
 
     if (!data.recursive && data.parent) {
@@ -199,12 +220,12 @@ export function getInheritableAttribute(data = {}) {
                 return false;
             }
 
-            return !meetsPrerequisites(document, attr.prerequisite).doesFail
+            return !meetsPrerequisites(data.entity, attr.prerequisite).doesFail
         });
     }
 
-    if(document.type === "character" || document.type === "npc"){
-        values = values.filter(value => !meetsPrerequisites(document, value.parentPrerequisite).doesFail);
+    if(data.entity.type === "character" || data.entity.type === "npc"){
+        values = values.filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail);
     }
 
     if (data.attributeFilter) {
@@ -218,7 +239,7 @@ export function getInheritableAttribute(data = {}) {
     if (overrides.length > 0) {
         values = overrides;
     }
-    return reduceArray(data.reduce, values, document);
+    return reduceArray(data.reduce, values, data.entity);
 }
 
 //TODO evaluate if we want to add attributes to a custom event class rather than using changes
