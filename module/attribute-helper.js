@@ -151,9 +151,23 @@ function getAttributesFromDocument(data) {
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
-function getCachedAttributesFromDocument(data) {
-    //let key = JSON.stringify({document: document.id, data});
+function functionString(fn) {
+    if(fn){
+        return fn.toLocaleString();
+    }
+}
 
+function getCachedAttributesFromDocument(data) {
+    let key = JSON.stringify({
+        id: data.entity.id,
+        attributeKey: data.attributeKey,
+        itemFilter: functionString(data.itemFilter),
+        attributeFilter: functionString(data.attributeFilter),
+        duplicates: data.duplicates
+    });
+    if(data.entity.getCached){
+        return data.entity.getCached(key, () => getAttributesFromDocument(data))
+    }
     return getAttributesFromDocument(data);
 }
 
