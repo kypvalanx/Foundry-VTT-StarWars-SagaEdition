@@ -97,15 +97,15 @@ export function generateSkills(actor) {
         skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
         skill.key = key;
         skill.variable = `@${actor.cleanSkillName(key)}`;
-        actor.resolvedVariables.set(`@${actor.cleanSkillName(key)}`, "1d20 + " + skill.value);
+        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
-        actor.resolvedLabels.set(`@${actor.cleanSkillName(key)}`, skill.label);
+        actor.resolvedLabels.set(skill.variable, skill.label);
 
         skill.notes = []
         for (let reroll of applicableRerolls) {
             skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
         }
-        actor.resolvedNotes.set(`@${actor.cleanSkillName(key)}`, skill.notes)
+        actor.resolvedNotes.set(skill.variable, skill.notes)
 
         if (classSkills.size === 0 && skill.trained) {
             data[`data.skills.${key}.trained`] = false;
