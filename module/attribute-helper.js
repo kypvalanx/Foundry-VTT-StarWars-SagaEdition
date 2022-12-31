@@ -102,6 +102,9 @@ export function getResolvedSize(entity, options) {
     if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
+    if(entity.system.resolvedSize){
+        return entity.system.resolvedSize;
+    }
     let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX", recursive: true}))
     let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM", recursive: true}))
 
@@ -112,8 +115,8 @@ export function getResolvedSize(entity, options) {
         reduce: "SUM", recursive: true
     }))
     let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
-
-    return sizeIndex + sizeBonus + miscBonus;
+    entity.system.resolvedSize = sizeIndex + sizeBonus + miscBonus;
+    return entity.system.resolvedSize;
 }
 
 

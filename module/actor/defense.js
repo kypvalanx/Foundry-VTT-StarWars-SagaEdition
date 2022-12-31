@@ -70,7 +70,7 @@ export function resolveDefenses(actor) {
     defense.fortitude = _resolveFort(actor, conditionBonus);
     defense.will = _resolveWill(actor, conditionBonus);
     defense.reflex = _resolveRef(actor, conditionBonus);
-    defense.damageThreshold = _resolveDt(actor, conditionBonus, fortitude.total);
+    defense.damageThreshold = _resolveDt(actor, conditionBonus, defense.fortitude.total);
     defense.situationalBonuses = _getSituationalBonuses(actor);
 
     defense.damageReduction = getInheritableAttribute({
