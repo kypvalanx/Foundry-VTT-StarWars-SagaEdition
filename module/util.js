@@ -830,6 +830,7 @@ export function fullJoin(...args){
 export function getItems(target) {
     if(!target.items ){
         console.log("unknown target", target)
+        return [];
     }
     if(Array.isArray(target.items)){
         return target.items;

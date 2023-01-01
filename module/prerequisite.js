@@ -101,20 +101,23 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'FEAT':
-                let ownedFeats = filterItemsByType(getItems(target), "feat");
                 let filteredFeats;
                 if(prereq.requirement.toLowerCase().includes("(any)")){
-                    let req = prereq.requirement.replace(" (any)", "").replace(" (Any)", "");
-
-                    filteredFeats = ownedFeats.filter(feat => SWSEItem.buildItemName(feat).startsWith(req));
+                    let req = prereq.requirement.replace(/ \(a|Any\)/, "");
+                    filteredFeats = getItems(target)
+                        .filter(item => item.type === "feat"
+                            && SWSEItem.buildItemName(item).startsWith(req));
                 } else if(prereq.requirement.includes("(Exotic Melee Weapons)")){
                     let exoticMeleeWeapons = game.generated?.exoticMeleeWeapons || [];
                     let possibleFeats = exoticMeleeWeapons?.map(w => prereq.requirement.replace("(Exotic Melee Weapons)", `(${w})`))
 
-                    filteredFeats = ownedFeats.filter(feat => possibleFeats.includes(SWSEItem.buildItemName(feat)));
+                    filteredFeats = getItems(target)
+                        .filter(item => item.type === "feat"
+                            && possibleFeats.includes(SWSEItem.buildItemName(item)));
                 }else{
-
-                    filteredFeats = ownedFeats.filter(feat => SWSEItem.buildItemName(feat) === prereq.requirement);
+                    filteredFeats = getItems(target)
+                        .filter(item => item.type === "feat"
+                            && SWSEItem.buildItemName(item) === prereq.requirement);
                 }
 
                 if (filteredFeats.length > 0) {
@@ -126,8 +129,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'CLASS':
-                let ownedClasses = filterItemsByType(getItems(target), "class");
-                let filteredClasses = ownedClasses.filter(feat => feat.finalName === prereq.requirement);
+                let filteredClasses = getItems(target)
+                    .filter(item => item.type === "class"
+                        && item.finalName === prereq.requirement);
                 if (filteredClasses.length > 0) {
                     if (!meetsPrerequisites(target, filteredClasses[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
@@ -136,8 +140,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'TRAIT':
-                let filteredTraits = filterItemsByType(getItems(target), "trait")
-                    .filter(feat => feat.finalName === prereq.requirement);
+                let filteredTraits = getItems(target)
+                    .filter(item => item.type === "trait"
+                        && item.finalName === prereq.requirement);
                 if (filteredTraits.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredTraits) {
@@ -152,8 +157,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'SPECIAL_QUALITY':
-                let filteredSpecialQualities = filterItemsByType(getItems(target), "beastQuality")
-                    .filter(feat => feat.finalName === prereq.requirement);
+                let filteredSpecialQualities = getItems(target)
+                    .filter(item => item.type === "beastQuality"
+                        && item.finalName === prereq.requirement);
                 if (filteredSpecialQualities.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpecialQualities) {
@@ -168,8 +174,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'SPECIES_TYPE':
-                let filteredSpeciesTypes = filterItemsByType(getItems(target), "beastType")
-                    .filter(feat => feat.finalName === prereq.requirement);
+                let filteredSpeciesTypes = getItems(target)
+                    .filter(item => item.type === "beastType"
+                        && item.finalName === prereq.requirement);
                 if (filteredSpeciesTypes.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpeciesTypes) {
@@ -184,8 +191,9 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'BEAST_ATTACK':
-                let filteredBeastAttacks = filterItemsByType(getItems(target), "beastAttack")
-                    .filter(feat => feat.name === prereq.requirement);
+                let filteredBeastAttacks = getItems(target)
+                    .filter(item => item.type === "beastAttack"
+                        && item.finalName === prereq.requirement);
                 if (filteredBeastAttacks.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredBeastAttacks) {
@@ -207,14 +215,18 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'TALENT':
-                let ownedTalents = filterItemsByType(getItems(target), "talent");
-                let filteredTalents = ownedTalents.filter(talent => {
-                    let actsAs = getInheritableAttribute({entity: talent, recursive:true, attributeKey: "actsAs",reduce: "VALUES"}) || []
+                let filteredTalents = getItems(target)
+                    .filter(item => {
+                        if(item.type !== "talent"){
+                            return false;
+                        }
+                        let actsAs = getInheritableAttribute({entity: item, recursive:true, attributeKey: "actsAs",reduce: "VALUES"}) || []
 
-                    return talent.finalName === prereq.requirement ||
-                        talent.system.possibleProviders.includes(prereq.requirement) ||
-                        talent.system.talentTree === prereq.requirement || actsAs.includes(prereq.requirement)
-                });
+                        return item.finalName === prereq.requirement ||
+                            item.system.possibleProviders.includes(prereq.requirement) ||
+                            item.system.talentTree === prereq.requirement || actsAs.includes(prereq.requirement)
+                    });
+
                 if (filteredTalents.length > 0) {
                     if (!meetsPrerequisites(target, filteredTalents[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: filteredTalents.length});
@@ -224,8 +236,10 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
                 break;
             case 'TRADITION':
-                let ownedTraditions = filterItemsByType(getItems(target), "affiliation");
-                let filteredTraditions = ownedTraditions.filter(feat => feat.finalName === prereq.requirement);
+                let filteredTraditions = getItems(target)
+                    .filter(item => item.type === "affiliation"
+                        && item.finalName === prereq.requirement);
+
                 if (filteredTraditions.length > 0) {
                     if (!meetsPrerequisites(target, filteredTraditions[0].system.prerequisite).doesFail) {
                         successList.push({prereq, count: 1});
@@ -414,7 +428,6 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                         attributeKey: ["actsAsForProficiency", "actsAs"],
                         reduce: "VALUES"
                     })
-
 
                     return item.name === req || item.finalName === req || system?.subtype === req || actsAs.includes(req)
                 });
