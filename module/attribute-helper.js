@@ -144,7 +144,7 @@ function getAttributesFromDocument(data) {
 
         let attributeMap = new Map();
         for (const attribute of allAttributes) {
-            if(!attribute.key){
+            if(!attribute || !attribute.key){
                 continue;
             }
             if(!attributeMap.has(attribute.key)){
