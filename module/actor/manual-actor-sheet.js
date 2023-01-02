@@ -171,6 +171,9 @@ export class SWSEManualActorSheet extends SWSEActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
 
+        if(elem.dataset.type && !dragData.type){
+            dragData.type = elem.dataset.type
+        }
 
         dragData.img = elem.dataset.img;
         dragData.itemId = elem.dataset.itemId;

@@ -67,10 +67,10 @@ export function resolveDefenses(actor) {
 
     let defense = actor.system.defense || {};
 
-    defense.fortitude = _resolveFort(actor, conditionBonus);
-    defense.will = _resolveWill(actor, conditionBonus);
-    defense.reflex = _resolveRef(actor, conditionBonus);
-    defense.damageThreshold = _resolveDt(actor, conditionBonus, defense.fortitude.total);
+    defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
+    defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
+    defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
+    defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
     defense.situationalBonuses = _getSituationalBonuses(actor);
 
     defense.damageReduction = getInheritableAttribute({
