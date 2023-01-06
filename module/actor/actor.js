@@ -120,7 +120,7 @@ export class SWSEActor extends Actor {
                 return;
             }
             this.system.sheetType = "Auto"
-            if (this._sheet instanceof SWSEManualActorSheet) {
+            if (this.flags.core.sheetClass === "swse.SWSEManualActorSheet") {
                 this.system.finalAttributeGenerationType = "Manual";
                 this.system.sheetType = "Manual"
             } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
@@ -1440,7 +1440,7 @@ export class SWSEActor extends Actor {
         let rollMode = false;
         // if (rollMode) msg.applyRollMode(rollMode);
 
-        return cls.create(msg.data, {rollMode});
+        return cls.create(msg, {rollMode});
 
         // roll.toMessage({
         //     speaker: ChatMessage.getSpeaker({actor: this}),

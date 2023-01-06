@@ -251,7 +251,7 @@ async function createVariableMacro(data, slot) {
 
     const command = `game.swse.rollVariable("${actorId}", "${data.variable}");`;
     const name = `${actor.name}: ${data.label}`
-    let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
+    let macro = game.macros._source.find((m) => m.name === name && m.command === command);
     if (!macro) {
         macro = await Macro.create(
             {
