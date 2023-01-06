@@ -65,16 +65,14 @@ export function generateSkills(actor) {
         let dirtyKey = key.toLowerCase()
             .replace(" ", "").trim()
         let old = skill.value;
+        let bonuses = [];
+        let attributeMod = actor.getAttributeMod(skill.attribute);
         if (actor.system.sheetType === "Auto") {
             skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
 
             let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
-            let bonuses = [];
-
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
-
-            let attributeMod = actor.getAttributeMod(skill.attribute);
             bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
 
             let trainedSkillBonus = skill.trained === true ? 5 : 0;
@@ -102,19 +100,10 @@ export function generateSkills(actor) {
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
             bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
 
-            let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
-            skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
-            skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
-            skill.variable = `@${actor.cleanSkillName(key)}`;
-            actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-            skill.label = key.titleCase().replace("Knowledge", "K.");
-            actor.resolvedLabels.set(skill.variable, skill.label);
-            skill.abilityBonus = attributeMod;
             skill.trainedBonus = trainedSkillBonus + untrainedSkillBonus;
             skill.focusBonus = skillFocusBonus;
             skill.miscBonus = miscBonus;
             skill.armorPenalty = acPenalty;
-            skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
             skill.notes = []
             for (let reroll of applicableRerolls) {
@@ -126,23 +115,24 @@ export function generateSkills(actor) {
                 data[`data.skills.${key}.trained`] = false;
             }
         } else {
-            let bonuses = [];
-            let attributeMod = actor.getAttributeMod(skill.attribute);
             bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
             bonuses.push({value: skill.manualBonus, description: `Miscellaneous Bonus: ${skill.manualBonus}`});
-            bonuses.push({value: skill.manualTrainingBonus, description: `Training Bonus: ${skill.manualTrainingBonus}`});
+            bonuses.push({
+                value: skill.manualTrainingBonus,
+                description: `Training Bonus: ${skill.manualTrainingBonus}`
+            });
             bonuses.push({value: skill.manualFocusBonus, description: `Focus Bonus: ${skill.manualFocusBonus}`});
             bonuses.push({value: skill.manualArmorBonus, description: `Armor Penalty: ${skill.manualArmorBonus}`});
-            let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
-            skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
-            skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
-            skill.variable = `@${actor.cleanSkillName(key)}`;
-            actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-            skill.label = key.titleCase().replace("Knowledge", "K.");
-            actor.resolvedLabels.set(skill.variable, skill.label);
-            skill.abilityBonus = attributeMod;
-            skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
         }
+        let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
+        skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
+        skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
+        skill.variable = `@${actor.cleanSkillName(key)}`;
+        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+        skill.label = key.titleCase().replace("Knowledge", "K.");
+        actor.resolvedLabels.set(skill.variable, skill.label);
+        skill.abilityBonus = attributeMod;
+        skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
         if (skill.value !== old) {
             data[`data.skills.${key}.value`] = skill.value;
