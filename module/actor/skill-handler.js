@@ -56,56 +56,66 @@ export function generateSkills(actor) {
     for (let [key, skill] of Object.entries(actor.system.skills)) {
         let dirtyKey = key.toLowerCase()
             .replace(" ", "").trim()
-        skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
-
-        let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
-
-        let bonuses = [];
-
-        bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
-
-        let attributeMod = actor.getAttributeMod(skill.attribute);
-        bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
-
-        let trainedSkillBonus = skill.trained === true ? 5 : 0;
-        bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
-
-        let untrainedSkillBonus = !skill.trained && untrainedSkillBonuses.includes(key) ? 2 : 0;
-        bonuses.push({value: untrainedSkillBonus, description: `Untrained Skill Bonus: ${untrainedSkillBonus}`})
-
-        let getAbilitySkillBonus = actor.getAbilitySkillBonus(key);
-        bonuses.push({value: getAbilitySkillBonus, description: `Ability Skill Modifier: ${getAbilitySkillBonus}`})
-
-        bonuses.push({value: parseInt(conditionBonus), description: `Condition Modifier: ${conditionBonus}`})
-
-        let acPenalty = skill.acp ? generateArmorCheckPenalties(actor) : 0;
-        bonuses.push({value: acPenalty, description: `Armor Class Penalty: ${acPenalty}`})
-
-        let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
-        bonuses.push({value: skillFocusBonus, description: `Skill Focus Bonus: ${skillFocusBonus}`})
-
-        bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
-
-        let miscBonuses = skillBonusAttr.filter(bonus => bonus.startsWith(dirtyKey)).map(bonus => bonus.split(":")[1]);
-        let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
-
-        bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
-
-        let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
         let old = skill.value;
-        skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
-        skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
-        skill.key = key;
-        skill.variable = `@${actor.cleanSkillName(key)}`;
-        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-        skill.label = key.titleCase().replace("Knowledge", "K.");
-        actor.resolvedLabels.set(skill.variable, skill.label);
+        if(actor.system.sheetType === "Auto") {
+            skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key);
 
-        skill.notes = []
-        for (let reroll of applicableRerolls) {
-            skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
+            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
+
+            let bonuses = [];
+
+            bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
+
+            let attributeMod = actor.getAttributeMod(skill.attribute);
+            bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
+
+            let trainedSkillBonus = skill.trained === true ? 5 : 0;
+            bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
+
+            let untrainedSkillBonus = !skill.trained && untrainedSkillBonuses.includes(key) ? 2 : 0;
+            bonuses.push({value: untrainedSkillBonus, description: `Untrained Skill Bonus: ${untrainedSkillBonus}`})
+
+            let abilitySkillBonus = actor.getAbilitySkillBonus(key);
+            bonuses.push({value: abilitySkillBonus, description: `Ability Skill Modifier: ${abilitySkillBonus}`})
+
+            bonuses.push({value: parseInt(conditionBonus), description: `Condition Modifier: ${conditionBonus}`})
+
+            let acPenalty = skill.acp ? generateArmorCheckPenalties(actor) : 0;
+            bonuses.push({value: acPenalty, description: `Armor Class Penalty: ${acPenalty}`})
+
+            let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
+            bonuses.push({value: skillFocusBonus, description: `Skill Focus Bonus: ${skillFocusBonus}`})
+
+            bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
+
+            let miscBonuses = skillBonusAttr.filter(bonus => bonus.startsWith(dirtyKey)).map(bonus => bonus.split(":")[1]);
+            let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
+
+            bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
+            bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
+
+            let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
+            skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
+            skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
+            skill.variable = `@${actor.cleanSkillName(key)}`;
+            actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+            skill.label = key.titleCase().replace("Knowledge", "K.");
+            actor.resolvedLabels.set(skill.variable, skill.label);
+            skill.abilityBonus = attributeMod;
+            skill.trainedBonus = trainedSkillBonus + untrainedSkillBonus;
+            skill.focusBonus = skillFocusBonus;
+            skill.miscBonus = miscBonus;
+            skill.armorPenalty = acPenalty;
+            skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
+
+            skill.notes = []
+            for (let reroll of applicableRerolls) {
+                skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
+            }
+            actor.resolvedNotes.set(skill.variable, skill.notes)
+        } else {
+
         }
-        actor.resolvedNotes.set(skill.variable, skill.notes)
 
         if (classSkills.size === 0 && skill.trained) {
             data[`data.skills.${key}.trained`] = false;

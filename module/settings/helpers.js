@@ -18,6 +18,10 @@ export const registerHandlebarsHelpers = function () {
         return Array.prototype.slice.call(arguments,0,-1);
     })
 
+    Handlebars.registerHelper('toUpperCase', function(str) {
+        return !!str ? str.toUpperCase() : str;
+    });
+
     Handlebars.registerHelper('toLowerCase', function(str) {
         return !!str ? str.toLowerCase() : str;
     });

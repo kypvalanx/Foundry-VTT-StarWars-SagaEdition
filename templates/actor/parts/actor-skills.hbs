@@ -5,30 +5,62 @@
         <thead>
         <tr>
             <th></th>
-            <th>Bonus</th>
-            <th>Attribute</th>
-            <th>Can Use<br/>Untrained</th>
-            <!--                                  <th>Class Skill</th>-->
+            <th>Total</th>
+            <th>Ability</th>
             <th>Trained</th>
+            <th>Focus</th>
+            <th>Misc</th>
+            <th>Armor</th>
+            <th>Manual</th>
         </tr>
         </thead>
         <tbody>
         {{#each actor.system.skills as |skill id|}}
             {{#unless skill.hide}}
-                <tr class="draggable" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
-                    <th><a class="rollable" title="Roll 1d20 + {{skill.value}}"
-                           data-label="{{id}}" data-roll="1d20 + {{skill.value}}" data-notes="{{skill.notes}}"><i
-                            class="fas fa-dice-d20"></i>
-                    </a><a href="{{skill.link}}">{{skill.label}}</a></th>
+                <tr class="draggable {{skill.rowColor}}" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
+                    <th>
+                        <a class="rollable" title="Roll 1d20 + {{skill.value}}"
+                           data-label="{{id}}" data-roll="1d20 + {{skill.value}}"
+                           data-notes="{{skill.notes}}">
+                            <i class="fas fa-dice-d20"></i>
+                        </a>
+                        {{#unless skill.uut}}(TRAINED){{/unless}}
+                        <a href="{{skill.link}}">{{skill.label}}</a>
+                    </th>
                     <td title="{{skill.title}}">{{skill.value}}</td>
-                    <td>{{skill.attribute}}</td>
-                    <td>{{#if skill.uut}}Y{{/if}}{{#unless skill.uut}}N{{/unless}}</td>
-                    <td>{{#if skill.isClass}}
-                        <label title="trained skills get an additional +5"><input class="skill"
-                                                                                  type="checkbox"
-                                                                                  data-id="{{id}}"
-                                                                                  data-name="system.skills.{{id}}.trained"
-                                                                                  {{#if skill.trained}}checked{{/if}}/></label>{{/if}}
+                    <td>
+                        <div class="background-text-container">
+                            {{toUpperCase skill.attribute}} ({{skill.abilityBonus}})
+<!--                            <div class="background-text">{{skill.attribute}}</div>-->
+<!--                            <div class="foreground-text">{{skill.abilityBonus}}</div>-->
+                        </div>
+                    </td>
+                    <td>
+                        {{#if skill.isClass}}
+                            <label title="trained skills get an additional +5">
+                                <input class="skill"
+                                       type="checkbox"
+                                       data-id="{{id}}"
+                                       data-name="system.skills.{{id}}.trained"
+                                       {{#if skill.trained}}checked{{/if}}/>
+                            </label>
+                        {{/if}}
+                        {{skill.trainedBonus}}
+                    </td>
+                    <td>
+                        {{skill.focusBonus}}
+                    </td>
+                    <td>
+                        {{skill.miscBonus}}
+                    </td>
+                    <td>
+                        {{#if skill.acp}}
+                            {{skill.armorPenalty}}
+                        {{/if}}
+                    </td>
+                    <td>
+                        <input class="plain tiny" name="system.skills.{{id}}.manualBonus" type="number"
+                               value="{{skill.manualBonus}}" placeholder="0"/>
                     </td>
                 </tr>
             {{/unless}}

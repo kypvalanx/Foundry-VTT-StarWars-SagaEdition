@@ -125,10 +125,17 @@ function getAttributesFromDocument(data) {
     let document = data.entity;
 
     let fn = () => {
-        let allAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
+        let allAttributes = [];
+        if (document.type !== 'class') {
+            allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
+        } else {
+            let classLevel = data.duplicates || 0;
+            if(classLevel < 2)
+            {
+                allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
+            }
+                allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
 
-        if (document.type === 'class') {
-            allAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
         }
 
         allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
@@ -154,7 +161,7 @@ function getAttributesFromDocument(data) {
         }
         return attributeMap;
     };
-    let unfilteredAttributes = document.getCached ? document.getCached("getAttributesFromDocument", fn) : fn();
+    let unfilteredAttributes = document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
 
 
     let values = [];
@@ -166,7 +173,7 @@ function getAttributesFromDocument(data) {
     }else if (data.attributeKey) {
         values.push(...(unfilteredAttributes.get(data.attributeKey) || []));
     } else {
-        for(let value in unfilteredAttributes.values()){
+        for(let value of unfilteredAttributes.values()){
             values.push(...(value || []))
         }
         //values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
@@ -181,13 +188,13 @@ function functionString(fn) {
 }
 
 function getCachedAttributesFromDocument(data) {
-    let key = JSON.stringify({
-        id: data.entity.id,
+    let key = {
+        fn: "getCachedAttributesFromDocument",
         attributeKey: data.attributeKey,
         itemFilter: functionString(data.itemFilter),
         attributeFilter: functionString(data.attributeFilter),
         duplicates: data.duplicates
-    });
+    };
     if(data.entity.getCached){
         return data.entity.getCached(key, () => getAttributesFromDocument(data))
     }

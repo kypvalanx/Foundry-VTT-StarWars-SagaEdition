@@ -1,7 +1,8 @@
 const gulp = require('gulp');
 const prefix = require('gulp-autoprefixer');
 const sourcemaps = require('gulp-sourcemaps');
-const sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('node-sass'));
+
 
 /* ----------------------------------------- */
 /*  Compile Sass
