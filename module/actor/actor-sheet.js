@@ -215,6 +215,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="shield"]').click(this._onShield.bind(this));
         html.find('[data-action="decrease-quantity"]').click(this._onDecreaseItemQuantity.bind(this));
         html.find('[data-action="increase-quantity"]').click(this._onIncreaseItemQuantity.bind(this));
+        html.find('[data-action="toggle-use"]').click(this._onToggleUse.bind(this));
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
         html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
 
@@ -1152,6 +1153,15 @@ export class SWSEActorSheet extends ActorSheet {
         const li = event.currentTarget.closest(".item");
         const item = this.actor.items.get(li.dataset.itemId);
         item.increaseQuantity();
+    }
+
+    _onToggleUse(event) {
+        event.preventDefault();
+        let toggle = event.currentTarget.checked
+        let key = event.currentTarget.dataset.name
+        const li = event.currentTarget.closest(".item");
+        const item = this.actor.items.get(li.dataset.itemId);
+        item.toggleUse(key, toggle)
     }
 
     /**

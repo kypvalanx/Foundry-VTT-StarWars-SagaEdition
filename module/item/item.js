@@ -1067,6 +1067,12 @@ export class SWSEItem extends Item {
         this.safeUpdate({"data.quantity": quantity});
     }
 
+    toggleUse(key, value) {
+        let data = {};
+        data[key] = value;
+        this.safeUpdate(data);
+    }
+
     getBaseUpgradePoints(ogName) {
         //TODO find power armors and add them here https://swse.fandom.com/wiki/Category:Powered_Armor
 

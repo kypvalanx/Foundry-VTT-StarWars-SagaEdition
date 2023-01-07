@@ -120,7 +120,7 @@ export class SWSEActor extends Actor {
                 return;
             }
             this.system.sheetType = "Auto"
-            if (this.flags.core.sheetClass === "swse.SWSEManualActorSheet") {
+            if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet") {
                 this.system.finalAttributeGenerationType = "Manual";
                 this.system.sheetType = "Manual"
             } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
