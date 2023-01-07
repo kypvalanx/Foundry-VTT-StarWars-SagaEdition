@@ -221,12 +221,13 @@ function explodeOptions(options, actor) {
                 reduce: "VALUES_TO_LOWERCASE"
             });
             for (let skill of actor.trainedSkills) {
-                if (!skillFocuses.includes(skill.key)) {
+                let attributeKey = skill.label;
+                if (!skillFocuses.includes(attributeKey.toLowerCase())) {
                     resolvedOptions.push({
-                        name: skill.key.titleCase(),
+                        name: attributeKey.titleCase(),
                         abilities: [],
                         items: [],
-                        payload: skill.key.titleCase()
+                        payload: attributeKey.titleCase()
                     });
                 }
             }
