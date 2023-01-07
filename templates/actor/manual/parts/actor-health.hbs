@@ -4,7 +4,7 @@
     <div class="flex flex-row">
         <div class="resource-block flex flex-col">
             <label class="resource-label">Total</label>
-                <input class="plain small" type="number" name="system.health.manual" value="{{actor.system.health.manual}}" data-dtype="Number"/>
+                <input class="plain small" type="number" name="system.health.manualTotal" value="{{actor.system.health.manualTotal}}" data-dtype="Number"/>
             </div>
         <div class="resource-block flex flex-col">
             <label class="resource-label">Current</label>
@@ -14,17 +14,17 @@
     <div class="flex flex-row panel">
         <div class="resource-block flex flex-col">
             <label class="resource-label">Damage Threshold</label>
-            <input class="plain small" type="number" name="system.defense.damageThreshold.manual" value="{{actor.system.defense.damageThreshold.manual}}" data-dtype="Number"/>
+            <input class="plain small" type="number" name="system.defense.damageThreshold.manualTotal" value="{{actor.system.defense.damageThreshold.manualTotal}}" data-dtype="Number"/>
         </div>
         <div class="resource-block">=</div>
         <div class="resource-block flex flex-col">
             <label class="resource-label">Fort</label>
-            <div class="plain input static">{{actor.system.defense.fortitude.manual}}</div>
+            <div class="plain input static">{{actor.system.defense.fortitude.manualTotal}}</div>
         </div>
         <div class="resource-block">+</div>
         <div class="resource-block flex flex-col">
             <label class="resource-label">Misc</label>
-            <input class="plain small" type="number" name="system.defense.damageThreshold.miscManual" value="{{actor.system.defense.damageThreshold.miscManual}}" data-dtype="Number"/>
+            <input class="plain small" type="number" name="system.defense.damageThreshold.manualMisc" value="{{actor.system.defense.damageThreshold.manualMisc}}" data-dtype="Number"/>
         </div>
     </div>
     <div class="flex flex-row">
@@ -54,7 +54,7 @@
         </div>
         <div class="resource-block flex flex-col">
             <label class="resource-label">Speed</label>
-            <input class="plain" type="text" name="system.speed" value="{{actor.system.speed}}" data-dtype="Number"/>
+            <input class="plain" type="text" name="system.manualSpeed" value="{{actor.system.manualSpeed}}" data-dtype="Number"/>
         </div>
     </div>
     <div class="flex flex-row">

@@ -123,30 +123,60 @@ export function getResolvedSize(entity, options) {
 
 function getAttributesFromDocument(data) {
     let document = data.entity;
-    let unfilteredAttributes = Object.values(document.system?.attributes || document._source?.system?.attributes || {})
 
-    if (document.type === 'class') {
-        unfilteredAttributes.push(...getAttributesFromClassLevel(document, data.duplicates || 0))
-    }
+    let fn = () => {
+        let allAttributes = [];
+        if (document.type !== 'class') {
+            allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
+        } else {
+            let classLevel = data.duplicates || 0;
+            if(classLevel < 2)
+            {
+                allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
+            }
+                allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
 
-    unfilteredAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
+        }
 
-    if (document.system?.modes) {
-        unfilteredAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
-    }
+        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
 
-    if (document.effects) {
-        document.effects.filter(effect => effect.disabled === false)
-            .forEach(effect => unfilteredAttributes.push(...extractEffectChange(effect.changes || [], effect)))
-    }
+        if (document.system?.modes) {
+            allAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
+        }
+
+        if (document.effects) {
+            document.effects.filter(effect => effect.disabled === false)
+                .forEach(effect => allAttributes.push(...extractEffectChange(effect.changes || [], effect)))
+        }
+
+        let attributeMap = new Map();
+        for (const attribute of allAttributes) {
+            if(!attribute || !attribute.key){
+                continue;
+            }
+            if(!attributeMap.has(attribute.key)){
+                attributeMap.set(attribute.key, []);
+            }
+            attributeMap.get(attribute.key).push(attribute);
+        }
+        return attributeMap;
+    };
+    let unfilteredAttributes = document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
+
 
     let values = [];
-    if (data.attributeKey && !Array.isArray(data.attributeKey)) {
-        values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
+    if (data.attributeKey && Array.isArray(data.attributeKey)) {
+        for(let key in data.attributeKey){
+            values.push(...(unfilteredAttributes.get(key)|| []))
+        }
+        //values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
     }else if (data.attributeKey) {
-        values.push(...unfilteredAttributes.filter(attr => attr && data.attributeKey.includes(attr.key)));
+        values.push(...(unfilteredAttributes.get(data.attributeKey) || []));
     } else {
-        values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
+        for(let value of unfilteredAttributes.values()){
+            values.push(...(value || []))
+        }
+        //values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
     }
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
@@ -158,13 +188,13 @@ function functionString(fn) {
 }
 
 function getCachedAttributesFromDocument(data) {
-    let key = JSON.stringify({
-        id: data.entity.id,
+    let key = {
+        fn: "getCachedAttributesFromDocument",
         attributeKey: data.attributeKey,
         itemFilter: functionString(data.itemFilter),
         attributeFilter: functionString(data.attributeFilter),
         duplicates: data.duplicates
-    });
+    };
     if(data.entity.getCached){
         return data.entity.getCached(key, () => getAttributesFromDocument(data))
     }

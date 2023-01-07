@@ -11,7 +11,6 @@
             <th>Focus</th>
             <th>Misc</th>
             <th>Armor</th>
-            <th>Manual</th>
         </tr>
         </thead>
         <tbody>
@@ -36,31 +35,22 @@
                         </div>
                     </td>
                     <td>
-                        {{#if skill.isClass}}
-                            <label title="trained skills get an additional +5">
-                                <input class="skill"
-                                       type="checkbox"
-                                       data-id="{{id}}"
-                                       data-name="system.skills.{{id}}.trained"
-                                       {{#if skill.trained}}checked{{/if}}/>
-                            </label>
-                        {{/if}}
-                        {{skill.trainedBonus}}
+                        <input class="plain tiny" name="system.skills.{{id}}.manualTrainingBonus" type="number"
+                               value="{{skill.manualTrainingBonus}}" placeholder="0"/>
                     </td>
                     <td>
-                        {{skill.focusBonus}}
-                    </td>
-                    <td>
-                        {{skill.miscBonus}}
-                    </td>
-                    <td>
-                        {{#if skill.acp}}
-                            {{skill.armorPenalty}}
-                        {{/if}}
+                        <input class="plain tiny" name="system.skills.{{id}}.manualFocusBonus" type="number"
+                               value="{{skill.manualFocusBonus}}" placeholder="0"/>
                     </td>
                     <td>
                         <input class="plain tiny" name="system.skills.{{id}}.manualBonus" type="number"
                                value="{{skill.manualBonus}}" placeholder="0"/>
+                    </td>
+                    <td>
+                        {{#if skill.acp}}
+                            <input class="plain tiny" name="system.skills.{{id}}.manualArmorBonus" type="number"
+                                   value="{{skill.manualArmorBonus}}" placeholder="0"/>
+                        {{/if}}
                     </td>
                 </tr>
             {{/unless}}

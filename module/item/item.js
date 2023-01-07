@@ -33,6 +33,7 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const system = this.system;
+        this.lazyResolve = new Map();
         //itemData.finalName = this.name;
 
         system.displayName = SWSEItem.buildItemName(this);
@@ -93,24 +94,38 @@ export class SWSEItem extends Item {
             finalName = `${finalName} (${modifiers})`
         }
 
-
-        for (let prefix of getInheritableAttribute({
+        let prefix = getInheritableAttribute({
             entity: item,
             attributeKey: "prefix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
-        })) {
+        }).join(" ");
+
+        if (prefix) {
             finalName = `${prefix} ${finalName}`;
         }
-        for (let suffix of getInheritableAttribute({
+
+        let suffix = getInheritableAttribute({
             entity: item,
             attributeKey: "suffix",
             reduce: "VALUES",
             attributeFilter: attr => attr.source !== id
-        })) {
+        }).join(" ");
+
+        if (suffix) {
             finalName = `${finalName} ${suffix}`;
         }
+
         return finalName;
+    }
+
+    getCached(key, fn) {
+        if (this.lazyResolve.has(key)) {
+            return this.lazyResolve.get(key);
+        }
+        let resolved = fn();
+        this.lazyResolve.set(key, resolved);
+        return resolved
     }
 
     static addSizeAdjustmentSuffix(itemData, finalName) {
@@ -1050,6 +1065,12 @@ export class SWSEItem extends Item {
 
         let quantity = Math.max(0, current - 1);
         this.safeUpdate({"data.quantity": quantity});
+    }
+
+    toggleUse(key, value) {
+        let data = {};
+        data[key] = value;
+        this.safeUpdate(data);
     }
 
     getBaseUpgradePoints(ogName) {

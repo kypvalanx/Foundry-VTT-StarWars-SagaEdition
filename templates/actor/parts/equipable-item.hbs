@@ -6,8 +6,22 @@
         <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                          height="24" alt=""/></div>
-            <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">{{item.finalName}}
-                {{#if quantity}}{{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}{{/if}}</h4>
+            <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">
+                {{item.finalName}}
+                {{#if quantity}}
+                    {{#unless usable}}
+                        {{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}
+                    {{else}}
+                        {{#times item.system.quantity}}
+                            <input data-action="toggle-use"
+                                   type="checkbox"
+                                   data-id="{{../item.id}} uses {{this}}"
+                                   data-name="system.uses.{{this}}"
+                                   {{#if (lookup ../item.system.uses this)}}checked{{/if}}/>
+                        {{/times}}
+                    {{/unless}}
+                {{/if}}
+            </h4>
             {{#ifContains fields "Prerequisites"}}
                 <h4 class="item-name">{{#if item.system.prerequisite}}
                     <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>

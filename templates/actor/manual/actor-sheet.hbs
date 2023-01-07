@@ -11,7 +11,8 @@
         <div class="flex-grow1">
             {{!-- Sheet Tab Navigation --}}
             <nav class="sheet-tabs tabs" data-group="primary">
-                <a class="item" data-tab="summary">Summary</a>
+                <a class="item" data-tab="summary">First Page</a>
+                <a class="item" data-tab="items">Second Page</a>
 <!--                <a class="item" data-tab="charClass">Class</a>-->
 <!--                {{#if actor.isBeast}}<a class="item" data-tab="beast">Beast</a>{{/if}}-->
 <!--                <a class="item" data-tab="equipment">Equipment</a>-->
@@ -59,286 +60,41 @@
                         <div>
                             <!--darkside-->
                             {{> 'systems/swse/templates/actor/parts/actor-darkside.hbs'}}
-
-                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="languages" label="Languages" items=actor.languages draggable=false delete="always" description="expandable" createNew='language' quickCreate='language'}}
-
                         </div>
                     </div>
                     <div class="flex flex-row">
                         {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
-                        {{> 'systems/swse/templates/actor/parts/actor-skills.hbs'}}
+                        {{> 'systems/swse/templates/actor/manual/parts/actor-skills.hbs'}}
                     </div>
                 </div>
 
 
-                {{!-- Class Page --}}
-                <div class="tab summary" data-group="primary" data-tab="charClass">
-                    <table class="fixed">
-                        <thead>
-                        <tr>
-                            <th></th>
-                            <th>Class</th>
-                            <th>Class HP</th>
-                            <th>Re-roll HP</th>
-                            <th>Attribute Bonus HP</th>
-                            <th>Total HP</th>
-                            <!--                  <th>First Level Class</th> -->
-                            <th>
-                                <a data-action="compendium" data-type="Item" data-filter="-type:class"
-                                   title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <!-- <ol class="items-list charclass-list"> -->
-                        {{#each actor.classes as |class id|}}
-                            <tr class="charclass item" data-item-id="{{class.id}}">
-                                <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
-                                                            height="24" alt="{{class.name}}"/></td>
-                                <td><h4 class="item-name">{{class.name}}</h4></td>
-                                <td><span class="text-box {{#unless
-                                        class.actAsFirstLevel}}item-attribute short{{/unless}} center"
-                                          data-item="{{class.id}}" data-item-attribute="rolledHp"
-                                          data-dtype="Number">{{class.classLevelHealth}}</span>
-                                </td>
-                                <td>
-                                    {{#unless class.actAsFirstLevel}}
-                                        <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}"
-                                           data-item="{{class.id}}" data-item-attribute="rolledHp"
-                                           data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
-                                        </a>{{/unless}}</td>
-                                <td>{{../actor.system.attributes.con.mod}}</td>
-                                <td>{{sum class.classLevelHealth ../actor.system.attributes.con.mod}}</td>
-                                <td class="item-controls">
-                                    <a data-action="view" class="item-control" title="View Class Description"><i
-                                            class="fas fa-edit"></i></a>
-                                    <a class="item-control item-duplicate" title="Copy Class"><i
-                                            class="fas fa-plus"></i></a>
-                                    {{#ifLast id actor.classes}}
-                                        <a class="item-control item-delete" title="Delete Class"><i
-                                                class="fas fa-trash"></i></a>{{/ifLast}}
-                                </td>
-                            </tr>
-                        {{/each}}
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td title="these bonuses come from feats, traits, and equipped items.">Other
-                                Bonuses:
-                            </td>
-                            <td> {{actor.system.health.other}}</td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td>{{actor.system.health.max}}</td>
-                            <td></td>
-                        </tr>
-                        <!-- </ol> -->
-                        </tbody>
-                    </table>
-                </div>
+                {{!-- Item Page --}}
+                <div class="tab summary flex flex-col" data-group="primary" data-tab="items">
+                    <div class="flex flex-row">
+                        <div class="flex flex-col flex-grow">
 
-                {{!-- Beast Page --}}
-                <div class="tab beast" data-group="primary" data-tab="beast">
-                    <h2><label class="resource-label">Beast
-                        <a data-action="compendium" data-type="Item" data-pack="swse.beast components"
-                           title="Beast"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="natural-weapons" label="Natural Weapons" items=actor.naturalWeapons draggable=false quantity=false delete="always"}}
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="special-senses" label="Special Senses" items=actor.specialSenses draggable=false quantity=false delete="always"}}
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="species-types" label="Species Types" items=actor.speciesTypes draggable=false quantity=false delete="always"}}
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="special-qualities" label="Special Qualities" items=actor.specialQualities draggable=false quantity=false delete="always"}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="talents" bigLabel="Talents" items=actor.talents draggable=false delete="always" description="expandable" createNew='talent' quickCreate='talent'}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="languages" bigLabel="Languages" items=actor.languages draggable=false delete="always" description="expandable" createNew='language' quickCreate='language'}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="species" bigLabel="Species Info" items=actor.species draggable=false delete="always" description="expandable" createNew='species' quickCreate='species'}}
 
-                </div>
+                        </div>
+                        <div class="flex flex-col flex-grow">
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="feats" bigLabel="Feats" items=actor.feats draggable=false delete="always" description="expandable" createNew='feat' quickCreate='feat'}}
 
-                {{!-- Biography Tab --}}
-                <div class="tab biography" data-group="primary" data-tab="description">
-                    {{editor actor.system.description target="system.description" button=true owner=owner
-                             editable=editable}}
-                </div>
-
-                {{!-- Owned Equipment Tab --}}
-                <div class="tab items" data-group="primary" data-tab="equipment">
-                    <div>
-                        <h2><label class="resource-label">Equipment
-                            <a data-action="compendium" data-type="Item" data-pack="swse.items"
-                               data-action-target="swse.items"
-                               title="Items"><i
-                                    class="fas fa-folder-plus"></i></a>
-                            <a data-action="compendium" data-type="Item" data-pack="swse.templates"
-                               data-action-target="swse.templates"
-                               title="Templates"><i
-                                    class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <div class="grid-2col">
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true quantity=true delete="always"}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true delete="always"}}
+                        </div>
                     </div>
 
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory draggable=true quantity=true delete="always"}}
-
-                    {{> 'systems/swse/templates/credits/credit-chip.hbs'}}
-
-                </div>
-
-
-                <div class="tab summary" data-group="primary" data-tab="droid">
-
-                </div>
-
-                {{!-- Owned Feats Tab --}}
-                <div class="tab items" data-group="primary" data-tab="feats">
-                    <div>
-                        <h2><label class="resource-label">Feats <a data-action="compendium" data-type="Item" data-filter="-type:feat"
-                                                                   title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
+                    <div class="flex flex-row">
+                        <div class="flex-grow">
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="weapons" bigLabel="Weapons" items=actor.weapons draggable=false delete="always" description="expandable" createNew='weapon' quickCreate='weapon'}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="armors" bigLabel="Armors" items=actor.armors draggable=false delete="always" description="expandable" createNew='armor' quickCreate='armor'}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipment" bigLabel="Equipment" items=actor.equipment draggable=false delete="always" description="expandable" createNew='equipment' quickCreate='equipment'}}
+                        </div>
+                        <div class="flex-grow">
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="forcePowers" bigLabel="Force Powers" items=actor.powers draggable=false quantity=true usable=true delete="always" description="expandable" createNew='forcePower' quickCreate='forcePower'}}
+                        </div>
                     </div>
-                    <ol class="items-list">
-                        {{#each actor.system.feats as |feat id|}}
-                            <li class="item feat flexrow " data-item-name="{{feat.finalName}}"
-                                data-item-id="{{feat.id}}">
-                                <!--                <div class="item-image"><img src="{{feat.img}}" title="{{feat.finalName}}" width="24" height="24"/></div>-->
-                                <h4 class="item-name"><b>{{feat.finalName}}</b></h4>
-                                {{#if feat.system.prerequisite }}
-                                    <h4 class="item-name"><b>Prerequisites:</b> {{feat.system.prerequisite.text}}</h4>{{/if}}
-                                <!-- TODO maybe put the description here-->
-
-                                <div class="item-controls">
-                                    <!--                                <a class="item-control item-edit" title="Edit Item"><i class="fas fa-edit"></i></a>-->
-                                    {{#unless feat.system.supplier.id}}
-                                        <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                    {{/unless}}
-                                    <a data-action="view" class="item-control" title="View Item"><i class="fas fa-eye"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </div>
-
-                {{!-- Owned Talents Tab --}}
-                <div class="tab items" data-group="primary" data-tab="talents">
-                    <div>
-                        <h2><label class="resource-label">Talents <a data-action="compendium" data-type="Item" data-filter="-type:talent"
-                                                                     title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.talents as |talent id|}}
-                            <li class="item flexrow" data-item-id="{{talent.id}}">
-                                <h4 class="item-name"><b>{{talent.finalName}}</b></h4>
-                                <h4 class="item-name"><a
-                                        href="{{talent.system.talentTreeUrl}}"><b>{{talent.system.talentTree}}</b></a></h4>
-                                <h4 class="item-name">{{#if talent.system.prerequisites}}
-                                    <b>Prerequisites:</b> {{talent.system.prerequisites}}{{/if}}</h4>
-                                <!--                            <h4 class="item-name">-->
-                                <!--                                <b>Source:</b> {{talent.system.talentTreeSource}}</h4>-->
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    {{#unless talent.system.supplier.id}}
-                                        <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                    {{/unless}}
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </div>
-
-
-                {{!-- Owned Traits Tab --}}
-                <div class="tab items" data-group="primary" data-tab="traits">
-                    <div>
-                        <h2><label class="resource-label">Traits <a data-action="compendium" data-type="Item" data-filter="-type:trait"
-                                                                    title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="items-list" fields= (arr "Source") items=actor.traits draggable=false quantity=false delete="unSupplied"}}
-
-                </div>
-
-                {{!-- Owned Powers Tab --}}
-                <div class="tab items" data-group="primary" data-tab="force">
-                    <div>
-                        <h2><label class="resource-label">Force Powers <a data-action="compendium" data-type="Item" data-filter="-type:forcePower"
-                                                                          title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.powers as |power id|}}
-                            <li class="item flexrow" data-item-id="{{power.id}}">
-                                <h4 class="item-name"><b>{{power.name}}</b></h4>
-                                {{#if power.system.prerequisites}}
-                                    <h4 class="item-name"><b>Prerequisites:</b> {{power.system.prerequisites}}</h4>{{/if}}
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                    <br/>
-                    <div>
-                        <h2><label class="resource-label">Force Secrets <a data-action="compendium" data-type="Item" data-filter="-type:forceSecret"
-                                                                           title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.secrets as |item id|}}
-                            <li class="item flexrow" data-item-id="{{item._id}}">
-                                <h4 class="item-name"><b>{{item.name}}</b></h4>
-                                <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                    <br/>
-                    <div>
-                        <h2><label class="resource-label">Force Techniques <a data-action="compendium" data-type="Item" data-filter="-type:forceTechnique"
-                                                                              title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.techniques as |item id|}}
-                            <li class="item flexrow" data-item-id="{{item._id}}">
-                                <h4 class="item-name"><b>{{item.name}}</b></h4>
-                                <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                    <br/>
-                    <div>
-                        <h2><label class="resource-label">Force Regimens <a data-action="compendium" data-type="Item" data-filter="-type:forceRegimen"
-                                                                            title="{{localize "Open Compendium"}}"><i
-                                class="fas fa-folder-plus"></i></a></label></h2>
-                    </div>
-                    <ol class="items-list">
-                        {{#each actor.regimens as |item id|}}
-                            <li class="item flexrow" data-item-id="{{item._id}}">
-                                <h4 class="item-name"><b>{{item.name}}</b></h4>
-                                <h4 class="item-name"><b>Prerequisites:</b> {{item.prerequisites}}</h4>
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                    <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                </div>
-                            </li>
-                        {{/each}}
-                    </ol>
-                </div>
-
-                <div class="tab affiliations" data-group="primary" data-tab="affiliations">
-                    {{> 'systems/swse/templates/actor/parts/actor-affiliations.hbs'}}
                 </div>
             </section>
         </div>

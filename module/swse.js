@@ -76,6 +76,7 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/parts/actor-summary.hbs',
         'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs',
         'systems/swse/templates/actor/parts/actor-skills.hbs',
+        'systems/swse/templates/actor/manual/parts/actor-skills.hbs',
         'systems/swse/templates/actor/parts/actor-ability-scores.hbs',
         'systems/swse/templates/actor/parts/actor-health.hbs',
         'systems/swse/templates/actor/parts/actor-shields.hbs',
@@ -250,7 +251,7 @@ async function createVariableMacro(data, slot) {
 
     const command = `game.swse.rollVariable("${actorId}", "${data.variable}");`;
     const name = `${actor.name}: ${data.label}`
-    let macro = game.macros.entities.find((m) => m.name === name && m.command === command);
+    let macro = game.macros._source.find((m) => m.name === name && m.command === command);
     if (!macro) {
         macro = await Macro.create(
             {

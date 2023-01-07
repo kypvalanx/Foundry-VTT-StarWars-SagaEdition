@@ -20,7 +20,7 @@ export function resolveOffense(actor) {
         data[`system.offense.bab`] = offense.bab;
     }
 
-    if(Object.values(data).length > 0 && actor._id && !actor.pack && !actor.flags.core?.sourceId.includes(actor._id)){
+    if(Object.values(data).length > 0 && actor._id && !actor.pack && !actor.flags.core?.sourceId?.includes(actor._id)){
         actor.safeUpdate(data);
     }
 }

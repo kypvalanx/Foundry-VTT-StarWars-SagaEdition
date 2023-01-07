@@ -828,13 +828,17 @@ export function fullJoin(...args){
  * @returns {*}
  */
 export function getItems(target) {
-    if(!target.items ){
-        console.log("unknown target", target)
-    }
-    if(Array.isArray(target.items)){
-        return target.items;
-    }
-    return target.items.values();
+    let fn = () => {
+        if(!target.items ){
+            console.log("unknown target", target)
+            return [];
+        }
+        if(Array.isArray(target.items)){
+            return target.items;
+        }
+        return Array.from(target.items.values());
+    };
+    return target.getCached ? target.getCached("getItems", fn) : fn();
 }
 
 
