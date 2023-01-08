@@ -722,6 +722,7 @@ export class SWSEActor extends Actor {
     }
 
 
+    //TODO extract this, it's not dependent on this class
     applyArmorSpeedPenalty(speed, armorType) {
         if (!armorType || "Light" === armorType) {
             return speed;
