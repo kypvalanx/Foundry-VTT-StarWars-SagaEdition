@@ -639,7 +639,7 @@ export function reduceArray(reduce, values, actor) {
     if(!Array.isArray(values)){
         values = [values];
     }
-    if(Array.isArray(reduce)){
+    if(Array.isArray(reduce) && (reduce.length < 2) || (reduce.length < 3 && reduce.includes("UNIQUE"))){
         for(let r of reduce){
             values = reduceArray(r, values, actor);
         }

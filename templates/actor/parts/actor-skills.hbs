@@ -29,11 +29,7 @@
                     </th>
                     <td title="{{skill.title}}">{{skill.value}}</td>
                     <td>
-                        <div class="background-text-container">
-                            {{toUpperCase skill.attribute}} ({{skill.abilityBonus}})
-<!--                            <div class="background-text">{{skill.attribute}}</div>-->
-<!--                            <div class="foreground-text">{{skill.abilityBonus}}</div>-->
-                        </div>
+                        <div class="background-text-container">{{toUpperCase skill.attribute}} ({{skill.abilityBonus}})</div>
                     </td>
                     <td>
                         {{#if skill.isClass}}

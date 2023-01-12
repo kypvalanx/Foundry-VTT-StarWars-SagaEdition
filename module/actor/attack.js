@@ -65,7 +65,9 @@ export class Attack {
     }
 
     get toJSONString() {
-        let s = JSON.stringify(this.toJSON);
+        let value = this.toJSON;
+        delete value.lazyResolve
+        let s = JSON.stringify(value);
         return escape(s);
     }
 
@@ -89,6 +91,17 @@ export class Attack {
         this.providerId = providerId;
         this.parentId = parentId;
         this.options = options || {};
+        this.lazyResolve = new Map();
+    }
+
+
+    getCached(key, fn) {
+        if (this.lazyResolve.has(key)) {
+            return this.lazyResolve.get(key);
+        }
+        let resolved = fn();
+        this.lazyResolve.set(key, resolved);
+        return resolved
     }
 
     /**
@@ -96,29 +109,34 @@ export class Attack {
      * @returns {ActorData | Object}
      */
     get actor() {
-        let find;
-        if(this.parentId){
-            let tokens = canvas.tokens.objects?.children || [];
-            let token = tokens.find(token => token.id === this.parentId);
-            return token.document.actor
-        } else if(this.actorId) {
-            find = game.data.actors.find(actor => actor._id === this.actorId);
-            if(!find){
-                let values = [...game.packs.values()];
-                for(let pack of values.filter(pack => pack.documentClass.documentName === "Actor")){
-                    find = pack.get(this.actorId)
+        let fn = () => {
+            let find;
+            if (this.parentId) {
+                let tokens = canvas.tokens.objects?.children || [];
+                let token = tokens.find(token => token.id === this.parentId);
+                return token.document.actor
+            } else if (this.actorId) {
+                find = game.actors.get(this.actorId)
+                //find = game.data.actors.find(actor => actor._id === this.actorId);
+                if (!find) {
+                    let values = [...game.packs.values()];
+                    for (let pack of values.filter(pack => pack.documentClass.documentName === "Actor")) {
+                        find = pack.get(this.actorId)
 
-                    if(find){
-                        break;
+                        if (find) {
+                            break;
+                        }
                     }
                 }
+            } else if (this.providerId) {
+                let provider = this.provider;
+                let quality = provider?.system?.crewQuality?.quality;
+                return SWSEActor.getCrewByQuality(quality);
             }
-        } else if(this.providerId){
-            let provider = this.provider;
-            let quality = provider?.system?.crewQuality?.quality;
-            return SWSEActor.getCrewByQuality(quality);
+            return find;
         }
-        return find;
+
+        return this.getCached("getActor", fn)
     }
 
     /**
@@ -142,27 +160,31 @@ export class Attack {
      * @returns {ItemData}
      */
     get item() {
-        let provider = this.provider;
-        let actor = !!provider ? provider : this.actor;
-        if(!actor){
-            return undefined;
+        let fn = () => {
+            let provider = this.provider;
+            let actor = !!provider ? provider : this.actor;
+            if(!actor){
+                return undefined;
+            }
+
+            if ('Unarmed Attack' === this.itemId) {
+                return new UnarmedAttack(this.actorId);
+            }
+
+            let items = actor.items?._source || actor.items;
+            let find = items.find(item => item._id === this.itemId);
+
+            if(!find){
+                find = this.options.items?.get(this.itemId)
+            }
+
+            if (find instanceof SWSEItem) {
+                return find.system;
+            }
+            return find;
         }
 
-        if ('Unarmed Attack' === this.itemId) {
-            return new UnarmedAttack(this.actorId);
-        }
-
-        let items = actor.items?._source || actor.items;
-        let find = items.find(item => item._id === this.itemId);
-
-        if(!find){
-            find = this.options.items?.get(this.itemId)
-        }
-
-        if (find instanceof SWSEItem) {
-            return find.data;
-        }
-        return find;
+        return this.getCached("getItem", fn)
     }
 
     get isUnarmed() {

@@ -166,7 +166,7 @@ function getAttributesFromDocument(data) {
 
     let values = [];
     if (data.attributeKey && Array.isArray(data.attributeKey)) {
-        for(let key in data.attributeKey){
+        for(let key of data.attributeKey){
             values.push(...(unfilteredAttributes.get(key)|| []))
         }
         //values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
