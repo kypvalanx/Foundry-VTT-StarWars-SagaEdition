@@ -1024,34 +1024,6 @@ export class SWSEItem extends Item {
         return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.subType);
     }
 
-    async removeCategory(index) {
-        let attacks = this.system.weapon.damage.attacks;
-        if (!Array.isArray(attacks)) {
-            let temp = [];
-            for (let attack of Object.values(attacks)) {
-                temp.push(attack);
-            }
-            attacks = temp;
-        }
-        console.log(attacks);
-        attacks.splice(index, 1);
-        await this.safeUpdate({"data.weapon.damage.attacks": attacks});
-    }
-
-    async addCategory() {
-        let attacks = this.system.weapon.damage.attacks;
-        if (!Array.isArray(attacks)) {
-            let temp = [];
-            for (let attack of Object.values(attacks)) {
-                temp.push(attack);
-            }
-            attacks = temp;
-        }
-        console.log(attacks);
-        attacks.push({key: "", value: "", dtype: "String"});
-        await this.safeUpdate({"data.weapon.damage.attacks": attacks});
-    }
-
     increaseQuantity() {
         let current = this.system.quantity;
 
