@@ -62,11 +62,11 @@ export function generateAttacks(actor) {
         weaponIds.push("Unarmed Attack")
     }
 
-    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, actor.parent?.id, {actor: actor.items}));
+    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, actor.parent?.id, {items: actor.items}));
 
     let items = actor.getAvailableItemsFromRelationships()
 
-    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, actor.parent?.id, {actor: actor.items})))
+    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, actor.parent?.id, {items: actor.items})))
     return attacks;
 }
 

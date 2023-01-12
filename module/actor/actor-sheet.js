@@ -95,6 +95,18 @@ export class SWSEActorSheet extends ActorSheet {
         super.activateListeners(html);
 
 
+        html.find(".toggle").on("click", event => {
+            event.stopPropagation();
+            let toggleId = event.currentTarget.dataset.toggleId
+            let data = {};
+
+            let toggles = this.actor.system.toggles || {};
+            data[`system.toggles.${toggleId}`] = !(toggles[toggleId] || false)
+
+            this.actor.safeUpdate(data);
+        })
+
+
         html.find(".collapse-toggle").on("click", event => {
             let down = "fa-minus";
             let up = "fa-plus";

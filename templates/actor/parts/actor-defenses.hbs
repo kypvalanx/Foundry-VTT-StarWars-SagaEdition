@@ -10,7 +10,7 @@
     {{#each actor.system.defense as |def id|}}
         {{#unless def.skip}}
             {{#if def.defenseBlock}}
-                {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=def}}
+                {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=def toggles=../actor.system.toggles}}
             {{/if}}
         {{/unless}}
     {{/each}}

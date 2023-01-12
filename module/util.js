@@ -639,7 +639,7 @@ export function reduceArray(reduce, values, actor) {
     if(!Array.isArray(values)){
         values = [values];
     }
-    if(Array.isArray(reduce)){
+    if(Array.isArray(reduce) && !reduce.includes("MAPPED")){
         for(let r of reduce){
             values = reduceArray(r, values, actor);
         }
@@ -650,7 +650,7 @@ export function reduceArray(reduce, values, actor) {
         reduce = reduce.toUpperCase();
     }
 
-    if(Array.isArray(reduce)){
+    if(Array.isArray(reduce) && reduce.includes("MAPPED")){
         let reduction = {};
         for(let r of reduce){
             reduction[r] = reduceArray(r, values, actor);
@@ -711,6 +711,8 @@ export function reduceArray(reduce, values, actor) {
             let summary = "";
             values.forEach(value => summary += `${value.sourceString}: ${value.value};  `)
             return summary;
+        case "MAPPED":
+            return values;
         default:
             return values.map(attr => attr.value).reduce(reduce, "");
     }

@@ -105,7 +105,7 @@ function _resolveFort(actor, conditionBonus) {
     let fortitudeDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "fortitudeDefenseBonus",
-        reduce: ["SUM", "SUMMARY"],
+        reduce: ["SUM", "SUMMARY", "MAPPED"],
         attributeFilter: attr => !attr.modifier
     })
     let otherBonus = fortitudeDefenseBonus["SUM"];
@@ -168,7 +168,7 @@ function _resolveWill(actor, conditionBonus) {
     let willDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "willDefenseBonus",
-        reduce: ["SUM", "SUMMARY"],
+        reduce: ["SUM", "SUMMARY", "MAPPED"],
         attributeFilter: attr => !attr.modifier
     })
     let otherBonus = willDefenseBonus["SUM"];
@@ -190,7 +190,7 @@ function _resolveWill(actor, conditionBonus) {
                 let inheritableAttribute = getInheritableAttribute({
                     entity: actor,
                     attributeKey: attributeKey,
-                    reduce: ["SUM", "SUMMARY"],
+                    reduce: ["SUM", "SUMMARY", "MAPPED"],
 
                     attributeFilter: attr => !attr.modifier
                 })
@@ -241,7 +241,7 @@ function _resolveRef(actor, conditionBonus) {
     let reflexDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "reflexDefenseBonus",
-        reduce: ["SUM", "SUMMARY"],
+        reduce: ["SUM", "SUMMARY", "MAPPED"],
         attributeFilter: attr => !attr.modifier
     })
     let otherBonus = reflexDefenseBonus["SUM"];
@@ -266,7 +266,7 @@ function _resolveRef(actor, conditionBonus) {
     let bonusDodgeReflexDefense = getInheritableAttribute({
         entity: actor,
         attributeKey: "bonusDodgeReflexDefense",
-        reduce: ["SUM", "SUMMARY"],
+        reduce: ["SUM", "SUMMARY", "MAPPED"],
         attributeFilter: attr => !attr.modifier
     })
 
