@@ -944,7 +944,7 @@ function attackDialogue(context) {
                         }
                     }
 
-                    rollAttacks(attacks, undefined);
+                    rollAttacks(attacks, undefined).then(() => {});
                 }
             },
             saveMacro: {
