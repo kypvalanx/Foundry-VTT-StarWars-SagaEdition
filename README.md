@@ -14,4 +14,4 @@ Manifest link: https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-
 
 join the community [discord](https://discord.gg/tGpxsrH9Em) 
 
-I will continue to work on this for free.  if you want to buy me a coffee you can do that [here on patreon (subscription)](https://www.patreon.com/stagnu) or [here on ko-fi (single gift)](https://ko-fi.com/A0A1BJ400)
+I will continue to work on this for free.  if you want to buy me a coffee you can do that here [patreon (subscription)](https://www.patreon.com/stagnu) or [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/A0A1BJ400)
