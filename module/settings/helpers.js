@@ -37,6 +37,10 @@ export const registerHandlebarsHelpers = function () {
         return (array && array.length > 0)? options.fn():"";
     })
 
+    Handlebars.registerHelper('sumActiveResults', function (array, options) {
+        return array.filter(result => result.active).reduce((accumulator, currentValue) => accumulator + currentValue.result, 0);
+    })
+
     Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
         if(Array.isArray(arg1)){
             return arg1.includes(arg2) ? options.fn(this) : options.inverse(this);

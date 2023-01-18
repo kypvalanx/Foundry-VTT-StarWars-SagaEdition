@@ -1,0 +1,18 @@
+<!--roll-->
+{{#each roll.terms as |term i|}}
+    {{#if term.faces}}
+        <section class="tooltip-part">
+            <div class="dice">
+                <header class="part-header flexrow">
+                    <span class="part-formula">{{term.number}}d{{term.faces}}</span>
+                    <span class="part-total">{{sumActiveResults term.results}}</span>
+                </header>
+                <ol class="dice-rolls">
+                    {{#each term.results as |result i|}}
+                        <li class="roll die d{{term.faces}} {{#unless term.active}}inactive{{/unless}}">{{result.result}}</li>
+                    {{/each}}
+                </ol>
+            </div>
+        </section>
+    {{/if}}
+{{/each}}

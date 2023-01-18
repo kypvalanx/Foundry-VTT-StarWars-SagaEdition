@@ -111,7 +111,12 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/parts/actor-type.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-health.hbs',
         'systems/swse/templates/credits/credit-chip.hbs',
-        'systems/swse/templates/settings/setting.hbs']);
+        'systems/swse/templates/settings/setting.hbs',
+        'systems/swse/templates/actor/parts/attack/attack-chat-card.hbs',
+        'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs',
+        'systems/swse/templates/roll/roll.hbs',
+        'systems/swse/templates/roll/roll-target.hbs',
+        'systems/swse/templates/roll/roll-tooltip.hbs']);
 
 });
 

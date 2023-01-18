@@ -1,0 +1,14 @@
+<!--index attack-->
+<div class="targets">
+    {{#each attack.targets as |target i|}}
+        {{> 'systems/swse/templates/roll/roll-target.hbs' target=target}}
+    {{/each}}
+</div>
+<div>Attack:</div>
+{{> 'systems/swse/templates/roll/roll.hbs' roll=attack.attack critical=attack.critical fail=attack.fail}}
+<div>Damage:</div>
+{{> 'systems/swse/templates/roll/roll.hbs' roll=attack.damage damageType=attack.damageType}}
+{{#each attack.notes as |note i|}}
+    <div>{{note}}</div>
+{{/each}}
+<div class="buttons"></div>
