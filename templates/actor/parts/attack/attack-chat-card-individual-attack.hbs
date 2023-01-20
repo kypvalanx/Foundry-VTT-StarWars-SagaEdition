@@ -1,9 +1,12 @@
 <!--index attack-->
-<div class="targets">
-    {{#each attack.targets as |target i|}}
-        {{> 'systems/swse/templates/roll/roll-target.hbs' target=target}}
-    {{/each}}
-</div>
+{{log this}}
+{{#if targetsEnabled}}
+    <div class="targets">
+        {{#each attack.targets as |target i|}}
+            {{> 'systems/swse/templates/roll/roll-target.hbs' target=target}}
+        {{/each}}
+    </div>
+{{/if}}
 <div>Attack:</div>
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.attack critical=attack.critical fail=attack.fail}}
 <div>Damage:</div>

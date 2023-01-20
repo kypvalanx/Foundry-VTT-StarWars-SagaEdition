@@ -37,6 +37,17 @@ export const registerSystemSettings = function () {
     //     },
     // });
 
+
+    game.settings.register("swse", "enableTargetResultsOnAttackCard", {
+        name: "Enable Target Results on attack rolls for targeted actors.",
+        hint: "Results require that a token is linked to an actor, because Reflex Defense is on that sheet.",
+        scope: "world",
+        config: true,
+        default: false,
+        type: Boolean
+    });
+
+
     game.settings.register("swse", "enable5105Measurement", {
         name: "Enable counting alternating diagonals as double the distance",
         hint: "Similar to games like Pathfinder",

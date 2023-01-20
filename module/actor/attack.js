@@ -1125,7 +1125,7 @@ function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
 
 async function generateAttackCard(resolvedAttacks, attack) {
     let template = await getTemplate("systems/swse/templates/actor/parts/attack/attack-chat-card.hbs")
-    return template({name: attack.name, notes: attack.notesHTML, attacks: resolvedAttacks})
+    return template({name: attack.name, notes: attack.notesHTML, attacks: resolvedAttacks, targetsEnabled: game.settings.get("swse", "enableTargetResultsOnAttackCard")})
 }
 
 function resolveAttack(attack, targetActors) {
@@ -1138,7 +1138,7 @@ function resolveAttack(attack, targetActors) {
         let reflexDefense = actor.system.defense.reflex.total;
         let isMiss = attack.isMiss(attackRollResult, reflexDefense)
         let targetResult = critical ? "Critical Hit!" : fail ? "Automatic Miss" : isMiss ? "Miss" : "Hit";
-        return {name: actor.name, reflexDefense, highlight: targetResult.includes("Miss") ? "miss" : "hit", targetResult}
+        return {name: actor.name, reflexDefense, highlight: targetResult.includes("Miss") ? "miss" : "hit", result: targetResult}
     })
 
 
