@@ -90,6 +90,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="class-control"]').click(this._onClassControl.bind(this));
         html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
+        html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="mode-control"]').click(this._onModeControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
 
@@ -449,6 +450,42 @@ export class SWSEItemSheet extends ItemSheet {
                 updateData[path] = null;
                 break;
             case 'add-child-prerequisite':
+                let maxKey = (Math.max(...Object.keys(system).map(k => toNumber(k))) || 0) +1
+                let selectedKey = maxKey;
+                for(let i = 0; i <=maxKey; i++){
+                    if(system[i] === undefined || system[i] === null){
+                        selectedKey = i;
+                    }
+                }
+                if(path.endsWith("child")){
+
+                    updateData[`${path}`] = {};
+                } else {
+                    updateData[`${path}.${selectedKey}`] = {};
+                }
+                break;
+        }
+        this.item.safeUpdate(updateData);
+    }
+
+    _onModifierControl(event){
+        let element = $(event.currentTarget);
+        let path = element.data("path");
+
+        let system = this.item.system || this.item._source.system
+
+        for(let tok of path.substring(5).split(".")){
+            if(!!system[tok]) {
+                system = system[tok];
+            }
+        }
+
+        let updateData = {};
+        switch (element.data("type")){
+            case 'remove-this-modifier':
+                updateData[path] = null;
+                break;
+            case 'add-modifier':
                 let maxKey = (Math.max(...Object.keys(system).map(k => toNumber(k))) || 0) +1
                 let selectedKey = maxKey;
                 for(let i = 0; i <=maxKey; i++){

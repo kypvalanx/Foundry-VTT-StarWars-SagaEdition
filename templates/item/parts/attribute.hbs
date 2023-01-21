@@ -1,5 +1,4 @@
-<li>
-    <div class="flex flex-col">
+    <div class="flex flex-col attribute-block">
         <div class="attribute" data-attribute="{{key}}" data-path="{{path}}.key">
             <label class="attribute-key" type="text" name="{{path}}.key" value="{{key}}">{{attr.key}}</label>
             <input class="attribute-value" data-action="attribute-control" data-type="change-value"
@@ -12,23 +11,24 @@
                 {{#if @root.editable}}
                     {{#unless attr.prerequisite}}
                         <a data-action="prerequisite-control" data-type="add-child-prerequisite"
-                           data-path="{{path}}.prerequisite" title="add child prerequisite"><i class="fas fa-plus"></i></a>
+                           data-path="{{path}}.prerequisite" title="add prerequisite"><i class="fas fa-plus"></i></a>
                     {{/unless}}
                     {{#unless attr.parentPrerequisite}}
                         <a data-action="prerequisite-control" data-type="add-child-prerequisite"
-                           data-path="{{path}}.parentPrerequisite" title="add parent prerequisite"><i
+                           data-path="{{path}}.parentPrerequisite" title="add parent prerequisite (these are for prerequisites that effect this item specifically, but rely on the actor that owns the item.)"><i
                                 class="fas fa-plus"></i></a>
+                    {{/unless}}
+                    {{#unless attr.modifier}}
+                        <a data-action="modifier-control" data-type="add-modifier"
+                           data-path="{{path}}.modifier" title="add modifier"><i
+                                class="fas fa-edit"></i></a>
                     {{/unless}}
                     <a data-action="attribute-control" data-type="remove-attribute" data-attribute-id="{{key}}"
                        data-level="{{level}}"><i class="fas fa-trash"></i></a>
                 {{/if}}
             </div>
         </div>
-        <div>
             {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=attr.prerequisite path=(concat path '.prerequisite') hideAdd=true}}
-        </div>
-        <div>
             {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=attr.parentPrerequisite path=(concat path '.parentPrerequisite') hideAdd=true titleOverride='<div title="prerequisites that are checked against the owning actor">Parent Prerequisite:</div>'}}
-        </div>
+            {{> 'systems/swse/templates/item/parts/modifier.hbs' modifier=attr.modifier path=(concat path '.modifier')}}
     </div>
-</li>

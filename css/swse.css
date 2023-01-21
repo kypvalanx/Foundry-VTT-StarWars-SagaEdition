@@ -886,6 +886,10 @@
   height: 30px;
 }
 
+.swse .attribute-block {
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .swse .mode {
   border-top: thin solid #7a7971;
   border-bottom: thin solid #7a7971;

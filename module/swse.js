@@ -103,6 +103,7 @@ Hooks.once('init', async function () {
         'systems/swse/templates/item/parts/summary.hbs',
         'systems/swse/templates/item/parts/prerequisites.hbs',
         'systems/swse/templates/item/parts/prerequisite.hbs',
+        'systems/swse/templates/item/parts/modifier.hbs',
         'systems/swse/templates/item/parts/attribute.hbs',
         'systems/swse/templates/item/parts/attributes.hbs',
         'systems/swse/templates/item/parts/mode.hbs',
