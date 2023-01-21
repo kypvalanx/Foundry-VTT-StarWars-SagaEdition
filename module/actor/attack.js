@@ -1138,7 +1138,21 @@ function resolveAttack(attack, targetActors) {
         let reflexDefense = actor.system.defense.reflex.total;
         let isMiss = attack.isMiss(attackRollResult, reflexDefense)
         let targetResult = critical ? "Critical Hit!" : fail ? "Automatic Miss" : isMiss ? "Miss" : "Hit";
-        return {name: actor.name, reflexDefense, highlight: targetResult.includes("Miss") ? "miss" : "hit", result: targetResult}
+
+        let conditionalDefenses =
+            getInheritableAttribute({
+                entity: actor,
+                attributeKey: ["reflexDefenseBonus"],
+                attributeFilter: attr => !!attr.modifier,
+                reduce: "VALUES"
+            });
+
+        return {name: actor.name,
+            defense: reflexDefense,
+            defenseType: 'Ref',
+            highlight: targetResult.includes("Miss") ? "miss" : "hit",
+            result: targetResult,
+            conditionalDefenses: conditionalDefenses}
     })
 
 
