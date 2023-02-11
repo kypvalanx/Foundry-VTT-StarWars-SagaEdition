@@ -1197,6 +1197,7 @@ function resolveAttack(attack, targetActors) {
     }
 
     let damage = damageRoll.roll({async: false});
+    let targetIds = targetActors.map(target => target.id);
     return {
         attack: attackRollResult,
         attackRollFunction: attackRoll.formula,
@@ -1206,7 +1207,7 @@ function resolveAttack(attack, targetActors) {
         notes: attack.notes,
         critical,
         fail,
-        targets
+        targets, targetIds
     };
 }
 
@@ -1244,8 +1245,13 @@ export async function createAttackChatMessage(attacks, rollMode) {
     const pool = PoolTerm.fromRolls(rolls);
     let roll = Roll.fromTerms([pool]);
 
+    let flags = {};
+    flags.swse = {};
+    flags.swse.context = {};
+    flags.swse.context.type = "attack-roll";
 
     let messageData = {
+        flags,
         user: game.user.id,
         speaker: speaker,
         flavor: flavor,

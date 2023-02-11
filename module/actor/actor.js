@@ -8,7 +8,7 @@ import {
     getIndexAndPack,
     getVariableFromActorData,
     resolveExpression,
-    resolveValueArray,
+    resolveValueArray, toNumber,
     toShortAttribute,
     unique
 } from "../util.js";
@@ -820,6 +820,17 @@ export class SWSEActor extends Actor {
         return this.system.condition;
     }
 
+    applyDamage(options){
+        let update = {};
+        update[`system.health.value`] = this.system.health.value - toNumber(options.damage);
+        this.safeUpdate(update);
+    }
+
+    applyHealing(options){
+        let update = {};
+        update[`system.health.value`] = this.system.health.value + toNumber(options.heal);
+        this.safeUpdate(update);
+    }
 
     setAttributes(attributes) {
         let update = {};

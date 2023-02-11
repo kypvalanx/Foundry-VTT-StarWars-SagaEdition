@@ -5,6 +5,8 @@
             {{> 'systems/swse/templates/roll/roll-target.hbs' target=target}}
         {{/each}}
     </div>
+    {{#if attack.targetIds}}
+    {{/if}}
 {{/if}}
 <div>Attack:</div>
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.attack critical=attack.critical fail=attack.fail}}
@@ -13,4 +15,11 @@
 {{#each attack.notes as |note i|}}
     <div>{{note}}</div>
 {{/each}}
-<div class="buttons"></div>
+<br>
+{{log attack}}
+<div class="buttons flex flex-row">
+    <button data-action="apply-attack" data-type="damage" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}"><i class="fas fa-explosion"></i><br><span class="button-text">Damage</span></button>
+    <button data-action="apply-attack" data-type="half" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}"><i class="fas fa-explosion"></i><br><span class="button-text">Half</span></button>
+    <button data-action="apply-attack" data-type="double" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}"><i class="fas fa-explosion"></i><br><span class="button-text">Double</span></button>
+    <button data-action="apply-attack" data-type="heal" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}"><i class="fas fa-hand-holding-heart"></i><br><span class="button-text">Heal</span></button>
+</div>

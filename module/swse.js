@@ -14,6 +14,7 @@ import {makeAttack} from "./actor/attack.js";
 import {measureDistances} from "./measure.js";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.js";
 import {SWSECompendiumDirectory} from "./compendium/compendium-directory.js";
+import {toNumber} from "./util.js";
 
 
 Hooks.once('init', async function () {
@@ -120,6 +121,107 @@ Hooks.once('init', async function () {
         'systems/swse/templates/roll/roll-tooltip.hbs']);
 
 });
+
+const applyAttack = (event) => {
+    let element = $(event.currentTarget);
+    let damageType = element.data("damage-type")
+    let type = element.data("type")
+    let attack = element.data("attack")
+    let damage = element.data("damage")
+
+    let targetTokens = game.user.targets
+    let targetActors = [];
+    let actorMap = {};
+    for(let targetToken of targetTokens.values()){
+        //targetToken.update
+        let actor = targetToken.document.getActor()
+        if(actor){
+            targetActors.push(actor)
+            actorMap[targetToken.id] = actor;
+        }
+    }
+
+    if(targetActors.length === 0){
+        new Dialog({
+            title: "No Targets Selected",
+            content: "No tokens were targeted",
+            buttons: {
+                ok:{
+                    label: "OK",
+                    icon:  `<i class="fas fa-check"></i>`
+                }
+            },
+            default: "ok"
+        }).render(true);
+    return;
+    }
+
+    let damageTypeString = !!damageType ? ` (${damageType})` : ""
+    let baseDamage = toNumber(damage);
+    if(type === "half"){
+        baseDamage /= 2
+    } else if(type === "double") {
+        baseDamage *= 2
+    }
+    let damageString = `${baseDamage}`
+    let content = `<div class="subtle-panel">
+<div>Attack Roll: ${attack}</div>
+<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
+</div>`;
+    for(let target of targetActors){
+
+        let hit = true;
+        content += `<div data-type="target" data-target="${target.parent.id}">
+<label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit?"checked":""}></label> ${target.name}
+</div>`
+    }
+
+    new Dialog({
+        title: "Resolve Attacks",
+        content,
+        buttons: {
+            attack:{
+                label: "Attack",
+                callback: (html)=>{
+                    let targets = html.find("[data-type=target]")
+                    for(let target of targets){
+
+                        let targetHit = $(target).find("[data-attribute=target-hit]")[0]?.checked
+                        if(!targetHit){return;}
+
+                        let targetActor = actorMap[target.dataset.target];
+                        if(type === "heal"){
+                            targetActor.applyHealing({heal: baseDamage})
+                        } else {
+                            targetActor.applyDamage({damage: baseDamage})
+                        }
+                    }
+                },
+                icon:  `<i class="fas fa-check"></i>`
+            },
+            cancel:{
+                label: "Cancel",
+                icon:  `<i class="fas fa-x"></i>`
+            }
+        },
+        default: "attack"
+    }).render(true);
+}
+
+Hooks.on('renderChatMessage', async (message, html) => {
+    if (typeof message.flags?.swse?.context === 'undefined') {
+        return;
+    }
+
+    if(message.flags.swse.context.type === "attack-roll"){
+       // console.log("bam")
+
+        html.find('[data-action="apply-attack"]').click(applyAttack.bind(this));
+    }
+
+})
+
+
 
 
 Hooks.on("ready", function () {
