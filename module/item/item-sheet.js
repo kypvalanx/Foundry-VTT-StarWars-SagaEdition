@@ -81,8 +81,8 @@ export class SWSEItemSheet extends ItemSheet {
             // Delete Inventory Item
             html.find('.item-delete').click(ev => {
                 const li = $(ev.currentTarget).parents(".item");
-                let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
-                let ownedItem = this.item.actor.items.get(itemToDelete._id);
+                //let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
+                let ownedItem = this.item.actor.items.get(li.data("itemId"));
                 this.item.revokeOwnership(ownedItem);
             });
         }
@@ -226,16 +226,16 @@ export class SWSEItemSheet extends ItemSheet {
 
         let actor = this.actor;
 
-        let ownedItem = actor.items.get(droppedItem.data._id);
+        let ownedItem = actor.items.get(droppedItem.itemId);
 
-        let isItemMod = Object.values(droppedItem.data.data.attributes).find(attr => attr.key === "itemMod");
+        let isItemMod = Object.values(ownedItem.system.attributes).find(attr => attr.key === "itemMod");
         if (isItemMod?.value === "true") {
-            let meetsPrereqs = meetsPrerequisites(this.object, droppedItem.data.data.prerequisite)
+            let meetsPrereqs = meetsPrerequisites(this.object, ownedItem.system.prerequisite)
 
             if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for the ${droppedItem.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    content: `You do not meet the prerequisites for the ${droppedItem.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                     buttons: {
                         ok: {
                             icon: '<i class="fas fa-check"></i>',

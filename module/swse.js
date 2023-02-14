@@ -122,10 +122,10 @@ Hooks.once('init', async function () {
 
 });
 
-function getHitOptionHTML(target, attack) {
+function getHitOptionHTML(target, attack, tokenId) {
     let hit = target.system.defense.reflex.total <= attack;
 
-    return `<div data-type="target" data-target="${target.parent.id}">
+    return `<div data-type="target" data-target="${tokenId}">
 <label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit ? "checked" : ""}></label> ${target.name}
 </div>`;
 }
@@ -140,12 +140,27 @@ const applyAttack = (event) => {
     let targetTokens = game.user.targets
     let targetActors = [];
     let actorMap = {};
+
+    let damageTypeString = !!damageType ? ` (${damageType})` : ""
+    let baseDamage = toNumber(damage);
+    if(type === "half"){
+        baseDamage /= 2
+    } else if(type === "double") {
+        baseDamage *= 2
+    }
+    let damageString = `${baseDamage}`
+
+    let content = `<div class="subtle-panel">
+<div>Attack Roll: ${attack}</div>
+<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
+</div>`;
     for(let targetToken of targetTokens.values()){
         //targetToken.update
         let actor = targetToken.document.getActor()
         if(actor){
             targetActors.push(actor)
             actorMap[targetToken.id] = actor;
+            content += getHitOptionHTML(actor, attack, targetToken.id)
         }
     }
 
@@ -162,22 +177,6 @@ const applyAttack = (event) => {
             default: "ok"
         }).render(true);
     return;
-    }
-
-    let damageTypeString = !!damageType ? ` (${damageType})` : ""
-    let baseDamage = toNumber(damage);
-    if(type === "half"){
-        baseDamage /= 2
-    } else if(type === "double") {
-        baseDamage *= 2
-    }
-    let damageString = `${baseDamage}`
-    let content = `<div class="subtle-panel">
-<div>Attack Roll: ${attack}</div>
-<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
-</div>`;
-    for(let target of targetActors){
-        content += getHitOptionHTML(target, attack)
     }
 
     new Dialog({
@@ -197,7 +196,7 @@ const applyAttack = (event) => {
                         if(type === "heal"){
                             targetActor.applyHealing({heal: baseDamage})
                         } else {
-                            targetActor.applyDamage({damage: baseDamage})
+                            targetActor.applyDamage({damage: baseDamage, damageType: damageType})
                         }
                     }
                 },

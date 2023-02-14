@@ -854,15 +854,26 @@ export class SWSEActor extends Actor {
 
     applyDamage(options){
         let update = {};
+        let totalDamage = toNumber(options.damage);
+
+        if(!options.skipDamageReduction) {
+            let damageReductions = getInheritableAttribute({entity: this, attributeKey: "damageReduction"})
+            for (let damageReduction of damageReductions) {
+                if (!damageReduction.modifier || damageReduction.modifier !== options.damageType) {
+                    totalDamage -= toNumber(damageReduction.value)
+                }
+            }
+        }
+
 
         if(!options.skipDamageThreshold){
-            if(toNumber(options.damage) > this.system.defense.damageThreshold.total){
+            if(totalDamage > this.system.defense.damageThreshold.total){
                 console.log("condition track change here")
                 this.reduceCondition()
             }
         }
 
-        update[`system.health.value`] = this.system.health.value - toNumber(options.damage);
+        update[`system.health.value`] = this.system.health.value - totalDamage;
         this.safeUpdate(update);
     }
 

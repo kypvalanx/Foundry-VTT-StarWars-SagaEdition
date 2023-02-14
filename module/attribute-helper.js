@@ -1,21 +1,25 @@
 import {filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
+import {SWSEActor} from "./actor/actor.js";
 
 function equippedItems(entity) {
+    let items = []
     if (entity.items) {
-        let equippedIds = entity.equippedIds?.map(equipped => equipped.id) || []
-        return entity.items.filter(item => equippedIds.includes(item.id || item._id));
+        if(entity instanceof SWSEActor){
+            let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
+            items.push(...entity.items.filter(item => equippedIds.includes(item?.id || item?._id)));
+        } else {
+            items.push(...entity.items)
+        }
     }
-    // if(entity.data?.items){
-    //     //items attached to items
-    //     return entity.data.items;
-    // }
-    return [];
+    return items;
 }
 
 export function inheritableItems(entity) {
-    if (!!entity.system.inheritableItems) {
+    if(!entity.system) return [];
+
+    if (!!entity.system?.inheritableItems) {
         return entity.system.inheritableItems;
     }
 
