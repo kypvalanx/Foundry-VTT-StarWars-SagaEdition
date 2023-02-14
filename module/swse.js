@@ -122,6 +122,14 @@ Hooks.once('init', async function () {
 
 });
 
+function getHitOptionHTML(target, attack) {
+    let hit = target.system.defense.reflex.total <= attack;
+
+    return `<div data-type="target" data-target="${target.parent.id}">
+<label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit ? "checked" : ""}></label> ${target.name}
+</div>`;
+}
+
 const applyAttack = (event) => {
     let element = $(event.currentTarget);
     let damageType = element.data("damage-type")
@@ -169,11 +177,7 @@ const applyAttack = (event) => {
 <div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
 </div>`;
     for(let target of targetActors){
-
-        let hit = true;
-        content += `<div data-type="target" data-target="${target.parent.id}">
-<label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit?"checked":""}></label> ${target.name}
-</div>`
+        content += getHitOptionHTML(target, attack)
     }
 
     new Dialog({

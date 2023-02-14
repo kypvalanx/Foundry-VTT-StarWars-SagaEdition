@@ -820,8 +820,48 @@ export class SWSEActor extends Actor {
         return this.system.condition;
     }
 
+    async clearCondition() {
+        let ids = this.effects
+            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
+
+        await this.deleteEmbeddedDocuments("ActiveEffect", ids);
+    }
+
+
+    reduceCondition() {
+        let i = CONFIG.conditionTrack.indexOf(`${this.system.condition}`)
+        let newCondition = CONFIG.conditionTrack[i+1]
+        this.setCondition(newCondition);
+    }
+
+    async setCondition(conditionValue) {
+        let statusEffect = CONFIG.statusEffects.find(e => {
+            return e.changes && e.changes.find(c => c.key === 'condition' && c.value === conditionValue);
+        })
+        await this.activateStatusEffect(statusEffect);
+    }
+    async activateStatusEffect(statusEffect) {
+        if (statusEffect) {
+            const createData = foundry.utils.deepClone(statusEffect);
+            createData.label = game.i18n.localize(statusEffect.label);
+            createData["flags.core.statusId"] = statusEffect.id;
+            //if ( overlay ) createData["flags.core.overlay"] = true;
+            delete createData.id;
+            const cls = getDocumentClass("ActiveEffect");
+            await cls.create(createData, {parent: this});
+        }
+    }
+
     applyDamage(options){
         let update = {};
+
+        if(!options.skipDamageThreshold){
+            if(toNumber(options.damage) > this.system.defense.damageThreshold.total){
+                console.log("condition track change here")
+                this.reduceCondition()
+            }
+        }
+
         update[`system.health.value`] = this.system.health.value - toNumber(options.damage);
         this.safeUpdate(update);
     }
@@ -2509,8 +2549,6 @@ export class SWSEActor extends Actor {
 
         return false;
     }
-
-
 }
 
 /**
