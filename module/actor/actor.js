@@ -897,9 +897,8 @@ export class SWSEActor extends Actor {
         }
 
 
-        if (!options.skipDamageThreshold) {
+        if (options.affectDamageThreshold) {
             if (totalDamage > this.system.defense.damageThreshold.total) {
-                console.log("condition track change here")
                 this.reduceCondition()
             }
         }

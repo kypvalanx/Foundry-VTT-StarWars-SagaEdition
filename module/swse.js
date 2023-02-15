@@ -125,8 +125,33 @@ Hooks.once('init', async function () {
 function getHitOptionHTML(target, attack, tokenId) {
     let hit = target.system.defense.reflex.total <= attack;
 
-    return `<div data-type="target" data-target="${tokenId}">
-<label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit ? "checked" : ""}></label> ${target.name}
+    return `<h4>${target.name}</h4>
+<div class="flex flex-col" data-type="target" data-target="${tokenId}">
+    <div>
+        <label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit ? "checked" : ""}></label>
+    </div>
+    <div class="panel">
+        <label>Damage Resistance</label>
+        <div class="flex flex-row" >
+            <label>Additional:<input data-attribute="additional-damage-resistance" type="number"></label> 
+            <label>Bypass:<input data-attribute="bypass-damage-resistance" type="checkbox"></label>
+        </div>
+    </div>
+    
+    <div class="panel">
+        <label>Shield Rating</label>
+        <div class="flex flex-row" >
+            <label>Additional:<input data-attribute="additional-shield-rating" type="number"></label>
+            <label>Bypass:<input data-attribute="bypass-shields" type="checkbox"></label>
+        </div>
+    </div>
+    
+    <div class="panel">
+        <label>Affect Condition</label>
+        <div class="flex flex-row" >
+            <input data-attribute="bypass-damage-threshold" type="checkbox" checked>
+        </div>
+    </div>
 </div>`;
 }
 
@@ -190,13 +215,29 @@ const applyAttack = (event) => {
                     for(let target of targets){
 
                         let targetHit = $(target).find("[data-attribute=target-hit]")[0]?.checked
+
+                        let additionalDR = $(target).find("[data-attribute=additional-damage-resistance]")[0].value
+                        let bypassDR = $(target).find("[data-attribute=bypass-damage-resistance]")[0]?.checked
+                        let additionalShields = $(target).find("[data-attribute=additional-shield-rating]")[0].value
+                        let bypassShields =  $(target).find("[data-attribute=bypass-shields]")[0]?.checked
+                        let affectDamageThreshold =  $(target).find("[data-attribute=bypass-damage-threshold]")[0]?.checked
+
+
                         if(!targetHit){return;}
 
                         let targetActor = actorMap[target.dataset.target];
                         if(type === "heal"){
                             targetActor.applyHealing({heal: baseDamage})
                         } else {
-                            targetActor.applyDamage({damage: baseDamage, damageType: damageType})
+                            targetActor.applyDamage({
+                                damage: baseDamage,
+                                damageType: damageType,
+                                additionalDR,
+                                skipDamageReduction: bypassDR,
+                                additionalShields,
+                                skipShields: bypassShields,
+                                affectDamageThreshold
+                            })
                         }
                     }
                 },
