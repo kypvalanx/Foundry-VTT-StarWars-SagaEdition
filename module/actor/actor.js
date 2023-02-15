@@ -6,7 +6,7 @@ import {
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
-    getVariableFromActorData,
+    getVariableFromActorData, innerJoin,
     resolveExpression,
     resolveValueArray, toNumber,
     toShortAttribute,
@@ -35,6 +35,8 @@ import {SWSEManualActorSheet} from "./manual-actor-sheet.js";
 
 
 // noinspection JSClosureCompilerSyntax
+const COMMMA_LIST = /, or | or |, /;
+
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -856,13 +858,25 @@ export class SWSEActor extends Actor {
         let update = {};
         let totalDamage = toNumber(options.damage);
 
+
+
         if(!options.skipDamageReduction) {
             let damageReductions = getInheritableAttribute({entity: this, attributeKey: "damageReduction"})
-            for (let damageReduction of damageReductions) {
-                if (!damageReduction.modifier || damageReduction.modifier !== options.damageType) {
-                    totalDamage -= toNumber(damageReduction.value)
+            let lightsaberResistance = getInheritableAttribute({entity: this, attributeKey: "blocksLightsaber", reduce: "OR"})
+            let damageTypes = options.damageType.split(COMMMA_LIST);
+
+            if(!damageTypes.includes("Lightsabers") || lightsaberResistance){
+                for (let damageReduction of damageReductions) {
+                    let modifier = damageReduction.modifier || "";
+
+                    let modifiers = modifier.split(COMMMA_LIST);
+                    let innerJoin1 = innerJoin(damageTypes, modifiers);
+                    if (!modifier || innerJoin1.length === 0) {
+                        totalDamage -= toNumber(damageReduction.value)
+                    }
                 }
             }
+
         }
 
 
