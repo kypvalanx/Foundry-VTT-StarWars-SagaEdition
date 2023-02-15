@@ -894,7 +894,6 @@ export class SWSEActor extends Actor {
                     }
                 }
             }
-
         }
 
 
