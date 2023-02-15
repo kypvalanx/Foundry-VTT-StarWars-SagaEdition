@@ -829,12 +829,16 @@ export class SWSEActor extends Actor {
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
     }
 
+    reduceShields(number) {
+        this.shields = Math.max(this.shields - number, 0);
+    }
 
     reduceCondition() {
         let i = CONFIG.conditionTrack.indexOf(`${this.system.condition}`)
-        let newCondition = CONFIG.conditionTrack[i+1]
+        let newCondition = CONFIG.conditionTrack[i + 1]
         this.setCondition(newCondition);
     }
+
 
     async setCondition(conditionValue) {
         let statusEffect = CONFIG.statusEffects.find(e => {
@@ -842,6 +846,7 @@ export class SWSEActor extends Actor {
         })
         await this.activateStatusEffect(statusEffect);
     }
+
     async activateStatusEffect(statusEffect) {
         if (statusEffect) {
             const createData = foundry.utils.deepClone(statusEffect);
@@ -854,18 +859,31 @@ export class SWSEActor extends Actor {
         }
     }
 
-    applyDamage(options){
+    applyDamage(options) {
         let update = {};
         let totalDamage = toNumber(options.damage);
 
+        if (!options.skipShields) {
+            let shields = this.system.shields;
+            let shieldValue = shields.value;
+            if (shields.active && shieldValue > 0) {
+                if (totalDamage > shieldValue) {
+                    this.reduceShields(5)
+                }
+                totalDamage -= shieldValue;
+            }
+        }
 
-
-        if(!options.skipDamageReduction) {
+        if (!options.skipDamageReduction) {
             let damageReductions = getInheritableAttribute({entity: this, attributeKey: "damageReduction"})
-            let lightsaberResistance = getInheritableAttribute({entity: this, attributeKey: "blocksLightsaber", reduce: "OR"})
+            let lightsaberResistance = getInheritableAttribute({
+                entity: this,
+                attributeKey: "blocksLightsaber",
+                reduce: "OR"
+            })
             let damageTypes = options.damageType.split(COMMMA_LIST);
 
-            if(!damageTypes.includes("Lightsabers") || lightsaberResistance){
+            if (!damageTypes.includes("Lightsabers") || lightsaberResistance) {
                 for (let damageReduction of damageReductions) {
                     let modifier = damageReduction.modifier || "";
 
@@ -880,18 +898,22 @@ export class SWSEActor extends Actor {
         }
 
 
-        if(!options.skipDamageThreshold){
-            if(totalDamage > this.system.defense.damageThreshold.total){
+        if (!options.skipDamageThreshold) {
+            if (totalDamage > this.system.defense.damageThreshold.total) {
                 console.log("condition track change here")
                 this.reduceCondition()
             }
         }
 
-        update[`system.health.value`] = this.system.health.value - totalDamage;
+        //TODO Floating numbers tie in
+
+        if (totalDamage > 0) {
+            update[`system.health.value`] = this.system.health.value - totalDamage;
+        }
         this.safeUpdate(update);
     }
 
-    applyHealing(options){
+    applyHealing(options) {
         let update = {};
         update[`system.health.value`] = this.system.health.value + toNumber(options.heal);
         this.safeUpdate(update);
@@ -1627,6 +1649,10 @@ export class SWSEActor extends Actor {
 
     set shields(shields) {
         this.safeUpdate({'data.shields.value': shields < 0 ? 0 : shields})
+    }
+
+    get shields() {
+        return this.system.shields.value;
     }
 
     setAge(age) {

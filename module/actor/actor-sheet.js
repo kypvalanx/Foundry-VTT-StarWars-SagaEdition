@@ -315,7 +315,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 if(ids.length === 0){
                     let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                    await this.activateStatusEffect(statusEffect);
+                    await this.actor.activateStatusEffect(statusEffect);
                 }
 
                 break;
