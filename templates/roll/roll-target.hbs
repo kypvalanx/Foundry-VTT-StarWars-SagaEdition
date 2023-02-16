@@ -1,0 +1,7 @@
+<div class="target">
+    <div>Target: {{target.name}} ({{target.defenseType}} {{target.defense}})</div>
+    {{#each target.conditionalDefenses as |i defense|}}
+        <div>{{defense}}</div>
+    {{/each}}
+    <div>Result: <div class="{{target.highlight}}">{{target.result}}</div></div>
+</div>

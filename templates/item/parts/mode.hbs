@@ -7,26 +7,32 @@
                        title="modes in groups are exclusive to each other">Group: {{mode.group}}</label>
             {{/if}}
             <!--          <label class="attribute-value" type="text" name="data.attributes.{{key}}.value" value="{{attr.value}}" data-dtype="{{attr.type}}"></label>-->
-            <a data-action="attribute-control" data-type="remove-attribute" class="attribute-delete" data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-trash"></i></a>
+            <a data-action="attribute-control" data-type="remove-attribute" class="attribute-delete"
+               data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-trash"></i></a>
         </div>
         <div>
             <ul>
                 {{#each mode.attributes as |attr akey|}}
                     {{#if attr}}
-                        {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level  path=(concat ../modePath '.attributes.' akey)}}
-
+                        <li>
+                            {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level  path=(concat ../modePath '.attributes.' akey)}}
+                        </li>
                     {{/if}}
                 {{/each}}
                 {{#if active}}
-                    <li class="attribute flexrow subtle"><a class="attribute-add attribute-indent-graphic"
-                                                            data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-plus"></i> add a
-                        new attribute to this mode.</a></li>
+                    <li class="attribute flexrow subtle">
+                        <a class="attribute-add attribute-indent-graphic"
+                           data-mode-id="{{mkey}}" data-level="{{level}}"><i
+                                class="fas fa-plus"></i> add a
+                            new attribute to this mode.</a>
+                    </li>
                 {{/if}}
                 {{#unlessEquals depth 2}}
-
                     {{#if active}}
-                        <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add" class="mode-add attribute-indent-graphic"
-                                                                data-mode-id="{{mkey}}" data-level="{{level}}"><i class="fas fa-plus"></i> add
+                        <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add"
+                                                                class="mode-add attribute-indent-graphic"
+                                                                data-mode-id="{{mkey}}" data-level="{{level}}"><i
+                                class="fas fa-plus"></i> add
                             a new mode to this mode.</a></li>
                     {{/if}}
                     {{#each mode.modes as |subMode subMkey|}}

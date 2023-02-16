@@ -6,9 +6,9 @@ import {
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
-    getVariableFromActorData,
+    getVariableFromActorData, innerJoin,
     resolveExpression,
-    resolveValueArray,
+    resolveValueArray, toNumber,
     toShortAttribute,
     unique
 } from "../util.js";
@@ -35,6 +35,8 @@ import {SWSEManualActorSheet} from "./manual-actor-sheet.js";
 
 
 // noinspection JSClosureCompilerSyntax
+const COMMMA_LIST = /, or | or |, /;
+
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -820,6 +822,100 @@ export class SWSEActor extends Actor {
         return this.system.condition;
     }
 
+    async clearCondition() {
+        let ids = this.effects
+            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
+
+        await this.deleteEmbeddedDocuments("ActiveEffect", ids);
+    }
+
+    reduceShields(number) {
+        this.shields = Math.max(this.shields - number, 0);
+    }
+
+    reduceCondition() {
+        let i = CONFIG.conditionTrack.indexOf(`${this.system.condition}`)
+        let newCondition = CONFIG.conditionTrack[i + 1]
+        this.setCondition(newCondition);
+    }
+
+
+    async setCondition(conditionValue) {
+        let statusEffect = CONFIG.statusEffects.find(e => {
+            return e.changes && e.changes.find(c => c.key === 'condition' && c.value === conditionValue);
+        })
+        await this.activateStatusEffect(statusEffect);
+    }
+
+    async activateStatusEffect(statusEffect) {
+        if (statusEffect) {
+            const createData = foundry.utils.deepClone(statusEffect);
+            createData.label = game.i18n.localize(statusEffect.label);
+            createData["flags.core.statusId"] = statusEffect.id;
+            //if ( overlay ) createData["flags.core.overlay"] = true;
+            delete createData.id;
+            const cls = getDocumentClass("ActiveEffect");
+            await cls.create(createData, {parent: this});
+        }
+    }
+
+    applyDamage(options) {
+        let update = {};
+        let totalDamage = toNumber(options.damage);
+
+        if (!options.skipShields) {
+            let shields = this.system.shields;
+            let shieldValue = shields.value;
+            if (shields.active && shieldValue > 0) {
+                if (totalDamage > shieldValue) {
+                    this.reduceShields(5)
+                }
+                totalDamage -= shieldValue;
+            }
+        }
+
+        if (!options.skipDamageReduction) {
+            let damageReductions = getInheritableAttribute({entity: this, attributeKey: "damageReduction"})
+            let lightsaberResistance = getInheritableAttribute({
+                entity: this,
+                attributeKey: "blocksLightsaber",
+                reduce: "OR"
+            })
+            let damageTypes = options.damageType.split(COMMMA_LIST);
+
+            if (!damageTypes.includes("Lightsabers") || lightsaberResistance) {
+                for (let damageReduction of damageReductions) {
+                    let modifier = damageReduction.modifier || "";
+
+                    let modifiers = modifier.split(COMMMA_LIST);
+                    let innerJoin1 = innerJoin(damageTypes, modifiers);
+                    if (!modifier || innerJoin1.length === 0) {
+                        totalDamage -= toNumber(damageReduction.value)
+                    }
+                }
+            }
+        }
+
+
+        if (options.affectDamageThreshold) {
+            if (totalDamage > this.system.defense.damageThreshold.total) {
+                this.reduceCondition()
+            }
+        }
+
+        //TODO Floating numbers tie in
+
+        if (totalDamage > 0) {
+            update[`system.health.value`] = this.system.health.value - totalDamage;
+        }
+        this.safeUpdate(update);
+    }
+
+    applyHealing(options) {
+        let update = {};
+        update[`system.health.value`] = this.system.health.value + toNumber(options.heal);
+        this.safeUpdate(update);
+    }
 
     setAttributes(attributes) {
         let update = {};
@@ -1551,6 +1647,10 @@ export class SWSEActor extends Actor {
 
     set shields(shields) {
         this.safeUpdate({'data.shields.value': shields < 0 ? 0 : shields})
+    }
+
+    get shields() {
+        return this.system.shields.value;
     }
 
     setAge(age) {
@@ -2498,8 +2598,6 @@ export class SWSEActor extends Actor {
 
         return false;
     }
-
-
 }
 
 /**

@@ -81,8 +81,8 @@ export class SWSEItemSheet extends ItemSheet {
             // Delete Inventory Item
             html.find('.item-delete').click(ev => {
                 const li = $(ev.currentTarget).parents(".item");
-                let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
-                let ownedItem = this.item.actor.items.get(itemToDelete._id);
+                //let itemToDelete = this.item.items.filter(item => item._id === li.data("itemId"))[0];
+                let ownedItem = this.item.actor.items.get(li.data("itemId"));
                 this.item.revokeOwnership(ownedItem);
             });
         }
@@ -90,6 +90,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="class-control"]').click(this._onClassControl.bind(this));
         html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
+        html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="mode-control"]').click(this._onModeControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
 
@@ -225,16 +226,16 @@ export class SWSEItemSheet extends ItemSheet {
 
         let actor = this.actor;
 
-        let ownedItem = actor.items.get(droppedItem.data._id);
+        let ownedItem = actor.items.get(droppedItem.itemId);
 
-        let isItemMod = Object.values(droppedItem.data.data.attributes).find(attr => attr.key === "itemMod");
+        let isItemMod = Object.values(ownedItem.system.attributes).find(attr => attr.key === "itemMod");
         if (isItemMod?.value === "true") {
-            let meetsPrereqs = meetsPrerequisites(this.object, droppedItem.data.data.prerequisite)
+            let meetsPrereqs = meetsPrerequisites(this.object, ownedItem.system.prerequisite)
 
             if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for the ${droppedItem.data.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    content: `You do not meet the prerequisites for the ${droppedItem.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                     buttons: {
                         ok: {
                             icon: '<i class="fas fa-check"></i>',
@@ -449,6 +450,42 @@ export class SWSEItemSheet extends ItemSheet {
                 updateData[path] = null;
                 break;
             case 'add-child-prerequisite':
+                let maxKey = (Math.max(...Object.keys(system).map(k => toNumber(k))) || 0) +1
+                let selectedKey = maxKey;
+                for(let i = 0; i <=maxKey; i++){
+                    if(system[i] === undefined || system[i] === null){
+                        selectedKey = i;
+                    }
+                }
+                if(path.endsWith("child")){
+
+                    updateData[`${path}`] = {};
+                } else {
+                    updateData[`${path}.${selectedKey}`] = {};
+                }
+                break;
+        }
+        this.item.safeUpdate(updateData);
+    }
+
+    _onModifierControl(event){
+        let element = $(event.currentTarget);
+        let path = element.data("path");
+
+        let system = this.item.system || this.item._source.system
+
+        for(let tok of path.substring(5).split(".")){
+            if(!!system[tok]) {
+                system = system[tok];
+            }
+        }
+
+        let updateData = {};
+        switch (element.data("type")){
+            case 'remove-this-modifier':
+                updateData[path] = null;
+                break;
+            case 'add-modifier':
                 let maxKey = (Math.max(...Object.keys(system).map(k => toNumber(k))) || 0) +1
                 let selectedKey = maxKey;
                 for(let i = 0; i <=maxKey; i++){

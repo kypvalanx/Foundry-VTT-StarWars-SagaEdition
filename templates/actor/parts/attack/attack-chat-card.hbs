@@ -1,0 +1,8 @@
+{{#each attacks as |attack i|}}
+    {{> 'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs' index = i attack = attack targetsEnabled = ../targetsEnabled}}
+{{/each}}
+
+<br/>
+{{#each notes as |note i|}}
+    <div>{{note}}</div>
+{{/each}}

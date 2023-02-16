@@ -37,6 +37,7 @@ export function getDieFlavor(flavor) {
 function plus() {
     return new OperatorTerm({operator: "+"});
 }
+
 function mult() {
     return new OperatorTerm({operator: "*"});
 }
@@ -61,7 +62,13 @@ export function appendNumericTerm(value, flavor) {
 export class Attack {
 
     get toJSON() {
-        return {actorId: this.actorId, itemId: this.itemId, providerId: this.providerId, parentId: this.parentId, options: this.options};
+        return {
+            actorId: this.actorId,
+            itemId: this.itemId,
+            providerId: this.providerId,
+            parentId: this.parentId,
+            options: this.options
+        };
     }
 
     get toJSONString() {
@@ -75,10 +82,10 @@ export class Attack {
         if (typeof json === "string") {
             json = JSON.parse(unescape(json));
         }
-        if(Array.isArray(json)){
+        if (Array.isArray(json)) {
             let attks = [];
-            for(let atk of json){
-                attks.push( new Attack(atk.actorId, atk.itemId, atk.providerId, atk.parentId, atk.options))
+            for (let atk of json) {
+                attks.push(new Attack(atk.actorId, atk.itemId, atk.providerId, atk.parentId, atk.options))
             }
             return attks;
         }
@@ -163,7 +170,7 @@ export class Attack {
         let fn = () => {
             let provider = this.provider;
             let actor = !!provider ? provider : this.actor;
-            if(!actor){
+            if (!actor) {
                 return undefined;
             }
 
@@ -174,7 +181,7 @@ export class Attack {
             let items = actor.items?._source || actor.items;
             let find = items.find(item => item._id === this.itemId);
 
-            if(!find){
+            if (!find) {
                 find = this.options.items?.get(this.itemId)
             }
 
@@ -212,6 +219,7 @@ export class Attack {
         let data = item.system;
         return weaponGroup['Ranged Weapons'].includes(data.subtype);
     }
+
     /**
      *
      * @param item {SWSEItem}
@@ -220,7 +228,7 @@ export class Attack {
     isMelee(item) {
         let data = item.system;
         let subtype = data.subtype;
-        if(!subtype && item.type === 'beastAttack'){
+        if (!subtype && item.type === 'beastAttack') {
             subtype = "Melee Natural Weapons"
         }
         return weaponGroup['Melee Weapons'].includes(subtype);
@@ -255,18 +263,19 @@ export class Attack {
         let name = SWSEItem.buildItemName(this.item);
         return ((this.isUnarmed && 'Unarmed Attack' !== name) ? `Unarmed Attack (${name})` : name) + this.nameModifier;
     }
+
     get nameModifier() {
         let modifiers = [""];
-        if(this.options.duplicateCount > 0){
-            modifiers.push(`#${this.options.duplicateCount+1}`)
+        if (this.options.duplicateCount > 0) {
+            modifiers.push(`#${this.options.duplicateCount + 1}`)
         }
-        if(this.options.additionalAttack > 0){
-            modifiers.push(`(${getOrdinal(this.options.additionalAttack+1)} attack)`)
+        if (this.options.additionalAttack > 0) {
+            modifiers.push(`(${getOrdinal(this.options.additionalAttack + 1)} attack)`)
         }
-        if(this.options.doubleAttack){
+        if (this.options.doubleAttack) {
             modifiers.push(`(Double Attack)`)
         }
-        if(this.options.tripleAttack){
+        if (this.options.tripleAttack) {
             modifiers.push(`(Triple Attack)`)
         }
         return modifiers.join(" ");
@@ -277,7 +286,7 @@ export class Attack {
         let item = this.item;
         let provider = this.provider;
 
-        if(!actor || !item){
+        if (!actor || !item) {
             return;
         }
 
@@ -287,7 +296,7 @@ export class Attack {
         let attributeStats = []
         if (this.isRanged(item)) {
             attributeStats.push("DEX")
-        } else{
+        } else {
             attributeStats.push("STR")
             if (canFinesse(getSize(actor), item, isFocus(actor, weaponTypes))) {
                 attributeStats.push(...(getInheritableAttribute({
@@ -300,7 +309,7 @@ export class Attack {
         let attributeMod = resolveFinesseBonus(actor, attributeStats);
         let terms = getDiceTermsFromString("1d20");
 
-        if(!!provider){
+        if (!!provider) {
             terms.push(...appendNumericTerm(provider.system.attributes.int.mod, "Vehicle Computer Bonus"))
 
             if (item.position === 'pilot' && actor.data.skills.pilot.trained) {
@@ -311,7 +320,7 @@ export class Attack {
 
         terms.push(...appendNumericTerm(actorSystem?.offense?.bab, "Base Attack Bonus"));
 
-        if(!provider) {
+        if (!provider) {
 
             let conditionBonus = getInheritableAttribute({
                 entity: actor,
@@ -319,7 +328,7 @@ export class Attack {
                 reduce: "FIRST"
             })
 
-            if("OUT" === conditionBonus || !conditionBonus){
+            if ("OUT" === conditionBonus || !conditionBonus) {
                 conditionBonus = "0";
             }
 
@@ -355,7 +364,7 @@ export class Attack {
         let actor = this.actor
         let item = this.item
 
-        if(!actor || !item){
+        if (!actor || !item) {
             return;
         }
 
@@ -387,7 +396,7 @@ export class Attack {
         let halfBeastLevel = Math.floor(beastClassLevels.length / 2)
 
         terms.push(...appendNumericTerm(halfHeroicLevel, "Half Heroic Level"));
-        if(item.type === 'beastAttack') {
+        if (item.type === 'beastAttack') {
             terms.push(...appendNumericTerm(halfBeastLevel, "Half Beast Level"));
         }
         terms.push(...getInheritableAttribute({
@@ -463,7 +472,7 @@ export class Attack {
         return atks.slice(1);
     }
 
-    get notes(){
+    get notes() {
         let itemData = this.item;
         let provider = this.provider;
         let notes = getInheritableAttribute({
@@ -471,15 +480,15 @@ export class Attack {
             attributeKey: 'special'
         })
         let type = this.type;
-        if('Stun' === type){
-            notes.push({href:"https://swse.fandom.com/wiki/Stun_Damage", value:"Stun Damage"})
+        if ('Stun' === type) {
+            notes.push({href: "https://swse.fandom.com/wiki/Stun_Damage", value: "Stun Damage"})
 
         }
-        if('Ion' === type){
-            notes.push({href:"https://swse.fandom.com/wiki/Ion_Damage", value:"Ion Damage"})
+        if ('Ion' === type) {
+            notes.push({href: "https://swse.fandom.com/wiki/Ion_Damage", value: "Ion Damage"})
         }
 
-        if(!!provider){
+        if (!!provider) {
             notes.push({value: `Weapon Emplacement on ${provider.name}`})
         }
         return notes;
@@ -490,7 +499,7 @@ export class Attack {
             let value = note.value;
             let href = note.href;
 
-            if(href){
+            if (href) {
                 value = `<a href="${href}">${value}</a>`
             }
 
@@ -500,8 +509,9 @@ export class Attack {
 
         }).join("<span>  </span>");
     }
+
     get notesText() {
-        return this.notes.map(note =>  note.value).join(", ");
+        return this.notes.map(note => note.value).join(", ");
     }
 
     get range() {
@@ -522,7 +532,7 @@ export class Attack {
         return resolvedSubtype;
     }
 
-    get rangeDisplay(){
+    get rangeDisplay() {
         let multipliers = getInheritableAttribute({
             entity: this.item,
             attributeKey: "rangeMultiplier",
@@ -531,7 +541,7 @@ export class Attack {
 
         let range1 = this.range;
 
-        for(let multiplier of multipliers){
+        for (let multiplier of multipliers) {
             range1 = range1 + multiplier;
         }
 
@@ -545,7 +555,7 @@ export class Attack {
     get type() {
         let item = this.item;
 
-        if(!item){
+        if (!item) {
             return;
         }
         let attributes = getInheritableAttribute({
@@ -554,7 +564,7 @@ export class Attack {
             reduce: "VALUES"
         });
 
-        if(attributes.length === 0 && item.type === "vehicleSystem"){
+        if (attributes.length === 0 && item.type === "vehicleSystem") {
             attributes.push("Energy");
         }
 
@@ -636,6 +646,11 @@ export class Attack {
             reduce: "NUMERIC_VALUES"
         }).includes(num);
     }
+    isMiss(roll, defense) {
+        let term = roll.terms.find(term => term.faces === 20);
+        let num = term.results[0].result;
+        return num < defense;
+    }
 
     isFailure(roll) {
         let term = roll.terms.find(term => term.faces === 20);
@@ -657,7 +672,7 @@ export class Attack {
         this.options.modifiers.push(...modifiers);
     }
 
-    clone(){
+    clone() {
         return new Attack(this.actorId, this.itemId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
     }
 }
@@ -670,7 +685,7 @@ function getItemStripping(item, key) {
 }
 
 function getDiceTermsFromString(dieString) {
-    if(!dieString){
+    if (!dieString) {
         return [];
     }
     dieString = `${dieString}`
@@ -681,11 +696,11 @@ function getDiceTermsFromString(dieString) {
         return [new NumericTerm({number: 1})];
     }
     let additionalTerms = []
-    if(dieString.includes("x")){
+    if (dieString.includes("x")) {
         let toks = dieString.split("x")
         dieString = toks[0];
-        additionalTerms.push( mult());
-        additionalTerms.push(  new NumericTerm({number: toks[1], options: getDieFlavor("multiplier")}));
+        additionalTerms.push(mult());
+        additionalTerms.push(new NumericTerm({number: toks[1], options: getDieFlavor("multiplier")}));
     }
     let toks = dieString.split("d")
     let dice = [new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])})];
@@ -741,7 +756,7 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
 
         let quantity = source.system.quantity || 1
 
-        for(let i = 0; i < quantity; i++){
+        for (let i = 0; i < quantity; i++) {
             let duplicateCount = existingWeaponNames.filter(name => name === attack.name).length;
 
             existingWeaponNames.push(attack.name)
@@ -750,7 +765,7 @@ export function attackOptions(attacks, doubleAttack, tripleAttack) {
             }
 
             let clonedAttack = attack.clone();
-            if(source.type === "beastAttack"){
+            if (source.type === "beastAttack") {
                 clonedAttack.options.beastAttack = true;
             } else {
                 clonedAttack.options.standardAttack = true;
@@ -818,14 +833,14 @@ function addMultiplierToDice(roll, multiplier) {
  */
 function attackDialogue(context) {
     context.attacks = context.attacks?.map(i => {
-        if(i instanceof Attack){
+        if (i instanceof Attack) {
             return i;
         }
         return Attack.fromJSON(i);
     }) || [];
     let actor = context.actor || context.attacks[0]?.actor;
 
-    if(!actor){
+    if (!actor) {
         return;
     }
     let availableAttacks = 1;
@@ -865,7 +880,7 @@ function attackDialogue(context) {
             if (tripleAttack.includes(subtype)) {
                 tripleAttackBonus = 1;
             }
-            if(item.type === "beastAttack"){
+            if (item.type === "beastAttack") {
                 beastAttacks++;
             }
         }
@@ -944,7 +959,8 @@ function attackDialogue(context) {
                         }
                     }
 
-                    rollAttacks(attacks, undefined);
+                    createAttackChatMessage(attacks, undefined).then(() => {
+                    });
                 }
             },
             saveMacro: {
@@ -965,7 +981,8 @@ function attackDialogue(context) {
                     data.attacks = attacks;
                     data.actorId = actor._id;
 
-                    createAttackMacro(data).then(() => {});
+                    createAttackMacro(data).then(() => {
+                    });
                 }
             }
         },
@@ -1105,54 +1122,39 @@ function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
 
     return attack;
 }
+
 async function generateAttackCard(resolvedAttacks, attack) {
-    let attackRolls = '<th>Attack:</th>';
-    let damageRolls = '<th>Damage:</th>';
-
-
-    for (let resolvedAttack of resolvedAttacks) {
-        let classes = [];
-        let modifiers = [];
-        if (resolvedAttack.critical) {
-            classes.push("critical")
-            modifiers.push(`<i class="fas fa-dice-d20">`)
-        }
-        if (resolvedAttack.fail) {
-            classes.push("fail")
-            modifiers.push(`<i class="fas fa-trash">`)
-        }
-        attackRolls += `<td><a class="inline-roll inline-result inline-dsn-hidden ${classes.join(" ")}" title="${resolvedAttack.attack._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.attack.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.attack.total}</a></td>`
-
-        let damageType = "";
-        if(resolvedAttack.damageType){
-            damageType = ` (${resolvedAttack.damageType})`;
-        }
-        damageRolls += `<td><a class="inline-roll inline-result inline-dsn-hidden ${classes.join(" ")}" title="${resolvedAttack.damage._formula}" data-roll="${escape(JSON.stringify(resolvedAttack.damage.toJSON()))}"><i class="fas fa-dice-d20"></i> ${resolvedAttack.damage.total}${damageType}</a></td>`
-    }
-
-    return `<table class="swse">
-<thead>
-<tr>
-<th>${attack.name}</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-${attackRolls}
-</tr>
-<tr>
-${damageRolls}
-</tr>
-</tbody>
-</table><br/><div>${attack.notesHTML}</div>`
+    let template = await getTemplate("systems/swse/templates/actor/parts/attack/attack-chat-card.hbs")
+    return template({name: attack.name, notes: attack.notesHTML, attacks: resolvedAttacks, targetsEnabled: game.settings.get("swse", "enableTargetResultsOnAttackCard")})
 }
 
-function resolveAttack(attack) {
+function resolveAttack(attack, targetActors) {
     let attackRoll = attack.attackRoll.roll;
     let attackRollResult = attackRoll.roll({async: false});
-
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
+
+    let targets = targetActors.map(actor => {
+        let reflexDefense = actor.system.defense.reflex.total;
+        let isMiss = attack.isMiss(attackRollResult, reflexDefense)
+        let targetResult = critical ? "Critical Hit!" : fail ? "Automatic Miss" : isMiss ? "Miss" : "Hit";
+
+        let conditionalDefenses =
+            getInheritableAttribute({
+                entity: actor,
+                attributeKey: ["reflexDefenseBonus"],
+                attributeFilter: attr => !!attr.modifier,
+                reduce: "VALUES"
+            });
+
+        return {name: actor.name,
+            defense: reflexDefense,
+            defenseType: 'Ref',
+            highlight: targetResult.includes("Miss") ? "miss" : "hit",
+            result: targetResult,
+            conditionalDefenses: conditionalDefenses}
+    })
+
 
 
     let ignoreCritical = getInheritableAttribute({
@@ -1195,6 +1197,7 @@ function resolveAttack(attack) {
     }
 
     let damage = damageRoll.roll({async: false});
+    let targetIds = targetActors.map(target => target.id);
     return {
         attack: attackRollResult,
         attackRollFunction: attackRoll.formula,
@@ -1203,17 +1206,26 @@ function resolveAttack(attack) {
         damageType: attack.type,
         notes: attack.notes,
         critical,
-        fail
+        fail,
+        targets, targetIds
     };
 }
 
-export async function rollAttacks(attacks, rollMode) {
-
+export async function createAttackChatMessage(attacks, rollMode) {
+    let targetTokens = game.user.targets
+    let targetActors = [];
+    for(let targetToken of targetTokens.values()){
+        let actorId = targetToken.document.actorId
+        let actor = game.actors.get(actorId)
+        if(actor){
+            targetActors.push(actor)
+        }
+    }
     let attackRows = [];
     let rolls = [];
     let rollOrder = 1;
     for (let attack of attacks) {
-        let resolvedAttack = resolveAttack(attack);
+        let resolvedAttack = resolveAttack(attack, targetActors);
         resolvedAttack.attack.dice.forEach(die => die.options.rollOrder = rollOrder);
         rolls.push(resolvedAttack.attack)
         resolvedAttack.damage.dice.forEach(die => die.options.rollOrder = rollOrder);
@@ -1233,8 +1245,13 @@ export async function rollAttacks(attacks, rollMode) {
     const pool = PoolTerm.fromRolls(rolls);
     let roll = Roll.fromTerms([pool]);
 
+    let flags = {};
+    flags.swse = {};
+    flags.swse.context = {};
+    flags.swse.context.type = "attack-roll";
 
     let messageData = {
+        flags,
         user: game.user.id,
         speaker: speaker,
         flavor: flavor,

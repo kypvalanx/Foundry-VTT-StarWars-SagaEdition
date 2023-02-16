@@ -288,28 +288,12 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onConditionChange(event) {
         event.stopPropagation();
-
-        let ids = this.actor.effects
-            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
-
-        await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
+        await this.actor.clearCondition();
         //this.actor.deleteEmbeddedDocuments("")
-
-        let statusEffect = CONFIG.statusEffects.find(e => e.changes && e.changes.find(c => c.key === 'condition' && c.value === event.currentTarget.value))
-        await this.activateStatusEffect(statusEffect);
+        await this.actor.setCondition(event.currentTarget.value);
     }
 
-    async activateStatusEffect(statusEffect) {
-        if (statusEffect) {
-            const createData = foundry.utils.deepClone(statusEffect);
-            createData.label = game.i18n.localize(statusEffect.label);
-            createData["flags.core.statusId"] = statusEffect.id;
-            //if ( overlay ) createData["flags.core.overlay"] = true;
-            delete createData.id;
-            const cls = getDocumentClass("ActiveEffect");
-            await cls.create(createData, {parent: this.actor});
-        }
-    }
+
 
     async _onShield(event) {
         let element = $(event.currentTarget);
@@ -331,7 +315,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                 if(ids.length === 0){
                     let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                    await this.activateStatusEffect(statusEffect);
+                    await this.actor.activateStatusEffect(statusEffect);
                 }
 
                 break;

@@ -33,9 +33,13 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const system = this.system;
+        this.system.inheritableItems = null;
         this.lazyResolve = new Map();
         //itemData.finalName = this.name;
 
+        this.items = this.system.items?.map(id => {
+            return this.parent.items.get(id)
+        }).filter(i => !!i) || []
         system.displayName = SWSEItem.buildItemName(this);
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
@@ -120,6 +124,7 @@ export class SWSEItem extends Item {
     }
 
     getCached(key, fn) {
+        this.lazyResolve = this.lazyResolve || new Map();
         if (this.lazyResolve.has(key)) {
             return this.lazyResolve.get(key);
         }
@@ -946,18 +951,18 @@ export class SWSEItem extends Item {
     async takeOwnership(item) {
         let items = this.items || [];
         items.push(item)
-        let filteredItems = [];
+        //let filteredItems = [];
         let foundIds = [];
 
         for (let item of items) {
             if (!foundIds.includes(item._id)) {
                 foundIds.push(item._id)
-                filteredItems.push(item);
+                //filteredItems.push(item);
             }
         }
 
 
-        await this.safeUpdate({"data.items": [...filteredItems]});
+        await this.safeUpdate({"data.items": [...foundIds]});
         await item.safeUpdate({"data.hasItemOwner": true});
     }
 

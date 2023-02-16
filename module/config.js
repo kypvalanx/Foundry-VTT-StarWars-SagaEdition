@@ -67,6 +67,8 @@ SWSE.Abilities.droidPointBuyTotal = 21;
  */
 SWSE.RecognizedAttributes = [];
 
+CONFIG.conditionTrack = ["0", "-1", "-2", "-5", "-10", "OUT"]
+
 CONFIG.statusEffects.push(...[
     {
         id: "condition-1",

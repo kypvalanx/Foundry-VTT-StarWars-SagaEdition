@@ -1,9 +1,8 @@
-
-    <!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
-    {{#each item.items as |child key|}}
-        {{#if child.system.attributes}}
-            <h3>Inherited Attributes</h3>
-            <ul>
+<!--INHERITED ATTRIBUTES--><!--do we need to add _source references?-->
+{{#each item.items as |child key|}}
+    {{#if child.system.attributes}}
+        <h3>Inherited Attributes</h3>
+        <ul>
             {{#each child.system.attributes as |attr key|}}
                 {{#unlessEquals attr.key 'upgradePointCost'}}
                     <li class="attribute flexrow" data-attribute="{{key}}">
@@ -13,60 +12,69 @@
                     </li>
                 {{/unlessEquals}}
             {{/each}}
-            </ul>
-        {{/if}}
-    {{/each}}
-    <h3>Attributes</h3>
-    <ul>
+        </ul>
+    {{/if}}
+{{/each}}
+<h3>Attributes</h3>
+<ul>
     <!-- active item -->
-        {{#if item.system.attributes}}
-            {{#each item.system.attributes as |attr key|}}
-                {{#if attr}}
+    {{#if item.system.attributes}}
+        {{#each item.system.attributes as |attr key|}}
+            {{#if attr}}
+                <li>
                     {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level path=(concat ../path '.' key)}}
-                {{/if}}
+                </li>
+            {{/if}}
+        {{/each}}
+        <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add"
+                                                class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+            add a new
+            attribute.</a></li>
+
+        <!--not supporting modes in levels at this time-->
+        {{#unless level}}
+            <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add" class="mode-add"
+                                                    data-level="{{level}}"><i class="fas fa-plus"></i>
+                add a new mode.</a></li>
+
+            {{#each item.system.modes as |mode mkey|}}
+
+                {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'system.modes.' mkey) active=true level=level}}
+
             {{/each}}
-            <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add" class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
-                add a new
-                attribute.</a></li>
-
-            <!--not supporting modes in levels at this time-->
-            {{#unless level}}
-                <li class="attribute flexrow subtle"><a data-action="mode-control" data-type="mode-add" class="mode-add" data-level="{{level}}"><i class="fas fa-plus"></i>
-                    add a new mode.</a></li>
-
-                {{#each item.system.modes as |mode mkey|}}
-
-                    {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'system.modes.' mkey) active=true level=level}}
-
-                {{/each}}
-            {{/unless}}
-        {{else}}
-            {{#each item._source.system.attributes as |attr key|}}
-                {{#if attr}}
+        {{/unless}}
+    {{else}}
+        {{#each item._source.system.attributes as |attr key|}}
+            {{#if attr}}
+                <li>
                     {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level  path=(concat ../path '.' key)}}
-                {{/if}}
+                </li>
+            {{/if}}
+        {{/each}}
+
+        <!--not supporting modes in levels at this time-->
+        {{#unless level}}
+            {{#each item._source.system.modes as |mode mkey|}}
+
+                {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'system.modes.' mkey) active=false level=level}}
+
             {{/each}}
-
-            <!--not supporting modes in levels at this time-->
-            {{#unless level}}
-                {{#each item._source.system.modes as |mode mkey|}}
-
-                    {{> 'systems/swse/templates/item/parts/mode.hbs' mode=mode mkey=mkey depth=1 modePath=(concat 'system.modes.' mkey) active=false level=level}}
-
-                {{/each}}
-            {{/unless}}
-        {{/if}}
+        {{/unless}}
+    {{/if}}
 
 
-        {{#if attributes}}
-            {{#each attributes as |attr key|}}
-                {{#if attr}}
+    {{#if attributes}}
+        {{#each attributes as |attr key|}}
+            {{#if attr}}
+                <li>
                     {{> 'systems/swse/templates/item/parts/attribute.hbs' attr=attr key=key level=../level path=(concat ../path '.' key)}}
-                {{/if}}
-            {{/each}}
-            <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add" class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
-                add a new
-                attribute.</a></li>
-        {{/if}}
+                </li>
+            {{/if}}
+        {{/each}}
+        <li class="attribute flexrow subtle"><a data-action="attribute-control" data-type="attribute-add"
+                                                class="attribute-add" data-level="{{level}}"><i class="fas fa-plus"></i>
+            add a new
+            attribute.</a></li>
+    {{/if}}
 
 </ul>
