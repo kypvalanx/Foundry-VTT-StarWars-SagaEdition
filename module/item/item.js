@@ -33,7 +33,6 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const system = this.system;
-        this.system.inheritableItems = null;
         this.lazyResolve = new Map();
         //itemData.finalName = this.name;
 

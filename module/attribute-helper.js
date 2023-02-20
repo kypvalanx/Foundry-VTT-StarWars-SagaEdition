@@ -3,54 +3,50 @@ import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
 import {SWSEActor} from "./actor/actor.js";
 
-function equippedItems(entity) {
-    let items = []
+export function equippedItems(entity) {
     if (entity.items) {
         if(entity instanceof SWSEActor){
             let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
-            items.push(...entity.items.filter(item => equippedIds.includes(item?.id || item?._id)));
+            return entity.items.filter(item => equippedIds.includes(item?.id || item?._id))
         } else {
-            items.push(...entity.items)
+            return entity.items
         }
     }
-    return items;
+    return [];
 }
 
 export function inheritableItems(entity) {
-    if(!entity.system) return [];
+    let fn = () => {
+        if (!entity.system) return [];
 
-    if (!!entity.system?.inheritableItems) {
-        return entity.system.inheritableItems;
-    }
+        let possibleInheritableItems = equippedItems(entity);
 
-    let possibleInheritableItems = equippedItems(entity);
-
-    if (entity instanceof SWSEItem) {
-        entity.system.inheritableItems = possibleInheritableItems
-        return possibleInheritableItems;
-    }
-
-    possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
-        "beastSense",
-        "beastType",
-        "beastQuality"]));
-
-
-    entity.system.inheritableItems = [];
-    let shouldRetry = possibleInheritableItems.length > 0;
-    while (shouldRetry) {
-        shouldRetry = false;
-        for (let possible of possibleInheritableItems) {
-            if (!meetsPrerequisites(entity, possible.system.prerequisite).doesFail) {
-                entity.system.inheritableItems.push(possible);
-                shouldRetry = true;
-            }
+        if (entity instanceof SWSEItem) {
+            return possibleInheritableItems;
         }
-        possibleInheritableItems = possibleInheritableItems.filter(possible => !entity.system.inheritableItems.includes(possible));
+
+        possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+            "beastSense",
+            "beastType",
+            "beastQuality"]));
+
+        let actualInheritable = [];
+        let shouldRetry = possibleInheritableItems.length > 0;
+        while (shouldRetry) {
+            shouldRetry = false;
+            for (let possible of possibleInheritableItems) {
+                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable}).doesFail) {
+                    actualInheritable.push(possible);
+                    shouldRetry = true;
+                }
+            }
+            possibleInheritableItems = possibleInheritableItems.filter(possible => !actualInheritable.includes(possible));
+        }
+
+        return actualInheritable;
     }
 
-
-    return entity.system.inheritableItems;
+    return entity.getCached ? entity.getCached({fn: "inheritableItems"}, fn) : fn();
 }
 
 /**
@@ -165,7 +161,7 @@ function getAttributesFromDocument(data) {
         }
         return attributeMap;
     };
-    let unfilteredAttributes = document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
+    let unfilteredAttributes = fn();// document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
 
 
     let values = [];
@@ -192,16 +188,16 @@ function functionString(fn) {
 }
 
 function getCachedAttributesFromDocument(data) {
-    let key = {
-        fn: "getCachedAttributesFromDocument",
-        attributeKey: data.attributeKey,
-        itemFilter: functionString(data.itemFilter),
-        attributeFilter: functionString(data.attributeFilter),
-        duplicates: data.duplicates
-    };
-    if(data.entity.getCached){
-        return data.entity.getCached(key, () => getAttributesFromDocument(data))
-    }
+    // let key = {
+    //     fn: "getCachedAttributesFromDocument",
+    //     attributeKey: data.attributeKey,
+    //     itemFilter: functionString(data.itemFilter),
+    //     attributeFilter: functionString(data.attributeFilter),
+    //     duplicates: data.duplicates
+    // };
+    // if(data.entity.getCached){
+    //     return data.entity.getCached(key, () => getAttributesFromDocument(data))
+    // }
     return getAttributesFromDocument(data);
 }
 

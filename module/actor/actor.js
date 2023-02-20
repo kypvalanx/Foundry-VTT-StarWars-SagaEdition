@@ -27,7 +27,7 @@ import {
     vehicleActorTypes
 } from "../constants.js";
 import {getActorFromId} from "../swse.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
+import {equippedItems, getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
 import {errorsFromActor, warningsFromActor} from "./warnings.js";
@@ -86,7 +86,6 @@ export class SWSEActor extends Actor {
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 
-        this.system.inheritableItems = null;
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
@@ -2600,25 +2599,3 @@ export class SWSEActor extends Actor {
     }
 }
 
-/**
- *
- *
- * @param actor {SWSEActor}
- */
-export function getEquippedItems(actor) {
-    if (!actor) {
-        return [];
-    }
-
-    let equippedIds = actor.system?.equippedIds || actor._source?.system?.equippedIds || [];
-    equippedIds = equippedIds.map(id => id.id)
-    let items = actor.items.values() || []
-    let filtered = [];
-    for (let item of items) {
-        if (equippedIds.includes(item._id)) {
-            filtered.push(item)
-        }
-    }
-
-    return filtered;
-}

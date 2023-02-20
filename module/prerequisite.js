@@ -1,7 +1,7 @@
 import {filterItemsByType, getItems, resolveExpression, resolveValueArray, toNumber} from "./util.js";
 import {sizeArray, weaponGroup} from "./constants.js";
-import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.js";
-import {getEquippedItems, SWSEActor} from "./actor/actor.js";
+import {equippedItems as equippedItems1, getInheritableAttribute, getResolvedSize} from "./attribute-helper.js";
+import {SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 
 function ensureArray(array) {
@@ -40,7 +40,12 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     let system = target.system;
 
     prereqs = ensureArray(prereqs)
-
+    let subCallTargetEntity = target;
+    if(!options.embeddedItemOverride){
+        options.embeddedItemOverride = getItems(target)
+    } else {
+        subCallTargetEntity = options.embeddedItemOverride;
+    }
     for (let prereq of prereqs) {
         switch (prereq.type.toUpperCase()) {
             case undefined:
@@ -80,7 +85,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'ITEM':
-                let ownedItem = SWSEActor.getInventoryItems(getItems(target));
+                let ownedItem = SWSEActor.getInventoryItems(options.embeddedItemOverride);
                 let filteredItem = ownedItem.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
@@ -104,49 +109,49 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 let filteredFeats;
                 if(prereq.requirement.toLowerCase().includes("(any)")){
                     let req = prereq.requirement.replace(/ \(a|Any\)/, "");
-                    filteredFeats = getItems(target)
+                    filteredFeats = options.embeddedItemOverride
                         .filter(item => item.type === "feat"
                             && SWSEItem.buildItemName(item).startsWith(req));
                 } else if(prereq.requirement.includes("(Exotic Melee Weapons)")){
                     let exoticMeleeWeapons = game.generated?.exoticMeleeWeapons || [];
                     let possibleFeats = exoticMeleeWeapons?.map(w => prereq.requirement.replace("(Exotic Melee Weapons)", `(${w})`))
 
-                    filteredFeats = getItems(target)
+                    filteredFeats = options.embeddedItemOverride
                         .filter(item => item.type === "feat"
                             && possibleFeats.includes(SWSEItem.buildItemName(item)));
                 }else{
-                    filteredFeats = getItems(target)
+                    filteredFeats = options.embeddedItemOverride
                         .filter(item => item.type === "feat"
                             && SWSEItem.buildItemName(item) === prereq.requirement);
                 }
 
                 if (filteredFeats.length > 0) {
                     let prereqs1 = filteredFeats[0].system?.prerequisite;
-                    if (!meetsPrerequisites(target, prereqs1).doesFail) {
+                    if (!meetsPrerequisites(target, prereqs1, options).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                 }
                 break;
             case 'CLASS':
-                let filteredClasses = getItems(target)
+                let filteredClasses = options.embeddedItemOverride
                     .filter(item => item.type === "class"
                         && item.finalName === prereq.requirement);
                 if (filteredClasses.length > 0) {
-                    if (!meetsPrerequisites(target, filteredClasses[0].system.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredClasses[0].system.prerequisite, options).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                 }
                 break;
             case 'TRAIT':
-                let filteredTraits = getItems(target)
+                let filteredTraits = options.embeddedItemOverride
                     .filter(item => item.type === "trait"
                         && item.finalName === prereq.requirement);
                 if (filteredTraits.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredTraits) {
-                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite, options).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -157,13 +162,13 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'SPECIAL_QUALITY':
-                let filteredSpecialQualities = getItems(target)
+                let filteredSpecialQualities = options.embeddedItemOverride
                     .filter(item => item.type === "beastQuality"
                         && item.finalName === prereq.requirement);
                 if (filteredSpecialQualities.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpecialQualities) {
-                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait.system.prerequisite, options).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -174,13 +179,13 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'SPECIES_TYPE':
-                let filteredSpeciesTypes = getItems(target)
+                let filteredSpeciesTypes = options.embeddedItemOverride
                     .filter(item => item.type === "beastType"
                         && item.finalName === prereq.requirement);
                 if (filteredSpeciesTypes.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredSpeciesTypes) {
-                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite, options).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -191,13 +196,13 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'BEAST_ATTACK':
-                let filteredBeastAttacks = getItems(target)
+                let filteredBeastAttacks = options.embeddedItemOverride
                     .filter(item => item.type === "beastAttack"
                         && item.finalName === prereq.requirement);
                 if (filteredBeastAttacks.length > 0) {
                     let parentsMeetPrequisites = false;
                     for (let filteredTrait of filteredBeastAttacks) {
-                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite).doesFail) {
+                        if (!meetsPrerequisites(target, filteredTrait?.system?.prerequisite, options).doesFail) {
                             successList.push({prereq, count: 1});
                             parentsMeetPrequisites = true;
                         }
@@ -208,14 +213,14 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'PROFICIENCY':
-                let proficiencies = getInheritableAttribute({entity:target, attributeKey:["weaponProficiency", "armorProficiency"], reduce:"VALUES_TO_LOWERCASE"})
+                let proficiencies = getInheritableAttribute({entity:subCallTargetEntity, attributeKey:["weaponProficiency", "armorProficiency"], reduce:"VALUES_TO_LOWERCASE"})
                 if (proficiencies.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     continue;
                 }
                 break;
             case 'TALENT':
-                let filteredTalents = getItems(target)
+                let filteredTalents = options.embeddedItemOverride
                     .filter(item => {
                         if(item.type !== "talent"){
                             return false;
@@ -228,7 +233,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     });
 
                 if (filteredTalents.length > 0) {
-                    if (!meetsPrerequisites(target, filteredTalents[0].system.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredTalents[0].system.prerequisite, options).doesFail) {
                         successList.push({prereq, count: filteredTalents.length});
                         continue;
                     }
@@ -236,19 +241,19 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
                 break;
             case 'TRADITION':
-                let filteredTraditions = getItems(target)
+                let filteredTraditions = options.embeddedItemOverride
                     .filter(item => item.type === "affiliation"
                         && item.finalName === prereq.requirement);
 
                 if (filteredTraditions.length > 0) {
-                    if (!meetsPrerequisites(target, filteredTraditions[0].system.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredTraditions[0].system.prerequisite, options).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                 }
                 break;
             case 'FORCE TECHNIQUE':
-                let ownedForceTechniques = filterItemsByType(getItems(target), "forceTechnique");
+                let ownedForceTechniques = filterItemsByType(options.embeddedItemOverride, "forceTechnique");
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForceTechniques.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -258,14 +263,14 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
                 let filteredForceTechniques = ownedForceTechniques.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredForceTechniques.length > 0) {
-                    if (!meetsPrerequisites(target, filteredForceTechniques[0].data.data.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredForceTechniques[0].data.data.prerequisite, options).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
                 }
                 break;
             case 'FORCE POWER':
-                let ownedForcePowers = filterItemsByType(getItems(target), "forcePower");
+                let ownedForcePowers = filterItemsByType(options.embeddedItemOverride, "forcePower");
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForcePowers.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -275,7 +280,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
                 let filteredForcePowers = ownedForcePowers.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredForcePowers.length > 0) {
-                    if (!meetsPrerequisites(target, filteredForcePowers[0].system.prerequisite).doesFail) {
+                    if (!meetsPrerequisites(target, filteredForcePowers[0].system.prerequisite, options).doesFail) {
                         successList.push({prereq, count: 1});
                         continue;
                     }
@@ -287,7 +292,8 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     let val = getInheritableAttribute({
                         entity: target,
                         attributeKey: toks[0],
-                        reduce: "SUM"
+                        reduce: "SUM",
+                        recursive: true
                     });
                     let check = parseInt(toks[1].substring(1));
                     if(toks[1].startsWith(">")){
@@ -322,7 +328,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 }
                 break;
             case 'NOT': {
-                let meetsChildPrereqs = meetsPrerequisites(target, prereq.child);
+                let meetsChildPrereqs = meetsPrerequisites(target, prereq.child, options);
                 if (meetsChildPrereqs.doesFail) {
                     successList.push({prereq, count: 1});
                     continue;
@@ -332,7 +338,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 continue;
             }
             case 'AND': {
-                let meetsChildPrereqs = meetsPrerequisites(target, prereq.children);
+                let meetsChildPrereqs = meetsPrerequisites(target, prereq.children, options);
                 if (!(meetsChildPrereqs.doesFail)) {
                     successList.push({prereq, count: 1});
                     continue;
@@ -345,7 +351,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 continue;
             }
             case 'OR': {
-                let meetsChildPrereqs = meetsPrerequisites(target, prereq.children)
+                let meetsChildPrereqs = meetsPrerequisites(target, prereq.children, options)
                 let count = 0;
                 for (let success of meetsChildPrereqs.successList) {
                     count += success.count;
@@ -373,7 +379,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             case 'SPECIAL':
                 if (prereq.requirement.toLowerCase() === 'not a droid') {
                     let inheritableAttributesByKey = getInheritableAttribute({
-                        entity: target,
+                        entity: subCallTargetEntity,
                         attributeKey: "isDroid",
                         reduce: "OR"
                     });
@@ -384,7 +390,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     break;
                 } else if (prereq.requirement.toLowerCase() === 'is a droid') {
                     if (getInheritableAttribute({
-                        entity: target,
+                        entity: subCallTargetEntity,
                         attributeKey: "isDroid",
                         reduce: "OR"
                     })) {
@@ -396,12 +402,12 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     failureList.push({fail: false, message: `${prereq.type}: ${prereq.text}`});
                     continue;
                 } else if (prereq.requirement === 'is part of a military') {
-                    if(filterItemsByType(getItems(target), "affiliation").length > 0) {
+                    if(filterItemsByType(options.embeddedItemOverride, "affiliation").length > 0) {
                         successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
                         continue;
                     }
                 } else if (prereq.requirement === 'is part of a major interstellar corporation') {
-                    if(filterItemsByType(getItems(target), "affiliation").length > 0) {
+                    if(filterItemsByType(options.embeddedItemOverride, "affiliation").length > 0) {
                         successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
                         continue;
                     }
@@ -421,7 +427,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                     req = toks[0];
                     comparison = toks[1];
                 }
-                let equippedItems = getEquippedItems(target);
+                let equippedItems = equippedItems1(target);
                 let filteredEquippedItems = equippedItems.filter(item => {
                     let actsAs = getInheritableAttribute({
                         entity: item,
@@ -471,7 +477,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
                 break;
             case "DAMAGE_TYPE":
                 let damageTypes = getInheritableAttribute({
-                    entity: target,
+                    entity: subCallTargetEntity,
                     attributeKey: "damageType",
                     reduce: "VALUES_TO_LOWERCASE"
                 });

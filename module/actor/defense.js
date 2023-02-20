@@ -1,6 +1,6 @@
-import {getEquippedItems, SWSEActor} from "./actor.js";
+import {SWSEActor} from "./actor.js";
 import {resolveValueArray, toNumber} from "../util.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
+import {equippedItems, getInheritableAttribute} from "../attribute-helper.js";
 
 
 function reduceSpeedForArmorType(speed, armorType) {
@@ -492,7 +492,7 @@ function _getEquipmentFortBonus(actor) {
 }
 
 function getArmorReflexDefenseBonus(actor) {
-    let bonuses = getEquippedItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
+    let bonuses = equippedItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
 
     if (bonuses.length === 0) {
         return undefined;

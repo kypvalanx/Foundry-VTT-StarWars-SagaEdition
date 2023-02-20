@@ -1,5 +1,5 @@
 import {UnarmedAttack} from "./unarmed-attack.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
+import {equippedItems as equippedItems1, getInheritableAttribute} from "../attribute-helper.js";
 import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
 import {compareSizes, getSize} from "./size.js";
 import {
@@ -12,7 +12,7 @@ import {
     resolveFinesseBonus
 } from "./attack-handler.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
-import {getEquippedItems, SWSEActor} from "./actor.js";
+import {SWSEActor} from "./actor.js";
 import {reduceWeaponRange, SWSEItem} from "../item/item.js";
 import {
     getAttackRange,
@@ -864,7 +864,7 @@ function attackDialogue(context) {
         });
 
         //availableAttacks = this.fullAttackCount;
-        let equippedItems = getEquippedItems(actor)
+        let equippedItems = equippedItems1(actor)
         availableAttacks = 0;
         let doubleAttackBonus = 0;
         let tripleAttackBonus = 0;
