@@ -1,5 +1,5 @@
-import {filterItemsByType} from "../util.js";
-import {equippedItems, getInheritableAttribute} from "../attribute-helper.js";
+import {equippedItems, filterItemsByType} from "../util.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 /**
  *

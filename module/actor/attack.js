@@ -1,5 +1,5 @@
 import {UnarmedAttack} from "./unarmed-attack.js";
-import {equippedItems as equippedItems1, getInheritableAttribute} from "../attribute-helper.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
 import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../constants.js";
 import {compareSizes, getSize} from "./size.js";
 import {
@@ -15,6 +15,7 @@ import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
 import {SWSEActor} from "./actor.js";
 import {reduceWeaponRange, SWSEItem} from "../item/item.js";
 import {
+    equippedItems,
     getAttackRange,
     getBonusString,
     getEntityFromCompendiums,
@@ -864,13 +865,13 @@ function attackDialogue(context) {
         });
 
         //availableAttacks = this.fullAttackCount;
-        let equippedItems = equippedItems1(actor)
+        let items = equippedItems(actor)
         availableAttacks = 0;
         let doubleAttackBonus = 0;
         let tripleAttackBonus = 0;
         let availableWeapons = 0
         let beastAttacks = 0;
-        for (let item of equippedItems) {
+        for (let item of items) {
             availableWeapons = Math.min(availableWeapons + (item.isDoubleWeapon ? 2 : 1) + (item.system.quantity > 1 ? 2 : 1), 2);
             //TODO support exotic weapons
             let subtype = item.system.subtype;

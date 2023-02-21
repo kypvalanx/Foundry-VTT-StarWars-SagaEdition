@@ -2,6 +2,7 @@ import {increaseDieSize, increaseDieType, toNumber} from "../util.js";
 import {sizeArray, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
+import {SimpleCache} from "../common/simple-cache.js";
 
 // noinspection JSClosureCompilerSyntax
 /**
@@ -33,9 +34,9 @@ export class SWSEItem extends Item {
         this._pendingUpdate = {};
         // Get the Item's data
         const system = this.system;
-        this.lazyResolve = new Map();
         //itemData.finalName = this.name;
 
+        this.cache = new SimpleCache();
         this.items = this.system.items?.map(id => {
             return this.parent.items.get(id)
         }).filter(i => !!i) || []
@@ -123,13 +124,7 @@ export class SWSEItem extends Item {
     }
 
     getCached(key, fn) {
-        this.lazyResolve = this.lazyResolve || new Map();
-        if (this.lazyResolve.has(key)) {
-            return this.lazyResolve.get(key);
-        }
-        let resolved = fn();
-        this.lazyResolve.set(key, resolved);
-        return resolved
+        return this.cache.getCached(key, fn)
     }
 
     static addSizeAdjustmentSuffix(itemData, finalName) {

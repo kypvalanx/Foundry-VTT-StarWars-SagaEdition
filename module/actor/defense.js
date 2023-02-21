@@ -1,6 +1,6 @@
 import {SWSEActor} from "./actor.js";
-import {resolveValueArray, toNumber} from "../util.js";
-import {equippedItems, getInheritableAttribute} from "../attribute-helper.js";
+import {equippedItems, resolveValueArray, toNumber} from "../util.js";
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 
 function reduceSpeedForArmorType(speed, armorType) {
