@@ -1,4 +1,11 @@
-import {equippedItems, filterItemsByType, resolveExpression, resolveValueArray, toNumber} from "./util.js";
+import {
+    equippedItems,
+    filterItemsByType,
+    inheritableItems,
+    resolveExpression,
+    resolveValueArray,
+    toNumber
+} from "./util.js";
 import {sizeArray, weaponGroup} from "./constants.js";
 import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.js";
 import {SWSEActor} from "./actor/actor.js";
@@ -551,7 +558,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 
     prereqs = ensureArray(prereqs)
     if (!options.embeddedItemOverride) {
-        options.embeddedItemOverride = equippedItems(target)
+        options.embeddedItemOverride = inheritableItems(target)
     }
     for (let prereq of prereqs) {
         let response = meetsPrerequisite(prereq, target, options);

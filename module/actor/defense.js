@@ -395,6 +395,11 @@ function _resolveDt(actor, conditionBonus, fortitudeTotal) {
         attributeKey: "damageThresholdBonus",
         reduce: "SUM"
     }));
+    total.push(... getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'damageThresholdHardenedMultiplier',
+        reduce: "NUMERIC_VALUES"
+    }).map(value => "*"+value))
     let damageThreshold = actor.system.defense?.damageThreshold || {};
     damageThreshold.total = resolveValueArray(total, actor);
     return damageThreshold
