@@ -24,6 +24,12 @@ export function resolveHealth(actor) {
         attributeKey: 'hitPointEq'
     });
     let multipliers = [];
+
+    healthBonuses.push(... getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'healthHardenedMultiplier',
+        reduce: "NUMERIC_VALUES"
+    }).map(value => "*"+value))
     for (let item of traitAttributes || []) {
         if (item) {
             others.push(item.value);

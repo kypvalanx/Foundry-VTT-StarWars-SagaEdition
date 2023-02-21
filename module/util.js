@@ -4,6 +4,7 @@ import {SWSE} from "./config.js";
 import {dieSize, dieType} from "./constants.js";
 import {SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
+import {meetsPrerequisites} from "./prerequisite.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -824,26 +825,17 @@ export function fullJoin(...args){
     return response;
 }
 
-/**
- *
- * @param {SWSEActor|SWSEItem|ActorData|ItemData|Object} target
- * @returns {*}
- */
-export function getItems(target) {
-    let fn = () => {
-        if(!target.items ){
-            console.log("unknown target", target)
-            return [];
+export function equippedItems(entity) {
+    if (entity.items) {
+        if (entity instanceof SWSEActor) {
+            let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
+            return entity.items.filter(item => equippedIds.includes(item?.id || item?._id))
+        } else {
+            return entity.items
         }
-        if(Array.isArray(target.items)){
-            return target.items;
-        }
-        return Array.from(target.items.values());
-    };
-    return target.getCached ? target.getCached("getItems", fn) : fn();
+    }
+    return [];
 }
-
-
 export function getItemParentId(id){
     let a = []//game.data.actors || []
     let b = game.actors?.values() || []
@@ -878,4 +870,38 @@ function test(){
     // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
     // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
     // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
+}
+
+export function inheritableItems(entity) {
+    let fn = () => {
+        if (!entity.system) return [];
+
+        let possibleInheritableItems = equippedItems(entity);
+
+        if (entity instanceof SWSEItem) {
+            return possibleInheritableItems;
+        }
+
+        possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+            "beastSense",
+            "beastType",
+            "beastQuality"]));
+
+        let actualInheritable = [];
+        let shouldRetry = possibleInheritableItems.length > 0;
+        while (shouldRetry) {
+            shouldRetry = false;
+            for (let possible of possibleInheritableItems) {
+                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable, existingTraitPrerequisite: possible.type === "trait"}).doesFail) {
+                    actualInheritable.push(possible);
+                    shouldRetry = true;
+                }
+            }
+            possibleInheritableItems = possibleInheritableItems.filter(possible => !actualInheritable.includes(possible));
+        }
+
+        return actualInheritable;
+    }
+
+    return entity.getCached ? entity.getCached("inheritableItems", fn) : fn();
 }

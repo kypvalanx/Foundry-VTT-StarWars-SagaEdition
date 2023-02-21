@@ -1,57 +1,6 @@
-import {filterItemsByType, getItemParentId, reduceArray, toNumber} from "./util.js";
+import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
-import {SWSEActor} from "./actor/actor.js";
-
-function equippedItems(entity) {
-    let items = []
-    if (entity.items) {
-        if(entity instanceof SWSEActor){
-            let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
-            items.push(...entity.items.filter(item => equippedIds.includes(item?.id || item?._id)));
-        } else {
-            items.push(...entity.items)
-        }
-    }
-    return items;
-}
-
-export function inheritableItems(entity) {
-    if(!entity.system) return [];
-
-    if (!!entity.system?.inheritableItems) {
-        return entity.system.inheritableItems;
-    }
-
-    let possibleInheritableItems = equippedItems(entity);
-
-    if (entity instanceof SWSEItem) {
-        entity.system.inheritableItems = possibleInheritableItems
-        return possibleInheritableItems;
-    }
-
-    possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
-        "beastSense",
-        "beastType",
-        "beastQuality"]));
-
-
-    entity.system.inheritableItems = [];
-    let shouldRetry = possibleInheritableItems.length > 0;
-    while (shouldRetry) {
-        shouldRetry = false;
-        for (let possible of possibleInheritableItems) {
-            if (!meetsPrerequisites(entity, possible.system.prerequisite).doesFail) {
-                entity.system.inheritableItems.push(possible);
-                shouldRetry = true;
-            }
-        }
-        possibleInheritableItems = possibleInheritableItems.filter(possible => !entity.system.inheritableItems.includes(possible));
-    }
-
-
-    return entity.system.inheritableItems;
-}
 
 /**
  * appends source meta to a given attribute
@@ -63,7 +12,7 @@ export function inheritableItems(entity) {
  * @returns {value, source, sourceString, sourceDescription}
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
-    if(attribute){
+    if (attribute) {
         attribute.source = source;
         attribute.sourceString = sourceString;
         attribute.sourceDescription = sourceDescription;
@@ -82,10 +31,10 @@ function getAttributesFromClassLevel(entity, classLevel) {
     return attributes;
 }
 
-function getAttributesFromEmbeddedItems(entity, predicate) {
+function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
     let attributes = [];
     let names = {};
-    let items = inheritableItems(entity);
+    let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
     if (predicate) {
         items = items.filter(predicate)
     }
@@ -106,23 +55,34 @@ export function getResolvedSize(entity, options) {
     if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
-    if(entity.system.resolvedSize){
-        return entity.system.resolvedSize;
+
+    const fn = () => {
+
+        let sizeIndex = toNumber(getInheritableAttribute({
+            entity,
+            attributeKey: "sizeIndex",
+            reduce: "MAX",
+            recursive: true
+        }))
+        let sizeBonus = toNumber(getInheritableAttribute({
+            entity,
+            attributeKey: "sizeBonus",
+            reduce: "SUM",
+            recursive: true
+        }))
+
+
+        let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
+            entity,
+            attributeKey: "damageThresholdEffectiveSize",
+            reduce: "SUM", recursive: true
+        }))
+        let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
+        return sizeIndex + sizeBonus + miscBonus;
     }
-    let sizeIndex = toNumber(getInheritableAttribute({entity, attributeKey: "sizeIndex", reduce: "MAX", recursive: true}))
-    let sizeBonus = toNumber(getInheritableAttribute({entity, attributeKey: "sizeBonus", reduce: "SUM", recursive: true}))
+    return entity.getCache ? entity.getCache("resolvedSize", fn) : fn()
 
-
-    let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
-        entity,
-        attributeKey: "damageThresholdEffectiveSize",
-        reduce: "SUM", recursive: true
-    }))
-    let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
-    entity.system.resolvedSize = sizeIndex + sizeBonus + miscBonus;
-    return entity.system.resolvedSize;
 }
-
 
 
 function getAttributesFromDocument(data) {
@@ -134,15 +94,14 @@ function getAttributesFromDocument(data) {
             allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
         } else {
             let classLevel = data.duplicates || 0;
-            if(classLevel < 2)
-            {
+            if (classLevel < 2) {
                 allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
             }
-                allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
+            allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
 
         }
 
-        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter))
+        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride))
 
         if (document.system?.modes) {
             allAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
@@ -155,29 +114,29 @@ function getAttributesFromDocument(data) {
 
         let attributeMap = new Map();
         for (const attribute of allAttributes) {
-            if(!attribute || !attribute.key){
+            if (!attribute || !attribute.key) {
                 continue;
             }
-            if(!attributeMap.has(attribute.key)){
+            if (!attributeMap.has(attribute.key)) {
                 attributeMap.set(attribute.key, []);
             }
             attributeMap.get(attribute.key).push(attribute);
         }
         return attributeMap;
     };
-    let unfilteredAttributes = document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
+    let unfilteredAttributes = fn()//document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
 
 
     let values = [];
     if (data.attributeKey && Array.isArray(data.attributeKey)) {
-        for(let key of data.attributeKey){
-            values.push(...(unfilteredAttributes.get(key)|| []))
+        for (let key of data.attributeKey) {
+            values.push(...(unfilteredAttributes.get(key) || []))
         }
         //values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
-    }else if (data.attributeKey) {
+    } else if (data.attributeKey) {
         values.push(...(unfilteredAttributes.get(data.attributeKey) || []));
     } else {
-        for(let value of unfilteredAttributes.values()){
+        for (let value of unfilteredAttributes.values()) {
             values.push(...(value || []))
         }
         //values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
@@ -186,22 +145,22 @@ function getAttributesFromDocument(data) {
 }
 
 function functionString(fn) {
-    if(fn){
+    if (fn) {
         return fn.toLocaleString();
     }
 }
 
 function getCachedAttributesFromDocument(data) {
-    let key = {
-        fn: "getCachedAttributesFromDocument",
-        attributeKey: data.attributeKey,
-        itemFilter: functionString(data.itemFilter),
-        attributeFilter: functionString(data.attributeFilter),
-        duplicates: data.duplicates
-    };
-    if(data.entity.getCached){
-        return data.entity.getCached(key, () => getAttributesFromDocument(data))
-    }
+    // let key = {
+    //     fn: "getCachedAttributesFromDocument",
+    //     attributeKey: data.attributeKey,
+    //     itemFilter: functionString(data.itemFilter),
+    //     attributeFilter: functionString(data.attributeFilter),
+    //     duplicates: data.duplicates
+    // };
+    // if(data.entity.getCached){
+    //     return data.entity.getCached(key, () => getAttributesFromDocument(data))
+    // }
     return getAttributesFromDocument(data);
 }
 
@@ -258,7 +217,7 @@ export function getInheritableAttribute(data = {}) {
         });
     }
 
-    if(data.entity.type === "character" || data.entity.type === "npc"){
+    if (data.entity.type === "character" || data.entity.type === "npc") {
         values = values.filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail);
     }
 
@@ -268,7 +227,7 @@ export function getInheritableAttribute(data = {}) {
     }
 
 
-    let overrides = values.filter(attr =>  attr && attr.override)
+    let overrides = values.filter(attr => attr && attr.override)
 
     if (overrides.length > 0) {
         values = overrides;
@@ -288,7 +247,7 @@ export function extractEffectChange(changes, entity) {
 export function extractModeAttributes(entity, activeModes) {
     let values = [];
     for (let mode of activeModes) {
-        for(let attribute of Object.values(mode.attributes)){
+        for (let attribute of Object.values(mode.attributes)) {
             values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
         }
         values.push(...extractModeAttributes(entity, Object.values(mode.modes || {}).filter(mode => mode && mode.isActive) || []));

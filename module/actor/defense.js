@@ -1,5 +1,5 @@
-import {getEquippedItems, SWSEActor} from "./actor.js";
-import {resolveValueArray, toNumber} from "../util.js";
+import {SWSEActor} from "./actor.js";
+import {equippedItems, resolveValueArray, toNumber} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 
 
@@ -395,6 +395,11 @@ function _resolveDt(actor, conditionBonus, fortitudeTotal) {
         attributeKey: "damageThresholdBonus",
         reduce: "SUM"
     }));
+    total.push(... getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'damageThresholdHardenedMultiplier',
+        reduce: "NUMERIC_VALUES"
+    }).map(value => "*"+value))
     let damageThreshold = actor.system.defense?.damageThreshold || {};
     damageThreshold.total = resolveValueArray(total, actor);
     return damageThreshold
@@ -492,7 +497,7 @@ function _getEquipmentFortBonus(actor) {
 }
 
 function getArmorReflexDefenseBonus(actor) {
-    let bonuses = getEquippedItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
+    let bonuses = equippedItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
 
     if (bonuses.length === 0) {
         return undefined;

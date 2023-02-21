@@ -1,6 +1,5 @@
-import {filterItemsByType} from "../util.js";
+import {equippedItems, filterItemsByType} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
-import {getEquippedItems} from "./actor.js";
 
 /**
  *
@@ -26,7 +25,7 @@ export function generateArmorCheckPenalties(actor) {
     let wearingMedium = false;
     let wearingHeavy = false;
 
-    for(let armor of filterItemsByType(getEquippedItems(actor), "armor")){
+    for(let armor of filterItemsByType(equippedItems(actor), "armor")){
         if('Heavy Armor' === armor.system.subtype){
             wearingHeavy = true;
         }

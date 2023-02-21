@@ -6,9 +6,12 @@ import {
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
-    getVariableFromActorData, innerJoin,
+    getVariableFromActorData,
+    inheritableItems,
+    innerJoin,
     resolveExpression,
-    resolveValueArray, toNumber,
+    resolveValueArray,
+    toNumber,
     toShortAttribute,
     unique
 } from "../util.js";
@@ -31,11 +34,22 @@ import {getInheritableAttribute} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
 import {errorsFromActor, warningsFromActor} from "./warnings.js";
-import {SWSEManualActorSheet} from "./manual-actor-sheet.js";
+import {SimpleCache} from "../common/simple-cache.js";
 
 
 // noinspection JSClosureCompilerSyntax
 const COMMMA_LIST = /, or | or |, /;
+const ALPHA_FINAL_NAME = (a, b) => {
+    let x = a.finalName?.toLowerCase();
+    let y = b.finalName?.toLowerCase();
+    if (x < y) {
+        return -1;
+    }
+    if (x > y) {
+        return 1;
+    }
+    return 0;
+};
 
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
@@ -86,11 +100,10 @@ export class SWSEActor extends Actor {
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 
-        this.system.inheritableItems = null;
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
-        this.lazyResolve = new Map();
+        this.cache = new SimpleCache()
 
         if (this.id && this.type === "npc") {
             this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
@@ -145,12 +158,7 @@ export class SWSEActor extends Actor {
     }
 
     getCached(key, fn) {
-        if (this.lazyResolve.has(key)) {
-            return this.lazyResolve.get(key);
-        }
-        let resolved = fn();
-        this.lazyResolve.set(key, resolved);
-        return resolved
+        return this.cache.getCached(key, fn)
     }
 
     setResolvedVariable(key, variable, label, notes) {
@@ -422,10 +430,10 @@ export class SWSEActor extends Actor {
 
         generateSpeciesData(this);
 
-        this.classes = filterItemsByType(this.items.values(), "class");
+        this.classes = filterItemsByType(inheritableItems(this), "class");
 
         this.traits = this.getTraits();
-        this.talents = this.getTalents();
+        this.talents = filterItemsByType(inheritableItems(this), "talent");
         this.powers = filterItemsByType(this.items.values(), "forcePower");
         this.languages = filterItemsByType(this.items.values(), "language");
         let backgrounds = filterItemsByType(this.items.values(), "background");
@@ -750,33 +758,8 @@ export class SWSEActor extends Actor {
     }
 
     getTraits() {
-        let activeTraits = [];
-        let possibleTraits = filterItemsByType(this.items.values(), "trait");
-
-
-        let shouldRetry = possibleTraits.length > 0;
-        while (shouldRetry) {
-            shouldRetry = false;
-            for (let possible of possibleTraits) {
-                if (!meetsPrerequisites(this, possible.system.prerequisite).doesFail) {
-                    activeTraits.push(possible);
-                    shouldRetry = true;
-                }
-            }
-            possibleTraits = possibleTraits.filter(possible => !activeTraits.includes(possible));
-        }
-
-        return activeTraits.sort((a, b) => {
-            let x = a.finalName?.toLowerCase();
-            let y = b.finalName?.toLowerCase();
-            if (x < y) {
-                return -1;
-            }
-            if (x > y) {
-                return 1;
-            }
-            return 0;
-        });
+        let activeTraits = filterItemsByType(inheritableItems(this), "trait");
+        return activeTraits.sort(ALPHA_FINAL_NAME);
     }
 
     getEquippedItems() {
@@ -789,24 +772,19 @@ export class SWSEActor extends Actor {
         return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
     }
 
-    getTalents() {
-        return filterItemsByType(this.items.values(), "talent");
-    }
-
     resolveFeats() {
         let feats = filterItemsByType(this.items.values(), "feat");
-        let activeFeats = [];
+        let activeFeats = filterItemsByType(inheritableItems(this), "feat");
         let removeFeats = [];
         let inactiveProvidedFeats = [];
         for (let feat of feats) {
-            let prereqResponse = meetsPrerequisites(this, feat.system.prerequisite);
-            let doesFail = prereqResponse.doesFail;
-            if (!doesFail) {
-                activeFeats.push(feat)
-            } else if (doesFail && !feat.system.supplier) {
-                removeFeats.push(feat);
-            } else if (prereqResponse.failureList.length > 0) {
-                inactiveProvidedFeats.push(feat);
+            let active = activeFeats.includes(feat)
+            if(!active){
+                if (!feat.system.supplier) {
+                    removeFeats.push(feat);
+                } else {
+                    inactiveProvidedFeats.push(feat);
+                }
             }
         }
 
@@ -1055,7 +1033,6 @@ export class SWSEActor extends Actor {
     }
 
     get isDroid() {
-        return this.getCached("isDroid", () => {
             if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
                 return false;
             } else {
@@ -1065,7 +1042,6 @@ export class SWSEActor extends Actor {
                     reduce: "OR"
                 });
             }
-        })
     }
 
     get trainedSkills() {
@@ -2600,25 +2576,3 @@ export class SWSEActor extends Actor {
     }
 }
 
-/**
- *
- *
- * @param actor {SWSEActor}
- */
-export function getEquippedItems(actor) {
-    if (!actor) {
-        return [];
-    }
-
-    let equippedIds = actor.system?.equippedIds || actor._source?.system?.equippedIds || [];
-    equippedIds = equippedIds.map(id => id.id)
-    let items = actor.items.values() || []
-    let filtered = [];
-    for (let item of items) {
-        if (equippedIds.includes(item._id)) {
-            filtered.push(item)
-        }
-    }
-
-    return filtered;
-}
