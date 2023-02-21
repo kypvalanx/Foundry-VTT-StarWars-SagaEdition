@@ -892,7 +892,7 @@ export function inheritableItems(entity) {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleInheritableItems) {
-                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable}).doesFail) {
+                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable, existingTraitPrerequisite: possible.type === "trait"}).doesFail) {
                     actualInheritable.push(possible);
                     shouldRetry = true;
                 }

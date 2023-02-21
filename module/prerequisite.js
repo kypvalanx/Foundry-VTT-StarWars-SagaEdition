@@ -538,7 +538,7 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     let failureList = [];
     let silentFail = [];
     let successList = [];
-    if (!prereqs || target.system.ignorePrerequisites) {
+    if (!prereqs || (target.system.ignorePrerequisites && !options.existingTraitPrerequisite)) {
         return {doesFail: false, failureList, silentFail, successList};
     }
     if (!target) {
