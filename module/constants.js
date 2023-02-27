@@ -119,3 +119,33 @@ export const GM_BONUSES = [
 
 export const NEW_LINE = `
 `;
+
+export const DROID_COST_FACTOR = {
+    "Colossal":20,
+    "Gargantuan":10,
+    "Huge":5,
+    "Large":2,
+    "Medium":1,
+    "Small":2,
+    "Tiny":5,
+    "Diminutive":10,
+    "Fine":20
+}
+export const SIZE_CARRY_CAPACITY_MODIFIER = {
+    "Colossal":20,
+    "Gargantuan":10,
+    "Huge":5,
+    "Large":2,
+    "Medium":1,
+    "Small":0.75,
+    "Tiny":0.5,
+    "Diminutive":0.25,
+    "Fine":0.01
+}
+
+export const GRAVITY_CARRY_CAPACITY_MODIFIER = {
+    "Normal": 1,
+    "High": 0.5,
+    "Low": 2,
+    "Zero": 10,
+}

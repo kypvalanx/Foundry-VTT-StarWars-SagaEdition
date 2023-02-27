@@ -37,11 +37,18 @@ export function warningsFromActor(actor) {
         warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite.text}</span>`)
     }
 
+    if(actor.overloadCapacity > actor.weight && actor.weight > actor.carryCapacity){
+        warnings.push(`<span>You're carrying more than your current capacity</span>`)
+    }
+
     return warnings;
 }
 export function errorsFromActor(actor) {
     let errors = [];
 
+    if(actor.overloadCapacity < actor.weight){
+        errors.push(`<span>You're carrying more than your overload capacity</span>`)
+    }
 
     return errors;
 }

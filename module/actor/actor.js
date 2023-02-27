@@ -10,7 +10,7 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveValueArray,
+    resolveValueArray, resolveWeight,
     toNumber,
     toShortAttribute,
     unique
@@ -22,15 +22,16 @@ import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js"
 import {SWSEItem} from "../item/item.js";
 import {
     crewPositions,
-    crewQuality,
-    equipableTypes,
+    crewQuality, DROID_COST_FACTOR,
+    equipableTypes, GRAVITY_CARRY_CAPACITY_MODIFIER,
     LIMITED_TO_ONE_TYPES,
+    SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
     skills,
     vehicleActorTypes
 } from "../constants.js";
 import {getActorFromId} from "../swse.js";
-import {getInheritableAttribute} from "../attribute-helper.js";
+import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.js";
 import {makeAttack} from "./attack.js";
 import {activateChoices} from "../choice/choice.js";
 import {errorsFromActor, warningsFromActor} from "./warnings.js";
@@ -97,6 +98,7 @@ export class SWSEActor extends Actor {
 
         const system = this.system;
         system.description = system.description || ""
+        system.gravity = system.gravity || "Normal"
         // Make separate methods for each Actor type (character, npc, etc.) to keep
         // things organized.
 
@@ -463,6 +465,8 @@ export class SWSEActor extends Actor {
         this.equipped = this.getEquippedItems();
         this.unequipped = this.getUnequippedItems();
         this.inventory = this.getNonequippableItems();
+
+        this.system.weight = this.weight
 
         generateAttributes(this);
 
@@ -2573,6 +2577,32 @@ export class SWSEActor extends Actor {
         }
 
         return false;
+    }
+
+    get weight() {
+        let fn = () => {
+            const resolvedSize = sizeArray[getResolvedSize(this)];
+            let costFactor = DROID_COST_FACTOR[resolvedSize]
+            let sum = 0;
+            for(let item of this.items.values()){
+                if(!!item.system.weight){
+                    sum += resolveWeight(item.system.weight, item.system.quantity, costFactor, this)
+                }
+            }
+            return sum;
+        }
+
+        return this.getCached("weight", fn)
+    }
+
+    get carryCapacity(){
+        return this.overloadCapacity * 0.5
+    }
+    get overloadCapacity(){
+        const resolvedSize1 = getResolvedSize(this);
+        const resolvedSize = sizeArray[resolvedSize1];
+        const number = Math.pow(this.system.attributes.str.total, 2);
+        return number * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize] * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
 }
 

@@ -184,6 +184,7 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
+        html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
 
         html.find('.mode-selector').on("click", async event => {
             //event.preventDefault();
@@ -291,6 +292,10 @@ export class SWSEActorSheet extends ActorSheet {
         await this.actor.clearCondition();
         //this.actor.deleteEmbeddedDocuments("")
         await this.actor.setCondition(event.currentTarget.value);
+    }
+    async _onGravityChange(event) {
+        event.stopPropagation();
+        await this.actor.safeUpdate({"data.gravity": event.currentTarget.value})
     }
 
 
