@@ -1,7 +1,7 @@
 import {resolveValueArray, toNumber} from "../util.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.js";
-import {NEW_LINE} from "../constants.js";
+import {HEAVY_LOAD_SKILLS, NEW_LINE} from "../constants.js";
 
 
 /**
@@ -29,6 +29,12 @@ export function generateSkills(actor) {
     let halfCharacterLevel
     let halfCharacterLevelRoundedUp
     let skillFocus
+    let heavyLoadAffected = [];
+
+
+    if(game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad){
+        heavyLoadAffected = HEAVY_LOAD_SKILLS;
+    }
 
     if (actor.system.sheetType === "Auto") {
         classSkills = actor._getClassSkills();
@@ -99,6 +105,10 @@ export function generateSkills(actor) {
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
             bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
+
+            if(heavyLoadAffected.includes(key)){
+                bonuses.push({value: -10, description: `Heavy Load Penalty: -10`})
+            }
 
             skill.trainedBonus = trainedSkillBonus + untrainedSkillBonus;
             skill.focusBonus = skillFocusBonus;

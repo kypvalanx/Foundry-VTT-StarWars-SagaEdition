@@ -10,7 +10,7 @@ export function unique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-export function resolveValueArray(values, actor) {
+export function resolveValueArray(values, actor, options) {
     if (!Array.isArray(values)) {
         values = [values];
     }
@@ -21,11 +21,11 @@ export function resolveValueArray(values, actor) {
             continue;
         }
         if(`${value}`.startsWith("\*")){
-            multiplier *= resolveExpression(value.substring(1, value.length), actor)
+            multiplier *= resolveExpression(value.substring(1, value.length), actor, options)
         } else if(`${value}`.startsWith("/")){
-            multiplier /= resolveExpression(value.substring(1, value.length), actor)
+            multiplier /= resolveExpression(value.substring(1, value.length), actor, options)
         } else {
-            total += resolveExpression(value, actor);
+            total += resolveExpression(value, actor, options);
         }
     }
     return total * multiplier;
@@ -51,7 +51,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     let result;
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
-        if(`${result}`){
+        if(!!result){
             return result;
         }
     }
@@ -82,16 +82,102 @@ function resolveParensAndFunctions(expression, actor){
         }
     }
     let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
-    if(`${result}`){
+    if(!!result){
         return result;
     }
-    // if(preceeding.endsWith("MIN")){
-    //     let toks = expression.substring(deepestStart+1, deepestEnd).split(",").map(a => resolveExpression(a.trim(), actor));
-    //     return Math.min(toks);
-    // }
-    let resolveExpression1 = resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart+1, deepestEnd), actor) + expression.substring(deepestEnd+1), actor);
-    return resolveExpression1;
+    if(deepestStart > deepestEnd){
+        return;
+    }
+    return resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1), actor);
 
+}
+
+function resolveComparativeExpression(expression, actor) {
+    let raw = expression.replace(/>/g, " > ").replace(/</g, " < ").replace(/=/g, " = ")
+    let holder = null;
+    while (raw !== holder) {
+        holder = raw;
+        raw = raw.replace(/  /g, " ");
+    }
+    let toks = raw.trim().split(" ");
+    if (toks.length !== 3) {
+        console.error("this kind of expression only accepts 2 terms and an operator");
+    }
+
+    for (let i = 1; i < toks.length; i++) {
+        if(toks[i] === ">" || toks[i] === "<" || toks[i] === "="){
+            const first = resolveExpression(toks[i - 1], actor);
+            const second = resolveExpression(toks[i + 1], actor);
+            if (toks[i] === ">") {
+                return first > second
+            } else if (toks[i] === "<") {
+                return first < second
+            }
+            return first === second
+        }
+    }
+}
+
+function resolveMultiplicativeExpression(expression, actor) {
+    let raw = expression.replace(/\*/g, " * ").replace(/\//g, " / ").replace(/\+/g, " + ").replace(/-/g, " - ")
+    let holder = null;
+    while (raw !== holder) {
+        holder = raw;
+        raw = raw.replace(/  /g, " ");
+    }
+    let toks = raw.trim().split(" ");
+
+    for (let i = 1; i < toks.length; i++) {
+        if (toks[i] === "*" || toks[i] === "x" || toks[i] === "/") {
+            if (toks[i + 1] === "-") {
+                toks[i + 1] = "-" + toks[i + 2];
+                toks[i + 2] = "";
+            }
+            const first = resolveExpression(toks[i - 1], actor);
+            const second = resolveExpression(toks[i + 1], actor);
+            if (toks[i] === "*" || toks[i] === "x") {
+                toks[i] = first * second;
+            } else {
+                toks[i] = first / second;
+            }
+            toks[i - 1] = "";
+            toks[i + 1] = "";
+            return resolveExpression(toks.join(""), actor)
+        }
+    }
+}
+
+function resolveAdditiveExpression(expression, actor) {
+    let raw = expression.replace(/\+/g, " + ").replace(/-/g, " - ")
+    let holder = null;
+    while (raw !== holder) {
+        holder = raw;
+        raw = raw.replace(/ +/g, " ");
+    }
+    let tokens = raw.trim().split(" ");
+    if (tokens[0] === "-") {
+        tokens[1] = "-" + tokens[1];
+        tokens[0] = "";
+    }
+
+    for (let i = 1; i < tokens.length; i++) {
+        if (tokens[i] === "+" || tokens[i] === "-") {
+            if (tokens[i + 1] === "-") {
+                tokens[i + 1] = "-" + tokens[i + 2];
+                tokens[i + 2] = "";
+            }
+            const first = resolveExpression(tokens[i - 1], actor);
+            const second = resolveExpression(tokens[i + 1], actor);
+            if (tokens[i] === "+") {
+                tokens[i] = first + second;
+            } else {
+                tokens[i] = first - second;
+            }
+            tokens[i - 1] = "";
+            tokens[i + 1] = "";
+            return resolveExpression(tokens.join(""), actor)
+        }
+    }
 }
 
 /**
@@ -99,7 +185,7 @@ function resolveParensAndFunctions(expression, actor){
  * @param expression
  * @param actor {SWSEActor}
  */
-export function resolveExpression(expression, actor){
+export function resolveExpression(expression, actor) {
     if (typeof expression === 'object') {
         return resolveExpression(expression.value, actor);
     }
@@ -109,97 +195,23 @@ export function resolveExpression(expression, actor){
     if(expression.includes("(")){
         return resolveParensAndFunctions(expression, actor);
     }
+
+    //exponents would be evaluated here if we wanted to do that.
+
     if(expression.includes("*") || expression.includes("/")){
-        let raw = expression.replace(/\*/g, " * ").replace(/\//g, " / ").replace(/\+/g, " + ").replace(/-/g, " - ")
-        let holder = null;
-        while (raw !== holder) {
-            holder = raw;
-            raw = raw.replace(/  /g, " ");
-        }
-        let toks = raw.trim().split(" ");
-
-        for(let i = 1; i < toks.length; i++){
-            if(toks[i] === "*" || toks[i] === "/") {
-                if(toks[i + 1] === "-"){
-                    toks[i + 1] = "-" + toks[i + 2];
-                    toks[i+2] = "";
-                }
-                if (toks[i] === "*") {
-                    toks[i] = resolveExpression(toks[i - 1], actor) * resolveExpression(toks[i + 1], actor);
-                    toks[i - 1] = "";
-                    toks[i + 1] = "";
-                    return resolveExpression(toks.join(""), actor)
-                } else if (toks[i] === "/") {
-                    toks[i] = resolveExpression(toks[i - 1], actor) / resolveExpression(toks[i + 1]);
-                    toks[i - 1] = "";
-                    toks[i + 1] = "";
-                    return resolveExpression(toks.join(""), actor)
-                }
-            }
-        }
+        return resolveMultiplicativeExpression(expression, actor);
     }
 
-    if(expression.includes("+") || expression.includes("-")){
-        let raw = expression.replace(/\+/g, " + ").replace(/-/g, " - ")
-        let holder = null;
-        while (raw !== holder) {
-            holder = raw;
-            raw = raw.replace(/  /g, " ");
-        }
-        let toks = raw.trim().split(" ");
-
-        if(toks[0] === "-"){
-            toks[0] = "";
-            toks[1] = "-"+toks[1];
-        }
-
-        for(let i = 1; i < toks.length; i++){
-            if(toks[i] === "+" || toks[i] === "-") {
-                if (toks[i + 1] === "-") {
-                    toks[i + 1] = "-" + toks[i + 2];
-                    toks[i + 2] = "";
-                }
-                if (toks[i] === "+") {
-                    toks[i] = resolveExpression(toks[i - 1], actor) + resolveExpression(toks[i + 1], actor);
-                    toks[i - 1] = "";
-                    toks[i + 1] = "";
-                    return resolveExpression(toks.join(""), actor)
-                } else if (toks[i] === "-") {
-                    toks[i] = resolveExpression(toks[i - 1], actor) - resolveExpression(toks[i + 1], actor);
-                    toks[i - 1] = "";
-                    toks[i + 1] = "";
-                    return resolveExpression(toks.join(""), actor)
-                }
-            }
-        }
-
+    if(expression.includes("+") || expression.substring(1).includes("-")){
+        return resolveAdditiveExpression(expression, actor);
     }
 
-
-    if(expression.includes(">") || expression.includes("<")) {
-        let raw = expression.replace(/>/g, " > ").replace(/</g, " < ")
-        let holder = null;
-        while (raw !== holder) {
-            holder = raw;
-            raw = raw.replace(/  /g, " ");
-        }
-        let toks = raw.trim().split(" ");
-        if(toks.length !== 3){
-            console.error("this kind of expression only accepts 2 terms and an operator");
-        }
-
-        for(let i = 1; i < toks.length; i++){
-            if(toks[i] === ">") {
-                return resolveExpression(toks[i - 1], actor) > resolveExpression(toks[i + 1], actor)
-            }
-            if(toks[i] === "<") {
-                return resolveExpression(toks[i - 1], actor) < resolveExpression(toks[i + 1], actor)
-            }
-        }
+    if(expression.includes(">") || expression.includes("<") || expression.includes("=")) {
+        return resolveComparativeExpression(expression, actor);
     }
 
     if(typeof expression === "string"){
-        if(expression.startsWith("@")){
+        if(!!actor && expression.startsWith("@")){
             let variable = getVariableFromActorData(actor, expression);
             if (variable !== undefined) {
                 return resolveExpression(variable, actor);
@@ -846,31 +858,6 @@ export function getItemParentId(id){
 }
 
 
-//test()
-
-function test(){
-    console.log("running tests...");
-
-    //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null))
-    //console.log(12 === resolveValueArray(["2", 4, "*2"], null))
-    //console.log( 24 === resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
-    // console.log(5 === resolveExpression("MAX(1,5)", null))
-    // console.log(1 === resolveExpression("MIN(1,5)", null))
-    // console.log(8 === resolveExpression("MAX(1,5)+3", null))
-    // console.log(8 === resolveExpression("MAX(1,MAX(2,5))+3", null))
-    // console.log(1 === resolveExpression("1+2-3+5-4", null))
-    // console.log(-9 === resolveExpression("1+2-(3+5)-4", null))
-    // console.log(27 === resolveExpression("3*9", null))
-    // console.log(39 === resolveExpression("3+4*9", null))
-    // console.log(-24 === resolveExpression("-3*8", null))
-    // console.log(-24 === resolveExpression("3*-8", null))
-
-    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
-    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
-    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
-}
 
 export function inheritableItems(entity) {
     let fn = () => {
@@ -904,4 +891,69 @@ export function inheritableItems(entity) {
     }
 
     return entity.getCached ? entity.getCached("inheritableItems", fn) : fn();
+}
+
+test()
+
+//test()
+
+function assertEquals(expected, actual) {
+    if(expected === actual){
+        console.log("passed")
+    } else {
+        console.warn(`expected ${expected}, but got ${actual}`)
+    }
+}
+
+function test(){
+    console.log("running util tests...");
+
+    assertEquals(5, resolveWeight("5", 1, 5))
+    assertEquals(5, resolveWeight("5 kg", 1, 5))
+    assertEquals(5, resolveWeight("5 KG", 1, 5))
+    assertEquals(5, resolveWeight("5 KiloGrams", 1, 5))
+    assertEquals(5000, resolveWeight("5 Ton", 1, 5))
+    assertEquals(5, resolveWeight(5, 1, 5))
+    assertEquals(15, resolveWeight(5, 3, 5))
+    assertEquals(0, resolveWeight(5, 0, 5))
+    assertEquals(200, resolveWeight("(40 x Cost Factor) kg", 1, 5))
+
+    //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null, null))
+    assertEquals(12, resolveValueArray(["2", 4, "*2"], null))
+    assertEquals( 24, resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
+
+    assertEquals(-5, resolveExpression("-5", null))
+    assertEquals(-10, resolveExpression("-5-5", null))
+    assertEquals(0, resolveExpression("-5--5", null))
+    assertEquals(5, resolveExpression("MAX(1,5)", null))
+    assertEquals(1, resolveExpression("MIN(1,5)", null))
+    assertEquals(8, resolveExpression("MAX(1,5)+3", null))
+    assertEquals(8, resolveExpression("MAX(1,MAX(2,5))+3", null))
+    assertEquals(1, resolveExpression("1+2-3+5-4", null))
+    assertEquals(-9, resolveExpression("1+2-(3+5)-4", null))
+    assertEquals(27, resolveExpression("3*9", null))
+    assertEquals(39, resolveExpression("3+4*9", null))
+    assertEquals(-24, resolveExpression("-3*8", null))
+    assertEquals(-24, resolveExpression("3*-8", null))
+
+    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
+    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
+    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
+    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
+}
+export function resolveWeight(weight, quantity = 1, costFactor = 1, actor){
+    weight = `${weight}`.toLowerCase();
+    let unitMultiplier = 1;
+
+    if(weight.endsWith(" ton")){
+        unitMultiplier = 1000;
+    }
+    if(weight.includes("cost factor")){
+        weight = weight.replace("cost factor", `${costFactor}`)
+        weight = weight.replace(" x ", " * ")
+        weight = weight.replace(/ kgs| kg| kilogram| ton/, "")
+    }
+    let numericWeight = resolveExpression(weight, actor)
+    return numericWeight * unitMultiplier * quantity
 }

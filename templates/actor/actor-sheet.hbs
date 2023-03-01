@@ -167,7 +167,8 @@
                 {{!-- Owned Equipment Tab --}}
                 <div class="tab items" data-group="primary" data-tab="equipment">
                     <div>
-                        <h2><label class="resource-label">Equipment
+                        <h2>
+                            <label class="resource-label">Equipment
                             <a data-action="compendium" data-type="Item" data-pack="swse.items"
                                data-action-target="swse.items"
                                title="Items"><i
@@ -175,8 +176,10 @@
                             <a data-action="compendium" data-type="Item" data-pack="swse.templates"
                                data-action-target="swse.templates"
                                title="Templates"><i
-                                    class="fas fa-folder-plus"></i></a></label></h2>
+                                    class="fas fa-folder-plus"></i></a></label>
+                        </h2>
                     </div>
+                    <div title="Strain Capacity: {{actor.strainCapacity}}; Maximum Capacity: {{actor.maximumCapacity}}">{{actor.weight}}/{{actor.heavyLoad}} kgs</div>
                     <div class="grid-2col">
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true quantity=true delete="always"}}
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true delete="always"}}

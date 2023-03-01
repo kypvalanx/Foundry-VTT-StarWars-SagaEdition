@@ -37,11 +37,25 @@ export function warningsFromActor(actor) {
         warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite.text}</span>`)
     }
 
+
+    if(game.settings.get("swse", "enableEncumbranceByWeight")){
+        if(actor.weight >= actor.heavyLoad){
+            warnings.push(`<span title="When carrying a heavy load a character takes a -10 penalty on some checks and the character's speed is reduced to three-quarters normal. A character can move up to three times his or her speed when Running with a Heavy Load.">You're carrying a <b>Heavy Load</b></span>`)
+        }
+
+        if(actor.weight >= actor.strainCapacity){
+            warnings.push(`<span title="Loses Dexterity Bonus to Reflex Defense and can only move one square">You're carrying more than your <b>Carry Capacity</b></span>`)
+        }
+
+        if(actor.weight >= actor.maximumCapacity){
+            warnings.push(`<span>You're carrying more than your <b>Maximum Capacity</b></span>`)
+        }
+    }
+
     return warnings;
 }
 export function errorsFromActor(actor) {
     let errors = [];
-
 
     return errors;
 }

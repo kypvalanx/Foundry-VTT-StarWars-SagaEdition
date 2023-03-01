@@ -101,4 +101,13 @@ export const registerSystemSettings = function () {
         default: true,
         type: Boolean
     });
+
+    game.settings.register("swse", "enableEncumbranceByWeight", {
+        name: "Enable encumbrance by weight.",
+        hint: "",
+        scope: "world",
+        config: true,
+        default: true,
+        type: Boolean
+    });
 }

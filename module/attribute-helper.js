@@ -51,7 +51,7 @@ function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride)
     return attributes;
 }
 
-export function getResolvedSize(entity, options) {
+export function getResolvedSize(entity, options = {}) {
     if (entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }

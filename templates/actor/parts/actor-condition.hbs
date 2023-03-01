@@ -15,12 +15,35 @@
         <tbody>
         <tr>
             {{#radio actor.system.condition}}
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="0"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-1"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-2"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-5"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-10"/></label></td>
-            <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="OUT"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="0"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-1"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-2"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-5"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-10"/></label></td>
+                <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="OUT"/></label></td>
+            {{/radio}}
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div class="condition-block panel flex flex-col">
+    <h1 class="resource-label">Gravity</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>Normal</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>Zero</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            {{#radio actor.system.gravity}}
+                <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="Normal"/></label></td>
+                <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="High"/></label></td>
+                <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="Low"/></label></td>
+                <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="Zero"/></label></td>
             {{/radio}}
         </tr>
         </tbody>
