@@ -238,6 +238,7 @@ function _resolveRef(actor, conditionBonus) {
     let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     bonuses.push(abilityBonus);
 
+
     let reflexDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "reflexDefenseBonus",
@@ -273,10 +274,17 @@ function _resolveRef(actor, conditionBonus) {
     let dodgeBonus = bonusDodgeReflexDefense["SUM"]
     miscBonusTip += bonusDodgeReflexDefense["SUMMARY"]
     miscBonusTip += `Condition: ${conditionBonus};  `
+    const miscBonuses = [otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus];
+    if(game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.strainCapacity){
+        const negativeAbilityBonus = abilityBonus*-1;
+        miscBonuses.push(negativeAbilityBonus)
+        bonuses.push(negativeAbilityBonus);
+        miscBonusTip += `Strained Capacity: ${negativeAbilityBonus};  `
+    }
     bonuses.push(dodgeBonus);
     bonuses.push(conditionBonus);
     bonuses.push(naturalArmorBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus])
+    let miscBonus = resolveValueArray(miscBonuses)
     let defenseModifiers = [_resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus)]
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex';

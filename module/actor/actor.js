@@ -10,7 +10,8 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveValueArray, resolveWeight,
+    resolveValueArray,
+    resolveWeight,
     toNumber,
     toShortAttribute,
     unique
@@ -22,8 +23,10 @@ import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.js"
 import {SWSEItem} from "../item/item.js";
 import {
     crewPositions,
-    crewQuality, DROID_COST_FACTOR,
-    equipableTypes, GRAVITY_CARRY_CAPACITY_MODIFIER,
+    crewQuality,
+    DROID_COST_FACTOR,
+    equipableTypes,
+    GRAVITY_CARRY_CAPACITY_MODIFIER,
     LIMITED_TO_ONE_TYPES,
     SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
@@ -731,7 +734,10 @@ export class SWSEActor extends Actor {
                 armorType = armor.armorType;
             }
         }
-        this.system.resolvedSpeed = attributes.map(name => this.applyArmorSpeedPenalty(name, armorType)).map(name => this.applyConditionSpeedPenalty(name, armorType)).join("; ");
+        this.system.resolvedSpeed = attributes.map(name => this.applyArmorSpeedPenalty(name, armorType))
+            .map(name => this.applyConditionSpeedPenalty(name, armorType))
+            .map(name => this.applyWeightSpeedPenalty(name))
+            .join("; ");
         return this.system.resolvedSpeed;
     }
 
@@ -761,6 +767,24 @@ export class SWSEActor extends Actor {
         return `${result[1]} ${Math.floor(number)}`
     }
 
+    applyWeightSpeedPenalty(speed) {
+        let result = /([\w\s]*)\s(\d*)/.exec(speed);
+
+        let number = parseInt(result[2]);
+        let speedType = result[1];
+        if (game.settings.get("swse", "enableEncumbranceByWeight")) {
+            if (this.weight >= this.maximumCapacity) {
+                number = 0;
+            } else if (this.weight >= this.strainCapacity) {
+                number = 1;
+            } else if (this.weight >= this.heavyLoad) {
+                number = number * 3 / 4
+            }
+        }
+
+        return `${speedType} ${Math.floor(number)}`
+    }
+
     getTraits() {
         let activeTraits = filterItemsByType(inheritableItems(this), "trait");
         return activeTraits.sort(ALPHA_FINAL_NAME);
@@ -783,7 +807,7 @@ export class SWSEActor extends Actor {
         let inactiveProvidedFeats = [];
         for (let feat of feats) {
             let active = activeFeats.includes(feat)
-            if(!active){
+            if (!active) {
                 if (!feat.system.supplier) {
                     removeFeats.push(feat);
                 } else {
@@ -1037,15 +1061,15 @@ export class SWSEActor extends Actor {
     }
 
     get isDroid() {
-            if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
-                return false;
-            } else {
-                return getInheritableAttribute({
-                    entity: this,
-                    attributeKey: "isDroid",
-                    reduce: "OR"
-                });
-            }
+        if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
+            return false;
+        } else {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "isDroid",
+                reduce: "OR"
+            });
+        }
     }
 
     get trainedSkills() {
@@ -2584,8 +2608,8 @@ export class SWSEActor extends Actor {
             const resolvedSize = sizeArray[getResolvedSize(this)];
             let costFactor = DROID_COST_FACTOR[resolvedSize]
             let sum = 0;
-            for(let item of this.items.values()){
-                if(!!item.system.weight){
+            for (let item of this.items.values()) {
+                if (!!item.system.weight) {
                     sum += resolveWeight(item.system.weight, item.system.quantity, costFactor, this)
                 }
             }
@@ -2595,14 +2619,25 @@ export class SWSEActor extends Actor {
         return this.getCached("weight", fn)
     }
 
-    get carryCapacity(){
-        return this.overloadCapacity * 0.5
+    get heavyLoad() {
+        const resolvedSize = sizeArray[getResolvedSize(this)];
+        return Math.pow(this.system.attributes.str.total * 0.5, 2)
+            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
+            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
-    get overloadCapacity(){
-        const resolvedSize1 = getResolvedSize(this);
-        const resolvedSize = sizeArray[resolvedSize1];
-        const number = Math.pow(this.system.attributes.str.total, 2);
-        return number * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize] * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+
+    get strainCapacity() {
+        const resolvedSize = sizeArray[getResolvedSize(this)];
+        return Math.pow(this.system.attributes.str.total, 2) * 0.5
+            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
+            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+    }
+
+    get maximumCapacity() {
+        const resolvedSize = sizeArray[getResolvedSize(this)];
+        return Math.pow(this.system.attributes.str.total, 2)
+            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
+            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
 }
 
