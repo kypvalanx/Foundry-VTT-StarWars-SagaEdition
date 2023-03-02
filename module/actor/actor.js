@@ -2024,13 +2024,14 @@ export class SWSEActor extends Actor {
                 if (entity.type === 'forceSecret') {
                     viewable = 'Force Secret'
                 }
-                if (!this.system.availableItems[viewable] && entity.type !== 'affiliation') {
+                if (!this.system.availableItems[viewable]) {
                     await Dialog.prompt({
                         title: `You can't take any more ${viewable.titleCase()}`,
                         content: `You can't take any more ${viewable.titleCase()}`,
                         callback: () => {
                         }
                     });
+                    return [];
                 }
             }
 
