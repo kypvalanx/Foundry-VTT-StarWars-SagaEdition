@@ -2047,7 +2047,7 @@ export class SWSEActor extends Actor {
                             }
                         }
                     }).render(true);
-                    response.fail = true;
+                    return []
                 }
             }
 
@@ -2065,7 +2065,7 @@ export class SWSEActor extends Actor {
                             }
                         }
                     }).render(true);
-                    response.fail = true;
+                    return []
                 }
             }
 
