@@ -47,6 +47,46 @@ function minus() {
     return new OperatorTerm({operator: "-"});
 }
 
+export function appendTerms(value, flavor) {
+    let toks = `${value}`.replace(/\+/g, " + ").replace(/-/g, " - ").replace(/\*/g, " * ").replace(/\//g, " / ").split(" ")
+
+    let terms = [];
+    let buffer = "";
+    for(let tok of toks){
+        if(tok === "-"){
+            buffer = "-"
+            continue;
+        } else if(tok === "+" || tok === ""){
+            continue;
+        }
+        terms.push(...appendTerm(`${buffer}${tok}`, flavor))
+        buffer = ""
+    }
+    return terms;
+}
+
+export function appendTerm(value, flavor){
+    if(`${parseInt(value)}` === value){
+        return appendNumericTerm(value, flavor);
+    }
+    return appendDiceTerm(value, flavor)
+}
+
+export function appendDiceTerm(value, flavor) {
+    if (!value) {
+        return [];
+    }
+
+    let parts = value.split("d")
+    let number = parseInt(parts[0]);
+    let faces = parseInt(parts[1]);
+    if (number === 0) {
+        return [];
+    }
+    return [number > -1 ? plus() : minus(),
+        new DiceTerm({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+}
+
 export function appendNumericTerm(value, flavor) {
     if (!value) {
         return [];
@@ -340,7 +380,7 @@ export class Attack {
         }
 
         for (let mod of this.modifiers("attack")) {
-            terms.push(...appendNumericTerm(mod.value, mod.source))
+            terms.push(...appendTerms(mod.value, mod.source))
         }
 
 
@@ -408,7 +448,7 @@ export class Attack {
 
 
         for (let mod of this.modifiers("damage")) {
-            terms.push(...appendNumericTerm(mod.value, mod.source))
+            terms.push(...appendTerms(mod.value, mod.source))
         }
 
         if (this.isMelee(item)) {
@@ -1002,6 +1042,7 @@ function attackDialogue(context) {
                 html.find(".attack-id").each((i, div) => populateItemStats(div, context));
             })
         },
+        callback: ()=>{},
         options: {
             height
         }
@@ -1099,7 +1140,9 @@ function populateItemStats(html, context) {
 
     options.append(attack.attackOptionHTML)
     options.find(".attack-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".attack-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".damage-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
 
     setAttackPreviewValues(total, attack, options, context);
 }
@@ -1268,4 +1311,42 @@ export async function createAttackChatMessage(attacks, rollMode) {
     if (rollMode) msg.applyRollMode(rollMode);
 
     return cls.create(msg, {rollMode});
+}
+
+
+test()
+
+//test()
+
+function assertEquals(expected, actual) {
+    if(expected === actual){
+        console.log("passed")
+    } else {
+        console.warn(`expected ${expected}, but got ${actual}`)
+    }
+}
+
+function test(){
+    console.log("running attack tests...");
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":1}]`, JSON.stringify(appendTerms(1, "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":2}]`, JSON.stringify(appendTerms("-2", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("-4d10", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}`+
+        `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"},`+
+        `{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":6,"faces":4,"modifiers":[],"results":[]},`+
+        `{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"},`+
+        `{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":9}]`, JSON.stringify(appendTerms("-4d10-6d4+9", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bomb"},"evaluated":false,"number":1}`+
+        `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bomb"},"evaluated":false,"number":3,"faces":6,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("1+3d6", "bomb")))
 }
