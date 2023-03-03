@@ -292,7 +292,14 @@ export function excludeItemsByType(items, type) {
 }
 
 export function getBonusString(atkBonus) {
-    return (atkBonus > 0 ? `+${atkBonus}` : (atkBonus < 0 ? `${atkBonus}` : ""));
+    const stringify = `${atkBonus}`;
+    if(stringify === "0" || stringify === ""){
+        return "";
+    }
+    if(stringify.startsWith("-") || stringify.startsWith("+")){
+        return stringify;
+    }
+    return `+${atkBonus}`
 }
 
 export function getLongKey(key) {
