@@ -454,6 +454,20 @@ export class Attack {
         if (this.isMelee(item)) {
             let strMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
+            let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
+
+            if(isMySize){
+                let grips = getInheritableAttribute({
+                    entity: item,
+                    attributeKey: "grip",
+                    reduce: "VALUES"
+                })
+
+                if(grips.includes("two handed")){
+                    isTwoHanded = true;
+                }
+            }
+
             terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
         }
 
@@ -615,6 +629,9 @@ export class Attack {
     get modes() {
         let item = this.item;
         let modes = SWSEItem.getModesFromItem(item);
+        const dynamicModes = this.getDynamicModes(modes.filter(mode=>mode.type ==="dynamic"));
+        modes = modes.filter(mode=>mode.type !=="dynamic")
+        modes.push(...dynamicModes)
         let groupedModes = {}
         for (let mode of Object.values(modes).filter(m => !!m)) {
             if (!groupedModes[mode.group]) {
@@ -715,6 +732,36 @@ export class Attack {
 
     clone() {
         return new Attack(this.actorId, this.itemId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
+    }
+
+    checkExistingDynamicModes(existingModes, newMode){
+        const found = existingModes.find(existingMode => existingMode.modePath === newMode.modePath)
+        if(found){
+            newMode.isActive = found.isActive;
+            newMode.attributes = found.attributes;
+        }
+        return newMode;
+    }
+
+    getDynamicModes(existingDynamicModes) {
+        let dynamics = [];
+        if (this.isMelee(this.item)) {
+            const actor = this.actor;
+            let isMySize = compareSizes(getSize(actor), getSize(this.item)) === 0;
+            let cannotUseTwoHands = getInheritableAttribute({entity:this.item, attributeKey:"isLightWeapon", reduce: "OR"})
+            if(isMySize && !cannotUseTwoHands){
+                const handedness = [this.checkExistingDynamicModes(existingDynamicModes, {name:"One-Handed Grip", attributes:{0:{key:"grip", value:"one handed"}}, modePath:"One-Handed Grip", group:"grip", type:"dynamic"}),
+                    this.checkExistingDynamicModes(existingDynamicModes, {name:"Two-Handed Grip", attributes:{0:{key:"grip", value:"two handed"}}, modePath:"Two-Handed Grip", group:"grip", type:"dynamic"})];
+
+                if(!handedness[1].isActive){
+                    handedness[0].isActive = true
+                }
+
+                dynamics.push(...handedness)
+            }
+            //terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
+        }
+        return dynamics;
     }
 }
 

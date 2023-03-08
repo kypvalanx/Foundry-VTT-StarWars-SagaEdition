@@ -51,7 +51,7 @@ export function getSize(actor) {
             }
         }
     } else if(actor.system.stripping){
-        let strippings = Object.values(actor.system.stripping).filter(stripping => stripping.enabled).map(stripping => stripping.label)
+        let strippings = Object.values(actor.system.stripping).filter(stripping => stripping.enabled && stripping.value).map(stripping => stripping.label)
 
         if(strippings.includes("Make Weapon Colossal")){
             return "Colossal";
@@ -74,7 +74,6 @@ export function getSize(actor) {
         if(strippings.includes("Make Weapon Tiny")){
             return "Tiny";
         }
-        return actor.system.size
     }
-    return undefined;
+    return actor.system.size
 }
