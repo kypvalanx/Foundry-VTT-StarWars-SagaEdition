@@ -34,8 +34,8 @@
                         <div class="mode-group">
                             {{#each group as |mode id|}}
                                 {{#if mode}}
-                                    <div class="mode-selector" data-mode-path="{{mode.modePath}}"
-                                         data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}">
+                                    <div class="mode-selector" data-type="{{mode.type}}" data-mode-path="{{mode.modePath}}"
+                                         data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}" data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
                                         <label for="{{mode.name}} {{../../attack.itemId}}">{{mode.name}}</label>
                                         <input class="" type="{{#unless mode.group}}checkbox{{/unless}}{{#if
                                                 mode.group}}radio{{/if}}" name="{{mode.group}} {{../../attack.itemId}}"
