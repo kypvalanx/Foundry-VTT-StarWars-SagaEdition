@@ -122,7 +122,7 @@ export function generateSkills(actor) {
             actor.resolvedNotes.set(skill.variable, skill.notes)
 
             if (classSkills.size === 0 && skill.trained) {
-                data[`data.skills.${key}.trained`] = false;
+                data[`system.skills.${key}.trained`] = false;
             }
         } else {
             bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
@@ -145,7 +145,7 @@ export function generateSkills(actor) {
         skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
         if (skill.value !== old) {
-            data[`data.skills.${key}.value`] = skill.value;
+            data[`system.skills.${key}.value`] = skill.value;
         }
     }
     if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
