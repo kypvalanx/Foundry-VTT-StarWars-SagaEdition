@@ -34,7 +34,7 @@ export function warningsFromActor(actor) {
         warnings.push(`<span>Items from ${item[0]} remaining: ${item[1]}</span>`)
     }
     for(let feat of actor.system.inactiveProvidedFeats || []){
-        warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite.text}</span>`)
+        warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite?.text}</span>`)
     }
 
 

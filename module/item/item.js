@@ -1235,47 +1235,104 @@ export class SWSEItem extends Item {
         return childModes;
     }
 
-    activateMode(mode) {
+    activateMode(mode, type, group, attributes) {
         let modes = this.system.modes;
         let update = {};
 
-        update.data = {};
-        this._activateMode(modes, mode, update.data);
+        update.system = {};
+        this._activateMode(modes, mode, update.system, type, group, attributes);
 
         this.safeUpdate(update);
     }
 
-    _activateMode(modes, mode, data) {
+    _activateMode(modes, mode, system, type, group, attributes) {
         let modeTokens = mode.split(".");
 
-        data.modes = {};
-        if (modeTokens.length === 1) {
-            let groups = Object.values(modes || []).filter(m => !!m && m.name === mode).map(m => m.group).filter(g => !!g)
+        system.modes = {};
+        if(type === "dynamic"){
+            if (modeTokens.length === 1) {
+                if (group) {
+                    let found = false;
+                    let entityKeys = Object.keys(modes);
+                        Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
+                            system.modes[parseInt(entity[0])] = {};
+                            const active = entity[1].name === mode;
+                            system.modes[parseInt(entity[0])].isActive = active;
+                            if(active){
+                                found = true;
+                            }
+                        })
 
-            if (groups.length > 0) {
-                groups.forEach(group => {
-                    Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
-                        data.modes[parseInt(entity[0])] = {};
-                        
-                        data.modes[parseInt(entity[0])].isActive = entity[1].name === mode;
+                    if(!found){
+                        entityKeys.push(-1)
+                        let newEntityKey = Math.max(...entityKeys)+1;
+                        system.modes[newEntityKey] = {};
+                        system.modes[newEntityKey].isActive = true;
+                        system.modes[newEntityKey].group = group;
+                        system.modes[newEntityKey].type = "dynamic"
+                        system.modes[newEntityKey].name = mode;
+                        system.modes[newEntityKey].attributes = attributes;
+                    }
+
+                } else {
+                    let found = false;
+                    let entityKeys = [];
+                    Object.entries(modes || []).filter(entity => !!entity[1] && entity[1].name === mode).forEach((entity) => {
+                        system.modes[parseInt(entity[0])] = {};
+                        system.modes[parseInt(entity[0])].isActive = !entity[1].isActive;
+                        entityKeys.push(parseInt(entity[0]));
+                        found = true
                     })
-                })
-
+                    if(!found){
+                        let newEntityKey = Math.max(...entityKeys)+1;
+                        system.modes[newEntityKey] = {};
+                        system.modes[newEntityKey].isActive = true;
+                        system.modes[newEntityKey].type = "dynamic"
+                        system.modes[newEntityKey].name = mode;
+                        system.modes[newEntityKey].attributes = attributes;
+                    }
+                }
             } else {
-                Object.entries(modes || []).filter(entity => !!entity[1] && entity[1].name === mode).forEach((entity) => {
-                    data.modes[parseInt(entity[0])] = {};
-                    data.modes[parseInt(entity[0])].isActive = !entity[1].isActive;
+                //TODO embeded dynamic modes.  do we need these?
+
+                let first = modeTokens[0];
+
+
+                Object.entries(modes || []).filter(entity => entity[1]?.isActive && entity[1]?.name === first).forEach(entity => {
+                    system.modes = system.modes || {};
+                    system.modes[parseInt(entity[0])] = system.modes[parseInt(entity[0])] || {};
+                    this._activateMode(entity[1].modes, modeTokens.slice(1).join("."), system.modes[parseInt(entity[0])])
                 })
             }
         } else {
-            let first = modeTokens[0];
+            if (modeTokens.length === 1) {
+                let groups = Object.values(modes || []).filter(m => !!m && m.name === mode).map(m => m.group).filter(g => !!g)
+
+                if (groups.length > 0) {
+                    groups.forEach(group => {
+                        Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
+                            system.modes[parseInt(entity[0])] = {};
+
+                            system.modes[parseInt(entity[0])].isActive = entity[1].name === mode;
+                        })
+                    })
+
+                } else {
+                    Object.entries(modes || []).filter(entity => !!entity[1] && entity[1].name === mode).forEach((entity) => {
+                        system.modes[parseInt(entity[0])] = {};
+                        system.modes[parseInt(entity[0])].isActive = !entity[1].isActive;
+                    })
+                }
+            } else {
+                let first = modeTokens[0];
 
 
-            Object.entries(modes || []).filter(entity => entity[1]?.isActive && entity[1]?.name === first).forEach(entity => {
-                data.modes = data.modes || {};
-                data.modes[parseInt(entity[0])] = data.modes[parseInt(entity[0])] || {};
-                this._activateMode(entity[1].modes, modeTokens.slice(1).join("."), data.modes[parseInt(entity[0])])
-            })
+                Object.entries(modes || []).filter(entity => entity[1]?.isActive && entity[1]?.name === first).forEach(entity => {
+                    system.modes = system.modes || {};
+                    system.modes[parseInt(entity[0])] = system.modes[parseInt(entity[0])] || {};
+                    this._activateMode(entity[1].modes, modeTokens.slice(1).join("."), system.modes[parseInt(entity[0])])
+                })
+            }
         }
     }
 

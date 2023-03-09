@@ -354,7 +354,6 @@ function meetsPrerequisite(prereq, target, options) {
                 } else {
                     failureList.push(...meetsChildPrereqs.failureList)
                 }
-                failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             }
             case 'OR': {
@@ -381,7 +380,6 @@ function meetsPrerequisite(prereq, target, options) {
                     })
                 }
 
-                failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             }
             case 'SPECIAL':

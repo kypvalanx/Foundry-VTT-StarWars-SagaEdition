@@ -62,6 +62,10 @@ const ALPHA_FINAL_NAME = (a, b) => {
 export class SWSEActor extends Actor {
     _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
+        const updateKeys = Object.keys(data.system)
+        if(!!this.system.cachedInheritableItems && !(updateKeys.length === 1 && updateKeys.includes("cachedInheritableItems"))){
+            //this.safeUpdate({"system.cachedInheritableItems": null})
+        }
         for (let crewMember of this.system.crew) {
             let linkedActor = getActorFromId(crewMember.id)
             if (!!linkedActor) {
@@ -69,6 +73,15 @@ export class SWSEActor extends Actor {
             }
         }
     }
+
+    _preUpdate(changed, options, user){
+        super._preUpdate(changed, options, user)
+        if(!changed.system.cachedInheritableItems){
+            changed.system.cachedInheritableItems = null;
+        }
+    }
+
+
 
     _onCreateEmbeddedDocuments(embeddedName, ...args) {
         super._onCreateEmbeddedDocuments(embeddedName, ...args);
@@ -173,7 +186,7 @@ export class SWSEActor extends Actor {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update')) {
+        if (this.canUserModify(game.user, 'update') && !this.pack) {
             this.update(data, context);
         }
     }
@@ -541,6 +554,9 @@ export class SWSEActor extends Actor {
         let ids = await this.removeSuppliedItems(itemId);
         ids.push(itemId);
         await this.deleteEmbeddedDocuments("Item", ids);
+    }
+    cachedInheritableItems(){
+        return this.system.cachedInheritableItems;
     }
 
     async removeChildItems(itemId) {
@@ -2024,13 +2040,14 @@ export class SWSEActor extends Actor {
                 if (entity.type === 'forceSecret') {
                     viewable = 'Force Secret'
                 }
-                if (!this.system.availableItems[viewable] && entity.type !== 'affiliation') {
+                if (!this.system.availableItems[viewable]) {
                     await Dialog.prompt({
                         title: `You can't take any more ${viewable.titleCase()}`,
                         content: `You can't take any more ${viewable.titleCase()}`,
                         callback: () => {
                         }
                     });
+                    return [];
                 }
             }
 
@@ -2046,7 +2063,7 @@ export class SWSEActor extends Actor {
                             }
                         }
                     }).render(true);
-                    response.fail = true;
+                    return []
                 }
             }
 
@@ -2064,7 +2081,7 @@ export class SWSEActor extends Actor {
                             }
                         }
                     }).render(true);
-                    response.fail = true;
+                    return []
                 }
             }
 

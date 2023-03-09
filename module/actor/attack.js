@@ -47,6 +47,46 @@ function minus() {
     return new OperatorTerm({operator: "-"});
 }
 
+export function appendTerms(value, flavor) {
+    let toks = `${value}`.replace(/\+/g, " + ").replace(/-/g, " - ").replace(/\*/g, " * ").replace(/\//g, " / ").split(" ")
+
+    let terms = [];
+    let buffer = "";
+    for(let tok of toks){
+        if(tok === "-"){
+            buffer = "-"
+            continue;
+        } else if(tok === "+" || tok === ""){
+            continue;
+        }
+        terms.push(...appendTerm(`${buffer}${tok}`, flavor))
+        buffer = ""
+    }
+    return terms;
+}
+
+export function appendTerm(value, flavor){
+    if(`${parseInt(value)}` === value){
+        return appendNumericTerm(value, flavor);
+    }
+    return appendDiceTerm(value, flavor)
+}
+
+export function appendDiceTerm(value, flavor) {
+    if (!value) {
+        return [];
+    }
+
+    let parts = value.split("d")
+    let number = parseInt(parts[0]);
+    let faces = parseInt(parts[1]);
+    if (number === 0) {
+        return [];
+    }
+    return [number > -1 ? plus() : minus(),
+        new DiceTerm({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+}
+
 export function appendNumericTerm(value, flavor) {
     if (!value) {
         return [];
@@ -340,7 +380,7 @@ export class Attack {
         }
 
         for (let mod of this.modifiers("attack")) {
-            terms.push(...appendNumericTerm(mod.value, mod.source))
+            terms.push(...appendTerms(mod.value, mod.source))
         }
 
 
@@ -408,12 +448,26 @@ export class Attack {
 
 
         for (let mod of this.modifiers("damage")) {
-            terms.push(...appendNumericTerm(mod.value, mod.source))
+            terms.push(...appendTerms(mod.value, mod.source))
         }
 
         if (this.isMelee(item)) {
             let strMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
+            let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
+
+            if(isMySize){
+                let grips = getInheritableAttribute({
+                    entity: item,
+                    attributeKey: "grip",
+                    reduce: "VALUES"
+                })
+
+                if(grips.includes("two handed")){
+                    isTwoHanded = true;
+                }
+            }
+
             terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
         }
 
@@ -575,6 +629,9 @@ export class Attack {
     get modes() {
         let item = this.item;
         let modes = SWSEItem.getModesFromItem(item);
+        const dynamicModes = this.getDynamicModes(modes.filter(mode=>mode.type ==="dynamic"));
+        modes = modes.filter(mode=>mode.type !=="dynamic")
+        modes.push(...dynamicModes)
         let groupedModes = {}
         for (let mode of Object.values(modes).filter(m => !!m)) {
             if (!groupedModes[mode.group]) {
@@ -675,6 +732,36 @@ export class Attack {
 
     clone() {
         return new Attack(this.actorId, this.itemId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
+    }
+
+    checkExistingDynamicModes(existingModes, newMode){
+        const found = existingModes.find(existingMode => existingMode.modePath === newMode.modePath)
+        if(found){
+            newMode.isActive = found.isActive;
+            newMode.attributes = found.attributes;
+        }
+        return newMode;
+    }
+
+    getDynamicModes(existingDynamicModes) {
+        let dynamics = [];
+        if (this.isMelee(this.item)) {
+            const actor = this.actor;
+            let isMySize = compareSizes(getSize(actor), getSize(this.item)) === 0;
+            let cannotUseTwoHands = getInheritableAttribute({entity:this.item, attributeKey:"isLightWeapon", reduce: "OR"})
+            if(isMySize && !cannotUseTwoHands){
+                const handedness = [this.checkExistingDynamicModes(existingDynamicModes, {name:"One-Handed Grip", attributes:{0:{key:"grip", value:"one handed"}}, modePath:"One-Handed Grip", group:"grip", type:"dynamic"}),
+                    this.checkExistingDynamicModes(existingDynamicModes, {name:"Two-Handed Grip", attributes:{0:{key:"grip", value:"two handed"}}, modePath:"Two-Handed Grip", group:"grip", type:"dynamic"})];
+
+                if(!handedness[1].isActive){
+                    handedness[0].isActive = true
+                }
+
+                dynamics.push(...handedness)
+            }
+            //terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
+        }
+        return dynamics;
     }
 }
 
@@ -1002,6 +1089,7 @@ function attackDialogue(context) {
                 html.find(".attack-id").each((i, div) => populateItemStats(div, context));
             })
         },
+        callback: ()=>{},
         options: {
             height
         }
@@ -1099,7 +1187,9 @@ function populateItemStats(html, context) {
 
     options.append(attack.attackOptionHTML)
     options.find(".attack-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".attack-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".damage-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
 
     setAttackPreviewValues(total, attack, options, context);
 }
@@ -1268,4 +1358,42 @@ export async function createAttackChatMessage(attacks, rollMode) {
     if (rollMode) msg.applyRollMode(rollMode);
 
     return cls.create(msg, {rollMode});
+}
+
+
+test()
+
+//test()
+
+function assertEquals(expected, actual) {
+    if(expected === actual){
+        console.log("passed")
+    } else {
+        console.warn(`expected ${expected}, but got ${actual}`)
+    }
+}
+
+function test(){
+    console.log("running attack tests...");
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":1}]`, JSON.stringify(appendTerms(1, "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":2}]`, JSON.stringify(appendTerms("-2", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("-4d10", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}`+
+        `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"},`+
+        `{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":6,"faces":4,"modifiers":[],"results":[]},`+
+        `{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"},`+
+        `{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":9}]`, JSON.stringify(appendTerms("-4d10-6d4+9", "bonus")))
+
+    assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"NumericTerm","options":{"flavor":"bomb"},"evaluated":false,"number":1}`+
+        `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
+        `,{"class":"DiceTerm","options":{"flavor":"bomb"},"evaluated":false,"number":3,"faces":6,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("1+3d6", "bomb")))
 }

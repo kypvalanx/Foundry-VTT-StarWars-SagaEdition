@@ -189,10 +189,14 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.mode-selector').on("click", async event => {
             //event.preventDefault();
             event.stopPropagation();
-            let modePath = $(event.currentTarget).data("modePath");
-            let data = $(event.currentTarget).data("itemId");
+            const target = $(event.currentTarget);
+            let modePath = target.data("modePath");
+            let type = target.data("type");
+            let group = target.data("group");
+            let data = target.data("itemId");
+            let attributes = target.data("attributes");
             let item = this.actor.items.get(data);
-            item.activateMode(modePath)
+            item.activateMode(modePath,type, group, attributes)
         })
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
@@ -356,7 +360,7 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.itemId = elem.dataset.itemId;
         dragData.providerId = elem.dataset.providerId;
         dragData.actorId = this.actor.id;
-        dragData.attacks = elem.dataset.attacks ? JSON.parse(elem.dataset.attacks) : [];
+        dragData.attacks = elem.dataset.attacks ? JSON.parse(unescape(elem.dataset.attacks)) : [];
         if (this.actor.isToken) {
             dragData.sceneId = canvas.scene.id;
             dragData.tokenId = this.actor.token.id;

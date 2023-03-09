@@ -285,7 +285,14 @@ export function excludeItemsByType(items, type) {
 }
 
 export function getBonusString(atkBonus) {
-    return (atkBonus > 0 ? `+${atkBonus}` : (atkBonus < 0 ? `${atkBonus}` : ""));
+    const stringify = `${atkBonus}`;
+    if(stringify === "0" || stringify === ""){
+        return "";
+    }
+    if(stringify.startsWith("-") || stringify.startsWith("+")){
+        return stringify;
+    }
+    return `+${atkBonus}`
 }
 
 export function getLongKey(key) {
@@ -858,10 +865,14 @@ export function getItemParentId(id){
 }
 
 
+const preinspectionOnlyTypes = ["class", "power", "secret", "forceTechnique", "affiliation", "regimen", "species"];
 
 export function inheritableItems(entity) {
     let fn = () => {
         if (!entity.system) return [];
+        if (entity.system.cachedInheritableItems){
+            return entity.system.cachedInheritableItems.map(i=>entity.items.get(i));
+        }
 
         let possibleInheritableItems = equippedItems(entity);
 
@@ -869,7 +880,7 @@ export function inheritableItems(entity) {
             return possibleInheritableItems;
         }
 
-        possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "technique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+        possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "power", "secret", "forceTechnique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
             "beastSense",
             "beastType",
             "beastQuality"]));
@@ -879,7 +890,7 @@ export function inheritableItems(entity) {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleInheritableItems) {
-                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable, existingTraitPrerequisite: possible.type === "trait"}).doesFail) {
+                if(preinspectionOnlyTypes.includes(possible.type) || !meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable, existingTraitPrerequisite: possible.type === "trait"}).doesFail) {
                     actualInheritable.push(possible);
                     shouldRetry = true;
                 }
@@ -887,6 +898,9 @@ export function inheritableItems(entity) {
             possibleInheritableItems = possibleInheritableItems.filter(possible => !actualInheritable.includes(possible));
         }
 
+        if(entity.safeUpdate){
+            entity.safeUpdate({"system.cachedInheritableItems":actualInheritable.map(m=>m._id)})
+        }
         return actualInheritable;
     }
 

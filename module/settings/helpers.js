@@ -22,6 +22,10 @@ export const registerHandlebarsHelpers = function () {
         return !!str ? str.toUpperCase() : str;
     });
 
+    Handlebars.registerHelper('stringify', function(str) {
+        return !!str ? JSON.stringify(str) : str;
+    });
+
     Handlebars.registerHelper('toLowerCase', function(str) {
         return !!str ? str.toLowerCase() : str;
     });
