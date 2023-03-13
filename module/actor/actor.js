@@ -62,10 +62,7 @@ const ALPHA_FINAL_NAME = (a, b) => {
 export class SWSEActor extends Actor {
     _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
-        const updateKeys = Object.keys(data.system)
-        if(!!this.system.cachedInheritableItems && !(updateKeys.length === 1 && updateKeys.includes("cachedInheritableItems"))){
-            //this.safeUpdate({"system.cachedInheritableItems": null})
-        }
+
         for (let crewMember of this.system.crew) {
             let linkedActor = getActorFromId(crewMember.id)
             if (!!linkedActor) {
@@ -76,9 +73,9 @@ export class SWSEActor extends Actor {
 
     _preUpdate(changed, options, user){
         super._preUpdate(changed, options, user)
-        if(!changed.system?.cachedInheritableItems){
-            changed.system = changed.system || {}
-            changed.system.cachedInheritableItems = null;
+        if(!changed.system.hardStorage){
+            //changed.system = changed.system || {}
+            changed.system.hardStorage = null;
         }
     }
 
@@ -106,18 +103,9 @@ export class SWSEActor extends Actor {
         }
         super.prepareData();
 
-        // if(this.lock && this.system.lockSystem){
-        //     this.system = this.system.lockSystem;
-        //     return;
-        // } else if(!this.lock && this.system.lockSystem){
-        //     this.safeUpdate({"system.lockSystem":null})
-        // }
-
         const system = this.system;
         system.description = system.description || ""
         system.gravity = system.gravity || "Normal"
-        // Make separate methods for each Actor type (character, npc, etc.) to keep
-        // things organized.
 
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
@@ -162,22 +150,79 @@ export class SWSEActor extends Actor {
 
             }
 
-
             if (this.type === 'character') this._prepareCharacterData(system);
             if (this.type === 'npc') this._prepareCharacterData(system);
             if (this.type === 'computer') this._prepareComputerData(system);
             if (this.type === 'vehicle') this._prepareVehicleData(system);
             if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
+        }
+        this.updateOutstandingValues();
+    }
 
-            // if(this.lock){
-            //     this.safeUpdate({"system.lockSystem":JSON.parse(JSON.stringify(this.system))})
-            // }
+    updateOutstandingValues(){
+        if(this.outstandingValues && Object.keys(this.outstandingValues).length>0){
+            this.safeUpdate(this.outstandingValues);
         }
     }
 
-    getCached(key, fn) {
-        return this.cache.getCached(key, fn)
+    /**
+     *
+     * @param key
+     * @param fn
+     * @param options
+     * @param options.hardStorage {Boolean}
+     * @returns {*}
+     */
+    getCached(key, fn, options= {}) {
+        if(options.hardStorage){
+            const hardStorageElement = this.getHardStore(key);
+            if(hardStorageElement){
+                return hardStorageElement
+            }
+        }
+        const cachedValue = this.cache.getCached(key, fn);
+        if(options.hardStorage){
+            this.hardStore(key, cachedValue)
+        }
+        return cachedValue
+    }
+
+    getHardStore(key) {
+        if(!this.system.hardStorage){
+            return;
+        }
+        let hardStorageElement = this.system.hardStorage[key];
+        if(Array.isArray(hardStorageElement)){
+            let elements = [];
+            for(let e of hardStorageElement){
+                elements.push(this.decompress(e))
+            }
+            hardStorageElement = elements;
+        } else {
+            hardStorageElement = this.decompress(hardStorageElement)
+        }
+        return hardStorageElement;
+    }
+
+    decompress(e){
+        if(e.compressionType === "item"){
+            return this.items.get(e.id)
+        }
+        return e;
+    }
+    compress(e){
+        if(e instanceof SWSEItem){
+            return {compressionType:"item", id:e.id}
+        }
+        return e;
+    }
+
+    hardStore(key, cachedValue) {
+        this.outstandingValues = this.outstandingValues || {}
+        this.outstandingValues.system = this.outstandingValues.system || {}
+        this.outstandingValues.system.hardStorage = this.outstandingValues.system.hardStorage || {}
+        this.outstandingValues.system.hardStorage[key] = this.compress(cachedValue);
     }
 
     setResolvedVariable(key, variable, label, notes) {
@@ -555,9 +600,6 @@ export class SWSEActor extends Actor {
         let ids = await this.removeSuppliedItems(itemId);
         ids.push(itemId);
         await this.deleteEmbeddedDocuments("Item", ids);
-    }
-    cachedInheritableItems(){
-        return this.system.cachedInheritableItems;
     }
 
     async removeChildItems(itemId) {

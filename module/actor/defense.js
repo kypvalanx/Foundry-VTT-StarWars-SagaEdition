@@ -50,41 +50,45 @@ function generateArmorBlock(actor, armor) {
  * @returns
  */
 export function resolveDefenses(actor) {
-    if(!actor){
-        return {};
+    function extracted() {
+        if (!actor) {
+            return {};
+        }
+        let conditionBonus = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "condition",
+            reduce: "FIRST"
+        })
+
+        if ("OUT" === conditionBonus || !conditionBonus) {
+            conditionBonus = "0";
+        }
+
+        //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
+
+        let defense = actor.system.defense || {};
+
+        defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
+        defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
+        defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
+        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
+        defense.situationalBonuses = _getSituationalBonuses(actor);
+
+        defense.damageReduction = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "damageReduction",
+            reduce: "SUM"
+        })
+
+        let armors = []
+
+        for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+            armors.push(generateArmorBlock(actor, armor));
+        }
+        return {defense, armors};
     }
-     let conditionBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "condition",
-        reduce: "FIRST"
-    })
 
-    if("OUT" === conditionBonus || !conditionBonus){
-        conditionBonus = "0";
-    }
-
-    //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
-
-    let defense = actor.system.defense || {};
-
-    defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
-    defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
-    defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
-    defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
-    defense.situationalBonuses = _getSituationalBonuses(actor);
-
-    defense.damageReduction = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "damageReduction",
-        reduce: "SUM"
-    })
-
-    let armors = []
-
-    for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
-        armors.push(generateArmorBlock(actor, armor));
-    }
-    return {defense, armors};
+    return actor.getCached ? actor.getCached("defenses", extracted, {hardStorage: true}) : extracted();
 }
 
 /**
@@ -528,7 +532,7 @@ function _getEquipmentMaxDexBonus(actor) {
 test()
 
 function test(){
-    resolveDefenses()
+    //resolveDefenses()
     let actor = {}
     //resolveDefenses(actor)
 }

@@ -870,9 +870,6 @@ const preinspectionOnlyTypes = ["class", "power", "secret", "forceTechnique", "a
 export function inheritableItems(entity) {
     let fn = () => {
         if (!entity.system) return [];
-        if (entity.system.cachedInheritableItems){
-            return entity.system.cachedInheritableItems.map(i=>entity.items.get(i));
-        }
 
         let possibleInheritableItems = equippedItems(entity);
 
@@ -898,9 +895,6 @@ export function inheritableItems(entity) {
             possibleInheritableItems = possibleInheritableItems.filter(possible => !actualInheritable.includes(possible));
         }
 
-        if(entity.safeUpdate){
-            entity.safeUpdate({"system.cachedInheritableItems":actualInheritable.map(m=>m._id)})
-        }
         return actualInheritable;
     }
 
