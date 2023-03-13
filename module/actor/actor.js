@@ -73,8 +73,8 @@ export class SWSEActor extends Actor {
 
     _preUpdate(changed, options, user){
         super._preUpdate(changed, options, user)
-        if(!changed.system.hardStorage){
-            //changed.system = changed.system || {}
+        if(!changed.system?.hardStorage){
+            changed.system = changed.system || {}
             changed.system.hardStorage = null;
         }
     }
