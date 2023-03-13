@@ -77,6 +77,7 @@ export class SWSEActor extends Actor {
     _preUpdate(changed, options, user){
         super._preUpdate(changed, options, user)
         if(!changed.system?.cachedInheritableItems){
+            changed.system = changed.system || {}
             changed.system.cachedInheritableItems = null;
         }
     }
