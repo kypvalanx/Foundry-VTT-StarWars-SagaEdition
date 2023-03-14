@@ -38,7 +38,7 @@ function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride)
     if (predicate) {
         items = items.filter(predicate)
     }
-    for (let item of items) {
+    for (let item of items.filter(i => !!i)) {
         let duplicates = (names[item.name] || 0) + 1;
         names[item.name] = duplicates;
         attributes.push(...getInheritableAttribute({
