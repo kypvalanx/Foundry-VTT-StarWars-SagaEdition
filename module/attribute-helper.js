@@ -35,6 +35,7 @@ function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride)
     let attributes = [];
     let names = {};
     let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
+    items = items.filter(i => !!i)
     if (predicate) {
         items = items.filter(predicate)
     }
