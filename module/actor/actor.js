@@ -430,12 +430,16 @@ export class SWSEActor extends Actor {
      * Prepare Character type specific data
      */
     _prepareCharacterData(system) {
-        let speciesList = filterItemsByType(this.items.values(), "species");
-        this.species = (speciesList.length > 0 ? speciesList[0] : null);
+        this.speciesList = filterItemsByType(this.items.values(), "species");
+        this.species = (this.speciesList.length > 0 ? this.speciesList[0] : null);
 
         generateSpeciesData(this);
 
         this.classes = filterItemsByType(inheritableItems(this), "class");
+
+        this.weapons = filterItemsByType(this.items.values(), "weapon");
+        this.armors = filterItemsByType(this.items.values(), "armor");
+        this.equipment = filterItemsByType(this.items.values(), "equipment");
 
         this.traits = this.getTraits();
         this.talents = filterItemsByType(inheritableItems(this), "talent");
