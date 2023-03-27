@@ -159,8 +159,12 @@ function resolveAdditiveExpression(expression, actor) {
         tokens[1] = "-" + tokens[1];
         tokens[0] = "";
     }
+    //
+    // if (tokens[0] === "+") {
+    //     tokens[0] = "";
+    // }
 
-    for (let i = 1; i < tokens.length; i++) {
+    for (let i = 0; i < tokens.length; i++) {
         if (tokens[i] === "+" || tokens[i] === "-") {
             if (tokens[i + 1] === "-") {
                 tokens[i + 1] = "-" + tokens[i + 2];
@@ -186,6 +190,9 @@ function resolveAdditiveExpression(expression, actor) {
  * @param actor {SWSEActor}
  */
 export function resolveExpression(expression, actor) {
+    if(!expression){
+        return 0;
+    }
     if (typeof expression === 'object') {
         return resolveExpression(expression.value, actor);
     }
@@ -920,11 +927,15 @@ function test(){
 
     //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null, null))
     assertEquals(12, resolveValueArray(["2", 4, "*2"], null))
+    assertEquals(2, resolveValueArray(["+2"], null))
     assertEquals( 24, resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
 
+    assertEquals(2, resolveExpression("+2", null))
     assertEquals(-5, resolveExpression("-5", null))
+    console.log("13")
     assertEquals(-10, resolveExpression("-5-5", null))
     assertEquals(0, resolveExpression("-5--5", null))
+    console.log("14")
     assertEquals(5, resolveExpression("MAX(1,5)", null))
     assertEquals(1, resolveExpression("MIN(1,5)", null))
     assertEquals(8, resolveExpression("MAX(1,5)+3", null))
