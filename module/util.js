@@ -932,10 +932,8 @@ function test(){
 
     assertEquals(2, resolveExpression("+2", null))
     assertEquals(-5, resolveExpression("-5", null))
-    console.log("13")
     assertEquals(-10, resolveExpression("-5-5", null))
     assertEquals(0, resolveExpression("-5--5", null))
-    console.log("14")
     assertEquals(5, resolveExpression("MAX(1,5)", null))
     assertEquals(1, resolveExpression("MIN(1,5)", null))
     assertEquals(8, resolveExpression("MAX(1,5)+3", null))
