@@ -36,6 +36,7 @@ export class SWSEItem extends Item {
         const system = this.system;
         //itemData.finalName = this.name;
 
+        this.system.attributes = this.system.attributes || {}
         this.cache = new SimpleCache();
         this.items = this.system.items?.map(id => {
             return this.parent.items.get(id)
