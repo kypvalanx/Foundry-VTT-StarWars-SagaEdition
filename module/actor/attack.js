@@ -1291,6 +1291,7 @@ function resolveAttack(attack, targetActors) {
     let targetIds = targetActors.map(target => target.id);
     return {
         attack: attackRollResult,
+        itemId: attack.itemId,
         attackRollFunction: attackRoll.formula,
         damage: damage,
         damageRollFunction: damageRoll.formula,
