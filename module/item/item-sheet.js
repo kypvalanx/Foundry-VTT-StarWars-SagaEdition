@@ -57,7 +57,7 @@ export class SWSEItemSheet extends ItemSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-        html.find('[data-action="to-chat"]').click(this._onToSheet.bind(this));
+        html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
@@ -136,7 +136,7 @@ export class SWSEItemSheet extends ItemSheet {
 
 
 
-    _onToSheet(event) {
+    _onToChat(event) {
         event.preventDefault();
         const a = event.currentTarget;
         const itemId = a.dataset.actionItem;

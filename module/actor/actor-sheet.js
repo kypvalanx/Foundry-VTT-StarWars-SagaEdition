@@ -236,11 +236,60 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="toggle-second-wind"]').click(this._onToggleSecondWind.bind(this));
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
         html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
+        html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
 
+    }
+
+
+    _onToChat(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const type = a.dataset.actionType;
+
+        let content = "";
+        switch (type){
+            case "defense":
+                let defense = this.actor.system.defense;
+                content += `<h3>Defenses</h3>`
+
+                for (let value of Object.values(defense)){
+                    content += this.defenseToTableRow(value)
+                }
+
+                content += `<tr><th>Damage Threshold</th><td>${defense.damageThreshold.total}</td></tr>`
+                content += `<tr><th>Damage Reduction</th><td>${defense.damageReduction}</td></tr>`
+
+                let bonusString = ""
+                for(let bonus of defense.situationalBonuses){
+                    bonusString += bonus;
+                }
+
+                content = `<table>${content}</table><ol>${bonusString}</ol>`
+
+                break;
+        }
+
+
+        let speaker = ChatMessage.getSpeaker({actor: this.object.parent});
+
+        let messageData = {
+            user: game.user.id,
+            speaker: speaker,
+            flavor: name,
+            type: CONST.CHAT_MESSAGE_TYPES.OOC,
+            content,
+            sound: CONFIG.sounds.dice
+        }
+
+        let cls = getDocumentClass("ChatMessage");
+
+        let msg = new cls(messageData);
+
+        return cls.create(msg.data, {});
     }
 
     _onCreateNewItem(event){
@@ -1547,6 +1596,17 @@ export class SWSEActorSheet extends ActorSheet {
         }).render(true);
     }
 
+    defenseToTableRow(value) {
+        const strings = Object.keys(value);
+        let rows = []
+        if (strings.includes('name') && strings.includes('total')){
+            rows.push(`<tr><th>${value.name}</th><td>${value.total}</td></tr>`)
+            for(let defenseModifier of value.defenseModifiers || []){
+                rows.push(this.defenseToTableRow(defenseModifier))
+            }
+        }
+        return rows.join("");
+    }
 }
 
 
