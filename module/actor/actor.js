@@ -184,7 +184,7 @@ export class SWSEActor extends Actor {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update')) {
+        if (this.canUserModify(game.user, 'update') && !this.pack) {
             this.update(data, context);
         }
     }
@@ -507,6 +507,13 @@ export class SWSEActor extends Actor {
             attributeKey: "isHeroic",
             reduce: "OR"
         });
+        this.system.secondWind = this.system.secondWind || {}
+        const bonusSecondWind = getInheritableAttribute({
+            entity: this,
+            attributeKey: "bonusSecondWind",
+            reduce: "SUM"
+        });
+        this.system.secondWind.perDay = bonusSecondWind + (this.isHeroic ? 1 : 0)
 
 
         system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length

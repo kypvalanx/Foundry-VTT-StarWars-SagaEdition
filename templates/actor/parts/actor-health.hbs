@@ -3,8 +3,19 @@
     <div><h1 class="resource-label">Hit Points</h1></div>
     <div class="flex flex-row">
         <div class="resource-block max-health numeric-override" data-override="{{actor.system.health.override}}" data-override-name="Maximum Health" data-override-key="system.health.override"><h3><label>Total</label><div class="plain input">{{actor.system.health.max}}</div></h3></div>
-        <div class="resource-block"><label class="top">Current</label>
-            <input class="plain small" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
+        <div class="resource-block">
+            <h3><label class="top">Current</label>
+                <input class="plain small" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
+            </h3>
+        </div>
+        <div class="resource-block">
+            <h3>
+            <label class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second Winds Per Day</label>
+                {{log actor.system.secondWind}}
+                {{#times actor.system.secondWind.perDay}}
+                    <input data-action="toggle-second-wind" type="checkbox" data-name="system.secondWind.toggles.{{this}}" {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
+                {{/times}}
+            </h3>
         </div>
     </div>
     <div class="flex flex-row panel">
