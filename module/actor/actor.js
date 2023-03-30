@@ -55,6 +55,17 @@ const ALPHA_FINAL_NAME = (a, b) => {
     return 0;
 };
 
+function viewableEntityFromEntityType(type) {
+    switch (type){
+        case 'forcePower':
+            return 'Force Powers'
+        case 'forceTechnique':
+            return 'Force Technique'
+        case 'forceSecret':
+            return 'Force Secret'
+    }
+}
+
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -1452,7 +1463,7 @@ export class SWSEActor extends Actor {
 
         for (let talent of this.talents || []) {
             if (!talent.system.supplier?.id) {
-                this.reduceAvailableItem(actorData, talent.system.talentTreeSource);
+                this.reduceAvailableItem(actorData, talent.system.activeCategory || talent.system.talentTreeSource);  //talentTreeSource is the old one
             }
         }
         for (let feat of this.feats) {
@@ -1461,7 +1472,7 @@ export class SWSEActor extends Actor {
             }
             let type = 'General Feats';
 
-            let featCategory = feat.system.bonusFeatCategory;
+            let featCategory = feat.system.activeCategory || feat.system.bonusFeatCategory;  //bonusFeatCategory is the old one
             if (featCategory) {
                 type = featCategory;
             } else {
@@ -1480,12 +1491,19 @@ export class SWSEActor extends Actor {
         }
         this.reduceAvailableItem(actorData, "Force Secret", this.secrets.length);
         this.reduceAvailableItem(actorData, "Force Technique", this.techniques.length);
-        this.reduceAvailableItem(actorData, "Force Powers", this.powers.length);
+        for (let forcePower of this.powers) {
+            this.reduceAvailableItem(actorData, forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
+        }
     }
 
-    reduceAvailableItem(actorData, type, reduceBy = 1) {
-        if (actorData.availableItems[type]) {
-            actorData.availableItems[type] = actorData.availableItems[type] - reduceBy;
+    reduceAvailableItem(actorData, type, reduceBy = 1, backupType) {
+        const availableItem = actorData.availableItems[type];
+        if (availableItem >= reduceBy) {
+            actorData.availableItems[type] = availableItem - reduceBy;
+        } else if (availableItem < reduceBy) {
+            let remainder = reduceBy - availableItem;
+            actorData.availableItems[type] = 0;
+            actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder :  -1 * remainder
         } else {
             actorData.availableItems[type] = -1 * reduceBy;
         }
@@ -1975,7 +1993,7 @@ export class SWSEActor extends Actor {
                         }
                     });
                 }
-                entity.system.talentTreeSource = Array.from(possibleTalentTrees)[0];
+                entity.system.activeCategory = Array.from(possibleTalentTrees)[0];
 
             }
 
@@ -2014,21 +2032,22 @@ export class SWSEActor extends Actor {
                     });
                 }
 
-                entity.system.bonusFeatCategory = possibleFeatTypes;
+                entity.system.activeCategory = possibleFeatTypes;
             }
 
             if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret') {
-                let viewable
-                if (entity.type === 'forcePower') {
-                    viewable = 'Force Powers'
+                let viewable = viewableEntityFromEntityType(entity.type);
+
+                let foundCategory = false
+                for (let category of entity.system.categories || []){
+                    if(!!this.system.availableItems[category.value]){
+                        foundCategory = true;
+                        entity.system.activeCategory = category.value;
+                        break;
+                    }
                 }
-                if (entity.type === 'forceTechnique') {
-                    viewable = 'Force Technique'
-                }
-                if (entity.type === 'forceSecret') {
-                    viewable = 'Force Secret'
-                }
-                if (!this.system.availableItems[viewable]) {
+
+                if (!foundCategory && !this.system.availableItems[viewable]) {
                     await Dialog.prompt({
                         title: `You can't take any more ${viewable.titleCase()}`,
                         content: `You can't take any more ${viewable.titleCase()}`,
@@ -2037,6 +2056,7 @@ export class SWSEActor extends Actor {
                     });
                     return [];
                 }
+                entity.system.activeCategory = entity.system.activeCategory || viewable;
             }
 
             if (entity.type === "background" || entity.type === "destiny") {
