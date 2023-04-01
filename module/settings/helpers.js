@@ -111,14 +111,11 @@ export const registerHandlebarsHelpers = function () {
         let selected;
         if(Array.isArray(arg1)){
             values = arg1;
-        }
-        if('type' === arg1){
+        } else if('type' === arg1){
             values = game.system.template.Item.types;
-        }
-        if('subtype' === arg1){
-            values = SUBTYPES[arg2.toLowerCase()] || [];
-        }
-        if(Object.entries(arg1).length > 0 && !values){
+        } else if('subtype' === arg1){
+            values = SUBTYPES[arg2] || [];
+        } else if(Object.entries(arg1).length > 0){
             values = []
             let hash = arg2.hash;
             if(hash){

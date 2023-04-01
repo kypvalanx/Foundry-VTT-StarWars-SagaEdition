@@ -333,6 +333,11 @@ export class SWSEActor extends Actor {
         })
 
         //TODO make the summation reduce function handle units?
+        const cargoCapacity = getInheritableAttribute({
+            entity: this,
+            attributeKey: "cargoCapacity",
+            reduce: "FIRST"
+        }) || 0;
         this.system.cargo =
             {
                 value: getInheritableAttribute({
@@ -340,11 +345,7 @@ export class SWSEActor extends Actor {
                     attributeKey: "weight",
                     reduce: "SUM"
                 }),
-                capacity: `${(getInheritableAttribute({
-                    entity: this,
-                    attributeKey: "cargoCapacity",
-                    reduce: "FIRST"
-                }))}`
+                capacity: `${cargoCapacity}`
             }
 
         this.system.consumables = getInheritableAttribute({
