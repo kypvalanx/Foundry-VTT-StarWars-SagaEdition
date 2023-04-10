@@ -45,7 +45,7 @@ import {SimpleCache} from "../common/simple-cache.js";
 
 
 /**
- * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
+ * Extend the base Actor entity
  * @extends {Actor}
  */
 export class SWSEActor extends Actor {
@@ -92,6 +92,7 @@ export class SWSEActor extends Actor {
         this.resolvedLabels = new Map();
         this.cache = new SimpleCache()
 
+
         if (this.id && this.type === "npc") {
             this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
         } else if (this.id && this.type === "npc-vehicle") {
@@ -130,17 +131,11 @@ export class SWSEActor extends Actor {
 
             }
 
-
             if (this.type === 'character') this._prepareCharacterData(system);
             if (this.type === 'npc') this._prepareCharacterData(system);
             if (this.type === 'computer') this._prepareComputerData(system);
             if (this.type === 'vehicle') this._prepareVehicleData(system);
             if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
-
-
-            // if(this.lock){
-            //     this.safeUpdate({"system.lockSystem":JSON.parse(JSON.stringify(this.system))})
-            // }
         }
     }
 

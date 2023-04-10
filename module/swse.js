@@ -15,6 +15,8 @@ import {measureDistances} from "./measure.js";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.js";
 import {SWSECompendiumDirectory} from "./compendium/compendium-directory.js";
 import {toNumber} from "./util.js";
+import {SWSEActiveEffect} from "./active-effect/active-effect.js";
+import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.js";
 
 
 Hooks.once('init', async function () {
@@ -49,6 +51,12 @@ Hooks.once('init', async function () {
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
 
+    CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
+    //CONFIG.ActiveEffect.sheetClasses["Active Sheet Classes"] = SWSEActiveEffectConfig;
+
+    DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
+    DocumentSheetConfig.unregisterSheet(ActiveEffect, "core", ActiveEffectConfig)
+
     registerSystemSettings();
     registerHandlebarsHelpers();
     if(game.settings.get("swse", "enableAdvancedCompendium")){
@@ -66,6 +74,7 @@ Hooks.once('init', async function () {
     Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
+    //ActiveEffects.reg
 
 
     await loadTemplates([
