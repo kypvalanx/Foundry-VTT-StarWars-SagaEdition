@@ -3,6 +3,8 @@ import {generateAttacks, generateVehicleAttacks} from "./attack-handler.js";
 import {resolveGrapple, resolveOffense} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
+    ALPHA_FINAL_NAME,
+    COMMMA_LIST,
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
@@ -14,7 +16,8 @@ import {
     resolveWeight,
     toNumber,
     toShortAttribute,
-    unique
+    unique,
+    viewableEntityFromEntityType
 } from "../util.js";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
 import {resolveDefenses} from "./defense.js";
@@ -41,31 +44,6 @@ import {errorsFromActor, warningsFromActor} from "./warnings.js";
 import {SimpleCache} from "../common/simple-cache.js";
 
 
-// noinspection JSClosureCompilerSyntax
-const COMMMA_LIST = /, or | or |, /;
-const ALPHA_FINAL_NAME = (a, b) => {
-    let x = a.finalName?.toLowerCase();
-    let y = b.finalName?.toLowerCase();
-    if (x < y) {
-        return -1;
-    }
-    if (x > y) {
-        return 1;
-    }
-    return 0;
-};
-
-function viewableEntityFromEntityType(type) {
-    switch (type){
-        case 'forcePower':
-            return 'Force Powers'
-        case 'forceTechnique':
-            return 'Force Technique'
-        case 'forceSecret':
-            return 'Force Secret'
-    }
-}
-
 /**
  * Extend the base Actor entity by defining a custom roll data structure which is ideal for the Simple system.
  * @extends {Actor}
@@ -84,6 +62,8 @@ export class SWSEActor extends Actor {
     _onCreateEmbeddedDocuments(embeddedName, ...args) {
         super._onCreateEmbeddedDocuments(embeddedName, ...args);
 
+
+        //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
         if ("ActiveEffect" === embeddedName) {
             let activeEffect = args[0][0];
             if (activeEffect.flags?.core?.statusId?.startsWith("condition")) {
@@ -103,18 +83,9 @@ export class SWSEActor extends Actor {
         }
         super.prepareData();
 
-        // if(this.lock && this.system.lockSystem){
-        //     this.system = this.system.lockSystem;
-        //     return;
-        // } else if(!this.lock && this.system.lockSystem){
-        //     this.safeUpdate({"system.lockSystem":null})
-        // }
-
         const system = this.system;
         system.description = system.description || ""
         system.gravity = system.gravity || "Normal"
-        // Make separate methods for each Actor type (character, npc, etc.) to keep
-        // things organized.
 
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();

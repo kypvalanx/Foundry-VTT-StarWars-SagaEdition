@@ -12,20 +12,32 @@ import {SimpleCache} from "../common/simple-cache.js";
 export class SWSEItem extends Item {
     constructor(...args) {
         super(...args);
-        this.items = this.items || [];
+
         this.hasItemOwner = this.hasItemOwner || false;
     }
 
 
-    static get config() {
-        return mergeObject(super.config, {
-            baseEntity: Item,
-            embeddedEntities: {
-                "OwnedItem": "items"
-            }
-        });
-    }
-
+    // static get config() {
+    //     return mergeObject(super.config, {
+    //         baseEntity: Item,
+    //         embeddedEntities: {
+    //             "Item": "items"
+    //         }
+    //     });
+    // }
+    //
+    // static defineSchema() {
+    //     let schema = super.defineSchema()
+    //     schema["items"] =  new schema.effects.constructor(foundry.documents.BaseItem); //this works but is hacky AF.  having trouble accessing certain class paths.
+    //
+    //     return schema;
+    // }
+    //
+    // static metadata = mergeObject({
+    //     embedded: {
+    //         Item: "items"
+    //     }
+    // }, super.metadata);
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
@@ -38,9 +50,13 @@ export class SWSEItem extends Item {
 
         this.system.attributes = this.system.attributes || {}
         this.cache = new SimpleCache();
-        this.items = this.system.items?.map(id => {
-            return this.parent.items.get(id)
-        }).filter(i => !!i) || []
+        this.system.items?.forEach(id => {
+            let item = this.parent.items.get(id)
+            if(item){
+                this.addActiveEffectFromItem(item)
+                this.item.revokeOwnership(item)
+            }
+        })
         system.displayName = SWSEItem.buildItemName(this);
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
@@ -1351,6 +1367,26 @@ export class SWSEItem extends Item {
         let classLevels = this.parent.classes.filter(clazz => clazz.data.name === this.data.name)
 
         return classLevels.length;
+    }
+
+    addActiveEffectFromItem(item) {
+
+        //could this be generated from the parent item at load?  would that be slow?
+        let activeEffect = {
+            label: item.name,
+            changes: Object.values(item.system.attributes),
+            icon: item.img,
+            origin: item.uuid,
+            disabled: true, //this active effect is marked as disabled so that it doesn't modify anything unintentionally
+
+            flags: {
+                swse: {
+                    description: item.description,
+                    itemModifier: true
+                }
+            }
+        }
+        this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
     }
 }
 

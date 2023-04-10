@@ -523,7 +523,7 @@ function meetsPrerequisite(prereq, target, options) {
         }
         return {failureList, successList}
     }
-    return !!options.prerequisiteCache ? options.prerequisiteCache.getCached(prereq.text, fn): fn()
+    return !!options.prerequisiteCache ? options.prerequisiteCache.getCached({type: prereq.type, requirement: prereq.requirement}, fn): fn()
 }
 
 /**

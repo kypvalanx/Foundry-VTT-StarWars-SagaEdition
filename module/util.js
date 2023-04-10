@@ -972,4 +972,27 @@ export function resolveWeight(weight, quantity = 1, costFactor = 1, actor){
     }
     let numericWeight = resolveExpression(weight, actor)
     return numericWeight * unitMultiplier * quantity
+} // noinspection JSClosureCompilerSyntax
+export const COMMMA_LIST = /, or | or |, /;
+export const ALPHA_FINAL_NAME = (a, b) => {
+    let x = a.finalName?.toLowerCase();
+    let y = b.finalName?.toLowerCase();
+    if (x < y) {
+        return -1;
+    }
+    if (x > y) {
+        return 1;
+    }
+    return 0;
+};
+
+export function viewableEntityFromEntityType(type) {
+    switch (type) {
+        case 'forcePower':
+            return 'Force Powers'
+        case 'forceTechnique':
+            return 'Force Technique'
+        case 'forceSecret':
+            return 'Force Secret'
+    }
 }

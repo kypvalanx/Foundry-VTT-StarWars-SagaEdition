@@ -74,6 +74,7 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
 
+
         if (this.actor) {
             // Update Inventory Item
             html.find('[data-action="view"]').click(this.actor.sheet._onItemEdit.bind(this.actor.sheet));
@@ -91,6 +92,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
+        html.find('[data-action="effect-control"]').click(this._onEffectControl.bind(this));
         html.find('[data-action="mode-control"]').click(this._onModeControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
 
@@ -197,10 +199,13 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Create drag data
         dragData.itemId = this.item.id;
-        dragData.owner = this.item.actor;
-        dragData.actorId = this.item.actor.id;
-        dragData.sceneId = this.item.actor.isToken ? canvas.scene?.id : null;
-        dragData.tokenId = this.item.actor.isToken ? this.actor.token.id : null;
+        const owner = this.item.actor;
+        if(owner){
+            dragData.owner = owner;
+            dragData.actorId = owner.id;
+            dragData.sceneId = owner.isToken ? canvas.scene?.id : null;
+            dragData.tokenId = owner.isToken ? this.actor.token.id : null;
+        }
 
         // Owned Items
         if (li.dataset.itemId) {
@@ -215,7 +220,7 @@ export class SWSEItemSheet extends ItemSheet {
     /* -------------------------------------------- */
     /** @override */
     async _onDrop(event) {
-        if (!this.actor.isOwner) return false;
+        if (!this.item.canUserModify(game.user, 'update')) return false;
         // Try to extract the droppedItem
         let droppedItem;
         try {
@@ -223,14 +228,27 @@ export class SWSEItemSheet extends ItemSheet {
         } catch (err) {
             return false;
         }
+        await this.handleDroppedItem(droppedItem);
+    }
 
+    async handleDroppedItem(droppedItem) {
         let actor = this.actor;
+        let item = undefined;
 
-        let ownedItem = actor.items.get(droppedItem.itemId);
+        if(actor){
+            item = actor?.items.get(droppedItem.itemId);
+        }
 
-        let isItemMod = Object.values(ownedItem.system.attributes).find(attr => attr.key === "itemMod");
+        if(droppedItem.uuid && !item){
+            item = await Item.implementation.fromDropData(droppedItem);
+        }
+        if(!item){
+            return;
+        }
+
+        let isItemMod = Object.values(item.system.attributes).find(attr => attr.key === "itemMod");
         if (isItemMod?.value === "true") {
-            let meetsPrereqs = meetsPrerequisites(this.object, ownedItem.system.prerequisite)
+            let meetsPrereqs = meetsPrerequisites(this.object, item.system.prerequisite)
 
             if (meetsPrereqs.doesFail) {
                 new Dialog({
@@ -245,11 +263,12 @@ export class SWSEItemSheet extends ItemSheet {
                 }).render(true);
                 return;
             }
-
-            await this.item.takeOwnership(ownedItem);
-
+            this.item.addActiveEffectFromItem(item);
+           // await this.item.takeOwnership(ownedItem);
         }
     }
+
+
 
     _canAttach(application) {
         if (!application) {
@@ -502,6 +521,19 @@ export class SWSEItemSheet extends ItemSheet {
                 break;
         }
         this.item.safeUpdate(updateData);
+    }
+    _onEffectControl(event){
+        let element = $(event.currentTarget);
+        let effectId = element.data("effectId");
+
+        switch (element.data("type")){
+            case 'view':
+                this.item.effects.get(effectId).sheet.render(true);
+                break;
+            case 'delete':
+                this.item.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+                break;
+        }
     }
 
     _onModeControl(event){

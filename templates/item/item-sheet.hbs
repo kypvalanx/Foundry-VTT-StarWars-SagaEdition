@@ -123,16 +123,18 @@
                 <label class="attribute-value">{{item.system.upgradePoints}}</label>
             </div>
             <ol class="items-list">
-                {{#each item.items as |modification id|}}
-                    <li class="item flexrow draggable" data-item-id="{{modification._id}}">
-                        <div class="item-image"><img src="{{modification.img}}" title="{{modification.name}}" width="24" height="24"/>
-                        </div>
-                        <h4 class="item-name">{{modification.name}}</h4>
-                        <div class="item-controls">
-                            <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                            <a class="item-control item-delete" title="Delete Item"><i class="fas fa-trash"></i></a>
-                        </div>
-                    </li>
+                {{#each item.effects as |modification id|}}
+                    {{#if modification.flags.swse.itemModifier}}
+                        <li class="item flexrow draggable" data-item-id="{{modification._id}}">
+                            <div class="item-image"><img src="{{modification.icon}}" title="{{modification.label}}" width="24" height="24"/>
+                            </div>
+                            <h4 class="item-name">{{modification.label}}</h4>
+                            <div class="item-controls">
+                                <a data-type="view" data-action="effect-control" data-effect-id="{{modification._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                <a data-type="delete" data-action="effect-control" data-effect-id="{{modification._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                    {{/if}}
                 {{/each}}
             </ol>
         </div>
