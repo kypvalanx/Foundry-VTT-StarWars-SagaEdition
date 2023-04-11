@@ -1378,7 +1378,6 @@ export class SWSEItem extends Item {
             icon: item.img,
             origin: item.uuid,
             disabled: true, //this active effect is marked as disabled so that it doesn't modify anything unintentionally
-
             flags: {
                 swse: {
                     description: item.system.description,

@@ -2,7 +2,8 @@
 
     <!-- Effect Header -->
     <header class="sheet-header">
-        <img class="effect-icon" src="{{ data.icon }}" data-edit="icon">
+        <img class="profile-img" src="{{ data.icon }}" data-edit="icon" title="{{data.label}}"
+             alt="{{data.label}}">
         <h1 class="effect-title">{{ data.label }}</h1>
     </header>
 
@@ -15,20 +16,33 @@
     <!-- Details Tab -->
     <section class="tab" data-tab="details">
 
-        <div class="form-group">
-            <label>{{ localize "EFFECT.Label" }}</label>
-            <div class="form-fields">
-                <input type="text" name="label" value="{{ data.label }}"/>
+<!--        <div class="form-group">-->
+<!--            <label>{{ localize "EFFECT.Label" }}</label>-->
+<!--            <div class="form-fields">-->
+<!--                <input type="text" name="label" value="{{ data.label }}"/>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="item-pane">
+            <div class="left-sidebar sidebar">
+
+            </div>
+            <div class="middle-right-sidebar">
+                <div class="flex-col">
+                    {{log this ../this}}
+    {{editor data.flags.swse.description target="flags.swse.description" button=true owner=owner
+             editable=editable}}
+                </div>
             </div>
         </div>
 
-        <div class="form-group">
-            <label>{{ localize "EFFECT.Icon" }}</label>
-            <div class="form-fields">
-                {{filePicker target="icon" type="image"}}
-                <input class="image" type="text" name="icon" placeholder="path/image.png" value="{{data.icon}}"/>
-            </div>
-        </div>
+<!--        <div class="form-group">-->
+<!--            <label>{{ localize "EFFECT.Icon" }}</label>-->
+<!--            <div class="form-fields">-->
+<!--                {{filePicker target="icon" type="image"}}-->
+<!--                <input class="image" type="text" name="icon" placeholder="path/image.png" value="{{data.icon}}"/>-->
+<!--            </div>-->
+<!--        </div>-->
     </section>
 
     <!-- Effects Tab -->
