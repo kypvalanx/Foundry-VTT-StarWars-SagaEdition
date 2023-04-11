@@ -102,6 +102,16 @@ function getAttributesFromDocument(data) {
 
         }
 
+        function isItemModifier(effect) {
+            return effect.flags.swse.itemModifier;
+        }
+
+        for(let effect of document.effects || []){
+            if(isItemModifier(effect)){
+                allAttributes.push(... effect.changes)
+            }
+        }
+
         allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride))
 
         if (document.system?.modes) {
@@ -151,23 +161,9 @@ function functionString(fn) {
     }
 }
 
-function getCachedAttributesFromDocument(data) {
-    // let key = {
-    //     fn: "getCachedAttributesFromDocument",
-    //     attributeKey: data.attributeKey,
-    //     itemFilter: functionString(data.itemFilter),
-    //     attributeFilter: functionString(data.attributeFilter),
-    //     duplicates: data.duplicates
-    // };
-    // if(data.entity.getCached){
-    //     return data.entity.getCached(key, () => getAttributesFromDocument(data))
-    // }
-    return getAttributesFromDocument(data);
-}
-
 function getInheritableValues(data) {
-    let values = [];
     if (Array.isArray(data.entity)) {
+        let values = [];
         for (let entity of data.entity) {
             values.push(...getInheritableValues({
                 entity: entity,
@@ -177,10 +173,9 @@ function getInheritableValues(data) {
                 recursive: data.recursive
             }))
         }
-    } else {
-        return getCachedAttributesFromDocument(data);
+        return values;
     }
-    return values;
+    return getAttributesFromDocument(data);
 }
 
 /**
