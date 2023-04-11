@@ -16,28 +16,6 @@ export class SWSEItem extends Item {
         this.hasItemOwner = this.hasItemOwner || false;
     }
 
-
-    // static get config() {
-    //     return mergeObject(super.config, {
-    //         baseEntity: Item,
-    //         embeddedEntities: {
-    //             "Item": "items"
-    //         }
-    //     });
-    // }
-    //
-    // static defineSchema() {
-    //     let schema = super.defineSchema()
-    //     schema["items"] =  new schema.effects.constructor(foundry.documents.BaseItem); //this works but is hacky AF.  having trouble accessing certain class paths.
-    //
-    //     return schema;
-    // }
-    //
-    // static metadata = mergeObject({
-    //     embedded: {
-    //         Item: "items"
-    //     }
-    // }, super.metadata);
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
