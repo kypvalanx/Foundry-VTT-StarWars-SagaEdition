@@ -1,4 +1,4 @@
-import {filterItemsByType, unique} from "../util.js";
+import {filterItemsByType, onCollapseToggle, unique} from "../util.js";
 import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
@@ -107,33 +107,7 @@ export class SWSEActorSheet extends ActorSheet {
         })
 
 
-        html.find(".collapse-toggle").on("click", event => {
-            let down = "fa-minus";
-            let up = "fa-plus";
-            event.stopPropagation();
-            let button = $(event.currentTarget);
-
-            let children = button.find("i.fas");
-            children.each((i, e) =>{
-                if(e.classList.contains(down)){
-                    e.classList.remove(down);
-                    e.classList.add(up);
-                } else if(e.classList.contains(up)){
-                    e.classList.remove(up);
-                    e.classList.add(down);
-                }
-            })
-
-            let container = button.parents(".collapsible-container")
-            let collapsible = container.children(".collapsible")
-            collapsible.each((i, div) => {
-                if(div.style.display === "grid"){
-                    div.style.display = "none"
-                } else {
-                    div.style.display = "grid"
-                }
-            })
-        })
+        html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;

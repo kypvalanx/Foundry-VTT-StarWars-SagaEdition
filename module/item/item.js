@@ -1381,7 +1381,7 @@ export class SWSEItem extends Item {
 
             flags: {
                 swse: {
-                    description: item.description,
+                    description: item.system.description,
                     itemModifier: true
                 }
             }

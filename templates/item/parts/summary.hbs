@@ -3,12 +3,23 @@
 
     </div>
     <div class="middle-right-sidebar">
-        {{#if item.system}}
-            {{editor item.system.description target="system.description" button=true owner=owner
-                     editable=editable}}
-        {{else}}
-            {{editor item._source.system.description target="system.description" button=true owner=owner
-                     editable=editable}}
-        {{/if}}
+        <div class="flex-col">
+
+            {{#if item.system}}
+                {{editor item.system.description target="system.description" button=true owner=owner
+                         editable=editable}}
+            {{else}}
+                {{editor item._source.system.description target="system.description" button=true owner=owner
+                         editable=editable}}
+            {{/if}}
+            {{#each item.effects as |modification id|}}
+                {{#if modification.flags.swse.itemModifier}}
+                    <div class="panel collapsible-container">
+                        <h3 class="collapse-toggle">{{modification.label}}</h3>
+                        <div style="display: none" class="collapsible description">{{{modification.flags.swse.description}}}</div>
+                    </div>
+                {{/if}}
+            {{/each}}
+        </div>
     </div>
 </div>

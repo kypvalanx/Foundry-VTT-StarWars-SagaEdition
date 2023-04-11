@@ -996,3 +996,31 @@ export function viewableEntityFromEntityType(type) {
             return 'Force Secret'
     }
 }
+
+export function onCollapseToggle(event) {
+    let down = "fa-minus";
+    let up = "fa-plus";
+    event.stopPropagation();
+    let button = $(event.currentTarget);
+
+    let children = button.find("i.fas");
+    children.each((i, e) => {
+        if (e.classList.contains(down)) {
+            e.classList.remove(down);
+            e.classList.add(up);
+        } else if (e.classList.contains(up)) {
+            e.classList.remove(up);
+            e.classList.add(down);
+        }
+    })
+
+    let container = button.parents(".collapsible-container")
+    let collapsible = container.children(".collapsible")
+    collapsible.each((i, div) => {
+        if (div.style.display === "grid") {
+            div.style.display = "none"
+        } else {
+            div.style.display = "grid"
+        }
+    })
+}

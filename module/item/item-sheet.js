@@ -4,7 +4,7 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.js";
-import {toNumber} from "../util.js";
+import {onCollapseToggle, toNumber} from "../util.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -59,6 +59,7 @@ export class SWSEItemSheet extends ItemSheet {
 
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
 
+        html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
 
