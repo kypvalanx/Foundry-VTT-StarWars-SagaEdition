@@ -226,6 +226,7 @@ export class SWSEItemSheet extends ItemSheet {
         try {
             droppedItem = JSON.parse(event.dataTransfer.getData("text/plain"));
         } catch (err) {
+            console.error(`Parsing error: ${event.dataTransfer.getData("text/plain")}`)
             return false;
         }
         await this.handleDroppedItem(droppedItem);
@@ -247,7 +248,7 @@ export class SWSEItemSheet extends ItemSheet {
         }
 
         let isItemMod = Object.values(item.system.attributes).find(attr => attr.key === "itemMod");
-        if (isItemMod?.value === "true") {
+        if (!!isItemMod?.value || isItemMod?.value === "true") {
             let meetsPrereqs = meetsPrerequisites(this.object, item.system.prerequisite)
 
             if (meetsPrereqs.doesFail) {

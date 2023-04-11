@@ -103,7 +103,7 @@ function getAttributesFromDocument(data) {
         }
 
         function isItemModifier(effect) {
-            return effect.flags.swse.itemModifier;
+            return effect.flags.swse?.itemModifier;
         }
 
         for(let effect of document.effects || []){
