@@ -4,7 +4,8 @@
     <header class="sheet-header">
         <img class="profile-img" src="{{ data.icon }}" data-edit="icon" title="{{data.label}}"
              alt="{{data.label}}">
-        <h1 class="effect-title">{{ data.label }}</h1>
+<!--        <h1 class="effect-title">{{ data.label }}</h1>-->
+        <h1 class="effect-title" data-action="direct-field" data-type="string" data-name="label">{{ data.label }}</h1>
     </header>
 
     <!-- Effect Configuration Tabs -->

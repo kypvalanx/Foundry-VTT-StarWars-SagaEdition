@@ -111,10 +111,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Everything below here is only needed if the sheet is editable
         if (!this.options.editable) return;
-        // html.find(".numeric-override").each((i, li)=>{
-        //
-        //     new ContextMenu($(li), ".numeric-override", getHealthOptions(this.actor))
-        // })
+
         new ContextMenu(html, ".numeric-override", getHealthOptions(this.actor))
 
         // Add general text box (span) handler
@@ -187,12 +184,11 @@ export class SWSEActorSheet extends ActorSheet {
             button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
         })
 
+        //TODO merge these using data-action and data-type
         // Add Inventory Item
         html.find('.item-create').click(this._onItemCreate.bind(this));
-
         // Delete Inventory Item
         html.find('.item-delete').click(this._onItemDelete.bind(this));
-
         html.find('.item-duplicate').click(this._onDuplicate.bind(this))
 
         // Rollable abilities.
