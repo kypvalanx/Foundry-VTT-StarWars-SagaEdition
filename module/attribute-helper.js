@@ -13,9 +13,9 @@ import {meetsPrerequisites} from "./prerequisite.js";
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
     if (attribute) {
-        attribute.source = source;
-        attribute.sourceString = sourceString;
-        attribute.sourceDescription = sourceDescription;
+        attribute.source = attribute.source || source;
+        attribute.sourceString = attribute.sourceString || sourceString;
+        attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
     }
     return attribute
 }
@@ -102,15 +102,7 @@ function getAttributesFromDocument(data) {
 
         }
 
-        function isItemModifier(effect) {
-            return effect.flags.swse?.itemModifier;
-        }
 
-        for(let effect of document.effects || []){
-            if(isItemModifier(effect)){
-                allAttributes.push(... effect.changes)
-            }
-        }
 
         allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride))
 
@@ -119,6 +111,16 @@ function getAttributesFromDocument(data) {
         }
 
         if (document.effects) {
+            function isItemModifier(effect) {
+                return effect.flags.swse?.itemModifier;
+            }
+
+            for(let effect of document.effects?.values() || []){
+                if(isItemModifier(effect)){
+                    allAttributes.push(...extractEffectChange(effect.changes || [], effect))
+                }
+            }
+
             document.effects.filter(effect => effect.disabled === false)
                 .forEach(effect => allAttributes.push(...extractEffectChange(effect.changes || [], effect)))
         }

@@ -50,7 +50,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         return fp.browse();
     }
 
-    _onSpanTextInput(event, callback = null, type, inputValue) {
+    _onSpanTextInput(event, callback = null, type) {
         const el = event.currentTarget;
         const parent = el.parentElement;
 
@@ -66,6 +66,8 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         // Set value of new input element
         let prevValue = el.innerText;
         if (el.classList.contains("placeholder")) prevValue = "";
+
+        let editableValue = el.dataset.editableValue;
 
         let name = el.getAttribute("name");
         if (el.dataset.name) {
@@ -90,7 +92,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         //         maxValue = getProperty(this.actor.data, maxName);
         //     }
         // }
-        // newEl.value = prevValue;
+        newEl.value = editableValue || prevValue;
 
         // Toggle classes
         const forbiddenClasses = ["placeholder", "direct", "allow-relative"];

@@ -35,7 +35,8 @@ export class SWSEItem extends Item {
                 this.item.revokeOwnership(item)
             }
         })
-        system.displayName = SWSEItem.buildItemName(this);
+        this.baseName = this.name;
+        this.name = SWSEItem.buildItemName(this);
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
@@ -74,8 +75,10 @@ export class SWSEItem extends Item {
     }
 
     // get name() {
-    //     let itemData = this.data;
-    //     return SWSEItem.buildItemName(itemData);
+    //     if(!this.system.baseName){
+    //
+    //     }
+    //     return SWSEItem.buildItemName(this);
     // }
 
     static buildItemName(item) {
@@ -169,9 +172,13 @@ export class SWSEItem extends Item {
         return sizeIndex + sizeBonus;
     }
 
-    get baseName() {
-        return this.name ?? null;
-    }
+    // get baseName() {
+    //     return this.system.baseName ?? null;
+    // }
+
+    // get displayName(){
+    //     return SWSEItem.buildItemName(this);
+    // }
 
     get sizeMod() {
         return getInheritableAttribute({
@@ -572,7 +579,7 @@ export class SWSEItem extends Item {
     }
 
     get finalName(){
-        return this.system.displayName;
+        return this.name;
     }
 
     get isEquipable() {
