@@ -158,29 +158,6 @@ export class SWSEItemSheet extends ItemSheet {
         let prevValue = el.innerText;
         if (el.classList.contains("placeholder")) prevValue = "";
 
-        let name = el.getAttribute("name");
-        if (el.dataset.name) {
-            name = el.dataset.name;
-        }
-
-        // let item = el.dataset.item;
-        // let maxValue;
-        // if (name) {
-        //     newEl.setAttribute("name", name);
-        //
-        //     let source = this.actor.data;
-        //     if (item) {
-        //         source = this.actor.items.get(item);
-        //         name = "data." + name; //TODO make this less hacky
-        //     }
-        //     prevValue = getProperty(source, name);
-        //     if (prevValue && typeof prevValue !== "string") prevValue = prevValue.toString();
-        //
-        //     if (name.endsWith(".value")) {
-        //         const maxName = name.replace(/\.value$/, ".max");
-        //         maxValue = getProperty(this.actor.data, maxName);
-        //     }
-        // }
         newEl.value = editableValue || prevValue;
 
         // Toggle classes
@@ -196,9 +173,6 @@ export class SWSEItemSheet extends ItemSheet {
         if (callback) {
             newEl.addEventListener("change", (...args) => {
                 changed = true;
-                // if (allowRelative) {
-                //     newEl.value = adjustNumberByStringCommand(parseFloat(prevValue), newEl.value, maxValue);
-                // }
 
                 if (newEl.value === prevValue) {
                     this._render();
@@ -226,7 +200,6 @@ export class SWSEItemSheet extends ItemSheet {
         // Select text inside new element
         newEl.focus();
         newEl.select();
-        //newEl.click()
     }
 
     _adjustPropertyBySpan(event) {
