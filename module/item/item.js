@@ -32,13 +32,23 @@ export class SWSEItem extends Item {
         //itemData.finalName = this.name;
 
         this.system.changes = this.system.changes || []
-        // if(this.system.attributes){
-        //     for(let change of Object.values(this.system.attributes)){
-        //         if(change){
-        //
-        //         }
-        //     }
-        // }
+
+        if(!Array.isArray(this.system.changes)){
+            this.system.changes = Object.values(this.system.changes)
+        }
+        if(this.system.attributes && this.canUserModify(game.user, 'update')){
+            let update = {};
+            let changes = this.system.changes;
+            for(let change of Object.values(this.system.attributes)){
+                if(change){
+                    changes.push(change);
+                }
+            }
+            update['system.changes'] = changes;
+            update['system.attributes'] = null;
+            this.safeUpdate(update)
+            return;
+        }
         if(this.system.modes && this.canUserModify(game.user, 'update')){
             let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
             if(modes.length > 0){
@@ -75,7 +85,13 @@ export class SWSEItem extends Item {
                 if(pack.metadata.packageType === "system"){
                     return false;
                 }
+            } else {
+                let retrieved = game.items.get(this.id)
+                if(!retrieved){
+                    return false;
+                }
             }
+            //game.
         }
         return canModify;
     }
@@ -95,12 +111,10 @@ export class SWSEItem extends Item {
 
     get inheritedChanges() {
         return this.getCached("inheritedChanges", () => {
-            let inheritableAttributes = getInheritableAttribute({
+            return getInheritableAttribute({
                 entity: this,
                 attributeFilter: (attr) => attr.source !== this.id
-            })
-            console.log(inheritableAttributes)
-            return inheritableAttributes;
+            });
         })
     }
 

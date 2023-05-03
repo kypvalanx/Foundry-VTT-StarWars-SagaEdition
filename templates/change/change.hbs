@@ -1,10 +1,10 @@
 <li class="effect-change change flexcol collapsible-container" data-index="{{#if inherited}}inherited~{{/if}}{{index}}">
     <div style="width:100%" class="flexrow">
         <div class="key">
-            <input type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
+            <input class="direct" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
         </div>
         <div class="value">
-            <input type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
+            <input class="direct" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
             <a class="change-control collapse-toggle" data-action="more"><i class="fas fa-plus"></i></a>

@@ -144,6 +144,13 @@ export class SWSEItemSheet extends ItemSheet {
         html.find("[data-action=direct-field]").on("click", (event) => {
             this._onSpanTextInput(event, this._adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
+
+        html.find("input.direct").on("change", (event) => {
+            const target = event.target
+            const update = this.safeInsert(this.object, `system.${target.name}`, target.value)
+
+            this.object.safeUpdate(update);
+        })
     }
 
     _onSpanTextInput(event, callback = null, type) {
@@ -789,5 +796,29 @@ export class SWSEItemSheet extends ItemSheet {
                 break;
         }
         this.item.updateData(updateData);
+    }
+
+    safeInsert(object, s, value) {
+        let update = {};
+        let cursor = update;
+        let itemCursor = object;
+        let tokens = s.split("\.")
+        let i = 0;
+        let length = tokens.length;
+        for(let tok of tokens){
+            if(i === length - 1){
+                cursor[tok] = value;
+            } else if(Array.isArray(itemCursor[tok])){
+                cursor[tok] = itemCursor[tok];
+                cursor = cursor[tok];
+                itemCursor = itemCursor[tok]
+            }else {
+                cursor[tok] = cursor[tok] || {};
+                cursor = cursor[tok];
+                itemCursor = itemCursor[tok]
+            }
+            i++;
+        }
+        return update;
     }
 }
