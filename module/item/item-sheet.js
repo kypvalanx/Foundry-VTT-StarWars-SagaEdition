@@ -37,7 +37,13 @@ export class SWSEItemSheet extends ItemSheet {
 
     /** @override */
     getData(options) {
-        return super.getData(options);
+        let data = super.getData(options);
+
+        data.modes = Object.entries(CONST.ACTIVE_EFFECT_MODES).reduce((obj, e) => {
+            obj[e[1]] = game.i18n.localize("EFFECT.MODE_"+e[0]);
+            return obj;
+        }, {})
+        return data;
     }
 
     /* -------------------------------------------- */
@@ -357,7 +363,7 @@ export class SWSEItemSheet extends ItemSheet {
                 }).render(true);
                 return;
             }
-            this.item.addActiveEffectFromItem(item);
+            this.item.addItemModificationEffectFromItem(item);
            // await this.item.takeOwnership(ownedItem);
         }
     }

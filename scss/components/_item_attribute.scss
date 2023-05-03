@@ -10,12 +10,12 @@
 .attribute-block {
   background: rgba(0, 0, 0, 0.05);
 }
-.mode {
-
-  border-top: thin solid #7a7971;
-  border-bottom: thin solid #7a7971;
-  box-shadow: #7a7971;
-}
+//.mode {
+//
+//  border-top: thin solid #7a7971;
+//  border-bottom: thin solid #7a7971;
+//  box-shadow: #7a7971;
+//}
 
 .attribute-key { grid-area: 1 / 1 / 2 / 5; }
 .attribute-value { grid-area: 1 / 5 / 2 / 9; }

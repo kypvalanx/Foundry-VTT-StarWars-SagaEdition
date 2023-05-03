@@ -55,7 +55,7 @@ Hooks.once('init', async function () {
     //CONFIG.ActiveEffect.sheetClasses["Active Sheet Classes"] = SWSEActiveEffectConfig;
 
     DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
-    DocumentSheetConfig.unregisterSheet(ActiveEffect, "core", ActiveEffectConfig)
+    //DocumentSheetConfig.unregisterSheet(ActiveEffect, "core", ActiveEffectConfig)
 
     registerSystemSettings();
     registerHandlebarsHelpers();
@@ -117,6 +117,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/item/parts/attribute.hbs',
         'systems/swse/templates/item/parts/attributes.hbs',
         'systems/swse/templates/item/parts/mode.hbs',
+        'systems/swse/templates/change/change-list.hbs',
+        'systems/swse/templates/change/change.hbs',
         'systems/swse/templates/actor/vehicle/crew-quality.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-template.hbs',
         'systems/swse/templates/actor/parts/actor-type.hbs',
@@ -127,7 +129,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs',
         'systems/swse/templates/roll/roll.hbs',
         'systems/swse/templates/roll/roll-target.hbs',
-        'systems/swse/templates/roll/roll-tooltip.hbs']);
+        'systems/swse/templates/roll/roll-tooltip.hbs',
+        'systems/swse/templates/active-effect/active-effect-list.hbs']);
 
 });
 

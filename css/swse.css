@@ -148,17 +148,33 @@
 }
 
 .flex-col {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
   flex-direction: column;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
 }
 
 .flex-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
   -webkit-box-orient: horizontal;
   -webkit-box-direction: normal;
   -ms-flex-direction: row;
   flex-direction: row;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-box-pack: start;
+  -ms-flex-pack: start;
+  justify-content: flex-start;
 }
 
 .flex-row-reverse {
@@ -890,13 +906,6 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
-.swse .mode {
-  border-top: thin solid #7a7971;
-  border-bottom: thin solid #7a7971;
-  -webkit-box-shadow: #7a7971;
-  box-shadow: #7a7971;
-}
-
 .swse .attribute-key {
   grid-area: 1 / 1 / 2 / 5;
 }
@@ -1109,4 +1118,96 @@
 
 .swse .directory-container {
   height: 90%;
+}
+
+.swse .flex-table-header {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-light-tertiary);
+  font-weight: bold;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 3px 1px;
+}
+
+.swse .flex-table-header .key {
+  padding-left: 4px;
+}
+
+.swse .change-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.swse .change-list-header {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-light-tertiary);
+  font-weight: bold;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 3px 1px;
+}
+
+.swse .change-list-header .key {
+  padding-left: 4px;
+  -webkit-box-flex: 2;
+  -ms-flex: 2;
+  flex: 2;
+}
+
+.swse .change-list .key {
+  -webkit-box-flex: 2;
+  -ms-flex: 2;
+  flex: 2;
+}
+
+.swse .change-list-header .value {
+  -webkit-box-flex: 2;
+  -ms-flex: 2;
+  flex: 2;
+}
+
+.swse .change-list .value {
+  -webkit-box-flex: 2;
+  -ms-flex: 2;
+  flex: 2;
+}
+
+.swse .change-list .change {
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 3px 1px;
+  border-bottom: 1px solid var(--color-border-light-primary);
+}
+
+.swse .change-controls {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  -ms-flex-preferred-size: 48px;
+  flex-basis: 48px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.swse .change-control {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
 }

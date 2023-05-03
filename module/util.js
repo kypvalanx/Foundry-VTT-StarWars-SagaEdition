@@ -1014,8 +1014,8 @@ export function onCollapseToggle(event) {
         }
     })
 
-    let container = button.parents(".collapsible-container")
-    let collapsible = container.children(".collapsible")
+    let container = button.closest(".collapsible-container")
+    let collapsible = container.find(".collapsible")
     collapsible.each((i, div) => {
         if (div.style.display === "grid") {
             div.style.display = "none"

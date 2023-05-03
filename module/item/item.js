@@ -4,6 +4,11 @@ import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 import {SimpleCache} from "../common/simple-cache.js";
 
+function createChangeFromAttribute(attr) {
+    attr.mode = 2;
+    return attr;
+}
+
 // noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic Item with some very simple modifications.
@@ -26,12 +31,28 @@ export class SWSEItem extends Item {
         const system = this.system;
         //itemData.finalName = this.name;
 
+        this.system.changes = this.system.changes || []
+        // if(this.system.attributes){
+        //     for(let change of Object.values(this.system.attributes)){
+        //         if(change){
+        //
+        //         }
+        //     }
+        // }
+        if(this.system.modes && this.canUserModify(game.user, 'update')){
+            let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
+            if(modes.length > 0){
+                let activeEffects = modes.map(mode => this.createActiveEffectFromMode(mode))
+                this.safeUpdate({"system.modes": null}).then(()=>this.createEmbeddedDocuments("ActiveEffect", activeEffects))
+            }
+        }
         this.system.attributes = this.system.attributes || {}
+
         this.cache = new SimpleCache();
         this.system.items?.forEach(id => {
             let item = this.parent.items.get(id)
-            if(item){
-                this.addActiveEffectFromItem(item)
+            if (item) {
+                this.addItemModificationEffectFromItem(item)
                 this.item.revokeOwnership(item)
             }
         })
@@ -46,11 +67,41 @@ export class SWSEItem extends Item {
         if (this.type === "feat") this.prepareFeatData(system);
     }
 
+    canUserModify(user, action, data){
+        let canModify = super.canUserModify(user, action, data);
+        if(canModify){
+            if(this.pack){
+                let pack = game.packs.get(this.pack)
+                if(pack.metadata.packageType === "system"){
+                    return false;
+                }
+            }
+        }
+        return canModify;
+    }
 
-    async safeUpdate(data={}, context={}) {
-        if(this.canUserModify(game.user, 'update')){
+    get changes() {
+        const changes = []
+        changes.push(...this.system.changes);
+        changes.push(...Object.values(this.system.attributes).map(attr => createChangeFromAttribute(attr)))
+        return changes;
+    }
+
+    async safeUpdate(data = {}, context = {}) {
+        if (this.canUserModify(game.user, 'update')) {
             await this.update(data, context);
         }
+    }
+
+    get inheritedChanges() {
+        return this.getCached("inheritedChanges", () => {
+            let inheritableAttributes = getInheritableAttribute({
+                entity: this,
+                attributeFilter: (attr) => attr.source !== this.id
+            })
+            console.log(inheritableAttributes)
+            return inheritableAttributes;
+        })
     }
 
     get strippable() {
@@ -122,6 +173,9 @@ export class SWSEItem extends Item {
     }
 
     getCached(key, fn) {
+        if(!this.cache){
+            return;
+        }
         return this.cache.getCached(key, fn)
     }
 
@@ -131,7 +185,7 @@ export class SWSEItem extends Item {
         }
         let resolvedSizeIndex = this.getResolvedSizeIndexForSizeProvider(itemData);
 
-        if(resolvedSizeIndex) {
+        if (resolvedSizeIndex) {
             let resolvedSize = sizeArray[resolvedSizeIndex] || sizeArray[0];
             if (resolvedSize !== finalName) {
                 finalName = `${finalName} (adjusted to ${resolvedSize})`;
@@ -578,7 +632,7 @@ export class SWSEItem extends Item {
         return attributes.map(attribute => attribute.value).join(', ');
     }
 
-    get finalName(){
+    get finalName() {
         return this.name;
     }
 
@@ -741,7 +795,7 @@ export class SWSEItem extends Item {
     }
 
     setChoice(choice) {
-        if(!choice){
+        if (!choice) {
             return;
         }
         this.system.selectedChoices = this.system.selectedChoices || [];
@@ -789,7 +843,7 @@ export class SWSEItem extends Item {
 
 
     addItemAttributes(modifiers) {
-        if(!modifiers){
+        if (!modifiers) {
             return;
         }
 
@@ -811,7 +865,7 @@ export class SWSEItem extends Item {
     }
 
     addProvidedItems(modifiers) {
-        if(!modifiers){
+        if (!modifiers) {
             return;
         }
         this.system.providedItems = this.system.providedItems || [];
@@ -823,11 +877,11 @@ export class SWSEItem extends Item {
      * @param parent {SWSEItem}
      */
     setParent(parent, unlocked) {
-        if(!parent){
+        if (!parent) {
             return;
         }
 
-        if(Array.isArray(parent)){
+        if (Array.isArray(parent)) {
             parent = parent[0];
         }
         this.crawlPrerequisiteTree(this.system.prerequisite, (prerequisite) => {
@@ -920,7 +974,7 @@ export class SWSEItem extends Item {
     }
 
     setPrerequisite(prerequisite) {
-        if(!prerequisite){
+        if (!prerequisite) {
             return;
         }
 
@@ -1108,7 +1162,7 @@ export class SWSEItem extends Item {
         })
     }
 
-    async setAttribute(attribute, value, options={}) {
+    async setAttribute(attribute, value, options = {}) {
         let update = this.getUpdateObjectForUpdatingAttribute(attribute, value);
         return await this.safeUpdate(update, options);
     }
@@ -1141,7 +1195,7 @@ export class SWSEItem extends Item {
         return attributes;
     }
 
-    setAttributes(attributes, options={}) {
+    setAttributes(attributes, options = {}) {
         let update = this.buildUpdateObjectForAttributes(attributes);
         return this.safeUpdate(update, options);
     }
@@ -1179,7 +1233,7 @@ export class SWSEItem extends Item {
     getProvidedItems(filter) {
         let items = this.system.providedItems;
 
-        if(!!items && !Array.isArray(items)){
+        if (!!items && !Array.isArray(items)) {
             items = Object.values(items);
         }
 
@@ -1188,10 +1242,11 @@ export class SWSEItem extends Item {
         }
         return items || [];
     }
+
     getModifications(filter) {
         let items = this.system.modifications;
 
-        if(!!items && !Array.isArray(items)){
+        if (!!items && !Array.isArray(items)) {
             items = Object.values(items);
         }
 
@@ -1251,23 +1306,23 @@ export class SWSEItem extends Item {
         let modeTokens = mode.split(".");
 
         system.modes = {};
-        if(type === "dynamic"){
+        if (type === "dynamic") {
             if (modeTokens.length === 1) {
                 if (group) {
                     let found = false;
                     let entityKeys = Object.keys(modes);
-                        Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
-                            system.modes[parseInt(entity[0])] = {};
-                            const active = entity[1].name === mode;
-                            system.modes[parseInt(entity[0])].isActive = active;
-                            if(active){
-                                found = true;
-                            }
-                        })
+                    Object.entries(modes || []).filter(entity => entity[1]?.group === group).forEach((entity) => {
+                        system.modes[parseInt(entity[0])] = {};
+                        const active = entity[1].name === mode;
+                        system.modes[parseInt(entity[0])].isActive = active;
+                        if (active) {
+                            found = true;
+                        }
+                    })
 
-                    if(!found){
+                    if (!found) {
                         entityKeys.push(-1)
-                        let newEntityKey = Math.max(...entityKeys)+1;
+                        let newEntityKey = Math.max(...entityKeys) + 1;
                         system.modes[newEntityKey] = {};
                         system.modes[newEntityKey].isActive = true;
                         system.modes[newEntityKey].group = group;
@@ -1285,8 +1340,8 @@ export class SWSEItem extends Item {
                         entityKeys.push(parseInt(entity[0]));
                         found = true
                     })
-                    if(!found){
-                        let newEntityKey = Math.max(...entityKeys)+1;
+                    if (!found) {
+                        let newEntityKey = Math.max(...entityKeys) + 1;
                         system.modes[newEntityKey] = {};
                         system.modes[newEntityKey].isActive = true;
                         system.modes[newEntityKey].type = "dynamic"
@@ -1354,7 +1409,7 @@ export class SWSEItem extends Item {
         return classLevels.length;
     }
 
-    addActiveEffectFromItem(item) {
+    addItemModificationEffectFromItem(item) {
 
         //could this be generated from the parent item at load?  would that be slow?
         let activeEffect = {
@@ -1370,7 +1425,22 @@ export class SWSEItem extends Item {
                 }
             }
         }
-        this.createEmbeddedDocuments("ActiveEffect", [activeEffect])
+        if (this.canUserModify(game.user, 'update')) {
+            this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
+    createActiveEffectFromMode(mode) {
+        return {
+            label: mode.name,
+            changes: Object.values(mode.attributes),
+            group: mode.group,
+            disabled: true,
+            flags: {
+                swse: {
+                    itemMode: true
+                }
+            }
+        };
     }
 }
 
