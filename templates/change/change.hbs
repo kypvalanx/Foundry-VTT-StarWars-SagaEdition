@@ -8,7 +8,7 @@
         </div>
         <div class="change-controls">
             <a class="change-control collapse-toggle" data-action="more"><i class="fas fa-plus"></i></a>
-            <a class="change-control {{#if inherited}}disabled{{/if}}" {{#unless inherited}}data-action="delete"{{/unless}}><i class="fas fa-trash"></i></a>
+            <a class="change-control {{#if inherited}}disabled{{/if}}" {{#unless inherited}}data-action="change-control" data-action-type="delete"{{/unless}} data-index="{{#if inherited}}inherited~{{/if}}{{index}}"><i class="fas fa-trash"></i></a>
         </div>
     </div>
     <div style="display: none" class="collapsible">butts</div>

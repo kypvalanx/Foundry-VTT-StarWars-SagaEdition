@@ -151,6 +151,32 @@ export class SWSEItemSheet extends ItemSheet {
 
             this.object.safeUpdate(update);
         })
+        html.find('[data-action="change-control"]').click(this._onChangeControl.bind(this));
+    }
+
+
+    _onChangeControl(event) {
+        event.preventDefault();
+
+        let element = $(event.currentTarget);
+        let type = element.data("action-type")
+        if ('add' === type) {
+            let update = {};
+            update['system.changes'] = this.object.system.changes;
+            update['system.changes'].push({key:"", value:""});
+            this.object.safeUpdate(update);
+        }
+        if ('delete' === type) {
+            let index = element.data("index")
+            let update = {};
+            update['system.changes'] = [];
+            for (let i = 0; i < this.object.system.changes.length; i++) {
+                if(index !== i){
+                    update['system.changes'].push(this.object.system.changes[i]);
+                }
+            }
+            this.object.safeUpdate(update);
+        }
     }
 
     _onSpanTextInput(event, callback = null, type) {
