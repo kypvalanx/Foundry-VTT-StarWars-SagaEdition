@@ -139,7 +139,7 @@
 
         {{!-- Attributes Tab --}}
         <div class="tab attributes" data-group="primary" data-tab="effects">
-            {{> 'systems/swse/templates/item/parts/attributes.hbs' system=item.system item=item path='system.attributes'}}
+            {{> 'systems/swse/templates/change/change-list.hbs' changes=item.changes inheritedChanges=item.inheritedChanges}}
         </div>
 
         {{!-- Provided Tab --}}

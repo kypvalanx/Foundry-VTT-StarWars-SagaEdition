@@ -4,7 +4,7 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.js";
-import {onCollapseToggle, toNumber} from "../util.js";
+import {onCollapseToggle, onToggle, safeInsert, toNumber} from "../util.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -67,8 +67,9 @@ export class SWSEItemSheet extends ItemSheet {
 
         html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
         // Everything below here is only needed if the sheet is editable
-        if (!this.options.editable) return;
+        if (!this.isEditable) return;
 
+        html.find(".toggle").on("click", onToggle.bind(this))
         html.find('.tab').each((i, li) => {
             li.addEventListener("drop", (ev) => this._onDrop(ev));
         });
@@ -145,9 +146,16 @@ export class SWSEItemSheet extends ItemSheet {
             this._onSpanTextInput(event, this._adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
-        html.find("input.direct").on("change", (event) => {
+        html.find("input[type=text].direct").on("change", (event) => {
             const target = event.target
-            const update = this.safeInsert(this.object, `system.${target.name}`, target.value)
+            const update = safeInsert(this.object, `system.${target.name}`, target.value)
+
+            this.object.safeUpdate(update);
+        })
+
+        html.find("input[type=checkbox].direct").on("click", (event) => {
+            const target = event.target
+            const update = safeInsert(this.object, `system.${target.name}`, target.checked)
 
             this.object.safeUpdate(update);
         })
@@ -379,7 +387,7 @@ export class SWSEItemSheet extends ItemSheet {
             return;
         }
 
-        let isItemMod = Object.values(item.system.attributes).find(attr => attr.key === "itemMod");
+        let isItemMod = Object.values(item.system.attributes).find(attr => attr.key === "itemMod") || Object.values(item.system.changes).find(attr => attr.key === "itemMod");
         if (!!isItemMod?.value || isItemMod?.value === "true") {
             let meetsPrereqs = meetsPrerequisites(this.object, item.system.prerequisite)
 
@@ -824,27 +832,5 @@ export class SWSEItemSheet extends ItemSheet {
         this.item.updateData(updateData);
     }
 
-    safeInsert(object, s, value) {
-        let update = {};
-        let cursor = update;
-        let itemCursor = object;
-        let tokens = s.split("\.")
-        let i = 0;
-        let length = tokens.length;
-        for(let tok of tokens){
-            if(i === length - 1){
-                cursor[tok] = value;
-            } else if(Array.isArray(itemCursor[tok])){
-                cursor[tok] = itemCursor[tok];
-                cursor = cursor[tok];
-                itemCursor = itemCursor[tok]
-            }else {
-                cursor[tok] = cursor[tok] || {};
-                cursor = cursor[tok];
-                itemCursor = itemCursor[tok]
-            }
-            i++;
-        }
-        return update;
-    }
+
 }

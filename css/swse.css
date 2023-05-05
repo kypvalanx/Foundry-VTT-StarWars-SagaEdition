@@ -357,8 +357,16 @@
   padding: 3px;
 }
 
-.swse .direct {
+.swse input[type=text].direct {
   cursor: text;
+}
+
+.swse input[type=radio].direct {
+  cursor: pointer;
+}
+
+.swse input[type=checkbox].direct {
+  cursor: pointer;
 }
 
 .swse .button {

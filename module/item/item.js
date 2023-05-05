@@ -1424,11 +1424,13 @@ export class SWSEItem extends Item {
     }
 
     addItemModificationEffectFromItem(item) {
-
+        let changes = [];
+        changes.push(...Object.values(item.system.attributes))
+        changes.push(...item.system.changes)
         //could this be generated from the parent item at load?  would that be slow?
         let activeEffect = {
             label: item.name,
-            changes: Object.values(item.system.attributes),
+            changes: changes,
             icon: item.img,
             origin: item.uuid,
             disabled: true, //this active effect is marked as disabled so that it doesn't modify anything unintentionally

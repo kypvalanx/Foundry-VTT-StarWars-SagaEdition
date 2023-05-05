@@ -1,3 +1,5 @@
+import {onCollapseToggle, onToggle, safeInsert} from "../util.js";
+
 /**
  * Extend the base ActiveEffect entity
  * @extends {ActiveEffectConfig}
@@ -10,6 +12,12 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         }
         return super.template
     }
+    /** @override */
+    static get defaultOptions() {
+        return mergeObject(super.defaultOptions, {
+            classes: ["swse", "sheet", "effect"]
+        });
+    }
     getData(options={}) {
         let data = super.getData(options);
         data.editable = this.isEditable;
@@ -18,10 +26,14 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
     }
 
     activateListeners(html) {
-        this.options.submitOnClose = true;
+        //this.options.submitOnClose = true;
         super.activateListeners(html);
 
-        if ( this.isEditable) html.find("img[data-edit]").click(ev => this._onEditImage(ev));
+        html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
+
+        // Everything below here is only needed if the sheet is editable
+        if (!this.isEditable) return;
+        html.find("img[data-edit]").click(ev => this._onEditImage(ev));
         html.find(".editor-content[data-edit]").each((i, div) => this._activateEditor(div));
 
         // html.find("span.text-box.direct").on("click", (event) => {
@@ -30,7 +42,44 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         html.find("[data-action=direct-field]").on("click", (event) => {
             this._onSpanTextInput(event, this._adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
+
+        html.find("input.direct").on("change", (event) => {
+            const target = event.target
+            const update = safeInsert(this.object, target.name, target.value)
+
+            this.object.safeUpdate(update);
+        })
+        html.find('[data-action="change-control"]').click(this._onChangeControl.bind(this));
+
+        html.find(".toggle").on("click", onToggle.bind(this))
     }
+
+
+
+    _onChangeControl(event) {
+        event.preventDefault();
+
+        let element = $(event.currentTarget);
+        let type = element.data("action-type")
+        if ('add' === type) {
+            let update = {};
+            update['changes'] = this.object.changes;
+            update['changes'].push({key:"", value:""});
+            this.object.safeUpdate(update);
+        }
+        if ('delete' === type) {
+            let index = element.data("index")
+            let update = {};
+            update['changes'] = [];
+            for (let i = 0; i < this.object.changes.length; i++) {
+                if(index !== i){
+                    update['changes'].push(this.object.changes[i]);
+                }
+            }
+            this.object.safeUpdate(update);
+        }
+    }
+
 
     _onEditImage(event) {
         const attr = event.currentTarget.dataset.edit;

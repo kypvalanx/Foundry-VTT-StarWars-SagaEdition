@@ -5,6 +5,7 @@ import {dieSize, dieType} from "./constants.js";
 import {SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
+import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -20,9 +21,9 @@ export function resolveValueArray(values, actor, options) {
         if (!value) {
             continue;
         }
-        if(`${value}`.startsWith("\*")){
+        if (`${value}`.startsWith("\*")) {
             multiplier *= resolveExpression(value.substring(1, value.length), actor, options)
-        } else if(`${value}`.startsWith("/")){
+        } else if (`${value}`.startsWith("/")) {
             multiplier /= resolveExpression(value.substring(1, value.length), actor, options)
         } else {
             total += resolveExpression(value, actor, options);
@@ -51,7 +52,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     let result;
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
-        if(!!result){
+        if (!!result) {
             return result;
         }
     }
@@ -62,30 +63,30 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
  * @param expression
  * @param actor {SWSEActor}
  */
-function resolveParensAndFunctions(expression, actor){
+function resolveParensAndFunctions(expression, actor) {
     let depth = 0;
     let deepest = 0;
     let deepestStart = 0;
     let deepestEnd = 0;
-    for(let index = 0; index < expression.length; index++){
-        if(expression.charAt(index) === "("){
+    for (let index = 0; index < expression.length; index++) {
+        if (expression.charAt(index) === "(") {
             depth++;
-            if(depth > deepest){
+            if (depth > deepest) {
                 deepest = depth;
                 deepestStart = index;
             }
-        } else if(expression.charAt(index) === ")"){
-            if(depth === deepest){
+        } else if (expression.charAt(index) === ")") {
+            if (depth === deepest) {
                 deepestEnd = index;
             }
             depth--;
         }
     }
     let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
-    if(!!result){
+    if (!!result) {
         return result;
     }
-    if(deepestStart > deepestEnd){
+    if (deepestStart > deepestEnd) {
         return;
     }
     return resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1), actor);
@@ -105,7 +106,7 @@ function resolveComparativeExpression(expression, actor) {
     }
 
     for (let i = 1; i < toks.length; i++) {
-        if(toks[i] === ">" || toks[i] === "<" || toks[i] === "="){
+        if (toks[i] === ">" || toks[i] === "<" || toks[i] === "=") {
             const first = resolveExpression(toks[i - 1], actor);
             const second = resolveExpression(toks[i + 1], actor);
             if (toks[i] === ">") {
@@ -190,40 +191,40 @@ function resolveAdditiveExpression(expression, actor) {
  * @param actor {SWSEActor}
  */
 export function resolveExpression(expression, actor) {
-    if(!expression){
+    if (!expression) {
         return 0;
     }
     if (typeof expression === 'object') {
         return resolveExpression(expression.value, actor);
     }
-    if(typeof expression === "number"){
+    if (typeof expression === "number") {
         return expression;
     }
-    if(expression.includes("(")){
+    if (expression.includes("(")) {
         return resolveParensAndFunctions(expression, actor);
     }
 
     //exponents would be evaluated here if we wanted to do that.
 
-    if(expression.includes("*") || expression.includes("/")){
+    if (expression.includes("*") || expression.includes("/")) {
         return resolveMultiplicativeExpression(expression, actor);
     }
 
-    if(expression.includes("+") || expression.substring(1).includes("-")){
+    if (expression.includes("+") || expression.substring(1).includes("-")) {
         return resolveAdditiveExpression(expression, actor);
     }
 
-    if(expression.includes(">") || expression.includes("<") || expression.includes("=")) {
+    if (expression.includes(">") || expression.includes("<") || expression.includes("=")) {
         return resolveComparativeExpression(expression, actor);
     }
 
-    if(typeof expression === "string"){
-        if(!!actor && expression.startsWith("@")){
+    if (typeof expression === "string") {
+        if (!!actor && expression.startsWith("@")) {
             let variable = getVariableFromActorData(actor, expression);
             if (variable !== undefined) {
                 return resolveExpression(variable, actor);
             }
-        }else {
+        } else {
             return toNumber(expression);
         }
     }
@@ -250,10 +251,9 @@ export function getVariableFromActorData(swseActor, variableName) {
  */
 export function filterItemsByType(items, type) {
     let types = [];
-    if(Array.isArray(type)){
+    if (Array.isArray(type)) {
         types = type;
-    }
-    else {
+    } else {
         if (arguments.length > 1) {
             for (let i = 1; i < arguments.length; i++) {
                 types[i - 1] = arguments[i];
@@ -262,12 +262,13 @@ export function filterItemsByType(items, type) {
     }
     let filtered = [];
     for (let item of items) {
-        if (types.includes(item.type)){// || types.includes(item.data.type)) {
+        if (types.includes(item.type)) {// || types.includes(item.data.type)) {
             filtered.push(item);
         }
     }
     return filtered;
 }
+
 /**
  *
  * @param type
@@ -293,10 +294,10 @@ export function excludeItemsByType(items, type) {
 
 export function getBonusString(atkBonus) {
     const stringify = `${atkBonus}`;
-    if(stringify === "0" || stringify === ""){
+    if (stringify === "0" || stringify === "") {
         return "";
     }
-    if(stringify.startsWith("-") || stringify.startsWith("+")){
+    if (stringify.startsWith("-") || stringify.startsWith("+")) {
         return stringify;
     }
     return `+${atkBonus}`
@@ -354,14 +355,14 @@ export function toShortAttribute(attributeName) {
  * @param bonus {number}
  * @returns {string}
  */
-export function increaseDieType(die, bonus= 0) {
+export function increaseDieType(die, bonus = 0) {
     let size;
     let quantity;
     die = `${die}`;
-    if(die === "1"){
+    if (die === "1") {
         quantity = "1"
         size = "1"
-    } else if(die.includes("d")){
+    } else if (die.includes("d")) {
         let toks = die.split("d");
         quantity = toks[0].trim();
         size = toks[1].trim();
@@ -371,7 +372,7 @@ export function increaseDieType(die, bonus= 0) {
         return "0";
     }
     size = dieType[index + bonus];
-    if(size === "1"){
+    if (size === "1") {
         return quantity;
     }
     return `${quantity}d${size}` || "0";
@@ -391,7 +392,7 @@ export function increaseDieSize(die, bonus) {
     return dieSize[index + bonus] || "0";
 }
 
-export function toBoolean(value){
+export function toBoolean(value) {
     if (typeof value === "undefined") {
         return false;
     }
@@ -438,21 +439,21 @@ export function toNumber(value) {
     return number;
 }
 
-export function resolveAttackRange(effectiveRange, distance, accurate, inaccurate){
+export function resolveAttackRange(effectiveRange, distance, accurate, inaccurate) {
     let range = SWSE.Combat.range[effectiveRange];
-    if(!range){
+    if (!range) {
         return 0;
     }
 
     //TODO add homebrew option for a range multiplier here
 
-    let resolvedRange = Object.entries(range).filter(entry => entry[1].low <=distance && entry[1].high >=distance)[0][0];
+    let resolvedRange = Object.entries(range).filter(entry => entry[1].low <= distance && entry[1].high >= distance)[0][0];
 
-    if(resolvedRange === 'short' && accurate){
+    if (resolvedRange === 'short' && accurate) {
         return "point-blank";
     }
 
-    if(resolvedRange === 'long' && inaccurate){
+    if (resolvedRange === 'long' && inaccurate) {
         return "out of range";
     }
 
@@ -498,16 +499,16 @@ export function handleAttackSelect(selects) {
 
         if (select.value) {
             selectedValuesBySelect[select.id] = select.value;
-            if(select.value !== "--") {
+            if (select.value !== "--") {
                 let selected = JSON.parse(unescape(select.value))
 
-                if(selected.options.standardAttack){
+                if (selected.options.standardAttack) {
                     hasStandard = true;
                 }
-                if(selected.options.doubleAttack){
+                if (selected.options.doubleAttack) {
                     hasDoubleAttack = true;
                 }
-                if(selected.options.tripleAttack){
+                if (selected.options.tripleAttack) {
                     hasTripleAttack = true;
                 }
             }
@@ -525,17 +526,17 @@ export function handleAttackSelect(selects) {
             }
         }
 
-        let selectValue = select.value !== "--"? JSON.parse(unescape(select.value)): {options:{}};
+        let selectValue = select.value !== "--" ? JSON.parse(unescape(select.value)) : {options: {}};
         for (let o of select.options) {
-            if(o.value !== "--" && !o.selected){
+            if (o.value !== "--" && !o.selected) {
                 let selected = JSON.parse(unescape(o.value));
 
                 //disable this doubleattack option if no standard attacks have been selected or we already have a double attack and it's not the current selection of this select box
-                if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))){
+                if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))) {
                     o.disabled = true
                 }
                 //disable this triple attack option if no double attacks have been selected or we already have a triple attack and it's not the current selection of this select box or if this select is currently selecting a double attack.
-                if (selected.options.tripleAttack && (!hasDoubleAttack || (hasTripleAttack && !selectValue.options.tripleAttack) || selectValue.options.doubleAttack)){
+                if (selected.options.tripleAttack && (!hasDoubleAttack || (hasTripleAttack && !selectValue.options.tripleAttack) || selectValue.options.doubleAttack)) {
                     o.disabled = true
                 }
             }
@@ -575,7 +576,7 @@ export function getAttackRange(range, isAccurate, isInaccurate, actor) {
 
     let sources = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (actor._id || actor.id)) || []; //get selected tokens of this actor
     if (sources.length === 0) {
-        sources = canvas.tokens.objects?.children.filter(token => token.document.actorId ===  (actor?._id || actor?.id)) || [];
+        sources = canvas.tokens.objects?.children.filter(token => token.document.actorId === (actor?._id || actor?.id)) || [];
     }
 
     let attackRange;
@@ -663,23 +664,23 @@ export function reduceArray(reduce, values, actor) {
     if (!reduce) {
         return values;
     }
-    if(!Array.isArray(values)){
+    if (!Array.isArray(values)) {
         values = [values];
     }
-    if(Array.isArray(reduce) && !reduce.includes("MAPPED")){
-        for(let r of reduce){
+    if (Array.isArray(reduce) && !reduce.includes("MAPPED")) {
+        for (let r of reduce) {
             values = reduceArray(r, values, actor);
         }
         return values;
     }
 
-    if(typeof reduce === "string"){
+    if (typeof reduce === "string") {
         reduce = reduce.toUpperCase();
     }
 
-    if(Array.isArray(reduce) && reduce.includes("MAPPED")){
+    if (Array.isArray(reduce) && reduce.includes("MAPPED")) {
         let reduction = {};
-        for(let r of reduce){
+        for (let r of reduce) {
             reduction[r] = reduceArray(r, values, actor);
         }
         return reduction;
@@ -687,7 +688,7 @@ export function reduceArray(reduce, values, actor) {
 
     switch (reduce) {
         case "SUM":
-            return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => a===0 && isNaN(b)? b : a + b, 0);
+            return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => a === 0 && isNaN(b) ? b : a + b, 0);
         case "AND":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a && b, true);
         case "OR":
@@ -695,7 +696,7 @@ export function reduceArray(reduce, values, actor) {
         case "MAX":
             return values.map(attr => attr.value).reduce((a, b) => {
                 let sub = {}
-                if(typeof a === 'string' && a.includes("d")){
+                if (typeof a === 'string' && a.includes("d")) {
                     let toks = a.split("d")
                     let key = toNumber(toks[0]) * toNumber(toks[1]);
                     sub[key] = a;
@@ -705,7 +706,7 @@ export function reduceArray(reduce, values, actor) {
                     sub[key] = a;
                     a = key;
                 }
-                if(typeof b === 'string' && b.includes("d")){
+                if (typeof b === 'string' && b.includes("d")) {
                     let toks = b.split("d")
                     let key = toNumber(toks[0]) * toNumber(toks[1]);
                     sub[key] = b;
@@ -722,7 +723,7 @@ export function reduceArray(reduce, values, actor) {
             return values.map(attr => toNumber(attr.value)).reduce((a, b) => a === undefined ? b : Math.min(a, b), undefined);
         case "FIRST":
             let map = values.map(attr => attr.value);
-            if(map.length > 0) {
+            if (map.length > 0) {
                 return map[0];
             }
             return undefined;
@@ -751,7 +752,7 @@ export function reduceArray(reduce, values, actor) {
  * @returns {CompendiumCollection}
  */
 export function getCompendium(item) {
-    if(item.pack){
+    if (item.pack) {
         return game.packs.find(pack => pack.collection.startsWith(item.pack));
     }
     switch (item.type.toLowerCase()) {
@@ -802,7 +803,7 @@ export async function getIndexAndPack(indices, item) {
     let compendiumReference = item.pack || item.type;
     let index = indices[compendiumReference];
     let pack = getCompendium(item);
-    if(!pack){
+    if (!pack) {
         console.error(`${compendiumReference} compendium not defined`)
         return {}
     }
@@ -813,15 +814,15 @@ export async function getIndexAndPack(indices, item) {
     return {index, pack};
 }
 
-export function getEntityFromCompendiums(type, id){
-    let packs = game.packs.filter(pack => pack.metadata.type===type);
+export function getEntityFromCompendiums(type, id) {
+    let packs = game.packs.filter(pack => pack.metadata.type === type);
 
-    for(let pack of packs){
+    for (let pack of packs) {
         //let index = await pack.getIndex();
         let entity = pack.get(id)///.find(thing => thing._id === id);
 
         //let entity = await pack.getDocument(id)
-        if(entity){
+        if (entity) {
             return entity;
         }
     }
@@ -831,9 +832,9 @@ export function getEntityFromCompendiums(type, id){
  *
  * @param args [[string]]
  */
-export function innerJoin(...args){
+export function innerJoin(...args) {
     let response = args[0];
-    for(let i = 1; i < args.length; i++){
+    for (let i = 1; i < args.length; i++) {
         response = response.filter(r => args[i].includes(r))
     }
     return response;
@@ -843,9 +844,9 @@ export function innerJoin(...args){
  *
  * @param args [[string]]
  */
-export function fullJoin(...args){
+export function fullJoin(...args) {
     let response = args[0];
-    for(let i = 1; i < args.length; i++){
+    for (let i = 1; i < args.length; i++) {
         response = response.concat(args[i]);
     }
     return response;
@@ -862,15 +863,15 @@ export function equippedItems(entity) {
     }
     return [];
 }
-export function getItemParentId(id){
+
+export function getItemParentId(id) {
     let a = []//game.data.actors || []
     let b = game.actors?.values() || []
 
     let actors = [...a, ...b];
     let actor = actors.find(actor => actor.items.find(item => item._id === id))
-    return !actor? undefined : actor._id// || actor.data._id;
+    return !actor ? undefined : actor._id// || actor.data._id;
 }
-
 
 
 export function inheritableItems(entity) {
@@ -893,7 +894,10 @@ export function inheritableItems(entity) {
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleInheritableItems) {
-                if (!meetsPrerequisites(entity, possible.system.prerequisite, {embeddedItemOverride: actualInheritable, existingTraitPrerequisite: possible.type === "trait"}).doesFail) {
+                if (!meetsPrerequisites(entity, possible.system.prerequisite, {
+                    embeddedItemOverride: actualInheritable,
+                    existingTraitPrerequisite: possible.type === "trait"
+                }).doesFail) {
                     actualInheritable.push(possible);
                     shouldRetry = true;
                 }
@@ -912,14 +916,14 @@ test()
 //test()
 
 function assertEquals(expected, actual) {
-    if(expected === actual){
+    if (expected === actual) {
         console.log("passed")
     } else {
         console.warn(`expected ${expected}, but got ${actual}`)
     }
 }
 
-function test(){
+function test() {
     console.log("running util tests...");
 
     assertEquals(5, resolveWeight("5", 1, 5))
@@ -935,7 +939,7 @@ function test(){
     //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null, null))
     assertEquals(12, resolveValueArray(["2", 4, "*2"], null))
     assertEquals(2, resolveValueArray(["+2"], null))
-    assertEquals( 24, resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
+    assertEquals(24, resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
 
     assertEquals(2, resolveExpression("+2", null))
     assertEquals(-5, resolveExpression("-5", null))
@@ -958,14 +962,15 @@ function test(){
     // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
     // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
 }
-export function resolveWeight(weight, quantity = 1, costFactor = 1, actor){
+
+export function resolveWeight(weight, quantity = 1, costFactor = 1, actor) {
     weight = `${weight}`.toLowerCase();
     let unitMultiplier = 1;
 
-    if(weight.endsWith(" ton")){
+    if (weight.endsWith(" ton")) {
         unitMultiplier = 1000;
     }
-    if(weight.includes("cost factor")){
+    if (weight.includes("cost factor")) {
         weight = weight.replace("cost factor", `${costFactor}`)
         weight = weight.replace(" x ", " * ")
         weight = weight.replace(/ kgs| kg| kilogram| ton/, "")
@@ -1023,4 +1028,54 @@ export function onCollapseToggle(event) {
             div.style.display = "grid"
         }
     })
+}
+
+export function safeInsert(object, s, value) {
+    let update = {};
+    let cursor = update;
+    let itemCursor = object;
+    let tokens = s.split("\.")
+    let i = 0;
+    let length = tokens.length;
+    for (let tok of tokens) {
+        if (i === length - 1) {
+            cursor[tok] = value;
+        } else if (Array.isArray(itemCursor[tok])) {
+            cursor[tok] = itemCursor[tok];
+            cursor = cursor[tok];
+            itemCursor = itemCursor[tok]
+        } else {
+            cursor[tok] = cursor[tok] || {};
+            cursor = cursor[tok];
+            itemCursor = itemCursor[tok]
+        }
+        i++;
+    }
+    return update;
+}
+
+export function onToggle(event) {
+    event.stopPropagation();
+    const target = $(event.currentTarget)
+    let toggleId = target.data("toggleId")
+    let data = {};
+
+    let toggles = getSystem(this).toggles || {};
+    data[`${getSystemPath(this)}.toggles.${toggleId}`] = !(toggles[toggleId] || false)
+
+    this.object.safeUpdate(data);
+}
+
+function getSystem(o) {
+    if (o instanceof SWSEActiveEffectConfig) {
+        return o.object.flags.swse;
+    }
+    return o.object.system
+}
+
+function getSystemPath(o) {
+    if (o instanceof SWSEActiveEffectConfig) {
+        return "flags.swse";
+    }
+    return "system";
 }

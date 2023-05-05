@@ -55,8 +55,14 @@ table.fixed{
 .padding-3{
   padding: 3px;
 }
-.direct{
+input[type=text].direct{
   cursor: text;
+}
+input[type=radio].direct{
+  cursor: pointer;
+}
+input[type=checkbox].direct{
+  cursor: pointer;
 }
 .button{
   cursor: pointer;

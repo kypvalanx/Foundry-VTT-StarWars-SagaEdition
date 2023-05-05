@@ -1,4 +1,4 @@
-import {filterItemsByType, onCollapseToggle, unique} from "../util.js";
+import {filterItemsByType, onCollapseToggle, onToggle, unique} from "../util.js";
 import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
@@ -94,24 +94,14 @@ export class SWSEActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-
-        html.find(".toggle").on("click", event => {
-            event.stopPropagation();
-            let toggleId = event.currentTarget.dataset.toggleId
-            let data = {};
-
-            let toggles = this.actor.system.toggles || {};
-            data[`system.toggles.${toggleId}`] = !(toggles[toggleId] || false)
-
-            this.actor.safeUpdate(data);
-        })
-
-
         html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
 
         // Everything below here is only needed if the sheet is editable
-        if (!this.options.editable) return;
+        if (!this.isEditable) return;
 
+
+
+        html.find(".toggle").on("click", onToggle.bind(this))
         new ContextMenu(html, ".numeric-override", getHealthOptions(this.actor))
 
         // Add general text box (span) handler

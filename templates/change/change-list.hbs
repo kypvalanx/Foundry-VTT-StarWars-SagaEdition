@@ -7,10 +7,11 @@
     </div>
 </header>
 <ol class="change-list">
+    {{log changes}}
     {{#each changes as |change i|}}
-        {{> 'systems/swse/templates/change/change.hbs' change=change index=i}}
+        {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i}}
     {{/each}}
     {{#each inheritedChanges as |change i|}}
-        {{> 'systems/swse/templates/change/change.hbs' change=change index=i inherited=true}}
+        {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true}}
     {{/each}}
 </ol>
