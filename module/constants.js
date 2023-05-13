@@ -158,3 +158,10 @@ export const GRAVITY_CARRY_CAPACITY_MODIFIER = {
     "Low": 2,
     "Zero": 10,
 }
+
+export const ITEM_ONLY_ATTRIBUTES = [
+    "damage",
+    "damageType",
+    "takeMultipleTimes",
+    "isThrowable"
+]

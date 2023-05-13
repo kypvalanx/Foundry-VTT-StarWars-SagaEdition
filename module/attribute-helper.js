@@ -1,6 +1,7 @@
 import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./util.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
+import {ITEM_ONLY_ATTRIBUTES} from "./constants.js";
 
 /**
  * appends source meta to a given attribute
@@ -86,75 +87,55 @@ export function getResolvedSize(entity, options = {}) {
 }
 
 
-function getAttributesFromDocument(data) {
-    let document = data.entity;
+function getLocalChangesOnDocument(document) {
+    const values = document.system?.changes || document._source?.system?.changes || [];
+    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+}
 
+function getChangesFromActiveEffects(document) {
+    let attributes = []
+    if (document.effects) {
+        function isItemModifier(effect) {
+            return effect.flags.swse?.itemModifier;
+        }
+
+        for (let effect of document.effects?.values() || []) {
+            if (isItemModifier(effect) || effect.disabled === false) {
+                attributes.push(...extractEffectChange(effect.changes || [], effect))
+            }
+        }
+    }
+    return attributes;
+}
+
+
+
+function getChangesFromDocument(data) {
+    let document = data.entity;
     let fn = () => {
         let allAttributes = [];
-        if (document.type !== 'class') {
-            allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
-        } else {
-            let classLevel = data.duplicates || 0;
-            if (classLevel < 2) {
-                allAttributes.push(...Object.values(document.system?.attributes || document._source?.system?.attributes || {}))
-            }
-            allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
-
-        }
-
-
-
-        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride))
-
-        if (document.system?.modes) {
-            allAttributes.push(...extractModeAttributes(document, Object.values(document.system.modes).filter(mode => mode && mode.isActive) || []));
-        }
-
-        if (document.effects) {
-            function isItemModifier(effect) {
-                return effect.flags.swse?.itemModifier;
-            }
-
-            for(let effect of document.effects?.values() || []){
-                if(isItemModifier(effect)){
-                    allAttributes.push(...extractEffectChange(effect.changes || [], effect))
+        if(!data.skipLocal){
+            if (document.type !== 'class') {
+                allAttributes.push(...getLocalChangesOnDocument(document))
+            } else {
+                let classLevel = data.duplicates || 0;
+                if (classLevel < 2) {
+                    allAttributes.push(...getLocalChangesOnDocument(document))
                 }
+                allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
             }
-
-            document.effects.filter(effect => effect.disabled === false)
-                .forEach(effect => allAttributes.push(...extractEffectChange(effect.changes || [], effect)))
         }
 
-        let attributeMap = new Map();
-        for (const attribute of allAttributes) {
-            if (!attribute || !attribute.key) {
-                continue;
-            }
-            if (!attributeMap.has(attribute.key)) {
-                attributeMap.set(attribute.key, []);
-            }
-            attributeMap.get(attribute.key).push(attribute);
-        }
-        return attributeMap;
+        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
+        allAttributes.push(...getChangesFromActiveEffects(document));
+        return allAttributes;
     };
-    let unfilteredAttributes = fn()//document.getCached ? document.getCached({fn: "getAttributesFromDocument", duplicates: data.duplicates, itemFilter:data.itemFilter}, fn) : fn();
-
-
-    let values = [];
-    if (data.attributeKey && Array.isArray(data.attributeKey)) {
-        for (let key of data.attributeKey) {
-            values.push(...(unfilteredAttributes.get(key) || []))
-        }
-        //values.push(...unfilteredAttributes.filter(attr => attr && attr.key === data.attributeKey));
-    } else if (data.attributeKey) {
-        values.push(...(unfilteredAttributes.get(data.attributeKey) || []));
-    } else {
-        for (let value of unfilteredAttributes.values()) {
-            values.push(...(value || []))
-        }
-        //values.push(...unfilteredAttributes.filter(attr => attr && attr.key));
-    }
-    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+    return document.getCached ? document.getCached({
+        fn: "getChangesFromDocument",
+        duplicates: data.duplicates,
+        predicate: data.predicate,
+        embeddedItemOverride: data.embeddedItemOverride
+    }, fn) : fn();
 }
 
 function functionString(fn) {
@@ -163,11 +144,11 @@ function functionString(fn) {
     }
 }
 
-function getInheritableValues(data) {
+function getChangesFromDocuments(data) {
     if (Array.isArray(data.entity)) {
         let values = [];
         for (let entity of data.entity) {
-            values.push(...getInheritableValues({
+            values.push(...getChangesFromDocument({
                 entity: entity,
                 attributeKey: data.attributeKey,
                 itemFilter: data.itemFilter,
@@ -177,8 +158,26 @@ function getInheritableValues(data) {
         }
         return values;
     }
-    return getAttributesFromDocument(data);
+    return getChangesFromDocument(data);
 }
+
+
+function mapAttributesByType(allAttributes) {
+    let attributeMap = new Map();
+    for (const attribute of allAttributes) {
+        if (!attribute || !attribute.key) {
+            continue;
+        }
+        if (!attributeMap.has(attribute.key)) {
+            attributeMap.set(attribute.key, []);
+        }
+        attributeMap.get(attribute.key).push(attribute);
+    }
+    return attributeMap;
+}
+
+
+
 
 /**
  *
@@ -196,8 +195,25 @@ export function getInheritableAttribute(data = {}) {
     if (!data.entity) {
         return [];
     }
-    let values = getInheritableValues(data);
+    let values = getChangesFromDocuments(data);
 
+    if(data.attributeKey){
+        let attributeKeyFilter;
+        if(Array.isArray(data.attributeKey)){
+            attributeKeyFilter = (attribute) => data.attributeKey.includes(attribute.key);
+        } else {
+            attributeKeyFilter = (attribute) => data.attributeKey === attribute.key
+        }
+        values = values.filter(attributeKeyFilter)
+    }
+
+    if (data.attributeFilter) {
+        if(data.attributeFilter === "ACTOR_INHERITABLE"){
+            values = values.filter((attribute) => !ITEM_ONLY_ATTRIBUTES.includes(attribute.key));
+        } else {
+            values = values.filter(data.attributeFilter);
+        }
+    }
 
     if (!data.recursive && data.parent) {
         values = values.filter(attr => {
@@ -216,14 +232,9 @@ export function getInheritableAttribute(data = {}) {
     }
 
     if (data.entity.type === "character" || data.entity.type === "npc") {
-        values = values.filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail);
+        values = values
+            .filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail)
     }
-
-    if (data.attributeFilter) {
-
-        values = values.filter(data.attributeFilter);
-    }
-
 
     let overrides = values.filter(attr => attr && attr.override)
 

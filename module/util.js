@@ -6,6 +6,7 @@ import {SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.js";
+import {SWSEActiveEffect} from "./active-effect/active-effect.js";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -31,7 +32,6 @@ export function resolveValueArray(values, actor, options) {
     }
     return total * multiplier;
 }
-
 
 
 function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
@@ -852,16 +852,22 @@ export function fullJoin(...args) {
     return response;
 }
 
+
+/**
+ * accepts an actor, item, or effect.  returns embeded entities that may have changes.
+ * @param entity
+ * @returns {*|*[]}
+ */
 export function equippedItems(entity) {
-    if (entity.items) {
-        if (entity instanceof SWSEActor) {
-            let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
-            return entity.items.filter(item => equippedIds.includes(item?.id || item?._id))
-        } else {
-            return entity.items
-        }
+    let entities = [];
+    if (entity.effects) {
+        entities.push(...entity.effects?.filter(effect => !effect.disabled) || []);
     }
-    return [];
+    if (entity.system?.equippedIds && entity.items) {
+        let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
+        entities.push(...entity.items?.filter(item => equippedIds.includes(item?.id || item?._id)) || []);
+    }
+    return entities;
 }
 
 export function getItemParentId(id) {
@@ -873,28 +879,30 @@ export function getItemParentId(id) {
     return !actor ? undefined : actor._id// || actor.data._id;
 }
 
+/**
+ * these types are always inherited by actors if they meet prerequisites.
+ * @type {string[]}
+ */
+const CONDITIONALLY_INHERITABLE_TYPES = ["background", "destiny", "trait", "feat", "talent", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+    "beastSense",
+    "beastType",
+    "beastQuality"];
 
 export function inheritableItems(entity) {
     let fn = () => {
-        if (!entity.system) return [];
-
         let possibleInheritableItems = equippedItems(entity);
-
-        if (entity instanceof SWSEItem) {
+        if (entity instanceof SWSEItem || entity instanceof SWSEActiveEffect) {
             return possibleInheritableItems;
         }
 
-        possibleInheritableItems.push(...filterItemsByType(entity.items || [], ["background", "destiny", "trait", "feat", "talent", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
-            "beastSense",
-            "beastType",
-            "beastQuality"]));
+        possibleInheritableItems.push(...filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES));
 
         let actualInheritable = [];
         let shouldRetry = possibleInheritableItems.length > 0;
         while (shouldRetry) {
             shouldRetry = false;
             for (let possible of possibleInheritableItems) {
-                if (!meetsPrerequisites(entity, possible.system.prerequisite, {
+                if (!possible.system?.prerequisite || !meetsPrerequisites(entity, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
                     existingTraitPrerequisite: possible.type === "trait"
                 }).doesFail) {

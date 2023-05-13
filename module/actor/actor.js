@@ -696,6 +696,14 @@ export class SWSEActor extends Actor {
         return this.system.age;
     }
 
+    get changes() {
+        return this.system.changes;
+    }
+
+    get inheritedChanges() {
+        return getInheritableAttribute({entity: this, attributeFilter: "ACTOR_INHERITABLE", skipLocal:true})
+    }
+
     get sex() {
         return this.system.sex;
     }

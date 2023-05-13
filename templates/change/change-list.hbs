@@ -7,7 +7,6 @@
     </div>
 </header>
 <ol class="change-list">
-    {{log changes}}
     {{#each changes as |change i|}}
         {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i}}
     {{/each}}
