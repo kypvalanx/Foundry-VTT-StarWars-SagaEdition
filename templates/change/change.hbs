@@ -8,8 +8,8 @@
         </div>
         <div class="change-controls">
             <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if  (lookup @root.document.system.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
-            <a class="change-control {{#if inherited}}disabled{{/if}}" {{#unless inherited}}data-action="change-control" data-action-type="delete"{{/unless}} data-index="{{#if inherited}}inherited~{{/if}}{{index}}"><i class="fas fa-trash"></i></a>
-        </div>
+    {{#unless inherited}}<a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>{{/unless}}
+    </div>
     </div>
     <div style="display: {{#if (lookup @root.document.system.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}" class="collapsible">
         <input class="attribute-override direct" data-action="change-control" data-action-type="toggle-override"

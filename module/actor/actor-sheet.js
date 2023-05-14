@@ -1,9 +1,10 @@
-import {filterItemsByType, onCollapseToggle, onToggle, unique} from "../util.js";
+import {filterItemsByType, onCollapseToggle, unique} from "../util.js";
 import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
+import {_onSpanTextInput, onToggle} from "../listeners.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -106,11 +107,11 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
-            this._onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
+            _onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
-            this._onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
+            _onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
         });
 
         html.find("input.plain").on("keypress", (event) => {
@@ -689,91 +690,6 @@ export class SWSEActorSheet extends ActorSheet {
                 });
             }
         } else this._onSubmit(event);
-    }
-
-    _onSpanTextInput(event, callback = null, type) {
-        const el = event.currentTarget;
-        const parent = el.parentElement;
-
-        // Replace span element with an input (text) element
-        const newEl = document.createElement(`INPUT`);
-        newEl.type = type;
-        if (el.dataset?.dtype) newEl.dataset.dtype = el.dataset.dtype;
-        if (el.dataset?.item) newEl.dataset.item = el.dataset.item;
-        if (el.dataset?.itemAttribute) newEl.dataset.itemAttribute = el.dataset.itemAttribute;
-
-        // Set value of new input element
-        let prevValue = el.innerText;
-        if (el.classList.contains("placeholder")) prevValue = "";
-
-        let name = el.getAttribute("name");
-        if (el.dataset.name) {
-            name = el.dataset.name;
-        }
-        let item = el.dataset.item;
-        let maxValue;
-        if (name) {
-            newEl.setAttribute("name", name);
-
-            let source = this.actor.data;
-            if (item) {
-                source = this.actor.items.get(item);
-                name = "data." + name; //TODO make this less hacky
-            }
-            prevValue = getProperty(source, name);
-            if (prevValue && typeof prevValue !== "string") prevValue = prevValue.toString();
-
-            if (name.endsWith(".value")) {
-                const maxName = name.replace(/\.value$/, ".max");
-                maxValue = getProperty(this.actor.data, maxName);
-            }
-        }
-        newEl.value = prevValue;
-
-        // Toggle classes
-        const forbiddenClasses = ["placeholder", "direct", "allow-relative"];
-        for (let cls of el.classList) {
-            if (!forbiddenClasses.includes(cls)) newEl.classList.add(cls);
-        }
-
-        // Replace span with input element
-        const allowRelative = el.classList.contains("allow-relative");
-        parent.replaceChild(newEl, el);
-        let changed = false;
-        if (callback) {
-            newEl.addEventListener("change", (...args) => {
-                changed = true;
-                if (allowRelative) {
-                    newEl.value = adjustNumberByStringCommand(parseFloat(prevValue), newEl.value, maxValue);
-                }
-
-                if (newEl.value === prevValue) {
-                    this._render();
-                } else {
-                    callback.call(this, ...args);
-                }
-            });
-        }
-        newEl.addEventListener("focusout", () => {
-            if (!changed) {
-                this._render();
-            }
-        });
-
-
-        newEl.addEventListener("keypress", (event) => {
-            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-                event.stopPropagation();
-                if (!changed) {
-                    this._render();
-                }
-            }
-        });
-
-        // Select text inside new element
-        newEl.focus();
-        newEl.select();
-        //newEl.click()
     }
 
     _mouseWheelAdd(event, el) {

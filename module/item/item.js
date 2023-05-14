@@ -85,13 +85,7 @@ export class SWSEItem extends Item {
                 if(pack.metadata.packageType === "system"){
                     return false;
                 }
-            } else {
-                let retrieved = game.items.get(this.id)
-                if(!retrieved){
-                    return false;
-                }
             }
-            //game.
         }
         return canModify;
     }

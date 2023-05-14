@@ -4,7 +4,8 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.js";
-import {onCollapseToggle, onToggle, safeInsert, toNumber} from "../util.js";
+import {onCollapseToggle, safeInsert, toNumber} from "../util.js";
+import {_adjustPropertyBySpan, _onChangeControl, _onSpanTextInput, onToggle} from "../listeners.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -140,10 +141,10 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
-            this._onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+            _onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
         html.find("[data-action=direct-field]").on("click", (event) => {
-            this._onSpanTextInput(event, this._adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+            _onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
         html.find("input[type=text].direct").on("change", (event) => {
@@ -159,122 +160,7 @@ export class SWSEItemSheet extends ItemSheet {
 
             this.object.safeUpdate(update);
         })
-        html.find('[data-action="change-control"]').click(this._onChangeControl.bind(this));
-    }
-
-
-    _onChangeControl(event) {
-        event.preventDefault();
-
-        let element = $(event.currentTarget);
-        let type = element.data("action-type")
-        if ('add' === type) {
-            let update = {};
-            update['system.changes'] = this.object.system.changes;
-            update['system.changes'].push({key:"", value:""});
-            this.object.safeUpdate(update);
-        }
-        if ('delete' === type) {
-            let index = element.data("index")
-            let update = {};
-            update['system.changes'] = [];
-            for (let i = 0; i < this.object.system.changes.length; i++) {
-                if(index !== i){
-                    update['system.changes'].push(this.object.system.changes[i]);
-                }
-            }
-            this.object.safeUpdate(update);
-        }
-    }
-
-    _onSpanTextInput(event, callback = null, type) {
-        const el = event.currentTarget;
-        const parent = el.parentElement;
-
-        // Replace span element with an input (text) element
-        const newEl = document.createElement(`INPUT`);
-        newEl.type = type;
-        if(el.dataset){
-            for(let attr of Object.keys(el.dataset)){
-                newEl.dataset[attr] = el.dataset[attr];
-            }
-        }
-        let editableValue = el.dataset.editableValue;
-
-        // Set value of new input element
-        let prevValue = el.innerText;
-        if (el.classList.contains("placeholder")) prevValue = "";
-
-        newEl.value = editableValue || prevValue;
-
-        // Toggle classes
-        const forbiddenClasses = ["placeholder", "direct", "allow-relative"];
-        for (let cls of el.classList) {
-            if (!forbiddenClasses.includes(cls)) newEl.classList.add(cls);
-        }
-
-        // Replace span with input element
-        //const allowRelative = el.classList.contains("allow-relative");
-        parent.replaceChild(newEl, el);
-        let changed = false;
-        if (callback) {
-            newEl.addEventListener("change", (...args) => {
-                changed = true;
-
-                if (newEl.value === prevValue) {
-                    this._render();
-                } else {
-                    callback.call(this, ...args);
-                }
-            });
-        }
-        newEl.addEventListener("focusout", () => {
-            if (!changed) {
-                this._render();
-            }
-        });
-
-
-        newEl.addEventListener("keypress", (event) => {
-            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-                event.stopPropagation();
-                if (!changed) {
-                    this._render();
-                }
-            }
-        });
-
-        // Select text inside new element
-        newEl.focus();
-        newEl.select();
-    }
-
-    _adjustPropertyBySpan(event) {
-        event.preventDefault();
-        const el = event.currentTarget;
-
-        const value = el.tagName.toUpperCase() === "INPUT" ? el.value : el.innerText;
-
-        let name = el.getAttribute("name");
-        if (el.dataset.name) {
-            name = el.dataset.name;
-        }
-
-        if (name) {
-            let updateTarget = this.object;
-            let data = {};
-            data[name] = value;
-            updateTarget.safeUpdate(data);
-        }
-
-        // Update on lose focus
-        if (event.originalEvent instanceof MouseEvent) {
-            if (!this._submitQueued) {
-                $(el).one("mouseleave", (event) => {
-                    this._onSubmit(event, {preventClose:true});
-                });
-            }
-        } else this._onSubmit(event, {preventClose:true});
+        html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
     }
 
 

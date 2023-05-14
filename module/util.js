@@ -1061,29 +1061,3 @@ export function safeInsert(object, s, value) {
     }
     return update;
 }
-
-export function onToggle(event) {
-    event.stopPropagation();
-    const target = $(event.currentTarget)
-    let toggleId = target.data("toggleId")
-    let data = {};
-
-    let toggles = getSystem(this).toggles || {};
-    data[`${getSystemPath(this)}.toggles.${toggleId}`] = !(toggles[toggleId] || false)
-
-    this.object.safeUpdate(data);
-}
-
-function getSystem(o) {
-    if (o instanceof SWSEActiveEffectConfig) {
-        return o.object.flags.swse;
-    }
-    return o.object.system
-}
-
-function getSystemPath(o) {
-    if (o instanceof SWSEActiveEffectConfig) {
-        return "flags.swse";
-    }
-    return "system";
-}
