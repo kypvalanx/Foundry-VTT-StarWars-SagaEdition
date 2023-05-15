@@ -4,7 +4,7 @@ import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
-import {_onSpanTextInput, onToggle} from "../listeners.js";
+import {_onChangeControl, _onSpanTextInput, onToggle} from "../listeners.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -198,6 +198,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
         html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
+        html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");

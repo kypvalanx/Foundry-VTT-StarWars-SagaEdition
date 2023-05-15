@@ -134,7 +134,8 @@ function getChangesFromDocument(data) {
         fn: "getChangesFromDocument",
         duplicates: data.duplicates,
         predicate: data.predicate,
-        embeddedItemOverride: data.embeddedItemOverride
+        embeddedItemOverride: data.embeddedItemOverride,
+        skipLocal: data.skipLocal
     }, fn) : fn();
 }
 

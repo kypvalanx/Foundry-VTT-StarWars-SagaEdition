@@ -129,9 +129,9 @@ export function onToggle(event) {
 
 function getChanges() {
     if(this.object instanceof SWSEActiveEffect){
-        return {changes: this.object.changes, updatePath: 'changes'}
+        return {changes: this.object.changes || [], updatePath: 'changes'}
     }
-    return {changes: this.object.system.changes, updatePath: 'system.changes'}
+    return {changes: this.object.system.changes || [], updatePath: 'system.changes'}
 }
 function getSystem() {
     if(this.object instanceof SWSEActiveEffect){
