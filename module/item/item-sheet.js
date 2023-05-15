@@ -66,7 +66,7 @@ export class SWSEItemSheet extends ItemSheet {
 
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
 
-        html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
+        html.find(".collapse-toggle").on("click", event => onCollapseToggle(event)) //TODO can i remove this?
         // Everything below here is only needed if the sheet is editable
         if (!this.isEditable) return;
 

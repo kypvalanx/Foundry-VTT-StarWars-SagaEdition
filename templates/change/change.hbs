@@ -7,11 +7,12 @@
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
-            <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if  (lookup @root.document.system.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
+            {{log @root.document.toggles @root.document @root}}
+            <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if  (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
     {{#unless inherited}}<a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>{{/unless}}
     </div>
     </div>
-    <div style="display: {{#if (lookup @root.document.system.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}" class="collapsible">
+    <div style="display: {{#if (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}" class="collapsible">
         <input class="attribute-override direct" data-action="change-control" data-action-type="toggle-override"
                name="changes.{{index}}.override" type="checkbox" {{#if change.override}}checked{{/if}}
                title="attributes with this enabled will override other attributes by the same name rather than both being active">

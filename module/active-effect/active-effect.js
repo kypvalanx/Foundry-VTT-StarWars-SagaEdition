@@ -18,4 +18,8 @@ export class SWSEActiveEffect extends ActiveEffect {
         super._onCreateDocuments(documents, context).then(
             game.items.directory.render())
     }
+
+    get toggles(){
+        return this.flags.swse.toggles
+    }
 }

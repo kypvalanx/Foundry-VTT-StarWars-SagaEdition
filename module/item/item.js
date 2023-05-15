@@ -97,6 +97,10 @@ export class SWSEItem extends Item {
         return changes;
     }
 
+    get toggles() {
+        return this.system.toggles;
+    }
+
     async safeUpdate(data = {}, context = {}) {
         if (this.canUserModify(game.user, 'update')) {
             await this.update(data, context);

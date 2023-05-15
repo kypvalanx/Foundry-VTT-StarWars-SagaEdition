@@ -23,6 +23,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         let data = super.getData(options);
         data.editable = this.isEditable;
         data.owner = this.document.parent.isOwner
+        data.document = this.document;
         return data;
     }
 

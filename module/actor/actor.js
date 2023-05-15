@@ -699,6 +699,9 @@ export class SWSEActor extends Actor {
     get changes() {
         return this.system.changes;
     }
+    get toggles() {
+        return this.system.toggles;
+    }
 
     get inheritedChanges() {
         return getInheritableAttribute({entity: this, attributeFilter: "ACTOR_INHERITABLE", skipLocal:true})
