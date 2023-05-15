@@ -7,7 +7,6 @@
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
-            {{log @root.document.toggles @root.document @root}}
             <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if  (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
     {{#unless inherited}}<a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>{{/unless}}
     </div>
