@@ -1,4 +1,4 @@
-import {filterItemsByType, onCollapseToggle, unique} from "../util.js";
+import {filterItemsByType, onCollapseToggle, safeInsert, unique} from "../util.js";
 import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
@@ -109,6 +109,13 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("span.text-box.direct").on("click", (event) => {
             _onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
+
+        html.find("input[type=text].direct").on("change", (event) => {
+            const target = event.target
+            const update = safeInsert(this.object, `system.${target.name}`, target.value)
+
+            this.object.safeUpdate(update);
+        })
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             _onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");

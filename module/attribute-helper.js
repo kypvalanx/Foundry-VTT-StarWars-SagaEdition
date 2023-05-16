@@ -220,9 +220,9 @@ export function getInheritableAttribute(data = {}) {
     }
 
     let overrides = values.filter(attr => attr && attr.override)
-
     if (overrides.length > 0) {
-        values = overrides;
+        let overriddenKeys = overrides.map(o => o.key);
+        values = values.filter(value => !overriddenKeys.includes(value.key) || value.override);
     }
     //TODO sort by key here
     return reduceArray(data.reduce, values, data.entity);
