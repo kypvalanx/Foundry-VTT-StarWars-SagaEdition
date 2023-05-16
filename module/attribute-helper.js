@@ -162,24 +162,6 @@ function getChangesFromDocuments(data) {
     return getChangesFromDocument(data);
 }
 
-
-function mapAttributesByType(allAttributes) {
-    let attributeMap = new Map();
-    for (const attribute of allAttributes) {
-        if (!attribute || !attribute.key) {
-            continue;
-        }
-        if (!attributeMap.has(attribute.key)) {
-            attributeMap.set(attribute.key, []);
-        }
-        attributeMap.get(attribute.key).push(attribute);
-    }
-    return attributeMap;
-}
-
-
-
-
 /**
  *
  * @param data
@@ -242,25 +224,14 @@ export function getInheritableAttribute(data = {}) {
     if (overrides.length > 0) {
         values = overrides;
     }
+    //TODO sort by key here
     return reduceArray(data.reduce, values, data.entity);
 }
 
-//TODO evaluate if we want to add attributes to a custom event class rather than using changes
 export function extractEffectChange(changes, entity) {
     let values = [];
     for (let attribute of Object.values(changes || {})) {
         values.push(appendSourceMeta(attribute, entity._id, entity.label, entity.label));
-    }
-    return values;
-}
-
-export function extractModeAttributes(entity, activeModes) {
-    let values = [];
-    for (let mode of activeModes) {
-        for (let attribute of Object.values(mode.attributes || {})) {
-            values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.system.description));
-        }
-        values.push(...extractModeAttributes(entity, Object.values(mode.modes || {}).filter(mode => mode && mode.isActive) || []));
     }
     return values;
 }
