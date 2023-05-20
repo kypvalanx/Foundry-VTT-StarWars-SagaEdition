@@ -163,5 +163,11 @@ export const ITEM_ONLY_ATTRIBUTES = [
     "damage",
     "damageType",
     "takeMultipleTimes",
-    "isThrowable"
+    "isThrowable",
+    "ammo",
+    "itemMod",
+    "overheatLimit",
+    "prefix",
+    "suffix",
+    "cooldownTime"
 ]

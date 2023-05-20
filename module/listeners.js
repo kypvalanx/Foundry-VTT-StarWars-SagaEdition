@@ -1,4 +1,5 @@
 import {SWSEActiveEffect} from "./active-effect/active-effect.js";
+import {safeInsert} from "./util.js";
 
 export function _onChangeControl(event) {
     event.preventDefault();
@@ -138,4 +139,19 @@ function getSystem() {
         return {system: this.object.flags.swse, updatePath: 'flags.swse'}
     }
     return {system: this.object.system, updatePath: 'system'}
+}
+
+export function changeText(event)
+{
+    const target = event.target
+    const update = safeInsert(this.object, `system.${target.name}`, target.value)
+
+    this.object.safeUpdate(update);
+}
+
+export function changeCheckbox(event){
+        const target = event.target
+        const update = safeInsert(this.object, `system.${target.name}`, target.checked)
+
+        this.object.safeUpdate(update);
 }

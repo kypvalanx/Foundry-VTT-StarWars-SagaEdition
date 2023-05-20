@@ -12,8 +12,8 @@
     </div>
     </div>
     <div style="display: {{#if (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}" class="collapsible">
-        <input class="attribute-override direct" data-action="change-control" data-action-type="toggle-override"
-               name="changes.{{index}}.override" type="checkbox" {{#if change.override}}checked{{/if}}
-               title="attributes with this enabled will override other attributes by the same name rather than both being active">
+        <label>Override: <input class="attribute-override direct" data-action="change-control" data-action-type="toggle-override"
+               {{#if inherited}}disabled{{else}}name="changes.{{index}}.override"{{/if}} type="checkbox" {{#if change.override}}checked{{/if}}
+               title="attributes with this enabled will override other attributes by the same name rather than both being active"></label>
     </div>
 </li>

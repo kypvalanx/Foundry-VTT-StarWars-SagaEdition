@@ -4,7 +4,7 @@ import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
 import {addSubCredits, transferCredits} from "./credits.js";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.js";
-import {_onChangeControl, _onSpanTextInput, onToggle} from "../listeners.js";
+import {_onChangeControl, _onSpanTextInput, changeCheckbox, changeText, onToggle} from "../listeners.js";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -110,12 +110,8 @@ export class SWSEActorSheet extends ActorSheet {
             _onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
-        html.find("input[type=text].direct").on("change", (event) => {
-            const target = event.target
-            const update = safeInsert(this.object, `system.${target.name}`, target.value)
-
-            this.object.safeUpdate(update);
-        })
+        html.find("input[type=text].direct").on("change", changeText.bind(this));
+        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             _onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");

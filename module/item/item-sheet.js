@@ -5,7 +5,14 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  */
 import {SWSEItem} from "./item.js";
 import {onCollapseToggle, safeInsert, toNumber} from "../util.js";
-import {_adjustPropertyBySpan, _onChangeControl, _onSpanTextInput, onToggle} from "../listeners.js";
+import {
+    _adjustPropertyBySpan,
+    _onChangeControl,
+    _onSpanTextInput,
+    changeCheckbox,
+    changeText,
+    onToggle
+} from "../listeners.js";
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -147,19 +154,9 @@ export class SWSEItemSheet extends ItemSheet {
             _onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
-        html.find("input[type=text].direct").on("change", (event) => {
-            const target = event.target
-            const update = safeInsert(this.object, `system.${target.name}`, target.value)
 
-            this.object.safeUpdate(update);
-        })
-
-        html.find("input[type=checkbox].direct").on("click", (event) => {
-            const target = event.target
-            const update = safeInsert(this.object, `system.${target.name}`, target.checked)
-
-            this.object.safeUpdate(update);
-        })
+        html.find("input[type=text].direct").on("change", changeText.bind(this));
+        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
     }
 

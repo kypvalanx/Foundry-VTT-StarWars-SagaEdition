@@ -45,6 +45,8 @@ Hooks.once('init', async function () {
         decimals: 2
     };
 
+    CONFIG.testMode=document.location.search ==="?test=true";
+
 
     // Define custom Entity classes
     CONFIG.SWSE = SWSE;
