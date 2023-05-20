@@ -911,6 +911,17 @@ function addMultiplierToDice(roll, multiplier) {
         .filter(term => !!term))
 }
 
+function getHands(actor) {
+    return 2;
+}
+
+function getAttackWindowTitle(context) {
+    if(context.type === "fullAttack"){
+        return "Full Attack";
+    }
+    return "Single Attack";
+}
+
 /**
  *
  * @param context {object}
@@ -932,14 +943,13 @@ function attackDialogue(context) {
         return;
     }
     let availableAttacks = 1;
-    let title = "Single Attack";
+    let title = getAttackWindowTitle(context);
     let dualWeaponModifier = -10;
     let doubleAttack = [];
     let tripleAttack = [];
-    //let hands = 2; //TODO resolve extra hands
+    let hands = getHands(actor); //TODO resolve extra hands
 
     if (context.type === "fullAttack") {
-        title = "Full Attack";
         doubleAttack = getInheritableAttribute({
             entity: actor,
             attributeKey: "doubleAttack",
@@ -953,7 +963,6 @@ function attackDialogue(context) {
 
         //availableAttacks = this.fullAttackCount;
         let items = equippedItems(actor)
-        availableAttacks = 0;
         let doubleAttackBonus = 0;
         let tripleAttackBonus = 0;
         let availableWeapons = 0
@@ -995,7 +1004,7 @@ function attackDialogue(context) {
     //     availableAttacks = suppliedAttacks.length;
     // }
 
-    let content = `<p>Select Attacks:</p>`;
+    let content = `<h3>Select Attacks:</h3><label>Smart Hands Mode<input type="checkbox"></label>`;
     let resolvedAttacks = [];
     if (suppliedAttacks.length < availableAttacks) {
         //CREATE OPTIONS
