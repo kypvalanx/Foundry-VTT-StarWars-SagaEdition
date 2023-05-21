@@ -111,6 +111,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="effect-control"]').click(this._onEffectControl.bind(this));
         html.find('[data-action="mode-control"]').click(this._onModeControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
+        html.find('[data-action="modification-control"]').click(this._onModificationControl.bind(this));
 
 
         //TODO switch to data action
@@ -619,7 +620,7 @@ export class SWSEItemSheet extends ItemSheet {
                     cursor++;
                 }
                 this.createItemAttribute(cursor, level, modeId)
-        }
+            }
             case "remove-attribute": {
 
                 let updateData = {};
@@ -663,6 +664,18 @@ export class SWSEItemSheet extends ItemSheet {
 
                 this.item.updateData(updateData);
                 this.render();
+            }
+        }
+
+    }
+
+    _onModificationControl(event){
+        let element = $(event.currentTarget);
+        let actionType = element.data('actionType');
+        switch (actionType) {
+            case "add":
+            {
+                this.item.addItemBlankModificationEffect();
             }
         }
 

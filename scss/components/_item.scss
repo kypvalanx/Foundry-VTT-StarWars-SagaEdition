@@ -25,3 +25,23 @@
 .prerequisite{
   border: solid 1px black;
 }
+
+.section-header{
+  height: 28px;
+  background: rgba(0,0,0,0.1);
+  border: 1px solid var(--color-border-light-tertiary);
+  font-weight: bold;
+  align-items: center;
+  padding: 3px 1px;
+}
+
+.section-header .section-header-controls {
+  flex: 0;
+  flex-basis: 48px;
+  display: flex;
+  flex-direction: row;
+}
+.section-header .entry {
+   padding-left: 4px;
+   flex: 4
+ }

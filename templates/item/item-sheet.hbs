@@ -116,9 +116,11 @@
 
         {{!-- Modifications Tab --}}
         <div class="tab items" data-group="primary" data-tab="modifications">
-            <div class="resource flex-group-center">
-                <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{item.system.upgradePoints}}</label>
+            <div class="section-header flexrow">
+                <div class="entry">Upgrade Points: {{item.system.upgradePoints}}</div>
+                <div class="section-header-controls">
+                    <a class="control" data-action="modification-control" data-action-type="add"><i class="far fa-plus-square"></i></a>
+                </div>
             </div>
             <ol class="items-list">
                 {{#each item.effects as |modification id|}}

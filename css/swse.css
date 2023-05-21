@@ -289,6 +289,14 @@
   padding: 0 8px;
 }
 
+.swse .editor {
+  min-height: 300px;
+}
+
+.swse .tox-tinymce {
+  min-height: 300px;
+}
+
 .swse .resource-label {
   font-weight: bold;
   text-transform: uppercase;
@@ -608,6 +616,39 @@
 
 .swse .prerequisite {
   border: solid 1px black;
+}
+
+.swse .section-header {
+  height: 28px;
+  background: rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--color-border-light-tertiary);
+  font-weight: bold;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 3px 1px;
+}
+
+.swse .section-header .section-header-controls {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  -ms-flex-preferred-size: 48px;
+  flex-basis: 48px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+}
+
+.swse .section-header .entry {
+  padding-left: 4px;
+  -webkit-box-flex: 4;
+  -ms-flex: 4;
+  flex: 4;
 }
 
 .swse .species-container .species {
@@ -1218,4 +1259,8 @@
   -webkit-box-pack: center;
   -ms-flex-pack: center;
   justify-content: center;
+}
+
+.swse .disabled {
+  cursor: pointer;
 }

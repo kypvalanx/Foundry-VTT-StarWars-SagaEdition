@@ -3,13 +3,13 @@ import {sizeArray, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 import {SimpleCache} from "../common/simple-cache.js";
+import {DEFAULT_MODIFICATION_EFFECT} from "../classDefaults.js";
 
 function createChangeFromAttribute(attr) {
     attr.mode = 2;
     return attr;
 }
 
-// noinspection JSClosureCompilerSyntax
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
@@ -1426,21 +1426,33 @@ export class SWSEItem extends Item {
         changes.push(...Object.values(item.system.attributes))
         changes.push(...item.system.changes)
         //could this be generated from the parent item at load?  would that be slow?
-        let activeEffect = {
-            label: item.name,
-            changes: changes,
-            icon: item.img,
-            origin: item.uuid,
-            disabled: true, //this active effect is marked as disabled so that it doesn't modify anything unintentionally
-            flags: {
-                swse: {
-                    description: item.system.description,
-                    itemModifier: true
-                }
-            }
-        }
+        let activeEffect = DEFAULT_MODIFICATION_EFFECT;
+        activeEffect.label = item.name;
+        activeEffect.changes = changes;
+        activeEffect.icon = item.img;
+        activeEffect.origin = item.uuid;
+        activeEffect.flags.swse.description = item.system.description;
+        // let activeEffect = {
+        //     label: item.name,
+        //     changes: changes,
+        //     icon: item.img,
+        //     origin: item.uuid,
+        //     disabled: false,
+        //     flags: {
+        //         swse: {
+        //             description: item.system.description,
+        //             itemModifier: true
+        //         }
+        //     }
+        // }
         if (this.canUserModify(game.user, 'update')) {
             this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
+
+    addItemBlankModificationEffect() {
+        if (this.canUserModify(game.user, 'update')) {
+            this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODIFICATION_EFFECT]);
         }
     }
     createActiveEffectFromMode(mode) {
