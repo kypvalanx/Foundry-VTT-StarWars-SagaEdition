@@ -16,7 +16,8 @@ Manifest link: https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-
 
   - Manifest link: https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/main/system.json
 
-- 0.7.X -> upcoming overhaul
+- 0.7.X -> V10+
+  - Manifest link: https://raw.githubusercontent.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition/unstable/system.json
 
 ### Wondering how to install from a Manifest Url? check [here](https://foundryvtt.com/article/tutorial/).
 
