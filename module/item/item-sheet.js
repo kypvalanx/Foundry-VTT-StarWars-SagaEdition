@@ -558,37 +558,12 @@ export class SWSEItemSheet extends ItemSheet {
             case 'delete':
                 this.item.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
                 break;
+            case 'disable':
+                this.item.toggleEffectDisabled(effectId, !event.currentTarget.checked)
+                break;
         }
     }
 
-    _onModeControl(event){
-
-        let element = $(event.currentTarget);
-        let modeId = element.data('modeId')
-        modeId = modeId ? `${modeId}` : undefined;
-        let level = element.data('level')
-
-
-        let modes = this.item.system;
-        //currently, levels do not have modes.
-        if (level) {
-            modes = modes.levels[level]
-        }
-
-        if (modeId) {
-            let toks = modeId.split(".");
-            for (let tok of toks) {
-                modes = modes.modes[tok];
-            }
-
-        }
-        modes = modes.modes || {};
-        let cursor = 0;
-        while (modes[cursor]) {
-            cursor++;
-        }
-        this.createItemMode(cursor, level, modeId)
-    }
 
     _onAttributeControl(event){
         let element = $(event.currentTarget);
@@ -675,7 +650,18 @@ export class SWSEItemSheet extends ItemSheet {
         switch (actionType) {
             case "add":
             {
-                this.item.addItemBlankModificationEffect();
+                this.item.addBlankModificationEffect();
+            }
+        }
+
+    }
+    _onModeControl(event){
+        let element = $(event.currentTarget);
+        let actionType = element.data('actionType');
+        switch (actionType) {
+            case "add":
+            {
+                this.item.addBlankMode();
             }
         }
 

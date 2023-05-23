@@ -54,12 +54,13 @@
 
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item" data-tab="summary"><i class="fas fa-book"></i> {{localize "ITEM.TabSummary"}}</a>
-        <a class="item" data-tab="effects"><i class="fas fa-cogs"></i> {{localize "ITEM.TabEffects"}}</a>
+        <a class="item" data-tab="summary"><!--<i class="fas fa-book"></i>--> {{localize "ITEM.TabSummary"}}</a>
+        <a class="item" data-tab="effects"><!--<i class="fas fa-cogs"></i>--> {{localize "ITEM.TabEffects"}}</a>
         <a class="item" data-tab="provided">Provided</a>
         {{#if item.hasPrerequisites}}<a class="item" data-tab="prerequisites">Prerequisites</a>{{/if}}
         {{#if item.strippable}}<a class="item" data-tab="stripping">Stripping</a>{{/if}}
         {{#if item.modifiable}}<a class="item" data-tab="modifications">Modifications</a>{{/if}}
+        {{#if item.hasModes}}<a class="item" data-tab="modes">Modes</a>{{/if}}
         {{#if item.hasLevels}}<a class="item" data-tab="levels">Levels</a>{{/if}}
     </nav>
 
@@ -135,6 +136,31 @@
                             </div>
                         </li>
                     {{/if}}
+                {{/each}}
+            </ol>
+        </div>
+        {{!-- Modes Tab --}}
+        <div class="tab items" data-group="primary" data-tab="modes">
+            <div class="section-header flexrow">
+                <div class="entry"></div>
+                <div class="section-header-controls">
+                    <a class="control" data-action="mode-control" data-action-type="add"><i class="far fa-plus-square"></i></a>
+                </div>
+            </div>
+            <ol class="items-list">
+                {{#each item.effects as |mode id|}}
+                    {{#unless mode.flags.swse.itemModifier}}
+                        <li class="item flexrow draggable" data-item-id="{{mode._id}}">
+                            <div class="item-image"><img src="{{mode.icon}}" title="{{mode.label}}" width="24" height="24"/>
+                            </div>
+                            <h4 class="item-name">{{mode.label}}</h4>
+                            <div class="item-controls">
+                                <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
+                                <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
+                            </div>
+                        </li>
+                    {{/unless}}
                 {{/each}}
             </ol>
         </div>

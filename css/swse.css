@@ -651,6 +651,12 @@
   flex: 4;
 }
 
+.swse .section-header .enabled {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+}
+
 .swse .species-container .species {
   display: -webkit-box;
   display: -ms-flexbox;

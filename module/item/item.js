@@ -3,7 +3,7 @@ import {sizeArray, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
 import {SimpleCache} from "../common/simple-cache.js";
-import {DEFAULT_MODIFICATION_EFFECT} from "../classDefaults.js";
+import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../classDefaults.js";
 
 function createChangeFromAttribute(attr) {
     attr.mode = 2;
@@ -128,6 +128,10 @@ export class SWSEItem extends Item {
         return ['armor', 'weapon'].includes(this.type)
     }
 
+    get hasModes(){
+        return true;
+    }
+
     get hasLevels() {
         return ['class'].includes(this.type)
     }
@@ -135,6 +139,11 @@ export class SWSEItem extends Item {
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         this.prepareData();
+    }
+    toggleEffectDisabled(effectId, disabled) {
+        console.log(effectId, disabled);
+        this.effects.get(effectId).safeUpdate({disabled})
+
     }
 
     // get name() {
@@ -1450,9 +1459,14 @@ export class SWSEItem extends Item {
         }
     }
 
-    addItemBlankModificationEffect() {
+    addBlankModificationEffect() {
         if (this.canUserModify(game.user, 'update')) {
             this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODIFICATION_EFFECT]);
+        }
+    }
+    addBlankMode() {
+        if (this.canUserModify(game.user, 'update')) {
+            this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODE_EFFECT]);
         }
     }
     createActiveEffectFromMode(mode) {
