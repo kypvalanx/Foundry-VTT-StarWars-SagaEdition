@@ -43,7 +43,7 @@ function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride)
     for (let item of items) {
         let duplicates = (names[item.name] || 0) + 1;
         names[item.name] = duplicates;
-        attributes.push(...getInheritableAttribute({
+        attributes.push(...getChangesFromDocuments({
             entity: item,
             duplicates,
             recursive: true,
@@ -88,7 +88,7 @@ export function getResolvedSize(entity, options = {}) {
 
 
 function getLocalChangesOnDocument(document) {
-    const values = document.system?.changes || document._source?.system?.changes || [];
+    const values = document.changes ||document.system?.changes || document._source?.system?.changes || [];
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
@@ -127,7 +127,7 @@ function getChangesFromDocument(data) {
         }
 
         allAttributes.push(...getAttributesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
-        allAttributes.push(...getChangesFromActiveEffects(document));
+        //allAttributes.push(...getChangesFromActiveEffects(document));
         return allAttributes;
     };
     return document.getCached ? document.getCached({

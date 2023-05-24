@@ -10,7 +10,7 @@ export function _onChangeControl(event) {
     if ('add' === type) {
         let update = {};
         update[updatePath] = changes;
-        update[updatePath].push({key:"", value:""});
+        update[updatePath].push({key: "", value: ""});
         this.object.safeUpdate(update);
     }
     if ('delete' === type) {
@@ -18,7 +18,7 @@ export function _onChangeControl(event) {
         let update = {};
         update[updatePath] = [];
         for (let i = 0; i < changes.length; i++) {
-            if(index !== i){
+            if (index !== i) {
                 update[updatePath].push(changes[i]);
             }
         }
@@ -49,10 +49,10 @@ export function _adjustPropertyBySpan(event) {
     if (event.originalEvent instanceof MouseEvent) {
         if (!this._submitQueued) {
             $(el).one("mouseleave", (event) => {
-                this._onSubmit(event, {preventClose:true});
+                this._onSubmit(event, {preventClose: true});
             });
         }
-    } else this._onSubmit(event, {preventClose:true});
+    } else this._onSubmit(event, {preventClose: true});
 }
 
 export function _onSpanTextInput(event, callback = null, type) {
@@ -62,8 +62,8 @@ export function _onSpanTextInput(event, callback = null, type) {
     // Replace span element with an input (text) element
     const newEl = document.createElement(`INPUT`);
     newEl.type = type;
-    if(el.dataset){
-        for(let attr of Object.keys(el.dataset)){
+    if (el.dataset) {
+        for (let attr of Object.keys(el.dataset)) {
             newEl.dataset[attr] = el.dataset[attr];
         }
     }
@@ -129,29 +129,40 @@ export function onToggle(event) {
 }
 
 function getChanges() {
-    if(this.object instanceof SWSEActiveEffect){
+    if (this.object instanceof SWSEActiveEffect) {
         return {changes: this.object.changes || [], updatePath: 'changes'}
     }
     return {changes: this.object.system.changes || [], updatePath: 'system.changes'}
 }
+
 function getSystem() {
-    if(this.object instanceof SWSEActiveEffect){
+    if (this.object instanceof SWSEActiveEffect) {
         return {system: this.object.flags.swse, updatePath: 'flags.swse'}
     }
     return {system: this.object.system, updatePath: 'system'}
 }
 
-export function changeText(event)
-{
+function getRoot() {
+    if (this.object instanceof SWSEActiveEffect) {
+        return {root: this.object, updatePath: ''}
+    }
+    return {root: this.object.system, updatePath: 'system.'}
+}
+
+export function changeText(event) {
+    let {system, updatePath} = getRoot.call(this);
     const target = event.target
-    const update = safeInsert(this.object, `system.${target.name}`, target.value)
+    const update = safeInsert(this.object, `${updatePath}${target.name}`, target.value)
 
     this.object.safeUpdate(update);
 }
 
-export function changeCheckbox(event){
-        const target = event.target
-        const update = safeInsert(this.object, `system.${target.name}`, target.checked)
+export function changeCheckbox(event) {
+    let {system, updatePath} = getRoot.call(this);
+    const target = event.target
+    const type = $(target).data("type");
+    const checked = type === "inverse" ? !target.checked : target.checked;
+    const update = safeInsert(this.object, `${updatePath}${target.name}`, checked)
 
-        this.object.safeUpdate(update);
+    this.object.safeUpdate(update);
 }

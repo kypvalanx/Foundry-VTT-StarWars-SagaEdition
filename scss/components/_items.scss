@@ -36,6 +36,12 @@
 
   .item-name {
     margin: 0;
+    flex: 5;
+  }
+
+  .item-upgrade {
+    flex:0;
+    white-space: nowrap;
   }
 
   .strikethrough{
@@ -44,6 +50,7 @@
 
   .item-controls {
     text-align: right;
+    flex:1;
   }
 }
 

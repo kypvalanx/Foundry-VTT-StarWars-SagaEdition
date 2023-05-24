@@ -1,0 +1,91 @@
+<form class="{{cssClass}}" autocomplete="off">
+
+    <!-- Effect Header -->
+    <header class="sheet-header">
+        <img class="profile-img" src="{{ data.icon }}" data-edit="icon" title="{{data.label}}"
+             alt="{{data.label}}">
+        <h1><span class="effect-title" data-action="direct-field" data-type="string" data-name="label">{{ data.label }}</span></h1>
+    </header>
+
+    <!-- Effect Configuration Tabs -->
+    <nav class="sheet-tabs tabs" aria-role="{{localize 'SHEETS.FormNavLabel'}}">
+        <a class="item" data-tab="details"><i class="fas fa-book"></i> {{localize "EFFECT.TabDetails"}}</a>
+        {{log this}}
+        {{#if document.hasDuration}}<a class="item" data-tab="duration"><i class="fas fa-clock"></i> {{localize "EFFECT.TabDuration"}}</a>{{/if}}
+        <a class="item" data-tab="effects"><i class="fas fa-cogs"></i> {{localize "EFFECT.TabEffects"}}</a>
+    </nav>
+
+    <!-- Details Tab -->
+    <section class="tab" data-tab="details">
+
+<!--        <div class="form-group">-->
+<!--            <label>{{ localize "EFFECT.Label" }}</label>-->
+<!--            <div class="form-fields">-->
+<!--                <input type="text" name="label" value="{{ data.label }}"/>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="item-pane">
+            <div class="left-sidebar sidebar">
+                {{#if document.hasDisable}}<input class="direct" name="disabled" data-type="inverse" type="checkbox" {{#unless document.disabled}}checked{{/unless}}>{{/if}}
+            </div>
+            <div class="middle-right-sidebar">
+                <div class="flex-col">
+    {{editor data.flags.swse.description target="flags.swse.description" button=true owner=owner
+             editable=editable}}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Effects Tab -->
+    <section class="tab" data-tab="effects">
+        {{> 'systems/swse/templates/change/change-list.hbs' changes=data.changes}}
+    </section>
+
+    <!-- Duration Tab -->
+    <section class="tab" data-tab="duration">
+        <div class="form-group">
+            <label>{{ localize "EFFECT.DurationSecs" }}</label>
+            <div class="form-fields">
+                <input class="direct" type="number" name="duration.seconds" value="{{ data.duration.seconds }}"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{ localize "EFFECT.StartTime" }}</label>
+            <div class="form-fields">
+                <input class="direct" type="number" name="duration.startTime" value="{{ data.duration.startTime }}"/>
+            </div>
+        </div>
+        <hr/>
+        <div class="form-group">
+            <label>{{ localize "EFFECT.DurationTurns" }}</label>
+            <div class="form-fields">
+                <label>{{ localize "COMBAT.Rounds" }}</label>
+                <input class="direct" type="number" name="duration.rounds" value="{{ data.duration.rounds }}"/>
+                <label>{{ localize "COMBAT.Turns" }}</label>
+                <input class="direct" type="number" name="duration.turns" value="{{ data.duration.turns }}"/>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>{{ localize "EFFECT.Combat" }}</label>
+            <div class="form-fields">
+                <input class="direct" type="text" name="duration.combat" value="{{ data.duration.combat }}" disabled/>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>{{ localize "EFFECT.StartTurns" }}</label>
+            <div class="form-fields">
+                <label>{{ localize "COMBAT.Round" }}</label>
+                <input class="direct" type="number" name="duration.startRound" value="{{ data.duration.startRound }}"/>
+                <label>{{ localize "COMBAT.Turn" }}</label>
+                <input class="direct" type="number" name="duration.startTurn" value="{{ data.duration.startTurn }}"/>
+            </div>
+        </div>
+    </section>
+
+<!--    <footer class="sheet-footer">-->
+<!--        <button type="submit"><i class="fas fa-save"></i> {{localize submitText}}</button>-->
+<!--    </footer>-->
+</form>

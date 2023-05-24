@@ -1,19 +1,30 @@
-<li class="effect-change change flexcol collapsible-container" data-index="{{#if inherited}}inherited~{{/if}}{{index}}" {{#if inherited}}title="{{change.sourceString}}"{{/if}}>
+<li class="effect-change change flexcol collapsible-container" data-index="{{#if inherited}}inherited~{{/if}}{{index}}"
+    {{#if inherited}}title="{{change.sourceString}}"{{/if}}>
     <div style="width:100%" class="flexrow">
         <div class="key">
-            <input class="direct{{#if inherited}} disabled{{/if}}" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
+                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
         </div>
         <div class="value">
-            <input class="direct{{#if inherited}} disabled{{/if}}" type="text" {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
+                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
-            <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if  (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
-    {{#unless inherited}}<a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i class="fas fa-trash"></i></a>{{/unless}}
+            <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if
+                    (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
+            {{#unless inherited}}
+                <a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i
+                        class="fas fa-trash"></i></a>{{/unless}}
+        </div>
     </div>
-    </div>
-    <div style="display: {{#if (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}" class="collapsible">
-        <label>Override: <input class="attribute-override direct" data-action="change-control" data-action-type="toggle-override"
-               {{#if inherited}}disabled{{else}}name="changes.{{index}}.override"{{/if}} type="checkbox" {{#if change.override}}checked{{/if}}
-               title="attributes with this enabled will override other attributes by the same name rather than both being active"></label>
+    <div style="display: {{#if
+            (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}"
+         class="collapsible">
+        {{log change}}
+        <label>Override: <input class="attribute-override direct" data-action="change-control"
+                                data-action-type="toggle-override"
+                                {{#if inherited}}disabled{{else}}name="changes.{{index}}.override"{{/if}}
+                                type="checkbox" {{#if change.override}}checked{{/if}}
+                                title="attributes with this enabled will override other attributes by the same name rather than both being active"></label>
     </div>
 </li>

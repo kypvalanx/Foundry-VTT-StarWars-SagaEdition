@@ -130,6 +130,9 @@
                             <div class="item-image"><img src="{{modification.icon}}" title="{{modification.label}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{modification.label}}</h4>
+                            {{#if modification.upgradePoints}}
+                                <h4 class="item-upgrade"><span>Upgrade Cost:{{modification.upgradePoints}}</span></h4>
+                            {{/if}}
                             <div class="item-controls">
                                 <a data-type="view" data-action="effect-control" data-effect-id="{{modification._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
                                 <a data-type="delete" data-action="effect-control" data-effect-id="{{modification._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>

@@ -1,5 +1,12 @@
 import {onCollapseToggle, safeInsert} from "../util.js";
-import {_adjustPropertyBySpan, _onChangeControl, _onSpanTextInput, onToggle} from "../listeners.js";
+import {
+    _adjustPropertyBySpan,
+    _onChangeControl,
+    _onSpanTextInput,
+    changeCheckbox,
+    changeText,
+    onToggle
+} from "../listeners.js";
 
 /**
  * Extend the base ActiveEffect entity
@@ -8,15 +15,17 @@ import {_adjustPropertyBySpan, _onChangeControl, _onSpanTextInput, onToggle} fro
 export class SWSEActiveEffectConfig extends ActiveEffectConfig {
     get template() {
         const path = "systems/swse/templates/active-effect";
-        if (this.object.flags.swse?.itemModifier) {
-            return `${path}/modifier-active-effect-sheet.hbs`;
-        }
-        return super.template
+        // if (this.object.flags.swse?.itemModifier) {
+            return `${path}/active-effect-sheet.hbs`;
+        // }
+        //return super.template
     }
+
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
-            classes: ["swse", "sheet", "effect"]
+            classes: ["swse", "sheet", "effect"],
+            closeOnSubmit: false
         });
     }
     getData(options={}) {
@@ -45,12 +54,10 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
             _onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
-        html.find("input.direct").on("change", (event) => {
-            const target = event.target
-            const update = safeInsert(this.object, target.name, target.value)
 
-            this.object.safeUpdate(update);
-        })
+        html.find("input[type=text].direct").on("change", changeText.bind(this));
+        html.find("input[type=number].direct").on("change", changeText.bind(this));
+        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
 
         html.find(".toggle").on("click", onToggle.bind(this))

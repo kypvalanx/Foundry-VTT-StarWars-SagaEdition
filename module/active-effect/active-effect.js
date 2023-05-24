@@ -1,3 +1,4 @@
+import {getInheritableAttribute} from "../attribute-helper.js";
 
 /**
  * Extend the base ActiveEffect entity
@@ -8,6 +9,15 @@ export class SWSEActiveEffect extends ActiveEffect {
         if(this.canUserModify(game.user, 'update')){
             await this.update(data, context);
         }
+    }
+
+
+    get hasDuration(){
+        return !this.flags.swse?.itemModifier
+    }
+
+    get hasDisable(){
+        return !this.flags.swse?.itemModifier
     }
 
     static async _onCreateDocuments(documents, context) {
@@ -21,5 +31,9 @@ export class SWSEActiveEffect extends ActiveEffect {
 
     get toggles(){
         return this.flags.swse.toggles
+    }
+
+    get upgradePoints(){
+        return getInheritableAttribute({entity: this, attributeKey:"upgradePointCost", reduce:"SUM"});
     }
 }

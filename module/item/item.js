@@ -709,21 +709,11 @@ export class SWSEItem extends Item {
         for (let stripped of Object.values(system.stripping)) {
             system.upgradePoints += stripped.value ? 1 : 0;
         }
-
-        if (system.items && system.items.length > 0) {
-            for (let mod of system.items ? system.items : []) {
-
-                let upgradePointCost = getInheritableAttribute({
-                    entity: mod,
-                    attributeKey: "upgradePointCost"
-                });
-
-                if (upgradePointCost !== undefined) {
-
-                    system.upgradePoints -= toNumber(upgradePointCost);
-                }
-            }
-        }
+        let upgradePointCost = getInheritableAttribute({
+            entity: this,
+            attributeKey: "upgradePointCost", reduce: "SUM"
+        });
+        system.upgradePoints -= upgradePointCost;
     }
 
     setStripping(key, label, enabled, type, low, high) {

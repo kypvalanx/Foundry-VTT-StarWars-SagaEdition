@@ -291,6 +291,8 @@
 
 .swse .editor {
   min-height: 300px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .swse .tox-tinymce {
@@ -556,6 +558,16 @@
 
 .swse .items-list .item-name {
   margin: 0;
+  -webkit-box-flex: 5;
+  -ms-flex: 5;
+  flex: 5;
+}
+
+.swse .items-list .item-upgrade {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  white-space: nowrap;
 }
 
 .swse .items-list .strikethrough {
@@ -564,6 +576,9 @@
 
 .swse .items-list .item-controls {
   text-align: right;
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
 .swse td {
