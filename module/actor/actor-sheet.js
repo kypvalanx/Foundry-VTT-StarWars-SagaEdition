@@ -88,7 +88,13 @@ export class SWSEActorSheet extends ActorSheet {
 
     /** @override */
     getData(options) {
-        return super.getData(options);
+        let data = super.getData(options);
+
+        data.modes = Object.entries(CONST.ACTIVE_EFFECT_MODES).reduce((obj, e) => {
+            obj[e[1]] = game.i18n.localize("EFFECT.MODE_"+e[0]);
+            return obj;
+        }, {})
+        return data;
     }
 
     /** @override */

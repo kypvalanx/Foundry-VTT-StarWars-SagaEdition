@@ -157,6 +157,14 @@ export function changeText(event) {
     this.object.safeUpdate(update);
 }
 
+export function changeSelect(event) {
+    let {system, updatePath} = getRoot.call(this);
+    const target = event.target
+    const update = safeInsert(this.object, `${updatePath}${target.name}`, target.value)
+
+    this.object.safeUpdate(update);
+}
+
 export function changeCheckbox(event) {
     let {system, updatePath} = getRoot.call(this);
     const target = event.target

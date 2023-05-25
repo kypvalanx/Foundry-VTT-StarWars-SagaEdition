@@ -9,7 +9,7 @@ import {
     _adjustPropertyBySpan,
     _onChangeControl,
     _onSpanTextInput,
-    changeCheckbox,
+    changeCheckbox, changeSelect,
     changeText,
     onToggle
 } from "../listeners.js";
@@ -156,6 +156,7 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
 
+        html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));

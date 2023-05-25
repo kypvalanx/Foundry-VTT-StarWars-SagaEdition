@@ -5,26 +5,26 @@
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
                    {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
         </div>
+        <div class="mode">
+            <select class="direct" {{#if inherited}}disabled{{else}}name="changes.{{index}}.mode"{{/if}} data-dtype="Number">
+                {{selectOptions modes selected=change.mode}}
+            </select>
+        </div>
         <div class="value">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
                    {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
-            <a class="change-control toggle" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if
+            <a class="change-control toggle" style="display:none" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if
                     (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
             {{#unless inherited}}
                 <a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i
-                        class="fas fa-trash"></i></a>{{/unless}}
+                        class="fas fa-trash"></i></a>
+            {{/unless}}
         </div>
     </div>
     <div style="display: {{#if
             (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}"
          class="collapsible">
-        {{log change}}
-        <label>Override: <input class="attribute-override direct" data-action="change-control"
-                                data-action-type="toggle-override"
-                                {{#if inherited}}disabled{{else}}name="changes.{{index}}.override"{{/if}}
-                                type="checkbox" {{#if change.override}}checked{{/if}}
-                                title="attributes with this enabled will override other attributes by the same name rather than both being active"></label>
     </div>
 </li>

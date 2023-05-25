@@ -6,6 +6,7 @@ import {SimpleCache} from "../common/simple-cache.js";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../classDefaults.js";
 
 function createChangeFromAttribute(attr) {
+    //console.warn(`i don't think this should run ${Object.entries(attr)}`)
     attr.mode = 2;
     return attr;
 }
@@ -36,36 +37,10 @@ export class SWSEItem extends Item {
         if(!Array.isArray(this.system.changes)){
             this.system.changes = Object.values(this.system.changes)
         }
-        if(this.system.attributes && this.canUserModify(game.user, 'update')){
-            let update = {};
-            let changes = this.system.changes;
-            for(let change of Object.values(this.system.attributes)){
-                if(change){
-                    changes.push(change);
-                }
-            }
-            update['system.changes'] = changes;
-            update['system.attributes'] = null;
-            this.safeUpdate(update)
-            return;
-        }
-        if(this.system.modes && this.canUserModify(game.user, 'update')){
-            let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
-            if(modes.length > 0){
-                let activeEffects = modes.map(mode => this.createActiveEffectFromMode(mode))
-                this.safeUpdate({"system.modes": null}).then(()=>this.createEmbeddedDocuments("ActiveEffect", activeEffects))
-            }
-        }
+        this.updateLegacyItem();
         this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        this.system.items?.forEach(id => {
-            let item = this.parent.items.get(id)
-            if (item) {
-                this.addItemModificationEffectFromItem(item)
-                this.item.revokeOwnership(item)
-            }
-        })
         this.baseName = this.name;
         this.name = SWSEItem.buildItemName(this);
 
@@ -75,6 +50,62 @@ export class SWSEItem extends Item {
         if (this.type === "weapon") this.prepareWeapon(system);
         if (this.type === "armor") this.prepareArmor(system);
         if (this.type === "feat") this.prepareFeatData(system);
+    }
+
+    updateLegacyItem() {
+        let update = {};
+        let activeEffects = [];
+        if (this.system.attributes && this.canUserModify(game.user, 'update')) {
+            let changes = this.system.changes;
+            for (let change of Object.values(this.system.attributes)) {
+                if (change) {
+                    changes.push(change);
+                }
+            }
+            update['system.changes'] = changes;
+            update['system.attributes'] = null;
+        }
+        if (this.system.modes && this.canUserModify(game.user, 'update')) {
+            let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
+            if(modes){
+                update["system.modes"] = null;
+            }
+
+            if (modes.length > 0) {
+                activeEffects = modes.map(mode => this.createActiveEffectFromMode(mode))
+                //this.safeUpdate(data).then(() => this.createEmbeddedDocuments("ActiveEffect", activeEffects))
+            }
+        }
+        this.system.items?.forEach(id => {
+            let item = this.parent.items.get(id)
+            if (item) {
+                this.addItemModificationEffectFromItem(item)
+                this.item.revokeOwnership(item)
+            }
+        })
+
+        if(this.system.changes){
+            for(const [idx, change] of this.system.changes.entries()){
+                if(change.mode){
+                    continue;
+                }
+                let override = change.override;
+                delete change.override;
+                if(override){
+                    change.mode = CONST.ACTIVE_EFFECT_MODES.OVERRIDE;
+                } else {
+                    change.mode = CONST.ACTIVE_EFFECT_MODES.ADD;
+                }
+                update[`system.changes.${idx}`] = change;
+            }
+        }
+
+        if(Object.keys(update).length>0){
+             this.safeUpdate(update)
+        }
+        if(activeEffects && activeEffects.length>0){
+            this.createEmbeddedDocuments("ActiveEffect", activeEffects)
+        }
     }
 
     canUserModify(user, action, data){
