@@ -1,4 +1,4 @@
-import {increaseDieSize, increaseDieType, toNumber} from "../util.js";
+import {convertOverrideToMode, increaseDieSize, increaseDieType, toNumber} from "../util.js";
 import {sizeArray, uniqueKey} from "../constants.js";
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {changeSize} from "../actor/size.js";
@@ -37,7 +37,9 @@ export class SWSEItem extends Item {
         if(!Array.isArray(this.system.changes)){
             this.system.changes = Object.values(this.system.changes)
         }
-        this.updateLegacyItem();
+        if(this.updateLegacyItem()){
+            return;
+        }
         this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
@@ -55,8 +57,8 @@ export class SWSEItem extends Item {
     updateLegacyItem() {
         let update = {};
         let activeEffects = [];
+        const changes = this.system.changes;
         if (this.system.attributes && this.canUserModify(game.user, 'update')) {
-            let changes = this.system.changes;
             for (let change of Object.values(this.system.attributes)) {
                 if (change) {
                     changes.push(change);
@@ -83,29 +85,18 @@ export class SWSEItem extends Item {
                 this.item.revokeOwnership(item)
             }
         })
+        convertOverrideToMode(changes, update);
 
-        if(this.system.changes){
-            for(const [idx, change] of this.system.changes.entries()){
-                if(change.mode){
-                    continue;
-                }
-                let override = change.override;
-                delete change.override;
-                if(override){
-                    change.mode = CONST.ACTIVE_EFFECT_MODES.OVERRIDE;
-                } else {
-                    change.mode = CONST.ACTIVE_EFFECT_MODES.ADD;
-                }
-                update[`system.changes.${idx}`] = change;
-            }
-        }
-
+        let response = false;
         if(Object.keys(update).length>0){
              this.safeUpdate(update)
+            response = true
         }
         if(activeEffects && activeEffects.length>0){
             this.createEmbeddedDocuments("ActiveEffect", activeEffects)
+            response = true
         }
+        return response;
     }
 
     canUserModify(user, action, data){

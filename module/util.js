@@ -5,7 +5,6 @@ import {dieSize, dieType} from "./constants.js";
 import {SWSEActor} from "./actor/actor.js";
 import {SWSEItem} from "./item/item.js";
 import {meetsPrerequisites} from "./prerequisite.js";
-import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.js";
 import {SWSEActiveEffect} from "./active-effect/active-effect.js";
 
 export function unique(value, index, self) {
@@ -660,6 +659,75 @@ export function getRangeModifierBlock(range, accurate, innacurate, id, defaultVa
     return table;
 }
 
+const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE];
+
+function resolveExpressionReduce(values, actor) {
+    const resolutionSorting = {};
+    for(const value of values){
+        const priority = value.priority || 1;
+        resolutionSorting[priority] = resolutionSorting[priority] || {};
+        const mode = value.mode || 2;
+        resolutionSorting[priority][mode] = resolutionSorting[priority][mode] ||[];
+        value.value = resolveValueArray(value.value, actor)
+        resolutionSorting[priority][mode].push(value)
+    }
+
+    let currentValue = 0;
+    let priorities = Object.keys(resolutionSorting).sort();
+    for(const priority of priorities){
+        let z = resolutionSorting[priority];
+        for(const mode of ATTRIBUTE_RESOLUTION_ORDER){
+            for(const value of z[mode] || []){
+                switch (mode){
+                    case CONST.ACTIVE_EFFECT_MODES.ADD:
+                        currentValue = currentValue + value.value;
+                        break;
+                    case CONST.ACTIVE_EFFECT_MODES.DOWNGRADE:
+                        currentValue = Math.min(currentValue, value.value);
+                        break;
+                    case CONST.ACTIVE_EFFECT_MODES.UPGRADE:
+                        currentValue = Math.max(currentValue, value.value);
+                        break;
+                    case CONST.ACTIVE_EFFECT_MODES.MULTIPLY:
+                        currentValue = currentValue * value.value;
+                        break;
+                    case CONST.ACTIVE_EFFECT_MODES.OVERRIDE:
+                        currentValue = value.value;
+                        break;
+                }
+            }
+        }
+    }
+    return currentValue;
+}
+
+function getValueSize(value) {
+    if (typeof value === 'string' && value.includes("d")) {
+        let toks = value.split("d")
+        return toNumber(toks[0]) * toNumber(toks[1]);
+    } else {
+        return toNumber(value);
+    }
+}
+
+function maxValue(values, actor) {
+    return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => {
+        let sub = {};
+        sub[getValueSize(a)] = a;
+        sub[getValueSize(b)] = b;
+        return sub[a === undefined ? b : Math.max(a, b)];
+    }, undefined);
+}
+
+function minValue(values, actor) {
+    return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => {
+        let sub = {};
+        sub[getValueSize(a)] = a;
+        sub[getValueSize(b)] = b;
+        return sub[a === undefined ? b : Math.min(a, b)];
+    }, undefined);
+}
+
 export function reduceArray(reduce, values, actor) {
     if (!reduce) {
         return values;
@@ -687,40 +755,17 @@ export function reduceArray(reduce, values, actor) {
     }
 
     switch (reduce) {
+        case "EXPRESSION":
         case "SUM":
-            return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => a === 0 && isNaN(b) ? b : a + b, 0);
+            return resolveExpressionReduce(values, actor);
         case "AND":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a && b, true);
         case "OR":
             return values.map(attr => toBoolean(attr.value)).reduce((a, b) => a || b, false);
         case "MAX":
-            return values.map(attr => attr.value).reduce((a, b) => {
-                let sub = {}
-                if (typeof a === 'string' && a.includes("d")) {
-                    let toks = a.split("d")
-                    let key = toNumber(toks[0]) * toNumber(toks[1]);
-                    sub[key] = a;
-                    a = key;
-                } else {
-                    let key = toNumber(a);
-                    sub[key] = a;
-                    a = key;
-                }
-                if (typeof b === 'string' && b.includes("d")) {
-                    let toks = b.split("d")
-                    let key = toNumber(toks[0]) * toNumber(toks[1]);
-                    sub[key] = b;
-                    b = key;
-                } else {
-                    let key = toNumber(b);
-                    sub[key] = b;
-                    b = key;
-                }
-                let result = a === undefined ? b : Math.max(a, b);
-                return sub[result];
-            }, undefined);
+            return maxValue(values, actor);
         case "MIN":
-            return values.map(attr => toNumber(attr.value)).reduce((a, b) => a === undefined ? b : Math.min(a, b), undefined);
+            return minValue(values, actor);
         case "FIRST":
             let map = values.map(attr => attr.value);
             if (map.length > 0) {
@@ -932,7 +977,25 @@ function assertEquals(expected, actual) {
 }
 
 function test() {
+
     console.log("running util tests...");
+    const ADD = CONST.ACTIVE_EFFECT_MODES.ADD
+    const MULTIPLY = CONST.ACTIVE_EFFECT_MODES.MULTIPLY
+    const UPGRADE = CONST.ACTIVE_EFFECT_MODES.UPGRADE
+    const DOWNGRADE = CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
+    const OVERRIDE = CONST.ACTIVE_EFFECT_MODES.OVERRIDE
+    const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
+
+    assertEquals(0, resolveExpressionReduce([], {}))
+    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}], {}))
+    assertEquals(0, resolveExpressionReduce([{value:5, mode:MULTIPLY}], {}))
+    assertEquals(25, resolveExpressionReduce([{value:5, mode:ADD}, {value:5, mode:MULTIPLY}], {}))
+    assertEquals(7, resolveExpressionReduce([{value:5, mode:ADD}, {value:7, mode:UPGRADE}], {}))
+    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}, {value:3, mode:UPGRADE}], {}))
+    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}, {value:7, mode:DOWNGRADE}], {}))
+    assertEquals(3, resolveExpressionReduce([{value:5, mode:ADD}, {value:3, mode:DOWNGRADE}], {}))
+    assertEquals(13, resolveExpressionReduce([{value:5, mode:ADD, priority:-1}, {value:5, mode:ADD, priority:2}, {value: 3, mode:2}], {}))
+    assertEquals(8, resolveExpressionReduce([{value:50, mode:MULTIPLY, priority:-1}, {value:5, mode:ADD, priority:2}, {value: 3, mode:2}], {}))
 
     assertEquals(5, resolveWeight("5", 1, 5))
     assertEquals(5, resolveWeight("5 kg", 1, 5))
@@ -1060,4 +1123,22 @@ export function safeInsert(object, s, value) {
         i++;
     }
     return update;
+}
+
+export function convertOverrideToMode(changes, update) {
+    if (changes) {
+        for (const [idx, change] of changes.entries()) {
+            if (change.mode) {
+                continue;
+            }
+            let override = change.override;
+            delete change.override;
+            if (override) {
+                change.mode = CONST.ACTIVE_EFFECT_MODES.OVERRIDE;
+            } else {
+                change.mode = CONST.ACTIVE_EFFECT_MODES.ADD;
+            }
+            update[`system.changes.${idx}`] = change;
+        }
+    }
 }

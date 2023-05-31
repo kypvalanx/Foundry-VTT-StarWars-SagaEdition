@@ -88,7 +88,7 @@ export function getResolvedSize(entity, options = {}) {
 
 
 function getLocalChangesOnDocument(document) {
-    const values = document.changes ||document.system?.changes || document._source?.system?.changes || [];
+    const values = document.changes || document.system?.changes || document._source?.system?.changes || [];
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
@@ -179,7 +179,12 @@ export function getInheritableAttribute(data = {}) {
         return [];
     }
     let values = getChangesFromDocuments(data);
-
+    // 1. get values
+    // 2. ?
+    // 3. profit
+    // really though we have to filter by attribute key, allow attribute filter,
+    // run prerequisites (look at this, it looks like it's done twice?)that order can stay the same
+    // i think that overrid needs to move to reduce, the reduce functions just need to acknowledge mode. TODO look at this after coffee
     if(data.attributeKey){
         let attributeKeyFilter;
         if(Array.isArray(data.attributeKey)){
@@ -219,12 +224,11 @@ export function getInheritableAttribute(data = {}) {
             .filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail)
     }
 
-    let overrides = values.filter(attr => attr && attr.override)
-    if (overrides.length > 0) {
-        let overriddenKeys = overrides.map(o => o.key);
-        values = values.filter(value => !overriddenKeys.includes(value.key) || value.override);
-    }
-    //TODO sort by key here
+    // let overrides = values.filter(attr => attr && attr.override)
+    // if (overrides.length > 0) {
+    //     let overriddenKeys = overrides.map(o => o.key);
+    //     values = values.filter(value => !overriddenKeys.includes(value.key) || value.override);
+    // }
     return reduceArray(data.reduce, values, data.entity);
 }
 

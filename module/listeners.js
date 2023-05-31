@@ -10,7 +10,7 @@ export function _onChangeControl(event) {
     if ('add' === type) {
         let update = {};
         update[updatePath] = changes;
-        update[updatePath].push({key: "", value: ""});
+        update[updatePath].push({key: "", mode:2, value: ""});
         this.object.safeUpdate(update);
     }
     if ('delete' === type) {

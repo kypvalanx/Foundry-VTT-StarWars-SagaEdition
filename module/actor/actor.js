@@ -4,7 +4,7 @@ import {resolveGrapple, resolveOffense} from "./offense.js";
 import {generateSpeciesData} from "./species.js";
 import {
     ALPHA_FINAL_NAME,
-    COMMMA_LIST,
+    COMMMA_LIST, convertOverrideToMode,
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
@@ -81,16 +81,19 @@ export class SWSEActor extends Actor {
         if (this.skipPrepare) {
             return;
         }
-        super.prepareData();
-
-        const system = this.system;
-        system.description = system.description || ""
-        system.gravity = system.gravity || "Normal"
-
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
         this.cache = new SimpleCache()
+        super.prepareData();
+
+        if(this.updateLegacyActor()){
+            return;
+        }
+        const system = this.system;
+        system.description = system.description || ""
+        system.gravity = system.gravity || "Normal"
+
 
 
         if (this.id && this.type === "npc") {
@@ -2648,6 +2651,21 @@ export class SWSEActor extends Actor {
         return Math.pow(this.system.attributes.str.total, 2)
             * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
             * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+    }
+
+    updateLegacyActor() {
+        let update= {};
+        let changes = !this.system?.changes ? undefined : Array.isArray(this.system.changes) ? this.system.changes : Object.values(this.system.changes);
+        if(!Array.isArray(this.system.changes)){
+            update['system.changes'] = !this.system?.changes ? undefined : Object.values(this.system.changes);
+        }
+        convertOverrideToMode(changes, update);
+        let response = false;
+        if(Object.keys(update).length>0){
+            this.safeUpdate(update)
+            response = true
+        }
+        return response;
     }
 }
 
