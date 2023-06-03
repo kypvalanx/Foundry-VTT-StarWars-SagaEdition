@@ -713,15 +713,6 @@ function addValues(a, b) {
     }
 
     let response = summedTerms.length ===1 && typeof summedTerms[0] === 'number'? 0 : "";
-    // const keys = Object.keys(summedTerms).map(key => toNumber(key)).sort();
-    // console.log(keys)
-    // for(const key of keys){
-    //     if(key > 0){
-    //         response = "";
-    //     } else {
-    //         response
-    //     }
-    // }
 
     for(let i = summedTerms.length-1; i>-1; i--){
         if(!summedTerms[i]){
@@ -739,6 +730,66 @@ function addValues(a, b) {
     return response;
 }
 
+function multiplyValues(currentValue, multiplier) {
+    multiplier = parseInt(multiplier);
+    let terms = resolveValue(currentValue);
+
+    let summedTerms = [];
+    for (const term of terms) {
+        const i = term.sides || 0;
+        let sum = summedTerms[i] || (typeof term.value === "number" ? 0 : "");
+        if(typeof sum === 'string' && sum !== ""){
+
+            summedTerms[i] = sum + " " + term.value;
+        } else {
+            summedTerms[i] = sum + term.value;
+        }
+    }
+
+    let response = summedTerms.length ===1 && typeof summedTerms[0] === 'number'? 0 : "";
+
+    for(let i = summedTerms.length-1; i>-1; i--){
+        if(!summedTerms[i]){
+            continue;
+        }
+        if(i < summedTerms.length-1){
+            response += " + "
+        }
+        if(typeof summedTerms[i] === 'number' && typeof multiplier === 'number'){
+            response+=summedTerms[i] * multiplier;
+        } else {
+            response+=summedTerms[i];
+        }
+        if( i>0){
+            response += `d${i}`;
+        }
+    }
+
+    return response;
+}
+
+function reduceValue(terms) {
+    let response = 0;
+    for (const term of terms) {
+        const i = term.sides || 1;
+        response += i * term.value;
+    }
+    return response;
+}
+
+function downgradeValues(a, b) {
+    let aReduced = reduceValue(resolveValue(a));
+    let bReduced = reduceValue(resolveValue(b));
+    if(aReduced === Math.min(aReduced, bReduced))
+    {return a}return b;
+}
+function upgradeValues(a, b) {
+    let aReduced = reduceValue(resolveValue(a));
+    let bReduced = reduceValue(resolveValue(b));
+    if(aReduced === Math.max(aReduced, bReduced))
+    {return a}return b;
+}
+
 function resolveExpressionReduce(values, actor) {
     const resolutionSorting = {};
     for (const value of values) {
@@ -746,7 +797,7 @@ function resolveExpressionReduce(values, actor) {
         resolutionSorting[priority] = resolutionSorting[priority] || {};
         const mode = value.mode || 2;
         resolutionSorting[priority][mode] = resolutionSorting[priority][mode] || [];
-        value.value = resolveValueArray(value.value, actor)
+        //value.value = resolveValueArray(value.value, actor)
         resolutionSorting[priority][mode].push(value)
     }
 
@@ -761,13 +812,13 @@ function resolveExpressionReduce(values, actor) {
                         currentValue = addValues(currentValue, value.value);
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.DOWNGRADE:
-                        currentValue = Math.min(currentValue, value.value);
+                        currentValue = downgradeValues(currentValue, value.value);
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.UPGRADE:
-                        currentValue = Math.max(currentValue, value.value);
+                        currentValue = upgradeValues(currentValue, value.value);
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.MULTIPLY:
-                        currentValue = currentValue * value.value;
+                        currentValue = multiplyValues(currentValue, value.value);
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.OVERRIDE:
                         currentValue = value.value;
@@ -1063,6 +1114,7 @@ function test() {
     const DOWNGRADE = CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
     const OVERRIDE = CONST.ACTIVE_EFFECT_MODES.OVERRIDE
     const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
+    const POST_ROLL_MULTIPLY = 6;
 
     assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
     assertEquals(7, addValues(4, 3));
@@ -1073,6 +1125,11 @@ function test() {
     assertEquals("1d6 + 4", addValues(4, "1d6"))
     assertEquals("1d6 + 2", addValues("1d6", 2))
 
+    assertEquals(2, multiplyValues(1, 2))
+    assertEquals("2d6", multiplyValues("1d6", 2))
+    assertEquals("4d8 + 2d6", multiplyValues("1d6 + 2d8", 2))
+    assertEquals("HELLO WORLD", multiplyValues("HELLO WORLD", 2))
+
 
     assertEquals(0, resolveExpressionReduce([], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
@@ -1080,6 +1137,8 @@ function test() {
     assertEquals(25, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 5, mode: MULTIPLY}], {}))
     assertEquals(7, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: UPGRADE}], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: UPGRADE}], {}))
+    assertEquals("1d8", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
+    assertEquals("5d8 + 3d6", resolveExpressionReduce([{value: "2d6 + 5d8 + 1d6", mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: DOWNGRADE}], {}))
     assertEquals(3, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: DOWNGRADE}], {}))
     assertEquals(13, resolveExpressionReduce([{value: 5, mode: ADD, priority: -1}, {
