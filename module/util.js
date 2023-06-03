@@ -661,26 +661,104 @@ export function getRangeModifierBlock(range, accurate, innacurate, id, defaultVa
 
 const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE];
 
+const regExp = new RegExp('(\\d+)d(\\d+)');
+
+function resolveValue(a) {
+    a = !!a.value ? a.value : a;
+    // if(typeof a === 'number'){
+    //     return [{value:a}]
+    // }
+    if (typeof a === 'string') {
+        const toks = a.replace(/-/g, " - ").replace(/\+/g, " + ").split(" ")
+
+        let results = [];
+
+        let negMult = 1;
+        for (const tok of toks) {
+            if('-' === tok){
+                negMult = -1;
+                continue;
+            }
+            if('+' === tok){
+                continue;
+            }
+            if (regExp.test(tok)) {
+                let result = regExp.exec(tok);
+                results.push({value: negMult*toNumber(result[1]), sides: toNumber(result[2])})
+                negMult = 1
+            } else {
+                const num = toNumber(tok);
+                if(typeof num === 'number'){
+                    results.push({value: negMult*num})
+                } else {
+                    results.push({value:num})
+                }
+                negMult = 1
+            }
+        }
+        return results;
+    }
+    return [{value: a}]
+}
+
+function addValues(a, b) {
+    let terms = resolveValue(a);
+    terms.push(...resolveValue(b));
+
+    let summedTerms = [];
+    for (const term of terms) {
+        const i = term.sides || 0;
+        let sum = summedTerms[i] || (typeof term.value === "number" ? 0 : "");
+        summedTerms[i] = sum + term.value;
+    }
+
+    let response = summedTerms.length ===1 && typeof summedTerms[0] === 'number'? 0 : "";
+    // const keys = Object.keys(summedTerms).map(key => toNumber(key)).sort();
+    // console.log(keys)
+    // for(const key of keys){
+    //     if(key > 0){
+    //         response = "";
+    //     } else {
+    //         response
+    //     }
+    // }
+
+    for(let i = summedTerms.length-1; i>-1; i--){
+        if(!summedTerms[i]){
+            continue;
+        }
+        if(i < summedTerms.length-1){
+            response += " + "
+        }
+        response+=summedTerms[i];
+        if( i>0){
+                response += `d${i}`;
+        }
+    }
+
+    return response;
+}
+
 function resolveExpressionReduce(values, actor) {
     const resolutionSorting = {};
-    for(const value of values){
+    for (const value of values) {
         const priority = value.priority || 1;
         resolutionSorting[priority] = resolutionSorting[priority] || {};
         const mode = value.mode || 2;
-        resolutionSorting[priority][mode] = resolutionSorting[priority][mode] ||[];
+        resolutionSorting[priority][mode] = resolutionSorting[priority][mode] || [];
         value.value = resolveValueArray(value.value, actor)
         resolutionSorting[priority][mode].push(value)
     }
 
     let currentValue = 0;
     let priorities = Object.keys(resolutionSorting).sort();
-    for(const priority of priorities){
+    for (const priority of priorities) {
         let z = resolutionSorting[priority];
-        for(const mode of ATTRIBUTE_RESOLUTION_ORDER){
-            for(const value of z[mode] || []){
-                switch (mode){
+        for (const mode of ATTRIBUTE_RESOLUTION_ORDER) {
+            for (const value of z[mode] || []) {
+                switch (mode) {
                     case CONST.ACTIVE_EFFECT_MODES.ADD:
-                        currentValue = currentValue + value.value;
+                        currentValue = addValues(currentValue, value.value);
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.DOWNGRADE:
                         currentValue = Math.min(currentValue, value.value);
@@ -986,16 +1064,34 @@ function test() {
     const OVERRIDE = CONST.ACTIVE_EFFECT_MODES.OVERRIDE
     const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
 
+    assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
+    assertEquals(7, addValues(4, 3));
+    assertEquals(7, addValues(3, 4));
+    assertEquals("HelloWorld", addValues("Hello", "World"))
+    assertEquals(13, addValues(7, {value: 6}))
+    assertEquals("2d6", addValues("1d6", "1d6"))
+    assertEquals("1d6 + 4", addValues(4, "1d6"))
+    assertEquals("1d6 + 2", addValues("1d6", 2))
+
+
     assertEquals(0, resolveExpressionReduce([], {}))
-    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}], {}))
-    assertEquals(0, resolveExpressionReduce([{value:5, mode:MULTIPLY}], {}))
-    assertEquals(25, resolveExpressionReduce([{value:5, mode:ADD}, {value:5, mode:MULTIPLY}], {}))
-    assertEquals(7, resolveExpressionReduce([{value:5, mode:ADD}, {value:7, mode:UPGRADE}], {}))
-    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}, {value:3, mode:UPGRADE}], {}))
-    assertEquals(5, resolveExpressionReduce([{value:5, mode:ADD}, {value:7, mode:DOWNGRADE}], {}))
-    assertEquals(3, resolveExpressionReduce([{value:5, mode:ADD}, {value:3, mode:DOWNGRADE}], {}))
-    assertEquals(13, resolveExpressionReduce([{value:5, mode:ADD, priority:-1}, {value:5, mode:ADD, priority:2}, {value: 3, mode:2}], {}))
-    assertEquals(8, resolveExpressionReduce([{value:50, mode:MULTIPLY, priority:-1}, {value:5, mode:ADD, priority:2}, {value: 3, mode:2}], {}))
+    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
+    assertEquals(0, resolveExpressionReduce([{value: 5, mode: MULTIPLY}], {}))
+    assertEquals(25, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 5, mode: MULTIPLY}], {}))
+    assertEquals(7, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: UPGRADE}], {}))
+    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: UPGRADE}], {}))
+    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: DOWNGRADE}], {}))
+    assertEquals(3, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: DOWNGRADE}], {}))
+    assertEquals(13, resolveExpressionReduce([{value: 5, mode: ADD, priority: -1}, {
+        value: 5,
+        mode: ADD,
+        priority: 2
+    }, {value: 3, mode: 2}], {}))
+    assertEquals(8, resolveExpressionReduce([{value: 50, mode: MULTIPLY, priority: -1}, {
+        value: 5,
+        mode: ADD,
+        priority: 2
+    }, {value: 3, mode: 2}], {}))
 
     assertEquals(5, resolveWeight("5", 1, 5))
     assertEquals(5, resolveWeight("5 kg", 1, 5))
