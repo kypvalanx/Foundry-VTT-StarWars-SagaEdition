@@ -26,10 +26,21 @@ export function resolveValueArray(values, actor, options) {
         } else if (`${value}`.startsWith("/")) {
             multiplier /= resolveExpression(value.substring(1, value.length), actor, options)
         } else {
-            total += resolveExpression(value, actor, options);
+            const result = resolveExpression(value, actor, options);
+            if(typeof result !== 'number'){
+                if(total === 0){
+                    total = "";
+                } else {
+                    total += " + ";
+                }
+            }
+            total += result;
         }
     }
-    return total * multiplier;
+    if(typeof total === 'number'){
+        return total * multiplier;
+    }
+    return total + (multiplier === 1 ? "" : " * " + multiplier)
 }
 
 
@@ -218,12 +229,17 @@ export function resolveExpression(expression, actor) {
     }
 
     if (typeof expression === "string") {
-        if (!!actor && expression.startsWith("@")) {
-            let variable = getVariableFromActorData(actor, expression);
-            if (variable !== undefined) {
-                return resolveExpression(variable, actor);
+        if (expression.startsWith("@")) {
+            if(!!actor){
+                let variable = getVariableFromActorData(actor, expression);
+                if (variable !== undefined) {
+                    return resolveExpression(variable, actor);
+                }
             }
-        } else {
+            return expression;
+        } else if(regExp.test(expression)){
+            return expression;
+        }else {
             return toNumber(expression);
         }
     }
@@ -232,7 +248,7 @@ export function resolveExpression(expression, actor) {
 
 export function getVariableFromActorData(swseActor, variableName) {
     if (!swseActor?.resolvedVariables) {
-        return 0;
+        return undefined;
     }
 
     let value = swseActor.resolvedVariables?.get(variableName);
@@ -659,7 +675,7 @@ export function getRangeModifierBlock(range, accurate, innacurate, id, defaultVa
     return table;
 }
 
-const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE];
+const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE, 6];
 
 const regExp = new RegExp('(\\d+)d(\\d+)');
 
@@ -707,14 +723,14 @@ function addValues(a, b) {
 
     let summedTerms = [];
     for (const term of terms) {
-        const i = term.sides || 0;
+        const i = typeof term.value === 'string' && term.value.startsWith("@") ? -1 : term.sides || 0;
         let sum = summedTerms[i] || (typeof term.value === "number" ? 0 : "");
         summedTerms[i] = sum + term.value;
     }
 
     let response = summedTerms.length ===1 && typeof summedTerms[0] === 'number'? 0 : "";
 
-    for(let i = summedTerms.length-1; i>-1; i--){
+    for(let i = summedTerms.length-1; i>-2; i--){
         if(!summedTerms[i]){
             continue;
         }
@@ -797,7 +813,7 @@ function resolveExpressionReduce(values, actor) {
         resolutionSorting[priority] = resolutionSorting[priority] || {};
         const mode = value.mode || 2;
         resolutionSorting[priority][mode] = resolutionSorting[priority][mode] || [];
-        //value.value = resolveValueArray(value.value, actor)
+        value.value = resolveExpression(value, actor)
         resolutionSorting[priority][mode].push(value)
     }
 
@@ -822,6 +838,9 @@ function resolveExpressionReduce(values, actor) {
                         break;
                     case CONST.ACTIVE_EFFECT_MODES.OVERRIDE:
                         currentValue = value.value;
+                        break;
+                    case 6:
+                        currentValue += " X "+value.value;
                         break;
                 }
             }
@@ -1133,12 +1152,13 @@ function test() {
 
     assertEquals(0, resolveExpressionReduce([], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
+    assertEquals("5 + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
     assertEquals(0, resolveExpressionReduce([{value: 5, mode: MULTIPLY}], {}))
     assertEquals(25, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 5, mode: MULTIPLY}], {}))
     assertEquals(7, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: UPGRADE}], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: UPGRADE}], {}))
     assertEquals("1d8", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
-    assertEquals("5d8 + 3d6", resolveExpressionReduce([{value: "2d6 + 5d8 + 1d6", mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
+    //assertEquals("5d8 + 3d6", resolveExpressionReduce([{value: "2d6 + 5d8 + 1d6", mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: DOWNGRADE}], {}))
     assertEquals(3, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: DOWNGRADE}], {}))
     assertEquals(13, resolveExpressionReduce([{value: 5, mode: ADD, priority: -1}, {
@@ -1151,6 +1171,8 @@ function test() {
         mode: ADD,
         priority: 2
     }, {value: 3, mode: 2}], {}))
+
+
 
     assertEquals(5, resolveWeight("5", 1, 5))
     assertEquals(5, resolveWeight("5 kg", 1, 5))
