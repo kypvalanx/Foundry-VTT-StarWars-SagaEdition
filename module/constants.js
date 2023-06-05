@@ -123,9 +123,13 @@ export const GM_BONUSES = [
     {display: "Technician Bonus Feats", key: "provides", value: "Technician Bonus Feats:#integer#"},
     {display: "Technician Talent Trees", key: "provides", value: "Technician Talent Trees:#integer#"},
     {display: "Trained Skills", key: "trainedSkills", value: "#integer#"},
-    {display: "Vanguard Talent Trees", key: "provides", value: "Vanguard Talent Trees:#integer#"}
+    {display: "Vanguard Talent Trees", key: "provides", value: "Vanguard Talent Trees:#integer#"},
+    {display: "Fortitude Defense Bonus", key: "fortitudeDefenseBonus", value: "#integer#"},
+    {display: "Reflex Defense Bonus", key: "reflexDefenseBonus", value: "#integer#"},
+    {display: "Will Defense Bonus", key: "willDefenseBonus", value: "#integer#"}
 ]
 
+//fortitudeDefenseBonus
 export const NEW_LINE = `
 `;
 
