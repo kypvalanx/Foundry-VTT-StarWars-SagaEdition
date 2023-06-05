@@ -11,7 +11,6 @@
         <div class="resource-block">
             <h3>
             <label class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second Winds Per Day</label>
-                {{log actor.system.secondWind}}
                 {{#times actor.system.secondWind.perDay}}
                     <input data-action="toggle-second-wind" type="checkbox" data-name="system.secondWind.toggles.{{this}}" {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
                 {{/times}}

@@ -8,7 +8,6 @@
 </header>
 <ol class="change-list">
     {{#each changes as |change i|}}
-        {{log this}}
         {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i modes=../modes}}
     {{/each}}
     {{#each inheritedChanges as |change i|}}
