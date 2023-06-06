@@ -43,12 +43,13 @@ function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride)
     for (let item of items) {
         let duplicates = (names[item.name] || 0) + 1;
         names[item.name] = duplicates;
-        attributes.push(...getChangesFromDocuments({
+        const changesFromDocuments = getChangesFromDocuments({
             entity: item,
             duplicates,
             recursive: true,
             parent: entity
-        }));
+        });
+        attributes.push(...changesFromDocuments);
     }
     return attributes;
 }
@@ -159,7 +160,8 @@ function getChangesFromDocuments(data) {
         }
         return values;
     }
-    return getChangesFromDocument(data);
+    const changesFromDocument = getChangesFromDocument(data);
+    return changesFromDocument;
 }
 
 /**

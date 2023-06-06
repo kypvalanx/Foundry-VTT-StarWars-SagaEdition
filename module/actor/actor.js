@@ -1408,8 +1408,8 @@ export class SWSEActor extends Actor {
      */
     hasItem(item) {
         return Array.from(this.items.values())
-            .map(i => i.finalName)
-            .includes(item.finalName);
+            .map(i => `${i.finalName}:${i.type}`)
+            .includes(`${item.finalName}:${item.type}`);
     }
 
     _reduceProvidedItemsByExistingItems(actorData) {
@@ -1866,8 +1866,8 @@ export class SWSEActor extends Actor {
                 if (this.hasItem(entity) && !takeMultipleTimes) {
                     if (!context.skipPrerequisite && !context.isUpload) {
                         await Dialog.prompt({
-                            title: `You already have this ${context.type}`,
-                            content: `You have already taken the ${entity.finalName} ${context.type}`,
+                            title: `You already have this ${entity.type}`,
+                            content: `You have already taken the ${entity.finalName} ${entity.type}`,
                             callback: () => {
                             }
                         })
@@ -2657,7 +2657,9 @@ export class SWSEActor extends Actor {
         let update= {};
         let changes = !this.system?.changes ? undefined : Array.isArray(this.system.changes) ? this.system.changes : Object.values(this.system.changes);
         if(!Array.isArray(this.system.changes)){
-            update['system.changes'] = !this.system?.changes ? undefined : Object.values(this.system.changes);
+            if(changes){
+                update['system.changes'] = changes;
+            }
         }
         convertOverrideToMode(changes, update);
         let response = false;

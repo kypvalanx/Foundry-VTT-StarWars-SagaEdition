@@ -681,6 +681,9 @@ const quantityPattern = new RegExp('(.+):(.+)');
 const diePattern = new RegExp('(\\d+)d(\\d+)');
 
 function resolveValue(a) {
+    if(a === undefined){
+        return [];
+    }
     if(Array.isArray(a)){
         let values = [];
         for(const b of a){

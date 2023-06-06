@@ -124,7 +124,7 @@ export class SWSEItem extends Item {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update')) {
+        if (this.canUserModify(game.user, 'update') && this._id) {
             await this.update(data, context);
         }
     }
@@ -217,7 +217,7 @@ export class SWSEItem extends Item {
 
     getCached(key, fn) {
         if(!this.cache){
-            return;
+            return fn();
         }
         return this.cache.getCached(key, fn)
     }
