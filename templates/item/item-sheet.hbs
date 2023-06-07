@@ -127,9 +127,9 @@
                 {{#each item.effects as |modification id|}}
                     {{#if modification.flags.swse.itemModifier}}
                         <li class="item flexrow draggable effect" data-effect-id="{{modification._id}}">
-                            <div class="item-image"><img src="{{modification.icon}}" title="{{modification.label}}" width="24" height="24"/>
+                            <div class="item-image"><img src="{{modification.img}}" title="{{modification.name}}" width="24" height="24"/>
                             </div>
-                            <h4 class="item-name">{{modification.label}}</h4>
+                            <h4 class="item-name">{{modification.name}}</h4>
                             {{#if modification.upgradePoints}}
                                 <h4 class="item-upgrade"><span>Upgrade Cost:{{modification.upgradePoints}}</span></h4>
                             {{/if}}
@@ -154,9 +154,9 @@
                 {{#each item.effects as |mode id|}}
                     {{#unless mode.flags.swse.itemModifier}}
                         <li class="item flexrow draggable effect" data-effect-id="{{mode._id}}">
-                            <div class="item-image"><img src="{{mode.icon}}" title="{{mode.label}}" width="24" height="24"/>
+                            <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
                             </div>
-                            <h4 class="item-name">{{mode.label}}</h4>
+                            <h4 class="item-name">{{mode.name}}</h4>
                             <div class="item-controls">
                                 <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
                                 <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>

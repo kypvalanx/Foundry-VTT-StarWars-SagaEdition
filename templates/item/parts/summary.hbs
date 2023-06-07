@@ -15,7 +15,7 @@
             {{#each item.effects as |modification id|}}
                 {{#if modification.flags.swse.itemModifier}}
                     <div class="panel collapsible-container">
-                        <h3 class="collapse-toggle">{{modification.label}}</h3>
+                        <h3 class="collapse-toggle">{{modification.name}}</h3>
                         <div style="display: none" class="collapsible description">{{{modification.flags.swse.description}}}</div>
                     </div>
                 {{/if}}

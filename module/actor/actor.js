@@ -59,8 +59,8 @@ export class SWSEActor extends Actor {
         }
     }
 
-    _onCreateEmbeddedDocuments(embeddedName, ...args) {
-        super._onCreateEmbeddedDocuments(embeddedName, ...args);
+    _onCreateDescendantDocuments (embeddedName, ...args) {
+        super._onCreateDescendantDocuments (embeddedName, ...args);
 
 
         //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
