@@ -66,6 +66,11 @@ input[type=checkbox].direct{
 }
 .button{
   cursor: pointer;
+  padding: 3px;
+  text-align: center;
+  margin: auto;
+  background-color: rgba(0,0,0,0.05);
+  border: 1px solid black;
 }
 
 .draggable{

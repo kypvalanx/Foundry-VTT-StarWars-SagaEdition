@@ -1,19 +1,20 @@
 {{#if bigLabel}}
-<div>
+<div class="flexrow">
     <h2><label class="resource-label">{{bigLabel}} <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
                                                 title="{{localize "Open Compendium"}}"><i
-            class="fas fa-folder-plus"></i></a></label></h2>
+            class="fas fa-folder-plus"></i></a></label></h2>{{{controls}}}
 </div>
 {{/if}}
 
 <div class="item-container panel flexcol {{container}}">
     {{#if label}}
-        <div class="header-row">
+        <div class="header-row flexrow">
             <label class="resource-label">{{label}}</label>
             {{#if createNew}}
                 <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}"
                    title="add new {{createNew}}"></a>
             {{/if}}
+            {{{controls}}}
         </div>
     {{/if}}
     {{#if quickCreate}}

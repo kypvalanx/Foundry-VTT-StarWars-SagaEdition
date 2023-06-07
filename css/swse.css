@@ -381,6 +381,11 @@
 
 .swse .button {
   cursor: pointer;
+  padding: 3px;
+  text-align: center;
+  margin: auto;
+  background-color: rgba(0, 0, 0, 0.05);
+  border: 1px solid black;
 }
 
 .swse .border {
@@ -587,6 +592,12 @@
 
 .swse .item-attribute {
   cursor: pointer;
+}
+
+.swse .flex-0 {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
 }
 
 .swse .item-pane {

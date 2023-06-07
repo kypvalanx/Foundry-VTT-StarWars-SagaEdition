@@ -208,6 +208,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
         html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
+        html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
@@ -821,6 +822,10 @@ export class SWSEActorSheet extends ActorSheet {
 
         await this.actor.addItems([data], undefined, context);
 
+    }
+
+    _onAddGMBonus(ev){
+        this.actor.addItems([{name:"GM Bonus", type:"trait"}], undefined, {})
     }
 
     async moveExistingItemWithinActor(data, ev) {
