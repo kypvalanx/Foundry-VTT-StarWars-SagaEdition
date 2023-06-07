@@ -14,6 +14,12 @@ import {
     onToggle
 } from "../listeners.js";
 
+function linkEffects(effectId1, effectId2) {
+    const effect1 = this.effects.get(effectId1)
+    const effect2 = this.effects.get(effectId2)
+    console.log(effect1, effect2)
+}
+
 export class SWSEItemSheet extends ItemSheet {
 
     /**
@@ -82,7 +88,7 @@ export class SWSEItemSheet extends ItemSheet {
             li.addEventListener("drop", (ev) => this._onDrop(ev));
         });
 
-        // Item Dragging
+        // Effect Dragging
         html.find("li.draggable").each((i, li) => {
             if (li.classList.contains("inventory-header")) return;
             li.setAttribute("draggable", true);
@@ -224,6 +230,7 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Create drag data
         dragData.itemId = this.item.id;
+
         const owner = this.item.actor;
         if(owner){
             dragData.owner = owner;
@@ -236,6 +243,11 @@ export class SWSEItemSheet extends ItemSheet {
         if (li.dataset.itemId) {
             dragData.modId = li.dataset.itemId;
             dragData.type = "Item";
+        }
+
+        if(li.dataset.effectId){
+            dragData.effectId = li.dataset.effectId
+            dragData.type = "ActiveEffect";
         }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
@@ -254,18 +266,29 @@ export class SWSEItemSheet extends ItemSheet {
             console.error(`Parsing error: ${event.dataTransfer.getData("text/plain")}`)
             return false;
         }
+        // Try to find any specific area that the item is dropped in
+        const currentTarget = $(event.currentTarget);
+        let effect = currentTarget.find(".effect")
+        if(effect){
+            droppedItem.targetEffectId = effect.data("effectId");
+        }
         await this.handleDroppedItem(droppedItem);
     }
 
     async handleDroppedItem(droppedItem) {
-        let actor = this.actor;
+        //let actor = this.actor;
         let item = undefined;
 
-        if(actor){
-            item = actor?.items.get(droppedItem.itemId);
+        // if(actor){
+        //     item = actor?.items.get(droppedItem.itemId);
+        // }
+
+        if(droppedItem.effectId && droppedItem.targetEffectId){
+            linkEffects.call(this.item, droppedItem.effectId, droppedItem.targetEffectId);
+            return;
         }
 
-        if(droppedItem.uuid && !item){
+        if(droppedItem.uuid){
             item = await Item.implementation.fromDropData(droppedItem);
         }
         if(!item){

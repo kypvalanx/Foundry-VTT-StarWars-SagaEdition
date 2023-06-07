@@ -374,6 +374,36 @@ String.prototype.titleCase = function () {
     }, []).join('(');
 };
 
+// ClientDatabaseBackend.prototype._createEmbeddedDocuments = async function (documentClass, parent, {data, options, pack}, user)
+// {
+//
+//     // Special Case
+//     if ( parent.parent ) {
+//         // if ( !(parent.parent instanceof TokenDocument) ) {
+//         //     throw new Error("Managing embedded Documents which are not direct descendants of a primary Document is "
+//         //         + "un-supported at this time.");
+//         // }
+//         if ( !options.temporary && (parent.parent instanceof TokenDocument)) {
+//             return parent.parent.createActorEmbeddedDocuments(documentClass.documentName, data, options);
+//         }
+//     }
+//
+//     // Standard Case
+//     const toCreate = await this._preCreateDocumentArray(documentClass, {data, options, pack, parent, user});
+//     if ( !toCreate.length || options.temporary ) return toCreate;
+//     let listeners = game.socket.listeners("modifyDocument")
+//     const response = await SocketInterface.dispatch("modifyDocument", {
+//         action: "create",
+//         type: documentClass.documentName,
+//         parentType: parent.documentName,
+//         parentId: parent.uuid,
+//         data: toCreate,
+//         options: options,
+//         pack: pack
+//     });
+//     return this._handleCreateEmbeddedDocuments(response);
+// }
+
 //
 // String.prototype.titleCase = function() {
 //   if (!this.length) return this;

@@ -126,7 +126,7 @@
             <ol class="items-list">
                 {{#each item.effects as |modification id|}}
                     {{#if modification.flags.swse.itemModifier}}
-                        <li class="item flexrow draggable" data-item-id="{{modification._id}}">
+                        <li class="item flexrow draggable effect" data-effect-id="{{modification._id}}">
                             <div class="item-image"><img src="{{modification.icon}}" title="{{modification.label}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{modification.label}}</h4>
@@ -153,7 +153,7 @@
             <ol class="items-list">
                 {{#each item.effects as |mode id|}}
                     {{#unless mode.flags.swse.itemModifier}}
-                        <li class="item flexrow draggable" data-item-id="{{mode._id}}">
+                        <li class="item flexrow draggable effect" data-effect-id="{{mode._id}}">
                             <div class="item-image"><img src="{{mode.icon}}" title="{{mode.label}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{mode.label}}</h4>
