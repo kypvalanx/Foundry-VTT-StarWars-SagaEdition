@@ -1368,3 +1368,36 @@ export function convertOverrideToMode(changes, update) {
         }
     }
 }
+
+export function getParentByHTMLClass(ev, token) {
+    let cursor = ev.target;
+    while (cursor != null && !cursor.classList.contains(token)) {
+        cursor = cursor.parentElement;
+    }
+    return cursor;
+}
+
+export function getDocumentByUuid(uuid) {
+    let toks = uuid.split(".")
+    let source;
+    for (let [i, tok] of toks.entries()) {
+        if (tok === "Actor") {
+            if (i === 0) {
+                source = game.actors;
+                continue;
+            }
+            source = source.actors;
+        } else if (tok === "Item") {
+            if (i === 0) {
+                source = game.items;
+                continue;
+            }
+            source = source.items;
+        } else if (tok === "ActiveEffect") {
+            source = source.effects;
+        } else {
+            source = source.get(tok)
+        }
+    }
+    return source;
+}

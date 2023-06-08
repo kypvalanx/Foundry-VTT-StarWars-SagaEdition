@@ -6,5 +6,6 @@
   "EFFECT.StatusConditionHelpless": "Helpless",
   "EFFECT.StatusShield": "Shield",
   "ITEM.TabSummary": "Summary",
-  "ITEM.TabEffects": "Effects"
+  "ITEM.TabEffects": "Effects",
+  "EFFECT.TabLinks": "Links"
 }

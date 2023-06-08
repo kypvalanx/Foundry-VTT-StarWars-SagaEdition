@@ -488,6 +488,10 @@
   height: 200px;
 }
 
+.swse .disabled {
+  color: #7a7971;
+}
+
 .swse .tabs {
   height: 40px;
   border-top: 1px solid #AAA;

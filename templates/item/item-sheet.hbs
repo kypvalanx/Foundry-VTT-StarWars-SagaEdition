@@ -126,7 +126,7 @@
             <ol class="items-list">
                 {{#each item.effects as |modification id|}}
                     {{#if modification.flags.swse.itemModifier}}
-                        <li class="item flexrow draggable effect" data-effect-id="{{modification._id}}">
+                        <li class="item flexrow effect{{#if modification.isDisabled}} disabled{{/if}}" data-effect-id="{{modification._id}}" data-uuid="{{modification.uuid}}">
                             <div class="item-image"><img src="{{modification.img}}" title="{{modification.name}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{modification.name}}</h4>
@@ -153,10 +153,11 @@
             <ol class="items-list">
                 {{#each item.effects as |mode id|}}
                     {{#unless mode.flags.swse.itemModifier}}
-                        <li class="item flexrow draggable effect" data-effect-id="{{mode._id}}">
+                        <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
                             <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{mode.name}}</h4>
+                            <div>{{#if mode.hasLinks}}<i class="fas fa-link" title="Has Links"></i>{{/if}}</div>
                             <div class="item-controls">
                                 <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
                                 <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>

@@ -1,7 +1,7 @@
 import {onCollapseToggle, safeInsert} from "../util.js";
 import {
     _adjustPropertyBySpan,
-    _onChangeControl,
+    _onChangeControl, _onLinkControl,
     _onSpanTextInput,
     changeCheckbox,
     changeText,
@@ -53,7 +53,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         //     this._onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         // });
         html.find("[data-action=direct-field]").on("click", (event) => {
-            _onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+            _onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
 
@@ -61,6 +61,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         html.find("input[type=number].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
+        html.find('[data-action="link-control"]').click(_onLinkControl.bind(this));
 
         html.find(".toggle").on("click", onToggle.bind(this))
     }

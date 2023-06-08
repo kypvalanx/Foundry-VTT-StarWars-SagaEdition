@@ -4,20 +4,86 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.js";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.js";
-import {onCollapseToggle, safeInsert, toNumber} from "../util.js";
+import {getDocumentByUuid, getParentByHTMLClass, onCollapseToggle, toNumber} from "../util.js";
 import {
     _adjustPropertyBySpan,
     _onChangeControl,
     _onSpanTextInput,
-    changeCheckbox, changeSelect,
+    changeCheckbox,
+    changeSelect,
     changeText,
     onToggle
 } from "../listeners.js";
 
+function getEffectBlock(effect) {
+    return `<div class="panel flex-col"><div>${effect.name}</div><div><img src="${effect.img}"></div></div>`;
+}
+
 function linkEffects(effectId1, effectId2) {
-    const effect1 = this.effects.get(effectId1)
-    const effect2 = this.effects.get(effectId2)
-    console.log(effect1, effect2)
+    const effect1 = getDocumentByUuid(effectId1)
+    const effect2 = getDocumentByUuid(effectId2)
+
+    let effectBlock1 = getEffectBlock(effect1)
+    let effectBlock2 = getEffectBlock(effect2)
+    let comboBlock = `<div class="flex-col padding-3"><div><-- Will become a</div><div><select>
+<option value="parent">Parent</option>
+<option value="child">Child</option>
+<option value="mirror">Mirror</option>
+<option value="exclusive">Exclusive</option>
+</select></div><div>of --></div></div>`
+
+    const title = "Create Link";
+    const content = `<div class="flex-row">${effectBlock1}${comboBlock}${effectBlock2}</div>`
+
+    let options = {
+        title,
+        content,
+        buttons: {
+            attack: {
+                label: "Create Links",
+                callback: (html) => {
+                    let select = html.find("select")[0];
+                    select.value;
+                    console.log(select.value)
+
+                    switch(select.value){
+                        case "parent":
+                            effect1.addLink("child", effect2)
+                            effect2.addLink("parent", effect1)
+                            break;
+                        case "child":
+                            effect1.addLink("parent", effect2)
+                            effect2.addLink("child", effect1)
+                            break;
+                        case "mirror":
+                            effect1.addLink("mirror", effect2)
+                            effect2.addLink("mirror", effect1)
+                            break;
+                        case "exclusive":
+                            effect1.addLink("exclusive", effect2)
+                            effect2.addLink("exclusive", effect1)
+                            break;
+                    }
+                }
+            },
+            saveMacro: {
+                label: "Cancel",
+                callback: (html) => {
+
+                }
+            }
+        },
+        render: async (html) => {
+
+        },
+        callback: ()=>{},
+        options: {
+
+        }
+    };
+
+
+    new Dialog(options).render(true);
 }
 
 export class SWSEItemSheet extends ItemSheet {
@@ -230,6 +296,7 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Create drag data
         dragData.itemId = this.item.id;
+       // dragData.uuid = li.dataset.uuid
 
         const owner = this.item.actor;
         if(owner){
@@ -247,6 +314,7 @@ export class SWSEItemSheet extends ItemSheet {
 
         if(li.dataset.effectId){
             dragData.effectId = li.dataset.effectId
+            dragData.effectUuid = li.dataset.uuid
             dragData.type = "ActiveEffect";
         }
 
@@ -267,10 +335,9 @@ export class SWSEItemSheet extends ItemSheet {
             return false;
         }
         // Try to find any specific area that the item is dropped in
-        const currentTarget = $(event.currentTarget);
-        let effect = currentTarget.find(".effect")
+        let effect = getParentByHTMLClass(event, "effect")
         if(effect){
-            droppedItem.targetEffectId = effect.data("effectId");
+            droppedItem.targetEffectUuid = effect.dataset.uuid;
         }
         await this.handleDroppedItem(droppedItem);
     }
@@ -283,8 +350,8 @@ export class SWSEItemSheet extends ItemSheet {
         //     item = actor?.items.get(droppedItem.itemId);
         // }
 
-        if(droppedItem.effectId && droppedItem.targetEffectId){
-            linkEffects.call(this.item, droppedItem.effectId, droppedItem.targetEffectId);
+        if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
+            linkEffects.call(this.item, droppedItem.effectUuid, droppedItem.targetEffectUuid);
             return;
         }
 

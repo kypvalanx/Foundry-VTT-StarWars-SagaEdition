@@ -1,4 +1,4 @@
-import {filterItemsByType, onCollapseToggle, safeInsert, unique} from "../util.js";
+import {filterItemsByType, getParentByHTMLClass, onCollapseToggle, unique} from "../util.js";
 import {crewPositions, vehicleActorTypes} from "../constants.js";
 import {getActorFromId} from "../swse.js";
 import {Attack} from "./attack.js";
@@ -392,7 +392,7 @@ export class SWSEActorSheet extends ActorSheet {
             dragData.type = 'attack';
         }
 
-        dragData.sourceContainer = this.getParentByHTMLClass(event, "item-container");
+        dragData.sourceContainer = getParentByHTMLClass(event, "item-container");
         dragData.draggableId = event.target.id;
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
@@ -732,7 +732,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (!["character", "npc"].includes(actor.data.type)) {
             return;
         }
-        let targetItemContainer = this.getParentByHTMLClass(event, "vehicle-station");
+        let targetItemContainer = getParentByHTMLClass(event, "vehicle-station");
 
         if (targetItemContainer !== null) {
             let currentPosition = crewPositions.filter(x => targetItemContainer.dataset.position === x);
@@ -835,7 +835,7 @@ export class SWSEActorSheet extends ActorSheet {
             await parentItem.revokeOwnership(movedItem);
         } else {
             //equip/unequip workflow
-            let targetItemContainer = this.getParentByHTMLClass(ev, "item-container");
+            let targetItemContainer = getParentByHTMLClass(ev, "item-container");
 
             if (targetItemContainer == null) {
                 return;
@@ -893,13 +893,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-    getParentByHTMLClass(ev, token) {
-        let cursor = ev.target;
-        while (cursor != null && !cursor.classList.contains(token)) {
-            cursor = cursor.parentElement;
-        }
-        return cursor;
-    }
 
 
     /* -------------------------------------------- */
@@ -941,7 +934,7 @@ export class SWSEActorSheet extends ActorSheet {
         event.preventDefault();
         const element = event.currentTarget;
 
-        let draggable = this.getParentByHTMLClass(event, "draggable")
+        let draggable = getParentByHTMLClass(event, "draggable")
         if (draggable) {
             this.actor.rollVariable(draggable.dataset.variable)
             return;
@@ -1543,3 +1536,4 @@ function getHealthOptions(actor) {
 
     return options;
 }
+

@@ -11,6 +11,7 @@
     <nav class="sheet-tabs tabs" aria-role="{{localize 'SHEETS.FormNavLabel'}}">
         <a class="item" data-tab="details"><i class="fas fa-book"></i> {{localize "EFFECT.TabDetails"}}</a>
         {{#if document.hasDuration}}<a class="item" data-tab="duration"><i class="fas fa-clock"></i> {{localize "EFFECT.TabDuration"}}</a>{{/if}}
+        <a class="item" data-tab="links"><i class="fas fa-book"></i> {{localize "EFFECT.TabLinks"}}</a>
         <a class="item" data-tab="effects"><i class="fas fa-cogs"></i> {{localize "EFFECT.TabEffects"}}</a>
     </nav>
 
@@ -40,6 +41,24 @@
     <!-- Effects Tab -->
     <section class="tab" data-tab="effects">
         {{> 'systems/swse/templates/change/change-list.hbs' changes=data.changes}}
+    </section>
+
+    <!-- Links Tab -->
+    <section class="tab" data-tab="links">
+
+        <ol class="item-list">
+            {{#each data.flags.swse.links as |link i|}}
+                <li class="flexrow item">
+                    <div>{{link.name}}</div>
+                    <div>type: {{link.type}}</div>
+
+                    <div class="change-controls">
+                    <a class="change-control" data-action="link-control" data-action-type="delete" data-uuid="{{link.uuid}}"><i
+                        class="fas fa-trash"></i></a>
+                    </div>
+                </li>
+            {{/each}}
+        </ol>
     </section>
 
     <!-- Duration Tab -->

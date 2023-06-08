@@ -163,7 +163,7 @@ export class SWSEItem extends Item {
         this.prepareData();
     }
     toggleEffectDisabled(effectId, disabled) {
-        this.effects.get(effectId).safeUpdate({disabled})
+        this.effects.get(effectId).disable(disabled)
     }
 
     // get name() {

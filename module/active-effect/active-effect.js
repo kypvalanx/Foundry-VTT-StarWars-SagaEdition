@@ -1,4 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.js";
+import {getDocumentByUuid} from "../util.js";
 //import * as fields from "../data/fields.mjs";
 
 /**
@@ -13,6 +14,55 @@ export class SWSEActiveEffect extends ActiveEffect {
         }
     }
 
+    addLink(type, effect){
+        let uuid = effect.uuid;
+        let links = this.flags.swse?.links || [];
+        links = links.filter(link => link.uuid !== uuid);
+        links.push({uuid, type, name:effect.name});
+        let data = {"flags.swse.links": links};
+        this.safeUpdate(data);
+    }
+
+    removeLink(uuid){
+        let links = this.flags.swse?.links || [];
+        links = links.filter(link => link.uuid !== uuid);
+        let data = {"flags.swse.links": links};
+        this.safeUpdate(data);
+    }
+
+    disable(disabled){
+        for(let link of this.links){
+            if(link.type === "exclusive" && !disabled){
+                let doc = getDocumentByUuid(link.uuid)
+                doc.safeUpdate({disabled: true})
+            } else if(link.type === "mirror") {
+                let doc = getDocumentByUuid(link.uuid)
+                doc.safeUpdate({disabled})
+            }
+        }
+
+
+        this.safeUpdate({disabled})
+    }
+
+    get isDisabled(){
+        let disabled = this.disabled;
+        for(let link of this.links){
+            if(link.type === "parent"){
+                let doc = getDocumentByUuid(link.uuid)
+                disabled = disabled || doc.disabled
+            }
+        }
+        return disabled
+    }
+
+    get hasLinks(){
+        return this.links.length > 0;
+    }
+
+    get links(){
+        return this.flags.swse?.links || []
+    }
 
     get hasDuration(){
         return !this.flags.swse?.itemModifier

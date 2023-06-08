@@ -89,7 +89,7 @@ export function getResolvedSize(entity, options = {}) {
 
 
 function getLocalChangesOnDocument(document) {
-    const values = document.changes || document.system?.changes || document._source?.system?.changes || [];
+    const values = !document.isDisabled ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 

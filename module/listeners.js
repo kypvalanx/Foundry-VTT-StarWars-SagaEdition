@@ -1,5 +1,5 @@
 import {SWSEActiveEffect} from "./active-effect/active-effect.js";
-import {safeInsert} from "./util.js";
+import {getDocumentByUuid, safeInsert} from "./util.js";
 
 export function _onChangeControl(event) {
     event.preventDefault();
@@ -23,6 +23,22 @@ export function _onChangeControl(event) {
             }
         }
         this.object.safeUpdate(update);
+    }
+}
+
+export function _onLinkControl(event) {
+    event.preventDefault();
+
+    let element = $(event.currentTarget);
+    let type = element.data("action-type")
+    if ('delete' === type) {
+        let uuid1 = this.object.uuid;
+        let doc1 = this.object;
+        let uuid2 = element.data("uuid")
+        let doc2 = getDocumentByUuid(uuid2);
+
+        doc1.removeLink(uuid2)
+        doc2.removeLink(uuid1)
     }
 }
 
