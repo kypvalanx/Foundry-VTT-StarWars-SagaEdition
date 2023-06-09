@@ -32,13 +32,9 @@ export function _onLinkControl(event) {
     let element = $(event.currentTarget);
     let type = element.data("action-type")
     if ('delete' === type) {
-        let uuid1 = this.object.uuid;
-        let doc1 = this.object;
         let uuid2 = element.data("uuid")
-        let doc2 = getDocumentByUuid(uuid2);
+        this.object.deleteReciprocalLinks(uuid2)
 
-        doc1.removeLink(uuid2)
-        doc2.removeLink(uuid1)
     }
 }
 

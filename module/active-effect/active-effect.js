@@ -1,5 +1,6 @@
 import {getInheritableAttribute} from "../attribute-helper.js";
 import {getDocumentByUuid} from "../util.js";
+
 //import * as fields from "../data/fields.mjs";
 
 /**
@@ -12,6 +13,20 @@ export class SWSEActiveEffect extends ActiveEffect {
         if(this.canUserModify(game.user, 'update')){
             await this.update(data, context);
         }
+    }
+
+    _onDelete(options, userId) {
+        super._onDelete(options, userId);
+        for(let link of this.links){
+            let doc = getDocumentByUuid(link.uuid);
+            doc.removeLink(this.uuid);
+        }
+    }
+
+    deleteReciprocalLinks(uuid){
+        let doc2 = getDocumentByUuid(uuid);
+        this.removeLink(uuid)
+        doc2.removeLink(this.uuid)
     }
 
     addLink(type, effect){
