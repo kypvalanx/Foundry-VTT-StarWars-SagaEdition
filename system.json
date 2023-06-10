@@ -19,7 +19,7 @@
     }
   ],
   "esmodules": [
-    "module/swse.js"
+    "module/swse.mjs"
   ],
   "styles": [
     "css/swse.css"
