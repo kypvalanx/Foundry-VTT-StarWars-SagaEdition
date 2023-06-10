@@ -1,7 +1,7 @@
 {
   "name": "swse",
   "version": "1.0.0",
-  "description": "CSS compiler for the Star Wars: Saga Edition system",
+  "description": "Star Wars: Saga Edition system",
   "scripts": {
     "build": "gulp",
     "compile": "gulp css",
