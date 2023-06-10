@@ -2,8 +2,8 @@
                                                                       "expandable"}}collapsible-container{{/ifEquals}}"
     data-item-id="{{item.id}}"
     data-item-name="{{item.name}}">
-    <div class="flexrow">
-        <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
+    <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
+        <div class="flexrow">
             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"
                                          height="24" alt=""/></div>
             <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">

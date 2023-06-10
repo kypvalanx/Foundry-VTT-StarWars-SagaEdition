@@ -18,13 +18,14 @@
                 <a class="item" data-tab="equipment">Equipment</a>
                 <!--        {{#if
                         actor.system.isDroid}}<a class="item" data-tab="droid"><span>Droid Systems</span></a>{{/if}}-->
-                <a class="item" data-tab="feats">Feats</a>
-                <a class="item" data-tab="talents">Talents</a>
-                <a class="item" data-tab="traits">Traits</a>
+                <a class="item" data-tab="feats">Feats & Talents</a>
+<!--                <a class="item" data-tab="talents">Talents</a>-->
                 {{#unless actor.hideForce}}<a class="item" data-tab="force">The Force</a>{{/unless}}
                 <a class="item" data-tab="affiliations">Affiliations</a>
-                <a class="item" data-tab="description">Notes</a>
+                <a class="item" data-tab="traits">Traits</a>
+                <a class="item" data-tab="modes">Modes</a>
                 <a class="item" data-tab="changes">Changes</a>
+                <a class="item" data-tab="description">Notes</a>
                 <a class="item" data-tab="settings">Settings</a>
 
             </nav>
@@ -200,12 +201,13 @@
                 {{!-- Owned Feats Tab --}}
                 <div class="tab items" data-group="primary" data-tab="feats">
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Feats" compendiumFilter="-type:feat" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.feats draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
-                </div>
-
-                {{!-- Owned Talents Tab --}}
-                <div class="tab items" data-group="primary" data-tab="talents">
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
+
+<!--                {{!-- Owned Talents Tab --}}-->
+<!--                <div class="tab items" data-group="primary" data-tab="talents">-->
+<!--                    {> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}-->
+<!--                </div>-->
 
 
                 {{!-- Owned Traits Tab --}}
@@ -282,11 +284,37 @@
                 </div>
 
                 <div class="tab settings" data-group="primary" data-tab="settings">
-                <div class="flexcol">
-                    {{#each actor.system.settings as |setting id|}}
-                        {{> 'systems/swse/templates/settings/setting.hbs' setting=setting id=id}}
-                    {{/each}}
+                    <div class="flexcol">
+                        {{#each actor.system.settings as |setting id|}}
+                            {{> 'systems/swse/templates/settings/setting.hbs' setting=setting id=id}}
+                        {{/each}}
+                    </div>
                 </div>
+
+                <div class="tab modes" data-group="primary" data-tab="modes">
+                    <div class="section-header flexrow">
+                        <div class="entry"></div>
+                        <div class="section-header-controls">
+                            <a class="control" data-action="effect-control" data-type="add-mode"><i class="far fa-plus-square"></i></a>
+                        </div>
+                    </div>
+                    <ol class="items-list">
+                        {{#each actor.effects as |mode id|}}
+                            {{#unless mode.flags.swse.itemModifier}}
+                                <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
+                                    <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
+                                    </div>
+                                    <h4 class="item-name">{{mode.name}}</h4>
+                                    <div>{{#if mode.hasLinks}}<i class="fas fa-link" title="Has Links"></i>{{/if}}</div>
+                                    <div class="item-controls">
+                                        <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
+                                        <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                        <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </li>
+                            {{/unless}}
+                        {{/each}}
+                    </ol>
                 </div>
             </section>
         </div>

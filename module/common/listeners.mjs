@@ -1,7 +1,7 @@
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
 import {getDocumentByUuid, safeInsert} from "../util.mjs";
 
-export function _onChangeControl(event) {
+export function onChangeControl(event) {
     event.preventDefault();
 
     let element = $(event.currentTarget);
@@ -38,6 +38,29 @@ export function _onLinkControl(event) {
     }
 }
 
+export function onEffectControl(event){
+    let element = $(event.currentTarget);
+    let effectId = element.data("effectId");
+
+    switch (element.data("type")){
+        case 'view':
+            this.object.effects.get(effectId).sheet.render(true);
+            break;
+        case 'delete':
+            this.object.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+            break;
+        case 'disable':
+            this.object.toggleEffectDisabled(effectId, !event.currentTarget.checked)
+            break;
+        case "add-modification":
+            this.object.addBlankModificationEffect();
+            break;
+        case "add-mode":
+            this.object.addBlankMode();
+            break;
+    }
+}
+
 
 export function _adjustPropertyBySpan(event) {
     event.preventDefault();
@@ -67,7 +90,7 @@ export function _adjustPropertyBySpan(event) {
     } else this._onSubmit(event, {preventClose: true});
 }
 
-export function _onSpanTextInput(event, callback = null, type) {
+export function onSpanTextInput(event, callback = null, type) {
     const el = event.currentTarget;
     const parent = el.parentElement;
 

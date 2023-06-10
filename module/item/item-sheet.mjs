@@ -4,87 +4,16 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.mjs";
-import {getDocumentByUuid, getParentByHTMLClass, onCollapseToggle, toNumber} from "../util.mjs";
+import {getParentByHTMLClass, linkEffects, onCollapseToggle, toNumber} from "../util.mjs";
 import {
     _adjustPropertyBySpan,
-    _onChangeControl,
-    _onSpanTextInput,
+    onChangeControl,
+    onSpanTextInput,
     changeCheckbox,
     changeSelect,
-    changeText,
+    changeText, onEffectControl,
     onToggle
 } from "../common/listeners.mjs";
-
-function getEffectBlock(effect) {
-    return `<div class="panel flex-col"><div>${effect.name}</div><div><img src="${effect.img}"></div></div>`;
-}
-
-function linkEffects(effectId1, effectId2) {
-    const effect1 = getDocumentByUuid(effectId1)
-    const effect2 = getDocumentByUuid(effectId2)
-
-    let effectBlock1 = getEffectBlock(effect1)
-    let effectBlock2 = getEffectBlock(effect2)
-    let comboBlock = `<div class="flex-col padding-3"><div><-- Will become a</div><div><select>
-<option value="parent">Parent</option>
-<option value="child">Child</option>
-<option value="mirror">Mirror</option>
-<option value="exclusive">Exclusive</option>
-</select></div><div>of --></div></div>`
-
-    const title = "Create Link";
-    const content = `<div class="flex-row">${effectBlock1}${comboBlock}${effectBlock2}</div>`
-
-    let options = {
-        title,
-        content,
-        buttons: {
-            attack: {
-                label: "Create Links",
-                callback: (html) => {
-                    let select = html.find("select")[0];
-                    select.value;
-                    console.log(select.value)
-
-                    switch(select.value){
-                        case "parent":
-                            effect1.addLink("child", effect2)
-                            effect2.addLink("parent", effect1)
-                            break;
-                        case "child":
-                            effect1.addLink("parent", effect2)
-                            effect2.addLink("child", effect1)
-                            break;
-                        case "mirror":
-                            effect1.addLink("mirror", effect2)
-                            effect2.addLink("mirror", effect1)
-                            break;
-                        case "exclusive":
-                            effect1.addLink("exclusive", effect2)
-                            effect2.addLink("exclusive", effect1)
-                            break;
-                    }
-                }
-            },
-            saveMacro: {
-                label: "Cancel",
-                callback: (html) => {
-
-                }
-            }
-        },
-        render: async (html) => {
-
-        },
-        callback: ()=>{},
-        options: {
-
-        }
-    };
-
-
-    new Dialog(options).render(true);
-}
 
 export class SWSEItemSheet extends ItemSheet {
 
@@ -180,10 +109,8 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="provided-item-control"]').click(this._onProvidedItemControl.bind(this));
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
-        html.find('[data-action="effect-control"]').click(this._onEffectControl.bind(this));
-        html.find('[data-action="mode-control"]').click(this._onModeControl.bind(this));
+        html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
-        html.find('[data-action="modification-control"]').click(this._onModificationControl.bind(this));
 
 
         //TODO switch to data action
@@ -221,17 +148,17 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
-            _onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+            onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
         html.find("[data-action=direct-field]").on("click", (event) => {
-            _onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+            onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
 
         html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
-        html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
+        html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
     }
 
 
@@ -638,22 +565,7 @@ export class SWSEItemSheet extends ItemSheet {
         }
         this.item.safeUpdate(updateData);
     }
-    _onEffectControl(event){
-        let element = $(event.currentTarget);
-        let effectId = element.data("effectId");
 
-        switch (element.data("type")){
-            case 'view':
-                this.item.effects.get(effectId).sheet.render(true);
-                break;
-            case 'delete':
-                this.item.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
-                break;
-            case 'disable':
-                this.item.toggleEffectDisabled(effectId, !event.currentTarget.checked)
-                break;
-        }
-    }
 
 
     _onAttributeControl(event){
@@ -732,30 +644,6 @@ export class SWSEItemSheet extends ItemSheet {
                 this.render();
             }
         }
-
-    }
-
-    _onModificationControl(event){
-        let element = $(event.currentTarget);
-        let actionType = element.data('actionType');
-        switch (actionType) {
-            case "add":
-            {
-                this.item.addBlankModificationEffect();
-            }
-        }
-
-    }
-    _onModeControl(event){
-        let element = $(event.currentTarget);
-        let actionType = element.data('actionType');
-        switch (actionType) {
-            case "add":
-            {
-                this.item.addBlankMode();
-            }
-        }
-
     }
 
     _onClassControl(event) {

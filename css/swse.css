@@ -556,6 +556,7 @@
 
 .swse .items-list .description {
   background-color: rgba(0, 0, 0, 0.05);
+  padding: 3px;
 }
 
 .swse .items-list .feat {
@@ -585,9 +586,11 @@
 
 .swse .items-list .item-controls {
   text-align: right;
-  -webkit-box-flex: 1;
-  -ms-flex: 1;
-  flex: 1;
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  -ms-flex-preferred-size: 48px;
+  flex-basis: 48px;
 }
 
 .swse td {

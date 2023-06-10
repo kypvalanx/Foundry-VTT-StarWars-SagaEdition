@@ -97,7 +97,7 @@ export class SWSEActiveEffect extends ActiveEffect {
     }
 
     get toggles(){
-        return this.flags.swse.toggles
+        return this.flags.swse?.toggles || [];
     }
 
     get upgradePoints(){

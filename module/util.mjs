@@ -1401,3 +1401,73 @@ export function getDocumentByUuid(uuid) {
     }
     return source;
 }
+
+function getEffectBlock(effect) {
+    return `<div class="panel flex-col"><div>${effect.name}</div><div><img src="${effect.img}"></div></div>`;
+}
+
+export function linkEffects(effectId1, effectId2) {
+    const effect1 = getDocumentByUuid(effectId1)
+    const effect2 = getDocumentByUuid(effectId2)
+
+    let effectBlock1 = getEffectBlock(effect1)
+    let effectBlock2 = getEffectBlock(effect2)
+    let comboBlock = `<div class="flex-col padding-3"><div><-- Will become a</div><div><select>
+<option value="parent">Parent</option>
+<option value="child">Child</option>
+<option value="mirror">Mirror</option>
+<option value="exclusive">Exclusive</option>
+</select></div><div>of --></div></div>`
+
+    const title = "Create Link";
+    const content = `<div class="flex-row">${effectBlock1}${comboBlock}${effectBlock2}</div>`
+
+    let options = {
+        title,
+        content,
+        buttons: {
+            attack: {
+                label: "Create Links",
+                callback: (html) => {
+                    let select = html.find("select")[0];
+                    select.value;
+                    console.log(select.value)
+
+                    switch (select.value) {
+                        case "parent":
+                            effect1.addLink("child", effect2)
+                            effect2.addLink("parent", effect1)
+                            break;
+                        case "child":
+                            effect1.addLink("parent", effect2)
+                            effect2.addLink("child", effect1)
+                            break;
+                        case "mirror":
+                            effect1.addLink("mirror", effect2)
+                            effect2.addLink("mirror", effect1)
+                            break;
+                        case "exclusive":
+                            effect1.addLink("exclusive", effect2)
+                            effect2.addLink("exclusive", effect1)
+                            break;
+                    }
+                }
+            },
+            saveMacro: {
+                label: "Cancel",
+                callback: (html) => {
+
+                }
+            }
+        },
+        render: async (html) => {
+
+        },
+        callback: () => {
+        },
+        options: {}
+    };
+
+
+    new Dialog(options).render(true);
+}

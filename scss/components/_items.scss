@@ -25,6 +25,7 @@
 
   .description{
     background-color: rgba(0,0,0,0.05);
+    padding: 3px;
   }
 
   .feat {
@@ -50,7 +51,8 @@
 
   .item-controls {
     text-align: right;
-    flex:1;
+    flex:0;
+    flex-basis: 48px;
   }
 }
 

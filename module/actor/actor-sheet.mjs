@@ -4,29 +4,17 @@ import {getActorFromId} from "../swse.mjs";
 import {Attack} from "./attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
-import {_onChangeControl, _onSpanTextInput, changeCheckbox, changeText, onToggle} from "../common/listeners.mjs";
+import {
+    onChangeControl,
+    onSpanTextInput,
+    changeCheckbox,
+    changeText,
+    onEffectControl,
+    onToggle
+} from "../common/listeners.mjs";
+import {getDefaultDataByType} from "../common/classDefaults.mjs";
 
 // noinspection JSClosureCompilerSyntax
-
-function getDefaultDataByType(itemType) {
-    switch (itemType) {
-        case "language":
-            return {
-                attributes: {
-                    0 : {key: "readable", value: true, override: false},
-                    1 : {key: "writable", value: true, override: false},
-                    2 : {key: "spoken", value: true, override: false},
-                    3 : {key: "characterReads", value: true, override: false},
-                    4 : {key: "characterWrites", value: true, override: false},
-                    5 : {key: "characterSpeaks", value: true, override: false},
-                    6 : {key: "silentCommunication", value: false, override: false},
-                    7 : {key: "visualCommunication", value: false, override: false}
-                }
-            }
-        default:
-            return {};
-    }
-}
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -113,14 +101,14 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
-            _onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
+            onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
         html.find("input[type=text].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
-            _onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
+            onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
         });
 
         html.find("input.plain").on("keypress", (event) => {
@@ -207,8 +195,9 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
         html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
-        html.find('[data-action="change-control"]').click(_onChangeControl.bind(this));
+        html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
+        html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
