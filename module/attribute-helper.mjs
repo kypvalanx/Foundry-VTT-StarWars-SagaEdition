@@ -1,4 +1,4 @@
-import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./util.mjs";
+import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";

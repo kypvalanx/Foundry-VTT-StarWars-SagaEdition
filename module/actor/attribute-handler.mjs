@@ -1,4 +1,4 @@
-import {getLongKey, resolveValueArray, toNumber} from "../util.mjs";
+import {getLongKey, resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 

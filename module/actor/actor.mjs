@@ -18,7 +18,7 @@ import {
     toShortAttribute,
     unique,
     viewableEntityFromEntityType
-} from "../util.mjs";
+} from "../common/util.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";

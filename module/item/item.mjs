@@ -1,4 +1,4 @@
-import {convertOverrideToMode, increaseDieSize, increaseDieType, toNumber} from "../util.mjs";
+import {convertOverrideToMode, increaseDieSize, increaseDieType, toNumber} from "../common/util.mjs";
 import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";

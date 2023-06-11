@@ -4,7 +4,7 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
  * @extends {ItemSheet}
  */
 import {SWSEItem} from "./item.mjs";
-import {getParentByHTMLClass, linkEffects, onCollapseToggle, toNumber} from "../util.mjs";
+import {getParentByHTMLClass, linkEffects, onCollapseToggle, toNumber} from "../common/util.mjs";
 import {
     _adjustPropertyBySpan,
     onChangeControl,

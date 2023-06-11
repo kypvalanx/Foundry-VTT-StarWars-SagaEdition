@@ -1,4 +1,4 @@
-import {toNumber} from "../util.mjs";
+import {toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 export function addSubCredits(type, actor) {

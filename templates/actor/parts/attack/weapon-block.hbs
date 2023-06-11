@@ -30,21 +30,11 @@
                     <div class="plain input">{{attack.type}}</div>
                 </div>
                 <div class="modes">
-                    {{#each attack.modes as |group groupId|}}
-                        <div class="mode-group">
-                            {{#each group as |mode id|}}
-                                {{#if mode}}
-                                    <div class="mode-selector" data-type="{{mode.type}}" data-mode-path="{{mode.modePath}}"
-                                         data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}" data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
-                                        <label for="{{mode.name}} {{../../attack.itemId}}">{{mode.name}}</label>
-                                        <input class="" type="{{#unless mode.group}}checkbox{{/unless}}{{#if
-                                                mode.group}}radio{{/if}}" name="{{mode.group}} {{../../attack.itemId}}"
-                                               {{#if mode.isActive}}checked{{/if}}
-                                               data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}"
-                                               id="{{mode.name}} {{../../attack.itemId}}"/>
-                                    </div>
-                                {{/if}}
-                            {{/each}}
+                    {{#each attack.modes as |mode id|}}
+                        <div class="mode-selector mode-group" data-type="{{mode.type}}" data-mode-path="{{mode.modePath}}"
+                             data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}" data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
+                            <label for="{{mode.name}} {{../../attack.itemId}}">{{mode.name}}</label>
+                            <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-uuid="{{mode.uuid}}"/>
                         </div>
                     {{/each}}
                 </div>

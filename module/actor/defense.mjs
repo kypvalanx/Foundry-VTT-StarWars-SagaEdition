@@ -1,5 +1,5 @@
 import {SWSEActor} from "./actor.mjs";
-import {equippedItems, resolveValueArray, toNumber} from "../util.mjs";
+import {equippedItems, resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 

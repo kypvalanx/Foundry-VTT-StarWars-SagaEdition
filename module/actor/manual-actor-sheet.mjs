@@ -1,4 +1,4 @@
-import {filterItemsByType, getParentByHTMLClass, unique} from "../util.mjs";
+import {filterItemsByType, getParentByHTMLClass, unique} from "../common/util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {Attack} from "./attack.mjs";

@@ -1,5 +1,5 @@
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
-import {addBlankMode, addBlankModificationEffect, getDocumentByUuid, safeInsert} from "../util.mjs";
+import {addBlankMode, addBlankModificationEffect, getDocumentByUuid, safeInsert} from "./util.mjs";
 
 export function onChangeControl(event) {
     event.preventDefault();
@@ -39,24 +39,38 @@ export function _onLinkControl(event) {
 }
 
 export function onEffectControl(event){
+    event.stopPropagation();
     let element = $(event.currentTarget);
     let effectId = element.data("effectId");
+    let effectUuid = element.data("effectUuid");
+
+    let doc;
+    let parentDoc;
+    if(effectUuid){
+        doc = getDocumentByUuid(effectUuid);
+        let toks = effectUuid.split(".");
+        effectId = toks[toks.length-1]
+        parentDoc = doc.parent;
+    } else {
+        parentDoc = this.object;
+        doc = this.object.effects.get(effectId)
+    }
 
     switch (element.data("type")){
         case 'view':
-            this.object.effects.get(effectId).sheet.render(true);
+            doc.sheet.render(true);
             break;
         case 'delete':
-            this.object.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
+            parentDoc.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
             break;
         case 'disable':
-            toggleEffectDisabled.call(this.object, effectId, !event.currentTarget.checked)
+            toggleEffectDisabled.call(parentDoc, effectId, !event.currentTarget.checked)
             break;
         case "add-modification":
-            addBlankModificationEffect.call(this.object);
+            addBlankModificationEffect.call(parentDoc);
             break;
         case "add-mode":
-            addBlankMode.call(this.object);
+            addBlankMode.call(parentDoc);
             break;
     }
 }

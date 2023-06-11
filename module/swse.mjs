@@ -14,7 +14,7 @@ import {makeAttack} from "./actor/attack.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
 import {SWSECompendiumDirectory} from "./compendium/compendium-directory.mjs";
-import {toNumber} from "./util.mjs";
+import {toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 

@@ -1,6 +1,6 @@
 import {GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {fullJoin, innerJoin} from "../util.mjs";
+import {fullJoin, innerJoin} from "../common/util.mjs";
 
 function skipFirstLevelChoice(choice, context) {
     return choice.isFirstLevel && !context.isFirstLevel;

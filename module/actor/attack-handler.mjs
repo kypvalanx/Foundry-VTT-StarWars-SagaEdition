@@ -1,6 +1,6 @@
-import {getBonusString, resolveValueArray, toShortAttribute} from "../util.mjs";
+import {appendNumericTerm, getBonusString, resolveValueArray, toShortAttribute} from "../common/util.mjs";
 import {SWSEItem} from "../item/item.mjs";
-import {appendNumericTerm, Attack} from "./attack.mjs";
+import {Attack} from "./attack.mjs";
 import {d20} from "../common/constants.mjs";
 import {compareSizes} from "./size.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";

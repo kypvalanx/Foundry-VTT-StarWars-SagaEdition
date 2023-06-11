@@ -1,4 +1,4 @@
-import {resolveValueArray, toNumber} from "../util.mjs";
+import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {HEAVY_LOAD_SKILLS, NEW_LINE} from "../common/constants.mjs";

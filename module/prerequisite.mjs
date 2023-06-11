@@ -5,7 +5,7 @@ import {
     resolveExpression,
     resolveValueArray,
     toNumber
-} from "./util.mjs";
+} from "./common/util.mjs";
 import {sizeArray, weaponGroup} from "./common/constants.mjs";
 import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.mjs";
 import {SWSEActor} from "./actor/actor.mjs";

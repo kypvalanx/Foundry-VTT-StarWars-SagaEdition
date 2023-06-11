@@ -1,5 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {getDocumentByUuid} from "../util.mjs";
+import {getDocumentByUuid} from "../common/util.mjs";
 
 //import * as fields from "../data/fields.mjs";
 

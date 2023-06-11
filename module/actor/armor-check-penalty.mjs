@@ -1,4 +1,4 @@
-import {equippedItems, filterItemsByType} from "../util.mjs";
+import {equippedItems, filterItemsByType} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 /**

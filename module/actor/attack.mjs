@@ -15,90 +15,25 @@ import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {SWSEActor} from "./actor.mjs";
 import {reduceWeaponRange, SWSEItem} from "../item/item.mjs";
 import {
+    appendNumericTerm,
+    appendTerms,
     equippedItems,
     getAttackRange,
     getBonusString,
+    getDieFlavor,
     getEntityFromCompendiums,
     getOrdinal,
     getRangeModifierBlock,
     handleAttackSelect,
     increaseDieSize,
+    mult,
     resolveValueArray,
     toNumber
-} from "../util.mjs";
+} from "../common/util.mjs";
 import {SWSERollWrapper} from "../common/roll.mjs";
 import {createAttackMacro} from "../swse.mjs";
 
 //Broken out because i have no idea if i'm doing this in a way that the roller understands
-
-export function getDieFlavor(flavor) {
-    return {flavor};
-}
-
-function plus() {
-    return new OperatorTerm({operator: "+"});
-}
-
-function mult() {
-    return new OperatorTerm({operator: "*"});
-}
-
-function minus() {
-    return new OperatorTerm({operator: "-"});
-}
-
-export function appendTerms(value, flavor) {
-    let toks = `${value}`.replace(/\+/g, " + ").replace(/-/g, " - ").replace(/\*/g, " * ").replace(/\//g, " / ").split(" ")
-
-    let terms = [];
-    let buffer = "";
-    for(let tok of toks){
-        if(tok === "-"){
-            buffer = "-"
-            continue;
-        } else if(tok === "+" || tok === ""){
-            continue;
-        }
-        terms.push(...appendTerm(`${buffer}${tok}`, flavor))
-        buffer = ""
-    }
-    return terms;
-}
-
-export function appendTerm(value, flavor){
-    if(`${parseInt(value)}` === value){
-        return appendNumericTerm(value, flavor);
-    }
-    return appendDiceTerm(value, flavor)
-}
-
-export function appendDiceTerm(value, flavor) {
-    if (!value) {
-        return [];
-    }
-
-    let parts = value.split("d")
-    let number = parseInt(parts[0]);
-    let faces = parseInt(parts[1]);
-    if (number === 0) {
-        return [];
-    }
-    return [number > -1 ? plus() : minus(),
-        new DiceTerm({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
-}
-
-export function appendNumericTerm(value, flavor) {
-    if (!value) {
-        return [];
-    }
-
-    let num = parseInt(value);
-    if (num === 0) {
-        return [];
-    }
-    return [num > -1 ? plus() : minus(),
-        new NumericTerm({number: Math.abs(num), options: getDieFlavor(flavor)})];
-}
 
 export class Attack {
 
@@ -196,7 +131,10 @@ export class Attack {
     }
 
     getActor(actorId) {
-        let find = game.data.actors.find(actor => actor._id === actorId);
+        if(!actorId){
+            return;
+        }
+        let find = game.actors.find(actor => actor._id === actorId);
         if (!find) {
             find = getEntityFromCompendiums("Actor", actorId)
         }
@@ -219,17 +157,16 @@ export class Attack {
                 return new UnarmedAttack(this.actorId);
             }
 
-            let items = actor.items?._source || actor.items;
-            let find = items.find(item => item._id === this.itemId);
+            let find = actor.items.get(this.itemId)
 
             if (!find) {
                 find = this.options.items?.get(this.itemId)
             }
 
-            if (find instanceof SWSEItem) {
-                return find.system;
-            }
-            return find;
+            // if (find instanceof SWSEItem) {
+            //     return find.system;
+            // }
+           return find;
         }
 
         return this.getCached("getItem", fn)
@@ -301,7 +238,7 @@ export class Attack {
 
 
     get name() {
-        let name = SWSEItem.buildItemName(this.item);
+        let name = this.item.name;
         return ((this.isUnarmed && 'Unarmed Attack' !== name) ? `Unarmed Attack (${name})` : name) + this.nameModifier;
     }
 
@@ -629,17 +566,13 @@ export class Attack {
     get modes() {
         let item = this.item;
         let modes = SWSEItem.getModesFromItem(item);
-        const dynamicModes = this.getDynamicModes(modes.filter(mode=>mode.type ==="dynamic"));
-        modes = modes.filter(mode=>mode.type !=="dynamic")
-        modes.push(...dynamicModes)
-        let groupedModes = {}
-        for (let mode of Object.values(modes).filter(m => !!m)) {
-            if (!groupedModes[mode.group]) {
-                groupedModes[mode.group] = [];
-            }
-            groupedModes[mode.group].push(mode);
-        }
-        return Object.values(groupedModes);
+        //const dynamicModes = this.getDynamicModes(modes.filter(mode=>mode.type ==="dynamic"));
+        modes = modes.filter(mode=>!!mode && mode.type !=="dynamic")
+
+        // modes.forEach(mode => {if(!mode.uuid){
+        //     mode.uuid = generateUUID(this.actorId, this.itemId, mode._id)
+        // }})
+        return modes;
     }
 
     get rangedAttackModifier() {

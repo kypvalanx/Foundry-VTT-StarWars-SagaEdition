@@ -1,4 +1,4 @@
-import {resolveValueArray} from "../util.mjs";
+import {resolveValueArray} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {SWSEActor} from "./actor.mjs";
 

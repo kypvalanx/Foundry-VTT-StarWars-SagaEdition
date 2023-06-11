@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 
-import {SWSE} from "./common/config.mjs";
-import {dieSize, dieType} from "./common/constants.mjs";
-import {SWSEActor} from "./actor/actor.mjs";
-import {SWSEItem} from "./item/item.mjs";
-import {meetsPrerequisites} from "./prerequisite.mjs";
-import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
-import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./common/classDefaults.mjs";
+import {SWSE} from "./config.mjs";
+import {dieSize, dieType} from "./constants.mjs";
+import {SWSEActor} from "../actor/actor.mjs";
+import {SWSEItem} from "../item/item.mjs";
+import {meetsPrerequisites} from "../prerequisite.mjs";
+import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
+import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -1483,4 +1483,89 @@ export function addBlankMode() {
     if (this.canUserModify(game.user, 'update')) {
         this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODE_EFFECT]);
     }
+}
+
+export function getDieFlavor(flavor) {
+    return {flavor};
+}
+
+function plus() {
+    return new OperatorTerm({operator: "+"});
+}
+
+export function mult() {
+    return new OperatorTerm({operator: "*"});
+}
+
+function minus() {
+    return new OperatorTerm({operator: "-"});
+}
+
+export function appendTerms(value, flavor) {
+    let toks = `${value}`.replace(/\+/g, " + ").replace(/-/g, " - ").replace(/\*/g, " * ").replace(/\//g, " / ").split(" ")
+
+    let terms = [];
+    let buffer = "";
+    for (let tok of toks) {
+        if (tok === "-") {
+            buffer = "-"
+            continue;
+        } else if (tok === "+" || tok === "") {
+            continue;
+        }
+        terms.push(...appendTerm(`${buffer}${tok}`, flavor))
+        buffer = ""
+    }
+    return terms;
+}
+
+export function appendTerm(value, flavor) {
+    if (`${parseInt(value)}` === value) {
+        return appendNumericTerm(value, flavor);
+    }
+    return appendDiceTerm(value, flavor)
+}
+
+export function appendDiceTerm(value, flavor) {
+    if (!value) {
+        return [];
+    }
+
+    let parts = value.split("d")
+    let number = parseInt(parts[0]);
+    let faces = parseInt(parts[1]);
+    if (number === 0) {
+        return [];
+    }
+    return [number > -1 ? plus() : minus(),
+        new DiceTerm({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+}
+
+export function appendNumericTerm(value, flavor) {
+    if (!value) {
+        return [];
+    }
+
+    let num = parseInt(value);
+    if (num === 0) {
+        return [];
+    }
+    return [num > -1 ? plus() : minus(),
+        new NumericTerm({number: Math.abs(num), options: getDieFlavor(flavor)})];
+}
+
+function generateUUID(actorId, itemId, effectId) {
+    let response = "";
+    if (actorId) {
+        response += `Actor.${actorId}`;
+    }
+    if (itemId) {
+        response = response.length === 22 ? response + "." : response
+        response += `Item.${itemId}`;
+    }
+    if (effectId) {
+        response = response.length === 44 ? response + "." : response
+        response += `Effect.${effectId}`;
+    }
+    return response;
 }
