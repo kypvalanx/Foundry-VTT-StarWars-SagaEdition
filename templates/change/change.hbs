@@ -5,10 +5,14 @@
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
                    {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
         </div>
-        <div class="mode">
+        <div class="mode" title="{{localize EFFECT.ModeDescription}}">
             <select class="direct" {{#if inherited}}disabled{{else}}name="changes.{{index}}.mode"{{/if}} data-dtype="Number">
                 {{selectOptions modes selected=change.mode}}
             </select>
+        </div>
+        <div class="priority" title="{{localize EFFECT.PriorityDescription}}">
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="number"
+                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.priority"{{/if}} value="{{change.priority}}"/>
         </div>
         <div class="value">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"

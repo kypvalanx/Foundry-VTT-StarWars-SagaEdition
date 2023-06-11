@@ -34,6 +34,23 @@
   flex: 2
 }
 
+.change-list-header .mode {
+  padding-left: 4px;
+  flex: 1
+}
+
+.change-list .mode {
+  flex: 1
+}
+.change-list-header .priority {
+  padding-left: 4px;
+  flex: 1
+}
+
+.change-list .priority {
+  flex: 1
+}
+
 .change-list-header .value {
   flex: 2
 }
