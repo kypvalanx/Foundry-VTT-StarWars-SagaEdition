@@ -14,9 +14,9 @@ import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
     if (attribute) {
-        attribute.source = attribute.source || source;
-        attribute.sourceString = attribute.sourceString || sourceString;
-        attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
+        attribute.source = source;
+        attribute.sourceString = sourceString;
+        attribute.sourceDescription = sourceDescription;
     }
     return attribute
 }

@@ -5,7 +5,7 @@ import {
     onSpanTextInput,
     changeCheckbox,
     changeText,
-    onToggle
+    onToggle, changeSelect
 } from "../common/listeners.mjs";
 
 /**
@@ -57,6 +57,7 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         });
 
 
+        html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
         html.find("input[type=number].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));

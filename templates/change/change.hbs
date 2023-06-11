@@ -12,7 +12,7 @@
         </div>
         <div class="priority" title="{{localize EFFECT.PriorityDescription}}">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="number"
-                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.priority"{{/if}} value="{{change.priority}}"/>
+                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.priority"{{/if}} value="{{#unless change.priority}}1{{else}}{{change.priority}}{{/unless}}"/>
         </div>
         <div class="value">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"

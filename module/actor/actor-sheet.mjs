@@ -10,7 +10,7 @@ import {
     changeCheckbox,
     changeText,
     onEffectControl,
-    onToggle
+    onToggle, changeSelect
 } from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 
@@ -104,6 +104,7 @@ export class SWSEActorSheet extends ActorSheet {
             onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
         });
 
+        html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
 

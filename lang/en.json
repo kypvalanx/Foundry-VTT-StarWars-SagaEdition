@@ -7,5 +7,8 @@
   "EFFECT.StatusShield": "Shield",
   "ITEM.TabSummary": "Summary",
   "ITEM.TabEffects": "Effects",
-  "EFFECT.TabLinks": "Links"
+  "EFFECT.TabLinks": "Links",
+  "EFFECT.ChangePriority": "Priority",
+  "EFFECT.PriorityDescription": "Default priority is 1.  Priority informs the system which round the change will be resolved.  1 is resolved before 2 etc.",
+  "EFFECT.ModeDescription": "Mode informs the system how the change will be resolved."
 }
