@@ -1283,35 +1283,14 @@ export class SWSEItem extends Item {
     }
 
     get modes() {
-        let itemData = this.data;
-        return SWSEItem.getModesFromItem(itemData);
+        return SWSEItem.getModesFromItem(this);
     }
 
     static getModesFromItem(item) {
         if (!item) {
             return [];
         }
-        let modes = Object.values(item.system.modes || []).filter(mode => !!mode);
-
-        modes.forEach(mode => mode.modePath = mode.name);
-        let activeModes = SWSEItem.getActiveModesFromItemData(item);
-        let childModes = SWSEItem.getChildModes(activeModes, "");
-
-        modes.push(...childModes);
-
-        return modes;
-    }
-
-    static getChildModes(activeModes, parentModePath) {
-        let childModes = [];
-        for (let activeMode of activeModes) {
-            let values = Object.values(activeMode.modes || []).filter(mode => !!mode);
-            let parentModePath1 = parentModePath + (!!parentModePath ? "." : "") + activeMode.name;
-            values.forEach(val => val.modePath = parentModePath1 + (!!parentModePath1 ? "." : "") + val.name)
-            childModes.push(...values)
-            childModes.push(...SWSEItem.getChildModes(values.filter(mode => !!mode && mode.isActive), parentModePath1))
-        }
-        return childModes;
+        return item.effects?.filter(effect => !effect.flags.swse?.itemModifier) || []
     }
 
     activateMode(mode, type, group, attributes) {
