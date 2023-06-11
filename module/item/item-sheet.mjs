@@ -17,14 +17,6 @@ import {
 
 export class SWSEItemSheet extends ItemSheet {
 
-    /**
-     * A convenience reference to the Item entity
-     * @type {SWSEItem}
-     */
-    get item() {
-        return this.object;
-    }
-
     /** @override */
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {

@@ -1,5 +1,5 @@
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
-import {getDocumentByUuid, safeInsert} from "../util.mjs";
+import {addBlankMode, addBlankModificationEffect, getDocumentByUuid, safeInsert} from "../util.mjs";
 
 export function onChangeControl(event) {
     event.preventDefault();
@@ -50,15 +50,19 @@ export function onEffectControl(event){
             this.object.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
             break;
         case 'disable':
-            this.object.toggleEffectDisabled(effectId, !event.currentTarget.checked)
+            toggleEffectDisabled.call(this.object, effectId, !event.currentTarget.checked)
             break;
         case "add-modification":
-            this.object.addBlankModificationEffect();
+            addBlankModificationEffect.call(this.object);
             break;
         case "add-mode":
-            this.object.addBlankMode();
+            addBlankMode.call(this.object);
             break;
     }
+}
+
+function toggleEffectDisabled(effectId, disabled) {
+    this.effects.get(effectId).disable(disabled)
 }
 
 

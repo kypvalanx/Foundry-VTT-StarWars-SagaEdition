@@ -6,6 +6,7 @@ import {SWSEActor} from "./actor/actor.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
+import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./common/classDefaults.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -1470,4 +1471,16 @@ export function linkEffects(effectId1, effectId2) {
 
 
     new Dialog(options).render(true);
+}
+
+
+export function addBlankModificationEffect() {
+    if (this.canUserModify(game.user, 'update')) {
+        this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODIFICATION_EFFECT]);
+    }
+}
+export function addBlankMode() {
+    if (this.canUserModify(game.user, 'update')) {
+        this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODE_EFFECT]);
+    }
 }

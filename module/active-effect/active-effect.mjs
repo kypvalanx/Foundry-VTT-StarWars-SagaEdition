@@ -45,14 +45,19 @@ export class SWSEActiveEffect extends ActiveEffect {
         this.safeUpdate(data);
     }
 
-    disable(disabled){
+    disable(disabled, affected = []){
+        if(this.disabled === disabled || (affected.includes(this.id))){
+            return;
+        }
         for(let link of this.links){
             if(link.type === "exclusive" && !disabled){
                 let doc = getDocumentByUuid(link.uuid)
-                doc.safeUpdate({disabled: true})
+                affected.push(this.id)
+                doc.disable(true, affected)
             } else if(link.type === "mirror") {
                 let doc = getDocumentByUuid(link.uuid)
-                doc.safeUpdate({disabled})
+                affected.push(this.id)
+                doc.disable(disabled, affected)
             }
         }
 

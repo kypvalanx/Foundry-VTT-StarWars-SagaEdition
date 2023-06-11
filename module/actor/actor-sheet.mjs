@@ -1,4 +1,4 @@
-import {filterItemsByType, getParentByHTMLClass, onCollapseToggle, unique} from "../util.mjs";
+import {filterItemsByType, getParentByHTMLClass, linkEffects, onCollapseToggle, unique} from "../util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {Attack} from "./attack.mjs";
@@ -383,6 +383,13 @@ export class SWSEActorSheet extends ActorSheet {
 
         dragData.sourceContainer = getParentByHTMLClass(event, "item-container");
         dragData.draggableId = event.target.id;
+
+
+        if(elem.dataset.effectId){
+            dragData.effectId = elem.dataset.effectId
+            dragData.effectUuid = elem.dataset.uuid
+            dragData.type = "ActiveEffect";
+        }
 
         event.dataTransfer.setData("text/plain", JSON.stringify(dragData));
     }
@@ -811,6 +818,30 @@ export class SWSEActorSheet extends ActorSheet {
 
         await this.actor.addItems([data], undefined, context);
 
+    }
+
+    async _onDropActiveEffect(event, data) {
+        let targetEffect = getParentByHTMLClass(event, "effect")
+        if(targetEffect){
+            let droppedItem;
+            try {
+                droppedItem = JSON.parse(event.dataTransfer.getData("text/plain"));
+            } catch (err) {
+                console.error(`Parsing error: ${event.dataTransfer.getData("text/plain")}`)
+                return false;
+            }
+            droppedItem.targetEffectUuid = targetEffect.dataset.uuid;
+            if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
+                linkEffects.call(this.item, droppedItem.effectUuid, droppedItem.targetEffectUuid);
+                return;
+            }
+        }
+
+
+        const effect = await ActiveEffect.implementation.fromDropData(data);
+        if ( !this.actor.isOwner || !effect ) return false;
+        if ( this.actor.uuid === effect.parent?.uuid ) return false;
+        return ActiveEffect.create(effect.toObject(), {parent: this.actor});
     }
 
     _onAddGMBonus(ev){

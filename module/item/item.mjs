@@ -155,23 +155,14 @@ export class SWSEItem extends Item {
     }
 
     get hasLevels() {
-        return ['class'].includes(this.type)
+        return 'class' === this.type
     }
 
     _onCreate(data, options, userId) {
         super._onCreate(data, options, userId);
         this.prepareData();
     }
-    toggleEffectDisabled(effectId, disabled) {
-        this.effects.get(effectId).disable(disabled)
-    }
 
-    // get name() {
-    //     if(!this.system.baseName){
-    //
-    //     }
-    //     return SWSEItem.buildItemName(this);
-    // }
 
     static buildItemName(item) {
         if (!item) {
@@ -1451,34 +1442,12 @@ export class SWSEItem extends Item {
         activeEffect.icon = item.img;
         activeEffect.origin = item.uuid;
         activeEffect.flags.swse.description = item.system.description;
-        // let activeEffect = {
-        //     label: item.name,
-        //     changes: changes,
-        //     icon: item.img,
-        //     origin: item.uuid,
-        //     disabled: false,
-        //     flags: {
-        //         swse: {
-        //             description: item.system.description,
-        //             itemModifier: true
-        //         }
-        //     }
-        // }
+
         if (this.canUserModify(game.user, 'update')) {
             this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
         }
     }
 
-    addBlankModificationEffect() {
-        if (this.canUserModify(game.user, 'update')) {
-            this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODIFICATION_EFFECT]);
-        }
-    }
-    addBlankMode() {
-        if (this.canUserModify(game.user, 'update')) {
-            this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODE_EFFECT]);
-        }
-    }
     createActiveEffectFromMode(mode) {
         return {
             label: mode.name,
