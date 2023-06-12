@@ -25,8 +25,8 @@ import {
     getOrdinal,
     getRangeModifierBlock,
     handleAttackSelect,
-    increaseDieSize,
-    mult,
+    increaseDieSize, minus,
+    mult, plus,
     resolveValueArray,
     toNumber
 } from "../common/util.mjs";
@@ -358,10 +358,10 @@ export class Attack {
             let damageDice = getInheritableAttribute({
                 entity: item,
                 attributeKey: ["damage", "damageDie"],
-                reduce: "VALUES"
+                reduce: "SUM"
             })
-            let damageDie = damageDice[damageDice.length - 1];
-            terms.push(...getDiceTermsFromString(damageDie))
+            //let damageDie = damageDice[damageDice.length - 1];
+            terms.push(...getDiceTermsFromString(damageDice))
         }
 
         let heroicClassLevels = (actor?.items || []).filter(item => item.type === 'class' && getInheritableAttribute({
@@ -710,22 +710,41 @@ function getDiceTermsFromString(dieString) {
         return [];
     }
     dieString = `${dieString}`
-    if (dieString === "0") {
-        return [new NumericTerm({number: 0})];
+    let dieTerms = dieString
+        .replace(/ /g,"")
+        .replace(/-/g, " - ")
+        .replace(/\+/g, " + ")
+        .replace(/x/g, " x ")
+        .split(/ /g)
+
+    let dice = [];
+    let lastOperator = "";
+    for(let dieTerm of dieTerms){
+        if (dieTerm === "0") {
+            //dice.push(new NumericTerm({number: 0}));
+        } else if (!isNaN(dieTerm)) {
+            if(lastOperator === "x"){
+                dice.push(new NumericTerm({number: toNumber(dieString), options: getDieFlavor("multiplier")}));
+            } else {
+                dice.push(new NumericTerm({number: toNumber(dieString)}));
+            }
+            lastOperator = "";
+        } else if(dieTerm === "+"){
+            dice.push(plus())
+            lastOperator = "+"
+        } else if(dieTerm === "-"){
+            dice.push(minus())
+            lastOperator = "-"
+        } else if(dieTerm === "x"){
+            dice.push(mult())
+            lastOperator = "x"
+        } else {
+            let toks = dieString.split("d")
+            dice.push(new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])}));
+        }
     }
-    if (dieString === "1") {
-        return [new NumericTerm({number: 1})];
-    }
-    let additionalTerms = []
-    if (dieString.includes("x")) {
-        let toks = dieString.split("x")
-        dieString = toks[0];
-        additionalTerms.push(mult());
-        additionalTerms.push(new NumericTerm({number: toks[1], options: getDieFlavor("multiplier")}));
-    }
-    let toks = dieString.split("d")
-    let dice = [new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])})];
-    dice.push(...additionalTerms);
+
+
     return dice;
 }
 

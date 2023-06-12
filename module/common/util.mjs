@@ -159,6 +159,20 @@ function resolveMultiplicativeExpression(expression, actor) {
     }
 }
 
+function add(first, second) {
+    if(!isNaN(first) && !isNaN(second) ){
+        return toNumber(first) + toNumber(second);
+    }
+    return `${first} + ${second}`;
+}
+
+function sub(first, second) {
+    if(!isNaN(first) && !isNaN(second) ){
+        return toNumber(first) - toNumber(second);
+    }
+    return `${first} - ${second}`;
+}
+
 function resolveAdditiveExpression(expression, actor) {
     let raw = expression.replace(/\+/g, " + ").replace(/-/g, " - ")
     let holder = null;
@@ -185,13 +199,17 @@ function resolveAdditiveExpression(expression, actor) {
             const first = resolveExpression(tokens[i - 1], actor);
             const second = resolveExpression(tokens[i + 1], actor);
             if (tokens[i] === "+") {
-                tokens[i] = first + second;
+                tokens[i] = add(first, second);
             } else {
-                tokens[i] = first - second;
+                tokens[i] = sub(first, second);
             }
             tokens[i - 1] = "";
             tokens[i + 1] = "";
-            return resolveExpression(tokens.join(""), actor)
+            const reduced = tokens.join("");
+            if(expression === reduced){
+                return reduced;
+            }
+            return resolveExpression(reduced, actor)
         }
     }
 }
@@ -921,6 +939,37 @@ function minValue(values, actor) {
     }, undefined);
 }
 
+function resolveValuesReduce(values, actor) {
+        const resolutionSorting = {};
+        for (const value of values) {
+            const priority = value.priority || 1;
+            resolutionSorting[priority] = resolutionSorting[priority] || {};
+            const mode = value.mode || 2;
+            resolutionSorting[priority][mode] = resolutionSorting[priority][mode] || [];
+            resolutionSorting[priority][mode].push(value)
+        }
+
+        let currentValue = [];
+        let priorities = Object.keys(resolutionSorting).sort();
+        let lastPriority;
+        for (const priority of priorities) {
+            let z = resolutionSorting[priority];
+            for (const mode of ATTRIBUTE_RESOLUTION_ORDER) {
+                for (const value of z[mode] || []) {
+                    if(mode === CONST.ACTIVE_EFFECT_MODES.OVERRIDE){
+                        if(!lastPriority || lastPriority < priority) {
+                            currentValue = [];
+                        }
+
+                    }
+                    currentValue.push(value.value);
+                    lastPriority = priority;
+                }
+            }
+        }
+        return currentValue;
+}
+
 export function reduceArray(reduce, values, actor) {
     if (!reduce) {
         return values;
@@ -966,7 +1015,7 @@ export function reduceArray(reduce, values, actor) {
             }
             return undefined;
         case "VALUES":
-            return values.map(attr => attr.value);
+            return resolveValuesReduce(values, actor);
         case "VALUES_TO_LOWERCASE":
             return values.map(attr => attr.value.toLowerCase());
         case "UNIQUE":
@@ -1242,6 +1291,7 @@ function test() {
     assertEquals(2, resolveExpression("+2", null))
     assertEquals(-5, resolveExpression("-5", null))
     assertEquals(-10, resolveExpression("-5-5", null))
+    assertEquals("3d6 + 3", resolveExpression("3d6+3", null))
     assertEquals(0, resolveExpression("-5--5", null))
     assertEquals(5, resolveExpression("MAX(1,5)", null))
     assertEquals(1, resolveExpression("MIN(1,5)", null))
@@ -1489,7 +1539,7 @@ export function getDieFlavor(flavor) {
     return {flavor};
 }
 
-function plus() {
+export function plus() {
     return new OperatorTerm({operator: "+"});
 }
 
@@ -1497,7 +1547,7 @@ export function mult() {
     return new OperatorTerm({operator: "*"});
 }
 
-function minus() {
+export function minus() {
     return new OperatorTerm({operator: "-"});
 }
 
