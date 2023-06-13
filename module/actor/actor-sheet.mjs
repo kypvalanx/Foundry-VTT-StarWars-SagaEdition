@@ -1,9 +1,10 @@
 import {
     filterItemsByType,
+    getCleanListFromCSV,
     getParentByHTMLClass,
     linkEffects,
+    numericOverrideOptions,
     onCollapseToggle,
-    toNumber,
     unique
 } from "../common/util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
@@ -12,12 +13,13 @@ import {Attack} from "./attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {
-    onChangeControl,
-    onSpanTextInput,
     changeCheckbox,
+    changeSelect,
     changeText,
+    onChangeControl,
     onEffectControl,
-    onToggle, changeSelect
+    onSpanTextInput,
+    onToggle
 } from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 
@@ -239,109 +241,87 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onCreateNewItem(event){
-        let element = $(event.currentTarget);
-        let itemType = element.data("action-type")
+        let itemType = $(event.currentTarget).data("action-type")
 
-        let itemData = {
+        this.actor.createEmbeddedDocuments('Item', [{
             name: `New ${itemType}`,
             type: itemType,
             data: getDefaultDataByType(itemType)
-        }
-
-        this.actor.createEmbeddedDocuments('Item', [itemData]);
+        }]);
     }
 
     _onQuickCreate(event) {
+        if (!(event.code === "Enter" || event.code === "NumpadEnter")) {
+            return;
+        }
+        event.preventDefault();
         let element = $(event.currentTarget);
         let itemType = element.data("action-type");
-            if(event.code === "Enter" || event.code === "NumpadEnter"){
-                event.preventDefault();
-                let name = element[0].value;
-                let names = [name]
-                if(name.includes(",")){
-                    names = name.split(",").map(n => n.trim());
-                }
+        const defaultDataByType = getDefaultDataByType(itemType);
 
-                let itemData = names.map(name => {
-                    return {
-                        name: name,
-                        type: itemType,
-                        data: getDefaultDataByType(itemType)
-                    }
-                })
-
-                this.actor.createEmbeddedDocuments('Item', itemData);
+        this.actor.createEmbeddedDocuments('Item',
+            getCleanListFromCSV(element[0].value).map(name => {
+                return {
+                name: name,
+                type: itemType,
+                data: defaultDataByType
             }
-
+        }));
     }
 
     _onCredit(event) {
-        let element = $(event.currentTarget);
-        let type = element.data("action-type")
-        let actor = this.actor;
+        let type = $(event.currentTarget).data("action-type")
+
         if ('add' === type || 'sub' === type) {
-            addSubCredits(type, actor);
-        }
-        if ('transfer' === type) {
-            transferCredits(actor, type);
+            addSubCredits(type, this.actor);
+        } else if ('transfer' === type) {
+            transferCredits(this.actor);
         }
     }
 
     async _onConditionChange(event) {
         event.stopPropagation();
-        await this.actor.clearCondition();
-        //this.actor.deleteEmbeddedDocuments("")
-        await this.actor.setCondition(event.currentTarget.value);
+        await this.object.clearCondition();
+        await this.object.setCondition(event.currentTarget.value);
     }
+
     async _onGravityChange(event) {
         event.stopPropagation();
-        await this.actor.safeUpdate({"data.gravity": event.currentTarget.value})
+        await this.object.safeUpdate({"data.gravity": event.currentTarget.value})
     }
 
-
-
     async _onShield(event) {
-        let element = $(event.currentTarget);
-        let type = element.data("action-type")
-        let actor = this.actor;
-        switch (type) {
+        switch ($(event.currentTarget).data("action-type")) {
             case 'plus':
-                actor.shields = actor.system.shields.value + 5
+                this.object.shields = this.object.shields.value + 5
                 break;
             case 'minus':
-                actor.shields = actor.system.shields.value - 5
+                this.object.shields = this.object.shields.value - 5
                 break;
             case 'toggle':
-
-                let ids = this.actor.effects
+                let ids = this.object.effects
                     .filter(effect => effect.icon?.includes("/shield.svg")).map(effect => effect.id)
-
-                await this.actor.deleteEmbeddedDocuments("ActiveEffect", ids);
-
                 if(ids.length === 0){
                     let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
-                    await this.actor.activateStatusEffect(statusEffect);
+                    await this.object.activateStatusEffect(statusEffect);
+                } else {
+                    await this.object.deleteEmbeddedDocuments("ActiveEffect", ids);
                 }
-
                 break;
         }
     }
 
-
     _onDuplicate(event) {
         const li = $(event.currentTarget).parents(".item");
-        let itemToDuplicate = this.actor.items.get(li.data("itemId"));
-        let data = {item: itemToDuplicate, duplicate:true}
-        //let {id, pack} = SWSEActorSheet.parseSourceId(itemToDuplicate.data.flags.core.sourceId)
+        let itemToDuplicate = this.object.items.get(li.data("itemId"));
 
-        this._onDropItem(event, data)
+        this._onDropItem(event, {item: itemToDuplicate, duplicate: true})
     }
 
     /** @inheritdoc */
     _onDragStart(event) {
         super._onDragStart(event);
-        let data = event.dataTransfer.getData("text/plain") || "{}";
-        let dragData = JSON.parse(data);
+        let dragData = JSON.parse(event.dataTransfer.getData("text/plain") || "{}");
 
         const elem = event.currentTarget;
 
@@ -384,7 +364,6 @@ export class SWSEActorSheet extends ActorSheet {
         ev.dataTransfer.dropEffect = "move";
     }
 
-
     _onDragEndMovable(ev) {
         ev.preventDefault();
         // Get the id of the target and add the moved element to the target's DOM
@@ -393,8 +372,6 @@ export class SWSEActorSheet extends ActorSheet {
             ev.target.appendChild(document.getElementById(data.draggableId));
         }
     }
-
-
 
     async _selectAge(event, sheet) {
         let options = this.buildAgeDialog(sheet);
@@ -408,11 +385,11 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     buildAgeDialog(sheet) {
-        let age = sheet.actor.data.data.age ? parseInt(sheet.actor.data.data.age) : 0;
+        let age = sheet.actor.system.age ? parseInt(sheet.actor.system.age) : 0;
         let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
             .map(trait => {
-                //let prereqs = trait.data.data.prerequisite.filter(prereq => );
-                let prereq = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, 'AGE')
+                //let prereqs = trait.system.prerequisite.filter(prereq => );
+                let prereq = this._prerequisiteHasTypeInStructure(trait.system.prerequisite, 'AGE')
                 if (prereq) {
                     return {
                         name: trait.data.finalName,
@@ -456,12 +433,12 @@ export class SWSEActorSheet extends ActorSheet {
 
 
     buildGenderDialog(sheet) {
-        let sex = sheet.actor.data.data.sex ? sheet.actor.data.data.sex : "";
-        let gender = sheet.actor.data.data.gender ? sheet.actor.data.data.gender : "";
+        let sex = sheet.actor.system.sex ? sheet.actor.system.sex : "";
+        let gender = sheet.actor.system.gender ? sheet.actor.system.gender : "";
         let searchString = "GENDER";
         let genderEffects = filterItemsByType(sheet.actor.items.values(), "trait")
-            .filter(trait => this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)).map(trait => {
-                let prerequisite = this._prerequisiteHasTypeInStructure(trait.data.data.prerequisite, searchString)
+            .filter(trait => this._prerequisiteHasTypeInStructure(trait.system.prerequisite, searchString)).map(trait => {
+                let prerequisite = this._prerequisiteHasTypeInStructure(trait.system.prerequisite, searchString)
 
                 return {
                     gender: prerequisite.text,
@@ -531,14 +508,6 @@ export class SWSEActorSheet extends ActorSheet {
                 div.classList.add("cursor")
             }
         }
-    }
-
-    parseRange(range) {
-        if (range.includes("-")) {
-            let tok = range.split("-");
-            return {low: parseInt(tok[0]), high: parseInt(tok[1])};
-        }
-        return {low: parseInt(range.replace("+", "")), high: -1};
     }
 
     getPointBuyTotal() {
@@ -727,8 +696,8 @@ export class SWSEActorSheet extends ActorSheet {
                     }
                 }
 
-                if (!this.actor.data.data.crew.find(crewMember => crewMember.position === currentPosition && crewMember.slot === targetItemContainer.dataset.slot)) {
-                    await this.removeCrewFromPositions(actor, actor.id, crewPositions, event);
+                if (!this.actor.system.crew.find(crewMember => crewMember.position === currentPosition && crewMember.slot === targetItemContainer.dataset.slot)) {
+                    await this.removeCrewFromPositions(actor, actor.id, crewPositions);
                     await this.addCrew({
                         actor,
                         id: actor.id,
@@ -740,48 +709,22 @@ export class SWSEActorSheet extends ActorSheet {
         }
     }
 
-    async removeCrewFromPositions(actor, actorId, positions, ev, delay = false) {
+    async removeCrewFromPositions(actor, actorId, positions) {
         for (let position of positions) {
-            await this.removeCrew(actorId, position, ev, delay);
+            await this.removeCrew(actorId, position);
         }
     }
 
-    async removeCrew(actorId, position, ev, delay = false) {
+    async removeCrew(actorId, position) {
         let crew = getActorFromId(actorId);
         await crew?.removeCrew(this.actor.id, position)
         await this.actor.removeCrew(actorId, position)
     }
 
-    async addCrew(crewMember, ev, delay = false) {
+    async addCrew(crewMember) {
         await this.actor.addCrew(crewMember.actor, crewMember.position, crewMember.slot)
         await crewMember.actor.addCrew(this.actor, crewMember.position, crewMember.slot)
     }
-
-
-    async removeReciprocalCrewLinks(actorId, positions, ev, delay = false) {
-
-        this._pendingUpdates['data.crew'] = this.actor.data.data.crew.filter(crewMember => crewMember.id !== actorId || !positions.includes(crewMember.position));
-        if (!delay) {
-            await this._onSubmit(ev);
-        }
-    }
-
-    async removeRecipricalCrewLink(actorId, position, ev, delay = false) {
-
-        this._pendingUpdates['data.crew'] = this.actor.data.data.crew.filter(crewMember => crewMember.id !== actorId || crewMember.position !== position);
-
-        if (!delay) {
-            await this._onSubmit(ev);
-        }
-    }
-
-    async addRecipricalCrewLink(crewMember, ev, delay = false) {
-        this._pendingUpdates['data.crew'] = [crewMember].concat(this.actor.data.data.crew);
-        if (!delay) {
-            await this._onSubmit(ev);
-        }
-    }
-
 
     async _onDropItem(ev, data) {
         ev.preventDefault();
@@ -829,7 +772,7 @@ export class SWSEActorSheet extends ActorSheet {
         return ActiveEffect.create(effect.toObject(), {parent: this.actor});
     }
 
-    _onAddGMBonus(ev){
+    _onAddGMBonus(){
         this.actor.addItems([{name:"GM Bonus", type:"trait"}], undefined, {})
     }
 
@@ -1029,7 +972,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Delete race
         if (a.classList.contains("crew-remove")) {
-            await this.removeCrew(a.dataset.actorId, a.dataset.position, event);
+            await this.removeCrew(a.dataset.actorId, a.dataset.position);
         }
     }
 
@@ -1396,29 +1339,6 @@ export class SWSEActorSheet extends ActorSheet {
         })
     }
 
-    async addOptionalRuleFeats(item) {
-        let items = [];
-
-        // if (item.name === 'Point-Blank Shot') {
-        //     if (game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-        //         await this.actor.addItemsFromCompendium('feat', items, {
-        //             category: 'Precise Shot',
-        //             prerequisite: 'SETTING:mergePointBlankShotAndPreciseShot'
-        //         });
-        //     }
-        // }
-
-        return items;
-    }
-
-    static parseSourceId(sourceId) {
-        let first = sourceId.indexOf(".");
-        let lastIndex = sourceId.lastIndexOf(".");
-        let pack = sourceId.substr(first + 1, lastIndex - first - 1);
-        let id = sourceId.substr(lastIndex + 1);
-        return {id, pack};
-    }
-
     _prerequisiteHasTypeInStructure(prereq, type) {
         if (!prereq) {
             return false;
@@ -1499,46 +1419,4 @@ export class SWSEActorSheet extends ActorSheet {
 }
 
 
-
-function numericOverrideOptions(actor) {
-    let options = [];
-    options.push({name: "Set Override",
-            icon: '<i class="fas fa-edit">',
-            callback: async element => {
-                let overrideKey = element.data('override-key');
-                let overrideName = element.data('override-name');
-                let value = await Dialog.prompt({
-                    title: `Set ${overrideName}`,
-                    content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
-                    callback: html => {
-                        let find = html.find(".choice");
-
-                        for (let foundElement of find) {
-                            return foundElement.value;
-                        }
-                    }
-                })
-
-                let data = {};
-                data[overrideKey] = toNumber(value);
-                await actor.safeUpdate(data);
-            }})
-
-    options.push({name: `Remove Override`,
-        icon: '<i class="fas fa-delete">',
-        callback: element =>{
-
-            let overrideKey = element.data('override-key');
-            let data = {};
-            data[overrideKey] = null;
-            actor.safeUpdate(data);
-        },
-        condition: element => {
-        let override = element[0].dataset["override"]
-        return !!override
-        }
-    })
-
-    return options;
-}
 

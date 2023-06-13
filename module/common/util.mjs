@@ -1229,6 +1229,9 @@ function test() {
     const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
     const POST_ROLL_MULTIPLY = 6;
 
+    assertEquals(`["item name"]`, JSON.stringify(getCleanListFromCSV("item name  ")))
+    assertEquals(`["item name","item name two"]`, JSON.stringify(getCleanListFromCSV("  item name, item name two")))
+
     assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
     assertEquals(7, addValues(4, 3));
     assertEquals(7, addValues(3, 4));
@@ -1618,4 +1621,53 @@ function generateUUID(actorId, itemId, effectId) {
         response += `Effect.${effectId}`;
     }
     return response;
+}
+
+export function getCleanListFromCSV(name) {
+    return name.split(",").map(n => n.trim());
+}
+
+export function numericOverrideOptions(actor) {
+    let options = [];
+    options.push({
+        name: "Set Override",
+        icon: '<i class="fas fa-edit">',
+        callback: async element => {
+            let overrideKey = element.data('override-key');
+            let overrideName = element.data('override-name');
+            let value = await Dialog.prompt({
+                title: `Set ${overrideName}`,
+                content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
+                callback: html => {
+                    let find = html.find(".choice");
+
+                    for (let foundElement of find) {
+                        return foundElement.value;
+                    }
+                }
+            })
+
+            let data = {};
+            data[overrideKey] = toNumber(value);
+            await actor.safeUpdate(data);
+        }
+    })
+
+    options.push({
+        name: `Remove Override`,
+        icon: '<i class="fas fa-delete">',
+        callback: element => {
+
+            let overrideKey = element.data('override-key');
+            let data = {};
+            data[overrideKey] = null;
+            actor.safeUpdate(data);
+        },
+        condition: element => {
+            let override = element[0].dataset["override"]
+            return !!override
+        }
+    })
+
+    return options;
 }

@@ -37,7 +37,7 @@ export function addSubCredits(type, actor) {
     d.render(true);
 }
 
-export function transferCredits(actor, type) {
+export function transferCredits(actor) {
     let options = actor.items
         .filter(item => getInheritableAttribute({entity: item, attributeKey: "credit"}).length > 0)
         .map(item => `<option data-credits="${getInheritableAttribute({
@@ -56,7 +56,7 @@ export function transferCredits(actor, type) {
                      <div><select>${options}</select><label>Credits:<div class="item-credits">0</div></label></div>
                  </div>`;
     let d = new Dialog({
-        title: type === "Transfer Credits",
+        title: "Transfer Credits",
         content: content,
         buttons: {
             one: {
