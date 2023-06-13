@@ -29,16 +29,6 @@ import {getDefaultDataByType} from "../common/classDefaults.mjs";
  */
 
 export class SWSEActorSheet extends ActorSheet {
-
-    /**
-     * A convenience reference to the Actor entity
-     * @type {SWSEActor}
-     */
-    get actor() {
-        return this.object;
-    }
-
-
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -152,19 +142,6 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
-
-        // html.find('.mode-selector').on("click", async event => {
-        //     //event.preventDefault();
-        //     event.stopPropagation();
-        //     const target = $(event.currentTarget);
-        //     let modePath = target.data("modePath");
-        //     let type = target.data("type");
-        //     let group = target.data("group");
-        //     let data = target.data("itemId");
-        //     let attributes = target.data("attributes");
-        //     let item = this.actor.items.get(data);
-        //     item.activateMode(modePath,type, group, attributes)
-        // })
 
         html.find("#selectAge").on("click", event => this._selectAge(event, this));
         html.find("#selectGender").on("click", event => this._selectGender(event, this));
