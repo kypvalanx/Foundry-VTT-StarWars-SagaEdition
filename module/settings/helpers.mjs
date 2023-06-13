@@ -26,7 +26,12 @@ export const registerHandlebarsHelpers = function () {
         return !!str ? JSON.stringify(str) : str;
     });
 
+    //TODO Remove
     Handlebars.registerHelper('toLowerCase', function(str) {
+        return !!str ? str.toLowerCase() : str;
+    });
+
+    Handlebars.registerHelper('toLowercase', function(str) {
         return !!str ? str.toLowerCase() : str;
     });
     Handlebars.registerHelper('toTitleCase', function(str) {

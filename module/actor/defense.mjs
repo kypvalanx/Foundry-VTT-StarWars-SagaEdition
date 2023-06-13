@@ -132,7 +132,7 @@ function _resolveFort(actor, conditionBonus) {
     let total = resolveValueArray(bonuses, actor);
     actor.setResolvedVariable("@FortDef", total, name, name);
     let fortitudeDefense = actor.system.defense?.fortitude || {};
-    fortitudeDefense.total = total;
+    fortitudeDefense.total = fortitudeDefense.override ? fortitudeDefense.override : total;
     fortitudeDefense.abilityBonus = abilityBonus;
     fortitudeDefense.armorBonus = armorBonus;
     fortitudeDefense.classBonus = classBonus;
@@ -210,7 +210,7 @@ function _resolveWill(actor, conditionBonus) {
     let name = 'Will';
     actor.setResolvedVariable("@WillDef", total, name, name);
     let willDefense = actor.system.defense?.will || {};
-    willDefense.total = total;
+    willDefense.total = willDefense.override ? willDefense.override : total;
     willDefense.abilityBonus = abilityBonus;
     willDefense.armorBonus = armorBonus;
     willDefense.classBonus = classBonus;
@@ -291,7 +291,7 @@ function _resolveRef(actor, conditionBonus) {
     actor.setResolvedVariable("@RefDef", total, name, name);
 
     let reflexDefense = actor.system.defense?.reflex || {};
-    reflexDefense.total = total;
+    reflexDefense.total = reflexDefense.override ? reflexDefense.override : total;
     reflexDefense.abilityBonus = abilityBonus;
     reflexDefense.armorBonus = armorBonus;
     reflexDefense.classBonus = classBonus;

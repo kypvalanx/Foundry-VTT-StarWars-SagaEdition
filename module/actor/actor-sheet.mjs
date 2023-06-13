@@ -97,7 +97,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
         html.find(".toggle").on("click", onToggle.bind(this))
-        new ContextMenu(html, ".numeric-override", getHealthOptions(this.actor))
+        new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
@@ -1516,7 +1516,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
 
-function getHealthOptions(actor) {
+function numericOverrideOptions(actor) {
     let options = [];
     options.push({name: "Set Override",
             icon: '<i class="fas fa-edit">',
