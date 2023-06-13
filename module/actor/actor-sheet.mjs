@@ -1,4 +1,11 @@
-import {filterItemsByType, getParentByHTMLClass, linkEffects, onCollapseToggle, unique} from "../common/util.mjs";
+import {
+    filterItemsByType,
+    getParentByHTMLClass,
+    linkEffects,
+    onCollapseToggle,
+    toNumber,
+    unique
+} from "../common/util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {Attack} from "./attack.mjs";
@@ -1536,7 +1543,7 @@ function numericOverrideOptions(actor) {
                 })
 
                 let data = {};
-                data[overrideKey] = value;
+                data[overrideKey] = toNumber(value);
                 await actor.safeUpdate(data);
             }})
 
