@@ -1,11 +1,14 @@
-<div class="vehicle-summary-header swse">
+<div class="summary-header swse">
 
-    <div class="name"><h2><label for="name">Vehicle Name<input class="plain" name="name" type="text"
-                                                               value="{{actor.name}}"
-                                                               placeholder=""/></label></h2></div>
+    <div class="name large-field labeled-input">
+        <label for="name" class="text">Vehicle Name</label>
+        <input class="input" name="name" type="text" value="{{actor.name}}" placeholder=""/>
+    </div>
 
-    <div class="type"><label for="type">Vehicle Type</label>
-        <div class="plain input static">{{actor.system.subType}}</div>
+    <div class="type large-field labeled-input">
+        <label for="type" class="text">Vehicle Type</label>
+        <input class="input" name="type" type="text" value="{{actor.system.subType}}" placeholder="" disabled/>
+<!--        <div class="plain input static">{{actor.system.subType}}</div>-->
     </div>
 
 
@@ -26,7 +29,8 @@
             <div class="plain input static">{{actor.size.name}}</div>
         </label>
         <label for="sizeMod">Mod
-            <div class="plain input static">{{actor.size.document.sizeMod}}</div></label>
+            <div class="plain input static">{{actor.size.document.sizeMod}}</div>
+        </label>
     </div>
 
 
@@ -60,7 +64,7 @@
 
     <div class="fightingSpace">
         <label for="fightingSpace">Fighting Space
-    </label>
+        </label>
         <div class="flex flex-row">
             <label class="flex-grow" for="vehicleSpeed">Character Scale
                 <div class="plain input static">{{actor.system.fightingSpace.character}} sq.</div>
@@ -73,7 +77,7 @@
 
     <div class="vehicleSpeed">
         <label for="vehicleSpeed">Vehicle Speed
-    </label>
+        </label>
         <div class="flex flex-row">
             <label class="flex-grow" for="vehicleSpeed">Character Scale
                 <div class="plain input static">{{actor.system.speed.character}} sq.</div>

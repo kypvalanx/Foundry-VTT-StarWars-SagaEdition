@@ -1104,64 +1104,91 @@
   background-repeat: no-repeat;
 }
 
-.swse .vehicle-summary-header {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(5, 1fr);
-  grid-column-gap: 0px;
-  grid-row-gap: 0px;
+.swse .summary-header {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.swse .vehicle-summary-header .name {
-  grid-area: 1 / 1 / 2 / 4;
+.swse .summary-header > * {
+  -webkit-box-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
 }
 
-.swse .vehicle-summary-header .type {
-  grid-area: 1 / 4 / 2 / 5;
+.swse .summary-header > .tiny-field {
+  -ms-flex-preferred-size: 50px;
+  flex-basis: 50px;
+  -webkit-box-flex: 0;
+  -ms-flex-positive: 0;
+  flex-grow: 0;
 }
 
-.swse .vehicle-summary-header .captain {
-  grid-area: 2 / 1 / 3 / 3;
+.swse .summary-header > .small-field {
+  -ms-flex-preferred-size: 100px;
+  flex-basis: 100px;
+  -webkit-box-flex: 2;
+  -ms-flex-positive: 2;
+  flex-grow: 2;
 }
 
-.swse .vehicle-summary-header .crew {
-  grid-area: 2 / 3 / 3 / 5;
+.swse .summary-header > .medium-field {
+  -ms-flex-preferred-size: 200px;
+  flex-basis: 200px;
+  -webkit-box-flex: 4;
+  -ms-flex-positive: 4;
+  flex-grow: 4;
 }
 
-.swse .vehicle-summary-header .cargoCapacity {
-  grid-area: 3 / 1 / 4 / 2;
+.swse .summary-header > .large-field {
+  -ms-flex-preferred-size: 400px;
+  flex-basis: 400px;
+  -webkit-box-flex: 8;
+  -ms-flex-positive: 8;
+  flex-grow: 8;
 }
 
-.swse .vehicle-summary-header .consumables {
-  grid-area: 3 / 2 / 4 / 3;
+.swse .labeled-input {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  position: static;
 }
 
-.swse .vehicle-summary-header .passengers {
-  grid-area: 3 / 3 / 4 / 4;
+.swse .labeled-input label {
+  font-size: 0.75rem;
+  color: #818CF8;
+  font-weight: 700;
+  position: relative;
+  top: 0.5rem;
+  margin: 0 0 0 7px;
+  padding: 0 3px;
+  background: #e8e8e8;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
 }
 
-.swse .vehicle-summary-header .cost {
-  grid-area: 3 / 4 / 4 / 5;
+.swse .labeled-input input[type=text].input {
+  padding: 11px 10px;
+  font-size: 0.75rem;
+  border: 2px #818CF8 solid;
+  border-radius: 5px;
+  background: #e8e8e8;
 }
 
-.swse .vehicle-summary-header .hyperdrive {
-  grid-area: 4 / 1 / 5 / 3;
-}
-
-.swse .vehicle-summary-header .size {
-  grid-area: 4 / 3 / 5 / 4;
-}
-
-.swse .vehicle-summary-header .maxVelocity {
-  grid-area: 4 / 4 / 5 / 5;
-}
-
-.swse .vehicle-summary-header .fightingSpace {
-  grid-area: 5 / 1 / 6 / 3;
-}
-
-.swse .vehicle-summary-header .vehicleSpeed {
-  grid-area: 5 / 3 / 6 / 5;
+.swse .labeled-input input[type=text].input:focus {
+  outline: none;
 }
 
 .swse .directory-item {
