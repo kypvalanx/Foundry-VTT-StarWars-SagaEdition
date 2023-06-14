@@ -30,22 +30,24 @@
                                 </select>
                             </label>
                         </div>
-                        <div class="flex-grow resource">
-                            <label class="resource-label">Subtype</label><br/>
-                            <label>
-                                <select name="system.subtype">
-                                    {{#if item.system}}
-                                        {{#select item.system.subtype}}
-                                            {{{options 'subtype' item.type}}}
-                                        {{/select}}
-                                    {{else}}
-                                        {{#select item._source.system.subtype}}
-                                            {{{options 'subtype' item.type}}}
-                                        {{/select}}
-                                    {{/if}}
-                                </select>
-                            </label>
-                        </div>
+                        {{#if (options 'subtype' item.type)}}
+                            <div class="flex-grow resource">
+                                <label class="resource-label">Subtype</label><br/>
+                                <label>
+                                    <select name="system.subtype">
+                                        {{#if item.system}}
+                                            {{#select item.system.subtype}}
+                                                {{{options 'subtype' item.type}}}
+                                            {{/select}}
+                                        {{else}}
+                                            {{#select item._source.system.subtype}}
+                                                {{{options 'subtype' item.type}}}
+                                            {{/select}}
+                                        {{/if}}
+                                    </select>
+                                </label>
+                            </div>
+                        {{/if}}
                     </div>
                 </div>
             </div>

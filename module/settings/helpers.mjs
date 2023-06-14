@@ -22,6 +22,10 @@ export const registerHandlebarsHelpers = function () {
         return !!str ? str.toUpperCase() : str;
     });
 
+    Handlebars.registerHelper('or', function(arg1, arg2) {
+        return arg1 || arg2;
+    });
+
     Handlebars.registerHelper('stringify', function(str) {
         return !!str ? JSON.stringify(str) : str;
     });

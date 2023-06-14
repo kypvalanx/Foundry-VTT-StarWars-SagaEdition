@@ -45,7 +45,7 @@ export const crewQuality = {
 export const uniqueKey = ["damage", "stunDamage"];
 
 export const weaponGroup = {
-    "Ranged Weapons": ["Heavy Weapons", "Pistols", "Rifles", "Simple Ranged Weapons", "Exotic Ranged Weapons", "Ranged Natural Weapons"],
+    "Ranged Weapons": ["Heavy Weapons", "Pistols", "Rifles", "Simple Ranged Weapons", "Exotic Ranged Weapons", "Ranged Natural Weapons", 'Weapon Systems'],
     "Melee Weapons": ["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons", "Melee Natural Weapons"]
 };
 

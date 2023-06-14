@@ -290,7 +290,7 @@ export class Attack {
         if (!!provider) {
             terms.push(...appendNumericTerm(provider.system.attributes.int.mod, "Vehicle Computer Bonus"))
 
-            if (item.position === 'pilot' && actor.data.skills.pilot.trained) {
+            if (item.position === 'pilot' && actor.system.skills.pilot.trained) {
                 terms.push(...appendNumericTerm(2, "Trained Pilot Bonus"))
             }
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
