@@ -43,7 +43,6 @@ export class SWSEItem extends Item {
         this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        this.baseName = this.name;
         this.name = SWSEItem.buildItemName(this);
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
@@ -169,7 +168,7 @@ export class SWSEItem extends Item {
             return "";
         }
         let id = item._id;
-        let finalName = item.name;
+        let finalName = item._source.name;
 
         finalName = this.addSizeAdjustmentSuffix(item, finalName);
 
@@ -822,6 +821,7 @@ export class SWSEItem extends Item {
         }
         this.system.selectedChoices = this.system.selectedChoices || [];
         this.system.selectedChoices.push(choice);
+
 
         this.system.displayName = SWSEItem.buildItemName(this);
     }

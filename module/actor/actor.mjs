@@ -1,7 +1,6 @@
 import {resolveHealth, resolveShield} from "./health.mjs";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.mjs";
 import {resolveGrapple, resolveOffense} from "./offense.mjs";
-import {generateSpeciesData} from "./species.mjs";
 import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST, convertOverrideToMode,
@@ -174,25 +173,10 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(system) {
-        let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
-        this.vehicleTemplate = (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
-
-        this.uninstalled = this.getUninstalledSystems();
-        this.installed = this.getInstalledSystems('installed');
-        this.pilotInstalled = this.getInstalledSystems('pilotInstalled');
-        this.gunnerPositions = this.getGunnerPositions()
-        this.cargo = filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"])
-            .filter(item => !item.system.hasItemOwner);
-        this.traits = this.getTraits();
-
         this.system.attributeGenerationType = "Manual"
         this.system.disableAttributeGenerationChange = true;
 
-        this.system.crewCount = getInheritableAttribute({
-            entity: this,
-            attributeKey: "crew",
-            reduce: "SUM"
-        })
+
 
         let coverValues = getInheritableAttribute({
             entity: this,
@@ -269,7 +253,7 @@ export class SWSEActor extends Actor {
             if (position === "Astromech Droid") {
                 this.hasAstromechSlot = true;
             }
-            this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
+            //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
             this.crewSlots.push(...this.resolveSlots(count, this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover));
         }
 
@@ -390,6 +374,14 @@ export class SWSEActor extends Actor {
         system.attacks = generateVehicleAttacks(this);
     }
 
+    get crew(){
+        return getInheritableAttribute({
+            entity: this,
+            attributeKey: "crew",
+            reduce: "SUM"
+        })
+    }
+
     /**
      * Prepare Computer type specific data
      */
@@ -408,52 +400,100 @@ export class SWSEActor extends Actor {
         });
     }
 
+    get vehicleTemplate() { return this.getCached("vehicleTemplate", () => {
+        let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
+        return (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
+    })
+    }
+
+    get uninstalled() { return this.getCached("uninstalled", () => {return this.getUninstalledSystems();})}
+    get installed() { return this.getCached("installed", () => {return this.getInstalledSystems('installed');})}
+    get pilotInstalled() { return this.getCached("pilotInstalled", () => {return this.getInstalledSystems('pilotInstalled');})}
+    get gunnerPositions() { return this.getCached("gunnerPositions", () => {return this.getGunnerPositions()})}
+    get cargo() { return this.getCached("cargo", () => {return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);})}
+    get speciesList() { return this.getCached("speciesList", () => {return filterItemsByType(this.items.values(), "species");})}
+    get species() { return this.getCached("species", () => {return (this.speciesList.length > 0 ? this.speciesList[0] : null);})}
+
+    get classes() { return this.getCached("classes", () => {return filterItemsByType(this.items.values(), "class");})}
+
+    get weapons() { return this.getCached("weapons", () => {return filterItemsByType(this.items.values(), "weapon");})}
+    get armors() { return this.getCached("armors", () => {return filterItemsByType(this.items.values(), "armor");})}
+    get equipment() { return this.getCached("equipment", () => {return filterItemsByType(this.items.values(), "equipment");})}
+
+    get traits() { return this.getCached("traits", () => {return this.getTraits();})}
+    get talents() { return this.getCached("talents", () => {return filterItemsByType(inheritableItems(this), "talent");})}
+    get powers() { return this.getCached("powers", () => {return filterItemsByType(this.items.values(), "forcePower");})}
+    get languages() { return this.getCached("languages", () => {return filterItemsByType(this.items.values(), "language");})}
+
+    get background() { return this.getCached("background", () => {
+        let backgrounds = filterItemsByType(this.items.values(), "background");
+        return (backgrounds.length > 0 ? backgrounds[0] : null);
+    })
+    }
+    get destiny() { return this.getCached("destiny", () => {
+        let destinies = filterItemsByType(this.items.values(), "destiny");
+        return (destinies.length > 0 ? destinies[0] : null);
+    })
+    }
+    get secrets() { return this.getCached("secrets", () => {return filterItemsByType(this.items.values(), "forceSecret");})}
+    get techniques() { return this.getCached("techniques", () => {return filterItemsByType(this.items.values(), "forceTechnique");})}
+    get affiliations() { return this.getCached("affiliations", () => {return filterItemsByType(this.items.values(), "affiliation");})}
+    get regimens() { return this.getCached("regimens", () => {return filterItemsByType(this.items.values(), "forceRegimen");})}
+    get naturalWeapons() { return this.getCached("naturalWeapons", () => {return filterItemsByType(this.items.values(), "beastAttack");})}
+    get specialSenses() { return this.getCached("specialSenses", () => {return filterItemsByType(this.items.values(), "beastSense");})}
+    get speciesTypes() { return this.getCached("speciesTypes", () => {return filterItemsByType(this.items.values(), "beastType");})}
+    get specialQualities() { return this.getCached("specialQualities", () => {return filterItemsByType(this.items.values(), "beastQuality");})}
+
+    get isBeast() { return this.getCached("isBeast", () => {return !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
+        || this.specialSenses.length > 0
+        || this.speciesTypes.length > 0
+        || this.specialQualities.length > 0;
+    })}
+    get equipped() { return this.getCached("equipped", () => {return this.getEquippedItems();})}
+    get unequipped() { return this.getCached("unequipped", () => {return this.getUnequippedItems();})}
+    get inventory() { return this.getCached("inventory", () => {return this.getNonequippableItems();})}
     /**
      * Prepare Character type specific data
      */
     _prepareCharacterData(system) {
-        this.speciesList = filterItemsByType(this.items.values(), "species");
-        this.species = (this.speciesList.length > 0 ? this.speciesList[0] : null);
-
-        generateSpeciesData(this);
-
-        this.classes = filterItemsByType(inheritableItems(this), "class");
-
-        this.weapons = filterItemsByType(this.items.values(), "weapon");
-        this.armors = filterItemsByType(this.items.values(), "armor");
-        this.equipment = filterItemsByType(this.items.values(), "equipment");
-
-        this.traits = this.getTraits();
-        this.talents = filterItemsByType(inheritableItems(this), "talent");
-        this.powers = filterItemsByType(this.items.values(), "forcePower");
-        this.languages = filterItemsByType(this.items.values(), "language");
-        let backgrounds = filterItemsByType(this.items.values(), "background");
-        this.background = (backgrounds.length > 0 ? backgrounds[0] : null);
-        let destinies = filterItemsByType(this.items.values(), "destiny");
-        this.destiny = (destinies.length > 0 ? destinies[0] : null);
-        this.secrets = filterItemsByType(this.items.values(), "forceSecret");
-        this.techniques = filterItemsByType(this.items.values(), "forceTechnique");
-        this.affiliations = filterItemsByType(this.items.values(), "affiliation");
-        this.regimens = filterItemsByType(this.items.values(), "forceRegimen");
-        this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
-        this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
-        this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
-        this.specialQualities = filterItemsByType(this.items.values(), "beastQuality");
-
-        this.isBeast = !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
-            || this.specialSenses.length > 0
-            || this.speciesTypes.length > 0
-            || this.specialQualities.length > 0;
+        // this.speciesList = filterItemsByType(this.items.values(), "species");
+        // this.species = (this.speciesList.length > 0 ? this.speciesList[0] : null);
+        //
+        // this.classes = filterItemsByType(inheritableItems(this), "class");
+        //
+        // this.weapons = filterItemsByType(this.items.values(), "weapon");
+        // this.armors = filterItemsByType(this.items.values(), "armor");
+        // this.equipment = filterItemsByType(this.items.values(), "equipment");
+        //
+        // this.traits = this.getTraits();
+        // this.talents = filterItemsByType(inheritableItems(this), "talent");
+        // this.powers = filterItemsByType(this.items.values(), "forcePower");
+        // this.languages = filterItemsByType(this.items.values(), "language");
+        // let backgrounds = filterItemsByType(this.items.values(), "background");
+        // this.background = (backgrounds.length > 0 ? backgrounds[0] : null);
+        // let destinies = filterItemsByType(this.items.values(), "destiny");
+        // this.destiny = (destinies.length > 0 ? destinies[0] : null);
+        // this.secrets = filterItemsByType(this.items.values(), "forceSecret");
+        // this.techniques = filterItemsByType(this.items.values(), "forceTechnique");
+        // this.affiliations = filterItemsByType(this.items.values(), "affiliation");
+        // this.regimens = filterItemsByType(this.items.values(), "forceRegimen");
+        // this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
+        // this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
+        // this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
+        // this.specialQualities = filterItemsByType(this.items.values(), "beastQuality");
+        //
+        // this.isBeast = !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
+        //     || this.specialSenses.length > 0
+        //     || this.speciesTypes.length > 0
+        //     || this.specialQualities.length > 0;
+        // this.equipped = this.getEquippedItems();
+        // this.unequipped = this.getUnequippedItems();
+        // this.inventory = this.getNonequippableItems();
 
         let {level, classSummary, classLevels} = this._generateClassData(system);
         system.levelSummary = level;
         system.classSummary = classSummary;
         system.classLevels = classLevels;
-
-
-        this.equipped = this.getEquippedItems();
-        this.unequipped = this.getUnequippedItems();
-        this.inventory = this.getNonequippableItems();
 
         this.system.weight = this.weight
 

@@ -160,8 +160,7 @@ function getChangesFromDocuments(data) {
         }
         return values;
     }
-    const changesFromDocument = getChangesFromDocument(data);
-    return changesFromDocument;
+    return getChangesFromDocument(data);
 }
 
 /**
