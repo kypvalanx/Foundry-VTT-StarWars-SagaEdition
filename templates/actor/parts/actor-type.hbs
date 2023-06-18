@@ -1,6 +1,5 @@
-<div class="panel" title="NPCs are disconnected from token sheets.  updates to token sheets do not modify the character sheet.">
-    <label class="resource-label">NPC
-        <input type="checkbox" name="system.isNPC" {{#if actor.system.isNPC}}
-               checked="isChecked"{{/if}}/>
-    </label>
+<div class="panel flex-row" title="NPCs are disconnected from token sheets.  updates to token sheets do not modify the character sheet.">
+    <label class="resource-label cyberpunk-checkbox-label" for="npc">NPC</label>
+        <input class="cyberpunk-checkbox" type="checkbox" id="npc" name="system.isNPC" {{#if actor.system.isNPC}}
+               checked{{/if}}/>
 </div>
