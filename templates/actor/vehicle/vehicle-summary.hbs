@@ -1,32 +1,32 @@
 <div class="summary-header swse">
 
-    <div class="name large-field labeled-input">
+    <div class="name large labeled-input">
         <label for="name" class="text">Vehicle Name</label>
         <input class="input" name="name" id="name" type="text" value="{{actor.name}}" placeholder=""/>
     </div>
 
-    <div class="type large-field labeled-input">
+    <div class="type large labeled-input">
         <label for="type" class="text">Vehicle Type</label>
         <input class="input" id="type" type="text" value="{{actor.system.subType}}" placeholder="" disabled/>
     </div>
 
-    <div class="captain medium-field labeled-input">
+    <div class="captain medium labeled-input">
         <label for="captain" class="text">Captain</label>
         <input class="input" name="system.captain" id="captain" type="text" value="{{actor.system.captain}}"
                placeholder=""/>
     </div>
 
-    <div class="crew medium-field labeled-input">
+    <div class="crew medium labeled-input">
         <label for="crew" class="text">Crew</label>
         <input class="input" id="crew" type="text" value="{{actor.crew}}" placeholder="" disabled/>
     </div>
 
-    <div class="passengers medium-field labeled-input">
+    <div class="passengers medium labeled-input">
         <label for="passengers" class="text">Passengers</label>
         <input class="input" id="passengers" type="text" value="{{actor.system.passengers}}" placeholder="" disabled/>
     </div>
 
-    <div class="size medium-field  flex-row">
+    <div class="size medium  flex-row">
         <div class="labeled-input">
             <label for="size" class="text">Size</label>
             <input class="left-input" id="size" type="text" value="{{actor.size.name}}" placeholder="" disabled/>
@@ -38,24 +38,24 @@
         </div>
     </div>
 
-    <div class="cargo medium-field labeled-input">
+    <div class="cargo medium labeled-input">
         <label for="cargo" class="text">Cargo</label>
         <input class="input" id="cargo" type="text"
                value="{{tons actor.system.cargo.value}}/{{tons actor.system.cargo.capacity}}" placeholder="" disabled/>
     </div>
 
-    <div class="consumables medium-field labeled-input">
+    <div class="consumables medium labeled-input">
         <label for="consumables" class="text">Consumables</label>
         <input class="input" id="consumables" type="text" value="{{actor.system.consumables}}" placeholder="" disabled/>
     </div>
 
-    <div class="cost medium-field labeled-input">
+    <div class="cost medium labeled-input">
         <label for="cost" class="text">Cost</label>
         <input class="input" id="cost" type="text" value="{{actor.system.cost}}" placeholder="" disabled/>
     </div>
 
 
-    <div class="size large-field  flex-row">
+    <div class="size large  flex-row">
         <div class="labeled-input">
             <label for="hyperdrive" class="text">Hyperdrive</label>
             <input class="left-input" id="hyperdrive" type="text" value="{{actor.system.hyperdrive.primary}}"
@@ -71,7 +71,7 @@
 
     <!--    <div class="armorBonus"><label for="armorBonus">Armor Bonus</label><div class="plain input static">{{actor.system.type}}</div></div>-->
 
-    <div class="maxVelocity medium-field labeled-input">
+    <div class="maxVelocity medium labeled-input">
         <label for="maxVelocity" class="text">Maximum Velocity</label>
         <input class="input" id="maxVelocity" type="text" value="{{actor.system.maximumVelocity}} km/h" placeholder=""
                disabled/>
@@ -80,7 +80,7 @@
 
 
 
-    <div class="large-field flex-col">
+    <div class="large flex-col">
         <div class="top-label center label">Fighting Space</div>
         <div class="size  flex-row">
             <div class="labeled-input">
@@ -99,7 +99,7 @@
 
 
 
-    <div class="large-field flex-col">
+    <div class="large flex-col">
         <div class="top-label center label">Vehicle Speed</div>
         <div class="size flex-row">
             <div class="labeled-input">

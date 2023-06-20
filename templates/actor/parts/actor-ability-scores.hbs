@@ -1,30 +1,42 @@
 {{!-- Ability Scores --}}
 <div class="ability-scores panel">
-    <div class="ability-score">
-        <div class="score"><h3>Score</h3></div>
-        <div class="temp"><h3>Temp</h3></div>
-        <div class="mod"><h3>Mod</h3></div>
+    <div class="flex-row">
+        <div class="medium"></div>
+        <div class="small small-header">Score</div>
+        <div class="small small-header">Temp</div>
+        <div class="small small-header">Mod</div>
     </div>
     {{#each actor.system.attributes as |attribute id|}}
         {{#unless attribute.skip}}
-            <div class="ability-score draggable" data-label="{{attribute.label}}"
-                 data-variable="@{{attribute.label}}ROLL" data-type="ability">
-                <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
-                     data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3>
+            <div class="draggable flex-row" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability">
+                <div class="rollable medium labeled-input" title="Roll 1d20 + {{attribute.roll}}" data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}">
+                    <input class="input" type="text" value="{{attribute.label}}"
+                           placeholder="" disabled/>
                 </div>
-                <div class="score input">
-                    {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}}
-                        <span class="center" title="">{{attribute.total}}</span>
-                    {{/unlessEquals}}
-                    {{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}}
-                        <input class="plain small" name="system.attributes.{{id}}.manual" type="number"
-                               value="{{attribute.total}}" placeholder="0"/>
-                    {{/ifEquals}}
+                <div class="small labeled-input">
+                    <input class="input" type="text" value="{{attribute.total}}"
+                           placeholder=""  name="system.attributes.{{id}}.manual"
+                           {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}}disabled{{/unlessEquals}}/>
+<!--                    {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}}-->
+<!--                        <span class="center" title="">{{attribute.total}}</span>-->
+<!--                    {{/unlessEquals}}-->
+<!--                    {{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}}-->
+<!--                        <input class="plain small" name="system.attributes.{{id}}.manual" type="number"-->
+<!--                               value="{{attribute.total}}" placeholder="0"/>-->
+<!--                    {{/ifEquals}}-->
                 </div>
-                <div class="temp input"><span class="center text-box direct tiny min-width-15"
-                                              name="system.attributes.{{id}}.customBonus"
-                                              data-dtype="Number">{{attribute.customBonus}}</span></div>
-                <div class="mod input"><span class="center">{{attribute.roll}}</span></div>
+                <div class="small labeled-input">
+                    <input class="input" type="text" value="{{attribute.customBonus}}"
+                           placeholder="" disabled/>
+<!--                    <span class="center text-box direct tiny min-width-15"-->
+<!--                                              name="system.attributes.{{id}}.customBonus"-->
+<!--                                              data-dtype="Number">{{attribute.customBonus}}</span>-->
+                </div>
+                <div class="small labeled-input">
+                    <input class="input" type="text" value="{{attribute.roll}}"
+                           placeholder="" disabled/>
+<!--                    <span class="center">{{attribute.roll}}</span>-->
+                </div>
             </div>
         {{/unless}}
     {{/each}}

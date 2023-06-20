@@ -2,6 +2,10 @@
   font-family: $font-primary;
 }
 
+.window-app .window-content{
+  background: $background;
+}
+
 .rollable {
   &:hover,
   &:focus {
@@ -29,10 +33,6 @@
   min-height: 25px;
 }
 
-.panel {
-  padding: 5px;
-  border: 1px solid #999;
-}
 
 .attack-block {
   min-height: 225px;
