@@ -1,11 +1,17 @@
 @import url("https://fonts.googleapis.com/css2?family=Martel:wght@400;800&family=Roboto:wght@300;400;500&display=swap");
+:root {
+  --main-bg-color: #e8e8e8;
+  --main-fg-color: #424ba4;
+  --main-mg-color: #bcc3fd;
+}
+
 /* Global styles */
 .window-app {
   font-family: "Roboto", sans-serif;
 }
 
 .window-app .window-content {
-  background: #e8e8e8;
+  background: var(--main-bg-color);
 }
 
 .rollable:hover, .rollable:focus {
@@ -382,7 +388,7 @@
   top: 0.5rem;
   margin: 0 0 0 7px;
   padding: 0 3px;
-  background: #e8e8e8;
+  background: var(--main-bg-color);
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
@@ -393,7 +399,7 @@
   font-size: 0.75rem;
   border: 2px #424ba4 solid;
   border-radius: 10px;
-  background: #e8e8e8;
+  background: var(--main-bg-color);
 }
 
 .swse input[type=text].left-input {

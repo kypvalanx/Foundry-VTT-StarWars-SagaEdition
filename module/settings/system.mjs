@@ -1,6 +1,5 @@
 
 
-
 export function refreshActors(options = { renderOnly: false, renderForEveryone: false }) {
     game.actors.contents.forEach((o) => {
         if (!options.renderOnly) o.prepareData();
@@ -16,6 +15,46 @@ export function refreshActors(options = { renderOnly: false, renderForEveryone: 
     if (options.renderForEveryone) {
         game.socket.emit("swse", "refreshActorSheets");
     }
+}
+
+function registerCSSColor(nameSpace, key, name, hint, scope, defaultColor, r, cssProperty) {
+    if (window.Ardittristan && window.Ardittristan.ColorSetting) {
+        new window.Ardittristan.ColorSetting(nameSpace, key, {
+            name,
+            hint,
+            scope,
+            restricted: false,
+            defaultColor,
+            onChange: (val) => {
+                // var r = document.querySelector(':root');
+                // var rs = getComputedStyle(r);
+                // // Alert the value of the --blue variable
+                // alert("The value of --main-bg-color is: " + rs.getPropertyValue('--main-bg-color'));
+
+                r.style.setProperty(cssProperty, val);
+            }
+        });
+    } else {
+        game.settings.register(nameSpace, key, {
+            name,
+            hint: hint + " (install VTTColorSettings for better color picker)",
+            scope,
+            config: true,
+            default: defaultColor,
+            type: String,
+            onChange: (val) => {
+                // var r = document.querySelector(':root');
+                // var rs = getComputedStyle(r);
+                // // Alert the value of the --blue variable
+                // alert("The value of --main-bg-color is: " + rs.getPropertyValue('--main-bg-color'));
+
+                r.style.setProperty(cssProperty, val);
+            }
+        });
+    }
+
+
+    r.style.setProperty(cssProperty, game.settings.get(nameSpace, key));
 }
 
 export const registerSystemSettings = function () {
@@ -110,4 +149,10 @@ export const registerSystemSettings = function () {
         default: true,
         type: Boolean
     });
+
+    const r = document.querySelector(':root');
+    const rs = getComputedStyle(r);
+    registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--main-bg-color');
+    registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--main-fg-color');
+    registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--main-mg-color');
 }

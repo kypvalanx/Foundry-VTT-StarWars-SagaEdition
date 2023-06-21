@@ -3,7 +3,7 @@
 }
 
 .window-app .window-content{
-  background: $background;
+  background: var(--main-bg-color);
 }
 
 .rollable {
