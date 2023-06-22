@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Martel:wght@400;800&family=Roboto:wght@300;400;500&display=swap");
 :root {
-  --main-bg-color: #e8e8e8;
+  --color-background: #e8e8e8;
   --main-fg-color: #424ba4;
   --main-mg-color: #bcc3fd;
 }
@@ -11,12 +11,12 @@
 }
 
 .window-app .window-content {
-  background: var(--main-bg-color);
+  background: var(--color-background);
 }
 
 .rollable:hover, .rollable:focus {
   color: #000;
-  text-shadow: 0 0 10px red;
+  text-shadow: 0 0 10px var(--color-shadow-primary);
   cursor: pointer;
 }
 
@@ -26,12 +26,12 @@
 
 .cursor {
   color: #000;
-  text-shadow: 0 0 10px red;
+  text-shadow: 0 0 10px var(--color-shadow-primary);
 }
 
 .input,
 .textarea {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
   font-family: inherit;
   font-size: inherit;
   overflow: auto;
@@ -45,7 +45,7 @@
 }
 
 .border-light {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
 }
 
 .grid,
@@ -352,7 +352,7 @@
 }
 
 .swse .label {
-  color: #424ba4;
+  color: var(--color-foreground);
   font-weight: 700;
 }
 
@@ -360,7 +360,7 @@
   font-size: 0.75rem;
   text-align: center;
   font-weight: 700;
-  color: #424ba4;
+  color: var(--color-foreground);
 }
 
 .swse .labeled-input {
@@ -382,13 +382,13 @@
 
 .swse .labeled-input label {
   font-size: 0.75rem;
-  color: #424ba4;
+  color: var(--color-foreground);
   font-weight: 700;
   position: relative;
   top: 0.5rem;
   margin: 0 0 0 7px;
   padding: 0 3px;
-  background: var(--main-bg-color);
+  background: var(--color-background);
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
@@ -397,9 +397,10 @@
 .swse input[type=text] {
   padding: 11px 10px;
   font-size: 0.75rem;
-  border: 2px #424ba4 solid;
+  border: 2px var(--color-foreground) solid;
   border-radius: 10px;
-  background: var(--main-bg-color);
+  color: var(--color-text-dark-primary);
+  background: var(--color-background);
 }
 
 .swse input[type=text].left-input {
@@ -415,8 +416,8 @@
 }
 
 .swse .cyberpunk-button {
-  background-color: #424ba4;
-  color: #fff;
+  background-color: var(--color-foreground);
+  color: var(--color-text-dark-primary);
   font-size: 18px;
   border: none;
   border-radius: 5px;
@@ -433,7 +434,7 @@
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #424ba4;
+  border: 2px solid var(--color-foreground);
   border-radius: 5px;
   background-color: transparent;
   display: inline-block;
@@ -444,7 +445,7 @@
 
 .swse input[type=checkbox]:before {
   content: "";
-  background-color: #424ba4;
+  background-color: var(--color-foreground);
   display: block;
   position: absolute;
   top: 50%;
@@ -468,15 +469,15 @@
 
 .swse .panel {
   padding: 5px;
-  border: 0px #424ba4 solid;
+  border: 0px var(--color-foreground) solid;
   border-radius: 10px;
-  background: #bcc3fd;
+  background: var(--color-midground);
   margin: 5px;
 }
 
 .swse .cyberpunk-checkbox-label {
   font-size: 18px;
-  color: #000000;
+  color: var(--color-text-dark-primary);
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;

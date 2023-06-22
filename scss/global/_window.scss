@@ -3,14 +3,14 @@
 }
 
 .window-app .window-content{
-  background: var(--main-bg-color);
+  background: var(--color-background);
 }
 
 .rollable {
   &:hover,
   &:focus {
     color: #000;
-    text-shadow: 0 0 10px red;
+    text-shadow: 0 0 10px var(--color-shadow-primary);
     cursor: pointer;
   }
 }
@@ -20,11 +20,11 @@
 
 .cursor {
   color: #000;
-  text-shadow: 0 0 10px red;
+  text-shadow: 0 0 10px var(--color-shadow-primary);
 }
 .input,
 .textarea {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
   font-family: inherit;
   font-size: inherit;
   overflow: auto;
@@ -39,5 +39,5 @@
 }
 
 .border-light {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
 }

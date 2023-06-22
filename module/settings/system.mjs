@@ -152,7 +152,10 @@ export const registerSystemSettings = function () {
 
     const r = document.querySelector(':root');
     const rs = getComputedStyle(r);
-    registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--main-bg-color');
-    registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--main-fg-color');
-    registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--main-mg-color');
+    registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--color-background');
+    registerCSSColor("swse", "cssColorShadowPrimary", "Shadow Color", "Modifies the Shadow color of sheets", "client", "#424ba4", r, '--color-shadow-primary');
+    registerCSSColor("swse", "cssColorDarkPrimary", "Text Color", "Modifies the standard text color", "client", "#191813", r, '--color-text-dark-primary');
+    registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--color-foreground');
+    registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--color-midground');
+    registerCSSColor("swse", "cssHyperlink", "Hyperlink Color", "Modifies the Hyperlink color of sheets", "client", "#132cff", r, '--color-text-hyperlink');
 }
