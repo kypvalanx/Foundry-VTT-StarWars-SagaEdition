@@ -11,7 +11,6 @@ export function generateAttributes(actor) {
     let system = actor.system;
 
     system.lockAttributes = actor.shouldLockAttributes
-    system.isBeast = actor.classes?.filter(clazz => clazz.name === "Beast").length > 0
     let attributeGenType = actor.system.finalAttributeGenerationType;
 
     let data = {};
@@ -25,15 +24,6 @@ export function generateAttributes(actor) {
         if(attributeGenType === 'Manual'){
             attribute.total = attribute.manual || 10;
         } else {
-            let attributeBonuses = getInheritableAttribute({
-                entity: actor,
-                attributeKey: `${longKey}Bonus`
-            })
-            let attributeMax = getInheritableAttribute({
-                entity: actor,
-                attributeKey: `${longKey}Max`,
-                reduce: "MIN"
-            });
             let attributeBase = getInheritableAttribute({
                 entity: actor,
                 attributeKey: `base${longKey.titleCase()}`,
@@ -42,14 +32,21 @@ export function generateAttributes(actor) {
             if (attributeBase > 0) {
                 attribute.base = attributeBase;
             }
+
+            let attributeMax = getInheritableAttribute({
+                entity: actor,
+                attributeKey: `${longKey}Max`,
+                reduce: "MIN"
+            });
             if (!isNaN(attributeMax)) {
                 attribute.base = Math.min(attribute.base, attributeMax);
             }
-            let bonuses = [];
-            for (let bonusAttribute of attributeBonuses) {
-                bonuses.push(bonusAttribute.value)
-            }
 
+            let bonuses = getInheritableAttribute({
+                entity: actor,
+                attributeKey: `${longKey}Bonus`,
+                reduce: "VALUES"
+            })
             let attributeBonus = system.levelAttributeBonus;
             for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {
                 bonuses.push(levelAttributeBonus[key])
@@ -75,13 +72,13 @@ export function generateAttributes(actor) {
                 let difference = estimate - attribute.total
                 attribute.total = estimate;
 
-                data[`data.attributes.${key}.base`] = attribute.base + difference;
-                data[`data.attributes.${key}.estimate`] = null;
+                data[`system.attributes.${key}.base`] = attribute.base + difference;
+                data[`system.attributes.${key}.estimate`] = null;
             }
 
 
             if(attribute.total !== oldTotal){
-                data[`data.attributes.${key}.total`] = attribute.total;
+                data[`system.attributes.${key}.total`] = attribute.total;
             }
         }
 
@@ -90,7 +87,7 @@ export function generateAttributes(actor) {
         attribute.mod = Math.floor((toNumber(attribute.total) + toNumber(attribute.customBonus) - 10) / 2);
 
         if(attribute.mod !== old){
-            data[`data.attributes.${key}.mod`] = attribute.mod;
+            data[`system.attributes.${key}.mod`] = attribute.mod;
         }
 
         let conditionBonus = getInheritableAttribute({

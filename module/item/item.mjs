@@ -391,7 +391,7 @@ export class SWSEItem extends Item {
 
         });
         if (maxDexBonuses.length === 0) {
-            return undefined;
+            return 0;
         }
         return toNumber(maxDexBonuses) - toNumber(this.getStripping("reduceJointProtection"));
     }

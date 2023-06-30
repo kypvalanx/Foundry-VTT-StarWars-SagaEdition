@@ -7,7 +7,7 @@
 
     <div class="type large labeled-input">
         <label for="type" class="text">Vehicle Type</label>
-        <input class="input" id="type" type="text" value="{{actor.system.subType}}" placeholder="" disabled/>
+        <input class="input" id="type" type="text" value="{{actor.subType}}" placeholder="" disabled/>
     </div>
 
     <div class="captain medium labeled-input">
@@ -23,7 +23,7 @@
 
     <div class="passengers medium labeled-input">
         <label for="passengers" class="text">Passengers</label>
-        <input class="input" id="passengers" type="text" value="{{actor.system.passengers}}" placeholder="" disabled/>
+        <input class="input" id="passengers" type="text" value="{{actor.passengers}}" placeholder="" disabled/>
     </div>
 
     <div class="size medium  flex-row">
@@ -41,12 +41,12 @@
     <div class="cargo medium labeled-input">
         <label for="cargo" class="text">Cargo</label>
         <input class="input" id="cargo" type="text"
-               value="{{tons actor.system.cargo.value}}/{{tons actor.system.cargo.capacity}}" placeholder="" disabled/>
+               value="{{tons actor.cargoCapacity.value}}/{{tons actor.cargoCapacity.capacity}}" placeholder="" disabled/>
     </div>
 
     <div class="consumables medium labeled-input">
         <label for="consumables" class="text">Consumables</label>
-        <input class="input" id="consumables" type="text" value="{{actor.system.consumables}}" placeholder="" disabled/>
+        <input class="input" id="consumables" type="text" value="{{actor.consumables}}" placeholder="" disabled/>
     </div>
 
     <div class="cost medium labeled-input">
@@ -58,22 +58,20 @@
     <div class="size large  flex-row">
         <div class="labeled-input">
             <label for="hyperdrive" class="text">Hyperdrive</label>
-            <input class="left-input" id="hyperdrive" type="text" value="{{actor.system.hyperdrive.primary}}"
+            <input class="left-input" id="hyperdrive" type="text" value="{{actor.hyperdrive.primary}}"
                    placeholder="" disabled/>
         </div>
         <div class="divider"></div>
         <div class="labeled-input">
             <label for="backupHyperdrive" class="text">Backup Hyperdrive</label>
-            <input class="right-input" id="backupHyperdrive" type="text" value="{{actor.system.hyperdrive.backup}}"
+            <input class="right-input" id="backupHyperdrive" type="text" value="{{actor.hyperdrive.backup}}"
                    placeholder="" disabled/>
         </div>
     </div>
 
-    <!--    <div class="armorBonus"><label for="armorBonus">Armor Bonus</label><div class="plain input static">{{actor.system.type}}</div></div>-->
-
     <div class="maxVelocity medium labeled-input">
         <label for="maxVelocity" class="text">Maximum Velocity</label>
-        <input class="input" id="maxVelocity" type="text" value="{{actor.system.maximumVelocity}} km/h" placeholder=""
+        <input class="input" id="maxVelocity" type="text" value="{{actor.maximumVelocity}} km/h" placeholder=""
                disabled/>
     </div>
 
@@ -86,13 +84,13 @@
             <div class="labeled-input">
                 <label for="characterScale" class="text">Character Scale</label>
                 <input class="left-input" id="characterScale" type="text"
-                       value="{{actor.system.fightingSpace.character}} sq." placeholder="" disabled/>
+                       value="{{actor.fightingSpace.character}} sq." placeholder="" disabled/>
             </div>
             <div class="divider"></div>
             <div class="labeled-input">
                 <label for="vehicleScale" class="text">Vehicle Scale</label>
                 <input class="right-input" id="vehicleScale" type="text"
-                       value="{{actor.system.fightingSpace.vehicle}} sq." placeholder="" disabled/>
+                       value="{{actor.fightingSpace.vehicle}} sq." placeholder="" disabled/>
             </div>
         </div>
     </div>
@@ -104,13 +102,13 @@
         <div class="size flex-row">
             <div class="labeled-input">
                 <label for="characterScaleSpeed" class="text">Character Scale</label>
-                <input class="left-input" id="characterScaleSpeed" type="text" value="{{actor.system.speed.character}}"
+                <input class="left-input" id="characterScaleSpeed" type="text" value="{{actor.speed.character}}"
                        placeholder="" disabled/>
             </div>
             <div class="divider"></div>
             <div class="labeled-input">
                 <label for="vehicleScaleSpeed" class="text">Vehicle Scale</label>
-                <input class="right-input" id="vehicleScaleSpeed" type="text" value="{{actor.system.speed.vehicle}}"
+                <input class="right-input" id="vehicleScaleSpeed" type="text" value="{{actor.speed.vehicle}}"
                        placeholder="" disabled/>
             </div>
         </div>

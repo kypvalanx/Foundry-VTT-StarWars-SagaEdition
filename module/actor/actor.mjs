@@ -25,7 +25,7 @@ import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.mjs
 import {SWSEItem} from "../item/item.mjs";
 import {
     crewPositions,
-    crewQuality,
+    crewQuality, crewSlotResolution,
     DROID_COST_FACTOR,
     equipableTypes,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
@@ -59,9 +59,8 @@ export class SWSEActor extends Actor {
         }
     }
 
-    _onCreateDescendantDocuments (embeddedName, ...args) {
-        super._onCreateDescendantDocuments (embeddedName, ...args);
-
+    _onCreateDescendantDocuments(embeddedName, ...args) {
+        super._onCreateDescendantDocuments(embeddedName, ...args);
 
         //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
         if ("ActiveEffect" === embeddedName) {
@@ -71,74 +70,6 @@ export class SWSEActor extends Actor {
                     .filter(effect => effect !== activeEffect && effect.flags?.core?.statusId?.startsWith("condition"))
                     .map(effect => effect.delete())
             }
-        }
-    }
-
-    /**
-     * Augment the basic actor data with additional dynamic data.
-     */
-    prepareData() {
-        if (this.skipPrepare) {
-            return;
-        }
-        this.resolvedVariables = new Map();
-        this.resolvedNotes = new Map();
-        this.resolvedLabels = new Map();
-        this.cache = new SimpleCache()
-        super.prepareData();
-
-        if(this.updateLegacyActor()){
-            return;
-        }
-        const system = this.system;
-        system.description = system.description || ""
-        system.gravity = system.gravity || "Normal"
-
-
-
-        if (this.id && this.type === "npc") {
-            this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
-        } else if (this.id && this.type === "npc-vehicle") {
-            this.safeUpdate({
-                "type": "vehicle",
-                "data.isNPC": true
-            }, {updateChanges: false});
-        } else if (this.id && system.isNPC && this.prototypeToken.actorLink) {
-            let children = canvas.tokens?.objects?.children || [];
-            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
-            this.setActorLinkOnActorAndTokens(documents, false);
-        } else if (this.id && !system.isNPC && !this.prototypeToken.actorLink) {
-            let children = canvas.tokens?.objects?.children || [];
-            let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
-            this.setActorLinkOnActorAndTokens(documents, true);
-        } else {
-            system.condition = 0;
-            let conditionEffect = this.effects.find(effect => effect.flags?.core?.statusId?.startsWith("condition"))
-
-            if (conditionEffect) {
-                system.condition = conditionEffect.changes.find(change => change.key === "condition").value
-            }
-
-            this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
-
-            if (Array.isArray(this.system.attributeGenerationType)) {
-                this.safeUpdate({"system.attributeGenerationType": this.system.attributeGenerationType[0]})
-                return;
-            }
-            this.system.sheetType = "Auto"
-            if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet") {
-                this.system.finalAttributeGenerationType = "Manual";
-                this.system.sheetType = "Manual"
-            } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
-                this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
-
-            }
-
-            if (this.type === 'character') this._prepareCharacterData(system);
-            if (this.type === 'npc') this._prepareCharacterData(system);
-            if (this.type === 'computer') this._prepareComputerData(system);
-            if (this.type === 'vehicle') this._prepareVehicleData(system);
-            if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
         }
     }
 
@@ -168,132 +99,211 @@ export class SWSEActor extends Actor {
     }
 
     /**
-     * Prepare Vehicle type specific data
-     * @param system
-     * @private
+     * Augment the basic actor data with additional dynamic data.
      */
-    _prepareVehicleData(system) {
-        this.system.attributeGenerationType = "Manual"
-        this.system.disableAttributeGenerationChange = true;
+    prepareData() {
+        if (this.skipPrepare) {
+            return;
+        }
+        this.resolvedVariables = new Map();
+        this.resolvedNotes = new Map();
+        this.resolvedLabels = new Map();
+        this.cache = new SimpleCache()
+        super.prepareData();
+
+        if (this.updateLegacyActor()) {
+            return;
+        }
+        const system = this.system;
+        system.description = system.description || ""
+        system.gravity = system.gravity || "Normal"
 
 
-
-        let coverValues = getInheritableAttribute({
-            entity: this,
-            attributeKey: "cover",
-            reduce: "VALUES"
-        })
-
-        let coverMap = {};
-        for (let coverValue of coverValues) {
-            if (coverValue.includes(":")) {
-                let toks = coverValue.split(":");
-                coverMap[toks[1]] = toks[0];
-            } else {
-                coverMap["default"] = coverValue;
+        if (this.id) {
+            if (this.type === "npc") {
+                this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
+                return;
+            } else if (this.type === "npc-vehicle") {
+                this.safeUpdate({
+                    "type": "vehicle",
+                    "data.isNPC": true
+                }, {updateChanges: false});
+                return;
+            } else if (system.isNPC && this.prototypeToken.actorLink) {
+                let children = canvas.tokens?.objects?.children || [];
+                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                this.setActorLinkOnActorAndTokens(documents, false);
+                return;
+            } else if (!system.isNPC && !this.prototypeToken.actorLink) {
+                let children = canvas.tokens?.objects?.children || [];
+                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                this.setActorLinkOnActorAndTokens(documents, true);
+                return;
             }
         }
 
+        system.condition = 0;
+        let conditionEffect = this.effects.find(effect => effect.flags?.core?.statusId?.startsWith("condition"))
 
-        this.crewSlots = [];
+        if (conditionEffect) {
+            system.condition = conditionEffect.changes.find(change => change.key === "condition").value
+        }
 
-        let crewSlotResolution = {};
-        crewSlotResolution['Pilot'] = (crew) => (crew > 0) ? 1 : 0
-        crewSlotResolution['Copilot'] = (crew) => (crew > 1) ? 1 : 0
-        crewSlotResolution['Gunner'] = (crew) => (crew > 1) ? 1 : 0;
-        crewSlotResolution['Commander'] = (crew) => (crew > 2) ? 1 : 0;
-        crewSlotResolution['System Operator'] = (crew) => (crew > 2) ? 1 : 0;
-        crewSlotResolution['Engineer'] = (crew) => (crew > 2) ? 1 : 0;
+        this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
 
+        if (Array.isArray(this.system.attributeGenerationType)) {
+            this.safeUpdate({"system.attributeGenerationType": this.system.attributeGenerationType[0]})
+            return;
+        }
+        this.system.sheetType = "Auto"
+        if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet") {
+            this.system.finalAttributeGenerationType = "Manual";
+            this.system.sheetType = "Manual"
+        } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
+            this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
-        crewPositions.forEach(position => {
-            let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
-            let positionCover;
+        }
 
-            if (this.system.crewCover) {
-                positionCover = this.system.crewCover[position]
-            }
+        if (this.type === 'character') this._prepareCharacterData(system);
+        if (this.type === 'npc') this._prepareCharacterData(system);
+        if (this.type === 'computer') this._prepareComputerData(system);
+        if (this.type === 'vehicle') this._prepareVehicleData(system);
+        if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
+    }
 
-            if (!positionCover) {
-                positionCover = coverMap[position];
-            }
-            if (!positionCover) {
-                positionCover = coverMap["default"];
-            }
-            if (position === 'Gunner') {
-                this.crewSlots.push(...this.resolveGunnerSlots(crewMember, position, positionCover));
-            } else {
-                let crewSlot = crewSlotResolution[position];
-                if (crewSlot) {
-                    this.crewSlots.push(...this.resolveSlots(crewSlot(this.system.crew), crewMember, position, positionCover));
+    get crewSlots() {
+        return this.getCached("crewSlots", () => {
+            let crewSlots = []
+
+            let coverValues = getInheritableAttribute({
+                entity: this,
+                attributeKey: "cover",
+                reduce: "VALUES"
+            })
+
+            let coverMap = {};
+            for (let coverValue of coverValues) {
+                if (coverValue.includes(":")) {
+                    let toks = coverValue.split(":");
+                    coverMap[toks[1]] = toks[0];
+                } else {
+                    coverMap["default"] = coverValue;
                 }
             }
-        });
-
-        this.system.hasAstromechSlot = false;
-        let providedSlots = getInheritableAttribute({
-            entity: this,
-            attributeKey: "providesSlot",
-            reduce: "VALUES"
-        });
-        for (let position of providedSlots.filter(unique)) {
-            let count = providedSlots.filter(s => s === position).length
-            let positionCover;
-
-            if (this.system.crewCover) {
-                positionCover = this.system.crewCover[position]
-            }
-
-            if (!positionCover) {
-                positionCover = coverMap[position];
-            }
-            if (!positionCover) {
-                positionCover = coverMap["default"];
-            }
-            if (position === "Astromech Droid") {
-                this.hasAstromechSlot = true;
-            }
-            //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
-            this.crewSlots.push(...this.resolveSlots(count, this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover));
-        }
 
 
-        if (!this.system.crewQuality || this.system.crewQuality.quality === undefined) {
-            let quality = getInheritableAttribute({
-                entity: this,
-                attributeKey: "crewQuality",
-                reduce: "FIRST"
+            crewPositions.forEach(position => {
+                let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
+                let positionCover;
+
+                if (this.system.crewCover) {
+                    positionCover = this.system.crewCover[position]
+                }
+
+                if (!positionCover) {
+                    positionCover = coverMap[position];
+                }
+                if (!positionCover) {
+                    positionCover = coverMap["default"];
+                }
+                if (position === 'Gunner') {
+                    crewSlots.push(...this.resolveGunnerSlots(crewMember, position, positionCover));
+                } else {
+                    let crewSlot = crewSlotResolution[position];
+                    if (crewSlot) {
+                        crewSlots.push(...this.resolveSlots(crewSlot(this.system.crew), crewMember, position, positionCover));
+                    }
+                }
             });
-            if (quality) {
-                this.system.crewQuality = {quality: quality.titleCase()}
+
+            let providedSlots = getInheritableAttribute({
+                entity: this,
+                attributeKey: "providesSlot",
+                reduce: "VALUES"
+            });
+            for (let position of providedSlots.filter(unique)) {
+                let count = providedSlots.filter(s => s === position).length
+                let positionCover;
+
+                if (this.system.crewCover) {
+                    positionCover = this.system.crewCover[position]
+                }
+
+                if (!positionCover) {
+                    positionCover = coverMap[position];
+                }
+                if (!positionCover) {
+                    positionCover = coverMap["default"];
+                }
+                //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
+                crewSlots.push(...this.resolveSlots(count, this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover));
             }
-        }
-
-        //TODO this has () in it and breaks things.  switched to FIRST reduce for now
-        this.system.passengers = getInheritableAttribute({
-            entity: this,
-            attributeKey: "passengers",
-            reduce: "FIRST"
-        })
-        this.system.subType = getInheritableAttribute({
-            entity: this,
-            attributeKey: "vehicleSubType",
-            reduce: "FIRST"
-        })
-        this.system.maximumVelocity = getInheritableAttribute({
-            entity: this,
-            attributeKey: "maximumVelocity",
-            reduce: "FIRST"
+            return crewSlots;
         })
 
-        //TODO make the summation reduce function handle units?
-        const cargoCapacity = getInheritableAttribute({
-            entity: this,
-            attributeKey: "cargoCapacity",
-            reduce: "FIRST"
-        }) || 0;
-        this.system.cargo =
-            {
+    }
+
+
+    get crewQuality() {
+        return this.getCached("crewQuality", () => {
+            let crewQuality;
+            if (!this.system.crewQuality || this.system.crewQuality.quality === undefined) {
+                let quality = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "crewQuality",
+                    reduce: "FIRST"
+                });
+                if (quality) {
+                    crewQuality = {quality: quality.titleCase()}
+                }
+            }
+            return crewQuality;
+        })
+    }
+
+
+    get passengers() {
+        return this.getCached("passengers", () => {
+            //TODO this has () in it and breaks things.  switched to FIRST reduce for now
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "passengers",
+                reduce: "FIRST"
+            })
+        })
+    }
+
+
+    get subType() {
+        return this.getCached("subType", () => {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "vehicleSubType",
+                reduce: "FIRST"
+            })
+        })
+    }
+
+    get maximumVelocity() {
+        return this.getCached("maximumVelocity", () => {
+            this.system.maximumVelocity = getInheritableAttribute({
+                entity: this,
+                attributeKey: "maximumVelocity",
+                reduce: "FIRST"
+            })
+        })
+    }
+
+
+    get cargoCapacity() {
+//TODO make the summation reduce function handle units?
+        return this.getCached("cargo", () => {
+            const cargoCapacity = getInheritableAttribute({
+                entity: this,
+                attributeKey: "cargoCapacity",
+                reduce: "FIRST"
+            }) || 0;
+            return {
                 value: getInheritableAttribute({
                     entity: this,
                     attributeKey: "weight",
@@ -301,66 +311,62 @@ export class SWSEActor extends Actor {
                 }),
                 capacity: `${cargoCapacity}`
             }
-
-        this.system.consumables = getInheritableAttribute({
-            entity: this,
-            attributeKey: "consumables",
-            reduce: "FIRST"
         })
-        this.system.grapple = resolveValueArray([this.pilot.system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
-            entity: this,
-            attributeKey: "grappleSizeModifier",
-            reduce: "SUM"
-        })], this)
+    }
 
-        let primary = `Class ${(getInheritableAttribute({
-            entity: this,
-            attributeKey: "hyperdrive",
-            reduce: "MIN"
-        }))}`;
-        let backup = `Class ${(getInheritableAttribute({
-            entity: this,
-            attributeKey: "hyperdrive",
-            reduce: "MAX"
-        }))}`;
-        if (primary === backup) {
-            backup = undefined;
-        }
-        if (primary === `Class undefined`) {
-            primary = undefined;
-        }
-        this.system.hyperdrive = {
-            primary: primary,
-            backup: backup
-        }
 
-        this.system.speed = {
-            vehicle: getInheritableAttribute({
+    get consumables() {
+        return this.getCached("consumables", () => {
+            return getInheritableAttribute({
                 entity: this,
-                attributeKey: "speedStarshipScale",
-                reduce: "SUM"
-            }),
-            character: getInheritableAttribute({
-                entity: this,
-                attributeKey: "speedCharacterScale",
-                reduce: "SUM"
+                attributeKey: "consumables",
+                reduce: "FIRST"
             })
-        }
+        })
+    }
 
-        let vehicleFightingSpace = getInheritableAttribute({
-            entity: this,
-            attributeKey: "vehicleFightingSpace",
-            reduce: "MAX"
-        });
-        let characterFightingSpace = getInheritableAttribute({
-            entity: this,
-            attributeKey: "characterFightingSpace",
-            reduce: "MAX"
-        });
-        this.system.fightingSpace = {
-            vehicle: vehicleFightingSpace,
-            character: characterFightingSpace
-        }
+    get grapple() {
+        return this.getCached("grapple", () => {
+            return resolveValueArray([this.pilot.system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
+                entity: this,
+                attributeKey: "grappleSizeModifier",
+                reduce: "SUM"
+            })], this)
+        })
+    }
+
+
+
+
+
+    get fightingSpace() {
+        return this.getCached("fightingSpace", () => {
+            let vehicleFightingSpace = getInheritableAttribute({
+                entity: this,
+                attributeKey: "vehicleFightingSpace",
+                reduce: "MAX"
+            });
+            let characterFightingSpace = getInheritableAttribute({
+                entity: this,
+                attributeKey: "characterFightingSpace",
+                reduce: "MAX"
+            });
+            return {
+                vehicle: vehicleFightingSpace,
+                character: characterFightingSpace
+            }
+        })
+    }
+
+
+    /**
+     * Prepare Vehicle type specific data
+     * @param system
+     * @private
+     */
+    _prepareVehicleData(system) {
+        this.system.attributeGenerationType = "Manual"
+        this.system.disableAttributeGenerationChange = true;
 
         generateAttributes(this);
         generateSkills(this);
@@ -374,128 +380,16 @@ export class SWSEActor extends Actor {
         system.attacks = generateVehicleAttacks(this);
     }
 
-    get crew(){
-        return getInheritableAttribute({
-            entity: this,
-            attributeKey: "crew",
-            reduce: "SUM"
-        })
-    }
-
-    /**
-     * Prepare Computer type specific data
-     */
-    _prepareComputerData(actorData) {
-        let div = document.createElement("DIV");
-        div.innerHTML = actorData.data.content;
-        let rough = div.textContent || div.innerText || "";
-        let toks = rough.split("\n");
-        for (let tok of toks) {
-
-        }
-        rough = toks.join("");
-        actorData.pages = JSON.parse(rough, (key, value) => {
-            console.log(key); // log the current property name, the last is "".
-            return value;     // return the unchanged property value.
-        });
-    }
-
-    get vehicleTemplate() { return this.getCached("vehicleTemplate", () => {
-        let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
-        return (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
-    })
-    }
-
-    get uninstalled() { return this.getCached("uninstalled", () => {return this.getUninstalledSystems();})}
-    get installed() { return this.getCached("installed", () => {return this.getInstalledSystems('installed');})}
-    get pilotInstalled() { return this.getCached("pilotInstalled", () => {return this.getInstalledSystems('pilotInstalled');})}
-    get gunnerPositions() { return this.getCached("gunnerPositions", () => {return this.getGunnerPositions()})}
-    get cargo() { return this.getCached("cargo", () => {return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);})}
-    get speciesList() { return this.getCached("speciesList", () => {return filterItemsByType(this.items.values(), "species");})}
-    get species() { return this.getCached("species", () => {return (this.speciesList.length > 0 ? this.speciesList[0] : null);})}
-
-    get classes() { return this.getCached("classes", () => {return filterItemsByType(this.items.values(), "class");})}
-
-    get weapons() { return this.getCached("weapons", () => {return filterItemsByType(this.items.values(), "weapon");})}
-    get armors() { return this.getCached("armors", () => {return filterItemsByType(this.items.values(), "armor");})}
-    get equipment() { return this.getCached("equipment", () => {return filterItemsByType(this.items.values(), "equipment");})}
-
-    get traits() { return this.getCached("traits", () => {return this.getTraits();})}
-    get talents() { return this.getCached("talents", () => {return filterItemsByType(inheritableItems(this), "talent");})}
-    get powers() { return this.getCached("powers", () => {return filterItemsByType(this.items.values(), "forcePower");})}
-    get languages() { return this.getCached("languages", () => {return filterItemsByType(this.items.values(), "language");})}
-
-    get background() { return this.getCached("background", () => {
-        let backgrounds = filterItemsByType(this.items.values(), "background");
-        return (backgrounds.length > 0 ? backgrounds[0] : null);
-    })
-    }
-    get destiny() { return this.getCached("destiny", () => {
-        let destinies = filterItemsByType(this.items.values(), "destiny");
-        return (destinies.length > 0 ? destinies[0] : null);
-    })
-    }
-    get secrets() { return this.getCached("secrets", () => {return filterItemsByType(this.items.values(), "forceSecret");})}
-    get techniques() { return this.getCached("techniques", () => {return filterItemsByType(this.items.values(), "forceTechnique");})}
-    get affiliations() { return this.getCached("affiliations", () => {return filterItemsByType(this.items.values(), "affiliation");})}
-    get regimens() { return this.getCached("regimens", () => {return filterItemsByType(this.items.values(), "forceRegimen");})}
-    get naturalWeapons() { return this.getCached("naturalWeapons", () => {return filterItemsByType(this.items.values(), "beastAttack");})}
-    get specialSenses() { return this.getCached("specialSenses", () => {return filterItemsByType(this.items.values(), "beastSense");})}
-    get speciesTypes() { return this.getCached("speciesTypes", () => {return filterItemsByType(this.items.values(), "beastType");})}
-    get specialQualities() { return this.getCached("specialQualities", () => {return filterItemsByType(this.items.values(), "beastQuality");})}
-
-    get isBeast() { return this.getCached("isBeast", () => {return !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
-        || this.specialSenses.length > 0
-        || this.speciesTypes.length > 0
-        || this.specialQualities.length > 0;
-    })}
-    get equipped() { return this.getCached("equipped", () => {return this.getEquippedItems();})}
-    get unequipped() { return this.getCached("unequipped", () => {return this.getUnequippedItems();})}
-    get inventory() { return this.getCached("inventory", () => {return this.getNonequippableItems();})}
     /**
      * Prepare Character type specific data
      */
     _prepareCharacterData(system) {
-        // this.speciesList = filterItemsByType(this.items.values(), "species");
-        // this.species = (this.speciesList.length > 0 ? this.speciesList[0] : null);
-        //
-        // this.classes = filterItemsByType(inheritableItems(this), "class");
-        //
-        // this.weapons = filterItemsByType(this.items.values(), "weapon");
-        // this.armors = filterItemsByType(this.items.values(), "armor");
-        // this.equipment = filterItemsByType(this.items.values(), "equipment");
-        //
-        // this.traits = this.getTraits();
-        // this.talents = filterItemsByType(inheritableItems(this), "talent");
-        // this.powers = filterItemsByType(this.items.values(), "forcePower");
-        // this.languages = filterItemsByType(this.items.values(), "language");
-        // let backgrounds = filterItemsByType(this.items.values(), "background");
-        // this.background = (backgrounds.length > 0 ? backgrounds[0] : null);
-        // let destinies = filterItemsByType(this.items.values(), "destiny");
-        // this.destiny = (destinies.length > 0 ? destinies[0] : null);
-        // this.secrets = filterItemsByType(this.items.values(), "forceSecret");
-        // this.techniques = filterItemsByType(this.items.values(), "forceTechnique");
-        // this.affiliations = filterItemsByType(this.items.values(), "affiliation");
-        // this.regimens = filterItemsByType(this.items.values(), "forceRegimen");
-        // this.naturalWeapons = filterItemsByType(this.items.values(), "beastAttack");
-        // this.specialSenses = filterItemsByType(this.items.values(), "beastSense");
-        // this.speciesTypes = filterItemsByType(this.items.values(), "beastType");
-        // this.specialQualities = filterItemsByType(this.items.values(), "beastQuality");
-        //
-        // this.isBeast = !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
-        //     || this.specialSenses.length > 0
-        //     || this.speciesTypes.length > 0
-        //     || this.specialQualities.length > 0;
-        // this.equipped = this.getEquippedItems();
-        // this.unequipped = this.getUnequippedItems();
-        // this.inventory = this.getNonequippableItems();
-
         let {level, classSummary, classLevels} = this._generateClassData(system);
         system.levelSummary = level;
         system.classSummary = classSummary;
         system.classLevels = classLevels;
 
-        this.system.weight = this.weight
+        //this.system.weight = this.weight
 
         generateAttributes(this);
 
@@ -544,6 +438,261 @@ export class SWSEActor extends Actor {
         system.attacks = generateAttacks(this);
         this.initializeCharacterSettings();
     }
+
+    get hyperdrive() {
+        return this.getCached("hyperdrive", () => {
+
+            let primary = `Class ${(getInheritableAttribute({
+                entity: this,
+                attributeKey: "hyperdrive",
+                reduce: "MIN"
+            }))}`;
+            let backup = `Class ${(getInheritableAttribute({
+                entity: this,
+                attributeKey: "hyperdrive",
+                reduce: "MAX"
+            }))}`;
+            if (primary === backup) {
+                backup = undefined;
+            }
+            if (primary === `Class undefined`) {
+                primary = undefined;
+            }
+            return {
+                primary: primary,
+                backup: backup
+            }
+        })
+    }
+
+    get crew() {
+        return this.getCached("crew", () => {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "crew",
+                reduce: "SUM"
+            })
+        })
+    }
+
+    /**
+     * Prepare Computer type specific data
+     */
+    _prepareComputerData(actorData) {
+        let div = document.createElement("DIV");
+        div.innerHTML = actorData.data.content;
+        let rough = div.textContent || div.innerText || "";
+        let toks = rough.split("\n");
+        for (let tok of toks) {
+
+        }
+        rough = toks.join("");
+        actorData.pages = JSON.parse(rough, (key, value) => {
+            console.log(key); // log the current property name, the last is "".
+            return value;     // return the unchanged property value.
+        });
+    }
+
+    get vehicleTemplate() {
+        return this.getCached("vehicleTemplate", () => {
+            let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
+            return (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
+        })
+    }
+
+    get uninstalled() {
+        return this.getCached("uninstalled", () => {
+            return this.getUninstalledSystems();
+        })
+    }
+
+    get installed() {
+        return this.getCached("installed", () => {
+            return this.getInstalledSystems('installed');
+        })
+    }
+
+    get pilotInstalled() {
+        return this.getCached("pilotInstalled", () => {
+            return this.getInstalledSystems('pilotInstalled');
+        })
+    }
+
+    get gunnerPositions() {
+        return this.getCached("gunnerPositions", () => {
+            return this.getGunnerPositions()
+        })
+    }
+
+    get cargo() {
+        return this.getCached("cargo", () => {
+            return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
+        })
+    }
+
+    get speciesList() {
+        return this.getCached("speciesList", () => {
+            return filterItemsByType(this.items.values(), "species");
+        })
+    }
+
+    get species() {
+        return this.getCached("species", () => {
+            return (this.speciesList.length > 0 ? this.speciesList[0] : null);
+        })
+    }
+
+    get classes() {
+        return this.getCached("classes", () => {
+            return filterItemsByType(this.items.values(), "class");
+        })
+    }
+
+    get weapons() {
+        return this.getCached("weapons", () => {
+            return filterItemsByType(this.items.values(), "weapon");
+        })
+    }
+
+    get armors() {
+        return this.getCached("armors", () => {
+            return filterItemsByType(this.items.values(), "armor");
+        })
+    }
+
+    get equipment() {
+        return this.getCached("equipment", () => {
+            return filterItemsByType(this.items.values(), "equipment");
+        })
+    }
+
+    get traits() {
+        return this.getCached("traits", () => {
+            return this.getTraits();
+        })
+    }
+
+    get talents() {
+        return this.getCached("talents", () => {
+            return filterItemsByType(inheritableItems(this), "talent");
+        })
+    }
+
+    get powers() {
+        return this.getCached("powers", () => {
+            return filterItemsByType(this.items.values(), "forcePower");
+        })
+    }
+
+    get languages() {
+        return this.getCached("languages", () => {
+            return filterItemsByType(this.items.values(), "language");
+        })
+    }
+
+    get background() {
+        return this.getCached("background", () => {
+            let backgrounds = filterItemsByType(this.items.values(), "background");
+            return (backgrounds.length > 0 ? backgrounds[0] : null);
+        })
+    }
+
+    get destiny() {
+        return this.getCached("destiny", () => {
+            let destinies = filterItemsByType(this.items.values(), "destiny");
+            return (destinies.length > 0 ? destinies[0] : null);
+        })
+    }
+
+    get secrets() {
+        return this.getCached("secrets", () => {
+            return filterItemsByType(this.items.values(), "forceSecret");
+        })
+    }
+
+    get techniques() {
+        return this.getCached("techniques", () => {
+            return filterItemsByType(this.items.values(), "forceTechnique");
+        })
+    }
+
+    get affiliations() {
+        return this.getCached("affiliations", () => {
+            return filterItemsByType(this.items.values(), "affiliation");
+        })
+    }
+
+    get regimens() {
+        return this.getCached("regimens", () => {
+            return filterItemsByType(this.items.values(), "forceRegimen");
+        })
+    }
+
+    get naturalWeapons() {
+        return this.getCached("naturalWeapons", () => {
+            return filterItemsByType(this.items.values(), "beastAttack");
+        })
+    }
+
+    get specialSenses() {
+        return this.getCached("specialSenses", () => {
+            return filterItemsByType(this.items.values(), "beastSense");
+        })
+    }
+
+    get speciesTypes() {
+        return this.getCached("speciesTypes", () => {
+            return filterItemsByType(this.items.values(), "beastType");
+        })
+    }
+
+    get specialQualities() {
+        return this.getCached("specialQualities", () => {
+            return filterItemsByType(this.items.values(), "beastQuality");
+        })
+    }
+
+    get isBeast() {
+        return this.getCached("isBeast", () => {
+            return !!this.classes.find(c => c.name === "Beast") || this.naturalWeapons.length > 0
+                || this.specialSenses.length > 0
+                || this.speciesTypes.length > 0
+                || this.specialQualities.length > 0;
+        })
+    }
+
+    get equipped() {
+        return this.getCached("equipped", () => {
+            return this.getEquippedItems();
+        })
+    }
+
+    get unequipped() {
+        return this.getCached("unequipped", () => {
+            return this.getUnequippedItems();
+        })
+    }
+
+    get inventory() {
+        return this.getCached("inventory", () => {
+            return this.getNonequippableItems();
+        })
+    }
+
+    get hasAstromechSlot() {
+        let providedSlots = getInheritableAttribute({
+            entity: this,
+            attributeKey: "providesSlot",
+            reduce: "VALUES"
+        });
+        return providedSlots.includes("Astromech Droid");
+    }
+
+    get hasCrewQuality() {
+        return true;
+    }
+
+
 
     initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
@@ -722,7 +871,7 @@ export class SWSEActor extends Actor {
 
     get astromech() {
         let actor = this.getActor(this.system.crew.find(c => c.position === 'Astromech Droid')?.id);
-        if (!actor && this.system.hasAstromech && this.system.hasAstromechSlot) {
+        if (!actor && this.system.hasAstromech && this.hasAstromechSlot) {
             actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
             //TODO figure out if this is consistent on different ships with droid sockets
 
@@ -743,12 +892,13 @@ export class SWSEActor extends Actor {
     get changes() {
         return this.system.changes;
     }
+
     get toggles() {
         return this.system.toggles;
     }
 
     get inheritedChanges() {
-        return getInheritableAttribute({entity: this, attributeFilter: "ACTOR_INHERITABLE", skipLocal:true})
+        return getInheritableAttribute({entity: this, attributeFilter: "ACTOR_INHERITABLE", skipLocal: true})
     }
 
     get sex() {
@@ -756,33 +906,47 @@ export class SWSEActor extends Actor {
     }
 
     get speed() {
-        if (this.system.resolvedSpeed) {
-            return this.system.resolvedSpeed;
-        }
-        if (!this.traits) {
-            return;
-        }
+        return this.getCached("speed", () => {
+            if(this.type === 'vehicle'){
+                return {
+                    vehicle: getInheritableAttribute({
+                        entity: this,
+                        attributeKey: "speedStarshipScale",
+                        reduce: "SUM"
+                    }),
+                    character: getInheritableAttribute({
+                        entity: this,
+                        attributeKey: "speedCharacterScale",
+                        reduce: "SUM"
+                    })
+                }
+            } else {
+                if (!this.traits) {
+                    return;
+                }
 
-        let attributes = getInheritableAttribute({
-            entity: this,
-            attributeKey: 'speed', reduce: "VALUES"
-        })
+                let attributes = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: 'speed', reduce: "VALUES"
+                })
 
-        if (attributes.length === 0) {
-            attributes.push("Stationary 0");
-        }
+                if (attributes.length === 0) {
+                    attributes.push("Stationary 0");
+                }
 
-        let armorType = "";
-        for (let armor of this.getEquippedItems().filter(item => item.type === "armor")) {
-            if (armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)) {
-                armorType = armor.armorType;
+                let armorType = "";
+                for (let armor of this.getEquippedItems().filter(item => item.type === "armor")) {
+                    if (armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)) {
+                        armorType = armor.armorType;
+                    }
+                }
+                return attributes.map(name => this.applyArmorSpeedPenalty(name, armorType))
+                    .map(name => this.applyConditionSpeedPenalty(name, armorType))
+                    .map(name => this.applyWeightSpeedPenalty(name))
+                    .join("; ");
             }
-        }
-        this.system.resolvedSpeed = attributes.map(name => this.applyArmorSpeedPenalty(name, armorType))
-            .map(name => this.applyConditionSpeedPenalty(name, armorType))
-            .map(name => this.applyWeightSpeedPenalty(name))
-            .join("; ");
-        return this.system.resolvedSpeed;
+
+        })
     }
 
 
@@ -1532,7 +1696,7 @@ export class SWSEActor extends Actor {
         } else if (availableItem < reduceBy) {
             let remainder = reduceBy - availableItem;
             actorData.availableItems[type] = 0;
-            actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder :  -1 * remainder
+            actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder : -1 * remainder
         } else {
             actorData.availableItems[type] = -1 * reduceBy;
         }
@@ -2068,8 +2232,8 @@ export class SWSEActor extends Actor {
                 let viewable = viewableEntityFromEntityType(entity.type);
 
                 let foundCategory = false
-                for (let category of entity.system.categories || []){
-                    if(!!this.system.availableItems[category.value]){
+                for (let category of entity.system.categories || []) {
+                    if (!!this.system.availableItems[category.value]) {
                         foundCategory = true;
                         entity.system.activeCategory = category.value;
                         break;
@@ -2695,16 +2859,16 @@ export class SWSEActor extends Actor {
     }
 
     updateLegacyActor() {
-        let update= {};
+        let update = {};
         let changes = !this.system?.changes ? undefined : Array.isArray(this.system.changes) ? this.system.changes : Object.values(this.system.changes);
-        if(!Array.isArray(this.system.changes)){
-            if(changes){
+        if (!Array.isArray(this.system.changes)) {
+            if (changes) {
                 update['system.changes'] = changes;
             }
         }
         convertOverrideToMode(changes, update);
         let response = false;
-        if(Object.keys(update).length>0){
+        if (Object.keys(update).length > 0) {
             this.safeUpdate(update)
             response = true
         }

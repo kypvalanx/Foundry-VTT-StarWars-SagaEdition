@@ -1,5 +1,32 @@
-<div class="panel flex-row" title="NPCs are disconnected from token sheets.  updates to token sheets do not modify the character sheet.">
-    <label class="resource-label cyberpunk-checkbox-label" for="npc">NPC</label>
-        <input class="cyberpunk-checkbox" type="checkbox" id="npc" name="system.isNPC" {{#if actor.system.isNPC}}
+<div class="panel flex-row">
+    <div class="panel flex-row" title="NPCs are disconnected from token sheets.  updates to token sheets do not modify the character sheet.">
+        <label class="resource-label" for="npc">NPC</label>
+        <input type="checkbox" id="npc" name="system.isNPC" {{#if actor.system.isNPC}}
                checked{{/if}}/>
+    </div>
+
+    {{#if actor.hasCrewQuality}}
+        <div class="crew-quality">
+            <label class="resource-label" for="crew-quality">Crew Quality</label>
+            <select id="crew-quality" name="system.crewQuality.quality">
+                {{#select actor.system.crewQuality.quality}}
+                    <option value="-">-</option>
+                    <option value="Untrained">Untrained</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Skilled">Skilled</option>
+                    <option value="Expert">Expert</option>
+                    <option value="Ace">Ace</option>
+                {{/select}}
+            </select>
+        </div>
+    {{/if}}
+
+    {{#if actor.hasAstromechSlot}}
+        <div>
+            <label class="resource-label" for="hasAstromech">Includes Astromech
+            </label>
+                <input type="checkbox" id="hasAstromech" name="system.hasAstromech" {{#if actor.system.hasAstromech}}
+                       checked="isChecked"{{/if}}/>
+        </div>
+    {{/if}}
 </div>

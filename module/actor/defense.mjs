@@ -27,18 +27,12 @@ function generateArmorBlock(actor, armor) {
     if (!armor._parentIsProficientWithArmor()) {
         attributes.push("(Not Proficient)");
     }
-    let speed = actor.speed
-
-
-    let refDefense = armor.armorReflexDefenseBonus || 0;
-    let fortDefense = armor.fortitudeDefenseBonus || 0;
-    let maxDex = armor.maximumDexterityBonus || 0;
     return {
         name: armor.name,
-        speed: speed,
-        refDefense,
-        fortDefense,
-        maxDex,
+        speed: actor.speed,
+        refDefense: armor.armorReflexDefenseBonus,
+        fortDefense: armor.fortitudeDefenseBonus,
+        maxDex: armor.maximumDexterityBonus,
         notes: attributes.join(", "),
         type: armor.armorType
     };

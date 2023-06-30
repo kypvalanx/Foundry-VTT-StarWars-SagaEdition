@@ -32,6 +32,15 @@ export const lightsaberForms = ["Ataru",
     "Tripzest"];
 
 export const crewPositions = ['Pilot', 'Copilot', 'Gunner', 'Commander', 'System Operator', 'Engineer', 'Astromech Droid'];
+
+export const crewSlotResolution = {
+    'Pilot': (crew) => (crew > 0) ? 1 : 0,
+    'Copilot':(crew) => (crew > 1) ? 1 : 0,
+    'Gunner':(crew) => (crew > 1) ? 1 : 0,
+    'Commander': (crew) => (crew > 2) ? 1 : 0,
+    'System Operator': (crew) => (crew > 2) ? 1 : 0,
+    'Engineer': (crew) => (crew > 2) ? 1 : 0,
+};
 export const vehicleActorTypes = ["vehicle", "npc-vehicle"];
 
 export const crewQuality = {
