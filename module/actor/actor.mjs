@@ -1867,7 +1867,7 @@ export class SWSEActor extends Actor {
     }
 
     set shields(shields) {
-        this.safeUpdate({'data.shields.value': shields < 0 ? 0 : shields})
+        this.safeUpdate({'system.shields.value': shields < 0 ? 0 : shields})
     }
 
     get shields() {

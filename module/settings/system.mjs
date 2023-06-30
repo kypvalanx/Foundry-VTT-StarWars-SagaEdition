@@ -158,4 +158,5 @@ export const registerSystemSettings = function () {
     registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--color-foreground');
     registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--color-midground');
     registerCSSColor("swse", "cssHyperlink", "Hyperlink Color", "Modifies the Hyperlink color of sheets", "client", "#132cff", r, '--color-text-hyperlink');
+    registerCSSColor("swse", "cssHeaderUnderline", "Header Underline", "Modifies the Underline color of Headers", "client", "#010e7c", r, '--color-underline-header');
 }

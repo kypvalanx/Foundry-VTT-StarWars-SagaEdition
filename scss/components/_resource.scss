@@ -1,6 +1,7 @@
 .resource-label {
-  font-weight: bold;
   text-transform: uppercase;
+  color: var(--color-foreground);
+  font-weight: 700;
 }
 .resource-block {
   padding: 3px;

@@ -60,37 +60,39 @@ export function resolveShield(actor) {
     if (!actor) {
         return;
     }
-    let system = actor.system;
-    let shieldRating = getInheritableAttribute({
-        entity: actor,
-        attributeKey: 'shieldRating',
-        reduce: "SUM"
-    })
+    let shields = actor.system.shields
+    shields.max = shields.override ;
+    if(!shields.override){
+        let shieldRating = getInheritableAttribute({
+            entity: actor,
+            attributeKey: 'shieldRating',
+            reduce: "SUM"
+        })
 
-    let advancedShieldRating = getInheritableAttribute({
-        entity: actor,
-        attributeKey: 'advancedShieldRating',
-        reduce: "MAX"
-    })
+        let advancedShieldRating = getInheritableAttribute({
+            entity: actor,
+            attributeKey: 'advancedShieldRating',
+            reduce: "MAX"
+        })
 //TODO make sure the 0 state doesn't activate if a users shields are dropped to 0
-    if (advancedShieldRating > 0) {
-        if (shieldRating === 0) {
-            shieldRating = advancedShieldRating * 2 + 10
-        } else {
-            shieldRating = shieldRating + advancedShieldRating;
+        if (advancedShieldRating > 0) {
+            if (shieldRating === 0) {
+                shieldRating = advancedShieldRating * 2 + 10
+            } else {
+                shieldRating = shieldRating + advancedShieldRating;
+            }
         }
+        shields.max = shieldRating;
     }
-    let value = Array.isArray(system.shields?.value) ? system.shields?.value[0] : system.shields?.value || 0;
-    let max = resolveValueArray(shieldRating, actor);
+
+    let value = Array.isArray(shields?.value) ? shields?.value[0] : shields?.value || 0;
     let failureChance = getInheritableAttribute({
         entity: actor,
         attributeKey: 'shieldFailureChance',
         reduce: "MAX"
     });
-    let active = !!actor.effects.find(effect => effect.flags?.core?.statusId === 'shield');
-    let shields = actor.system.shields
+    let active = !!actor.effects.find(effect => effect.statuses.has('shield') && effect.disabled === false);
     shields.value = value;
-    shields.max = max;
     shields.failureChance = failureChance;
     shields.active = active;
     return shields;

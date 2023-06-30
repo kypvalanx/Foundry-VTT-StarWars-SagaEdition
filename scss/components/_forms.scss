@@ -126,7 +126,7 @@
   width: fit-content;
 }
 
-input[type=text] {
+input[type=text], input[type=number] {
   padding: 11px 10px;
   font-size: 0.75rem;
   border: 2px var(--color-foreground) solid;
@@ -136,13 +136,17 @@ input[type=text] {
 }
 
 
-input[type=text].left-input {
+input[type=text].left-input, input[type=number].left-input {
   border-radius: 10px 0 0 10px;
 }
 
 
-input[type=text].right-input {
+input[type=text].right-input, input[type=number].right-input {
   border-radius: 0 10px 10px 0;
+}
+
+input[type=text].middle-input, input[type=number].middle-input {
+  border-radius: 0 0 0 0;
 }
 
 input[type=text]:focus {

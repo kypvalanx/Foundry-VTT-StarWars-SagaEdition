@@ -30,14 +30,18 @@
                     <div class="flex-grow">
                         <!--health-->
                         {{> 'systems/swse/templates/actor/vehicle/vehicle-health.hbs'}}
-                        <!--Shields-->
-                        {{> 'systems/swse/templates/actor/parts/actor-shields.hbs'}}
+                    </div>
+<!--                    <div class="flex-grow">-->
+<!--                        &lt;!&ndash;Shields&ndash;&gt;-->
+<!--                        {{> 'systems/swse/templates/actor/parts/actor-shields.hbs'}}-->
+<!--                    </div>-->
+                    <div class="flex flex-col">
+                    <!--condition-->
+                    {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
                     </div>
                     <div class="flex flex-col">
                         <!--portrait-->
                         {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
-                        <!--condition-->
-                        {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
                     </div>
                 </div>
                 <div class="flex flex-row">

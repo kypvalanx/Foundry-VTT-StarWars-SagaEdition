@@ -394,7 +394,7 @@
   width: fit-content;
 }
 
-.swse input[type=text] {
+.swse input[type=text], .swse input[type=number] {
   padding: 11px 10px;
   font-size: 0.75rem;
   border: 2px var(--color-foreground) solid;
@@ -403,12 +403,16 @@
   background: var(--color-background);
 }
 
-.swse input[type=text].left-input {
+.swse input[type=text].left-input, .swse input[type=number].left-input {
   border-radius: 10px 0 0 10px;
 }
 
-.swse input[type=text].right-input {
+.swse input[type=text].right-input, .swse input[type=number].right-input {
   border-radius: 0 10px 10px 0;
+}
+
+.swse input[type=text].middle-input, .swse input[type=number].middle-input {
+  border-radius: 0 0 0 0;
 }
 
 .swse input[type=text]:focus {
@@ -492,8 +496,9 @@
 }
 
 .swse .resource-label {
-  font-weight: bold;
   text-transform: uppercase;
+  color: var(--color-foreground);
+  font-weight: 700;
 }
 
 .swse .resource-block {

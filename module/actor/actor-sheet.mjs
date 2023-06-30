@@ -291,12 +291,13 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _onShield(event) {
-        switch ($(event.currentTarget).data("action-type")) {
+        const type = $(event.currentTarget).data("action-type");
+        switch (type) {
             case 'plus':
-                this.object.shields = this.object.shields.value + 5
+                this.object.shields = this.object.shields + 5
                 break;
             case 'minus':
-                this.object.shields = this.object.shields.value - 5
+                this.object.shields = this.object.shields - 5
                 break;
             case 'toggle':
                 let ids = this.object.effects
