@@ -1064,14 +1064,15 @@ export class SWSEActor extends Actor {
     }
 
     async activateStatusEffect(statusEffect) {
-        if (statusEffect) {
-            const createData = foundry.utils.deepClone(statusEffect);
-            createData.label = game.i18n.localize(statusEffect.label);
-            createData["statuses"] = [statusEffect.id]
-            delete createData.id;
-            const cls = getDocumentClass("ActiveEffect");
-            await cls.create(createData, {parent: this});
+        if (!statusEffect) {
+            return;
         }
+        const createData = foundry.utils.deepClone(statusEffect);
+        createData.label = game.i18n.localize(statusEffect.label);
+        createData["statuses"] = [statusEffect.id]
+        delete createData.id;
+        const cls = getDocumentClass("ActiveEffect");
+        await cls.create(createData, {parent: this});
     }
 
     applyDamage(options) {
