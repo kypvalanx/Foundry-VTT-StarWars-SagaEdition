@@ -3,7 +3,8 @@ import {generateAttacks, generateVehicleAttacks} from "./attack-handler.mjs";
 import {resolveGrapple, resolveOffense} from "./offense.mjs";
 import {
     ALPHA_FINAL_NAME,
-    COMMMA_LIST, convertOverrideToMode,
+    COMMMA_LIST,
+    convertOverrideToMode,
     excludeItemsByType,
     filterItemsByType,
     getIndexAndPack,
@@ -25,7 +26,8 @@ import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.mjs
 import {SWSEItem} from "../item/item.mjs";
 import {
     crewPositions,
-    crewQuality, crewSlotResolution,
+    crewQuality,
+    crewSlotResolution,
     DROID_COST_FACTOR,
     equipableTypes,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
@@ -59,15 +61,15 @@ export class SWSEActor extends Actor {
         }
     }
 
-    _onCreateDescendantDocuments(embeddedName, ...args) {
-        super._onCreateDescendantDocuments(embeddedName, ...args);
+    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
 
         //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
-        if ("ActiveEffect" === embeddedName) {
-            let activeEffect = args[0][0];
-            if (activeEffect.flags?.core?.statusId?.startsWith("condition")) {
+        if ("effects" === collection) {
+            let activeEffect = documents[0];
+            if (activeEffect.statuses.filter(status => status.startsWith('condition')).size > 0) {
                 this.effects
-                    .filter(effect => effect !== activeEffect && effect.flags?.core?.statusId?.startsWith("condition"))
+                    .filter(effect => effect !== activeEffect && effect.statuses.filter(status => status.startsWith('condition')).size > 0)
                     .map(effect => effect.delete())
             }
         }
@@ -143,7 +145,7 @@ export class SWSEActor extends Actor {
         }
 
         system.condition = 0;
-        let conditionEffect = this.effects.find(effect => effect.flags?.core?.statusId?.startsWith("condition"))
+        let conditionEffect = this.effects.find(effect => effect.statuses.filter(status => status.startsWith("condition")).size > 0)
 
         if (conditionEffect) {
             system.condition = conditionEffect.changes.find(change => change.key === "condition").value
@@ -1065,8 +1067,7 @@ export class SWSEActor extends Actor {
         if (statusEffect) {
             const createData = foundry.utils.deepClone(statusEffect);
             createData.label = game.i18n.localize(statusEffect.label);
-            createData["flags.core.statusId"] = statusEffect.id;
-            //if ( overlay ) createData["flags.core.overlay"] = true;
+            createData["statuses"] = [statusEffect.id]
             delete createData.id;
             const cls = getDocumentClass("ActiveEffect");
             await cls.create(createData, {parent: this});
