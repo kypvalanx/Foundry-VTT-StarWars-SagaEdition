@@ -1303,6 +1303,17 @@ export class SWSEItem extends Item {
         this.safeUpdate(update);
     }
 
+
+
+    equip(type){
+
+        this.safeUpdate({'system.equipped': type});
+    }
+    unequip(){
+
+        this.safeUpdate({'system.equipped': null});
+    }
+
     _activateMode(modes, mode, system, type, group, attributes) {
         let modeTokens = mode.split(".");
 

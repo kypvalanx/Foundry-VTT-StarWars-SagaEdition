@@ -789,54 +789,52 @@ export class SWSEActorSheet extends ActorSheet {
             if (targetItemContainer == null) {
                 return;
             }
+            const containerId = $(targetItemContainer).data("containerId");
             let itemId = data.itemId;
-
-
-            //TODO clean this up. the design was good when it was a few lists, but with 4 lists it's clunky  maybe a map to rules?
-            let specialTypes = ["new-gunner"]
-            let specialType = specialTypes.find(x => targetItemContainer.classList.contains(x));
+            let item = this.object.items.get(itemId);
 
             //This type does not allow weapon systems
             let equipTypes = ["equipped", "installed"];
-            let equipType = equipTypes.find(x => targetItemContainer.classList.contains(x));
-
             let weaponSystemOnlyTypes = ["pilotInstalled"];
             let gunnerPositions = this.actor.gunnerPositions || [];
             weaponSystemOnlyTypes.push(...gunnerPositions.filter(e => !!e.id).map(e => e.id).filter(unique));
-            let weaponSystemOnlyType = weaponSystemOnlyTypes.find(x => targetItemContainer.classList.contains(x));
 
             let unequipTypes = ["unequipped", "uninstalled"];
-            let unequipType = unequipTypes.find(x => targetItemContainer.classList.contains(x));
 
-            let item = this.actor.items.get(itemId);
-            if (equipType) {
+
+            if(unequipTypes.includes(containerId)){
+                await this.object.unequipItem(itemId, ev);
+            } else if(containerId === "new-gunner"){
+                if (item.system.subtype.toLowerCase() !== "weapon systems") {
+                    this.onlyAllowsWeaponsDialog();
+                    return;
+                }
+                //let types = this.object.system.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
+                let types = this.object.getEquipTypes().filter(e=> !!e);
+                let equipType;
+                for (let i = 0; i <= types.length; i++) {
+                    equipType = `gunnerInstalled${i}`;
+                    if (!types.includes(equipType)) {
+                        break;
+                    }
+                }
+                await this.object.equipItem(itemId, equipType, {event:ev, offerOverride:true});
+
+            } else if(equipTypes.includes(containerId)){
                 if (item.system.subtype.toLowerCase() === "weapon systems") {
                     this.onlyAllowsWeaponsDialog(false);
                 } else {
-                    await this.actor.equipItem(itemId, equipType, {event:ev});
+                    await this.object.equipItem(itemId, containerId, {event:ev});
                 }
-            } else if (weaponSystemOnlyType) {
+            } else if(weaponSystemOnlyTypes.includes(containerId)){
                 if (item.system.subtype.toLowerCase() === "weapon systems") {
-                    await this.actor.equipItem(itemId, weaponSystemOnlyType, {event:ev, offerOverride:true});
+                    await this.object.equipItem(itemId, containerId, {event:ev, offerOverride:true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
                 }
-            } else if (unequipType) {
-                await this.actor.unequipItem(itemId, ev);
-            } else if (specialType === "new-gunner") {
-                if (item.system.subtype.toLowerCase() === "weapon systems") {
-                    let types = this.actor.system.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
-                    let equipType;
-                    for (let i = 0; i <= types.length; i++) {
-                        if (!types.includes(i)) {
-                            equipType = `gunnerInstalled${i}`;
-                            break;
-                        }
-                    }
-                    await this.actor.equipItem(itemId, equipType, {event:ev, offerOverride:true});
-                } else {
-                    this.onlyAllowsWeaponsDialog();
-                }
+            } else {
+                //ui.notifications.
+                console.warn(`${containerId} is an unknown equip type`)
             }
         }
     }

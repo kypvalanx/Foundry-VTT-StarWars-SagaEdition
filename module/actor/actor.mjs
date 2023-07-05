@@ -514,13 +514,13 @@ export class SWSEActor extends Actor {
 
     get installed() {
         return this.getCached("installed", () => {
-            return this.getInstalledSystems('installed');
+            return filterItemsByType(this.items.values(), "vehicleSystem").filter(item => item.system.equipped === 'installed');
         })
     }
 
     get pilotInstalled() {
         return this.getCached("pilotInstalled", () => {
-            return this.getInstalledSystems('pilotInstalled');
+            return filterItemsByType(this.items.values(), "vehicleSystem").filter(item => item.system.equipped === 'pilotInstalled');
         })
     }
 
@@ -1423,48 +1423,37 @@ export class SWSEActor extends Actor {
     getUninstalledSystems() {
         let items = filterItemsByType(this.items.values(), "vehicleSystem");
 
-        let equippedIds = (this.system.equippedIds || []).map(id => id.id);
-
-        return items.filter(item => !equippedIds.includes(item.system._id)).filter(item => !item.system.hasItemOwner);
+        return items.filter(item => !item.system.equipped);
     }
-
-    getInstalledSystems(installationType) {
-        let items = filterItemsByType(this.items.values(), "vehicleSystem");
-        let installed = [];
-        for (let item of items) {
-            let find = this.system.equippedIds?.find(e => e.id === item.system._id && e.type === installationType);
-            if (find) {
-                installed.push(item);
-            }
-        }
-        return installed;
-    }
-
     getGunnerPositions() {
         let items = filterItemsByType(this.items.values(), "vehicleSystem");
-        let gunnerSlots = this.system.equippedIds.filter(id => !!id.type && id.type.startsWith("gunnerInstalled")).map(id => parseInt(id.slot)).filter(unique)
+        let positions = items.filter(item => !!item.system.equipped).map(item => item.system.equipped).filter(unique).filter(e => e.startsWith("gunnerInstalled")).map(e => {
 
-        let positions = [];
-
-        for (let gunnerSlot of gunnerSlots) {
-            let gunnerItemReferences = this.system.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
-            let gunnerItems = []
-            for (let item of items) {
-                let find = gunnerItemReferences?.find(e => e.id === item.system._id);
-                if (find) {
-                    gunnerItems.push(item);
-                }
-            }
-
-
-            positions.push({
-                id: `gunnerInstalled${gunnerSlot}`,
-                numericId: gunnerSlot,
-                installed: gunnerItems.map(item => {
-                    return {name: item.system.name, id: item.system._id, img: item.system.img}
-                })
-            });
-        }
+            return {id: e, numericId: toNumber(e.substring(15)), installed: items.filter(item => item.system.equipped === e)}
+        });
+        // let gunnerSlots = this.system.equippedIds.filter(id => !!id.type && id.type.startsWith("gunnerInstalled")).map(id => parseInt(id.slot)).filter(unique)
+        //
+        // let positions = [];
+        //
+        // for (let gunnerSlot of gunnerSlots) {
+        //     let gunnerItemReferences = this.system.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
+        //     let gunnerItems = []
+        //     for (let item of items) {
+        //         let find = gunnerItemReferences?.find(e => e.id === item.system._id);
+        //         if (find) {
+        //             gunnerItems.push(item);
+        //         }
+        //     }
+        //
+        //
+        //     positions.push({
+        //         id: `gunnerInstalled${gunnerSlot}`,
+        //         numericId: gunnerSlot,
+        //         installed: gunnerItems.map(item => {
+        //             return {name: item.system.name, id: item.system._id, img: item.system.img}
+        //         })
+        //     });
+        // }
 
         return positions.sort((a, b) => a.numericId > b.numericId ? 1 : -1);
     }
@@ -2729,7 +2718,7 @@ export class SWSEActor extends Actor {
             if (meetsPrereqs.doesFail) {
                 await new Dialog({
                     title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for equipping ${v.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                    content: `You do not meet the prerequisites for equipping ${item.finalName}:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                     buttons: {
                         ok: {
                             icon: '<i class="fas fa-check"></i>',
@@ -2766,18 +2755,26 @@ export class SWSEActor extends Actor {
 
 
     async resolveUpdate(itemId, equipType, slot, position) {
-        let update = {};
-        update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
-            .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
-
-        await this.safeUpdate(update);
+        let item = this.items.get(itemId);
+        item.equip(equipType);
+        // let update = {};
+        // update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
+        //     .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
+        //
+        // await this.safeUpdate(update);
     }
 
     async unequipItem(itemId) {
-        let update = {};
-        update['system.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
+        let item = this.items.get(itemId);
+        item.unequip();
+        // let update = {};
+        // update['system.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
+        //
+        // await this.safeUpdate(update);
+    }
 
-        await this.safeUpdate(update);
+    getEquipTypes(){
+        return this.items.map(item => item.system.equipped).filter(unique)
     }
 
     parseSlotAndPosition(type) {

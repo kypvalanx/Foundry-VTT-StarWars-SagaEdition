@@ -89,7 +89,7 @@
                         {{#each actor.gunnerPositions as |position id|}}
                             {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true}}
                         {{/each}}
-                        <div class="subtle item-container new-gunner"
+                        <div class="subtle item-container new-gunner" data-container-id="new-gunner"
                              title="Drag a weapon emplacement here to create a new gunner position"><a><i
                                 class="fas fa-plus"></i></a>New Gunner
                         </div>

@@ -6,7 +6,7 @@
 </div>
 {{/if}}
 
-<div class="item-container panel flexcol {{container}}">
+<div class="item-container panel flexcol {{container}}" {{#if container}}data-container-id="{{container}}"{{/if}}>
     {{#if label}}
         <div class="header-row flexrow">
             <label class="resource-label">{{label}}</label>
