@@ -78,7 +78,7 @@ export function generateAttributes(actor) {
 
 
             if(attribute.total !== oldTotal){
-                data[`system.attributes.${key}.total`] = attribute.total;
+                //data[`system.attributes.${key}.total`] = attribute.total;
             }
         }
 
@@ -87,7 +87,7 @@ export function generateAttributes(actor) {
         attribute.mod = Math.floor((toNumber(attribute.total) + toNumber(attribute.customBonus) - 10) / 2);
 
         if(attribute.mod !== old){
-            data[`system.attributes.${key}.mod`] = attribute.mod;
+            //data[`system.attributes.${key}.mod`] = attribute.mod;
         }
 
         let conditionBonus = getInheritableAttribute({

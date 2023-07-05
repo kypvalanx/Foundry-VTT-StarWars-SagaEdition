@@ -3,15 +3,15 @@
     <div class="flex-col">
         <h1 class="top-label label resource-label">Hit Points</h1>
         <div class="flex-row">
-            <div class="labeled-input numeric-override" data-override="{{actor.system.health.override}}" data-override-name="Total Health" data-override-key="system.health.override">
+            <div class="labeled-input numeric-override" data-override="{{actor.health.override}}" data-override-name="Total Health" data-override-key="system.health.override">
                 <label for="maxHealth" class="text">Total</label>
                 <input class="left-input" id="maxHealth" type="text"
-                       value="{{actor.system.health.max}}" placeholder="" disabled/>
+                       value="{{actor.health.max}}" placeholder="" disabled/>
             </div>
             <div class="divider"></div>
             <div class="labeled-input">
                 <label for="currentHealth" class="text">Current</label>
-                <input class="right-input" id="currentHealth" type="number" name="system.health.value" value="{{actor.system.health.value}}" data-dtype="Number"/>
+                <input class="right-input" id="currentHealth" type="number" name="system.health.value" value="{{actor.health.value}}" data-dtype="Number"/>
             </div>
         </div>
     </div>

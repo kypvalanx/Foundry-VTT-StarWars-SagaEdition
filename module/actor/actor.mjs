@@ -360,6 +360,12 @@ export class SWSEActor extends Actor {
         })
     }
 
+    get health(){
+        return this.getCached("health", () => {
+            return resolveHealth(this);
+        });
+    }
+
 
     /**
      * Prepare Vehicle type specific data
@@ -373,7 +379,6 @@ export class SWSEActor extends Actor {
         generateAttributes(this);
         generateSkills(this);
 
-        system.health = resolveHealth(this);
         system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
         system.defense = defense;
@@ -429,7 +434,6 @@ export class SWSEActor extends Actor {
 
         this._reduceProvidedItemsByExistingItems(system);
 
-        system.health = resolveHealth(this);
         system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
         system.defense = defense;
