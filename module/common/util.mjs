@@ -1150,9 +1150,8 @@ export function equippedItems(entity) {
     if (entity.effects) {
         entities.push(...entity.effects?.filter(effect => !effect.disabled) || []);
     }
-    if (entity.system?.equippedIds && entity.items) {
-        let equippedIds = entity.system.equippedIds?.map(equipped => equipped.id) || []
-        entities.push(...entity.items?.filter(item => equippedIds.includes(item?.id || item?._id)) || []);
+    if (entity.items) {
+        entities.push(...entity.items?.filter(item => !!item.system.equipped))
     }
     return entities;
 }
