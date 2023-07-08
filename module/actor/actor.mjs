@@ -11,7 +11,6 @@ import {
     getVariableFromActorData,
     inheritableItems,
     innerJoin,
-    notEmpty, range,
     resolveExpression,
     resolveValueArray,
     resolveWeight,
@@ -544,7 +543,8 @@ export class SWSEActor extends Actor {
             id: actor.id,
             uuid: actor.uuid,
             position,
-            slot
+            slot,
+            system: this.getCachedLinkData(actor.type, position, actor)
         };
         let update = {};
         if(Array.isArray(this.actorLinks) ){
@@ -1983,6 +1983,7 @@ export class SWSEActor extends Actor {
             if (crew) {
                 let actor = game.data.actors.find(actor => actor._id === crew.id);
                 slot.id = crew.id;
+                slot.uuid = crew.uuid;
                 slot.img = actor?.img;
                 slot.name = actor?.name;
             }
@@ -2874,6 +2875,13 @@ export class SWSEActor extends Actor {
             response = true
         }
         return response;
+    }
+
+    getCachedLinkData(type, position, actor) {
+        if(["character", "npc"].includes(type)){
+            return {skills: actor.system.skills}
+        }
+        return {};
     }
 }
 

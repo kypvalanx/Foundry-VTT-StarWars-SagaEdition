@@ -1,6 +1,5 @@
 <div class="vehicle-station panel {{toHtmlClass crew.type}} swse {{#if crew.id}}draggable{{/if}}"
-     data-actor-id="{{crew.id}}" data-position="{{crew.type}}" data-slot="{{crew.slotNumber}}">
-{{log crew}}
+     data-actor-id="{{crew.id}}" data-position="{{crew.type}}" data-slot="{{crew.slotNumber}}" data-uuid="{{crew.uuid}}" data-type="Actor">
 
     {{#if crew.id}}
         <div class="crew-member-portrait"
