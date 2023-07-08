@@ -1,6 +1,6 @@
 import {
     filterItemsByType,
-    getCleanListFromCSV,
+    getCleanListFromCSV, getDocumentByUuid,
     getParentByHTMLClass,
     linkEffects,
     numericOverrideOptions,
@@ -676,55 +676,38 @@ export class SWSEActorSheet extends ActorSheet {
         event.preventDefault();
         if (!this.actor.isOwner) return false;
 
-        if (!vehicleActorTypes.includes(this.actor.data.type)) {
+        if (!vehicleActorTypes.includes(this.actor.type)) {
             return;
         }
-        let actor = getActorFromId(data.id);
-        if (!["character", "npc"].includes(actor.data.type)) {
+        let actor = getDocumentByUuid(data.uuid);
+        if (!["character", "npc"].includes(actor.type)) {
             return;
         }
         let targetItemContainer = getParentByHTMLClass(event, "vehicle-station");
 
-        if (targetItemContainer !== null) {
-            let currentPosition = crewPositions.filter(x => targetItemContainer.dataset.position === x);
-            if (currentPosition.length > 0) {
-                currentPosition = currentPosition[0];
+        if (targetItemContainer === null) {
+            return;
+        }
 
-                if (currentPosition === 'Astromech Droid') {
-                    if (actor.species.name !== 'Astromech Droid' && actor.species.name !== '2nd-Degree Droid Model') {
-                        this.onlyAllowsAstromechsDialog();
-                        return;
-                    }
-                }
+        const postion = $(targetItemContainer).data('position');
+        const slot = $(targetItemContainer).data('slot');
+        if(!postion){
+            console.error("no position associated with the activated crew slot")
+            return;
+        }
 
-                if (!this.actor.system.crew.find(crewMember => crewMember.position === currentPosition && crewMember.slot === targetItemContainer.dataset.slot)) {
-                    await this.removeCrewFromPositions(actor, actor.id, crewPositions);
-                    await this.addCrew({
-                        actor,
-                        id: actor.id,
-                        position: currentPosition,
-                        slot: targetItemContainer.dataset.slot
-                    }, event);
-                }
+        if (postion === 'Astromech Droid') {
+            if (actor.species.name !== 'Astromech Droid' && actor.species.name !== '2nd-Degree Droid Model') {
+                this.onlyAllowsAstromechsDialog();
+                return;
             }
         }
-    }
 
-    async removeCrewFromPositions(actor, actorId, positions) {
-        for (let position of positions) {
-            await this.removeCrew(actorId, position);
-        }
-    }
-
-    async removeCrew(actorId, position) {
-        let crew = getActorFromId(actorId);
-        await crew?.removeCrew(this.actor.id, position)
-        await this.actor.removeCrew(actorId, position)
-    }
-
-    async addCrew(crewMember) {
-        await this.actor.addCrew(crewMember.actor, crewMember.position, crewMember.slot)
-        await crewMember.actor.addCrew(this.actor, crewMember.position, crewMember.slot)
+                //if (!this.object.crewMembers.find(crewMember => crewMember.position === postion && crewMember.slot === slot)) {
+                    //await this.removeCrewFromPositions(actor, actor.id, crewPositions);
+        //await this.object.removeActorLink(actor)
+        await this.object.addActorLink(actor,postion, slot);
+                //}
     }
 
     async _onDropItem(ev, data) {
@@ -971,7 +954,9 @@ export class SWSEActorSheet extends ActorSheet {
 
         // Delete race
         if (a.classList.contains("crew-remove")) {
-            await this.removeCrew(a.dataset.actorId, a.dataset.position);
+            const uuid = $(a).data("uuid");
+            let actor = getDocumentByUuid(uuid);
+            await this.object.removeActorLink(actor);
         }
     }
 

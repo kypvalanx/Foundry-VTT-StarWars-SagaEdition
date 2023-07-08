@@ -1,4 +1,4 @@
-<div class="vehicle-stations-header swse">
+<div class="vehicle-stations-header swse flex-row">
     {{#each actor.crewSlots as |crew id|}}
         {{> 'systems/swse/templates/actor/vehicle/vehicle-station.hbs' id=id type=crew.type crew=crew}}
     {{/each}}

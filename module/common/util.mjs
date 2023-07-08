@@ -11,6 +11,12 @@ import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
 }
+export function notEmpty(value, index, self) {
+    return !!value;
+}
+
+export const range = (start, end, length = end - start + 1) =>
+    Array.from({ length }, (_, i) => start + i)
 
 export function resolveValueArray(values, actor, options) {
     if (!Array.isArray(values)) {
@@ -1431,6 +1437,9 @@ export function getParentByHTMLClass(ev, token) {
 }
 
 export function getDocumentByUuid(uuid) {
+    if(!uuid){
+        return;
+    }
     let toks = uuid.split(".")
     let source;
     for (let [i, tok] of toks.entries()) {

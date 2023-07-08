@@ -11,6 +11,7 @@ import {
     getVariableFromActorData,
     inheritableItems,
     innerJoin,
+    notEmpty, range,
     resolveExpression,
     resolveValueArray,
     resolveWeight,
@@ -53,12 +54,12 @@ import {SWSE} from "../common/config.mjs";
 export class SWSEActor extends Actor {
     _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
-        for (let crewMember of this.system.crew) {
-            let linkedActor = getActorFromId(crewMember.id)
-            if (!!linkedActor) {
-                linkedActor.prepareData()
-            }
-        }
+        // for (let crewMember of this.system.crew) {
+        //     let linkedActor = getActorFromId(crewMember.id)
+        //     if (!!linkedActor) {
+        //         linkedActor.prepareData()
+        //     }
+        // }
     }
 
     _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
@@ -187,59 +188,81 @@ export class SWSEActor extends Actor {
             for (let coverValue of coverValues) {
                 if (coverValue.includes(":")) {
                     let toks = coverValue.split(":");
-                    coverMap[toks[1]] = toks[0];
+                    coverMap[toks[1] || "default"] = toks[0];
                 } else {
                     coverMap["default"] = coverValue;
                 }
             }
 
-
-            crewPositions.forEach(position => {
-                let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
-                let positionCover;
-
-                if (this.system.crewCover) {
-                    positionCover = this.system.crewCover[position]
-                }
-
-                if (!positionCover) {
-                    positionCover = coverMap[position];
-                }
-                if (!positionCover) {
-                    positionCover = coverMap["default"];
-                }
-                if (position === 'Gunner') {
-                    crewSlots.push(...this.resolveGunnerSlots(crewMember, position, positionCover));
-                } else {
-                    let crewSlot = crewSlotResolution[position];
-                    if (crewSlot) {
-                        crewSlots.push(...this.resolveSlots(crewSlot(this.system.crew), crewMember, position, positionCover));
-                    }
-                }
-            });
-
-            let providedSlots = getInheritableAttribute({
+            let slots = getInheritableAttribute({
                 entity: this,
                 attributeKey: "providesSlot",
                 reduce: "VALUES"
             });
-            for (let position of providedSlots.filter(unique)) {
-                let count = providedSlots.filter(s => s === position).length
-                let positionCover;
 
-                if (this.system.crewCover) {
-                    positionCover = this.system.crewCover[position]
-                }
+            crewPositions.forEach(position => {
 
-                if (!positionCover) {
-                    positionCover = coverMap[position];
+                let count = "Gunner" === position ? this.gunnerPositions.length : crewSlotResolution[position](this.crew);
+                for(let i = 0; i < count; i++){
+                    slots.push(position)
                 }
-                if (!positionCover) {
-                    positionCover = coverMap["default"];
-                }
-                //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
-                crewSlots.push(...this.resolveSlots(count, this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover));
-            }
+            });
+
+            let slotCount = {};
+
+            slots.forEach(position => {
+                const numericSlot = slotCount[position] || 0;
+                slotCount[position] = numericSlot + 1;
+                let slotId = `${position}${numericSlot}`
+
+
+                let crewMember = this.actorLinks.find(crewMember => crewMember.position === position && crewMember.slot === numericSlot);
+
+
+                this.system.crewCover = this.system.crewCover || {}
+
+                let positionCover = this.system.crewCover[slotId] || this.system.crewCover[position] || coverMap[position] || coverMap["default"];
+
+                crewSlots.push(this.resolveSlot(crewMember, position, positionCover, numericSlot));
+            })
+
+
+            // crewPositions.forEach(position => {
+            //     let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
+            //     let positionCover;
+            //
+            //     if (this.system.crewCover) {
+            //         positionCover = this.system.crewCover[position]
+            //     }
+            //     positionCover = positionCover || coverMap[position] || coverMap["default"];
+            //
+            //     if (position === 'Gunner') {
+            //         crewSlots.push(...this.resolveSlots(crewMember, position, positionCover, this.gunnerPositions.map(gp => gp.numericId)));
+            //     } else {
+            //         let crewSlot = crewSlotResolution[position];
+            //         if (crewSlot) {
+            //             crewSlots.push(...this.resolveSlots( crewMember, position, positionCover, range(0, crewSlot(this.crew) - 1)));
+            //         }
+            //     }
+            // });
+            //
+            // for (let position of providedSlots.filter(notEmpty).filter(unique)) {
+            //     let count = providedSlots.filter(s => s === position).length
+            //     let positionCover;
+            //
+            //     if (this.system.crewCover) {
+            //         positionCover = this.system.crewCover[position]
+            //     }
+            //
+            //     if (!positionCover) {
+            //         positionCover = coverMap[position];
+            //     }
+            //     if (!positionCover) {
+            //         positionCover = coverMap["default"];
+            //     }
+            //     //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
+            //     crewSlots.push(...this.resolveSlots(this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover, count -1));
+            // }
             return crewSlots;
         })
 
@@ -480,6 +503,60 @@ export class SWSEActor extends Actor {
             })
         })
     }
+    get actorLinks() {
+        return this.getCached("actorLinks", () => {
+            return Array.isArray(this.system.actorLinks) ? this.system.actorLinks || [] : [];
+        })
+    }
+
+    /**
+     *
+     * @param actor {SWSEActor}
+     * @param context {Object}
+     */
+    async removeActorLink(actor, context = {}){
+        if(!context.skipReciprocal){
+            await actor.removeActorLink(this, {skipReciprocal:true});
+        }
+        let update = {};
+        update['system.actorLinks'] = this.actorLinks.filter(c => c.uuid !== actor.uuid)
+        if(!context.skipUpdate) {
+            await this.safeUpdate(update);
+        }
+        return update;
+    }
+
+    /**
+     *
+     * @param actor {SWSEActor}
+     * @param position {String}
+     * @param slot {Number}
+     * @param context {Object}
+     */
+    async addActorLink(actor, position, slot, context = {}){
+        if(actor.id === this.id){
+            return;
+        }
+        if(!context.skipReciprocal){
+            await actor.addActorLink(this, position, slot, {skipReciprocal:true});
+        }
+        const link = {
+            id: actor.id,
+            uuid: actor.uuid,
+            position,
+            slot
+        };
+        let update = {};
+        if(Array.isArray(this.actorLinks) ){
+            const links = this.actorLinks.filter(link => link.uuid !== actor.uuid);
+            links.push(link)
+            update['system.actorLinks'] = links;
+        } else {
+            update['system.actorLinks'] = [link];
+        }
+
+        await this.safeUpdate(update);
+    }
 
     /**
      * Prepare Computer type specific data
@@ -526,7 +603,15 @@ export class SWSEActor extends Actor {
 
     get gunnerPositions() {
         return this.getCached("gunnerPositions", () => {
-            return this.getGunnerPositions()
+            let items = filterItemsByType(this.items.values(), "vehicleSystem");
+            let positions = items.filter(item => !!item.system.equipped)
+                .map(item => item.system.equipped)
+                .filter(unique)
+                .filter(e => e.startsWith("gunnerInstalled"))
+                .map(e => {
+                    return {id: e, numericId: toNumber(e.substring(15)), installed: items.filter(item => item.system.equipped === e)};
+                });
+            return positions.sort((a, b) => a.numericId > b.numericId ? 1 : -1);
         })
     }
 
@@ -1167,33 +1252,6 @@ export class SWSEActor extends Actor {
         return response;
     }
 
-    /**
-     *
-     * @param actor {SWSEActor}
-     * @param position {string}
-     * @param slot {string}
-     */
-    async addCrew(actor, position, slot) {
-        let update = {};
-        update['data.crew'] = [{actor: actor.data, id: actor.id, position, slot}].concat(this.system.crew);
-
-        await this.safeUpdate(update);
-    }
-
-    async removeCrew(actorId, position) {
-        let update = {};
-        if (!!actorId && !!position) {
-            update['data.crew'] = this.system.crew.filter(c => c.id !== actorId || c.position !== position)
-        } else if (!!actorId) {
-
-            update['data.crew'] = this.system.crew.filter(c => c.id !== actorId)
-        } else if (!!position) {
-
-            update['data.crew'] = this.system.crew.filter(c => c.position !== position)
-        }
-
-        await this.safeUpdate(update);
-    }
 
     /**
      *
@@ -1425,40 +1483,6 @@ export class SWSEActor extends Actor {
 
         return items.filter(item => !item.system.equipped);
     }
-    getGunnerPositions() {
-        let items = filterItemsByType(this.items.values(), "vehicleSystem");
-        let positions = items.filter(item => !!item.system.equipped).map(item => item.system.equipped).filter(unique).filter(e => e.startsWith("gunnerInstalled")).map(e => {
-
-            return {id: e, numericId: toNumber(e.substring(15)), installed: items.filter(item => item.system.equipped === e)}
-        });
-        // let gunnerSlots = this.system.equippedIds.filter(id => !!id.type && id.type.startsWith("gunnerInstalled")).map(id => parseInt(id.slot)).filter(unique)
-        //
-        // let positions = [];
-        //
-        // for (let gunnerSlot of gunnerSlots) {
-        //     let gunnerItemReferences = this.system.equippedIds.filter(id => id.type.startsWith(`gunnerInstalled`) && parseInt(id.slot) === gunnerSlot)
-        //     let gunnerItems = []
-        //     for (let item of items) {
-        //         let find = gunnerItemReferences?.find(e => e.id === item.system._id);
-        //         if (find) {
-        //             gunnerItems.push(item);
-        //         }
-        //     }
-        //
-        //
-        //     positions.push({
-        //         id: `gunnerInstalled${gunnerSlot}`,
-        //         numericId: gunnerSlot,
-        //         installed: gunnerItems.map(item => {
-        //             return {name: item.system.name, id: item.system._id, img: item.system.img}
-        //         })
-        //     });
-        // }
-
-        return positions.sort((a, b) => a.numericId > b.numericId ? 1 : -1);
-    }
-
-
     getNonequippableItems() {
         return this._getUnequipableItems(SWSEActor.getInventoryItems(this.items.values())).filter(i => !i.system.hasItemOwner);
     }
@@ -1949,48 +1973,22 @@ export class SWSEActor extends Actor {
         await makeAttack(context);
     }
 
-    resolveSlots(availableSlots, crew, type, cover) {
-        let slots = [];
-        for (let i = 0; i < availableSlots; i++) {
-
-            let crewMemberInSlot = crew.find(c => c.slot === `${i}`);
-            let actor;
-            if (crewMemberInSlot) {
-                actor = game.data.actors.find(actor => actor._id === crewMemberInSlot.id);
+    resolveSlot(crew, type, cover, numericSlot) {
+            let slot = {
+                slotNumber: numericSlot,
+                type: type,
+                cover: cover,
+                slotName: type === "Gunner" ? `Gunner ${numericSlot} Slot` : `${type} Slot`
+            };
+            if (crew) {
+                let actor = game.data.actors.find(actor => actor._id === crew.id);
+                slot.id = crew.id;
+                slot.img = actor?.img;
+                slot.name = actor?.name;
             }
-            if (!!actor) {
-                slots.push({slotNumber: i, id: crewMemberInSlot.id, img: actor.img, name: actor.name, type, cover});
-            } else {
-                slots.push({slotNumber: i, type, cover});
-            }
-        }
-        return slots;
+        return slot
     }
 
-    resolveGunnerSlots(crew, type, cover) {
-        let slots = [];
-        for (let gunnerPosition of this.gunnerPositions) {
-
-            let crewMemberInSlot = crew.find(c => c.slot === `${gunnerPosition.numericId}`);
-            let actor;
-            if (crewMemberInSlot) {
-                actor = game.data.actors.find(actor => actor._id === crewMemberInSlot.id);
-            }
-            if (!!actor) {
-                slots.push({
-                    slotNumber: gunnerPosition.numericId,
-                    id: crewMemberInSlot.id,
-                    img: actor.img,
-                    name: actor.name,
-                    type,
-                    cover
-                });
-            } else {
-                slots.push({slotNumber: gunnerPosition.numericId, type, cover});
-            }
-        }
-        return slots.sort((first, second) => first.slotNumber < second.slotNumber);
-    }
 
     getAvailableItemsFromRelationships() {
         if (['vehicle', 'npc-vehicle'].includes(this.type)) {

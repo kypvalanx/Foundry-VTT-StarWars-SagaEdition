@@ -1,16 +1,22 @@
-<div class="vehicle-station {{toHtmlClass crew.type}} swse {{#if crew.id}}draggable{{/if}}"  data-actor-id="{{crew.id}}" data-position="{{crew.type}}" data-slot="{{crew.slotNumber}}">
+<div class="vehicle-station panel {{toHtmlClass crew.type}} swse {{#if crew.id}}draggable{{/if}}"
+     data-actor-id="{{crew.id}}" data-position="{{crew.type}}" data-slot="{{crew.slotNumber}}">
+{{log crew}}
+
     {{#if crew.id}}
         <div class="crew-member-portrait"
              style="background-image: url('{{crew.img}}');">
-            <div>{{crew.type}}: {{crew.name}}</div>
-            <a class="crew-control crew-remove" title="Remove Crew" data-actor-id="{{crew.id}}" data-position="{{crew.type}}"><i class="fas fa-trash"></i></a>
+            <h3 class="top-label label resource-label">{{crew.slotName}}: {{crew.name}}</h3>
+            <a class="crew-control crew-remove" title="Remove Crew" data-actor-id="{{crew.id}}" data-uuid="{{crew.uuid}}"
+               data-position="{{crew.type}}"><i class="fas fa-trash"></i></a>
         </div>
-<!--        <div class=""><img class="crew-member-portrait" src="{{crew.img}}" alt="{{crew.name}}" data-edit="img" title="{{crew.name}}"/></div>-->
-{{/if}}
-    {{#unless crew.id}}{{crew.type}} slot{{/unless}}
+        <!--        <div class=""><img class="crew-member-portrait" src="{{crew.img}}" alt="{{crew.name}}" data-edit="img" title="{{crew.name}}"/></div>-->
+    {{else}}
+        <h3 class="top-label label resource-label">{{crew.slotName}}</h3>
+    {{/if}}
 
-    <div class="crewCover"><label for="crewCover">Crew Cover
-        <select name="system.crewCover.{{crew.type}}">
+    <div class="crewCover medium labeled-input">
+        <label for="crewCover">Crew Cover</label>
+        <select id="crewCover" name="system.crewCover.{{concat crew.type crew.slotNumber}}">
             {{#select crew.cover}}
                 <option value="None">None</option>
                 <option value="+5 Cover Bonus">+5 Cover Bonus</option>
@@ -18,5 +24,5 @@
                 <option value="Total Cover">Total Cover</option>
             {{/select}}
         </select>
-    </label></div>
+    </div>
 </div>
