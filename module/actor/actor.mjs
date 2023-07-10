@@ -180,10 +180,11 @@ export class SWSEActor extends Actor {
         for(let link of this.actorLinks){
             let linkedActor = getDocumentByUuid(link.uuid);
             let reciLink = linkedActor.actorLinks.find(link => link.uuid === this.uuid)
-            let system = this.getCachedLinkData(this.type, link.position, this, reciLink.system)
 
-            if(JSON.stringify(reciLink.system) !== JSON.stringify(system)){
-                reciLink.system = system;
+            const oldLink = JSON.stringify(reciLink);
+            let system = this.getCachedLinkData(this.type, link.position, this, reciLink)
+
+            if(oldLink !== JSON.stringify(system)){
                 let actorLinks = linkedActor.actorLinks;
                 linkedActor.safeUpdate({"system.actorLinks": actorLinks});
             }
@@ -556,13 +557,12 @@ export class SWSEActor extends Actor {
         if(!context.skipReciprocal){
             await actor.addActorLink(this, position, slot, {skipReciprocal:true});
         }
-        const link = {
+        const link = this.getCachedLinkData(actor.type, position, actor, {
             id: actor.id,
             uuid: actor.uuid,
             position,
-            slot,
-            system: this.getCachedLinkData(actor.type, position, actor)
-        };
+            slot
+        })
         let update = {};
         if(Array.isArray(this.actorLinks) ){
             const links = this.actorLinks.filter(link => link.uuid !== actor.uuid);
@@ -903,6 +903,8 @@ export class SWSEActor extends Actor {
                 return this._crewman("Commander", "Copilot", "Astromech Droid");
             case "Engineer":
                 return this._crewman("Engineer", "Astromech Droid");
+            case "Astromech Droid":
+                return this._crewman("Astromech Droid");
             case "Systems Operator":
             case "SystemsOperator":
                 return this._crewman("Systems Operator", "Astromech Droid");
@@ -914,24 +916,17 @@ export class SWSEActor extends Actor {
 
     _crewman(position, backup, third) {
         let crewman = this.actorLinks.find(l => l.position === position)
-        if (!crewman) {
+        if (!crewman && (!!backup || !!third)) {
             crewman = this._crewman(backup, third);
         }
         if (!crewman) {
             crewman = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
+            if(position === "Astromech Droid" && this.system.hasAstromech && this.hasAstromechSlot){
+                crewman.system.skills['mechanics'].value = 13;
+                crewman.system.skills['use computer'].value = 13;
+            }
         }
         return crewman;
-    }
-
-    get copilot() {
-        let copilot = this.actorLinks.find(l => l.position === "Copilot")
-        if (!copilot) {
-            copilot = this.astromech;
-        }
-        if (!copilot) {
-            copilot = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-        }
-        return copilot;
     }
 
     gunner(index) {
@@ -942,55 +937,6 @@ export class SWSEActor extends Actor {
         }
 
         return actor;
-    }
-
-    get commander() {
-        let commander = this.actorLinks.find(l => l.position === "Commander")
-        if (!commander) {
-            commander = this._crewman;
-        }
-        if (!commander) {
-            commander = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-        }
-        return commander;
-    }
-
-    get systemsOperator() {
-        let systemsOperator = this.actorLinks.find(l => l.position === "Systems Operator")
-        if (!systemsOperator) {
-            systemsOperator = this.astromech;
-        }
-        if (!systemsOperator) {
-            systemsOperator = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-        }
-        return systemsOperator;
-    }
-
-    get engineer() {
-        let engineer = this.actorLinks.find(l => l.position === "Engineer")
-        if (!engineer) {
-            engineer = this.astromech;
-        }
-        if (!engineer) {
-            engineer = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-        }
-        return engineer;
-    }
-
-    get astromech() {
-        let actor = this.actorLinks.find(l => l.position === "Astromech Droid")
-        if (!actor && this.system.hasAstromech && this.hasAstromechSlot) {
-            actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-            //TODO figure out if this is consistent on different ships with droid sockets
-
-            actor.data.skills['mechanics'].value = 13;
-            actor.data.skills['use computer'].value = 13;
-        }
-        return actor;
-    }
-
-    getActor(id) {
-        return game.data.actors.find(actor => actor._id === id);
     }
 
     get age() {
@@ -2895,16 +2841,17 @@ export class SWSEActor extends Actor {
         return response;
     }
 
-    getCachedLinkData(type, position, actor, existingSystem) {
+    getCachedLinkData(type, position, actor, existingLink = {}) {
         if(["character", "npc"].includes(type)){
             let skills = {};
             for(let [key, value] of Object.entries(actor.system.skills)){
                 skills[key] = {value: value.value}
             }
-            //const skills = Object.values(actor.system.skills).map();
-            return {skills: skills}
+            existingLink.name = actor.name;
+            existingLink.system = existingLink.system || {}
+            existingLink.system.skills = skills;
         }
-        return {};
+        return existingLink;
     }
 }
 

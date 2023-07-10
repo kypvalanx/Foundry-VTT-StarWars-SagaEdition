@@ -108,7 +108,9 @@ export function generateSkills(actor) {
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
-            bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
+            if(skill.manualBonus){
+                bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
+            }
 
             if(heavyLoadAffected.includes(key)){
                 bonuses.push({value: -10, description: `Heavy Load Penalty: -10`})
@@ -215,6 +217,8 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
     } else if (key.endsWith('(engineer)')) {
         positionlessKey = key.slice(0, key.length - 10).trim()
         position = "Engineer";
+    } else {
+        return [];
     }
     crew = actor.crewman(position);
 
@@ -230,7 +234,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     applicableReRolls.push(...reRollSkills.filter(reroll => reroll.value.toLowerCase() === positionlessKey || reroll.value.toLowerCase() === "any"))
 
-    let crewSkillBonus = crew.system.skills[positionlessKey] || 0;
+    let crewSkillBonus = crew.system.skills[positionlessKey]?.value || 0;
     let bonus = {
         value: crewSkillBonus,
         description: `${position} Skill Bonus (${crew.name}): ${crewSkillBonus}`
