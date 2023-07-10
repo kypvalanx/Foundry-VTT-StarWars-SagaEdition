@@ -369,15 +369,35 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/Pilot"
+            "link": "https://swse.fandom.com/wiki/Pilot",
+            "sizeMod": true
           },
           "initiative (pilot)": {
             "value": 0,
             "attribute": "dex",
             "uut": true,
             "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Initiative"
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Initiative",
+            "sizeMod": true
+          },
+          "deception (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Starship_Deception",
+            "sizeMod": true
+          },
+          "stealth (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Stealth#Starship_Stealth",
+            "sizeMod": true
           },
           "pilot (copilot)": {
             "value": 0,

@@ -17,7 +17,7 @@ export function generateVehicleAttacks(actor) {
         equippedId => {
 
             map[equippedId.id] =
-                actor.getCrewByPosition(equippedId.position, equippedId.slot)?._id
+                actor.crewman(equippedId.position, equippedId.slot)?._id
         }
     )
 

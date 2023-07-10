@@ -100,6 +100,10 @@ export function generateSkills(actor) {
 
             bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
 
+            if(skill.sizeMod){
+                bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
+            }
+
             let miscBonuses = skillBonusAttr.filter(bonus => bonus.startsWith(dirtyKey)).map(bonus => bonus.split(":")[1]);
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
@@ -195,22 +199,24 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     let crew;
     let positionlessKey;
+    let position
     if (key.endsWith("(pilot)")) {
         positionlessKey = key.slice(0, key.length - 7).trim()
-        crew = actor.pilot;
+        position = "Pilot";
     } else if (key.endsWith('(copilot)')) {
         positionlessKey = key.slice(0, key.length - 9).trim()
-        crew = actor.copilot;
+        position = "Copilot";
     } else if (key.endsWith('(commander)')) {
         positionlessKey = key.slice(0, key.length - 11).trim()
-        crew = actor.commander;
+        position = "Commander";
     } else if (key.endsWith('(system operator)')) {
         positionlessKey = key.slice(0, key.length - 17).trim()
-        crew = actor.systemsOperator;
+        position = "Systems Operator";
     } else if (key.endsWith('(engineer)')) {
         positionlessKey = key.slice(0, key.length - 10).trim()
-        crew = actor.systemsOperator;
+        position = "Engineer";
     }
+    crew = actor.crewman(position);
 
     if (!crew) {
         return [];
@@ -224,72 +230,11 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
 
     applicableReRolls.push(...reRollSkills.filter(reroll => reroll.value.toLowerCase() === positionlessKey || reroll.value.toLowerCase() === "any"))
 
-    if (key === "pilot (pilot)") {
-        let pilotSkillBonus = crew.system.skills.pilot?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Pilot Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-        bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
+    let crewSkillBonus = crew.system.skills[positionlessKey] || 0;
+    let bonus = {
+        value: crewSkillBonus,
+        description: `${position} Skill Bonus (${crew.name}): ${crewSkillBonus}`
     }
-    if (key === "initiative (pilot)") {
-
-        let pilotSkillBonus = Math.max(crew.system.skills.pilot?.value || 0, crew.system.skills.initiative?.value || 0);
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Pilot Initiative Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-        bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
-    }
-    if (key === "pilot (copilot)") {
-        let pilotSkillBonus = crew.system.skills.pilot?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Copilot Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
-    if (key === "use computer (commander)") {
-        let pilotSkillBonus = crew.system.skills['use computer']?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Commander Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
-    if (key === "knowledge (tactics) (commander)") {
-        let pilotSkillBonus = crew.system.skills['knowledge (tactics)']?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Commander Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
-
-
-    if (key === "use computer (system operator)") {
-        let pilotSkillBonus = crew.system.skills['use computer']?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Systems Operator Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
-    if (key === "mechanics (system operator)") {
-        let pilotSkillBonus = crew.system.skills.mechanics?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Systems Operator Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
-    if (key === "mechanics (engineer)") {
-        let pilotSkillBonus = crew.system.skills.mechanics?.value || 0;
-        bonuses.push({
-            value: pilotSkillBonus,
-            description: `Engineer Skill Bonus (${crew.name}): ${pilotSkillBonus}`
-        })
-
-    }
+    bonuses.push(bonus);
     return bonuses;
 }

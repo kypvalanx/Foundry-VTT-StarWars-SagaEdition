@@ -368,7 +368,7 @@ export class SWSEActor extends Actor {
 
     get grapple() {
         return this.getCached("grapple", () => {
-            return resolveValueArray([this.pilot.system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
+            return resolveValueArray([this.crewman("Pilot").system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
                 entity: this,
                 attributeKey: "grappleSizeModifier",
                 reduce: "SUM"
@@ -893,38 +893,38 @@ export class SWSEActor extends Actor {
         }
     }
 
-    getCrewByPosition(position, slot) {
+    crewman(position, slot) {
         switch (position.titleCase()) {
             case "Pilot":
-                return this.pilot;
+                return this._crewman("Pilot", "Astromech Droid");
             case "Copilot":
-                return this.copilot;
+                return this._crewman("Copilot", "Astromech Droid");
             case "Commander":
-                return this.commander;
+                return this._crewman("Commander", "Copilot", "Astromech Droid");
             case "Engineer":
-                return this.engineer
+                return this._crewman("Engineer", "Astromech Droid");
             case "Systems Operator":
             case "SystemsOperator":
-                return this.systemsOperator
+                return this._crewman("Systems Operator", "Astromech Droid");
             case "Gunner":
                 return this.gunner(slot)
         }
         return SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
     }
 
-    get pilot() {
-        let pilot = this.getActor(this.system.crew.find(c => c.position === 'Pilot')?.id);
-        if (!pilot) {
-            pilot = this.astromech;
+    _crewman(position, backup, third) {
+        let crewman = this.actorLinks.find(l => l.position === position)
+        if (!crewman) {
+            crewman = this._crewman(backup, third);
         }
-        if (!pilot) {
-            pilot = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
+        if (!crewman) {
+            crewman = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
         }
-        return pilot;
+        return crewman;
     }
 
     get copilot() {
-        let copilot = this.getActor(this.system.crew.find(c => c.position === 'Copilot')?.id);
+        let copilot = this.actorLinks.find(l => l.position === "Copilot")
         if (!copilot) {
             copilot = this.astromech;
         }
@@ -935,7 +935,7 @@ export class SWSEActor extends Actor {
     }
 
     gunner(index) {
-        let actor = this.getActor(this.system.crew.find(c => c.position === 'Gunner' && c.slot === (index || 0))?.id);
+        let actor = this.actorLinks.find(c => c.position === 'Gunner' && c.slot === (index || 0))
 
         if (!actor) {
             actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
@@ -945,9 +945,9 @@ export class SWSEActor extends Actor {
     }
 
     get commander() {
-        let commander = this.getActor(this.system.crew.find(c => c.position === 'Commander')?.id);
+        let commander = this.actorLinks.find(l => l.position === "Commander")
         if (!commander) {
-            commander = this.pilot;
+            commander = this._crewman;
         }
         if (!commander) {
             commander = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
@@ -956,7 +956,7 @@ export class SWSEActor extends Actor {
     }
 
     get systemsOperator() {
-        let systemsOperator = this.getActor(this.system.crew.find(c => c.position === 'Systems Operator')?.id);
+        let systemsOperator = this.actorLinks.find(l => l.position === "Systems Operator")
         if (!systemsOperator) {
             systemsOperator = this.astromech;
         }
@@ -967,7 +967,7 @@ export class SWSEActor extends Actor {
     }
 
     get engineer() {
-        let engineer = this.getActor(this.system.crew.find(c => c.position === 'Engineer')?.id);
+        let engineer = this.actorLinks.find(l => l.position === "Engineer")
         if (!engineer) {
             engineer = this.astromech;
         }
@@ -978,7 +978,7 @@ export class SWSEActor extends Actor {
     }
 
     get astromech() {
-        let actor = this.getActor(this.system.crew.find(c => c.position === 'Astromech Droid')?.id);
+        let actor = this.actorLinks.find(l => l.position === "Astromech Droid")
         if (!actor && this.system.hasAstromech && this.hasAstromechSlot) {
             actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
             //TODO figure out if this is consistent on different ships with droid sockets
