@@ -7,6 +7,7 @@ import {
     convertOverrideToMode,
     excludeItemsByType,
     filterItemsByType,
+    getDocumentByUuid,
     getIndexAndPack,
     getVariableFromActorData,
     inheritableItems,
@@ -53,6 +54,7 @@ import {SWSE} from "../common/config.mjs";
 export class SWSEActor extends Actor {
     _onUpdate(data, options, userId) {
         super._onUpdate(data, options, userId);
+
         // for (let crewMember of this.system.crew) {
         //     let linkedActor = getActorFromId(crewMember.id)
         //     if (!!linkedActor) {
@@ -76,6 +78,9 @@ export class SWSEActor extends Actor {
     }
 
     getCached(key, fn) {
+        if(!this.cache){
+            return fn();
+        }
         return this.cache.getCached(key, fn)
     }
 
@@ -171,6 +176,18 @@ export class SWSEActor extends Actor {
         if (this.type === 'computer') this._prepareComputerData(system);
         if (this.type === 'vehicle') this._prepareVehicleData(system);
         if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
+
+        for(let link of this.actorLinks){
+            let linkedActor = getDocumentByUuid(link.uuid);
+            let reciLink = linkedActor.actorLinks.find(link => link.uuid === this.uuid)
+            let system = this.getCachedLinkData(this.type, link.position, this, reciLink.system)
+
+            if(JSON.stringify(reciLink.system) !== JSON.stringify(system)){
+                reciLink.system = system;
+                let actorLinks = linkedActor.actorLinks;
+                linkedActor.safeUpdate({"system.actorLinks": actorLinks});
+            }
+        }
     }
 
     get crewSlots() {
@@ -1535,6 +1552,7 @@ export class SWSEActor extends Actor {
      * @returns {*}
      */
     getAttributeMod(ability) {
+        if(!ability) return;
         return this.system.attributes[ability.toLowerCase()].mod;
     }
 
@@ -2877,9 +2895,14 @@ export class SWSEActor extends Actor {
         return response;
     }
 
-    getCachedLinkData(type, position, actor) {
+    getCachedLinkData(type, position, actor, existingSystem) {
         if(["character", "npc"].includes(type)){
-            return {skills: actor.system.skills}
+            let skills = {};
+            for(let [key, value] of Object.entries(actor.system.skills)){
+                skills[key] = {value: value.value}
+            }
+            //const skills = Object.values(actor.system.skills).map();
+            return {skills: skills}
         }
         return {};
     }
