@@ -889,11 +889,17 @@ export class SWSEActor extends Actor {
                 skills: resolvedSkills
             },
             items: [],
-            name: quality
+            name: quality,
+            id: quality
         }
     }
 
     crewman(position, slot) {
+
+        if(position.startsWith("Gunner") && position !== "Gunner"){
+            slot = toNumber(position.slice(6, position.length))
+            position = "Gunner"
+        }
         switch (position.titleCase()) {
             case "Pilot":
                 return this._crewman("Pilot", "Astromech Droid");
@@ -1059,7 +1065,7 @@ export class SWSEActor extends Actor {
 
     getInstalledWeapons() {
         let items = this.items;
-        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), ["pilotInstalled", "copilotInstalled", "gunnerInstalled"])
+        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()))
     }
 
     resolveFeats() {
@@ -1422,23 +1428,18 @@ export class SWSEActor extends Actor {
 
 
     static _getEquippedItems(system, items, equipTypes) {
+        if(!equipTypes){
+            return items.filter(item => !item.system.equipped);
+        }
         equipTypes = Array.isArray(equipTypes) ? equipTypes : [equipTypes];
 
-        let equippedIds = system.equippedIds || [];
-        if (equipTypes.length > 0) {
-            equippedIds = equippedIds.filter(id => equipTypes.includes(id.type))
-        }
-        equippedIds = equippedIds.map(id => id.id);
-
-        return items.filter(item => equippedIds.includes(item._id))
+        return items.filter(item => equipTypes.includes(item.system.equipped));
     }
 
     getUnequippedItems() {
         let items = this._getEquipable(SWSEActor.getInventoryItems(this.items.values()));
 
-        let equippedIds = (this.system.equippedIds || []).map(id => id.id);
-
-        return items.filter(item => !equippedIds.includes(item._id))
+        return items.filter(item => !item.system.equipped);
     }
 
     getUninstalledSystems() {

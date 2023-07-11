@@ -6,25 +6,43 @@ import {compareSizes} from "./size.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 
+function getCrewPosition(equipmentSlot) {
+
+    if(equipmentSlot === "pilotInstalled"){
+        return "Pilot";
+    } else if(equipmentSlot.startsWith("gunnerInstalled")){
+        return equipmentSlot.replace("gunnerInstalled", "Gunner")
+    } else {
+        console.log(equipmentSlot)
+    }
+    return undefined;
+};
+
 /**
  *
  * @param {SWSEActor} actor
  * @returns {Promise<void>}
  */
 export function generateVehicleAttacks(actor) {
-    let map = {}
-    actor.system.equippedIds.forEach(
-        equippedId => {
-
-            map[equippedId.id] =
-                actor.crewman(equippedId.position, equippedId.slot)?._id
-        }
-    )
+    //let map = {}
+    // actor.actorLinks.forEach(
+    //     actorLink => {
+    //
+    //     }
+    // )
+    // actor.getInstalledWeapons()
+    // actor.system.equippedIds.forEach(
+    //     equippedId => {
+    //
+    //         map[equippedId.id] =
+    //             actor.crewman(equippedId.position, equippedId.slot)?._id
+    //     }
+    // )
 
     let attacks = [];
     attacks.push(...actor.getAvailableItemsFromRelationships()
-        .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems')
-        .map(weapon =>  new Attack(map[weapon._id], weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items})));
+        .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && item.system.equipped)
+        .map(weapon =>  new Attack(actor.crewman(getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items})));
         //.map(weapon => generateAttackFromShipWeapon(weapon, map[weapon._id])));
     return attacks;
 }
