@@ -394,13 +394,18 @@
   width: fit-content;
 }
 
-.swse input[type=text], .swse input[type=number] {
-  padding: 11px 10px;
-  font-size: 0.75rem;
+.swse input[type=text], .swse input[type=number], .swse select {
+  padding: 14px 6px;
+  font-size: 1.25rem;
   border: 2px var(--color-foreground) solid;
   border-radius: 10px;
   color: var(--color-text-dark-primary);
   background: var(--color-background);
+}
+
+.swse select {
+  padding: 3px 6px;
+  height: 32px;
 }
 
 .swse input[type=text].left-input, .swse input[type=number].left-input {

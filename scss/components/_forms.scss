@@ -126,13 +126,17 @@
   width: fit-content;
 }
 
-input[type=text], input[type=number] {
-  padding: 11px 10px;
-  font-size: 0.75rem;
+input[type=text], input[type=number], select {
+  padding: 14px 6px;
+  font-size: 1.25rem;
   border: 2px var(--color-foreground) solid;
   border-radius: 10px;
   color: var(--color-text-dark-primary);
   background: var(--color-background);
+}
+select {
+  padding: 3px 6px;
+  height: 32px;
 }
 
 
