@@ -1,28 +1,50 @@
 {{!-- Defense Block --}}
-<div class="collapsible-container">
-    <div class="defense">
-        <div class="defense-label plain input static flex flex-row">
-            <div>{{toTitleCase def.name}}</div>
-            {{#if def.defenseModifiers}}
-                <div class="toggle flex-float-right" data-toggle-id="{{def.name}}-defense-modifier-toggle"><h3
-                        class="plain input"><a data-action="hide"><i
-                        class="fas {{#if (lookup toggles (concat def.name "-defense-modifier-toggle"))}}fa-minus{{else}}fa-plus{{/if}}"></i></a></h3></div>
-            {{/if}}
-        </div>
-        <div class="defense-total numeric-override" data-override="{{def.override}}" data-override-name="{{def.name}}" data-override-key="system.defense.{{toLowercase def.name}}.override"><h2><div class="plain input">{{def.total}}</div></h2></div>
-
-<!--        <div class="defense-total plain input static"><h2>{{def.total}}</h2></div>-->
-        <div class="defense-10 plain input static">10</div>
-        <div class="defense-level-armor plain input static">{{def.armorBonus}}</div>
-        <div class="defense-ability plain input static">{{def.abilityBonus}}</div>
-        <div class="defense-class plain input static">{{def.classBonus}}</div>
-        <div class="defense-misc plain input static" title="{{def.miscBonusTip}}">{{def.miscBonus}}</div>
-    </div>
-    <div class="collapsible" style="display: {{#if (lookup toggles (concat def.name "-defense-modifier-toggle"))}}grid{{else}}none{{/if}}">
+<div class="defense flex-row">
+    <div class="large labeled-input">
+        <input class="input" type="text" value="{{toTitleCase def.name}}"
+               placeholder="" disabled/>
         {{#if def.defenseModifiers}}
-            {{#each def.defenseModifiers as |defenseModifier id|}}
-                {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=defenseModifier}}
-            {{/each}}
+            <div class="toggle" data-toggle-id="{{def.name}}-defense-modifier-toggle">
+                <a>
+                    <i class="fas {{#if (lookup toggles (concat def.name "-defense-modifier-toggle"))}}fa-minus{{else}}fa-plus{{/if}}"></i>
+                </a>
+            </div>
         {{/if}}
     </div>
+
+
+    <div class="large labeled-input numeric-override" data-override="{{def.override}}" data-override-name="{{def.name}}"
+         data-override-key="system.defense.{{toLowercase def.name}}.override">
+        <input class="input" type="text" value="{{def.total}}"
+               placeholder="" name="system.attributes.{{id}}.manual" disabled/>
+    </div>
+
+
+    <div class="large labeled-input">
+        <input class="input" type="text" value="10"
+               placeholder="" disabled/>
+    </div>
+    <div class="large labeled-input">
+        <input class="input" type="text" value="{{def.armorBonus}}"
+               placeholder="" disabled/>
+    </div>
+    <div class="large labeled-input">
+        <input class="input" type="text" value="{{def.abilityBonus}}"
+               placeholder="" disabled/>
+    </div>
+    <div class="large labeled-input">
+        <input class="input" type="text" value="{{def.classBonus}}"
+               placeholder="" disabled/>
+    </div>
+    <div class="large labeled-input" title="{{def.miscBonusTip}}">
+        <input class="input" type="text" value="{{def.miscBonus}}"
+               placeholder="" disabled/>
+    </div>
+</div>
+<div style="display: {{#if (lookup toggles (concat def.name "-defense-modifier-toggle"))}}grid{{else}}none{{/if}}">
+    {{#if def.defenseModifiers}}
+        {{#each def.defenseModifiers as |defenseModifier id|}}
+            {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=defenseModifier}}
+        {{/each}}
+    {{/if}}
 </div>

@@ -94,6 +94,11 @@
   flex-basis: 300px;
   flex-grow: 8;
 }
+
+.huge {
+  flex-basis: 600px;
+  flex-grow: 16;
+}
 .label{
   color: var(--color-foreground);
   font-weight: 700;
@@ -105,12 +110,24 @@
   font-weight: 700;
   color: var(--color-foreground);
 }
+.medium-header{
+  font-size: 1rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-foreground);
+}
+.large-header{
+  font-size: 1.25rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-foreground);
+}
 
 .labeled-input {
   display: flex;
   flex-direction: column;
   width: fit-content;
-  position: static;
+  position: relative;
   flex-grow: 1;
 }
 
@@ -124,6 +141,20 @@
   padding: 0 3px;
   background: var(--color-background);
   width: fit-content;
+}
+
+.labeled-input .toggle{
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 18px;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+.labeled-input .toggle :hover{
+  text-shadow: 0 0 10px var(--color-shadow-primary);
+  cursor: pointer;
 }
 
 input[type=text], input[type=number], select {
