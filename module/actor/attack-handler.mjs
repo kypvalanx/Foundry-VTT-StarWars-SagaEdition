@@ -21,43 +21,13 @@ function getCrewPosition(equipmentSlot) {
 /**
  *
  * @param {SWSEActor} actor
- * @returns {Promise<void>}
+ * @returns {Attack[]}
  */
 export function generateVehicleAttacks(actor) {
-    //let map = {}
-    // actor.actorLinks.forEach(
-    //     actorLink => {
-    //
-    //     }
-    // )
-    // actor.getInstalledWeapons()
-    // actor.system.equippedIds.forEach(
-    //     equippedId => {
-    //
-    //         map[equippedId.id] =
-    //             actor.crewman(equippedId.position, equippedId.slot)?._id
-    //     }
-    // )
-
-    let attacks = [];
-    attacks.push(...actor.getAvailableItemsFromRelationships()
+    return actor.getAvailableItemsFromRelationships()
         .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && item.system.equipped)
-        .map(weapon =>  new Attack(actor.crewman(getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items})));
-        //.map(weapon => generateAttackFromShipWeapon(weapon, map[weapon._id])));
-    return attacks;
+        .map(weapon =>  new Attack(actor.crewman(getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items}));
 }
-
-
-// let attacks = [];
-// attacks.push(generateUnarmedAttack(actor));
-// attacks.push(...actor.getEquippedItems()
-//     .filter(item => item.type === 'weapon')
-//     .map(weapon => generateAttackFromWeapon(weapon, actor)));
-// attacks.push(...actor.getAvailableItemsFromRelationships()
-//     .filter(item => item.data.subtype.toLowerCase() === 'weapon systems')
-//     .map(weapon => generateAttackFromShipWeapon(weapon, actor.data)))
-// // attacks.push(...actor.getAvailableItemsFromRelationships().filter(item => item.type === "vehicleSystem"))
-// return attacks;
 
 /**
  *
