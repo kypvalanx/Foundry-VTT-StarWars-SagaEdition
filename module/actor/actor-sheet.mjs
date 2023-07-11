@@ -88,6 +88,16 @@ export class SWSEActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
+        //disable submit on enter
+        $(document).ready(function() {
+            $(window).keydown(function(event){
+                if(event.keyCode === 13) {
+                    event.preventDefault();
+                    return false;
+                }
+            });
+        });
+
         html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
 
         // Everything below here is only needed if the sheet is editable
@@ -291,6 +301,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _onShield(event) {
+        event.stopPropagation();
         const type = $(event.currentTarget).data("action-type");
         switch (type) {
             case 'plus':
