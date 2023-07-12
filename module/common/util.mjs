@@ -703,7 +703,7 @@ export function getRangeModifierBlock(range, accurate, innacurate, id, defaultVa
 const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE, 6];
 
 const quantityPattern = new RegExp('(.+):(.+)');
-const diePattern = new RegExp('(\\d+)d(\\d+)');
+const diePattern = new RegExp('(\\d+)d(\\d+)x?(\\d?)');
 
 function resolveValue(a) {
     if(a === undefined){
@@ -720,61 +720,68 @@ function resolveValue(a) {
     // if(typeof a === 'number'){
     //     return [{value:a}]
     // }
-    if (typeof a === 'string') {
-        const toks = a.replace(/-/g, " - ").replace(/\+/g, " + ").split(" ")
-
-        let results = [];
-
-        let negMult = 1;
-        for (const tok of toks) {
-            if('-' === tok){
-                negMult = -1;
-                continue;
-            }
-            if('+' === tok){
-                continue;
-            }
-            if (quantityPattern.test(tok)) {
-                let result = quantityPattern.exec(tok);
-                let resolved = resolveValue(result[2])
-                resolved.forEach(res => res.item = result[1])
-                results.push(...resolved)
-                negMult = 1
-            } else if (diePattern.test(tok)) {
-                let result = diePattern.exec(tok);
-                results.push({value: negMult*toNumber(result[1]), sides: toNumber(result[2])})
-                negMult = 1
-            } else {
-                const num = toNumber(tok);
-                if(typeof num === 'number'){
-                    results.push({value: negMult*num})
-                } else {
-                    results.push({value:num})
-                }
-                negMult = 1
-            }
-        }
-        return results;
+    if (typeof a !== 'string') {
+        return [{value: a}]
     }
-    return [{value: a}]
+    const toks = a.replace(/-/g, " - ").replace(/\+/g, " + ").split(" ")
+
+    let results = [];
+
+    let negMult = 1;
+    for (const tok of toks) {
+        if('-' === tok){
+            negMult = -1;
+            continue;
+        }
+        if('+' === tok || "" === tok){
+            continue;
+        }
+        if (quantityPattern.test(tok)) {
+            let result = quantityPattern.exec(tok);
+            let resolved = resolveValue(result[2])
+            resolved.forEach(res => res.item = result[1])
+            results.push(...resolved)
+            negMult = 1
+        } else if (diePattern.test(tok)) {
+            let result = diePattern.exec(tok);
+            const multiplier = !!result[3] ? toNumber(result[3]) : undefined;
+            const items = {value: negMult*toNumber(result[1]), sides: toNumber(result[2])};
+            if(multiplier){
+                items.multiplier = multiplier
+            }
+            results.push(items)
+            negMult = 1
+        } else {
+            const num = toNumber(tok);
+            if(typeof num === 'number'){
+                results.push({value: negMult*num})
+            } else {
+                results.push({value:num})
+            }
+            negMult = 1
+        }
+    }
+    return results;
 }
 
 function addValues(a, b) {
     let terms = resolveValue(a);
     terms.push(...resolveValue(b));
 
-    let summedTerms = {};
+    let summedTerms = [];
     for (const term of terms) {
         const groupId = term.item || "default"
         const i = typeof term.value === 'string' && term.value.startsWith("@") ? -1 : term.sides || 0;
+        const j = term.multiplier || 0;
         summedTerms[groupId] = summedTerms[groupId] || [];
         let group = summedTerms[groupId];
+        group[i] = group[i] || [];
 
-        let sum = group[i] || (typeof term.value === "number" ? 0 : "");
+        let sum = group[i][j] || (typeof term.value === "number" ? 0 : "");
         if(typeof sum === 'string' && sum.length > 0 && term.value.startsWith("@")){
             sum += " + "
         }
-        group[i] = sum + term.value;
+        group[i][j] = sum + term.value;
     }
 
     let singleResponse = true;
@@ -785,21 +792,31 @@ function addValues(a, b) {
             singleResponse = false;
         }
         const currentTerm = summedTerm[1];
-        let response = currentTerm.length ===1 && typeof currentTerm[0] === 'number'? 0 : "";
+        let response = currentTerm.length ===1 && typeof currentTerm[0][0] === 'number'? 0 : "";
 
         for(let i = currentTerm.length-1; i>-2; i--){
             if(!currentTerm[i]){
                 continue;
             }
-            if(i < currentTerm.length-1){
-                response += " + "
-            }
-            response+=currentTerm[i];
-            if( i>0){
-                response += `d${i}`;
-            }
-            if(summedTerm[0] !== 'default'){
-                response = summedTerm[0] + ":" + response;
+
+
+            for(let j = currentTerm[i].length-1; j > -1; j--){
+                if(!currentTerm[i][j]){
+                    continue;
+                }
+                if(!(typeof currentTerm[i][j] === "number" && typeof response === "number") && !!response){
+                    response += " + "
+                }
+                response+=currentTerm[i][j];
+                if( i>0){
+                    response += `d${i}`;
+                }
+                if( j>0){
+                    response += `x${j}`;
+                }
+                if(summedTerm[0] !== 'default'){
+                    response = summedTerm[0] + ":" + response;
+                }
             }
         }
 
@@ -821,36 +838,69 @@ function multiplyValues(currentValue, multiplier) {
 
     let summedTerms = [];
     for (const term of terms) {
-        const i = term.sides || 0;
-        let sum = summedTerms[i] || (typeof term.value === "number" ? 0 : "");
-        if(typeof sum === 'string' && sum !== ""){
+        const groupId = term.item || "default"
+        const i = typeof term.value === 'string' && term.value.startsWith("@") ? -1 : term.sides || 0;
+        const j = term.multiplier || 0;
+        summedTerms[groupId] = summedTerms[groupId] || [];
+        let group = summedTerms[groupId];
+        group[i] = group[i] || [];
 
-            summedTerms[i] = sum + " " + term.value;
-        } else {
-            summedTerms[i] = sum + term.value;
+        let sum = group[i][j] || (typeof term.value === "number" ? 0 : "");
+        if(typeof sum === 'string' && sum.length > 0 && term.value.startsWith("@")){
+            sum += " + "
+        }
+        group[i][j] = sum + term.value;
+    }
+
+    let singleResponse = true;
+    let responses = [];
+
+    for(let summedTerm of Object.entries(summedTerms)){
+        if(summedTerm[0] !== 'default'){
+            singleResponse = false;
+        }
+        const currentTerm = summedTerm[1];
+        let response = currentTerm.length ===1 && typeof currentTerm[0][0] === 'number'? 0 : "";
+
+        for(let i = currentTerm.length-1; i>-2; i--){
+            if(!currentTerm[i]){
+                continue;
+            }
+            if(i < currentTerm.length-1){
+                response += " + "
+            }
+
+            for(let j = currentTerm[i].length-1; j > -1; j--){
+                if(!currentTerm[i][j]){
+                    continue;
+                }
+                if(typeof currentTerm[i][j] === 'number' && typeof multiplier === 'number'){
+                    response+=currentTerm[i][j] * multiplier;
+                } else {
+                    response+=currentTerm[i][j];
+                }
+                if( i>0){
+                    response += `d${i}`;
+                }
+                if( j>0){
+                    response += `x${j}`;
+                }
+                if(summedTerm[0] !== 'default'){
+                    response = summedTerm[0] + ":" + response;
+                }
+            }
+        }
+
+        if(response){
+            responses.push(response)
         }
     }
 
-    let response = summedTerms.length ===1 && typeof summedTerms[0] === 'number'? 0 : "";
 
-    for(let i = summedTerms.length-1; i>-1; i--){
-        if(!summedTerms[i]){
-            continue;
-        }
-        if(i < summedTerms.length-1){
-            response += " + "
-        }
-        if(typeof summedTerms[i] === 'number' && typeof multiplier === 'number'){
-            response+=summedTerms[i] * multiplier;
-        } else {
-            response+=summedTerms[i];
-        }
-        if( i>0){
-            response += `d${i}`;
-        }
+    if(singleResponse){
+        return responses[0];
     }
-
-    return response;
+    return responses;
 }
 
 function reduceValue(terms) {
@@ -1245,15 +1295,20 @@ function test() {
     assertEquals("2d6", addValues("1d6", "1d6"))
     assertEquals("1d6 + 4", addValues(4, "1d6"))
     assertEquals("1d6 + 2", addValues("1d6", 2))
+    assertEquals("7d10x2 + 4", addValues(4, "7d10x2"))
+    assertEquals("14d10x2", addValues("7d10x2", "7d10x2"))
 
     assertEquals(2, multiplyValues(1, 2))
     assertEquals("2d6", multiplyValues("1d6", 2))
     assertEquals("4d8 + 2d6", multiplyValues("1d6 + 2d8", 2))
+    assertEquals("14d10x2", multiplyValues("7d10x2", 2))
     assertEquals("HELLO WORLD", multiplyValues("HELLO WORLD", 2))
 
 
     assertEquals(0, resolveExpressionReduce([], {}))
     assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
+    assertEquals("7d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}], {}))
+    assertEquals("14d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}, {value: "7d10x2", mode: ADD}], {}))
     assertEquals("5 + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
     assertEquals("5 + @WISMOD + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
     assertEquals(0, resolveExpressionReduce([{value: 5, mode: MULTIPLY}], {}))
