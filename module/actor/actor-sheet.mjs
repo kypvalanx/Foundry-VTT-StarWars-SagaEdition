@@ -115,6 +115,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
+        html.find("input[type=number].direct").on("change", changeText.bind(this));
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
@@ -396,7 +397,6 @@ export class SWSEActorSheet extends ActorSheet {
         await Dialog.prompt(options);
     }
 
-
     buildAgeDialog(sheet) {
         let age = sheet.actor.system.age ? parseInt(sheet.actor.system.age) : 0;
         let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
@@ -405,7 +405,7 @@ export class SWSEActorSheet extends ActorSheet {
                 let prereq = this._prerequisiteHasTypeInStructure(trait.system.prerequisite, 'AGE')
                 if (prereq) {
                     return {
-                        name: trait.data.finalName,
+                        name: trait.name,
                         low: parseInt(prereq.low),
                         high: prereq.high ? parseInt(prereq.high) : -1,
                         text: prereq.text

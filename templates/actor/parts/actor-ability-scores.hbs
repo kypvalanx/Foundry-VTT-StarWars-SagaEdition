@@ -15,12 +15,12 @@
                 </div>
                 <div class="small labeled-input">
                     <input class="input" type="text" value="{{attribute.total}}"
-                           placeholder=""  name="system.attributes.{{id}}.manual"
+                           placeholder="0"  name="system.attributes.{{id}}.manual"
                            {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}}disabled{{/unlessEquals}}/>
                 </div>
                 <div class="small labeled-input">
                     <input class="input" type="text" value="{{attribute.customBonus}}"
-                           placeholder="" disabled/>
+                           placeholder="" name="system.attributes.{{id}}.customBonus"/>
                 </div>
                 <div class="small labeled-input">
                     <input class="input" type="text" value="{{attribute.roll}}"
