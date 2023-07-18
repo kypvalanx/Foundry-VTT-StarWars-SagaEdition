@@ -8,6 +8,7 @@
             <a class="item" data-tab="cargo">Cargo</a>
             <a class="item" data-tab="traits">Traits</a>
             <a class="item" data-tab="notes">Notes</a>
+            <a class="item" data-tab="settings">Settings</a>
         </nav>
 
         {{!-- Sheet Body --}}
@@ -17,7 +18,7 @@
                 <div class="flex flex-row">
                     <div class="flex flex-col">
                         <!--attributes-->
-                        {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}
+                        {{> 'systems/swse/templates/actor/vehicle/vehicle-crew.hbs'}}
                         {{> 'systems/swse/templates/actor/parts/actor-ability-scores.hbs'}}
                         {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
                     </div>
@@ -64,6 +65,15 @@
             {{!-- Biography Tab --}}
             <div class="tab biography" data-group="primary" data-tab="notes">
                 {{editor actor.system.biography target="biography" button=true owner=owner editable=editable}}
+            </div>
+
+
+            <div class="tab settings" data-group="primary" data-tab="settings">
+                <div class="flexcol">
+                    {{#each actor.system.settings as |setting id|}}
+                        {{> 'systems/swse/templates/settings/setting.hbs' setting=setting id=id}}
+                    {{/each}}
+                </div>
             </div>
 
 

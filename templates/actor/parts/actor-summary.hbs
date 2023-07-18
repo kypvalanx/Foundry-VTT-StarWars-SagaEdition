@@ -28,20 +28,20 @@
                disabled/>
     </div>
 
-    <div class="large labeled-input item" {{#if actor.species}}data-action="species"
+    <div class="large labeled-input item" {{#if actor.species}}
          data-item-id="{{actor.species.id}}" {{else}}data-action="compendium" data-type="Item"
          data-filter="-type:species"{{/if}}>
-        <label for="classSummary" class="text">Species</label>
-        <input class="input" id="classSummary" type="text"
+        <label for="species" class="text">Species</label>
+        <input class="input" id="species" type="text"
                value="{{#if actor.species}}{{actor.species.name}}{{else}}Add Species{{/if}}" placeholder="" disabled/>
         {{#if actor.species}}
             <div class="control-2">
-                <a class="" data-action="species" data-action-type="edit" data-item-id="{{actor.species.id}}"
+                <a class="" data-action="view" data-item-id="{{actor.species.id}}"
                    title="view item"><i
                         class="fas fa-eye"></i></a>
             </div>
             <div class="control-1">
-                <a class="" data-action="species" data-action-type="delete" data-item-id="{{actor.species.id}}"
+                <a class="" data-action="delete" data-item-id="{{actor.species.id}}"
                    title="delete item"><i
                         class="fas fa-trash"></i></a>
             </div>

@@ -135,9 +135,6 @@ export class SWSEActorSheet extends ActorSheet {
             this._pendingUpdates['data.classesfirst'] = event.target.value;
         });
 
-        // Species controls
-        //html.find(".species-control").click(this._onSpeciesControl.bind(this));
-        html.find('[data-action="species"]').click(this._onSpeciesControl.bind(this));
         // crew controls
         html.find(".crew-control").click(this._onCrewControl.bind(this));
 
@@ -935,32 +932,6 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
     }
-
-
-    async _onSpeciesControl(event) {
-        event.preventDefault();
-        const a = $(event.currentTarget);
-
-
-        // Add race
-        const data = a.data("actionType");
-        if (data === "add") {
-            const itemData = {
-                name: "New Species",
-                type: "species",
-            };
-            await this.actor.createOwnedItem(itemData);
-        }
-        // Edit race
-        else if (data === "edit") {
-            this._onItemEdit(event);
-        }
-        // Delete race
-        else if (data === "delete") {
-            this._onItemDelete(event);
-        }
-    }
-
 
     async _onCrewControl(event) {
         event.preventDefault();

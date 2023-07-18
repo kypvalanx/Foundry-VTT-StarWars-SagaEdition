@@ -1,10 +1,4 @@
 <div class="panel flex-row">
-    <div class="panel flex-row" title="NPCs are disconnected from token sheets.  updates to token sheets do not modify the character sheet.">
-        <label class="resource-label" for="npc">NPC</label>
-        <input type="checkbox" id="npc" name="system.isNPC" {{#if actor.system.isNPC}}
-               checked{{/if}}/>
-    </div>
-
     {{#if actor.hasCrewQuality}}
         <div class="crew-quality medium labeled-input">
             <label class="resource-label" for="crew-quality">Crew Quality</label>

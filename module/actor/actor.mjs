@@ -425,6 +425,7 @@ export class SWSEActor extends Actor {
         system.armors = armors;
 
         system.attacks = generateVehicleAttacks(this);
+        this.initializeCharacterSettings();
     }
 
     /**
