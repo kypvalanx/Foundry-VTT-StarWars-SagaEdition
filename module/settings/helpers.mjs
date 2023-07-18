@@ -96,6 +96,9 @@ export const registerHandlebarsHelpers = function () {
     Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
         return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
     });
+    Handlebars.registerHelper('ifEither', function(arg1, arg2, options) {
+        return (arg1 || arg2) ? options.fn(this) : options.inverse(this);
+    });
 
     Handlebars.registerHelper('sum', function(arg1, arg2, options) {
         let number = parseInt(arg1|| 0) + parseInt(arg2||0);

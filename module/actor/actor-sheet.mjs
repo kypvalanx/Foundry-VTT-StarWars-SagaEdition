@@ -136,7 +136,8 @@ export class SWSEActorSheet extends ActorSheet {
         });
 
         // Species controls
-        html.find(".species-control").click(this._onSpeciesControl.bind(this));
+        //html.find(".species-control").click(this._onSpeciesControl.bind(this));
+        html.find('[data-action="species"]').click(this._onSpeciesControl.bind(this));
         // crew controls
         html.find(".crew-control").click(this._onCrewControl.bind(this));
 
@@ -156,8 +157,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
 
-        html.find("#selectAge").on("click", event => this._selectAge(event, this));
-        html.find("#selectGender").on("click", event => this._selectGender(event, this));
         html.find("#selectWeight").on("click", () => this._unavailable());
         html.find("#selectHeight").on("click", () => this._unavailable());
         html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
@@ -196,6 +195,8 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
+        html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
+        html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
@@ -938,11 +939,12 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onSpeciesControl(event) {
         event.preventDefault();
-        const a = event.currentTarget;
+        const a = $(event.currentTarget);
 
 
         // Add race
-        if (a.classList.contains("add")) {
+        const data = a.data("actionType");
+        if (data === "add") {
             const itemData = {
                 name: "New Species",
                 type: "species",
@@ -950,11 +952,11 @@ export class SWSEActorSheet extends ActorSheet {
             await this.actor.createOwnedItem(itemData);
         }
         // Edit race
-        else if (a.classList.contains("edit")) {
+        else if (data === "edit") {
             this._onItemEdit(event);
         }
         // Delete race
-        else if (a.classList.contains("delete")) {
+        else if (data === "delete") {
             this._onItemDelete(event);
         }
     }

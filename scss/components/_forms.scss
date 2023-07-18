@@ -127,6 +127,7 @@
   display: flex;
   flex-direction: column;
   width: fit-content;
+  height: fit-content;
   position: relative;
   flex-grow: 1;
 }
@@ -143,11 +144,29 @@
   width: fit-content;
 }
 
-.labeled-input .toggle{
+.labeled-input .control-1, .labeled-input .control{
   position: absolute;
-  top: 0.4rem;
+  bottom: 0.4rem;
   right: 0.4rem;
-  width: 18px;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+.labeled-input .control-2{
+  position: absolute;
+  bottom: 0.4rem;
+  right: 1.9rem;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+.labeled-input .control-3{
+  position: absolute;
+  bottom: 0.4rem;
+  right: 3.4rem;
+  width: fit-content;
   border-radius: 10px;
   background: var(--color-foreground);
   color: var(--color-background);

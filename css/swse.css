@@ -389,6 +389,9 @@
   width: -webkit-fit-content;
   width: -moz-fit-content;
   width: fit-content;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
   position: relative;
   -webkit-box-flex: 1;
   -ms-flex-positive: 1;
@@ -409,11 +412,37 @@
   width: fit-content;
 }
 
-.swse .labeled-input .toggle {
+.swse .labeled-input .control-1, .swse .labeled-input .control {
   position: absolute;
-  top: 0.4rem;
+  bottom: 0.4rem;
   right: 0.4rem;
-  width: 18px;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.swse .labeled-input .control-2 {
+  position: absolute;
+  bottom: 0.4rem;
+  right: 1.9rem;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.swse .labeled-input .control-3 {
+  position: absolute;
+  bottom: 0.4rem;
+  right: 3.4rem;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
   border-radius: 10px;
   background: var(--color-foreground);
   color: var(--color-background);

@@ -1,124 +1,110 @@
 <!--TODO find a spot for the portrait -->
 <div class="summary-header swse">
-    <div class="name"><label for="name">Name</label>
-        <h2><input class="plain" name="name" type="text" value="{{actor.name}}"
-                   placeholder=""/></h2></div>
-    <div class="player"><label for="player">Player</label>
-        <h2><input class="plain" name="system.player" type="text"
-                   value="{{actor.system.player}}" placeholder=""/></h2></div>
-    <div class="classes"><label for="classes">Classes</label>
-        <div class="plain input static">{{actor.system.classSummary}}</div>
-    </div>
-    <div class="level"><label for="level">Level</label>
-        <div class="plain input static">{{actor.system.levelSummary}}</div>
-    </div>
-    <div class="challenge"><label for="challenge">CL</label>
-        <h2><input class="plain" name="system.cl" type="text"
-                   value="{{actor.system.cl}}" placeholder="0"/></h2>
+    <div class="large labeled-input">
+        <label for="name" class="text">Name</label>
+        <input class="input" name="name" id="name" type="text" value="{{actor.name}}" placeholder=""/>
     </div>
 
-    <div class="species">
-
-        <label for="species">Species</label>
-        <div class="flex item" id="view-species" data-item-id="{{actor.species.id}}">
-
-            {{#if actor.species}}
-                <div class="plain input flex-grow rollable" data-action="view"
-                     data-item-id="{{actor.species.id}}">{{actor.species.name}}</div>
-                <div class="species-controls flex-col">
-                    <a class="species-control edit" title="view item"><i
-                            class="fas fa-eye"></i></a>
-                </div>
-                <div class="species-controls flex-col">
-                    <a class="species-control delete" title="delete item"><i
-                            class="fas fa-trash"></i></a>
-                </div>
-            {{/if}}
-            {{#unless actor.species}}
-                <div class="plain input flex-grow rollable" data-action="compendium" data-type="Item" data-filter="-type:species">
-                    Add Species
-                </div>
-                <div class="species-controls flex-col">
-                    <a data-action="compendium" data-type="Item" data-filter="-type:species"
-                       title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                </div>
-            {{/unless}}
-        </div>
-
+    <div class="medium labeled-input">
+        <label for="player" class="text">Player</label>
+        <input class="input" name="system.player" id="player" type="text" value="{{actor.system.player}}"
+               placeholder=""/>
     </div>
-    <div class="sex">
-        <label for="gender">Gender</label>
-        <div id="selectGender">
-            <div class="plain input rollable">{{#if
-                    actor.system.gender}}{{actor.system.gender}}{{/if}}{{#unless
-                    actor.system.gender}}{{#if
-                    actor.system.sex}}{{actor.system.sex}}{{/if}}{{#unless actor.system.sex}}
-                Select Gender{{/unless}}{{/unless}}</div>
-        </div>
 
+    <div class="medium labeled-input">
+        <label for="classSummary" class="text">Classes</label>
+        <input class="input" id="classSummary" type="text" value="{{actor.system.classSummary}}" placeholder=""
+               disabled/>
     </div>
-    <div class="age">
-        <label for="age">Age</label>
-        <div id="selectAge">
-            <div class="plain input rollable">{{#if
-                    actor.system.age}}{{actor.system.age}} years{{/if}}{{#unless actor.system.age}}
-                Select Age{{/unless}}</div>
-        </div>
+
+    <div class="small labeled-input">
+        <label for="level" class="text">Level</label>
+        <input class="input" id="level" type="text" value="{{actor.system.levelSummary}}" placeholder="" disabled/>
     </div>
-    <div class="height"><label for="height">Height</label>
-        <h2><input class="plain" name="system.height" type="text"
-                   value="{{actor.system.height}}" placeholder="Height"/></h2></div>
-    <div class="weight"><label for="weight">Weight</label>
-        <h2><input class="plain" name="system.weight" type="text"
-                   value="{{actor.system.weight}}" placeholder="Weight"/></h2></div>
-    <div class="destiny">
-        {{#if actor.destiny}}
-            <label>Destiny</label>
-            <div class="flex item" data-item-id="{{actor.destiny.id}}">
-                <div class="plain input flex-grow rollable">{{actor.destiny.name}}</div>
-                <div class="species-controls flex-col">
-                    <a data-action="view"
-                       title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
-                </div>
-                <div class="species-controls flex-col">
-                    <a data-action="delete" data-action-target="swse.background"
-                       title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
-                </div>
+
+    <div class="small labeled-input">
+        <label for="challenge" class="text">CL</label>
+        <input class="input" id="challenge" name="system.cl" type="text" value="{{actor.system.cl}}" placeholder=""
+               disabled/>
+    </div>
+
+    <div class="large labeled-input item" {{#if actor.species}}data-action="species"
+         data-item-id="{{actor.species.id}}" {{else}}data-action="compendium" data-type="Item"
+         data-filter="-type:species"{{/if}}>
+        <label for="classSummary" class="text">Species</label>
+        <input class="input" id="classSummary" type="text"
+               value="{{#if actor.species}}{{actor.species.name}}{{else}}Add Species{{/if}}" placeholder="" disabled/>
+        {{#if actor.species}}
+            <div class="control-2">
+                <a class="" data-action="species" data-action-type="edit" data-item-id="{{actor.species.id}}"
+                   title="view item"><i
+                        class="fas fa-eye"></i></a>
+            </div>
+            <div class="control-1">
+                <a class="" data-action="species" data-action-type="delete" data-item-id="{{actor.species.id}}"
+                   title="delete item"><i
+                        class="fas fa-trash"></i></a>
             </div>
         {{else}}
-
-            {{#if actor.background}}
-                <label>Background</label>
-                <div class="flex item" data-item-id="{{actor.background.id}}">
-                    <div class="plain input flex-grow rollable">{{actor.background.name}}</div>
-                    <div class="species-controls flex-col">
-                        <a data-action="view"
-                           title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
-                    </div>
-                    <div class="species-controls flex-col">
-                        <a data-action="delete"
-                           title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
-                    </div>
-                </div>
-            {{else}}
-                <label>Destiny or Background</label>
-                <div class="flex item">
-                    <div class="plain input flex-grow">Select a Destiny or a Background</div>
-                    <div class="species-controls flex-col">
-                        <a data-action="compendium" data-type="Item" data-filter="-type:destiny"
-                           title="{{localize "Open Destiny Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                    </div>
-                    <div class="species-controls flex-col">
-                        <a data-action="compendium" data-type="Item" data-filter="-type:background"
-                           title="{{localize "Open Background Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-                    </div>
-                </div>
-            {{/if}}
+            <div class="species-controls flex-col">
+                <a data-action="compendium" data-type="Item" data-filter="-type:species"
+                   title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+            </div>
         {{/if}}
+    </div>
+
+    <div class="medium labeled-input" data-action="gender">
+        <label for="gender" class="text">Gender</label>
+        <input class="input" id="gender" type="text" value="{{#if actor.system.gender}}{{actor.system.gender}}{{else}}{{#if actor.system.sex}}{{actor.system.sex}}{{/if}}
+        {{/if}}" placeholder=""
+               disabled/>
+    </div>
+
+
+    <div class="medium labeled-input" data-action="age">
+        <label for="age" class="text">Age</label>
+        <input class="input" id="age" type="text" value="{{#if actor.system.age}}{{actor.system.age}} years{{/if}}" placeholder="" disabled/>
+    </div>
+
+    <div class="small labeled-input">
+        <label for="height" class="text">Height</label>
+        <input class="input" id="height" name="system.height" type="text" value="{{actor.system.height}}" placeholder=""/>
+    </div>
+
+    <div class="small labeled-input">
+        <label for="weight" class="text">Weight</label>
+        <input class="input" id="weight" name="system.weight" type="text" value="{{actor.system.weight}}" placeholder=""/>
+    </div>
+
+
+
+    <div class="large labeled-input item" data-item-id="{{#if actor.destiny}}{{actor.destiny.id}}{{else}}{{#if actor.background}}{{actor.background.id}}{{/if}}{{/if}}">
+        <label for="destiny" class="text">{{#if actor.destiny}}Destiny{{else}}{{#if actor.background}}Background{{else}}Destiny or Background{{/if}}{{/if}}</label>
+        <input class="input" id="destiny"  type="text" value="{{#if actor.destiny}}{{actor.destiny.name}}{{else}}{{#if actor.background}}{{actor.background.name}}{{/if}}{{/if}}" placeholder="" disabled/>
+        {{#ifEither actor.destiny actor.background}}
+            <div class="control-2">
+                <a data-action="view"
+                   title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
+            </div>
+            <div class="control-1">
+                <a data-action="delete" data-action-target="swse.background"
+                   title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
+            </div>
+        {{else}}
+            <div class="control-2">
+                <a data-action="compendium" data-type="Item" data-filter="-type:destiny"
+                   title="{{localize "Open Destiny Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+            </div>
+            <div class="control-1">
+                <a data-action="compendium" data-type="Item" data-filter="-type:background"
+                   title="{{localize "Open Background Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+            </div>
+        {{/ifEither}}
 
     </div>
-    <div class="experience"><label for="experience">XP</label>
-        <h2><input class="plain" name="system.experience" type="text"
-                   value="{{actor.system.experience}}" placeholder="0"/></h2>
+    <div class="small labeled-input">
+        <label for="experience" class="text">XP</label>
+        <input class="input" id="experience" name="system.experience" type="text" value="{{actor.system.experience}}" placeholder=""/>
     </div>
+
 </div>
