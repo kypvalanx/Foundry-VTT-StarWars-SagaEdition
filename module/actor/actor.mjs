@@ -339,7 +339,7 @@ export class SWSEActor extends Actor {
 
     get cargoCapacity() {
 //TODO make the summation reduce function handle units?
-        return this.getCached("cargo", () => {
+        return this.getCached("cargoCapacity", () => {
             const cargoCapacity = getInheritableAttribute({
                 entity: this,
                 attributeKey: "cargoCapacity",

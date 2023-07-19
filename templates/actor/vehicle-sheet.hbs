@@ -136,43 +136,15 @@
 
             {{!-- Owned Equipment Tab --}}
             <div class="tab items" data-group="primary" data-tab="cargo">
-                <div>
-                    <h2><label class="resource-label">Cargo <a data-action="compendium" data-type="Item" data-pack="swse.items"
-                                                                   title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
 
-
-                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="Cargo" items=actor.cargo draggable=false delete="always"}}
-
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" bigLabel="Cargo" items=actor.cargo draggable=false delete="always" createNew="equipment" compendiumPack="swse.items"}}
 
             </div>
 
             {{!-- Owned Traits Tab --}}
             <div class="tab items" data-group="primary" data-tab="traits">
-                <div>
-                    <h2><label class="resource-label">Traits <a data-action="compendium" data-type="Item" data-filter="-type:trait"
-                                                                title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
-                <ol class="items-list">
-                    {{#each actor.traits as |trait id|}}
-                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.system.textDescription}}">
-                            <div class="flexrow">
-                                <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
-                                <h4 class="item-name">Source: {{trait.system.supplier.type}}
-                                    , {{trait.system.supplier.name}}</h4>
-                                    <!--                            <h4 class="item-name">{{#if
-                                    trait.system.prerequisites}}-->
-                                    <!--                                <b>Prerequisites:</b> {{trait.system.prerequisites}}{{/if}}</h4>-->
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                </div>
-                            </div>
-                            <!--<div>{{trait.system.textDescription}}</div>-->
-                        </li>
-                    {{/each}}
-                </ol>
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable" controls='<button class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>'}}
+
             </div>
         </section>
     </div>

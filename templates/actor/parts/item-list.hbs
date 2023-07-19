@@ -5,6 +5,10 @@
             <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
                title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
         {{/if}}
+        {{#if compendiumPack}}
+            <a data-action="compendium" data-type="Item" data-pack="{{compendiumPack}}"
+               title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+        {{/if}}
         {{#if createNew}}
             <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}"
                title="add new {{createNew}}"></a>
@@ -15,8 +19,16 @@
 
 <div class="item-container panel flexcol {{container}}" {{#if container}}data-container-id="{{container}}"{{/if}}>
     {{#if label}}
-        <div class="header-row flexrow">
+        <div class="header-row flex-row">
             <label class="resource-label">{{label}}</label>
+            {{#if compendiumFilter}}
+                <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
+                   title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+            {{/if}}
+            {{#if compendiumPack}}
+                <a data-action="compendium" data-type="Item" data-pack="{{compendiumPack}}"
+                   title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+            {{/if}}
             {{#if createNew}}
                 <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}"
                    title="add new {{createNew}}"></a>
