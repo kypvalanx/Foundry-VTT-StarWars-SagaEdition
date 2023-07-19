@@ -1,8 +1,15 @@
 {{#if bigLabel}}
 <div class="flexrow">
-    <h2><label class="resource-label">{{bigLabel}} <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
-                                                title="{{localize "Open Compendium"}}"><i
-            class="fas fa-folder-plus"></i></a></label></h2>{{{controls}}}
+    <h2><label class="resource-label">{{bigLabel}}
+        {{#if compendiumFilter}}
+            <a data-action="compendium" data-type="Item" data-filter="{{compendiumFilter}}"
+               title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
+        {{/if}}
+        {{#if createNew}}
+            <a class="fas fa-plus" data-action="create" data-action-type="{{createNew}}"
+               title="add new {{createNew}}"></a>
+        {{/if}}
+    </label></h2>{{{controls}}}
 </div>
 {{/if}}
 
