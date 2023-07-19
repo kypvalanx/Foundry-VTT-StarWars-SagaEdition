@@ -5,7 +5,7 @@
         <input class="input" name="name" id="name" type="text" value="{{actor.name}}" placeholder=""/>
     </div>
 
-    <div class="medium labeled-input">
+    <div class="large labeled-input">
         <label for="player" class="text">Player</label>
         <input class="input" name="system.player" id="player" type="text" value="{{actor.system.player}}"
                placeholder=""/>
@@ -28,7 +28,7 @@
                disabled/>
     </div>
 
-    <div class="large labeled-input item" {{#if actor.species}}
+    <div class="large labeled-input item clickable" {{#if actor.species}}
          data-item-id="{{actor.species.id}}" {{else}}data-action="compendium" data-type="Item"
          data-filter="-type:species"{{/if}}>
         <label for="species" class="text">Species</label>
@@ -46,14 +46,14 @@
                         class="fas fa-trash"></i></a>
             </div>
         {{else}}
-            <div class="species-controls flex-col">
+            <div class="control-1">
                 <a data-action="compendium" data-type="Item" data-filter="-type:species"
                    title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
             </div>
         {{/if}}
     </div>
 
-    <div class="medium labeled-input" data-action="gender">
+    <div class="medium labeled-input clickable" data-action="gender">
         <label for="gender" class="text">Gender</label>
         <input class="input" id="gender" type="text" value="{{#if actor.system.gender}}{{actor.system.gender}}{{else}}{{#if actor.system.sex}}{{actor.system.sex}}{{/if}}
         {{/if}}" placeholder=""

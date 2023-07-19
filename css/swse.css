@@ -357,6 +357,10 @@
   font-weight: 700;
 }
 
+.swse .clickable {
+  cursor: pointer;
+}
+
 .swse .small-header {
   font-size: 0.75rem;
   text-align: center;
