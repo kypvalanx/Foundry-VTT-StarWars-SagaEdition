@@ -35,18 +35,18 @@
         <input class="input" id="species" type="text"
                value="{{#if actor.species}}{{actor.species.name}}{{else}}Add Species{{/if}}" placeholder="" disabled/>
         {{#if actor.species}}
-            <div class="control-2">
+            <div class="control-1">
                 <a class="" data-action="view" data-item-id="{{actor.species.id}}"
                    title="view item"><i
                         class="fas fa-eye"></i></a>
             </div>
-            <div class="control-1">
+            <div class="control-0">
                 <a class="" data-action="delete" data-item-id="{{actor.species.id}}"
                    title="delete item"><i
                         class="fas fa-trash"></i></a>
             </div>
         {{else}}
-            <div class="control-1">
+            <div class="control-0">
                 <a data-action="compendium" data-type="Item" data-filter="-type:species"
                    title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
             </div>
@@ -82,20 +82,20 @@
         <label for="destiny" class="text">{{#if actor.destiny}}Destiny{{else}}{{#if actor.background}}Background{{else}}Destiny or Background{{/if}}{{/if}}</label>
         <input class="input" id="destiny"  type="text" value="{{#if actor.destiny}}{{actor.destiny.name}}{{else}}{{#if actor.background}}{{actor.background.name}}{{/if}}{{/if}}" placeholder="" disabled/>
         {{#ifEither actor.destiny actor.background}}
-            <div class="control-2">
+            <div class="control-1">
                 <a data-action="view"
                    title="{{localize "Edit"}}"><i class="fas fa-eye"></i></a>
             </div>
-            <div class="control-1">
+            <div class="control-0">
                 <a data-action="delete" data-action-target="swse.background"
                    title="{{localize "Delete"}}"><i class="fas fa-trash"></i></a>
             </div>
         {{else}}
-            <div class="control-2">
+            <div class="control-1">
                 <a data-action="compendium" data-type="Item" data-filter="-type:destiny"
                    title="{{localize "Open Destiny Compendium"}}"><i class="fas fa-folder-plus"></i></a>
             </div>
-            <div class="control-1">
+            <div class="control-0">
                 <a data-action="compendium" data-type="Item" data-filter="-type:background"
                    title="{{localize "Open Background Compendium"}}"><i class="fas fa-folder-plus"></i></a>
             </div>

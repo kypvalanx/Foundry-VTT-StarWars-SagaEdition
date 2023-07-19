@@ -416,7 +416,7 @@
   width: fit-content;
 }
 
-.swse .labeled-input .control-1, .swse .labeled-input .control {
+.swse .labeled-input .control-0, .swse .labeled-input .control {
   position: absolute;
   bottom: 0.4rem;
   right: 0.4rem;
@@ -428,7 +428,7 @@
   color: var(--color-background);
 }
 
-.swse .labeled-input .control-2 {
+.swse .labeled-input .control-1 {
   position: absolute;
   bottom: 0.4rem;
   right: 1.9rem;
@@ -440,7 +440,7 @@
   color: var(--color-background);
 }
 
-.swse .labeled-input .control-3 {
+.swse .labeled-input .control-2 {
   position: absolute;
   bottom: 0.4rem;
   right: 3.4rem;
@@ -450,6 +450,50 @@
   border-radius: 10px;
   background: var(--color-foreground);
   color: var(--color-background);
+}
+
+.swse .labeled-input .left-control-0, .swse .labeled-input .left-control {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 0.4rem;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.swse .labeled-input .left-control-1 {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 1.9rem;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.swse .labeled-input .left-control-2 {
+  position: absolute;
+  bottom: 0.4rem;
+  left: 3.4rem;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  border-radius: 10px;
+  background: var(--color-foreground);
+  color: var(--color-background);
+}
+
+.swse .labeled-input input[type=checkbox].left-control, .swse .labeled-input input[type=checkbox].left-control-0, .swse .labeled-input input[type=checkbox].left-control-1, .swse .labeled-input input[type=checkbox].left-control-2,
+.swse .labeled-input input[type=checkbox].control, .swse .labeled-input input[type=checkbox].control-0, .swse .labeled-input input[type=checkbox].control-1, .swse .labeled-input input[type=checkbox].control-2 {
+  width: 20px;
+  border-radius: 5px;
+  background: transparent;
+  bottom: 0.05rem;
 }
 
 .swse .labeled-input .toggle :hover {
