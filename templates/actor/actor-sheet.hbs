@@ -197,12 +197,6 @@
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
 
-<!--                {{!-- Owned Talents Tab --}}-->
-<!--                <div class="tab items" data-group="primary" data-tab="talents">-->
-<!--                    {> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}-->
-<!--                </div>-->
-
-
                 {{!-- Owned Traits Tab --}}
                 <div class="tab items" data-group="primary" data-tab="traits">
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable" controls='<button class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>'}}

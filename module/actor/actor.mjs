@@ -1,6 +1,5 @@
 import {resolveHealth, resolveShield} from "./health.mjs";
 import {generateAttacks, generateVehicleAttacks} from "./attack-handler.mjs";
-import {resolveGrapple, resolveOffense} from "./offense.mjs";
 import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
@@ -13,7 +12,6 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveValueArray,
     resolveWeight,
     toNumber,
     toShortAttribute,
@@ -369,17 +367,13 @@ export class SWSEActor extends Actor {
 
     get grapple() {
         return this.getCached("grapple", () => {
-            return resolveValueArray([this.crewman("Pilot").system.offense?.bab, this.system.attributes.str.mod, getInheritableAttribute({
+            return this.baseAttackBonus + Math.max(this.system.attributes.str.mod, this.system.attributes.dex.mod) + getInheritableAttribute({
                 entity: this,
                 attributeKey: "grappleSizeModifier",
                 reduce: "SUM"
-            })], this)
+            });
         })
     }
-
-
-
-
 
     get fightingSpace() {
         return this.getCached("fightingSpace", () => {
@@ -443,7 +437,6 @@ export class SWSEActor extends Actor {
 
         this.handleDarksideArray(this);
 
-        resolveOffense(this);
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats;
         this.system.feats = feats.activeFeats;
@@ -479,7 +472,6 @@ export class SWSEActor extends Actor {
         let {defense, armors} = resolveDefenses(this);
         system.defense = defense;
         system.armors = armors;
-        system.grapple = resolveGrapple(this);
 
         this._manageAutomaticItems(this, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(system));
         system.attacks = generateAttacks(this);
@@ -883,10 +875,8 @@ export class SWSEActor extends Actor {
         let resolvedSkills = {}
         skills.forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
         return {
+            baseAttackBonus: attackBonus,
             system: {
-                offense: {
-                    bab: attackBonus
-                },
                 skills: resolvedSkills
             },
             items: [],
@@ -1891,7 +1881,13 @@ export class SWSEActor extends Actor {
     }
 
     get baseAttackBonus() {
-        return this.system.offense?.bab;
+        return this.getCached("baseAttackBonus", () => {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "baseAttackBonus",
+                reduce: "SUM"
+            });
+        })
     }
 
     get darkSideScore() {

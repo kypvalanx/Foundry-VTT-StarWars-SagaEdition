@@ -268,8 +268,6 @@ export class Attack {
             return;
         }
 
-        let actorSystem = actor.system;
-        //let providerData = provider.data;
         let weaponTypes = getPossibleProficiencies(actor, item);
         let attributeStats = []
         if (this.isRanged(item)) {
@@ -296,7 +294,7 @@ export class Attack {
             ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
         }
 
-        terms.push(...appendNumericTerm(actorSystem?.offense?.bab, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(actor.baseAttackBonus, "Base Attack Bonus"));
 
         if (!provider) {
 

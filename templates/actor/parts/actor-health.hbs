@@ -58,17 +58,17 @@
         <div class="labeled-input">
             <label for="baseAttack">Base Attack</label>
             <input class="left-input" id="baseAttack" type="text"
-                   value="{{actor.system.offense.bab}}" placeholder="" disabled/>
+                   value="{{actor.baseAttackBonus}}" placeholder="" disabled/>
             <div class="control-0">
-                <a class="rollable" title="Roll 1d20 + {{actor.system.offense.bab}}" data-roll="1d20 + {{actor.system.offense.bab}}"><i class="fas fa-dice-d20"></i></a>
+                <a class="rollable" title="Roll 1d20 + {{actor.baseAttackBonus}}" data-roll="1d20 + {{actor.baseAttackBonus}}"><i class="fas fa-dice-d20"></i></a>
             </div>
         </div>
         <div class="labeled-input">
             <label for="grapple">Grapple Bonus</label>
             <input class="middle-input" id="grapple" type="text"
-                   value="{{actor.system.grapple}}" placeholder="" disabled/>
+                   value="{{actor.grapple}}" placeholder="" disabled/>
             <div class="control-0">
-                <a class="rollable" title="Roll 1d20 + {{actor.system.grapple}}" data-roll="1d20 + {{actor.system.grapple}}"><i class="fas fa-dice-d20"></i></a>
+                <a class="rollable" title="Roll 1d20 + {{actor.grapple}}" data-roll="1d20 + {{actor.grapple}}"><i class="fas fa-dice-d20"></i></a>
             </div>
         </div>
         <div class="labeled-input">
