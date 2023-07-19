@@ -1881,6 +1881,19 @@ export class SWSEActor extends Actor {
     }
 
     get baseAttackBonus() {
+        const baseAttackBonus = this._baseAttackBonus();
+        return baseAttackBonus;
+    }
+
+    _baseAttackBonus(override) {
+        if(override){
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "baseAttackBonus",
+                embeddedItemOverride: override,
+                reduce: "SUM"
+            });
+        }
         return this.getCached("baseAttackBonus", () => {
             return getInheritableAttribute({
                 entity: this,

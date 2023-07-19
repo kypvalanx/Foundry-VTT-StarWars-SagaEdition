@@ -52,7 +52,7 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             case 'BASE ATTACK BONUS':
-                if (!(target.baseAttackBonus < parseInt(prereq.requirement))) {
+                if (!(target._baseAttackBonus(options.embeddedItemOverride) < parseInt(prereq.requirement))) {
                     successList.push({prereq, count: 1});
                     break;
                 }

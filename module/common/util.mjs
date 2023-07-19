@@ -820,7 +820,7 @@ function addValues(a, b) {
             }
         }
 
-        if(response){
+        if(response !== null && response !== undefined){
             responses.push(response)
         }
     }
