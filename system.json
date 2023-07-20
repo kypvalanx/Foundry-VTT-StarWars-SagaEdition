@@ -29,7 +29,7 @@
     {
       "name": "affiliations",
       "label": "Affiliations",
-      "path": "packs/affiliations.db",
+      "path": "packs/affiliations",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -37,7 +37,7 @@
     {
       "name": "classes",
       "label": "Classes",
-      "path": "packs/classes.db",
+      "path": "packs/classes",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -45,7 +45,7 @@
     {
       "name": "feats",
       "label": "Feats",
-      "path": "packs/feats.db",
+      "path": "packs/feats",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -53,7 +53,7 @@
     {
       "name": "force powers",
       "label": "Force Powers",
-      "path": "packs/force-powers.db",
+      "path": "packs/force-powers",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -61,7 +61,7 @@
     {
       "name": "force regimens",
       "label": "Force Regimens",
-      "path": "packs/force-regimens.db",
+      "path": "packs/force-regimens",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -69,7 +69,7 @@
     {
       "name": "force secrets",
       "label": "Force Secrets",
-      "path": "packs/force-secrets.db",
+      "path": "packs/force-secrets",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -77,7 +77,7 @@
     {
       "name": "force techniques",
       "label": "Force Techniques",
-      "path": "packs/force-techniques.db",
+      "path": "packs/force-techniques",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -85,7 +85,7 @@
     {
       "name": "items",
       "label": "Items",
-      "path": "packs/items.db",
+      "path": "packs/items",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -93,7 +93,7 @@
     {
       "name": "species",
       "label": "Species",
-      "path": "packs/species.db",
+      "path": "packs/species",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -101,7 +101,7 @@
     {
       "name": "talents",
       "label": "Talents",
-      "path": "packs/talents.db",
+      "path": "packs/talents",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -109,7 +109,7 @@
     {
       "name": "templates",
       "label": "Templates",
-      "path": "packs/templates.db",
+      "path": "packs/templates",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -117,7 +117,7 @@
     {
       "name": "traits",
       "label": "Traits",
-      "path": "packs/traits.db",
+      "path": "packs/traits",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -125,7 +125,7 @@
     {
       "name": "destiny",
       "label": "Destiny",
-      "path": "packs/destiny.db",
+      "path": "packs/destiny",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -133,7 +133,7 @@
     {
       "name": "background",
       "label": "Background",
-      "path": "packs/background.db",
+      "path": "packs/background",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -141,7 +141,7 @@
     {
       "name": "vehicle base types",
       "label": "Vehicle Base Types",
-      "path": "packs/vehicle-base-types.db",
+      "path": "packs/vehicle-base-types",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -149,7 +149,7 @@
     {
       "name": "vehicle systems",
       "label": "Vehicle Systems",
-      "path": "packs/vehicle-systems.db",
+      "path": "packs/vehicle-systems",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -157,7 +157,7 @@
     {
       "name": "beast components",
       "label": "Beast Components",
-      "path": "packs/beast-components.db",
+      "path": "packs/beast-components",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -165,7 +165,7 @@
     {
       "name": "languages",
       "label": "Languages",
-      "path": "packs/languages.db",
+      "path": "packs/languages",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
@@ -173,7 +173,7 @@
     {
       "name": "vehicles",
       "label": "Vehicles",
-      "path": "packs/vehicles.db",
+      "path": "packs/vehicles",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -181,7 +181,7 @@
     {
       "name": "units cl  0",
       "label": "Units CL  0",
-      "path": "packs/units-cl-0.db",
+      "path": "packs/units-cl-0",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -189,7 +189,7 @@
     {
       "name": "units cl  1",
       "label": "Units CL  1",
-      "path": "packs/units-cl-1.db",
+      "path": "packs/units-cl-1",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -197,7 +197,7 @@
     {
       "name": "units cl  2",
       "label": "Units CL  2",
-      "path": "packs/units-cl-2.db",
+      "path": "packs/units-cl-2",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -207,7 +207,7 @@
     {
       "name": "units cl  3",
       "label": "Units CL  3",
-      "path": "packs/units-cl-3.db",
+      "path": "packs/units-cl-3",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -215,7 +215,7 @@
     {
       "name": "units cl  4",
       "label": "Units CL  4",
-      "path": "packs/units-cl-4.db",
+      "path": "packs/units-cl-4",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -223,7 +223,7 @@
     {
       "name": "units cl  5",
       "label": "Units CL  5",
-      "path": "packs/units-cl-5.db",
+      "path": "packs/units-cl-5",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -231,7 +231,7 @@
     {
       "name": "units cl  6",
       "label": "Units CL  6",
-      "path": "packs/units-cl-6.db",
+      "path": "packs/units-cl-6",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -239,7 +239,7 @@
     {
       "name": "units cl  7",
       "label": "Units CL  7",
-      "path": "packs/units-cl-7.db",
+      "path": "packs/units-cl-7",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -247,7 +247,7 @@
     {
       "name": "units cl  8",
       "label": "Units CL  8",
-      "path": "packs/units-cl-8.db",
+      "path": "packs/units-cl-8",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -255,7 +255,7 @@
     {
       "name": "units cl  9",
       "label": "Units CL  9",
-      "path": "packs/units-cl-9.db",
+      "path": "packs/units-cl-9",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -263,7 +263,7 @@
     {
       "name": "units cl 10",
       "label": "Units CL 10",
-      "path": "packs/units-cl-10.db",
+      "path": "packs/units-cl-10",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -271,7 +271,7 @@
     {
       "name": "units cl 11",
       "label": "Units CL 11",
-      "path": "packs/units-cl-11.db",
+      "path": "packs/units-cl-11",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -279,7 +279,7 @@
     {
       "name": "units cl 12",
       "label": "Units CL 12",
-      "path": "packs/units-cl-12.db",
+      "path": "packs/units-cl-12",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -287,7 +287,7 @@
     {
       "name": "units cl 13",
       "label": "Units CL 13",
-      "path": "packs/units-cl-13.db",
+      "path": "packs/units-cl-13",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -295,7 +295,7 @@
     {
       "name": "units cl 14",
       "label": "Units CL 14",
-      "path": "packs/units-cl-14.db",
+      "path": "packs/units-cl-14",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -303,7 +303,7 @@
     {
       "name": "units cl 15",
       "label": "Units CL 15",
-      "path": "packs/units-cl-15.db",
+      "path": "packs/units-cl-15",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -311,7 +311,7 @@
     {
       "name": "units cl 16",
       "label": "Units CL 16",
-      "path": "packs/units-cl-16.db",
+      "path": "packs/units-cl-16",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -319,7 +319,7 @@
     {
       "name": "units cl 17",
       "label": "Units CL 17",
-      "path": "packs/units-cl-17.db",
+      "path": "packs/units-cl-17",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -327,7 +327,7 @@
     {
       "name": "units cl 18",
       "label": "Units CL 18",
-      "path": "packs/units-cl-18.db",
+      "path": "packs/units-cl-18",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -335,7 +335,7 @@
     {
       "name": "units cl 19",
       "label": "Units CL 19",
-      "path": "packs/units-cl-19.db",
+      "path": "packs/units-cl-19",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
@@ -343,7 +343,7 @@
     {
       "name": "units cl 20",
       "label": "Units CL 20",
-      "path": "packs/units-cl-20.db",
+      "path": "packs/units-cl-20",
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"

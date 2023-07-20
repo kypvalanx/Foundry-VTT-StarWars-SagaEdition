@@ -180,7 +180,7 @@
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true delete="always"}}
                     </div>
 
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory draggable=true quantity=true delete="always"}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="General Equipment" items=actor.inventory quickCreate="equipment" createNew="equipment"  draggable=true quantity=true delete="always"}}
 
                     {{> 'systems/swse/templates/credits/credit-chip.hbs'}}
 
