@@ -63,7 +63,7 @@ Hooks.once('init', async function () {
     registerHandlebarsHelpers();
     initializeStatusEffects(CONFIG)
     if(game.settings.get("swse", "enableAdvancedCompendium")){
-        CONFIG.ui.compendium = SWSECompendiumDirectory;
+        //CONFIG.ui.compendium = SWSECompendiumDirectory;
     }
 
     // Create compendium browsers
