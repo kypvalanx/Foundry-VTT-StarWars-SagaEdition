@@ -150,7 +150,7 @@ export function onSpanTextInput(event, callback = null, type, sheet) {
     newEl.addEventListener("focusout", _onFocusOut.bind(sheet));
 
 
-    newEl.addEventListener("keypress", _onEnter.bind(sheet));
+    newEl.addEventListener("keyup", _onEnter.bind(sheet));
 
     // Select text inside new element
     newEl.focus();
@@ -158,7 +158,6 @@ export function onSpanTextInput(event, callback = null, type, sheet) {
 }
 
 function _onEnter(event, changed)  {
-    console.log(event.code)
     if (event.code === 'Enter' || event.code === 'NumpadEnter') {
         event.stopPropagation();
         if (!changed) {

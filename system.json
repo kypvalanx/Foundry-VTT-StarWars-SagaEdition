@@ -115,14 +115,6 @@
       "entity": "Item"
     },
     {
-      "name": "items",
-      "label": "Items",
-      "path": "packs/items",
-      "type": "Item",
-      "system": "swse",
-      "entity": "Item"
-    },
-    {
       "name": "species",
       "label": "Species",
       "path": "packs/species",

@@ -187,7 +187,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="toggle-use"]').click(this._onToggleUse.bind(this));
         html.find('[data-action="toggle-second-wind"]').click(this._onToggleSecondWind.bind(this));
         html.find('[data-action="create"]').click(this._onCreateNewItem.bind(this));
-        html.find('[data-action="quickCreate"]').on("keypress", this._onQuickCreate.bind(this));
+        html.find('[data-action="quickCreate"]').on("keyup", this._onQuickCreate.bind(this));
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
