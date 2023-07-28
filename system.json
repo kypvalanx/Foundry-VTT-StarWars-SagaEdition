@@ -217,6 +217,14 @@
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
+    },
+    {
+      "name": "upgrades",
+      "label": "Upgrades",
+      "path": "packs/upgrade",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
     }
   ],
   "disabledPacks": [
