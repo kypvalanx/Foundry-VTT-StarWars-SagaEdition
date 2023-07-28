@@ -260,10 +260,11 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onQuickCreate(event) {
+        console.log(event.code)
         if (!(event.code === "Enter" || event.code === "NumpadEnter")) {
             return;
         }
-        event.preventDefault();
+        event.stopPropagation();
         let element = $(event.currentTarget);
         let itemType = element.data("action-type");
         const defaultDataByType = getDefaultDataByType(itemType);

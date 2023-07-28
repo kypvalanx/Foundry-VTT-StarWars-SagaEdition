@@ -61,8 +61,9 @@
             </div>
 
             {{!-- Biography Tab --}}
-            <div class="tab biography" data-group="primary" data-tab="notes">
-                {{editor actor.system.biography target="biography" button=true owner=owner editable=editable}}
+            <div class="tab biography" data-group="primary" data-tab="description">
+                {{editor actor.system.description target="system.description" button=true owner=owner
+                         editable=editable}}
             </div>
 
 

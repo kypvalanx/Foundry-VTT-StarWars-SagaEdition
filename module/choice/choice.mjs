@@ -31,10 +31,9 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
                 items = selectedChoice.providedItems
             }
             if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
-                Object.values(selectedChoice.attributes).forEach(attr => {
-                    let index = Math.max(Object.keys(item.system.attributes)) + 1
-                    item.system.attributes[index] = attr;
-                })
+                item.system.changes = item.system.changes || [];
+                item.system.changes.push(...Object.values(selectedChoice.attributes))
+
             }
         }
     }

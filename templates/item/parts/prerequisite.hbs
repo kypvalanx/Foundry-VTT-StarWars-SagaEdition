@@ -47,13 +47,13 @@
 
                 <label class="flex-grow" title="Human readable flavor text.">
                     Text:<br/>
-                    <input type="text" value="{{prerequisite.text}}" name="{{path}}.text">
+                    <input type="text" class="direct" value="{{prerequisite.text}}" name="{{path}}.text">
                 </label>
                 {{#ifEquals prerequisite.type (arr "OR")}}
 
                     <label class="flex-grow" title="How many of below requirements need to be met">
                         Count:<br/>
-                        <input type="number" value="{{prerequisite.count}}" name="{{path}}.count">
+                        <input type="number" class="direct" value="{{prerequisite.count}}" name="{{path}}.count">
                     </label>
                 {{/ifEquals}}
                 {{#ifEquals prerequisite.type (arr "OR" "AND")}}
@@ -77,11 +77,11 @@
                 {{#ifEquals prerequisite.type (arr "AGE")}}
                     <label class="flex-grow" title="Inclusive low value of age range.">
                         Low:<br/>
-                        <input type="number" value="{{prerequisite.low}}" name="{{path}}.low">
+                        <input type="number" class="direct" value="{{prerequisite.low}}" name="{{path}}.low">
                     </label>
                     <label class="flex-grow" title="Inclusive high value of age range.">
                         High:<br/>
-                        <input type="number" value="{{prerequisite.high}}" name="{{path}}.high">
+                        <input type="number" class="direct" value="{{prerequisite.high}}" name="{{path}}.high">
                     </label>
                 {{/ifEquals}}
 
@@ -89,7 +89,7 @@
                             (arr "ARMOR_TYPE" "ATTRIBUTE" "BASE ATTACK BONUS" "CHARACTER LEVEL" "CLASS" "CONDITION" "DAMAGE_TYPE" "DARK SIDE SCORE" "EQUIPPED" "FEAT" "FORCE POWER" "FORCE SECRET" "FORCE TECHNIQUE" "LANGUAGE" "MODE" "PROFICIENCY" "SOURCE" "SPECIAL" "SPECIES" "SUBTYPE" "TALENT" "TEMPLATE" "TRADITION" "TRAINED SKILL" "TRAIT" "TYPE" "WEAPON_GROUP" "WEAPON_SIZE" "SIZE")}}
                     <label class="flex-grow">
                         Requirement:<br/>
-                        <input type="text" value="{{prerequisite.requirement}}" name="{{path}}.requirement">
+                        <input type="text" class="direct" value="{{prerequisite.requirement}}" name="{{path}}.requirement">
                     </label>
                 {{/ifEquals}}
                 {{#if @root.editable}}

@@ -143,7 +143,7 @@ export class SWSEItemSheet extends ItemSheet {
             onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
         html.find("[data-action=direct-field]").on("click", (event) => {
-            onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+            onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text", this); // this._adjustItemPropertyBySpan.bind(this)
         });
 
 

@@ -108,7 +108,7 @@ export function _adjustPropertyBySpan(event) {
     } else this._onSubmit(event, {preventClose: true});
 }
 
-export function onSpanTextInput(event, callback = null, type) {
+export function onSpanTextInput(event, callback = null, type, sheet) {
     const el = event.currentTarget;
     const parent = el.parentElement;
 
@@ -147,25 +147,36 @@ export function onSpanTextInput(event, callback = null, type) {
             }
         });
     }
-    newEl.addEventListener("focusout", () => {
-        if (!changed) {
-            this._render();
-        }
-    });
+    newEl.addEventListener("focusout", _onFocusOut.bind(sheet));
 
 
-    newEl.addEventListener("keypress", (event) => {
-        if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-            event.stopPropagation();
-            if (!changed) {
-                this._render();
-            }
-        }
-    });
+    newEl.addEventListener("keypress", _onEnter.bind(sheet));
 
     // Select text inside new element
     newEl.focus();
     newEl.select();
+}
+
+function _onEnter(event, changed)  {
+    console.log(event.code)
+    if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+        event.stopPropagation();
+        if (!changed) {
+            let data = {}
+            data[event.currentTarget.dataset.name] = event.currentTarget.value
+            this.document.safeUpdate(data);
+
+        }
+    }
+}
+function _onFocusOut(event, changed)  {
+    event.stopPropagation();
+    if (!changed) {
+        let data = {}
+        data[event.currentTarget.dataset.name] = event.currentTarget.value
+        this.document.safeUpdate(data);
+        this._render()
+    }
 }
 
 export function onToggle(event) {

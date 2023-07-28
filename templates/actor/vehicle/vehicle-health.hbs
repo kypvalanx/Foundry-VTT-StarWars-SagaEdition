@@ -43,31 +43,31 @@
             </div>
         </div>
     </div>
-    <div class="flex-col">
-        <h1 class="top-label label resource-label">Shields</h1>
-        <div class="flex-row">
-            <div class="labeled-input numeric-override" data-override="{{actor.system.shields.override}}" data-override-name="Total Shields" data-override-key="system.shields.override">
-                <label for="maxShields" class="text">Total</label>
-                <input class="left-input" id="maxShields" type="text"
-                       value="{{actor.system.shields.max}}" placeholder="" disabled/>
-            </div>
-            <div class="divider"></div>
-            <div class="labeled-input">
-                <label for="currentShield" class="text">Current</label>
-                <input class="{{#if actor.system.shields.failureChance}}middle-input{{else}}right-input{{/if}}" id="currentShield" type="number" name="system.shields.value" value="{{actor.system.shields.value}}" data-dtype="Number"/>
-            </div>
-            {{#if actor.system.shields.failureChance}}
-                <div class="labeled-input"><label>Failure Chance</label><div class="plain input static">{{actor.system.shields.failureChance}}</div><</div>
 
-                <div class="labeled-input">
-                    <label for="failureChance">Failure Chance</label>
-                    <input class="right-input" id="failureChance" type="text"
-                           value="{{actor.system.defense.fort.total}}" placeholder="" disabled/>
-                </div>
-            {{/if}}
-            <div title="Toggle Shield {{#if actor.system.shields.active}}Off{{else}}On{{/if}}"><a data-action="shield" data-action-type="toggle" class="{{#if actor.system.shields.active}}cursor{{/if}}"><i class="fas fa-shield-virus"></i></a></div>
-            <div title="Shield +5"><a data-action="shield" data-action-type="plus"><i class="fas fa-plus"></i></a></div>
-            <div title="Shield -5"><a data-action="shield" data-action-type="minus"><i class="fas fa-minus"></i></a></div>
+    <h1 class="top-label label resource-label">Shields</h1>
+    <div class="flex-row">
+        <div class="labeled-input numeric-override" data-override="{{actor.system.shields.override}}" data-override-name="Total Shields" data-override-key="system.shields.override">
+            <label for="maxShields" class="text">Total</label>
+            <input class="left-input" id="maxShields" type="text"
+                   value="{{actor.system.shields.max}}" placeholder="" disabled/>
+        </div>
+        <div class="divider"></div>
+        {{#if actor.system.shields.failureChance}}
+            <div class="labeled-input"><label>Failure Chance</label><div class="plain input static">{{actor.system.shields.failureChance}}</div><</div>
+
+            <div class="labeled-input">
+                <label for="failureChance">Failure Chance</label>
+                <input class="middle-input" id="failureChance" type="text"
+                       value="{{actor.system.defense.fort.total}}" placeholder="" disabled/>
+            </div>
+        {{/if}}
+        <div class="labeled-input">
+            <label for="currentShield" class="text">Current</label>
+            <input class="right-input" id="currentShield" type="number" name="system.shields.value" value="{{actor.system.shields.value}}" data-dtype="Number"/>
+
+            <div class="control-2" title="Toggle Shield {{#if actor.system.shields.active}}Off{{else}}On{{/if}}"><a data-action="shield" data-action-type="toggle" class="{{#if actor.system.shields.active}}cursor{{/if}}"><i class="fas fa-shield-virus"></i></a></div>
+            <div class="control-1" title="Shield +5"><a data-action="shield" data-action-type="plus"><i class="fas fa-plus"></i></a></div>
+            <div class="control-0" title="Shield -5"><a data-action="shield" data-action-type="minus"><i class="fas fa-minus"></i></a></div>
         </div>
     </div>
 </div>

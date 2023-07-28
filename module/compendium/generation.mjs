@@ -1,7 +1,7 @@
 import {SWSEItem} from "../item/item.mjs";
 import {SWSEActor} from "../actor/actor.mjs";
 
-async function importCompendium(jsonImport, compendiumName, entity, forceRefresh) {
+async function importCompendium(jsonImport, forceRefresh) {
     let response;
     try {
         response = await fetch(jsonImport);
@@ -13,6 +13,8 @@ async function importCompendium(jsonImport, compendiumName, entity, forceRefresh
         return;
     }
     const content = await response.json();
+    const compendiumName = content.name;
+    const entity = content.type;
 
     let pack = await game.packs.get(`world.${compendiumName.toLowerCase()}`);
 
@@ -101,60 +103,65 @@ export const deleteEmptyCompendiums = async function () {
 
 export const generateCompendiums = async function (forceRefresh = false, type = "Item") {
     console.log("Generating Compendiums...")
-
-    let pack = await game.packs.find(p => p.metadata.label === 'SWSE Abilities');
-    if (pack) {
-        pack.delete();
-    }
-    pack = await game.packs.find(p => p.metadata.label === 'SWSE Force Traditions');
-    if (pack) {
-        pack.delete();
+    let response;
+    try {
+        response = await fetch("systems/swse/raw_export/manifest.json");
+    } catch (e) {
+        return;
     }
 
-
-    if (type.toLowerCase() === "actor") {
-        await importCompendium("systems/swse/raw_export/Vehicles.json", 'Vehicles', "Actor", forceRefresh);
-
-        for(let i = 0; i < 21; i++){
-            await importCompendium(`systems/swse/raw_export/Units CL ${i}.json`, `Units CL ${i}`, "Actor", forceRefresh);
-        }
+    if (response.status === 404) {
+        return;
     }
-    if (type.toLowerCase() === "item") {
-        await importCompendium("systems/swse/raw_export/Traits.json", 'Traits', "Item", forceRefresh);
+    const content = await response.json();
 
-        await importCompendium("systems/swse/raw_export/Destiny.json", 'Destiny', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Background.json", 'Background', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Vehicle Base Types.json", 'Vehicle Base Types', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Vehicle Systems.json", 'Vehicle Systems', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Classes.json", 'Classes', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Feats.json", 'Feats', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Force Powers.json", 'Force Powers', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Force Regimens.json", 'Force Regimens', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Force Secrets.json", 'Force Secrets', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Force Techniques.json", 'Force Techniques', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Affiliations.json", 'Affiliations', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Items.json", 'Items', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Species.json", 'Species', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/Talents.json", 'Talents', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/templates.json", 'Templates', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/beast components.json", 'Beast Components', "Item", forceRefresh);
-
-        await importCompendium("systems/swse/raw_export/languages.json", 'Languages', "Item", forceRefresh);
+    for (const file of content.files) {
+        await importCompendium(file, forceRefresh);
     }
+
+    // if (type.toLowerCase() === "actor") {
+    //     await importCompendium("systems/swse/raw_export/Vehicles.json", 'Vehicles', "Actor", forceRefresh);
+    //
+    //     for(let i = 0; i < 21; i++){
+    //         await importCompendium(`systems/swse/raw_export/Units CL ${i}.json`, `Units CL ${i}`, "Actor", forceRefresh);
+    //     }
+    // }
+    // if (type.toLowerCase() === "item") {
+    //     await importCompendium("systems/swse/raw_export/Traits.json", 'Traits', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Destiny.json", 'Destiny', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Background.json", 'Background', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Vehicle Base Types.json", 'Vehicle Base Types', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Vehicle Systems.json", 'Vehicle Systems', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Classes.json", 'Classes', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Feats.json", 'Feats', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Force Powers.json", 'Force Powers', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Force Regimens.json", 'Force Regimens', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Force Secrets.json", 'Force Secrets', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Force Techniques.json", 'Force Techniques', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Affiliations.json", 'Affiliations', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Items.json", 'Items', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Species.json", 'Species', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/Talents.json", 'Talents', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/templates.json", 'Templates', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/beast components.json", 'Beast Components', "Item", forceRefresh);
+    //
+    //     await importCompendium("systems/swse/raw_export/languages.json", 'Languages', "Item", forceRefresh);
+    // }
     console.log("End Generation")
 }

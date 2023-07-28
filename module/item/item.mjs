@@ -3,7 +3,7 @@ import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
-import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
+import {DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -16,10 +16,14 @@ function createChangeFromAttribute(attr) {
  * @extends {Item}
  */
 export class SWSEItem extends Item {
-    constructor(...args) {
-        super(...args);
 
-        this.hasItemOwner = this.hasItemOwner || false;
+    async _preUpdate(changed, options, user) {
+        super._preUpdate(changed, options, user);
+        if(changed.system?.dirty !== false){
+            changed.system = changed.system || {};
+            changed.system.dirty = true;
+        }
+        console.log(changed)
     }
 
     /**
@@ -28,29 +32,39 @@ export class SWSEItem extends Item {
     prepareData() {
         super.prepareData();
         this._pendingUpdate = {};
-        // Get the Item's data
-        const system = this.system;
-        //itemData.finalName = this.name;
-
-        this.system.changes = this.system.changes || []
+        this.hasItemOwner = this.hasItemOwner || false;
 
         if(!Array.isArray(this.system.changes)){
-            this.system.changes = Object.values(this.system.changes)
+            this.system.changes = Object.values(this.system.changes || {})
+        } else{
+            this.system.changes = this.system.changes || []
         }
         if(this.updateLegacyItem()){
             return;
         }
-        this.system.attributes = this.system.attributes || {}
+        //this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        this.name = SWSEItem.buildItemName(this);
+        if(this.system.dirty || !this.system.name){
+            this.name = SWSEItem.buildItemName(this);
+            if(this.name !== this.system.name){
+                this.safeUpdate({"system.name": this.name});
+                return;
+            }
+        } else {
+            this.name = this.system.name;
+        }
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
         if (this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
-        if (this.type === "weapon") this.prepareWeapon(system);
-        if (this.type === "armor") this.prepareArmor(system);
-        if (this.type === "feat") this.prepareFeatData(system);
+        if (this.type === "weapon") this.prepareWeapon(this.system);
+        if (this.type === "armor") this.prepareArmor(this.system);
+        if (this.type === "feat") this.prepareFeatData(this.system);
+
+        if (this.system.dirty){
+            this.safeUpdate({"system.dirty": false});
+        }
     }
 
     updateLegacyItem() {
@@ -114,7 +128,7 @@ export class SWSEItem extends Item {
     get changes() {
         const changes = []
         changes.push(...this.system.changes);
-        changes.push(...Object.values(this.system.attributes).map(attr => createChangeFromAttribute(attr)))
+        changes.push(...Object.values(this.system.attributes || {}).map(attr => createChangeFromAttribute(attr)))
         return changes;
     }
 
@@ -932,29 +946,25 @@ export class SWSEItem extends Item {
     }
 
 
-    _crawlAttributes(data, funct) {
-        if (!data) {
+    _crawlAttributes(system, funct) {
+        if (!system) {
             return;
         }
-        for (let attribute of Object.values(data.attributes) || []) {
-            funct(attribute)
+        for (let change of system.changes || []) {
+            funct(change)
         }
-        if (data.levels) {
-
-            for (let level of Object.values(data.levels) || []) {
-
+        if (system.levels) {
+            for (let level of Object.values(system.levels) || []) {
                 for (let attribute of Object.values(level.attributes) || []) {
                     funct(attribute)
                 }
             }
         }
-        //funct(data);
-        if (data.modes) {
-            for (let mode of Object.values(data.modes) || []) {
+        if (system.modes) {
+            for (let mode of Object.values(system.modes) || []) {
                 this._crawlAttributes(mode, funct)
             }
         }
-
     }
 
     _crawlProvidedItems(data, funct) {

@@ -35,6 +35,38 @@
       "entity": "Item"
     },
     {
+      "name": "armor",
+      "label": "Armor",
+      "path": "packs/armor",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
+      "name": "weapons",
+      "label": "Weapons",
+      "path": "packs/weapon",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
+      "name": "equipment",
+      "label": "Equipment",
+      "path": "packs/equipment",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
+      "name": "backgrounds",
+      "label": "Backgrounds",
+      "path": "packs/backgrounds",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
       "name": "classes",
       "label": "Classes",
       "path": "packs/classes",
@@ -123,17 +155,9 @@
       "entity": "Item"
     },
     {
-      "name": "destiny",
-      "label": "Destiny",
-      "path": "packs/destiny",
-      "type": "Item",
-      "system": "swse",
-      "entity": "Item"
-    },
-    {
-      "name": "background",
-      "label": "Background",
-      "path": "packs/background",
+      "name": "destinies",
+      "label": "Destinies",
+      "path": "packs/destinies",
       "type": "Item",
       "system": "swse",
       "entity": "Item"
