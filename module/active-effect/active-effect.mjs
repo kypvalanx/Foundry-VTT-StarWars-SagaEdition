@@ -37,6 +37,26 @@ export class SWSEActiveEffect extends ActiveEffect {
         let data = {"flags.swse.links": links};
         this.safeUpdate(data);
     }
+    addLinks(that, type){
+        switch (type) {
+            case "parent":
+                this.addLink("child", that)
+                that.addLink("parent", this)
+                break;
+            case "child":
+                this.addLink("parent", that)
+                that.addLink("child", this)
+                break;
+            case "mirror":
+                this.addLink("mirror", that)
+                that.addLink("mirror", this)
+                break;
+            case "exclusive":
+                this.addLink("exclusive", that)
+                that.addLink("exclusive", this)
+                break;
+        }
+    }
 
     removeLink(uuid){
         let links = this.flags.swse?.links || [];

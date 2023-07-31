@@ -1547,27 +1547,8 @@ export function linkEffects(effectId1, effectId2) {
                 label: "Create Links",
                 callback: (html) => {
                     let select = html.find("select")[0];
-                    select.value;
-                    console.log(select.value)
 
-                    switch (select.value) {
-                        case "parent":
-                            effect1.addLink("child", effect2)
-                            effect2.addLink("parent", effect1)
-                            break;
-                        case "child":
-                            effect1.addLink("parent", effect2)
-                            effect2.addLink("child", effect1)
-                            break;
-                        case "mirror":
-                            effect1.addLink("mirror", effect2)
-                            effect2.addLink("mirror", effect1)
-                            break;
-                        case "exclusive":
-                            effect1.addLink("exclusive", effect2)
-                            effect2.addLink("exclusive", effect1)
-                            break;
-                    }
+                    effect1.addLinks(effect2, select.value);
                 }
             },
             saveMacro: {

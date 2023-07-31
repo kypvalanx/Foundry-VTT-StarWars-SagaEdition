@@ -535,7 +535,10 @@
       "beastAttack",
       "beastSense",
       "beastType",
-      "beastQuality"
+      "beastQuality",
+      "droid system",
+      "hazard",
+      "implant"
     ],
     "templates": {
       "base": {
