@@ -59,7 +59,7 @@ async function importCompendium(jsonImport, forceRefresh) {
                     groupedEffects.forEach(e => e.addLinks(effect, e.flags.swse.type.toLowerCase()))
                     console.log(effect)
                 }
-                delete effect.flags.swse.linkData
+                //delete effect.flags.swse.linkData
             }
             promises.push(collection.importDocument(item));
         }
