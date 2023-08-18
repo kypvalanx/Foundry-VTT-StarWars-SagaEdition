@@ -13,7 +13,7 @@ async function importCompendium(jsonImport, forceRefresh) {
         return;
     }
     const content = await response.json();
-    const compendiumName = content.name;
+    const compendiumName = content.name.replace(" ", "-");
     const entity = content.type;
 
     let pack = await game.packs.get(`world.${compendiumName.toLowerCase()}`);
@@ -54,9 +54,9 @@ async function importCompendium(jsonImport, forceRefresh) {
         let items = await SWSEItem.create(content.entries);
         for (let item of items) {
             for(let effect of item.effects){
-                for(let link of effect.flags.swse.linkData){
+                for(let link of effect.flags.swse.linkData || []){
                     let groupedEffects = item.effects.filter(effect => effect.flags.swse.group === link.group)
-                    groupedEffects.forEach(e => e.addLinks(effect, e.flags.swse.type.toLowerCase()))
+                    groupedEffects.forEach(e => e.addLinks(effect, link.type.toLowerCase()))
                     console.log(effect)
                 }
                 //delete effect.flags.swse.linkData

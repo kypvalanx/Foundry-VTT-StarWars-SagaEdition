@@ -59,6 +59,22 @@
       "entity": "Item"
     },
     {
+      "name": "hazard",
+      "label": "Hazards",
+      "path": "packs/hazard",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
+      "name": "implant",
+      "label": "Implants",
+      "path": "packs/implant",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
       "name": "backgrounds",
       "label": "Backgrounds",
       "path": "packs/backgrounds",
@@ -70,6 +86,14 @@
       "name": "classes",
       "label": "Classes",
       "path": "packs/classes",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
+      "name": "droid systems",
+      "label": "Droid Systems",
+      "path": "packs/droid-system",
       "type": "Item",
       "system": "swse",
       "entity": "Item"

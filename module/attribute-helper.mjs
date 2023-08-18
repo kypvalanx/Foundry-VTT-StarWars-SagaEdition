@@ -25,7 +25,8 @@ function getAttributesFromClassLevel(entity, classLevel) {
     let attributes = [];
     if (classLevel > 0) {
         let level = entity.system.levels[classLevel];
-        for (let attribute of Object.values(level.system.changes)) {
+        const changes = level.system?.changes;
+        for (let attribute of Array.isArray(changes) ? changes : Object.values(changes || {})) {
             attributes.push(appendSourceMeta(attribute, entity._id, entity.name, `${entity.name} level ${classLevel}`));
         }
     }

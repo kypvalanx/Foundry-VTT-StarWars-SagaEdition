@@ -1465,9 +1465,9 @@ export function safeInsert(object, s, value) {
     return update;
 }
 
-export function convertOverrideToMode(changes, update) {
+export function convertOverrideToMode(changes) {
     if (changes) {
-        for (const [idx, change] of changes.entries()) {
+        for (const change of changes.entries()) {
             if (change.mode) {
                 continue;
             }
@@ -1478,8 +1478,8 @@ export function convertOverrideToMode(changes, update) {
             } else {
                 change.mode = CONST.ACTIVE_EFFECT_MODES.ADD;
             }
-            update[`system.changes.${idx}`] = change;
         }
+        return changes;
     }
 }
 

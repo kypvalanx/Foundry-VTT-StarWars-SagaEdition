@@ -68,10 +68,14 @@ export class SWSEItem extends Item {
     }
 
     updateLegacyItem() {
+        if(!this.canUserModify(game.user, 'update')){
+            return;
+        }
         let update = {};
         let activeEffects = [];
         const changes = this.system.changes;
-        if (this.system.attributes && this.canUserModify(game.user, 'update')) {
+
+        if (this.system.attributes) {
             for (let change of Object.values(this.system.attributes)) {
                 if (change) {
                     changes.push(change);
@@ -80,7 +84,7 @@ export class SWSEItem extends Item {
             update['system.changes'] = changes;
             update['system.attributes'] = null;
         }
-        if (this.system.modes && this.canUserModify(game.user, 'update')) {
+        if (this.system.modes) {
             let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
             if(modes){
                 update["system.modes"] = null;
@@ -132,6 +136,10 @@ export class SWSEItem extends Item {
         return changes;
     }
 
+    updateOrAddChange(change){
+        this.system.changes.filter(c => c.key === change.key && c.mode === change.mode)
+    }
+
     get toggles() {
         return this.system.toggles;
     }
@@ -149,6 +157,9 @@ export class SWSEItem extends Item {
                 attributeFilter: (attr) => attr.source !== this.id
             });
         })
+    }
+    get levelsTaken(){
+        return this.system.levelsTaken || []
     }
 
     get strippable() {

@@ -194,6 +194,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
+        html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
@@ -390,6 +391,7 @@ export class SWSEActorSheet extends ActorSheet {
         let options = this.buildAgeDialog(sheet);
         await Dialog.prompt(options);
     }
+
 
     async _selectGender(event, sheet) {
         let options = this.buildGenderDialog(sheet);
@@ -739,7 +741,7 @@ export class SWSEActorSheet extends ActorSheet {
         let context = {};
         context.newFromCompendium = true;
 
-        await this.actor.addItems([data], undefined, context);
+        await this.object.addItems([data], undefined, context);
 
     }
 
@@ -970,7 +972,7 @@ export class SWSEActorSheet extends ActorSheet {
         let itemId = li.data("itemId");
         let itemToDelete = this.actor.items.get(itemId);
         if (game.keyboard.downKeys.has("Shift")) {
-            await this.actor.removeItem(itemId);
+            await this.object.removeItem(itemId);
         } else {
             button.disabled = true;
 
@@ -979,7 +981,33 @@ export class SWSEActorSheet extends ActorSheet {
                 title: title,
                 content: title,
                 yes: async () => {
-                    await this.actor.removeItem(itemId);
+                    await this.object.removeItem(itemId);
+                    button.disabled = false
+                },
+                no: () => (button.disabled = false),
+            });
+        }
+    }
+    async removeClassLevel(event, sheet) {
+        event.preventDefault();
+        const button = event.currentTarget;
+        if (button.disabled) return;
+
+        const li = $(button).closest(".item");
+
+        let itemId = li.data("itemId");
+        let itemToDelete = this.actor.items.get(itemId);
+        if (game.keyboard.downKeys.has("Shift") || game.keyboard.downKeys.has("ShiftLeft")) {
+            await this.object.removeClassLevel(itemId);
+        } else {
+            button.disabled = true;
+
+            let title = `Are you sure you want to delete ${itemToDelete.finalName}`;
+            await Dialog.confirm({
+                title: title,
+                content: title,
+                yes: async () => {
+                    await this.object.removeClassLevel(itemId);
                     button.disabled = false
                 },
                 no: () => (button.disabled = false),

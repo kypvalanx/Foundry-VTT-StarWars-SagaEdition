@@ -635,23 +635,28 @@ export class SWSEActor extends Actor {
             return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
         })
     }
-
-    get speciesList() {
-        return this.getCached("speciesList", () => {
-            return filterItemsByType(this.items.values(), "species");
-        })
-    }
-
     get species() {
         return this.getCached("species", () => {
-            return (this.speciesList.length > 0 ? this.speciesList[0] : null);
+            const speciesList = filterItemsByType(this.items.values(), "species");
+            return (speciesList.length > 0 ? speciesList[0] : null);
         })
     }
 
     get classes() {
         return this.getCached("classes", () => {
-            return filterItemsByType(this.items.values(), "class");
+            const classObjects = filterItemsByType(this.items.values(), "class");
+            let classes = [];
+            for (let co of classObjects) {
+                for (let level of co.levelsTaken) {
+                    classes[level - 1] = co;
+                }
+            }
+            return classes;
         })
+    }
+
+    get poorlyFormattedClasses() {
+        return filterItemsByType(this.items.values(), "class").filter(c => c.levelsTaken.length === 0);
     }
 
     get weapons() {
@@ -823,16 +828,38 @@ export class SWSEActor extends Actor {
         })
     }
 
+    async removeItems(itemIds) {
+        let ids = [];
+        ids.push(...itemIds)
+        for (let itemId of itemIds) {
+            await this.removeChildItems(itemId);
+            ids.push(...await this.removeSuppliedItems(itemId));
+        }
+        await this.deleteEmbeddedDocuments("Item", ids);
+    }
+
     async removeItem(itemId) {
         await this.removeChildItems(itemId);
         let ids = await this.removeSuppliedItems(itemId);
         ids.push(itemId);
         await this.deleteEmbeddedDocuments("Item", ids);
     }
+    async removeClassLevel(itemId) {
+        let classItem = this.items.get(itemId)
+        const levelsTaken = classItem.levelsTaken;
+        if(levelsTaken.length > 1){
+            await classItem.safeUpdate({"system.levelsTaken": levelsTaken.slice(0, levelsTaken.length - 1)});
+        } else {
+            await this.removeItem(itemId);
+        }
+    }
 
     async removeChildItems(itemId) {
         let itemToDelete = this.items.get(itemId);
-        for (let childItem of itemToDelete.system.items || []) {
+        if(!itemToDelete){
+            return;
+        }
+        for (let childItem of itemToDelete.system?.items || []) {
             let ownedItem = this.items.get(childItem._id);
             await itemToDelete.revokeOwnership(ownedItem);
         }
@@ -2511,88 +2538,117 @@ export class SWSEActor extends Actor {
         if (!Array.isArray(items)) {
             items = [items];
         }
-        let notificationMessage = "";
+        let notificationMessages = "";
         let addedItems = [];
         for (let providedItem of items.filter(item => item && ((item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate))) {
-            //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
-            let {payload, itemName, entity} = await this.resolveEntity(providedItem);
-
-            if (!entity) {
-                if (options.suppressWarnings) {
-                    console.debug(`attempted to add ${itemName}`, arguments)
-                } else {
-                    console.warn(`attempted to add ${itemName}`, arguments)
-                }
-                continue;
-            }
-
-            entity.prepareData();
-
-
-            //TODO weird spot for this.  maybe this can leverage the newer payload system
-            if (itemName === "Bonus Feat" && payload) {
-                for (let attr of Object.values(entity.system.attributes)) {
-                    if (attr.key === "provides") {
-                        attr.key = "bonusFeat";
-                        attr.value = payload;
-                    }
-                }
-            }
-
-            entity.addItemAttributes(providedItem.attributes);
-            entity.addProvidedItems(providedItem.providedItems);
-            entity.setParent(parent, providedItem.unlocked);
-            entity.setPrerequisite(providedItem.prerequisite);
-
-            //TODO payload should be deprecated in favor of payloads
-            if (!!payload) {
-                entity.setChoice(payload)
-                entity.setPayload(payload);
-            }
-            for (let payload of Object.entries(providedItem.payloads || {})) {
-                entity.setChoice(payload[1]);
-                entity.setPayload(payload[1], payload[0]);
-            }
-
-
-            entity.setTextDescription();
-            notificationMessage = notificationMessage + `<li>${entity.finalName}</li>`
-            let childOptions = JSON.parse(JSON.stringify(options))
-            //childOptions.type = "provided";
-            //childOptions.skipPrerequisite = false;
-            childOptions.itemAnswers = providedItem.answers;
-            //childOptions.newFromCompendium = false;
-            let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
-
-            //do stuff based on type of item
-            let modifications = providedItem.modifications;
-            if (!!modifications) {
-                let addedModifications = [];
-                addedModifications = await this.addItems(modifications, null, {
-                    returnAdded: true,
-                    actor: options.actor,
-                    suppressWarnings: options.suppressWarnings
-                });
-                for (let addedModification of addedModifications) {
-                    await addedItem.takeOwnership(addedModification)
-                }
-            }
+            let {notificationMessage, addedItem} = await this.addItem(providedItem, options, parent);
+            notificationMessages += notificationMessage;
             addedItems.push(addedItem);
-
-            let equip = providedItem.equip;
-            if (equip) {
-                await this.equipItem(addedItem._id, equip, options)
-            }
-            if (providedItem.equipToParent) {
-                await parent.takeOwnership(addedItem);
-            }
         }
         if (options.returnAdded) {
             return addedItems;
         }
-        return notificationMessage;
+        return notificationMessages;
     }
 
+
+    async addItem(providedItem, options, parent) {
+        //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
+        let {payload, itemName, entity} = await this.resolveEntity(providedItem);
+
+        if (!entity) {
+            if (options.suppressWarnings) {
+                console.debug(`attempted to add ${itemName}`)
+            } else {
+                console.warn(`attempted to add ${itemName}`)
+            }
+            return;
+        }
+
+        if(entity.type === "class"){
+            let existing = this.classes.find(item => item.name === entity.name)
+            let levels = [0];
+            for(let clazz of this.classes){
+                levels.push(...clazz.levelsTaken)
+            }
+
+            let nextLevel = Math.max(...levels) + 1
+
+
+            if(existing){
+                let levels = existing.levelsTaken;
+                levels.push(nextLevel);
+                await existing.safeUpdate({"system.levelsTaken": levels});
+                let notificationMessage = `<li>Took level of ${existing.name}</li>`
+                let addedItem = undefined;
+                return {notificationMessage, addedItem}
+            }
+
+            entity.system.levelsTaken = [nextLevel];
+        }
+
+        entity.prepareData();
+
+
+        //TODO weird spot for this.  maybe this can leverage the newer payload system
+        if (itemName === "Bonus Feat" && payload) {
+            for (let attr of Object.values(entity.system.attributes || {})) {
+                if (attr.key === "provides") {
+                    attr.key = "bonusFeat";
+                    attr.value = payload;
+                }
+            }
+        }
+
+        entity.addItemAttributes(providedItem.attributes);
+        entity.addProvidedItems(providedItem.providedItems);
+        entity.setParent(parent, providedItem.unlocked);
+        entity.setPrerequisite(providedItem.prerequisite);
+
+        //TODO payload should be deprecated in favor of payloads
+        if (!!payload) {
+            entity.setChoice(payload)
+            entity.setPayload(payload);
+        }
+        for (let payload of Object.entries(providedItem.payloads || {})) {
+            entity.setChoice(payload[1]);
+            entity.setPayload(payload[1], payload[0]);
+        }
+
+
+        entity.setTextDescription();
+        let notificationMessage = `<li>${entity.finalName}</li>`
+        let childOptions = JSON.parse(JSON.stringify(options))
+        //childOptions.type = "provided";
+        //childOptions.skipPrerequisite = false;
+        childOptions.itemAnswers = providedItem.answers;
+        //childOptions.newFromCompendium = false;
+        let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
+
+        //do stuff based on type of item
+        let modifications = providedItem.modifications;
+        if (!!modifications) {
+            let addedModifications = [];
+            addedModifications = await this.addItems(modifications, null, {
+                returnAdded: true,
+                actor: options.actor,
+                suppressWarnings: options.suppressWarnings
+            });
+            for (let addedModification of addedModifications) {
+                await addedItem.takeOwnership(addedModification)
+            }
+        }
+        //addedItems.push(addedItem);
+
+        let equip = providedItem.equip;
+        if (equip) {
+            await this.equipItem(addedItem._id, equip, options)
+        }
+        if (providedItem.equipToParent) {
+            await parent.takeOwnership(addedItem);
+        }
+        return {notificationMessage, addedItem};
+    }
 
     async resolveEntity(item) {
         let entity = undefined
@@ -2838,13 +2894,70 @@ export class SWSEActor extends Actor {
 
     updateLegacyActor() {
         let update = {};
-        let changes = !this.system?.changes ? undefined : Array.isArray(this.system.changes) ? this.system.changes : Object.values(this.system.changes);
+
+        // what class items do we have
+
+        let classes = this.items.filter(i => i.type === "class")
+        // do any of these class items not have a list of levels taken at?
+        if (classes.find(c => !c.system.levelsTaken ||  (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0)) {
+            // if so lets figure out what levels each class was taken
+            let orderedClasses = [];
+            let unsortedClasses = [];
+            for (let c of classes) {
+                let levels = c.system.levelsTaken;
+                if (!levels) {
+                    unsortedClasses.push(c.name);
+                    continue;
+                }
+                for (let level of levels) {
+                    orderedClasses[level] = c.name;
+                }
+            }
+
+            for (let uc of unsortedClasses) {
+                let found = false;
+                let i = 0;
+                for (let orderedClass of orderedClasses) {
+                    if (!orderedClass) {
+                        orderedClasses[i] = uc;
+                        found = true;
+                        break;
+                    }
+                    i++;
+                }
+                if (!found) {
+                    orderedClasses.push(uc);
+                }
+            }
+
+            let preppedForRemoval = [];
+            for (let distinct of unsortedClasses.distinct()) {
+                let classesOfType = classes.filter(c => c.name === distinct)
+                let indicies = [];
+                let index = 0;
+                while (true) {
+                    index = orderedClasses.indexOf(distinct, index);
+                    if (index === -1) {
+                        break;
+                    }
+                    indicies.push(index++)
+                }
+                preppedForRemoval.push(... classesOfType.slice(1).map(c => c.id))
+                classesOfType[0].safeUpdate({"system.levelsTaken": indicies});
+            }
+            preppedForRemoval.push(... classes.filter(c => (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
+
+            this.removeItems(preppedForRemoval)
+        }
+
+
         if (!Array.isArray(this.system.changes)) {
+            let changes = !this.system?.changes ? undefined : Object.values(this.system.changes);
+            convertOverrideToMode(changes);
             if (changes) {
                 update['system.changes'] = changes;
             }
         }
-        convertOverrideToMode(changes, update);
         let response = false;
         if (Object.keys(update).length > 0) {
             this.safeUpdate(update)
