@@ -2497,9 +2497,9 @@ export class SWSEActor extends Actor {
             }
         } else {
             if (context.isFirstLevel) {
-                item.addAttribute({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
+                item.addChange({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
             } else if (isFirstLevelOfClass) {
-                item.addAttribute({key: "provides", value: `${item.name} Starting Feats`})
+                item.addChange({key: "provides", value: `${item.name} Starting Feats`})
             }
         }
 

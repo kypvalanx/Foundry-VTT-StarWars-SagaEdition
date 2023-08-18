@@ -1073,16 +1073,17 @@ export class SWSEItem extends Item {
         return subtypes.includes(this.system.subtype?.toLowerCase()) || subtypes.includes(this.system.attributes?.treatedAsForRange?.toLowerCase())
     }
 
-    addAttribute(attribute) {
+    addChange(attribute) {
         let data = {};
-        let attributes = this.system.attributes
-        let attributeId = 0;
-        while (attributes[attributeId]) {
-            attributeId++;
+        let changes = this.system.changes
+        let chanceIndex = 0;
+        while (changes[chanceIndex]) {
+            chanceIndex++;
         }
 
-        data.attributes = {};
-        data.attributes[attributeId] = attribute;
+        data.system = {};
+        data.system.changes = [];
+        data.system.changes[chanceIndex] = attribute;
         this.updateData(data);
     }
 
