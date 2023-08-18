@@ -21,16 +21,14 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
     return attribute
 }
 
-function getAttributesFromClassLevel(entity, classLevel) {
-    let attributes = [];
-    if (classLevel > 0) {
-        let level = entity.system.levels[classLevel];
-        const changes = level.system?.changes;
-        for (let attribute of Array.isArray(changes) ? changes : Object.values(changes || {})) {
-            attributes.push(appendSourceMeta(attribute, entity._id, entity.name, `${entity.name} level ${classLevel}`));
-        }
+function getAttributesFromClassLevel(entity) {
+    let changes = [];
+    const classLevel = entity.system.levelsTaken.length;
+    const levels = entity.effects.filter(e => e.flags.swse.isLevel && e.flags.swse.level <=classLevel)
+    for(const level of levels){
+        changes.push(...level.changes);
     }
-    return attributes;
+    return changes;
 }
 
 function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
@@ -117,14 +115,9 @@ function getChangesFromDocument(data) {
     let fn = () => {
         let allAttributes = [];
         if(!data.skipLocal){
-            if (document.type !== 'class') {
-                allAttributes.push(...getLocalChangesOnDocument(document))
-            } else {
-                let classLevel = data.duplicates || 0;
-                if (classLevel < 2) {
-                    allAttributes.push(...getLocalChangesOnDocument(document))
-                }
-                allAttributes.push(...getAttributesFromClassLevel(document, classLevel))
+            allAttributes.push(...getLocalChangesOnDocument(document))
+            if (document.type === 'class') {
+                allAttributes.push(...getAttributesFromClassLevel(document))
             }
         }
 
