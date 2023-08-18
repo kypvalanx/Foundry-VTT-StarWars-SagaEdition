@@ -33,18 +33,14 @@ function getAttributesFromClassLevel(entity) {
 
 function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
     let attributes = [];
-    let names = {};
     let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
     items = items.filter(i => !!i)
     if (predicate) {
         items = items.filter(predicate)
     }
     for (let item of items) {
-        let duplicates = (names[item.name] || 0) + 1;
-        names[item.name] = duplicates;
         const changesFromDocuments = getChangesFromDocuments({
             entity: item,
-            duplicates,
             recursive: true,
             parent: entity
         });
@@ -127,7 +123,6 @@ function getChangesFromDocument(data) {
     };
     return document.getCached ? document.getCached({
         fn: "getChangesFromDocument",
-        duplicates: data.duplicates,
         predicate: data.predicate,
         embeddedItemOverride: data.embeddedItemOverride,
         skipLocal: data.skipLocal
@@ -148,7 +143,6 @@ function getChangesFromDocuments(data) {
                 entity: entity,
                 attributeKey: data.attributeKey,
                 itemFilter: data.itemFilter,
-                duplicates: data.duplicates,
                 recursive: data.recursive
             }))
         }
@@ -164,7 +158,6 @@ function getChangesFromDocuments(data) {
  * @param data.attributeKey {string}
  * @param data.attributeFilter {function}
  * @param data.itemFilter {function} filters out child items based on a filter
- * @param data.duplicates {number}
  * @param data.reduce {string}
  * @param data.recursive {boolean}
  * @returns {*|string|[]|*[]}
