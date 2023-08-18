@@ -94,9 +94,12 @@ function getChangesFromActiveEffects(document) {
         function isItemModifier(effect) {
             return effect.flags.swse?.itemModifier;
         }
+        function isClassLevel(effect) {
+            return effect.flags.swse?.isLevel;
+        }
 
         for (let effect of document.effects?.values() || []) {
-            if (isItemModifier(effect) || effect.disabled === false) {
+            if (!isClassLevel(effect) && (isItemModifier(effect) || effect.disabled === false)) {
                 attributes.push(...extractEffectChange(effect.changes || [], effect))
             }
         }
@@ -118,9 +121,11 @@ function getChangesFromDocument(data) {
         }
 
         allAttributes.push(...getAttributesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
-        //allAttributes.push(...getChangesFromActiveEffects(document));
+        allAttributes.push(...getChangesFromActiveEffects(document));
         return allAttributes;
     };
+
+
     return document.getCached ? document.getCached({
         fn: "getChangesFromDocument",
         predicate: data.predicate,
