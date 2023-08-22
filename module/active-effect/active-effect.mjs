@@ -96,6 +96,10 @@ export class SWSEActiveEffect extends ActiveEffect {
         return disabled
     }
 
+    get isMode(){
+        return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
+    }
+
     get hasLinks(){
         return this.links.length > 0;
     }
@@ -105,11 +109,11 @@ export class SWSEActiveEffect extends ActiveEffect {
     }
 
     get hasDuration(){
-        return !this.flags.swse?.itemModifier
+        return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
     get hasDisable(){
-        return !this.flags.swse?.itemModifier
+        return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
     static async _onCreateDocuments(documents, context) {

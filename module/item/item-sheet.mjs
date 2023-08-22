@@ -3,15 +3,15 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-import {SWSEItem} from "./item.mjs";
 import {getParentByHTMLClass, linkEffects, onCollapseToggle, toNumber} from "../common/util.mjs";
 import {
     _adjustPropertyBySpan,
-    onChangeControl,
-    onSpanTextInput,
     changeCheckbox,
     changeSelect,
-    changeText, onEffectControl,
+    changeText,
+    onChangeControl,
+    onEffectControl,
+    onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
 
@@ -641,23 +641,15 @@ export class SWSEItemSheet extends ItemSheet {
     _onClassControl(event) {
         let element = $(event.currentTarget);
 
-        let system = this.item.system || this.item._source.system
-        let levelKeys = Object.values(system.levels).filter(i => !!i).map(i => parseInt(i.level));
-        let updateData = {};
+        let highestLevel = this.object.levels.map(c => c.flags.swse.level).reduce((a,b)=> Math.max(a,b),0);
         switch (element.data("type")){
             case "add-level":
-                let newLevel = Math.max(...levelKeys) + 1;
-
-                updateData.levels = {};
-                updateData.levels[newLevel] = {data:{description:"", attributes:{}}, level:`${newLevel}`, type:"level"};
+                this.object.addClassLevel(highestLevel + 1)
                 break;
             case "remove-level":
-                let currentLevel = Math.max(...levelKeys)
-                updateData.levels = {};
-                updateData.levels[currentLevel] = null;
+                this.object.removeClassLevel(highestLevel)
                 break;
         }
-        this.item.updateData(updateData);
     }
 
     _onProvidedItemControl(event) {

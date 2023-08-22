@@ -103,6 +103,10 @@ export class SWSEActor extends Actor {
         await this.safeUpdate({"token.actorLink": val})
     }
 
+    applyActiveEffects() {
+        //disable default effect resolution
+    }
+
     /**
      * Augment the basic actor data with additional dynamic data.
      */

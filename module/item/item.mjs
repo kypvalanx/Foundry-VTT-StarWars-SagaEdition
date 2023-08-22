@@ -3,7 +3,7 @@ import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
-import {DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
+import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -180,6 +180,33 @@ export class SWSEItem extends Item {
 
     get hasLevels() {
         return 'class' === this.type
+    }
+
+    get levels(){
+        const array = this.effects
+            .filter(e => e.flags.swse.isLevel)
+            .sort((a,b) => a.flags.swse.level - b.flags.swse.level);
+        return array
+    }
+
+    addClassLevel(level){
+        let changes = [];
+        let activeEffect = DEFAULT_LEVEL_EFFECT;
+        activeEffect.name = `Level ${level}`;
+        activeEffect.level = level;
+        activeEffect.changes = changes;
+        activeEffect.disabled = true;
+
+        if (this.canUserModify(game.user, 'update')) {
+            this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        }
+    }
+
+    removeClassLevel(level){
+        const id = this.levels.find(l => l.flags.swse.level === level || !l.flags.swse.level).id;
+        if (this.canUserModify(game.user, 'update')) {
+            this.deleteEmbeddedDocuments("ActiveEffect",[id]);
+        }
     }
 
     _onCreate(data, options, userId) {

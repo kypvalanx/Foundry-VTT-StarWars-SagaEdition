@@ -11,7 +11,9 @@
     {{#each changes as |change i|}}
         {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i modes=../modes}}
     {{/each}}
-    {{#each inheritedChanges as |change i|}}
-        {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true modes=../modes}}
-    {{/each}}
+        {{#if inheritedChanges}}
+            {{#each inheritedChanges as |change i|}}
+                {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true modes=../modes}}
+            {{/each}}
+        {{/if}}
 </ol>

@@ -228,7 +228,7 @@ export function getInheritableAttribute(data = {}) {
 export function extractEffectChange(changes, entity) {
     let values = [];
     for (let attribute of Object.values(changes || {})) {
-        values.push(appendSourceMeta(attribute, entity._id, entity.label, entity.label));
+        values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.name));
     }
     return values;
 }

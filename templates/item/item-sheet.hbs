@@ -57,7 +57,7 @@
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
         <a class="item" data-tab="summary"><!--<i class="fas fa-book"></i>--> {{localize "ITEM.TabSummary"}}</a>
-        <a class="item" data-tab="effects"><!--<i class="fas fa-cogs"></i>--> {{localize "ITEM.TabEffects"}}</a>
+        <a class="item" data-tab="effects"><!--<i class="fas fa-cogs"></i>--> {{localize "ITEM.TabChanges"}}</a>
         <a class="item" data-tab="provided">Provided</a>
         {{#if item.hasPrerequisites}}<a class="item" data-tab="prerequisites">Prerequisites</a>{{/if}}
         {{#if item.strippable}}<a class="item" data-tab="stripping">Stripping</a>{{/if}}
@@ -154,7 +154,7 @@
             </div>
             <ol class="items-list">
                 {{#each item.effects as |mode id|}}
-                    {{#unless mode.flags.swse.itemModifier}}
+                    {{#if mode.isMode}}
                         <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
                             <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
                             </div>
@@ -166,7 +166,7 @@
                                 <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
                             </div>
                         </li>
-                    {{/unless}}
+                    {{/if}}
                 {{/each}}
             </ol>
         </div>

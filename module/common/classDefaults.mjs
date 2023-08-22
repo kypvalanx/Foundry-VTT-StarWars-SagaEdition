@@ -10,6 +10,17 @@ export const DEFAULT_MODIFICATION_EFFECT = {
             itemModifier: true
         }
     }
+};export const DEFAULT_LEVEL_EFFECT = {
+    label: "New Level",
+    changes: [],
+    icon: "icons/svg/item-bag.svg",
+    disabled: false,
+    flags: {
+        swse: {
+            description: "",
+            isLevel: true
+        }
+    }
 };
 
 // noinspection JSClosureCompilerSyntax
