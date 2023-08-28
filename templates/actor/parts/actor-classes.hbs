@@ -28,7 +28,7 @@
             <td>
                 {{#if class.canRerollHealth}}
                     <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}"
-                       data-item="{{class.id}}" data-item-attribute="rolledHp"
+                       data-item="{{class.id}}" data-item-attribute="rolledHp" data-level="{{sum id 1}}"
                        data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
                     </a>{{/if}}</td>
             <td>{{../actor.system.attributes.con.mod}}</td>

@@ -216,21 +216,25 @@ export class SWSEActorSheet extends ActorSheet {
             const value = event.currentTarget.value;
 
             if (target.data("action") === "update-level-attribute") {
-                const classObject = this.document.items.get(target.data("item"));
-                const levelEffect = classObject.level(parseInt(target.data("level")));
-                let change = levelEffect.changes.find(change => change.key === target.data("attribute"))
-                let data = {};
-
-                data.changes = levelEffect.changes;
-                if (!change) {
-                    change = {key: target.data("attribute"), mode: 2, value}
-                    data.changes.push(change);
-                } else {
-                    change.value = value;
-                }
-                levelEffect.safeUpdate(data);
-                this._render()
+                this.updateItemEffectAttribute(value, target.data("item"), parseInt(target.data("level")), target.data("attribute"));
             }
+    }
+
+    updateItemEffectAttribute( value, itemId, level, attributeKey) {
+        const classObject = this.document.items.get(itemId);
+        const levelEffect = classObject.level(level);
+        let change = levelEffect.changes.find(change => change.key === attributeKey)
+        let data = {};
+
+        data.changes = levelEffect.changes;
+        if (!change) {
+            change = {key: attributeKey, mode: 2, value}
+            data.changes.push(change);
+        } else {
+            change.value = value;
+        }
+        levelEffect.safeUpdate(data);
+        this._render()
     }
 
     _onToChat(event) {
@@ -925,10 +929,15 @@ export class SWSEActorSheet extends ActorSheet {
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
             roll = roll.roll({async: false});
             let item = dataset.item;
-            if (dataset.itemAttribute) {
-                if (item) {
+            let level = dataset.level
+            const attributeKey = dataset.itemAttribute;
+            if (attributeKey) {
+                if (item && level) {
+
+                    this.updateItemEffectAttribute(roll.total, item, parseInt(level), attributeKey);
+                } else if (item){
                     let updateTarget = this.actor.items.get(item);
-                    updateTarget.setAttribute(dataset.itemAttribute, roll.total);
+                    updateTarget.setAttribute(attributeKey, roll.total);
                 }
             } else if (dataset.name) {
                 let updateCandidate = this.actor;
