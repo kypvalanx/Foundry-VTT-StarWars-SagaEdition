@@ -399,9 +399,9 @@ export class SWSEActor extends Actor {
     }
 
     get health() {
-        return this.getCached("health", () => {
+        //return this.getCached("health", () => {
             return resolveHealth(this);
-        });
+        //});
     }
 
 
@@ -647,17 +647,34 @@ export class SWSEActor extends Actor {
     }
 
     get classes() {
-        return this.getCached("classes", () => {
+       // return this.getCached("classes", () => {
             const classObjects = filterItemsByType(this.items.values(), "class");
             let classes = [];
             for (let co of classObjects) {
-                for (let level of co.levelsTaken) {
-                    classes[level - 1] = co;
+                const levelUpHitPoints = getInheritableAttribute({entity: co, attributeKey:"levelUpHitPoints", reduce:"FIRST"});
+                const firstLevelHitPoints = getInheritableAttribute({entity: co, attributeKey:"firstLevelHitPoints", reduce:"FIRST"});
+                for (let [i, level] of co.levelsTaken.entries()) {
+                    const levelOfClass = i +1;
+                    let leveledClass = {}
+                    leveledClass.id = co.id;
+                    leveledClass.img = co.img;
+                    leveledClass.name = co.name;
+                    leveledClass.levelUpHitPoints = co.levelUpHitPoints;
+                    leveledClass.canRerollHealth = co.canRerollHealth(levelOfClass);
+                    leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass);
+                    leveledClass.isLatest = false;
+
+                    classes[level - 1] = leveledClass;
                 }
             }
+
+            if(classes.length>0){
+                classes[classes.length-1].isLatest = true;
+            }
             return classes;
-        })
+        //})
     }
+
 
     get poorlyFormattedClasses() {
         return filterItemsByType(this.items.values(), "class").filter(c => c.levelsTaken.length === 0);
@@ -1410,7 +1427,7 @@ export class SWSEActor extends Actor {
         });
         let characterLevel = this.classes.length;
         if (characterLevel > 0) {
-            this.classes[characterLevel - 1].system.isLatest = true;
+            this.classes[characterLevel - 1].isLatest = true;
         }
 
         let hasUpdate = false;

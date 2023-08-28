@@ -83,8 +83,8 @@ export function getResolvedSize(entity, options = {}) {
 }
 
 
-function getLocalChangesOnDocument(document) {
-    const values = !document.isDisabled ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
+function getLocalChangesOnDocument(document, flags) {
+    const values = !document.isDisabled || flags.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
@@ -114,7 +114,7 @@ function getChangesFromDocument(data) {
     let fn = () => {
         let allAttributes = [];
         if(!data.skipLocal){
-            allAttributes.push(...getLocalChangesOnDocument(document))
+            allAttributes.push(...getLocalChangesOnDocument(document, data.flags))
             if (document.type === 'class') {
                 allAttributes.push(...getAttributesFromClassLevel(document))
             }

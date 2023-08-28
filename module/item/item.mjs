@@ -26,6 +26,9 @@ export class SWSEItem extends Item {
         console.log(changed)
     }
 
+    _onUpdateDocuments(){}
+
+
     /**
      * Augment the basic Item data model with additional dynamic data.
      */
@@ -189,6 +192,10 @@ export class SWSEItem extends Item {
         return array
     }
 
+    level(level){
+        return this.levels.find(l => l.flags.swse.level === level)
+    }
+
     addClassLevel(level){
         let changes = [];
         let activeEffect = DEFAULT_LEVEL_EFFECT;
@@ -336,11 +343,11 @@ export class SWSEItem extends Item {
         }).map(attr => attr.value)[0];
     }
 
-    get classLevelHealth() {
+    classLevelHealth(level) {
         if (this.type !== "class") {
             return 0;
         }
-        if (this.actAsFirstLevel) {
+        if (!this.canRerollHealth(level)) {
 
             return getInheritableAttribute({
                 entity: this,
@@ -349,22 +356,27 @@ export class SWSEItem extends Item {
 
             }).map(attr => parseInt(attr.value))[0];
         }
-        let attrs = getInheritableAttribute({
-            entity: this,
-            attributeKey: "rolledHp"
+        let attr = getInheritableAttribute({
+            entity: this.level(level),
+            attributeKey: "rolledHp",
+            reduce: "FIRST",
+            flags: ["IGNORE_DISABLE"]
         });
 
-        if (attrs.length > 0) {
-            let rolledHp = attrs.map(attr => parseInt(attr.value))[0]
-
-            let max = getInheritableAttribute({
-                entity: this,
-                attributeKey: "levelUpHitPoints"
-            }).map(attr => parseInt(attr.value.split("d")[1]))[0]
-            return rolledHp > max ? max : rolledHp;
+        if (!attr || attr.length === 0) {
+            return 1;
         }
 
-        return 1;
+        let rolledHp = parseInt(attr)
+
+        const inheritableAttribute = getInheritableAttribute({
+            entity: this,
+            attributeKey: "levelUpHitPoints",
+            reduce: "FIRST"
+        });
+        let max = inheritableAttribute.split("d")[1]
+        return rolledHp > max ? max : rolledHp;
+
     }
 
     get actAsFirstLevel() {
@@ -381,6 +393,16 @@ export class SWSEItem extends Item {
 
 
         });
+    }
+
+    canRerollHealth(level){
+        if(level>1){
+            return true;
+        }
+        const firstLevelHitPoints = getInheritableAttribute({entity: this, attributeKey:"firstLevelHitPoints", reduce:"FIRST"});
+        if(`${firstLevelHitPoints}`.split("d").length === 2){
+            return true;
+        }
     }
 
     get isDoubleWeapon() {

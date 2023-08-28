@@ -15,6 +15,18 @@ export class SWSEActiveEffect extends ActiveEffect {
         }
     }
 
+    _onUpdate(data, options, userId) {
+        return super._onUpdate(data, options, userId);
+    }
+
+
+    get target() {
+        if ( this.parent instanceof Actor ) return this.parent;
+        if ( CONFIG.ActiveEffect.legacyTransferral ) return this.transfer ? null : this.parent;
+        return this.transfer ? (this.parent.parent ?? null) : this.parent;
+    }
+
+
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         for(let link of this.links){

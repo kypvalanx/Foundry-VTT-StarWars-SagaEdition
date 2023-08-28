@@ -140,10 +140,10 @@ export class SWSEItemSheet extends ItemSheet {
 
         // Add general text box (span) handler
         html.find("span.text-box.direct").on("click", (event) => {
-            onSpanTextInput(event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+            onSpanTextInput.call(this, event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
         html.find("[data-action=direct-field]").on("click", (event) => {
-            onSpanTextInput(event, _adjustPropertyBySpan.bind(this), "text", this); // this._adjustItemPropertyBySpan.bind(this)
+            onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
         });
 
 

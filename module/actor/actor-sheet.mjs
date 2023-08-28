@@ -108,10 +108,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find(".toggle").on("click", onToggle.bind(this))
         new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
 
-        // Add general text box (span) handler
-        html.find("span.text-box.direct").on("click", (event) => {
-            onSpanTextInput(event, this._adjustActorPropertyBySpan.bind(this), "text");
-        });
 
         html.find("select.direct").on("change", changeSelect.bind(this));
         html.find("input[type=text].direct").on("change", changeText.bind(this));
@@ -119,21 +115,34 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
-            onSpanTextInput(event, this._adjustItemAttributeBySpan.bind(this), "text");
+            onSpanTextInput.call(this, event, this._adjustItemAttributeBySpan.bind(this), "text");
         });
+        // Add general text box (span) handler
+        html.find("span.text-box.direct").on("click", (event) => {
+            onSpanTextInput.call(this, event, this._adjustActorPropertyBySpan.bind(this), "text");
+        });
+        html.find("span.text-box.item-action").on("click", (event) => {
+            onSpanTextInput.call(this, event, this._performItemAction.bind(this), "text");
+        });
+        html.find("input.input").on("keyup", (event) => {
 
-        html.find("input.plain").on("keypress", (event) => {
             if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-                event.stopPropagation();
-                //if (!changed) {
-                this._onSubmit(event);
-                //}
+                this._adjustActorPropertyBySpan.bind(this)
+
             }
         });
+        // html.find("input.plain").on("keypress", (event) => {
+        //     if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+        //         event.stopPropagation();
+        //         //if (!changed) {
+        //         this._onSubmit(event);
+        //         //}
+        //     }
+        // });
 
-        html.find("input.direct").on("click", (event) => {
-            this._pendingUpdates['data.classesfirst'] = event.target.value;
-        });
+        // html.find("input.direct").on("click", (event) => {
+        //     this._pendingUpdates['data.classesfirst'] = event.target.value;
+        // });
 
         // crew controls
         html.find(".crew-control").click(this._onCrewControl.bind(this));
@@ -202,6 +211,27 @@ export class SWSEActorSheet extends ActorSheet {
 
     }
 
+    _performItemAction(event){
+            const target = $(event.currentTarget)
+            const value = event.currentTarget.value;
+
+            if (target.data("action") === "update-level-attribute") {
+                const classObject = this.document.items.get(target.data("item"));
+                const levelEffect = classObject.level(parseInt(target.data("level")));
+                let change = levelEffect.changes.find(change => change.key === target.data("attribute"))
+                let data = {};
+
+                data.changes = levelEffect.changes;
+                if (!change) {
+                    change = {key: target.data("attribute"), mode: 2, value}
+                    data.changes.push(change);
+                } else {
+                    change.value = value;
+                }
+                levelEffect.safeUpdate(data);
+                this._render()
+            }
+    }
 
     _onToChat(event) {
         event.preventDefault();

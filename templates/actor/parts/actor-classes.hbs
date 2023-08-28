@@ -20,17 +20,17 @@
             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                         height="24" alt="{{class.name}}"/></td>
             <td><h4 class="item-name">{{class.name}}</h4></td>
-            <td><span class="text-box {{#unless
-                    class.actAsFirstLevel}}item-attribute short{{/unless}} center"
-                      data-item="{{class.id}}" data-item-attribute="rolledHp"
+            <td><span class="text-box {{#if class.canRerollHealth}}item-action short{{/if}} center"
+                      data-action="update-level-attribute"
+                      data-item="{{class.id}}" data-attribute="rolledHp" data-level="{{sum id 1}}"
                       data-dtype="Number">{{class.classLevelHealth}}</span>
             </td>
             <td>
-                {{#unless class.actAsFirstLevel}}
+                {{#if class.canRerollHealth}}
                     <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}"
                        data-item="{{class.id}}" data-item-attribute="rolledHp"
                        data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
-                    </a>{{/unless}}</td>
+                    </a>{{/if}}</td>
             <td>{{../actor.system.attributes.con.mod}}</td>
             <td>{{sum class.classLevelHealth ../actor.system.attributes.con.mod}}</td>
             <td class="item-controls">
@@ -38,9 +38,9 @@
                         class="fas fa-edit"></i></a>
                 <a class="item-control item-duplicate" title="Copy Class"><i
                         class="fas fa-plus"></i></a>
-                {{#ifLast id actor.classes}}
+                {{#if class.isLatest}}
                     <a data-action="remove-class-level" title="Delete Class"><i
-                            class="fas fa-trash"></i></a>{{/ifLast}}
+                            class="fas fa-trash"></i></a>{{/if}}
             </td>
         </tr>
     {{/each}}
