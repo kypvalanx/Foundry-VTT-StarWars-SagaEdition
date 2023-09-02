@@ -72,12 +72,25 @@ export async function activateChoices(item, context) {
         } else {
             options = explodeOptions(choice.options, actor);
 
-            let preprogrammedAnswer = options.find(o => context.itemAnswers && (context.itemAnswers.includes(o.name) || context.itemAnswers.includes(o.value)))
+            //let preprogrammedAnswer;
+            console.log("itemAnswers: " + context.itemAnswers);
+            let preprogrammedAnswer = !!context.itemAnswers && context.itemAnswers.length === 1 ? context.itemAnswers[0]: undefined;
+
+
             if(!preprogrammedAnswer) {
-                preprogrammedAnswer = options.find(o => context.generalAnswers && (context.generalAnswers.includes(o.name) || context.generalAnswers.includes(o.value)))
+                const answeredOption = options.find(o => context.itemAnswers && (context.itemAnswers.includes(o.name) || context.itemAnswers.includes(o.value)));
+                if (answeredOption) {
+                    preprogrammedAnswer = answeredOption.name
+                }
+            }
+            if(!preprogrammedAnswer) {
+                const answeredOption = options.find(o => context.generalAnswers && (context.generalAnswers.includes(o.name) || context.generalAnswers.includes(o.value)));
+                if(answeredOption){
+                    preprogrammedAnswer = answeredOption.name
+                }
             }
             if(preprogrammedAnswer){
-                items.push(...resolveActionsFromChoice(choice, item, preprogrammedAnswer.name, options));
+                items.push(...resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
                 continue;
             }else{
                 console.log(choice.options, context, item);

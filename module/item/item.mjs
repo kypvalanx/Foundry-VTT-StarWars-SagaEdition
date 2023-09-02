@@ -23,7 +23,7 @@ export class SWSEItem extends Item {
             changed.system = changed.system || {};
             changed.system.dirty = true;
         }
-        console.log(changed)
+        //console.log(changed)
     }
 
     _onUpdateDocuments(){}
@@ -48,15 +48,15 @@ export class SWSEItem extends Item {
         //this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        if(this.system.dirty || !this.system.name){
-            this.name = SWSEItem.buildItemName(this);
-            if(this.name !== this.system.name){
-                this.safeUpdate({"system.name": this.name});
-                return;
-            }
-        } else {
-            this.name = this.system.name;
-        }
+        // if(this.system.dirty || !this.system.name){
+        //     this.name = SWSEItem.buildItemName(this);
+        //     if(this.name !== this.system.name){
+        //         this.safeUpdate({"system.name": this.name});
+        //         return;
+        //     }
+        // } else {
+        //     this.name = this.system.name;
+        // }
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
@@ -65,9 +65,9 @@ export class SWSEItem extends Item {
         if (this.type === "armor") this.prepareArmor(this.system);
         if (this.type === "feat") this.prepareFeatData(this.system);
 
-        if (this.system.dirty){
-            this.safeUpdate({"system.dirty": false});
-        }
+        // if (this.system.dirty){
+        //     this.safeUpdate({"system.dirty": false});
+        // }
     }
 
     updateLegacyItem() {
@@ -102,7 +102,7 @@ export class SWSEItem extends Item {
             let item = this.parent.items.get(id)
             if (item) {
                 this.addItemModificationEffectFromItem(item)
-                this.item.revokeOwnership(item)
+                this.item?.revokeOwnership(item)
             }
         })
         convertOverrideToMode(changes, update);
@@ -943,19 +943,19 @@ export class SWSEItem extends Item {
             return;
         }
 
-        let attributes = this.system.attributes
-        let attributeId = 0;
-        while (attributes[attributeId]) {
-            attributeId++;
+        let changes = this.system.changes
+        let changeIndex = 0;
+        while (changes[changeIndex]) {
+            changeIndex++;
         }
 
         for (let modifier of modifiers) {
-            let existingAttribute = Object.values(attributes).find(attribute => attribute.key === modifier.key);
-            if (existingAttribute && uniqueKey.includes(modifier.key)) {
-                existingAttribute.value = modifier.value;
+            let existingChange = Object.values(changes).find(change => change.key === modifier.key);
+            if (existingChange && uniqueKey.includes(modifier.key)) {
+                existingChange.value = modifier.value;
             } else {
-                attributes[attributeId] = modifier;
-                attributeId++;
+                changes[changeIndex] = modifier;
+                changeIndex++;
             }
         }
     }
@@ -1133,7 +1133,7 @@ export class SWSEItem extends Item {
         data.system = {};
         data.system.changes = [];
         data.system.changes[chanceIndex] = attribute;
-        this.updateData(data);
+        this.safeUpdate(data);
     }
 
     canStripAutoFire() {
@@ -1309,14 +1309,6 @@ export class SWSEItem extends Item {
         update.system.modes[modeIndex].attributes = attributes;
         this.safeUpdate(update);
     }
-
-    updateData(data) {
-        let update = {};
-        update.data = data;
-        this.safeUpdate(update);
-    }
-
-
     // setAttribute(attributeIndex, attr) {
     //     let data = {};
     //     data.attributes = {}
@@ -1494,7 +1486,7 @@ export class SWSEItem extends Item {
 
     addItemModificationEffectFromItem(item) {
         let changes = [];
-        changes.push(...Object.values(item.system.attributes))
+        changes.push(...Object.values(item.system.attributes || {}))
         changes.push(...item.system.changes)
         //could this be generated from the parent item at load?  would that be slow?
         let activeEffect = DEFAULT_MODIFICATION_EFFECT;

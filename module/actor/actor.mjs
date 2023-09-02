@@ -2562,9 +2562,13 @@ export class SWSEActor extends Actor {
         let notificationMessages = "";
         let addedItems = [];
         for (let providedItem of items.filter(item => item && ((item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate))) {
-            let {notificationMessage, addedItem} = await this.addItem(providedItem, options, parent);
+            let response = await this.addItem(providedItem, options, parent);
+            let notificationMessage = response.notificationMessage
+            let addedItem = response.addedItem
             notificationMessages += notificationMessage;
-            addedItems.push(addedItem);
+            if(addedItem){
+                addedItems.push(addedItem);
+            }
         }
         if (options.returnAdded) {
             return addedItems;
@@ -2583,21 +2587,21 @@ export class SWSEActor extends Actor {
             } else {
                 console.warn(`attempted to add ${itemName}`)
             }
-            return;
+            return {};
         }
 
         if(entity.type === "class"){
-            let existing = this.classes.find(item => item.name === entity.name)
+            let existing = this.items.find(item => item.name === entity.name && item.type === "class")
             let levels = [0];
             for(let clazz of this.classes){
-                levels.push(...clazz.levelsTaken)
+                levels.push(...(clazz.levelsTaken || []))
             }
 
             let nextLevel = Math.max(...levels) + 1
 
 
             if(existing){
-                let levels = existing.levelsTaken;
+                let levels = existing.levelsTaken || [];
                 levels.push(nextLevel);
                 await existing.safeUpdate({"system.levelsTaken": levels});
                 let notificationMessage = `<li>Took level of ${existing.name}</li>`
@@ -2649,14 +2653,17 @@ export class SWSEActor extends Actor {
         //do stuff based on type of item
         let modifications = providedItem.modifications;
         if (!!modifications) {
-            let addedModifications = [];
-            addedModifications = await this.addItems(modifications, null, {
-                returnAdded: true,
-                actor: options.actor,
-                suppressWarnings: options.suppressWarnings
-            });
-            for (let addedModification of addedModifications) {
-                await addedItem.takeOwnership(addedModification)
+            // let addedModifications = [];
+            // addedModifications = await this.addItems(modifications, null, {
+            //     returnAdded: true,
+            //     actor: options.actor,
+            //     suppressWarnings: options.suppressWarnings
+            // });
+            for (let modification of modifications) {
+                let {payload, itemName, entity} = this.resolveEntity(modification)
+                if(entity){
+                    await addedItem.addItemModificationEffectFromItem(entity)
+                }
             }
         }
         //addedItems.push(addedItem);
@@ -2683,14 +2690,15 @@ export class SWSEActor extends Actor {
                 entity = await Item.implementation.fromDropData(item);
                 itemName = entity.name;
             } else {
-                game.indices = game.indices || {};
+                game.indicesByType = game.indicesByType || {};
 
-                let {index, pack} = await getIndexAndPack(game.indices, item);
-                let response = await this.getIndexEntryByName(item.name, index);
+                let indices = await getIndexAndPack(game.indicesByType, item);
+                let response = await this.getIndexEntryByName(item.name, indices);
 
                 let entry = response.entry;
                 itemName = response.itemName;
                 payload = response.payload;
+                let lookup = response.lookup;
                 /**
                  *
                  * @type {SWSEItem}
@@ -2699,7 +2707,7 @@ export class SWSEActor extends Actor {
                 if (entry && entry._id) {
                     entity = await Item.implementation.fromDropData({
                         type: 'Item',
-                        uuid: `Compendium.${pack.metadata.id}.${entry._id}`
+                        uuid: `Compendium.${lookup.pack.metadata.id}.${entry._id}`
                     });
                 }
             }
@@ -2737,20 +2745,29 @@ export class SWSEActor extends Actor {
     }
 
 
-    async getIndexEntryByName(item, index) {
-        if (!index) {
+    async getIndexEntryByName(item, lookups) {
+        if (!lookups || lookups.length === 0) {
             return
         }
 
         let {itemName, payload} = this.resolveItemNameAndPayload(item);
         let cleanItemName1 = this.cleanItemName(itemName);
-        let entry = await index.find(f => f.name === cleanItemName1);
-        if (!entry) {
-            let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
-            entry = await index.find(f => f.name === cleanItemName2);
-            payload = undefined;
+
+        let entry;
+        let currentLookup;
+
+        for(let lookup of lookups){
+            let index = lookup.index;
+            entry = await index.find(f => f.name === cleanItemName1);
+            if (!entry) {
+                let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
+                entry = await index.find(f => f.name === cleanItemName2);
+                payload = undefined;
+            }
+            currentLookup = lookup
+            if(entry) break;
         }
-        return {entry, payload, itemName};
+        return {entry, payload, itemName, lookup: currentLookup};
     }
 
     cleanItemName(feat) {
@@ -2966,8 +2983,9 @@ export class SWSEActor extends Actor {
                 preppedForRemoval.push(... classesOfType.slice(1).map(c => c.id))
                 classesOfType[0].safeUpdate({"system.levelsTaken": indicies});
             }
-            preppedForRemoval.push(... classes.filter(c => (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
+            preppedForRemoval.push(... classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
 
+            console.log("PREPPED FOR REMOVAL", preppedForRemoval)
             this.removeItems(preppedForRemoval)
         }
 

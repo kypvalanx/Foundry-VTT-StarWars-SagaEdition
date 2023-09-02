@@ -219,6 +219,14 @@
       "entity": "Actor"
     },
     {
+      "name": "upgrades",
+      "label": "Upgrades",
+      "path": "packs/upgrade",
+      "type": "Item",
+      "system": "swse",
+      "entity": "Item"
+    },
+    {
       "name": "units cl  0",
       "label": "Units CL  0",
       "path": "packs/units-cl-0",
@@ -242,16 +250,6 @@
       "system": "swse",
       "entity": "Actor"
     },
-    {
-      "name": "upgrades",
-      "label": "Upgrades",
-      "path": "packs/upgrade",
-      "type": "Item",
-      "system": "swse",
-      "entity": "Item"
-    }
-  ],
-  "disabledPacks": [
     {
       "name": "units cl  3",
       "label": "Units CL  3",
@@ -396,6 +394,9 @@
       "system": "swse",
       "entity": "Actor"
     }
+  ],
+  "disabledPacks": [
+
   ],
   "languages": [
     {

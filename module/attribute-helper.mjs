@@ -23,7 +23,7 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
 
 function getAttributesFromClassLevel(entity) {
     let changes = [];
-    const classLevel = entity.system.levelsTaken.length;
+    const classLevel = entity.system.levelsTaken?.length || 0;
     const levels = entity.effects.filter(e => e.flags.swse.isLevel && e.flags.swse.level <=classLevel)
     for(const level of levels){
         changes.push(...level.changes);
@@ -181,16 +181,16 @@ export function getInheritableAttribute(data = {}) {
     if(data.attributeKey){
         let attributeKeyFilter;
         if(Array.isArray(data.attributeKey)){
-            attributeKeyFilter = (attribute) => data.attributeKey.includes(attribute.key);
+            attributeKeyFilter = (attribute) => !!attribute && data.attributeKey.includes(attribute.key);
         } else {
-            attributeKeyFilter = (attribute) => data.attributeKey === attribute.key
+            attributeKeyFilter = (attribute) => !!attribute && data.attributeKey === attribute.key
         }
         values = values.filter(attributeKeyFilter)
     }
 
     if (data.attributeFilter) {
         if(data.attributeFilter === "ACTOR_INHERITABLE"){
-            values = values.filter((attribute) => !ITEM_ONLY_ATTRIBUTES.includes(attribute.key));
+            values = values.filter((attribute) => !!attribute && !ITEM_ONLY_ATTRIBUTES.includes(attribute.key));
         } else {
             values = values.filter(data.attributeFilter);
         }

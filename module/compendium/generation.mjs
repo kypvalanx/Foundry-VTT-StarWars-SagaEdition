@@ -73,6 +73,8 @@ async function importCompendium(jsonImport, forceRefresh) {
                 let providedItems = actor.system.providedItems;
                 delete actor.system.providedItems;
 
+                actor.prepareData();
+
                 actor.skipPrepare = true;
 
                 await actor.addItems(providedItems, null, {

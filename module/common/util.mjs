@@ -778,7 +778,7 @@ function addValues(a, b) {
         group[i] = group[i] || [];
 
         let sum = group[i][j] || (typeof term.value === "number" ? 0 : "");
-        if(typeof sum === 'string' && sum.length > 0 && term.value.startsWith("@")){
+        if(typeof sum === 'string' && sum.length > 0 && `${term.value}`.startsWith("@")){
             sum += " + "
         }
         group[i][j] = sum + term.value;
@@ -1091,70 +1091,83 @@ export function reduceArray(reduce, values, actor) {
 
 /**
  *
- * @param type
- * @returns {CompendiumCollection}
+ * @returns {[CompendiumCollection]}
+ * @param item
  */
 export function getCompendium(item) {
     if (item.pack) {
-        return game.packs.find(pack => pack.collection.startsWith(item.pack));
+        return game.packs.filter(pack => pack.collection.startsWith(item.pack));
     }
     switch (item.type.toLowerCase()) {
         case 'item':
-            return game.packs.find(pack => pack.collection.startsWith("swse.items"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.items")
+                || pack.collection.startsWith("swse.armor") || pack.collection.startsWith("swse.weapons")
+                || pack.collection.startsWith("swse.equipment") || pack.collection.startsWith("swse.hazard")
+                || pack.collection.startsWith("swse.implant") || pack.collection.startsWith("swse.droid systems"));
         case 'trait':
-            return game.packs.find(pack => pack.collection.startsWith("swse.traits"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.traits"));
         case 'feat':
-            return game.packs.find(pack => pack.collection.startsWith("swse.feats"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.feats"));
         case 'species':
-            return game.packs.find(pack => pack.collection.startsWith("swse.species"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.species"));
         case 'talent':
-            return game.packs.find(pack => pack.collection.startsWith("swse.talents"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
-            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle templates"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle templates"));
         case 'vehiclebasetype':
-            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle base types"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle base types"));
         case 'vehiclesystem':
-            return game.packs.find(pack => pack.collection.startsWith("swse.vehicle systems"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
-            return game.packs.find(pack => pack.collection.startsWith("swse.templates"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.templates"));
         case 'affiliation':
-            return game.packs.find(pack => pack.collection.startsWith("swse.affiliations"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.affiliations"));
         case 'class':
-            return game.packs.find(pack => pack.collection.startsWith("swse.classes"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.classes"));
         case 'forceregimen':
-            return game.packs.find(pack => pack.collection.startsWith("swse.force regimens"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.force regimens"));
         case 'forcepower':
-            return game.packs.find(pack => pack.collection.startsWith("swse.force powers"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.force powers"));
         case 'forcesecret':
-            return game.packs.find(pack => pack.collection.startsWith("swse.force secrets"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.force secrets"));
         case 'forcetechnique':
-            return game.packs.find(pack => pack.collection.startsWith("swse.force techniques"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.force techniques"));
         case 'beasttype':
-            return game.packs.find(pack => pack.collection.startsWith("swse.beast components"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.beast components"));
         case 'background':
-            return game.packs.find(pack => pack.collection.startsWith("swse.background"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.background"));
         case 'destiny':
-            return game.packs.find(pack => pack.collection.startsWith("swse.destiny"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.destinies"));
         case 'language':
-            return game.packs.find(pack => pack.collection.startsWith("swse.languages"));
+            return game.packs.filter(pack => pack.collection.startsWith("swse.languages"));
     }
+    return [];
 }
 
 
-export async function getIndexAndPack(indices, item) {
+export async function getIndexAndPack(indicesByType, item) {
 
     let compendiumReference = item.pack || item.type;
-    let index = indices[compendiumReference];
-    let pack = getCompendium(item);
-    if (!pack) {
+    let indices = indicesByType[compendiumReference];
+    let packs = getCompendium(item);
+    if (packs.length === 0) {
         console.error(`${compendiumReference} compendium not defined`)
         return {}
     }
-    if (!index) {
-        index = await pack.getIndex();
-        indices[compendiumReference] = index;
+    if (!indices) {
+        indices = [];
+        for(let pack of packs){
+            let index = await pack.getIndex();
+            indices.push({pack, index})
+        }
+
+        // indices = packs.map(async p => {
+        //     return {pack: p, index: await p.getIndex()}
+        // });
+        //indices = await pack.getIndex();
+        indicesByType[compendiumReference] = indices;
     }
-    return {index, pack};
+    return indices;
 }
 
 export function getEntityFromCompendiums(type, id) {
