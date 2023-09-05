@@ -2694,6 +2694,11 @@ export class SWSEActor extends Actor {
             }
         }
 
+        if(!entity && item.type === "language"){
+            const cls = getDocumentClass("Item");
+            const entities = await cls.createDocuments([item], {});
+            entity = entities[0];
+        }
 
         return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null};
     }
@@ -2743,7 +2748,9 @@ export class SWSEActor extends Actor {
             if (!entry) {
                 let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
                 entry = await index.find(f => f.name === cleanItemName2);
-                payload = undefined;
+                if(entry){
+                    payload = undefined;
+                }
             }
             currentLookup = lookup
             if(entry) break;

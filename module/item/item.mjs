@@ -51,7 +51,7 @@ export class SWSEItem extends Item {
         if(this.system.dirty || !this.system.name){
             this.name = SWSEItem.buildItemName(this);
             if(this.name !== this.system.name){
-                this.safeUpdate({"system.name": this.name});
+               // this.safeUpdate({"system.name": this.name});
                 return;
             }
         } else {
