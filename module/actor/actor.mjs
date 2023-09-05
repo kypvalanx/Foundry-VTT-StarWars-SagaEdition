@@ -663,6 +663,7 @@ export class SWSEActor extends Actor {
                     leveledClass.canRerollHealth = co.canRerollHealth(levelOfClass);
                     leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass);
                     leveledClass.isLatest = false;
+                    leveledClass.level = level;
 
                     classes[level - 1] = leveledClass;
                 }
@@ -2385,12 +2386,6 @@ export class SWSEActor extends Actor {
         providedItemContext.provided = true;
         await this.addItems(providedItems, mainItem[0], providedItemContext);
 
-        let modifications = item.getModifications()
-
-        modifications.forEach(mod => mod.equipToParent = true)
-
-        await this.addItems(modifications, mainItem[0], context);
-
         if (item.type === "class") {
             await this.addClassFeats(mainItem[0], providedItemContext);
         }
@@ -2593,12 +2588,11 @@ export class SWSEActor extends Actor {
         if(entity.type === "class"){
             let existing = this.items.find(item => item.name === entity.name && item.type === "class")
             let levels = [0];
-            for(let clazz of this.classes){
+            for(let clazz of this.items.filter(item => item.type === "class")){
                 levels.push(...(clazz.levelsTaken || []))
             }
 
             let nextLevel = Math.max(...levels) + 1
-
 
             if(existing){
                 let levels = existing.levelsTaken || [];
@@ -2644,21 +2638,12 @@ export class SWSEActor extends Actor {
         entity.setTextDescription();
         let notificationMessage = `<li>${entity.finalName}</li>`
         let childOptions = JSON.parse(JSON.stringify(options))
-        //childOptions.type = "provided";
-        //childOptions.skipPrerequisite = false;
         childOptions.itemAnswers = providedItem.answers;
-        //childOptions.newFromCompendium = false;
         let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
         //do stuff based on type of item
         let modifications = providedItem.modifications;
         if (!!modifications) {
-            // let addedModifications = [];
-            // addedModifications = await this.addItems(modifications, null, {
-            //     returnAdded: true,
-            //     actor: options.actor,
-            //     suppressWarnings: options.suppressWarnings
-            // });
             for (let modification of modifications) {
                 let {payload, itemName, entity} = this.resolveEntity(modification)
                 if(entity){
@@ -2666,14 +2651,10 @@ export class SWSEActor extends Actor {
                 }
             }
         }
-        //addedItems.push(addedItem);
 
         let equip = providedItem.equip;
         if (equip) {
             await this.equipItem(addedItem._id, equip, options)
-        }
-        if (providedItem.equipToParent) {
-            await parent.takeOwnership(addedItem);
         }
         return {notificationMessage, addedItem};
     }

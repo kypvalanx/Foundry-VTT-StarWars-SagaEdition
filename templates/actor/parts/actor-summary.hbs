@@ -54,16 +54,16 @@
     </div>
 
     <div class="medium labeled-input clickable" data-action="gender">
-        <label for="gender" class="text">Gender</label>
-        <input class="input" id="gender" type="text" value="{{#if actor.system.gender}}{{actor.system.gender}}{{else}}{{#if actor.system.sex}}{{actor.system.sex}}{{/if}}
+        <label for="gender" class="text clickable">Gender</label>
+        <input class="input clickable" data-action="gender" id="gender" type="text" value="{{#if actor.system.gender}}{{actor.system.gender}}{{else}}{{#if actor.system.sex}}{{actor.system.sex}}{{/if}}
         {{/if}}" placeholder=""
                disabled/>
     </div>
 
 
     <div class="medium labeled-input" data-action="age">
-        <label for="age" class="text">Age</label>
-        <input class="input" id="age" type="text" value="{{#if actor.system.age}}{{actor.system.age}} years{{/if}}" placeholder="" disabled/>
+        <label for="age" class="text clickable">Age</label>
+        <input class="input clickable" data-action="age" id="age" type="text" value="{{#if actor.system.age}}{{actor.system.age}} years{{/if}}" placeholder="" disabled/>
     </div>
 
     <div class="small labeled-input">

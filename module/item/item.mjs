@@ -48,15 +48,15 @@ export class SWSEItem extends Item {
         //this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        // if(this.system.dirty || !this.system.name){
-        //     this.name = SWSEItem.buildItemName(this);
-        //     if(this.name !== this.system.name){
-        //         this.safeUpdate({"system.name": this.name});
-        //         return;
-        //     }
-        // } else {
-        //     this.name = this.system.name;
-        // }
+        if(this.system.dirty || !this.system.name){
+            this.name = SWSEItem.buildItemName(this);
+            if(this.name !== this.system.name){
+                this.safeUpdate({"system.name": this.name});
+                return;
+            }
+        } else {
+            this.name = this.system.name;
+        }
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
@@ -65,9 +65,9 @@ export class SWSEItem extends Item {
         if (this.type === "armor") this.prepareArmor(this.system);
         if (this.type === "feat") this.prepareFeatData(this.system);
 
-        // if (this.system.dirty){
-        //     this.safeUpdate({"system.dirty": false});
-        // }
+        if (this.system.dirty){
+            this.safeUpdate({"system.dirty": false});
+        }
     }
 
     updateLegacyItem() {
@@ -1131,7 +1131,7 @@ export class SWSEItem extends Item {
         }
 
         data.system = {};
-        data.system.changes = [];
+        data.system.changes = changes;
         data.system.changes[chanceIndex] = attribute;
         this.safeUpdate(data);
     }
@@ -1317,19 +1317,6 @@ export class SWSEItem extends Item {
     // }
     getProvidedItems(filter) {
         let items = this.system.providedItems;
-
-        if (!!items && !Array.isArray(items)) {
-            items = Object.values(items);
-        }
-
-        if (!!filter) {
-            return items.filter(filter);
-        }
-        return items || [];
-    }
-
-    getModifications(filter) {
-        let items = this.system.modifications;
 
         if (!!items && !Array.isArray(items)) {
             items = Object.values(items);

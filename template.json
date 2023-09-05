@@ -39,79 +39,49 @@
       },
       "crew": {
         "crewQuality": {},
-        "crew" : []
+        "crew": []
       },
       "characterAttributes": {
         "attributes": {
           "str": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "dex": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "con": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "int": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "wis": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "cha": {
             "total": 10,
+            "manualTotal": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           }
@@ -326,36 +296,18 @@
           "str": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           },
           "dex": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           },
           "int": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           }
