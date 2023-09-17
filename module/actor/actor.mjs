@@ -653,16 +653,16 @@ export class SWSEActor extends Actor {
         const classObjects = filterItemsByType(this.items.values(), "class");
         let classes = [];
         for (let co of classObjects) {
-            const levelUpHitPoints = getInheritableAttribute({
-                entity: co,
-                attributeKey: "levelUpHitPoints",
-                reduce: "FIRST"
-            });
-            const firstLevelHitPoints = getInheritableAttribute({
-                entity: co,
-                attributeKey: "firstLevelHitPoints",
-                reduce: "FIRST"
-            });
+            // const levelUpHitPoints = getInheritableAttribute({
+            //     entity: co,
+            //     attributeKey: "levelUpHitPoints",
+            //     reduce: "FIRST"
+            // });
+            // const firstLevelHitPoints = getInheritableAttribute({
+            //     entity: co,
+            //     attributeKey: "firstLevelHitPoints",
+            //     reduce: "FIRST"
+            // });
             for (let [i, level] of co.levelsTaken.entries()) {
                 const levelOfClass = i + 1;
                 let leveledClass = {}
@@ -1998,7 +1998,11 @@ export class SWSEActor extends Actor {
     }
 
     get shouldLockAttributes() {
-        return !!this.traits?.find(trait => trait.name === 'Disable Attribute Modification');
+        const find = this.items.find(trait => trait.type === "trait" && trait.name === 'Disable Attribute Modification');
+        if(find?.system.prerequisite){
+            console.error(find);
+        }
+        return find;
     }
 
     get isForceSensitive() {
@@ -2669,9 +2673,9 @@ export class SWSEActor extends Actor {
 
         if (!entity) {
             if (options.suppressWarnings) {
-                console.debug(`attempted to add ${itemName}`)
+                console.debug(`attempted to add ${providedItem}`)
             } else {
-                console.warn(`attempted to add ${itemName}`)
+                console.warn(`attempted to add ${providedItem}`)
             }
             return {};
         }

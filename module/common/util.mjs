@@ -75,7 +75,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
             return result;
         }
     }
-    console.error("unresolved Function: ", expression, deepestStart, deepestEnd, actor)
+    //console.error("unresolved Function: ", expression, deepestStart, deepestEnd, actor)
 }
 
 /**
@@ -282,10 +282,10 @@ export function getVariableFromActorData(swseActor, variableName) {
     }
 
     let value = swseActor.resolvedVariables?.get(variableName);
-    if (value === undefined && (variableName.startsWith("@STR")|| variableName.startsWith("@DEX")|| variableName.startsWith("@CON")||variableName.startsWith("@INT")|| variableName.startsWith("@CHA")|| variableName.startsWith("@WIS"))) {
-        generateAttributes(swseActor);
-        value = swseActor.resolvedVariables?.get(variableName);
-    }
+    // if (value === undefined && (variableName.startsWith("@STR")|| variableName.startsWith("@DEX")|| variableName.startsWith("@CON")||variableName.startsWith("@INT")|| variableName.startsWith("@CHA")|| variableName.startsWith("@WIS"))) {
+    //     generateAttributes(swseActor);
+    //     value = swseActor.resolvedVariables?.get(variableName);
+    // }
     if (value === undefined) {
         console.warn("could not find " + variableName, swseActor.resolvedVariables);
     }
@@ -1247,18 +1247,19 @@ export function getItemParentId(id) {
  * these types are always inherited by actors if they meet prerequisites.
  * @type {string[]}
  */
-const CONDITIONALLY_INHERITABLE_TYPES = ["background", "destiny", "trait", "feat", "talent", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "class", "vehicleBaseType", "beastAttack",
+const CONDITIONALLY_INHERITABLE_TYPES = ["background", "destiny", "trait", "feat", "talent", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "vehicleBaseType", "beastAttack",
     "beastSense",
     "beastType",
     "beastQuality"];
+const ALWAYS_INHERITABLE_TYPES = ["class"];
 
 export function inheritableItems(entity) {
     let fn = () => {
         let possibleInheritableItems = equippedItems(entity);
-
         possibleInheritableItems.push(...filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES));
 
         let actualInheritable = [];
+        actualInheritable.push(...filterItemsByType(entity.items || [], ALWAYS_INHERITABLE_TYPES));
         let shouldRetry = possibleInheritableItems.length > 0;
         let shouldResolveSkills = false;
         while (shouldRetry) {
