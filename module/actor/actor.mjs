@@ -675,7 +675,7 @@ export class SWSEActor extends Actor {
                 leveledClass.isLatest = false;
                 leveledClass.level = level;
 
-                classes[level - 1] = leveledClass;
+                classes.push(leveledClass);
             }
         }
 
