@@ -2,6 +2,7 @@ import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./common
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
+import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 
 /**
  * appends source meta to a given attribute
@@ -21,17 +22,11 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
     return attribute
 }
 
-function getAttributesFromClassLevel(entity) {
-    let changes = [];
-    const classLevel = entity.system.levelsTaken?.length || 0;
-    const levels = entity.effects.filter(e => e.flags.swse.isLevel && e.flags.swse.level <=classLevel)
-    for(const level of levels){
-        changes.push(...level.changes);
-    }
-    return changes;
-}
 
-function getAttributesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
+function getChangesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
+    if(entity instanceof SWSEItem || entity instanceof SWSEActiveEffect){
+        return [];
+    }
     let attributes = [];
     let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
     items = items.filter(i => !!i)
@@ -89,25 +84,26 @@ function getLocalChangesOnDocument(document, flags) {
 }
 
 function getChangesFromActiveEffects(document) {
-    let attributes = []
-    if (document.effects) {
-        function isItemModifier(effect) {
-            return effect.flags.swse?.itemModifier;
-        }
-        function isClassLevel(effect) {
-            return effect.flags.swse?.isLevel;
-        }
+    if (!document.effects) {
+        return [];
+    }
 
-        for (let effect of document.effects?.values() || []) {
-            if (!isClassLevel(effect) && (isItemModifier(effect) || effect.disabled === false)) {
-                attributes.push(...extractEffectChange(effect.changes || [], effect))
-            }
+    let attributes = []
+    for (let effect of document.effects?.values() || []) {
+        if (isActiveEffect(effect, document)) {
+            attributes.push(...extractEffectChange(effect.changes || [], effect))
         }
     }
     return attributes;
 }
 
+function isActiveEffect(effect, document) {
+    if(effect.flags.swse && effect.flags.swse.isLevel){
+        return effect.flags.swse.level <= (document.system.levelsTaken?.length || 0);
+    }
 
+    return effect.flags.swse?.itemModifier || effect.disabled === false;
+}
 
 function getChangesFromDocument(data) {
     let document = data.entity;
@@ -115,12 +111,10 @@ function getChangesFromDocument(data) {
         let allAttributes = [];
         if(!data.skipLocal){
             allAttributes.push(...getLocalChangesOnDocument(document, data.flags))
-            if (document.type === 'class') {
-                allAttributes.push(...getAttributesFromClassLevel(document))
-            }
+
         }
 
-        allAttributes.push(...getAttributesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
+        allAttributes.push(...getChangesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
         allAttributes.push(...getChangesFromActiveEffects(document));
         return allAttributes;
     };

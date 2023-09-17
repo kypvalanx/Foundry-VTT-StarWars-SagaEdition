@@ -183,3 +183,26 @@ export const ITEM_ONLY_ATTRIBUTES = [
     "suffix",
     "cooldownTime"
 ]
+
+export const CLASSES_BY_STARTING_FEAT = {
+    "Shake It Off": ["Scout"],
+    "Weapon Proficiency (Heavy Weapons)": ["Nonheroic"],
+    "Force Sensitivity": ["Jedi", "Force Prodigy"],
+    "Armor Proficiency (Light)": ["Soldier", "Nonheroic"],
+    "Weapon Proficiency (Lightsabers)": ["Jedi"],
+    "Weapon Proficiency (Rifles)": ["Scout", "Soldier", "Nonheroic"],
+    "Skill Training": ["Nonheroic"],
+    "Linguist": ["Noble"],
+    "Weapon Proficiency (Pistols)": ["Noble", "Scoundrel", "Scout", "Soldier", "Nonheroic"],
+    "Tech Specialist": ["Technician"],
+    "Skill Focus": ["Nonheroic"],
+    "Weapon Proficiency (Simple Weapons)": ["Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy", "Nonheroic"],
+    "Force Training": ["Force Prodigy"],
+    "Point-Blank Shot": ["Scoundrel"],
+    "Armor Proficiency (Medium)": ["Soldier", "Nonheroic"],
+    "Weapon Proficiency (Advanced Melee Weapons)": ["Nonheroic"]
+}
+
+export const KNOWN_WEIRD_UNITS = [
+    "Eldewn and Elsae Sarvool"
+]

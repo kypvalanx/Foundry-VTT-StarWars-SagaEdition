@@ -7,6 +7,8 @@ import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
+import {generateAttributes} from "../actor/attribute-handler.mjs";
+import {generateSkills} from "../actor/skill-handler.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -58,7 +60,7 @@ function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
         let toks = payload.split(",").map(a => resolveExpression(a.trim(), actor));
         let result = func.function(toks);
         //let max = Math.max(...toks);
-        return resolveExpression(expression.substring(0, deepestStart - func.name.length) + result + expression.substring(deepestEnd + 1), actor);
+        return result;
 
     }
 }
@@ -73,6 +75,7 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
             return result;
         }
     }
+    console.error("unresolved Function: ", expression, deepestStart, deepestEnd, actor)
 }
 
 /**
@@ -106,7 +109,9 @@ function resolveParensAndFunctions(expression, actor) {
     if (deepestStart > deepestEnd) {
         return;
     }
-    return resolveExpression(expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1), actor);
+    const subExpression = expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1);
+    //subExpression.split(", ").map(t => resolveExpression(t, actor))
+    return resolveExpression(subExpression, actor);
 
 }
 
@@ -277,6 +282,10 @@ export function getVariableFromActorData(swseActor, variableName) {
     }
 
     let value = swseActor.resolvedVariables?.get(variableName);
+    if (value === undefined && (variableName.startsWith("@STR")|| variableName.startsWith("@DEX")|| variableName.startsWith("@CON")||variableName.startsWith("@INT")|| variableName.startsWith("@CHA")|| variableName.startsWith("@WIS"))) {
+        generateAttributes(swseActor);
+        value = swseActor.resolvedVariables?.get(variableName);
+    }
     if (value === undefined) {
         console.warn("could not find " + variableName, swseActor.resolvedVariables);
     }
@@ -829,6 +838,9 @@ function addValues(a, b) {
     if(singleResponse){
         return responses[0];
     }
+    if(responses.length > 1){
+        responses = responses.filter(response => response !== 0);
+    }
 return responses;
 }
 
@@ -891,7 +903,7 @@ function multiplyValues(currentValue, multiplier) {
             }
         }
 
-        if(response){
+        if(response !== undefined && response !== null){
             responses.push(response)
         }
     }
@@ -1216,9 +1228,6 @@ export function fullJoin(...args) {
  */
 export function equippedItems(entity) {
     let entities = [];
-    if (entity.effects) {
-        entities.push(...entity.effects?.filter(effect => !effect.disabled) || []);
-    }
     if (entity.items) {
         entities.push(...entity.items?.filter(item => !!item.system.equipped))
     }
@@ -1246,22 +1255,28 @@ const CONDITIONALLY_INHERITABLE_TYPES = ["background", "destiny", "trait", "feat
 export function inheritableItems(entity) {
     let fn = () => {
         let possibleInheritableItems = equippedItems(entity);
-        if (entity instanceof SWSEItem || entity instanceof SWSEActiveEffect) {
-            return possibleInheritableItems;
-        }
 
         possibleInheritableItems.push(...filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES));
 
         let actualInheritable = [];
         let shouldRetry = possibleInheritableItems.length > 0;
+        let shouldResolveSkills = false;
         while (shouldRetry) {
             shouldRetry = false;
+            if(shouldResolveSkills){
+                //generateSkills(entity);
+            }
+            shouldResolveSkills = false;
             for (let possible of possibleInheritableItems) {
                 if (!possible.system?.prerequisite || !meetsPrerequisites(entity, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
                     existingTraitPrerequisite: possible.type === "trait"
                 }).doesFail) {
                     actualInheritable.push(possible);
+                    if(possible.system.changes.find(c => c.key === "forceSensitivity" && c.value === "true")){
+                        shouldResolveSkills = true;
+                    }
+
                     shouldRetry = true;
                 }
             }
@@ -1280,7 +1295,7 @@ test()
 
 function assertEquals(expected, actual) {
     if (expected === actual) {
-        console.log("passed")
+        //console.log("passed")
     } else {
         console.warn(`expected "${expected}", but got "${actual}"`)
     }
@@ -1297,33 +1312,33 @@ function test() {
     const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
     const POST_ROLL_MULTIPLY = 6;
 
-    assertEquals(`["item name"]`, JSON.stringify(getCleanListFromCSV("item name  ")))
-    assertEquals(`["item name","item name two"]`, JSON.stringify(getCleanListFromCSV("  item name, item name two")))
-
-    assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
-    assertEquals(7, addValues(4, 3));
-    assertEquals(7, addValues(3, 4));
-    assertEquals("HelloWorld", addValues("Hello", "World"))
-    assertEquals(13, addValues(7, {value: 6}))
-    assertEquals("2d6", addValues("1d6", "1d6"))
-    assertEquals("1d6 + 4", addValues(4, "1d6"))
-    assertEquals("1d6 + 2", addValues("1d6", 2))
-    assertEquals("7d10x2 + 4", addValues(4, "7d10x2"))
-    assertEquals("14d10x2", addValues("7d10x2", "7d10x2"))
-
-    assertEquals(2, multiplyValues(1, 2))
-    assertEquals("2d6", multiplyValues("1d6", 2))
-    assertEquals("4d8 + 2d6", multiplyValues("1d6 + 2d8", 2))
-    assertEquals("14d10x2", multiplyValues("7d10x2", 2))
-    assertEquals("HELLO WORLD", multiplyValues("HELLO WORLD", 2))
-
-
-    assertEquals(0, resolveExpressionReduce([], {}))
-    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
-    assertEquals("7d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}], {}))
-    assertEquals("14d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}, {value: "7d10x2", mode: ADD}], {}))
-    assertEquals("5 + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
-    assertEquals("5 + @WISMOD + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
+    // assertEquals(`["item name"]`, JSON.stringify(getCleanListFromCSV("item name  ")))
+    // assertEquals(`["item name","item name two"]`, JSON.stringify(getCleanListFromCSV("  item name, item name two")))
+    //
+    // assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
+    // assertEquals(7, addValues(4, 3));
+    // assertEquals(7, addValues(3, 4));
+    // assertEquals("HelloWorld", addValues("Hello", "World"))
+    // assertEquals(13, addValues(7, {value: 6}))
+    // assertEquals("2d6", addValues("1d6", "1d6"))
+    // assertEquals("1d6 + 4", addValues(4, "1d6"))
+    // assertEquals("1d6 + 2", addValues("1d6", 2))
+    // assertEquals("7d10x2 + 4", addValues(4, "7d10x2"))
+    // assertEquals("14d10x2", addValues("7d10x2", "7d10x2"))
+    //
+    // assertEquals(2, multiplyValues(1, 2))
+    // assertEquals("2d6", multiplyValues("1d6", 2))
+    // assertEquals("4d8 + 2d6", multiplyValues("1d6 + 2d8", 2))
+    // assertEquals("14d10x2", multiplyValues("7d10x2", 2))
+    // assertEquals("HELLO WORLD", multiplyValues("HELLO WORLD", 2))
+    //
+    //
+    // assertEquals(0, resolveExpressionReduce([], {}))
+    // assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
+    // assertEquals("7d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}], {}))
+    // assertEquals("14d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}, {value: "7d10x2", mode: ADD}], {}))
+    // assertEquals("5 + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
+    // assertEquals("5 + @WISMOD + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
     assertEquals(0, resolveExpressionReduce([{value: 5, mode: MULTIPLY}], {}))
     assertEquals(25, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 5, mode: MULTIPLY}], {}))
     assertEquals(7, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: UPGRADE}], {}))

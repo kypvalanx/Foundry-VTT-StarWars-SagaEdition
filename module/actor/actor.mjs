@@ -24,12 +24,13 @@ import {generateAttributes} from "./attribute-handler.mjs";
 import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
+    CLASSES_BY_STARTING_FEAT,
     crewPositions,
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
     equipableTypes,
-    GRAVITY_CARRY_CAPACITY_MODIFIER,
+    GRAVITY_CARRY_CAPACITY_MODIFIER, KNOWN_WEIRD_UNITS,
     LIMITED_TO_ONE_TYPES,
     SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
@@ -400,7 +401,7 @@ export class SWSEActor extends Actor {
 
     get health() {
         //return this.getCached("health", () => {
-            return resolveHealth(this);
+        return resolveHealth(this);
         //});
     }
 
@@ -442,7 +443,7 @@ export class SWSEActor extends Actor {
         this.handleDarksideArray(this);
 
         let feats = this.resolveFeats();
-        this.feats = feats.activeFeats;
+        this.feats = feats.activeFeats || [];
         this.system.feats = feats.activeFeats;
         generateSkills(this);
 
@@ -639,6 +640,7 @@ export class SWSEActor extends Actor {
             return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
         })
     }
+
     get species() {
         return this.getCached("species", () => {
             const speciesList = filterItemsByType(this.items.values(), "species");
@@ -647,32 +649,40 @@ export class SWSEActor extends Actor {
     }
 
     get classes() {
-       // return this.getCached("classes", () => {
-            const classObjects = filterItemsByType(this.items.values(), "class");
-            let classes = [];
-            for (let co of classObjects) {
-                const levelUpHitPoints = getInheritableAttribute({entity: co, attributeKey:"levelUpHitPoints", reduce:"FIRST"});
-                const firstLevelHitPoints = getInheritableAttribute({entity: co, attributeKey:"firstLevelHitPoints", reduce:"FIRST"});
-                for (let [i, level] of co.levelsTaken.entries()) {
-                    const levelOfClass = i +1;
-                    let leveledClass = {}
-                    leveledClass.id = co.id;
-                    leveledClass.img = co.img;
-                    leveledClass.name = co.name;
-                    leveledClass.levelUpHitPoints = co.levelUpHitPoints;
-                    leveledClass.canRerollHealth = co.canRerollHealth(levelOfClass);
-                    leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass);
-                    leveledClass.isLatest = false;
-                    leveledClass.level = level;
+        // return this.getCached("classes", () => {
+        const classObjects = filterItemsByType(this.items.values(), "class");
+        let classes = [];
+        for (let co of classObjects) {
+            const levelUpHitPoints = getInheritableAttribute({
+                entity: co,
+                attributeKey: "levelUpHitPoints",
+                reduce: "FIRST"
+            });
+            const firstLevelHitPoints = getInheritableAttribute({
+                entity: co,
+                attributeKey: "firstLevelHitPoints",
+                reduce: "FIRST"
+            });
+            for (let [i, level] of co.levelsTaken.entries()) {
+                const levelOfClass = i + 1;
+                let leveledClass = {}
+                leveledClass.id = co.id;
+                leveledClass.img = co.img;
+                leveledClass.name = co.name;
+                leveledClass.levelUpHitPoints = co.levelUpHitPoints;
+                leveledClass.canRerollHealth = co.canRerollHealth(levelOfClass);
+                leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass);
+                leveledClass.isLatest = false;
+                leveledClass.level = level;
 
-                    classes[level - 1] = leveledClass;
-                }
+                classes[level - 1] = leveledClass;
             }
+        }
 
-            if(classes.length>0){
-                classes[classes.length-1].isLatest = true;
-            }
-            return classes;
+        if (classes.length > 0) {
+            classes[classes.length - 1].isLatest = true;
+        }
+        return classes;
         //})
     }
 
@@ -866,10 +876,11 @@ export class SWSEActor extends Actor {
         ids.push(itemId);
         await this.deleteEmbeddedDocuments("Item", ids);
     }
+
     async removeClassLevel(itemId) {
         let classItem = this.items.get(itemId)
         const levelsTaken = classItem.levelsTaken;
-        if(levelsTaken.length > 1){
+        if (levelsTaken.length > 1) {
             await classItem.safeUpdate({"system.levelsTaken": levelsTaken.slice(0, levelsTaken.length - 1)});
         } else {
             await this.removeItem(itemId);
@@ -878,7 +889,7 @@ export class SWSEActor extends Actor {
 
     async removeChildItems(itemId) {
         let itemToDelete = this.items.get(itemId);
-        if(!itemToDelete){
+        if (!itemToDelete) {
             return;
         }
         for (let childItem of itemToDelete.system?.items || []) {
@@ -1298,8 +1309,9 @@ export class SWSEActor extends Actor {
 
     get characterLevel() {
         return this.getCached("characterLevel", () => {
-            if (this.classes) {
-                let charLevel = this.classes.length;
+            const classes = this.classes;
+            if (classes) {
+                let charLevel = classes.length;
                 this.resolvedVariables.set("@charLevel", charLevel);
                 return charLevel;
             }
@@ -1656,6 +1668,7 @@ export class SWSEActor extends Actor {
         this.system.bonuses = {};
         this.system.activeFeatures = [];
         let dynamicGroups = {};
+        let specificProvided = {};
 
         for (let provided of provides) {
             let key = provided.value;
@@ -1663,18 +1676,24 @@ export class SWSEActor extends Actor {
             if (key.includes(":")) {
                 let toks = key.split(":");
                 key = toks[0];
-                value = resolveExpression(toks[1], this)
+                if (toks.length === 2) {
+                    value = resolveExpression(toks[1], this)
+                } else if (toks.length === 3) {
+                    key = toks[0]
+                    value = 1;
+                    specificProvided[toks[1] + ":" + toks[2]] = toks[0];
+                }
             }
 
             if (key.endsWith("Starting Feats")) {
                 //this means we need to check the source of the provision to figure out what feats are included
                 let providingItem = this.items.get(provided.source);
 
-                dynamicGroups[key] = getInheritableAttribute({
+                dynamicGroups[key] = this._explodeFeatNames(getInheritableAttribute({
                     entity: providingItem,
                     attributeKey: "classFeat",
                     reduce: "VALUES"
-                });
+                }));
             }
             this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] + value : value;
         }
@@ -1682,50 +1701,107 @@ export class SWSEActor extends Actor {
         let classLevel = this.classes?.length;
         this.system.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.system.availableItems['General Feats'] ? this.system.availableItems['General Feats'] : 0);
 
+        let bonusTalentTrees = getInheritableAttribute({
+            entity: this,
+            attributeKey: "bonusTalentTree",
+            reduce: "VALUES"
+        });
+
+        let bonusTreeTalents = [];
 
         for (let talent of this.talents || []) {
-            if (!talent.system.supplier?.id) {
-                this.reduceAvailableItem(actorData, talent.system.activeCategory || talent.system.talentTreeSource);  //talentTreeSource is the old one
+            if (talent.system.supplier?.id) {
+                continue;
             }
+            let type = talent.system.activeCategory || talent.system.talentTreeSource;
+
+
+            if (!type) {
+                type = specificProvided[`TALENT:${talent.finalName}`] || type;
+            }
+
+            if (!type) {
+                let types = innerJoin(talent.system.possibleProviders, Object.keys(this.system.availableItems))
+                if (types && types.length > 0) {
+                    type = types[0]
+                }
+            }
+
+            if(!type && innerJoin(bonusTalentTrees, talent.system.possibleProviders).length > 0){
+                bonusTreeTalents.push(talent);
+                continue;
+            }
+
+            this.reduceAvailableItem(type);  //talentTreeSource is the old one
+
         }
+
+        for (let talent of bonusTreeTalents) {
+            let type = Object.keys(this.system.availableItems).find(item => item.includes("Talent"))
+            this.reduceAvailableItem(type);
+        }
+
         for (let feat of this.feats) {
             if (feat.system.supplier.id) {
                 continue;
             }
             let type = 'General Feats';
 
-            let featCategory = feat.system.activeCategory || feat.system.bonusFeatCategory;  //bonusFeatCategory is the old one
-            if (featCategory) {
-                type = featCategory;
-            } else {
-                let bonusFeatCategories = feat.system.bonusFeatCategories;
+            type = feat.system.activeCategory || feat.system.bonusFeatCategory || type;  //bonusFeatCategory is the old one
+
+            if (!type || type === 'General Feats') {
+                type = specificProvided[`FEAT:${feat.finalName}`] || type;
+            }
+
+            if (!type || type === 'General Feats') {
+                let bonusFeatCategories = feat.system.possibleProviders.filter(category => category !== "General Feats");
                 if (bonusFeatCategories && bonusFeatCategories.length === 1) {
-                    type = bonusFeatCategories[0].value
-                } else {
-                    for (let entry of Object.entries(dynamicGroups)) {
-                        if (entry[1].includes(feat.finalName)) {
-                            type = entry[0];
-                        }
+                    type = bonusFeatCategories[0]
+                } else if (bonusFeatCategories && bonusFeatCategories.length > 1) {
+                    let selection = innerJoin(bonusFeatCategories, Object.keys(this.system.availableItems))
+                    type = selection[0] || type;
+                }
+            }
+
+            if (!type || type === 'General Feats') {
+                for (let entry of Object.entries(dynamicGroups)) {
+                    if (entry[1].includes(feat.finalName)) {
+                        type = entry[0];
+                        break;
                     }
                 }
             }
-            this.reduceAvailableItem(actorData, type);
+
+            this.reduceAvailableItem(type, 1, "General Feats");
         }
-        this.reduceAvailableItem(actorData, "Force Secret", this.secrets.length);
-        this.reduceAvailableItem(actorData, "Force Technique", this.techniques.length);
+        this.reduceAvailableItem("Force Secret", this.secrets.length);
+        this.reduceAvailableItem("Force Technique", this.techniques.length);
         for (let forcePower of this.powers) {
-            this.reduceAvailableItem(actorData, forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
+            this.reduceAvailableItem(forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
         }
     }
 
-    reduceAvailableItem(actorData, type, reduceBy = 1, backupType) {
-        const availableItem = actorData.availableItems[type];
+    //TODO this is trash and needs a refactor
+    reduceAvailableItem(type, reduceBy = 1, backupType) {
+        let actorData = this.system;
+        if (!type && !backupType) {
+            if (!KNOWN_WEIRD_UNITS.includes(this.name)) {
+                console.error("tried to reduce undefined on: " + this.name, this)
+            }
+            return;
+        }
+
+        const availableItem = actorData.availableItems[type] || 0;
         if (availableItem >= reduceBy) {
             actorData.availableItems[type] = availableItem - reduceBy;
         } else if (availableItem < reduceBy) {
             let remainder = reduceBy - availableItem;
             actorData.availableItems[type] = 0;
-            actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder : -1 * remainder
+            if(backupType){
+                actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder : -1 * remainder
+            } else {
+                actorData.availableItems[type] = actorData.availableItems[type] - remainder;
+            }
         } else {
             actorData.availableItems[type] = -1 * reduceBy;
         }
@@ -1926,12 +2002,8 @@ export class SWSEActor extends Actor {
     }
 
     get isForceSensitive() {
-        let hasForceSensativity = getInheritableAttribute({
-            entity: this,
-            attributeKey: "forceSensitivity",
-            reduce: "OR"
-        });
-        return hasForceSensativity && !this.isDroid;
+        const forceSensitivity = this.items.find(i => i.name === "Force Sensitivity")
+        return !!forceSensitivity && !this.isDroid;
     }
 
     get baseAttackBonus() {
@@ -2070,6 +2142,7 @@ export class SWSEActor extends Actor {
             return [];
         }
 
+        //Check that the item being added can be added to this actor type and that it hasn't been added too many times
         if (context.newFromCompendium) {
             if (!this.isPermittedForActorType(entity.type)) {
                 new Dialog({
@@ -2103,12 +2176,14 @@ export class SWSEActor extends Actor {
                     return [];
                 }
             }
+        }
 
+
+        if (context.newFromCompendium) {
             if (!context.skipPrerequisite && !context.isUpload) {
-                let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
-
                 //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
                 if (!equipableTypes.includes(entity.type)) {
+                    let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
                     if (meetsPrereqs.doesFail) {
                         if (context.offerOverride) {
                             let override = await Dialog.wait({
@@ -2309,51 +2384,51 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if (entity.type === "class") {
-                context.isFirstLevel = this.classes.length === 0;
-                if (!context.skipPrerequisite && !context.isUpload) {
+        }
+        if (entity.type === "class") {
+            context.isFirstLevel = this.classes.length === 0;
+            if (!context.skipPrerequisite && !context.isUpload) {
 
-                    if (entity.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
-                        new Dialog({
-                            title: "The Beast class is not allowed at this time",
-                            content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok'
-                                }
+                if (entity.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
+                    new Dialog({
+                        title: "The Beast class is not allowed at this time",
+                        content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
                             }
-                        }).render(true);
-                        return [];
-                    }
-                    if (entity.name !== "Beast" && this.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
-                        new Dialog({
-                            title: "The Beast class is not allowed to multiclass at this time",
-                            content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok'
-                                }
+                        }
+                    }).render(true);
+                    return [];
+                }
+                if (entity.name !== "Beast" && this.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
+                    new Dialog({
+                        title: "The Beast class is not allowed to multiclass at this time",
+                        content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
                             }
-                        }).render(true);
-                        return [];
-                    }
+                        }
+                    }).render(true);
+                    return [];
                 }
+            }
 
-                SWSEActor.updateOrAddChange(entity, "isFirstLevel", context.isFirstLevel);
+            SWSEActor.updateOrAddChange(entity, "isFirstLevel", context.isFirstLevel);
 
-                if (context.isFirstLevel) {
-                    let firstLevelHP = getInheritableAttribute({
-                        entity,
-                        attributeKey: "firstLevelHitPoints",
-                        reduce: "VALUES"
-                    })[0]
-                    SWSEActor.updateOrAddChange(entity, "rolledHP", `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP);
+            if (context.isFirstLevel) {
+                let firstLevelHP = getInheritableAttribute({
+                    entity,
+                    attributeKey: "firstLevelHitPoints",
+                    reduce: "VALUES"
+                })[0]
+                SWSEActor.updateOrAddChange(entity, "rolledHP", `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP);
 
-                } else {
-                    SWSEActor.updateOrAddChange(entity, "rolledHP", 1);
-                }
+            } else {
+                SWSEActor.updateOrAddChange(entity, "rolledHP", 1);
             }
         }
 
@@ -2362,10 +2437,10 @@ export class SWSEActor extends Actor {
     }
 
 
-    static updateOrAddChange(entity, key, value) {
+    static updateOrAddChange(entity, key, value, forceAdd = false) {
         let find = (entity.system.changes || Object.values(entity.system.attributes)).find(v => v.key === key);
 
-        if (find) {
+        if (find && !forceAdd) {
             find.value = value;
         } else {
             entity.system.changes = entity.system.changes || [];
@@ -2375,9 +2450,44 @@ export class SWSEActor extends Actor {
 
     async resolveAddItem(item, choices, context) {
         context.skipPrerequisite = true;
-        let mainItem = await this.createEmbeddedDocuments("Item", [item.toObject(false)]);
+
+        //on uploads add "provide" changes for classFeats
+        if (item.type === "class") {
+            let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
+            let availableClassFeats = getInheritableAttribute({
+                entity: item,
+                attributeKey: "availableClassFeats",
+                reduce: "SUM"
+            });
+            let classFeats = getInheritableAttribute({
+                entity: item,
+                attributeKey: "classFeat",
+                reduce: "VALUES"
+            });
+            if (context.isUpload) {
+                if (!availableClassFeats) {
+                    availableClassFeats = classFeats.length
+                }
+                if (context.isFirstLevel && availableClassFeats) {
+                    SWSEActor.updateOrAddChange(item, "provides", `${item.name} Starting Feats:${availableClassFeats}`, true)
+                    // item.system.changes.push({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
+                } else if (isFirstLevelOfClass) {
+                    item.system.changes.push({key: "provides", value: `${item.name} Starting Feats`})
+                }
+            }
+        }
+
 
         let providedItems = item.getProvidedItems() || [];
+
+        if (context.isUpload) {
+            let addProviders = providedItems.filter(i => i.type !== "trait")
+            for (let addProvider of addProviders) {
+                SWSEActor.updateOrAddChange(item, "provides", `${item.name} ${item.type} ${addProvider.type}:${addProvider.type.toUpperCase()}:${addProvider.name}`, true)
+            }
+            providedItems = providedItems.filter(i => i.type === "trait")
+        }
+        let mainItem = await this.createEmbeddedDocuments("Item", [item.toObject(false)]);
 
         providedItems.push(...choices.items);
 
@@ -2398,127 +2508,108 @@ export class SWSEActor extends Actor {
      * Adds Feats provided by a class and provides choices to the player when one is available
      * @param item {SWSEItem}
      * @param context
-     * @returns {Promise<[]>}
      */
     async addClassFeats(item, context) {
+        if (context.isUpload) {
+            return;
+        }
+
         let feats = getInheritableAttribute({
             entity: item,
             attributeKey: "classFeat",
             reduce: "VALUES"
         }).map(feat => this.cleanItemName(feat));
+
+        if (feats.length === 0) {
+            return;
+        }
+
+        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
         let availableClassFeats = getInheritableAttribute({
             entity: item,
             attributeKey: "availableClassFeats",
             reduce: "SUM"
         });
+        // if (context.isUpload) {
+        //     if (context.isFirstLevel) {
+        //         SWSEActor.updateOrAddChange(item, "provides", `${item.name} Starting Feats:${availableClassFeats}`, true)
+        //        // item.system.changes.push({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
+        //     } else if (isFirstLevelOfClass) {
+        //         item.system.changes.push({key: "provides", value: `${item.name} Starting Feats`})
+        //     }
+        //     return;
+        // }
 
-        if (feats.length === 0) {
-            return [];
+
+        const currentFeats = this.feats || [];
+        if (context.isFirstLevel) {
+            if (!(availableClassFeats > 0 && availableClassFeats < feats.length)) {
+                await this.addItems(feats.map(feat => {
+                    return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
+                }), item, context);
+                let featString = await this.addItems(feats.map(feat => {
+                    return {type: 'FEAT', name: feat}
+                }), item, context);
+
+
+                new Dialog({
+                    title: "Adding Class Starting Feats",
+                    content: `Adding class starting feats: <ul>${featString}</ul>`,
+                    buttons: {
+                        ok: {
+                            icon: '<i class="fas fa-check"></i>',
+                            label: 'Ok'
+                        }
+                    }
+                }).render(true);
+            } else {
+                let ownedFeats = currentFeats.map(f => f.finalName);
+                for (let i = 0; i < availableClassFeats; i++) {
+                    const availableFeats = this._explodeFeatNames(feats);
+                    ownedFeats.push(await this.selectFeat(availableFeats, ownedFeats, item, context))
+                }
+            }
+        } else if (isFirstLevelOfClass) {
+            const availableFeats = this._explodeFeatNames(feats);
+            availableFeats.push(...(getInheritableAttribute({
+                entity: item,
+                attributeKey: "multiclassFeat",
+                reduce: "VALUES"
+            }).map(feat => this.cleanItemName(feat))))
+
+            let ownedFeats = currentFeats.map(f => f.finalName);
+            await this.selectFeat(availableFeats, ownedFeats, item, context);
+        }
+    }
+
+    async selectFeat(availableFeats, ownedFeats, parentItem, context) {
+        let options = "";
+        for (let feat of availableFeats) {
+            let owned = "";
+            let overlappingFeats = ownedFeats.filter(f => f === feat);
+            if (overlappingFeats.length > 0) {
+                owned = "<i>(you already have this feat)</i>"
+            }
+            options += `<option value="${feat}">${feat}${owned}</option>`
         }
 
-        let feats1 = this.feats
-        let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
-        if (!context.isUpload) {
-            if (context.isFirstLevel) {
-                if (availableClassFeats > 0 && availableClassFeats < feats.length) {
-                    let selectedFeats = [];
-                    for (let i = 0; i < availableClassFeats; i++) {
-                        let options = "";
-
-                        for (let feat of this._explodeFeatNames(feats)) {
-                            let owned = "";
-                            let ownedFeats = feats1.filter(f => f.finalName === feat);
-                            ownedFeats.push(...selectedFeats.filter(f => f === feat))
-                            if (ownedFeats.length > 0) {
-                                owned = "<i>(you already have this feat)</i>"
-                            }
-
-                            options += `<option value="${feat}">${feat}${owned}</option>`
-                        }
-
-                        await Dialog.prompt({
-                            title: `Select a Starting feat from this class`,
-                            content: `<p>Select a Starting feat from this class</p>
+        return await Dialog.prompt({
+            title: `Select a Starting feat from this class`,
+            content: `<p>Select a Starting feat from this class</p>
                         <div><select id='feat'>${options}</select> 
                         </div>`,
-                            callback: async (html) => {
-                                let feat = html.find("#feat")[0].value;
-                                selectedFeats.push(feat);
-                                await this.addItems([{
-                                    type: 'TRAIT',
-                                    name: `Bonus Feat (${feat})`
-                                }, {
-                                    type: 'FEAT',
-                                    name: feat
-                                }], item, context);
-                            }
-                        });
-                    }
-                } else {
-                    await this.addItems(feats.map(feat => {
-                        return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                    }), item, context);
-                    let featString = await this.addItems(feats.map(feat => {
-                        return {type: 'FEAT', name: feat}
-                    }), item, context);
-
-
-                    new Dialog({
-                        title: "Adding Class Starting Feats",
-                        content: `Adding class starting feats: <ul>${featString}</ul>`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                }
-            } else if (isFirstLevelOfClass) {
-                let options = "";
-
-                let allFeats = [];
-                allFeats.push(...feats)
-                let multiclassFeats = getInheritableAttribute({
-                    entity: item,
-                    attributeKey: "multiclassFeat",
-                    reduce: "VALUES"
-                }).map(feat => this.cleanItemName(feat));
-                allFeats.push(...multiclassFeats)
-
-                for (let feat of allFeats) {
-                    let owned = "";
-                    let ownedFeats = feats1.filter(f => f.finalName === feat);
-                    if (ownedFeats.length > 0) {
-                        owned = "<i>(you already have this feat)</i>"
-                    }
-
-                    options += `<option value="${feat}">${feat}${owned}</option>`
-                }
-
-                await Dialog.prompt({
-                    title: "Select a Starting feat from this class",
-                    content: `<p>Select a Starting feat from this class</p>
-                        <div><select id='feat'>${options}</select> 
-                        </div>`,
-                    callback: async (html) => {
-                        let feat = html.find("#feat")[0].value;
-                        await this.addItems({
-                            type: 'TRAIT',
-                            name: `Bonus Feat (${feat})`
-                        }, item, context);
-                        await this.addItems({type: 'FEAT', name: feat}, item, context);
-                    }
-                });
+            callback: async (html) => {
+                let feat = html.find("#feat")[0].value;
+                await this.addItems([{
+                    type: 'TRAIT',
+                    name: `Bonus Feat (${feat})`
+                }, {
+                    type: 'FEAT',
+                    name: feat
+                }], parentItem, context);
+                return feat;
             }
-        } else {
-            if (context.isFirstLevel) {
-                item.addChange({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
-            } else if (isFirstLevelOfClass) {
-                item.addChange({key: "provides", value: `${item.name} Starting Feats`})
-            }
-        }
-
+        });
     }
 
     _isFirstLevelOfClass(name) {
@@ -2561,7 +2652,7 @@ export class SWSEActor extends Actor {
             let notificationMessage = response.notificationMessage
             let addedItem = response.addedItem
             notificationMessages += notificationMessage;
-            if(addedItem){
+            if (addedItem) {
                 addedItems.push(addedItem);
             }
         }
@@ -2574,7 +2665,7 @@ export class SWSEActor extends Actor {
 
     async addItem(providedItem, options, parent) {
         //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
-        let {payload, itemName, entity} = await this.resolveEntity(providedItem);
+        let {payload, itemName, entity, createdItem} = await this.resolveEntity(providedItem);
 
         if (!entity) {
             if (options.suppressWarnings) {
@@ -2585,16 +2676,16 @@ export class SWSEActor extends Actor {
             return {};
         }
 
-        if(entity.type === "class"){
-            let existing = this.items.find(item => item.name === entity.name && item.type === "class")
-            let levels = [0];
-            for(let clazz of this.items.filter(item => item.type === "class")){
+        if (entity.type === "class") {
+            let levels = [1];
+            for (let clazz of this.items.filter(item => item.type === "class")) {
                 levels.push(...(clazz.levelsTaken || []))
             }
 
-            let nextLevel = Math.max(...levels) + 1
+            let nextLevel = providedItem.firstLevel ? 1 : Math.max(...levels) + 1
 
-            if(existing){
+            let existing = this.items.find(item => item.name === entity.name && item.type === "class")
+            if (existing) {
                 let levels = existing.levelsTaken || [];
                 levels.push(nextLevel);
                 await existing.safeUpdate({"system.levelsTaken": levels});
@@ -2606,20 +2697,22 @@ export class SWSEActor extends Actor {
             entity.system.levelsTaken = [nextLevel];
         }
 
-        entity.prepareData();
-
-
-        //TODO weird spot for this.  maybe this can leverage the newer payload system
-        if (itemName === "Bonus Feat" && payload) {
-            for (let attr of Object.values(entity.system.attributes || {})) {
-                if (attr.key === "provides") {
-                    attr.key = "bonusFeat";
-                    attr.value = payload;
+        if (entity.type === "feat") {
+            const classes = CLASSES_BY_STARTING_FEAT[itemName];
+            if (classes) {
+                for (let charClass of classes) {
+                    entity.system.possibleProviders.push(`${charClass} Starting Feats`)
                 }
+            }
+            if(entity.name === 'Bonus Feat' && payload === undefined){
+                SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
             }
         }
 
-        entity.addItemAttributes(providedItem.attributes);
+        entity.prepareData();
+
+
+        entity.addItemAttributes(providedItem.changes);
         entity.addProvidedItems(providedItem.providedItems);
         entity.setParent(parent, providedItem.unlocked);
         entity.setPrerequisite(providedItem.prerequisite);
@@ -2645,8 +2738,8 @@ export class SWSEActor extends Actor {
         let modifications = providedItem.modifications;
         if (!!modifications) {
             for (let modification of modifications) {
-                let {payload, itemName, entity} = this.resolveEntity(modification)
-                if(entity){
+                let {payload, itemName, entity} = await this.resolveEntity(modification)
+                if (entity) {
                     await addedItem.addItemModificationEffectFromItem(entity)
                 }
             }
@@ -2654,7 +2747,10 @@ export class SWSEActor extends Actor {
 
         let equip = providedItem.equip;
         if (equip) {
-            await this.equipItem(addedItem._id, equip, options)
+            addedItem.system.equipped = equip
+        }
+        if (createdItem) {
+            // entity.delete();
         }
         return {notificationMessage, addedItem};
     }
@@ -2693,14 +2789,17 @@ export class SWSEActor extends Actor {
                 }
             }
         }
-
-        if(!entity && item.type === "language"){
-            const cls = getDocumentClass("Item");
-            const entities = await cls.createDocuments([item], {});
-            entity = entities[0];
+        let createdItem = false;
+        if (!entity && item.type === "language") {
+            entity = game.items.find(i => i.name === item.name)
+            if (!entity) {
+                let entities = await SWSEItem.create([item]);
+                entity = entities[0];
+                createdItem = true;
+            }
         }
 
-        return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null};
+        return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null, createdItem};
     }
 
     get warnings() {
@@ -2742,18 +2841,18 @@ export class SWSEActor extends Actor {
         let entry;
         let currentLookup;
 
-        for(let lookup of lookups){
+        for (let lookup of lookups) {
             let index = lookup.index;
             entry = await index.find(f => f.name === cleanItemName1);
             if (!entry) {
                 let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
                 entry = await index.find(f => f.name === cleanItemName2);
-                if(entry){
+                if (entry) {
                     payload = undefined;
                 }
             }
             currentLookup = lookup
-            if(entry) break;
+            if (entry) break;
         }
         return {entry, payload, itemName, lookup: currentLookup};
     }
@@ -2762,8 +2861,10 @@ export class SWSEActor extends Actor {
         return feat.replace("*", "").trim();
     }
 
-    async equipItem(itemId, equipType, options) {
-        let item = this.items.get(itemId);
+    async equipItem(item, equipType, options) {
+        if (typeof item !== "object") {
+            item = this.items.get(item);
+        }
 
         let {slot, position, newEquipType} = this.parseSlotAndPosition(equipType);
 
@@ -2806,13 +2907,15 @@ export class SWSEActor extends Actor {
                 return;
             }
         }
-        await this.resolveUpdate(itemId, equipType, slot, position);
+        await this.resolveUpdate(item, equipType, slot, position);
 
     }
 
 
-    async resolveUpdate(itemId, equipType, slot, position) {
-        let item = this.items.get(itemId);
+    async resolveUpdate(item, equipType, slot, position) {
+        if (typeof item !== "object") {
+            item = this.items.get(item);
+        }
         item.equip(equipType);
         // let update = {};
         // update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
@@ -2925,7 +3028,7 @@ export class SWSEActor extends Actor {
 
         let classes = this.items.filter(i => i.type === "class")
         // do any of these class items not have a list of levels taken at?
-        if (classes.find(c => !c.system.levelsTaken ||  (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0)) {
+        if (classes.find(c => !c.system.levelsTaken || (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0)) {
             // if so lets figure out what levels each class was taken
             let orderedClasses = [];
             let unsortedClasses = [];
@@ -2968,10 +3071,10 @@ export class SWSEActor extends Actor {
                     }
                     indicies.push(index++)
                 }
-                preppedForRemoval.push(... classesOfType.slice(1).map(c => c.id))
+                preppedForRemoval.push(...classesOfType.slice(1).map(c => c.id))
                 classesOfType[0].safeUpdate({"system.levelsTaken": indicies});
             }
-            preppedForRemoval.push(... classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
+            preppedForRemoval.push(...classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
 
             console.log("PREPPED FOR REMOVAL", preppedForRemoval)
             this.removeItems(preppedForRemoval)

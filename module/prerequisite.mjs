@@ -253,7 +253,7 @@ function meetsPrerequisite(prereq, target, options) {
                         break;
                     }
                 }
-                failureList.push({fail: true, message: `${prereq.text}`});
+                failureList.push({fail: false, message: `${prereq.text}`});
                 break;
             case 'FORCE TECHNIQUE':
                 let ownedForceTechniques = filterItemsByType(options.embeddedItemOverride, "forceTechnique");

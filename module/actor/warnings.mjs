@@ -18,7 +18,7 @@ export function warningsFromActor(actor) {
         warnings.push(`<span class="attributeGenerationType">Please Select an attribute generation type</span>`)
     }
 
-    if(!actor.species){
+    if(!actor.species && !actor.classes.find(c => c.name === 'Beast')){
         warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:species">Please Select a Species</span>`)
     }
     if(!actor.classes){
@@ -31,7 +31,9 @@ export function warningsFromActor(actor) {
         warnings.push(`<span>Too Many Skills Selected: ${actor.tooManySkills}</span>`)
     }
     for(let item of Object.entries(actor.system.availableItems || {})){
-        warnings.push(`<span>Items from ${item[0]} remaining: ${item[1]}</span>`)
+        if(item[1] !== 0){
+            warnings.push(`<span>Items from ${item[0]} remaining: ${item[1]}</span>`)
+        }
     }
     for(let feat of actor.system.inactiveProvidedFeats || []){
         warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite?.text}</span>`)
