@@ -663,17 +663,17 @@ export class SWSEActor extends Actor {
             //     attributeKey: "firstLevelHitPoints",
             //     reduce: "FIRST"
             // });
-            for (let [i, level] of co.levelsTaken.entries()) {
+            for (let [i, characterLevel] of co.levelsTaken.entries()) {
                 const levelOfClass = i + 1;
                 let leveledClass = {}
                 leveledClass.id = co.id;
                 leveledClass.img = co.img;
                 leveledClass.name = co.name;
                 leveledClass.levelUpHitPoints = co.levelUpHitPoints;
-                leveledClass.canRerollHealth = co.canRerollHealth(levelOfClass);
-                leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass);
+                leveledClass.canRerollHealth = co.canRerollHealth(characterLevel);
+                leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass, characterLevel);
                 leveledClass.isLatest = false;
-                leveledClass.level = level;
+                leveledClass.level = characterLevel;
 
                 classes.push(leveledClass);
             }
@@ -2681,7 +2681,7 @@ export class SWSEActor extends Actor {
         }
 
         if (entity.type === "class") {
-            let levels = [1];
+            let levels = [0];
             for (let clazz of this.items.filter(item => item.type === "class")) {
                 levels.push(...(clazz.levelsTaken || []))
             }

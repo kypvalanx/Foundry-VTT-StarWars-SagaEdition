@@ -343,21 +343,18 @@ export class SWSEItem extends Item {
         }).map(attr => attr.value)[0];
     }
 
-    classLevelHealth(level) {
+    classLevelHealth(classLevel, characterLevel) {
         if (this.type !== "class") {
             return 0;
         }
-        if (!this.canRerollHealth(level)) {
-
+        if (!this.canRerollHealth(characterLevel)) {
             return getInheritableAttribute({
                 entity: this,
-                attributeKey: "firstLevelHitPoints",
-
-
+                attributeKey: "firstLevelHitPoints"
             }).map(attr => parseInt(attr.value))[0];
         }
         let attr = getInheritableAttribute({
-            entity: this.level(level),
+            entity: this.level(classLevel),
             attributeKey: "rolledHp",
             reduce: "FIRST",
             flags: ["IGNORE_DISABLE"]
@@ -395,14 +392,13 @@ export class SWSEItem extends Item {
         });
     }
 
-    canRerollHealth(level){
-        if(level>1){
+    canRerollHealth(characterLevel){
+        if(characterLevel>1){
             return true;
         }
         const firstLevelHitPoints = getInheritableAttribute({entity: this, attributeKey:"firstLevelHitPoints", reduce:"FIRST"});
-        if(`${firstLevelHitPoints}`.split("d").length === 2){
-            return true;
-        }
+        return `${firstLevelHitPoints}`.split("d").length === 2;
+
     }
 
     get isDoubleWeapon() {
