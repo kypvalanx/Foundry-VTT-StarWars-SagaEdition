@@ -153,7 +153,7 @@ export class SWSEActor extends Actor {
         }
 
         system.condition = 0;
-        let conditionEffect = this.effects.find(effect => effect.statuses.filter(status => status.startsWith("condition")).size > 0)
+        let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
 
         if (conditionEffect) {
             system.condition = conditionEffect.changes.find(change => change.key === "condition").value
