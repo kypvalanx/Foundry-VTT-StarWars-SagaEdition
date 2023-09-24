@@ -22,13 +22,13 @@
             <td><h4 class="item-name">{{class.name}}</h4></td>
             <td><span class="text-box {{#if class.canRerollHealth}}item-action short{{/if}} center"
                       data-action="update-level-attribute"
-                      data-item="{{class.id}}" data-attribute="rolledHp" data-level="{{sum id 1}}"
+                      data-item="{{class.id}}" data-attribute="rolledHp" data-level="{{class.level}}"
                       data-dtype="Number">{{class.classLevelHealth}}</span>
             </td>
             <td>
                 {{#if class.canRerollHealth}}
                     <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}"
-                       data-item="{{class.id}}" data-item-attribute="rolledHp" data-level="{{sum id 1}}"
+                       data-item="{{class.id}}" data-item-attribute="rolledHp" data-level="{{class.level}}"
                        data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
                     </a>{{/if}}</td>
             <td>{{../actor.system.attributes.con.mod}}</td>
