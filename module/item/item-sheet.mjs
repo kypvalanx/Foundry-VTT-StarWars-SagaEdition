@@ -281,7 +281,7 @@ export class SWSEItemSheet extends ItemSheet {
             return;
         }
 
-        let isItemMod = Object.values(item.system.attributes).find(attr => attr.key === "itemMod") || Object.values(item.system.changes).find(attr => attr.key === "itemMod");
+        let isItemMod = Object.values(item.system.attributes ? item.system.attributes : []).find(attr => attr.key === "itemMod") || Object.values(item.system.changes).find(attr => attr.key === "itemMod");
         if (!!isItemMod?.value || isItemMod?.value === "true") {
             let meetsPrereqs = meetsPrerequisites(this.object, item.system.prerequisite)
 
