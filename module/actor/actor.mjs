@@ -2960,6 +2960,7 @@ export class SWSEActor extends Actor {
                 "feat",
                 "talent",
                 "species",
+                "droid system",
                 "class",
                 "upgrade",
                 "forcePower",
