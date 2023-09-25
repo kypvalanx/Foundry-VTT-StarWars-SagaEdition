@@ -362,12 +362,7 @@ export class Attack {
             terms.push(...getDiceTermsFromString(damageDice))
         }
 
-        let heroicClassLevels = (actor?.items || []).filter(item => item.type === 'class' && getInheritableAttribute({
-            entity: item,
-            attributeKey: "isHeroic", reduce: "OR"
-        }))
-        let halfHeroicLevel = Math.floor(heroicClassLevels.length / 2)
-
+        let halfHeroicLevel = actor?.halfHeroicLevel || 0;
         let beastClassLevels = (actor?.items || []).filter(item => item.type === 'class' && item.name === "Beast")
         let halfBeastLevel = Math.floor(beastClassLevels.length / 2)
 
