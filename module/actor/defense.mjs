@@ -511,6 +511,7 @@ function _getEquipmentMaxDexBonus(actor) {
     let equipped = actor.getEquippedItems();
     let bonus = 1000;
     for (let item of equipped) {
+        if (item.type !== "armor") continue;
         let maximumDexterityBonus = item.maximumDexterityBonus;
         if (!isNaN(maximumDexterityBonus)) {
             bonus = Math.min(bonus, maximumDexterityBonus);
