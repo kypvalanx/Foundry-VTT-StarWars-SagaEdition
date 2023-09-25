@@ -1322,11 +1322,17 @@ export class SWSEActor extends Actor {
     get heroicLevel() {
         return this.getCached("heroicLevel", () => {
             if (this.classes) {
-                let heroicLevel = this.classes.filter(c => getInheritableAttribute({
-                    entity: c,
+                const classObjects = filterItemsByType(this.items.values(), "class");
+                let heroicLevel = 0;
+                for (let co of classObjects) {
+                    if (getInheritableAttribute({
+                        entity: co,
                     attributeKey: "isHeroic",
                     reduce: "OR"
-                })).length;
+                    })) {
+                        heroicLevel += this.classes.filter(clazz => clazz.name === co.name).length;
+                    }
+                }
                 this.resolvedVariables.set("@heroicLevel", heroicLevel);
                 return heroicLevel;
             }
