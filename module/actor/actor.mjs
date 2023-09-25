@@ -1326,11 +1326,11 @@ export class SWSEActor extends Actor {
                 let heroicLevel = 0;
                 for (let co of classObjects) {
                     if (getInheritableAttribute({
-                        entity: co,
-                    attributeKey: "isHeroic",
-                    reduce: "OR"
-                    })) {
-                        heroicLevel += this.classes.filter(clazz => clazz.name === co.name).length;
+                            entity: co,
+                            attributeKey: "isHeroic",
+                            reduce: "OR"
+                        })) {
+                        heroicLevel += co.system.levelsTaken.length;
                     }
                 }
                 this.resolvedVariables.set("@heroicLevel", heroicLevel);
