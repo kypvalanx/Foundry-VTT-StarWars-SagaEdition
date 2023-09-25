@@ -673,7 +673,8 @@ export class SWSEActor extends Actor {
                 leveledClass.canRerollHealth = co.canRerollHealth(characterLevel);
                 leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass, characterLevel);
                 leveledClass.isLatest = false;
-                leveledClass.level = levelOfClass;
+                leveledClass.classLevel = levelOfClass;
+                leveledClass.characterLevel = characterLevel;
 
                 classes.push(leveledClass);
             }
