@@ -2963,6 +2963,7 @@ export class SWSEActor extends Actor {
             return ["weapon",
                 "armor",
                 "equipment",
+                "implant",
                 "feat",
                 "talent",
                 "species",
