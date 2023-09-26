@@ -673,7 +673,8 @@ export class SWSEActor extends Actor {
                 leveledClass.canRerollHealth = co.canRerollHealth(characterLevel);
                 leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass, characterLevel);
                 leveledClass.isLatest = false;
-                leveledClass.level = characterLevel;
+                leveledClass.classLevel = levelOfClass;
+                leveledClass.characterLevel = characterLevel;
 
                 classes.push(leveledClass);
             }
@@ -2964,6 +2965,7 @@ export class SWSEActor extends Actor {
                 "feat",
                 "talent",
                 "species",
+                "droid system",
                 "class",
                 "upgrade",
                 "forcePower",
