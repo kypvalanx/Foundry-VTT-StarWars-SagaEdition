@@ -1064,6 +1064,10 @@ export class SWSEActor extends Actor {
         })
     }
 
+    // getter for further speed calculations
+    get resolvedSpeed() {
+        return parseInt(/([\w\s]*)\s(\d*)/.exec(this.speed)[2]);
+    }
 
     //TODO extract this, it's not dependent on this class
     applyArmorSpeedPenalty(speed, armorType) {
