@@ -1327,11 +1327,17 @@ export class SWSEActor extends Actor {
     get heroicLevel() {
         return this.getCached("heroicLevel", () => {
             if (this.classes) {
-                let heroicLevel = this.classes.filter(c => getInheritableAttribute({
-                    entity: c,
-                    attributeKey: "isHeroic",
-                    reduce: "OR"
-                })).length;
+                const classObjects = filterItemsByType(this.items.values(), "class");
+                let heroicLevel = 0;
+                for (let co of classObjects) {
+                    if (getInheritableAttribute({
+                            entity: co,
+                            attributeKey: "isHeroic",
+                            reduce: "OR"
+                        })) {
+                        heroicLevel += co.system.levelsTaken.length;
+                    }
+                }
                 this.resolvedVariables.set("@heroicLevel", heroicLevel);
                 return heroicLevel;
             }
@@ -2962,6 +2968,7 @@ export class SWSEActor extends Actor {
             return ["weapon",
                 "armor",
                 "equipment",
+                "implant",
                 "feat",
                 "talent",
                 "species",
