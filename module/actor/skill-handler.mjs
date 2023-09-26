@@ -166,11 +166,17 @@ export function generateSkills(actor) {
  */
 export function getAvailableTrainedSkillCount(actor) {
     let intBonus = actor.getAttributeMod("int")
-    let classBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "trainedSkillsFirstLevel",
-        reduce: "FIRST"
-    })
+    let classBonus = 0;
+    for (let co of actor.itemTypes.class) {
+        if (co.levelsTaken.includes(1)) {
+            classBonus = getInheritableAttribute({
+                entity: co,
+                attributeKey: "trainedSkillsFirstLevel",
+                reduce: "SUM"
+            })
+            break;
+        }
+    }
     let classSkills = Math.max(resolveValueArray([classBonus, intBonus]), 1);
     let otherSkills = getInheritableAttribute({
         entity: actor,
