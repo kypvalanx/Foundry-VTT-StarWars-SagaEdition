@@ -1,7 +1,6 @@
-import {appendNumericTerm, getBonusString, resolveValueArray, toShortAttribute} from "../common/util.mjs";
+import {appendNumericTerm, toShortAttribute} from "../common/util.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {Attack} from "./attack.mjs";
-import {d20} from "../common/constants.mjs";
 import {compareSizes} from "./size.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
@@ -243,25 +242,6 @@ function explodeProficiencies(proficiencies) {
         result.push(proficiency)
     }
     return result;
-}
-
-export function resolveFinesseBonus(actor, finesseStats) {
-    let values = finesseStats.map(stat => getCharacterAttribute(actor, stat).mod);
-    return Math.max(...values)
-}
-
-/**
- *
- * @param {SWSEActor} actor
- * @param {string} attributeName
- */
-function getCharacterAttribute(actor, attributeName) {
-    let data = actor.system
-    let attributes = data.attributes;
-    if(!!attributes) {
-        return attributes[toShortAttribute(attributeName).toLowerCase()];
-    }
-    return {mod:0}
 }
 
 

@@ -89,7 +89,7 @@ function getChangesFromActiveEffects(document) {
     }
 
     let attributes = []
-    for (let effect of document.effects?.values() || []) {
+    for (let effect of document.effects?.filter(effect => !effect.origin) || []) {
         if (isActiveEffect(effect, document)) {
             attributes.push(...extractEffectChange(effect.changes || [], effect))
         }
@@ -114,7 +114,7 @@ function getChangesFromDocument(data) {
 
         }
 
-        allAttributes.push(...getChangesFromEmbeddedItems(document, data.predicate, data.embeddedItemOverride));
+        allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
         allAttributes.push(...getChangesFromActiveEffects(document));
         return allAttributes;
     };
@@ -122,7 +122,7 @@ function getChangesFromDocument(data) {
 
     return document.getCached ? document.getCached({
         fn: "getChangesFromDocument",
-        predicate: data.predicate,
+        predicate: data.itemFilter,
         embeddedItemOverride: data.embeddedItemOverride,
         skipLocal: data.skipLocal
     }, fn) : fn();

@@ -8,8 +8,7 @@ import {
     getPossibleProficiencies,
     getProficiencyBonus,
     getSpecializationDamageBonuses,
-    isFocus,
-    resolveFinesseBonus
+    isFocus
 } from "./attack-handler.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {SWSEActor} from "./actor.mjs";
@@ -25,10 +24,13 @@ import {
     getOrdinal,
     getRangeModifierBlock,
     handleAttackSelect,
-    increaseDieSize, minus,
-    mult, plus,
+    increaseDieSize,
+    minus,
+    mult,
+    plus,
     resolveValueArray,
-    toNumber
+    toNumber,
+    toShortAttribute
 } from "../common/util.mjs";
 import {SWSERollWrapper} from "../common/roll.mjs";
 import {createAttackMacro} from "../swse.mjs";
@@ -89,7 +91,7 @@ export class Attack {
 
     /**
      *
-     * @returns {ActorData | Object}
+     * @returns {SWSEActor}
      */
     get actor() {
         let fn = () => {
@@ -143,7 +145,7 @@ export class Attack {
 
     /**
      *
-     * @returns {ItemData}
+     * @returns {SWSEItem}
      */
     get item() {
         let fn = () => {
@@ -269,20 +271,7 @@ export class Attack {
         }
 
         let weaponTypes = getPossibleProficiencies(actor, item);
-        let attributeStats = []
-        if (this.isRanged(item)) {
-            attributeStats.push("DEX")
-        } else {
-            attributeStats.push("STR")
-            if (canFinesse(getSize(actor), item, isFocus(actor, weaponTypes))) {
-                attributeStats.push(...(getInheritableAttribute({
-                    entity: actor,
-                    attributeKey: "finesseStat", reduce: "VALUES"
-                })));
-            }
-        }
-
-        let attributeMod = resolveFinesseBonus(actor, attributeStats);
+        let attributeMod = this._resolveAttributeModifier(item, actor, weaponTypes);
         let terms = getDiceTermsFromString("1d20");
 
         if (!!provider) {
@@ -321,6 +310,7 @@ export class Attack {
 
         terms.push(...appendNumericTerm(generateArmorCheckPenalties(actor), "Armor Check Penalty"));
 
+        //toHitModifiers only apply to the weapon they are on.  a toHitModifier change that is not on a weapon always applies
         getInheritableAttribute({
             entity: [item, actor],
             attributeKey: "toHitModifier",
@@ -334,6 +324,35 @@ export class Attack {
 
         return new SWSERollWrapper(Roll.fromTerms(terms
             .filter(term => !!term)));
+    }
+
+    _resolveAttributeModifier(item, actor, weaponTypes) {
+        let attributeStats = []
+        if (this.isRanged(item)) {
+            attributeStats.push("DEX")
+        } else {
+            attributeStats.push("STR")
+            if (canFinesse(getSize(actor), item, isFocus(actor, weaponTypes))) {
+                attributeStats.push(...(getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "finesseStat", reduce: "VALUES"
+                })));
+            }
+        }
+
+        return Math.max(...(attributeStats.map(stat => this._getCharacterAttributeModifier(actor, stat))));
+    }
+
+
+
+    /**
+     *
+     * @param {SWSEActor} actor
+     * @param {string} attributeName
+     */
+    _getCharacterAttributeModifier(actor, attributeName) {
+        let attributes = actor.system.attributes;
+        return !attributes ? 0 : attributes[toShortAttribute(attributeName).toLowerCase()].mod;
     }
 
     get damageRoll() {
