@@ -159,7 +159,7 @@ testSuite()
 //test()
 
 function assertEquals(expected, actual) {
-    if (expected === actual) {
+    if (expected == actual) {
         //console.log("passed")
     } else {
         console.warn(`expected "${expected}", but got "${actual}"`)
@@ -175,7 +175,8 @@ async function testSuite() {
     //testEldewnandElsaeSarvool();
     //testTeek();
     //testSpecForceMarine();
-    testObiWanKenobiJediSpirit();
+    //testObiWanKenobiJediSpirit();
+    testVeteranImperialOfficer();
 }
 
 async function getActorRawData(file, unitName) {
@@ -350,6 +351,33 @@ async function testSpecForceMarine() {
     assertEquals("9", actor.system.attributes.int.total)
     assertEquals("10", actor.system.attributes.wis.total)
     assertEquals("8", actor.system.attributes.cha.total)
+
+    assertEquals(0, actor.warnings.length)
+    if(actor.warnings.length > 0){
+        console.warn(actor.warnings)
+    }
+
+    actor.delete()
+}
+
+async function testVeteranImperialOfficer() {
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-9.json", "Veteran Imperial Officer")
+
+    let actor = await processActor(actorData);
+
+    assertEquals("Veteran Imperial Officer", actor.name)
+
+    assertEquals(50, actor.system.health.value)
+    assertEquals(50, actor.system.health.max)
+    assertEquals(50, actor.system.health.override)
+
+    assertEquals("Manual", actor.system.attributeGenerationType)
+    assertEquals(10, actor.system.attributes.str.total)
+    assertEquals(8, actor.system.attributes.dex.total)
+    assertEquals(10, actor.system.attributes.con.total)
+    assertEquals(14, actor.system.attributes.int.total)
+    assertEquals(13, actor.system.attributes.wis.total)
+    assertEquals(14, actor.system.attributes.cha.total)
 
     assertEquals(0, actor.warnings.length)
     if(actor.warnings.length > 0){
