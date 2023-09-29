@@ -3,6 +3,7 @@ import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
+import {SWSEActor} from "./actor/actor.mjs";
 
 /**
  * appends source meta to a given attribute
@@ -24,7 +25,7 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
 
 
 function getChangesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
-    if(entity instanceof SWSEItem || entity instanceof SWSEActiveEffect){
+    if(!(entity instanceof SWSEActor)){
         return [];
     }
     let attributes = [];

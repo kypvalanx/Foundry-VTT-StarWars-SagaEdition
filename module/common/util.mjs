@@ -991,19 +991,17 @@ function getValueSize(value) {
 
 function maxValue(values, actor) {
     return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => {
-        let sub = {};
-        sub[getValueSize(a)] = a;
-        sub[getValueSize(b)] = b;
-        return sub[a === undefined ? b : Math.max(a, b)];
+        const aSize = getValueSize(a);
+        const bSize = getValueSize(b);
+        return aSize > bSize ? a : b;
     }, undefined);
 }
 
 function minValue(values, actor) {
     return values.map(attr => resolveValueArray(attr.value, actor)).reduce((a, b) => {
-        let sub = {};
-        sub[getValueSize(a)] = a;
-        sub[getValueSize(b)] = b;
-        return sub[a === undefined ? b : Math.min(a, b)];
+        const aSize = getValueSize(a);
+        const bSize = getValueSize(b);
+        return aSize < bSize ? a : b;
     }, undefined);
 }
 

@@ -1101,11 +1101,11 @@ export class SWSEActor extends Actor {
         let number = parseInt(result[2]);
         let speedType = result[1];
         if (game.settings.get("swse", "enableEncumbranceByWeight")) {
-            if (this.weight >= this.maximumCapacity) {
+            if (this.carriedWeight >= this.maximumCapacity) {
                 number = 0;
-            } else if (this.weight >= this.strainCapacity) {
+            } else if (this.carriedWeight >= this.strainCapacity) {
                 number = 1;
-            } else if (this.weight >= this.heavyLoad) {
+            } else if (this.carriedWeight >= this.heavyLoad) {
                 number = number * 3 / 4
             }
         }
@@ -3015,6 +3015,20 @@ export class SWSEActor extends Actor {
         }
 
         return this.getCached("weight", fn)
+    }
+    get carriedWeight(){
+        // let fn = () => {
+            const resolvedSize = sizeArray[getResolvedSize(this)];
+            let costFactor = DROID_COST_FACTOR[resolvedSize]
+            let sum = 0;
+            for (let item of this.items.values()) {
+                const weight = getInheritableAttribute({entity:item, attributeKey:"weight", reduce:"SUM"})
+                    sum += resolveWeight(weight, item.system.quantity, costFactor, this)
+            }
+            return sum;
+        // }
+        //
+        // return this.getCached("weight", fn)
     }
 
     get heavyLoad() {
