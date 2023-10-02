@@ -9,7 +9,6 @@ import {refreshActors, registerSystemSettings} from "./settings/system.mjs";
 import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
 import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {getInheritableAttribute} from "./attribute-helper.mjs";
-import {runTests} from "../module_test/runTests.mjs";
 import {makeAttack} from "./actor/attack.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
@@ -17,6 +16,14 @@ import {SWSECompendiumDirectory} from "./compendium/compendium-directory.mjs";
 import {toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
+import {registerTestSuites} from "../module_test/test-suites.test.mjs";
+
+
+Hooks.once('quenchReady',  (quench) => {
+    console.warn("It's Quenching time!")
+    registerTestSuites(quench);
+})
+
 
 
 Hooks.once('init', async function () {
@@ -28,7 +35,6 @@ Hooks.once('init', async function () {
         rollItem,
         makeAttack,
         generateCompendiums, deleteEmptyCompendiums,
-        runTests,
         refreshActors,
         applications: {
             SWSECompendiumBrowser
