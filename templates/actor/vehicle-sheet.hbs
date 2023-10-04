@@ -117,15 +117,15 @@
                 </div>
                 <div class="grid-2col">
                     <div>
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true delete="always"}}
                     </div>
                     <div>
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true delete="always"}}
 
                         {{#each actor.gunnerPositions as |position id|}}
-                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true delete="always"}}
                         {{/each}}
                         <div class="subtle item-container new-gunner panel" data-container-id="new-gunner"
                              title="Drag a weapon emplacement here to create a new gunner position">
