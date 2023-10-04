@@ -148,7 +148,8 @@ export class SWSEItem extends Item {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update') && this._id) {
+        if (this.canUserModify(game.user, 'update') && this._id
+            && (!this.parent || this.parent.canUserModify(game.user, 'update')) && game.actors.get(this.parent.id)) {
             await this.update(data, context);
         }
     }

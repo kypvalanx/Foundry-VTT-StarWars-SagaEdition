@@ -90,7 +90,7 @@ export class SWSEActor extends Actor {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update') && !this.pack) {
+        if (this.canUserModify(game.user, 'update') && !this.pack && !!game.actors.get(this.id)) {
             this.update(data, context);
         }
     }
@@ -1483,7 +1483,7 @@ export class SWSEActor extends Actor {
         }
 
         if (hasUpdate && this.id) {
-            return this.safeUpdate({_id: this.id, 'data.levelAttributeBonus': system.levelAttributeBonus});
+            return this.safeUpdate({'data.levelAttributeBonus': system.levelAttributeBonus});
         }
         return undefined;
     }
