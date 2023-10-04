@@ -15,18 +15,14 @@ function assertEquals(context, expected, actual) {
     expect(actual).to.equal(expected)
 }
 
-export function generationTests(quench) {
+export async function generationTests(quench) {
     console.log("GENERATION TESTS")
     quench.registerBatch("compendium.generation.spotChecks",
         (context)=>{
             const { describe, it, assert, expect, should } = context;
             describe("Generation Spot Checks", ()=>{
-                it("Generate CL0 A9G-Series Archive Droid", ()=>{
-                    try{
-                        testArchiveDroid(context);
-                    }catch (e){
-                        assert.fail()
-                    }
+                it("Generate CL0 A9G-Series Archive Droid", async () => {
+                    await testArchiveDroid(context);
                 });
                 it("Generate CL0 AS23 Aerial Survey Droid", ()=>{
                     testAerialSurveyDroid(context);

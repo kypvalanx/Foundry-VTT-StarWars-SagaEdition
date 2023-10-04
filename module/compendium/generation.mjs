@@ -25,14 +25,7 @@ export async function processActor(actorData) {
 }
 
 export async function getFile(jsonImport) {
-    //console.log(jsonImport);
-    let response;
-    try {
-        response = await fetch(jsonImport);
-    } catch (e) {
-        return;
-    }
-
+    let response = await fetch(jsonImport);
     if (response.status === 404) {
         return;
     }

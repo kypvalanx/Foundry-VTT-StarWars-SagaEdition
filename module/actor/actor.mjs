@@ -3090,6 +3090,7 @@ export class SWSEActor extends Actor {
                 }
             }
 
+            this.skipPrepare = true;
             let preppedForRemoval = [];
             for (let distinct of unsortedClasses.distinct()) {
                 let classesOfType = classes.filter(c => c.name === distinct)
@@ -3108,7 +3109,9 @@ export class SWSEActor extends Actor {
             preppedForRemoval.push(...classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
 
             console.log("PREPPED FOR REMOVAL", preppedForRemoval)
+            this.skipPrepare = false;
             this.removeItems(preppedForRemoval)
+            return true;
         }
 
 
