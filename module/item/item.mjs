@@ -149,7 +149,7 @@ export class SWSEItem extends Item {
 
     async safeUpdate(data = {}, context = {}) {
         if (this.canUserModify(game.user, 'update') && this._id
-            && (!this.parent || this.parent.canUserModify(game.user, 'update')) && game.actors.get(this.parent.id)) {
+            && (!this.parent || (this.parent.canUserModify(game.user, 'update') && game.actors.get(this.parent.id)))) {
             await this.update(data, context);
         }
     }
@@ -336,12 +336,13 @@ export class SWSEItem extends Item {
     }
 
     get levelUpHitPoints() {
-        return getInheritableAttribute({
+        const map = getInheritableAttribute({
             entity: this,
             attributeKey: "levelUpHitPoints",
 
 
-        }).map(attr => attr.value)[0];
+        }).map(attr => !attr ? null : attr.value);
+        return map.length > 0 ? map[0]: 0;
     }
 
     classLevelHealth(classLevel, characterLevel) {
@@ -352,7 +353,7 @@ export class SWSEItem extends Item {
             return getInheritableAttribute({
                 entity: this,
                 attributeKey: "firstLevelHitPoints"
-            }).map(attr => parseInt(attr.value))[0];
+            }).map(attr => parseInt(!attr ? "0" : attr.value))[0];
         }
         let attr = getInheritableAttribute({
             entity: this.level(classLevel),

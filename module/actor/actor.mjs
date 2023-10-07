@@ -1386,6 +1386,12 @@ export class SWSEActor extends Actor {
         })
     }
 
+    get untrainedSkills() {
+        return this.getCached("untrainedSkills", () => {
+            return this.skills.filter(skill => skill && !skill.trained);
+        })
+    }
+
     get skills() {
         return Object.values(this.system.skills);
     }
@@ -2463,6 +2469,12 @@ export class SWSEActor extends Actor {
         }
     }
 
+    static removeChange(entity, key, forceAdd = false) {
+        let find = (entity.system.changes || Object.values(entity.system.attributes)).filter(v => v.key !== key);
+
+        entity.system.changes = find;
+    }
+
     async resolveAddItem(item, choices, context) {
         context.skipPrerequisite = true;
 
@@ -2721,6 +2733,17 @@ export class SWSEActor extends Actor {
             }
             if(entity.name === 'Bonus Feat' && payload === undefined){
                 SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
+            }
+            if(entity.name === 'Skill Training' && payload === undefined && options.isUpload){
+                SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
+                SWSEActor.removeChange(entity, "automaticTrainedSkill");
+            }
+        }
+
+        if (entity.type === "trait"){
+            if(entity.name === 'Bonus Trained Skill' && payload === undefined && options.isUpload){
+                SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
+                SWSEActor.removeChange(entity, "automaticTrainedSkill");
             }
         }
 

@@ -1075,7 +1075,7 @@ export function reduceArray(reduce, values, actor) {
         case "MIN":
             return minValue(values, actor);
         case "FIRST":
-            let map = values.map(attr => attr.value);
+            let map = values.map(attr => !attr ? null : attr.value);
             if (map.length > 0) {
                 return map[0];
             }

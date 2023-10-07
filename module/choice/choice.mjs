@@ -96,6 +96,11 @@ export async function activateChoices(item, context) {
                 console.log(choice.options, context, item);
             }
 
+            if(context.isUpload){
+                console.info("Failed to resolve choices: ",item, context)
+                continue;
+            }
+
             let optionString = "";
             if (options.length === 0) {
                 greetingString = choice.noOptions ? choice.noOptions : choice.description;
@@ -242,6 +247,16 @@ function explodeOptions(options, actor) {
                         payload: attributeKey.titleCase()
                     });
                 }
+            }
+        } else if (key === 'AVAILABLE_UNTRAINED_SKILLS') {
+            for (let skill of actor.untrainedSkills) {
+                let attributeKey = skill.label;
+                resolvedOptions.push({
+                    name: attributeKey.titleCase(),
+                    abilities: [],
+                    items: [],
+                    payload: attributeKey.titleCase()
+                });
             }
         } else if (key === 'AVAILABLE_SKILL_MASTERY') {
             resolvedOptions.push(...(resolveOptions(actor, "skillMastery", "skillFocus", {excluded:["Use The Force"]})));

@@ -209,7 +209,7 @@ export function getInheritableAttribute(data = {}) {
 
     if (data.entity.type === "character" || data.entity.type === "npc") {
         values = values
-            .filter(value => !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail)
+            .filter(value => !!value && !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail)
     }
 
     // let overrides = values.filter(attr => attr && attr.override)

@@ -39,6 +39,12 @@ export function warningsFromActor(actor) {
         warnings.push(`<span>The ${feat.finalName} feat is provided but cannot be added because of missing prerequisites: ${feat.system.prerequisite?.text}</span>`)
     }
 
+    for(let skill of Object.values(actor.system.skills)){
+        if(skill.blockedSkill){
+            warnings.push(`<span>The ${skill.label} skill is provided but is not a Class Skill</span>`)
+        }
+    }
+
 
     if(game.settings.get("swse", "enableEncumbranceByWeight")){
         if(actor.weight >= actor.heavyLoad){

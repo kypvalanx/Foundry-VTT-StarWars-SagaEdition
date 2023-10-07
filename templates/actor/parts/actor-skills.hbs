@@ -38,7 +38,7 @@
                                        type="checkbox"
                                        data-id="{{id}}"
                                        data-name="system.skills.{{id}}.trained"
-                                       {{#if skill.trained}}checked{{/if}}/>
+                                       {{#if skill.trained}}checked{{/if}} {{#if skill.locked}}disabled{{/if}}/>
                             </label>
                         {{/if}}
                         {{skill.trainedBonus}}
