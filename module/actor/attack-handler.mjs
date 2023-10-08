@@ -3,6 +3,7 @@ import {SWSEItem} from "../item/item.mjs";
 import {Attack} from "./attack.mjs";
 import {compareSizes} from "./size.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
+import { RANGED_WEAPON_TYPES, LIGHTSABER_WEAPON_TYPES, SIMPLE_WEAPON_TYPES, weaponGroup } from "../common/constants.mjs";
 
 
 function getCrewPosition(equipmentSlot) {
@@ -111,14 +112,28 @@ export function getPossibleProficiencies(actor, weapon) {
     return descriptors.filter(descriptor => !!descriptor);
 }
 
-const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
-    "heavy weapons", "simple ranged weapons"];
-const LIGHTSABER_WEAPON_TYPES = ["lightsabers", "lightsaber"];
-const SIMPLE_WEAPON_TYPES = ['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon', "grenades"];
-const UNARMED_WEAPON_TYPES = ["simple melee weapon"];
+/**
+ *
+ * @param weapon {SWSEItem}
+ * @returns {boolean}
+ */
+export function isRanged(weapon) {
+    let itemData = weapon.system;
+    return RANGED_WEAPON_TYPES.includes(itemData.subtype.toLowerCase());
+}
 
-function isRanged(weapon) {
-    return RANGED_WEAPON_TYPES.includes(weapon.data.data.subtype.toLowerCase());
+/**
+ *
+ * @param weapon {SWSEItem}
+ * @returns {boolean}
+ */
+export function isMelee(weapon) {
+    let itemData = weapon.system;
+    let subtype = itemData.subtype;
+    if (!subtype && weapon.type === 'beastAttack') {
+        subtype = "Melee Natural Weapons"
+    }
+    return weaponGroup['Melee Weapons'].includes(subtype);
 }
 
 /**

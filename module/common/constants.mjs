@@ -61,8 +61,7 @@ export const equipableTypes = ["armor", "weapon", "equipment", "upgrade", "trait
 export const LIMITED_TO_ONE_TYPES = ["feat", "talent"]
 
 
-export const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades",
-    "heavy weapons", "simple ranged weapons"];
+export const RANGED_WEAPON_TYPES = ["pistols", "rifles", "exotic ranged weapons", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons"];
 export const LIGHTSABER_WEAPON_TYPES = ["lightsabers", "lightsaber"];
 export const SIMPLE_WEAPON_TYPES = ['simple melee weapons', 'simple ranged weapons', 'simple melee weapon', 'simple ranged weapon', "grenades"];
 
