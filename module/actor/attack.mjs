@@ -4,6 +4,7 @@ import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../common/constants.mjs";
 import {compareSizes, getSize} from "./size.mjs";
 import {
     canFinesse,
+    isLightsaber,
     getFocusAttackBonuses,
     getPossibleProficiencies,
     getProficiencyBonus,
@@ -401,7 +402,7 @@ export class Attack {
         }
 
         if (this.isMelee(item)) {
-            let strMod = parseInt(actor.system.attributes.str.mod);
+            let abilityMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
             let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
 
@@ -417,7 +418,21 @@ export class Attack {
                 }
             }
 
-            terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
+            if(isLightsaber(item))
+            {
+                let abilitySelect = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "lightsabersDamageStat",
+                    reduce: "VALUES"
+                })[0].toLowerCase();
+                const abilities = ["str", "dex", "con", "int", "wis", "cha"];
+                if (abilities.includes(abilitySelect)) {
+                    let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
+                    abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod: abilityMod;
+                }
+            }
+
+            terms.push(...appendNumericTerm(isTwoHanded ? abilityMod * 2 : abilityMod, "Attribute Modifier"))
         }
 
         let weaponTypes = getPossibleProficiencies(actor, item);

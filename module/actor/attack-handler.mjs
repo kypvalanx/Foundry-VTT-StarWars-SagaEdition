@@ -126,7 +126,7 @@ function isRanged(weapon) {
  * @param weapon {SWSEItem}
  * @returns {boolean}
  */
-function isLightsaber(weapon) {
+export function isLightsaber(weapon) {
     let itemData = weapon.system;
     return LIGHTSABER_WEAPON_TYPES.includes(itemData.subtype.toLowerCase());
 }
