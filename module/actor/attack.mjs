@@ -1357,17 +1357,17 @@ function test(){
         `,{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":2}]`, JSON.stringify(appendTerms("-2", "bonus")))
 
     assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
-        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("-4d10", "bonus")))
+        `,{"class":"Die","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("-4d10", "bonus")))
 
     assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"}`+
-        `,{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}`+
+        `,{"class":"Die","options":{"flavor":"bonus"},"evaluated":false,"number":4,"faces":10,"modifiers":[],"results":[]}`+
         `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"-"},`+
-        `{"class":"DiceTerm","options":{"flavor":"bonus"},"evaluated":false,"number":6,"faces":4,"modifiers":[],"results":[]},`+
+        `{"class":"Die","options":{"flavor":"bonus"},"evaluated":false,"number":6,"faces":4,"modifiers":[],"results":[]},`+
         `{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"},`+
         `{"class":"NumericTerm","options":{"flavor":"bonus"},"evaluated":false,"number":9}]`, JSON.stringify(appendTerms("-4d10-6d4+9", "bonus")))
 
     assertEquals(`[{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
         `,{"class":"NumericTerm","options":{"flavor":"bomb"},"evaluated":false,"number":1}`+
         `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}`+
-        `,{"class":"DiceTerm","options":{"flavor":"bomb"},"evaluated":false,"number":3,"faces":6,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("1+3d6", "bomb")))
+        `,{"class":"Die","options":{"flavor":"bomb"},"evaluated":false,"number":3,"faces":6,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("1+3d6", "bomb")))
 }
