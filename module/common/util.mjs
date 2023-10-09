@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import {SWSE} from "./config.mjs";
-import {dieSize, dieType} from "./constants.mjs";
+import {dieSize, dieType, weaponGroup} from "./constants.mjs";
 import {SWSEActor} from "../actor/actor.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
@@ -653,6 +653,14 @@ export function getTokenDistanceInSquares(source, target) {
 export function getRangeModifierBlock(range, accurate, innacurate, id, defaultValue) {
     if (range === 'Grenades') {
         range = 'Thrown Weapons'
+    }
+
+    //For now, standardize 'treated as' groups
+    for (let rangedGroup of weaponGroup["Ranged Weapons"]) {
+        if (rangedGroup.includes(range)) {
+            range = rangedGroup;
+            break;
+        }
     }
 
     let table = document.createElement("table");
