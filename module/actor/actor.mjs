@@ -374,6 +374,10 @@ export class SWSEActor extends Actor {
         return this.getCached("grapple", () => {
             return this.baseAttackBonus + Math.max(this.system.attributes.str.mod, this.system.attributes.dex.mod) + getInheritableAttribute({
                 entity: this,
+                attributeKey: "grappleBonus",
+                reduce: "SUM"
+            }) + getInheritableAttribute({
+                entity: this,
                 attributeKey: "grappleSizeModifier",
                 reduce: "SUM"
             });
