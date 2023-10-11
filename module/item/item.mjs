@@ -326,11 +326,12 @@ export class SWSEItem extends Item {
     // }
 
     get sizeMod() {
+
         return getInheritableAttribute({
             entity: this,
             attributeKey: "shipSkillModifier",
             reduce: "SUM",
-
+            parent: this.parent
 
         })
     }
