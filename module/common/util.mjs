@@ -1094,6 +1094,8 @@ export function reduceArray(reduce, values, actor) {
             return summary;
         case "MAPPED":
             return values;
+        case "COUNT":
+            return values.length;
         default:
             return values.map(attr => attr.value).reduce(reduce, "");
     }

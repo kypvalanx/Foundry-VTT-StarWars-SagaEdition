@@ -30,7 +30,8 @@ import {
     crewSlotResolution,
     DROID_COST_FACTOR,
     equipableTypes,
-    GRAVITY_CARRY_CAPACITY_MODIFIER, KNOWN_WEIRD_UNITS,
+    GRAVITY_CARRY_CAPACITY_MODIFIER,
+    KNOWN_WEIRD_UNITS,
     LIMITED_TO_ONE_TYPES,
     SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
@@ -453,11 +454,6 @@ export class SWSEActor extends Actor {
         this.remainingSkills = remainingSkills < 0 ? false : remainingSkills;
         this.tooManySKills = remainingSkills < 0 ? Math.abs(remainingSkills) : false;
 
-        this.isHeroic = getInheritableAttribute({
-            entity: this,
-            attributeKey: "isHeroic",
-            reduce: "OR"
-        });
         this.system.secondWind = this.system.secondWind || {}
         const bonusSecondWind = getInheritableAttribute({
             entity: this,
@@ -478,7 +474,7 @@ export class SWSEActor extends Actor {
         system.defense = defense;
         system.armors = armors;
 
-        this._manageAutomaticItems(this, feats.removeFeats).then(() => this.handleLeveBasedAttributeBonuses(system));
+        this._manageAutomaticItems(this, feats.removeFeats).then(() => {});
         system.attacks = generateAttacks(this);
         this.initializeCharacterSettings();
     }
@@ -506,6 +502,17 @@ export class SWSEActor extends Actor {
                 primary: primary,
                 backup: backup
             }
+        })
+    }
+
+
+    get isHeroic() {
+        return this.getCached("crew", () => {
+            return getInheritableAttribute({
+                entity: this,
+                attributeKey: "isHeroic",
+                reduce: "OR"
+            });
         })
     }
 
@@ -1456,42 +1463,41 @@ export class SWSEActor extends Actor {
             reduce: "OR"
         });
         let characterLevel = this.classes.length;
-        if (characterLevel > 0) {
-            this.classes[characterLevel - 1].isLatest = true;
-        }
 
-        let hasUpdate = false;
-        if (!system.levelAttributeBonus) {
-            system.levelAttributeBonus = {};
-            hasUpdate = true;
-        }
+        return (characterLevel - (characterLevel % 4)) /4
 
-        for (let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel += 4) {
-            if (bonusAttributeLevel > characterLevel) {
-                if (system.levelAttributeBonus[bonusAttributeLevel]) {
-                    system.levelAttributeBonus[bonusAttributeLevel] = null;
-                    hasUpdate = true;
-                }
-            } else {
-                if (!system.levelAttributeBonus[bonusAttributeLevel]) {
-                    system.levelAttributeBonus[bonusAttributeLevel] = {};
-                    hasUpdate = true;
-                } else {
-                    let total = (system.levelAttributeBonus[bonusAttributeLevel].str || 0)
-                        + (system.levelAttributeBonus[bonusAttributeLevel].dex || 0)
-                        + (system.levelAttributeBonus[bonusAttributeLevel].con || 0)
-                        + (system.levelAttributeBonus[bonusAttributeLevel].int || 0)
-                        + (system.levelAttributeBonus[bonusAttributeLevel].wis || 0)
-                        + (system.levelAttributeBonus[bonusAttributeLevel].cha || 0)
-                    system.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
-                }
-            }
-        }
-
-        if (hasUpdate && this.id) {
-            return this.safeUpdate({'data.levelAttributeBonus': system.levelAttributeBonus});
-        }
-        return undefined;
+        // let hasUpdate = false;
+        // if (!system.levelAttributeBonus) {
+        //     system.levelAttributeBonus = {};
+        //     hasUpdate = true;
+        // }
+        //
+        // for (let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel += 4) {
+        //     if (bonusAttributeLevel > characterLevel) {
+        //         if (system.levelAttributeBonus[bonusAttributeLevel]) {
+        //             system.levelAttributeBonus[bonusAttributeLevel] = null;
+        //             hasUpdate = true;
+        //         }
+        //     } else {
+        //         if (!system.levelAttributeBonus[bonusAttributeLevel]) {
+        //             system.levelAttributeBonus[bonusAttributeLevel] = {};
+        //             hasUpdate = true;
+        //         } else {
+        //             let total = (system.levelAttributeBonus[bonusAttributeLevel].str || 0)
+        //                 + (system.levelAttributeBonus[bonusAttributeLevel].dex || 0)
+        //                 + (system.levelAttributeBonus[bonusAttributeLevel].con || 0)
+        //                 + (system.levelAttributeBonus[bonusAttributeLevel].int || 0)
+        //                 + (system.levelAttributeBonus[bonusAttributeLevel].wis || 0)
+        //                 + (system.levelAttributeBonus[bonusAttributeLevel].cha || 0)
+        //             system.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
+        //         }
+        //     }
+        // }
+        //
+        // if (hasUpdate && this.id) {
+        //     return this.safeUpdate({'data.levelAttributeBonus': system.levelAttributeBonus});
+        // }
+        // return undefined;
     }
 
     ignoreCon() {
@@ -1677,17 +1683,18 @@ export class SWSEActor extends Actor {
 
     _reduceProvidedItemsByExistingItems(actorData) {
 
-        let provides = getInheritableAttribute({
-            entity: this,
-            attributeKey: "provides"
-        });
         this.system.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
+        this.system.availableItems['Ability Score Level Bonus'] = this.handleLeveBasedAttributeBonuses(actorData);
+
         this.system.bonuses = {};
         this.system.activeFeatures = [];
         let dynamicGroups = {};
         let specificProvided = {};
 
-        for (let provided of provides) {
+        for (let provided of getInheritableAttribute({
+            entity: this,
+            attributeKey: "provides"
+        })) {
             let key = provided.value;
             let value = 1;
             if (key.includes(":")) {
@@ -1713,6 +1720,23 @@ export class SWSEActor extends Actor {
                 }));
             }
             this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] + value : value;
+        }
+
+        for (let consumed of getInheritableAttribute({
+            entity: this,
+            attributeKey: "consumes",
+            reduce: "VALUES"
+        })) {
+            let key = consumed;
+            let value = 1;
+            if (key.includes(":")) {
+                let toks = key.split(":");
+                key = toks[0];
+                if (toks.length === 2) {
+                    value = resolveExpression(toks[1], this)
+                }
+            }
+            this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] - value : 0 - value;
         }
 
         let classLevel = this.classes?.length;
@@ -1796,9 +1820,10 @@ export class SWSEActor extends Actor {
         for (let forcePower of this.powers) {
             this.reduceAvailableItem(forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
         }
+
+        this.system.remainingLevelUpBonuses = this.system.availableItems['Ability Score Level Bonus'];
     }
 
-    //TODO this is trash and needs a refactor
     reduceAvailableItem(type, reduceBy = 1, backupType) {
         let actorData = this.system;
         if (!type && !backupType) {
@@ -1809,22 +1834,19 @@ export class SWSEActor extends Actor {
         }
 
         const availableItem = actorData.availableItems[type] || 0;
-        if (availableItem >= reduceBy) {
-            actorData.availableItems[type] = availableItem - reduceBy;
-        } else if (availableItem < reduceBy) {
-            let remainder = reduceBy - availableItem;
+        actorData.availableItems[type] = availableItem - reduceBy;
+
+        if(backupType && actorData.availableItems[type] < 0){
+            let availableBackup = actorData.availableItems[backupType] || 0;
+            actorData.availableItems[type] = availableBackup + actorData.availableItems[type];
             actorData.availableItems[type] = 0;
-            if(backupType){
-                actorData.availableItems[backupType] = !!actorData.availableItems[backupType] ? actorData.availableItems[backupType] - remainder : -1 * remainder
-            } else {
-                actorData.availableItems[type] = actorData.availableItems[type] - remainder;
-            }
-        } else {
-            actorData.availableItems[type] = -1 * reduceBy;
         }
 
         if (actorData.availableItems[type] === 0) {
             delete actorData.availableItems[type];
+        }
+        if (actorData.availableItems[backupType] === 0) {
+            delete actorData.availableItems[backupType];
         }
     }
 

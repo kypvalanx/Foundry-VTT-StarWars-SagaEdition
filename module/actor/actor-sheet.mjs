@@ -200,6 +200,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
+        html.find('[data-action="level-up-bonus"]').click(this._onAddLevelUpBonus.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
@@ -804,7 +805,15 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onAddGMBonus(){
-        this.actor.addItems([{name:"GM Bonus", type:"trait"}], undefined, {})
+        this.object.addItems([{name:"GM Bonus", type:"trait"}], undefined, {})
+    }
+
+    _onAddLevelUpBonus(){
+        if(this.object.isHeroic){
+            this.object.addItems([{name:"Heroic Ability Score Level Bonus", type:"trait"}], undefined, {})
+        } else {
+            this.object.addItems([{name:"Nonheroic Ability Score Level Bonus", type:"trait"}], undefined, {})
+        }
     }
 
     async moveExistingItemWithinActor(data, ev) {

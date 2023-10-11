@@ -42,13 +42,11 @@
                 </div>
             {{/ifEquals}}
             {{#unlessEquals actor.system.finalAttributeGenerationType "Manual"}}
-                {{#each actor.system.levelAttributeBonus as |bonus key|}}
-                    {{#if bonus}}
-                        <div class="leveledAttributeBonus  {{#if bonus.warn}}warning{{/if}}" data-level="{{key}}"
-                             title="Select Level Up Attribute Bonus for Level {{key}}"><a><i
-                                class="fas fa-exclamation"></i></a></div>
-                    {{/if}}
-                {{/each}}
+                {{#times actor.system.remainingLevelUpBonuses}}
+                    <div data-action="level-up-bonus"
+                         title="Select Level Up Attribute Bonus for Level"><a><i
+                            class="fas fa-exclamation"></i></a></div>
+                {{/times}}
             {{/unlessEquals}}
         </div>
     {{/unless}}
