@@ -1649,10 +1649,10 @@ export function appendTerm(value, flavor) {
     if (`${parseInt(value)}` === value) {
         return appendNumericTerm(value, flavor);
     }
-    return appendDiceTerm(value, flavor)
+    return appendDieTerm(value, flavor)
 }
 
-export function appendDiceTerm(value, flavor) {
+export function appendDieTerm(value, flavor) {
     if (!value) {
         return [];
     }
@@ -1664,7 +1664,7 @@ export function appendDiceTerm(value, flavor) {
         return [];
     }
     return [number > -1 ? plus() : minus(),
-        new DiceTerm({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+        new Die({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
 }
 
 export function appendNumericTerm(value, flavor) {
