@@ -1,9 +1,11 @@
 import {UnarmedAttack} from "./unarmed-attack.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {LIGHTSABER_WEAPON_TYPES, weaponGroup} from "../common/constants.mjs";
 import {compareSizes, getSize} from "./size.mjs";
 import {
     canFinesse,
+    isLightsaber,
+    isRanged,
+    isMelee,
     getFocusAttackBonuses,
     getPossibleProficiencies,
     getProficiencyBonus,
@@ -190,55 +192,6 @@ export class Attack {
         return modifiers;
     }
 
-    /**
-     *
-     * @param item {SWSEItem}
-     * @returns {boolean}
-     */
-    isRanged(item) {
-        let data = item.system;
-        return weaponGroup['Ranged Weapons'].includes(data.subtype);
-    }
-
-    /**
-     *
-     * @param item {SWSEItem}
-     * @returns {boolean}
-     */
-    isMelee(item) {
-        let data = item.system;
-        let subtype = data.subtype;
-        if (!subtype && item.type === 'beastAttack') {
-            subtype = "Melee Natural Weapons"
-        }
-        return weaponGroup['Melee Weapons'].includes(subtype);
-    }
-
-    /**
-     *
-     * @param actor {SWSEActor}
-     * @param item {SWSEItem}
-     * @returns {boolean|boolean}
-     */
-    canFinesse(actor, item) {
-        let sizes = compareSizes(actor.size, item.size);
-        let isOneHanded = sizes < 1;
-        let isLight = sizes < 0;
-        let weaponTypes = getPossibleProficiencies(actor, item);
-
-        return isLight || (isOneHanded && isFocus(actor, weaponTypes)) || this.isLightsaber(item);
-    }
-
-    /**
-     *
-     * @param weapon {SWSEItem}
-     * @returns {boolean}
-     */
-    isLightsaber(weapon) {
-        return LIGHTSABER_WEAPON_TYPES.includes(weapon.data.data.subtype.toLowerCase());
-    }
-
-
     get name() {
         let name = this.item.name;
         return ((this.isUnarmed && 'Unarmed Attack' !== name) ? `Unarmed Attack (${name})` : name) + this.nameModifier;
@@ -328,7 +281,7 @@ export class Attack {
 
     _resolveAttributeModifier(item, actor, weaponTypes) {
         let attributeStats = []
-        if (this.isRanged(item)) {
+        if (isRanged(item)) {
             attributeStats.push("DEX")
         } else {
             attributeStats.push("STR")
@@ -400,8 +353,8 @@ export class Attack {
             terms.push(...appendTerms(mod.value, mod.source))
         }
 
-        if (this.isMelee(item)) {
-            let strMod = parseInt(actor.system.attributes.str.mod);
+        if (isMelee(item)) {
+            let abilityMod = parseInt(actor.system.attributes.str.mod);
             let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
             let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
 
@@ -417,7 +370,21 @@ export class Attack {
                 }
             }
 
-            terms.push(...appendNumericTerm(isTwoHanded ? strMod * 2 : strMod, "Attribute Modifier"))
+            if(isLightsaber(item))
+            {
+                let abilitySelect = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "lightsabersDamageStat",
+                    reduce: "VALUES"
+                })[0].toLowerCase();
+                const abilities = ["str", "dex", "con", "int", "wis", "cha"];
+                if (abilities.includes(abilitySelect)) {
+                    let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
+                    abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod: abilityMod;
+                }
+            }
+
+            terms.push(...appendNumericTerm(isTwoHanded ? abilityMod * 2 : abilityMod, "Attribute Modifier"))
         }
 
         let weaponTypes = getPossibleProficiencies(actor, item);
@@ -690,7 +657,7 @@ export class Attack {
 
     getDynamicModes(existingDynamicModes) {
         let dynamics = [];
-        if (this.isMelee(this.item)) {
+        if (isMelee(this.item)) {
             const actor = this.actor;
             let isMySize = compareSizes(getSize(actor), getSize(this.item)) === 0;
             let cannotUseTwoHands = getInheritableAttribute({entity:this.item, attributeKey:"isLightWeapon", reduce: "OR"})
