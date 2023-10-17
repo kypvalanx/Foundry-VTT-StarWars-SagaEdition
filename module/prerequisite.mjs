@@ -422,7 +422,7 @@ function meetsPrerequisite(prereq, target, options) {
                         break;
                     }
                 }
-                failureList.push({fail: true, message: `${prereq.text}`});
+                failureList.push({fail: false, message: `${prereq.text}`});
                 break;
             case 'GENDER':
                 if (target.system.sex && target.system.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
