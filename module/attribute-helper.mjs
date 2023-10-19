@@ -90,7 +90,7 @@ function getChangesFromActiveEffects(document) {
     }
 
     let attributes = []
-    for (let effect of document.effects?.filter(effect => !effect.origin) || []) {
+    for (let effect of document.effects || []) {
         if (isActiveEffect(effect, document)) {
             attributes.push(...extractEffectChange(effect.changes || [], effect))
         }

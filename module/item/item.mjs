@@ -799,6 +799,18 @@ export class SWSEItem extends Item {
         system.upgradePoints -= upgradePointCost;
     }
 
+    get upgradePoints(){
+        let upgradePoints = this.getBaseUpgradePoints();
+        for (let stripped of Object.values(this.system.stripping)) {
+            upgradePoints += stripped.value ? 1 : 0;
+        }
+        let upgradePointCost = getInheritableAttribute({
+            entity: this,
+            attributeKey: "upgradePointCost", reduce: "SUM"
+        });
+        return upgradePoints - upgradePointCost;
+    }
+
     setStripping(key, label, enabled, type, low, high) {
         this.system.stripping[key] = this.system.stripping[key] || {};
         this.system.stripping[key].label = label;

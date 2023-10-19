@@ -147,7 +147,8 @@ export function onSpanTextInput(event, callback = null, type) {
             }
         });
         newEl.addEventListener("keyup", (...args) => {
-            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+            let event = args[0];
+            if (['Enter', 'NumpadEnter'].includes(event.code)) {
                 changed = true;
 
                 if (newEl.value === prevValue) {

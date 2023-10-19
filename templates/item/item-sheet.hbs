@@ -78,7 +78,7 @@
         <div class="tab stripping" data-group="primary" data-tab="stripping">
             <div class="resource flex-group-center">
                 <label class="resource-label">Upgrade Points: </label>
-                <label class="attribute-value">{{item.system.upgradePoints}}</label>
+                <label class="attribute-value">{{item.upgradePoints}}</label>
                 <table>
                     {{#each item.system.stripping as |stripping id|}}
                         {{#if stripping.enabled}}
@@ -120,7 +120,7 @@
         {{!-- Modifications Tab --}}
         <div class="tab items" data-group="primary" data-tab="modifications">
             <div class="section-header flexrow">
-                <div class="entry">Upgrade Points: {{item.system.upgradePoints}}</div>
+                <div class="entry">Upgrade Points: {{item.upgradePoints}}</div>
                 <div class="section-header-controls">
                     <a class="control" data-action="effect-control" data-type="add-modification"><i class="far fa-plus-square"></i></a>
                 </div>
