@@ -125,7 +125,7 @@
 
                 {{!-- Owned Feats Tab --}}
                 <div class="tab items" data-group="primary" data-tab="feats">
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Feats" compendiumFilter="-type:feat" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.feats draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Feats" compendiumFilter="-type:feat" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.feats draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable" controls='<button class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>'}}
                     {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Talents" compendiumFilter="-type:talent" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.talents draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable"}}
                 </div>
 

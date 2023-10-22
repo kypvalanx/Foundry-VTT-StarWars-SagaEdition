@@ -801,7 +801,7 @@ export class SWSEItem extends Item {
 
     get upgradePoints(){
         let upgradePoints = this.getBaseUpgradePoints();
-        for (let stripped of Object.values(this.system.stripping)) {
+        for (let stripped of Object.values(this.system.stripping || {})) {
             upgradePoints += stripped.value ? 1 : 0;
         }
         let upgradePointCost = getInheritableAttribute({
