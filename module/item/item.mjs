@@ -1512,6 +1512,13 @@ export class SWSEItem extends Item {
             }
         };
     }
+
+    toObject() {
+        let o = super.toObject();
+        let cost = this.system.changes.find(c => c.key === "cost");
+        o.system.cost = (cost) ? cost["value"] : "0";
+        return o;
+    }
 }
 
 export function reduceWeaponRange(range) {
