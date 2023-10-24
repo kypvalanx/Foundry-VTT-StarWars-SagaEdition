@@ -33,7 +33,7 @@ export function generateSkills(actor) {
     let heavyLoadAffected = [];
 
 
-    if(game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad){
+    if (game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad) {
         heavyLoadAffected = HEAVY_LOAD_SKILLS;
     }
 
@@ -78,14 +78,15 @@ export function generateSkills(actor) {
             .replace(" ", "").trim()
         let old = skill.value;
         let bonuses = [];
-        let attributeMod = actor.getAttributeMod(skill.attribute);
+        let attributeMod = getAttributeMod(actor, key, skill);
+
         if (actor.system.sheetType === "Auto") {
             skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key)
 
-            if(automaticTrainedSkill.includes(key)){
+            if (automaticTrainedSkill.includes(key)) {
                 skill.trained = true;
                 skill.locked = true;
-                if(!skill.isClass){
+                if (!skill.isClass) {
                     skill.blockedSkill = true;
                 }
             }
@@ -114,7 +115,7 @@ export function generateSkills(actor) {
 
             bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
 
-            if(skill.sizeMod){
+            if (skill.sizeMod) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
@@ -122,11 +123,11 @@ export function generateSkills(actor) {
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
-            if(skill.manualBonus){
+            if (skill.manualBonus) {
                 bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
             }
 
-            if(heavyLoadAffected.includes(key)){
+            if (heavyLoadAffected.includes(key)) {
                 bonuses.push({value: -10, description: `Heavy Load Penalty: -10`})
             }
 
@@ -171,6 +172,48 @@ export function generateSkills(actor) {
     }
     if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
         actor.safeUpdate(data);
+    }
+}
+
+function extractSkillAttributes(actor) {
+    let skillAttributes = [];
+    if (!actor.system.changes) return skillAttributes;
+
+    for (let [_, changes] of Object.entries(actor.system.changes)) {
+        if (changes.key === "skillAttribute") {
+            skillAttributes.push(changes);
+        }
+    }
+    return skillAttributes;
+}
+
+function getModifiedSkillAttribute(skillAttributes, key) {
+    for (let skillAttribute of skillAttributes) {
+        let value = skillAttribute.value;
+        const [skillAttributeKey, skillAttributeValue] = value.split(":");
+        if (skillAttributeKey.toLowerCase() === key) {
+            return skillAttributeValue;
+        }
+    }
+    return null;
+}
+
+function getAttributeMod(actor, key, skill) {
+    const defaultSkillAttribute = skill.attribute;
+    const skillAttributes = extractSkillAttributes(actor);
+
+    const modifiedSkillAttribute = getModifiedSkillAttribute(skillAttributes, key);
+    if (modifiedSkillAttribute) {
+        skill.attribute = modifiedSkillAttribute;
+    }
+
+    try {
+        return actor.getAttributeMod(skill.attribute);
+    } catch (e) {
+        console.warn(`swse: Ability mod override not valid for skill "${key}" and ability "${skill.attribute}".
+        Using default attribute "${defaultSkillAttribute}" instead.`);
+        skill.attribute = defaultSkillAttribute;
+        return actor.getAttributeMod(skill.attribute);
     }
 }
 
