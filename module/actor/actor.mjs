@@ -92,7 +92,11 @@ export class SWSEActor extends Actor {
 
     async safeUpdate(data = {}, context = {}) {
         if (this.canUserModify(game.user, 'update') && !this.pack && !!game.actors.get(this.id)) {
-            this.update(data, context);
+            try{
+                await this.update(data, context);
+            } catch (e) {
+
+            }
         }
     }
 
@@ -2731,13 +2735,13 @@ export class SWSEActor extends Actor {
 
         if (entity.type === "class") {
             let levels = [0];
-            for (let clazz of this.items.filter(item => item.type === "class")) {
+            for (let clazz of this.itemTypes.class) {
                 levels.push(...(clazz.levelsTaken || []))
             }
 
             let nextLevel = providedItem.firstLevel ? 1 : Math.max(...levels) + 1
 
-            let existing = this.items.find(item => item.name === entity.name && item.type === "class")
+            let existing = this.itemTypes.class.find(item => item.name === entity.name)
             if (existing) {
                 let levels = existing.levelsTaken || [];
                 levels.push(nextLevel);
@@ -3106,7 +3110,7 @@ export class SWSEActor extends Actor {
 
         // what class items do we have
 
-        let classes = this.items.filter(i => i.type === "class")
+        let classes = this.itemTypes.class
         // do any of these class items not have a list of levels taken at?
         if (classes.find(c => !c.system.levelsTaken || (c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0)) {
             // if so lets figure out what levels each class was taken
@@ -3150,12 +3154,12 @@ export class SWSEActor extends Actor {
                     if (index === -1) {
                         break;
                     }
-                    indicies.push(index++)
+                    indicies.push(++index)
                 }
                 preppedForRemoval.push(...classesOfType.slice(1).map(c => c.id))
                 classesOfType[0].safeUpdate({"system.levelsTaken": indicies});
             }
-            preppedForRemoval.push(...classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
+            //preppedForRemoval.push(...classes.filter(c => (!c.system.levelsTaken || c.system.levelsTaken.length === 1 && c.system.levelsTaken[0] === 0) || c.system.levelsTaken.length === 0).map(c => c.id))
 
             console.log("PREPPED FOR REMOVAL", preppedForRemoval)
             this.skipPrepare = false;
