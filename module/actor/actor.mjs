@@ -1763,6 +1763,8 @@ export class SWSEActor extends Actor {
                 continue;
             }
             let type = talent.system.activeCategory || talent.system.talentTreeSource;
+            let providers = talent.system.possibleProviders || [];
+            providers.push(talent.system.bonusTalentTree)
 
 
             if (!type) {
@@ -1770,13 +1772,13 @@ export class SWSEActor extends Actor {
             }
 
             if (!type) {
-                let types = innerJoin(talent.system.possibleProviders, Object.keys(this.system.availableItems))
+                let types = innerJoin(providers, Object.keys(this.system.availableItems))
                 if (types && types.length > 0) {
                     type = types[0]
                 }
             }
 
-            if(!type && innerJoin(bonusTalentTrees, talent.system.possibleProviders).length > 0){
+            if(!type && innerJoin(bonusTalentTrees, providers).length > 0){
                 bonusTreeTalents.push(talent);
                 continue;
             }
@@ -2556,7 +2558,6 @@ export class SWSEActor extends Actor {
         if (item.type === "class") {
             await this.addClassFeats(mainItem[0], providedItemContext);
         }
-
         return mainItem[0];
     }
 
@@ -2732,6 +2733,7 @@ export class SWSEActor extends Actor {
             }
             return {};
         }
+        entity.prepareData();
 
         if (entity.type === "class") {
             let levels = [0];
@@ -2751,6 +2753,7 @@ export class SWSEActor extends Actor {
                 return {notificationMessage, addedItem}
             }
 
+            //await entity.safeUpdate({"system.levelsTaken": [nextLevel]});
             entity.system.levelsTaken = [nextLevel];
         }
 
@@ -2777,7 +2780,6 @@ export class SWSEActor extends Actor {
             }
         }
 
-        entity.prepareData();
 
 
         entity.addItemAttributes(providedItem.changes);
@@ -2797,11 +2799,11 @@ export class SWSEActor extends Actor {
 
 
         entity.setTextDescription();
-        let notificationMessage = `<li>${entity.finalName}</li>`
         let childOptions = JSON.parse(JSON.stringify(options))
         childOptions.itemAnswers = providedItem.answers;
         let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
+        let notificationMessage = `<li>${addedItem.finalName}</li>`
         //do stuff based on type of item
         let modifications = providedItem.modifications;
         if (!!modifications) {
