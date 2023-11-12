@@ -174,19 +174,6 @@ export function generateSkills(actor) {
         actor.safeUpdate(data);
     }
 }
-
-function extractSkillAttributes(actor) {
-    let skillAttributes = [];
-    if (!actor.system.changes) return skillAttributes;
-
-    for (let [_, changes] of Object.entries(actor.system.changes)) {
-        if (changes.key === "skillAttribute") {
-            skillAttributes.push(changes);
-        }
-    }
-    return skillAttributes;
-}
-
 function getModifiedSkillAttribute(skillAttributes, key) {
     for (let skillAttribute of skillAttributes) {
         let value = skillAttribute.value;
@@ -200,7 +187,10 @@ function getModifiedSkillAttribute(skillAttributes, key) {
 
 function getAttributeMod(actor, key, skill) {
     const defaultSkillAttribute = skill.attribute;
-    const skillAttributes = extractSkillAttributes(actor);
+    const skillAttributes = getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'skillAttribute'
+    });
 
     const modifiedSkillAttribute = getModifiedSkillAttribute(skillAttributes, key);
     if (modifiedSkillAttribute) {
