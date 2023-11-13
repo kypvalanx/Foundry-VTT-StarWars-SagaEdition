@@ -43,31 +43,39 @@ export async function generationTests(quench) {
                 // it("Generate CL9 Veteran Imperial Officer", ()=>{
                 //     testVeteranImperialOfficer(context);
                 // });
+                // it("Generate CL15 Leia Organa Solo, Ex-Chief of State", ()=>{
+                //     testLeiaOrganaSoloExChiefOfState(context);
+                // });
 
-                it("Generate Mandalorian Trooper", (context) => {
-                    return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
-
-                        const { describe, it, assert, expect, should } = context;
-                        context.assert(actor.name === "Veteran Imperial Officer")
-
-                        context.assert(actor.system.health.value === 50)
-                        context.assert(actor.system.health.max === 50)
-                        context.assert(actor.system.health.override === 50)
-
-                        context.assert(actor.system.attributeGenerationType === "Manual")
-                        context.assert(actor.system.attributes.str.total === 10)
-                        context.assert(actor.system.attributes.dex.total === 8)
-                        context.assert(actor.system.attributes.con.total === 10)
-                        context.assert(actor.system.attributes.int.total === 14)
-                        context.assert(actor.system.attributes.wis.total === 13)
-                        context.assert(actor.system.attributes.cha.total === 14)
-
-                        context.assert(actor.warnings.length === 0)
-                        if (actor.warnings.length > 0) {
-                            console.warn(actor.warnings)
-                        }
-                    })
+                it("Generate CL20 Luke Skywalker, Grand Master", ()=>{
+                    testLukeSkywalkerjedimaster(context);
                 });
+
+
+                // it("Generate Mandalorian Trooper", (context) => {
+                //     return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
+                //
+                //         const { describe, it, assert, expect, should } = context;
+                //         context.assert(actor.name === "Veteran Imperial Officer")
+                //
+                //         context.assert(actor.system.health.value === 50)
+                //         context.assert(actor.system.health.max === 50)
+                //         context.assert(actor.system.health.override === 50)
+                //
+                //         context.assert(actor.system.attributeGenerationType === "Manual")
+                //         context.assert(actor.system.attributes.str.total === 10)
+                //         context.assert(actor.system.attributes.dex.total === 8)
+                //         context.assert(actor.system.attributes.con.total === 10)
+                //         context.assert(actor.system.attributes.int.total === 14)
+                //         context.assert(actor.system.attributes.wis.total === 13)
+                //         context.assert(actor.system.attributes.cha.total === 14)
+                //
+                //         context.assert(actor.warnings.length === 0)
+                //         if (actor.warnings.length > 0) {
+                //             console.warn(actor.warnings)
+                //         }
+                //     })
+                // });
             })
         },
         {displayName: "GENERATION: ACTOR SPOT CHECKS"})
@@ -256,6 +264,59 @@ async function testSpecForceMarine(context) {
 
 async function testVeteranImperialOfficer(context) {
     let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-9.json", "Veteran Imperial Officer")
+
+    let actor = await processActor(actorData);
+
+    context.assert(actor.name === "Veteran Imperial Officer")
+
+    context.assert(actor.system.health.value === 50)
+    context.assert(actor.system.health.max === 50)
+    context.assert(actor.system.health.override === 50)
+
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === 10)
+    context.assert(actor.system.attributes.dex.total === 8)
+    context.assert(actor.system.attributes.con.total === 10)
+    context.assert(actor.system.attributes.int.total === 14)
+    context.assert(actor.system.attributes.wis.total === 13)
+    context.assert(actor.system.attributes.cha.total === 14)
+
+    context.assert(actor.warnings.length === 0)
+    if(actor.warnings.length > 0){
+        console.warn(actor.warnings)
+    }
+
+    actor.delete()
+}
+
+async function testLeiaOrganaSoloExChiefOfState(context) {
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-15.json", "Leia Organa Solo, Ex-Chief of State")
+
+    let actor = await processActor(actorData);
+
+    context.assert(actor.name === "Veteran Imperial Officer")
+
+    context.assert(actor.system.health.value === 50)
+    context.assert(actor.system.health.max === 50)
+    context.assert(actor.system.health.override === 50)
+
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === 10)
+    context.assert(actor.system.attributes.dex.total === 8)
+    context.assert(actor.system.attributes.con.total === 10)
+    context.assert(actor.system.attributes.int.total === 14)
+    context.assert(actor.system.attributes.wis.total === 13)
+    context.assert(actor.system.attributes.cha.total === 14)
+
+    context.assert(actor.warnings.length === 0)
+    if(actor.warnings.length > 0){
+        console.warn(actor.warnings)
+    }
+
+    actor.delete()
+}
+async function testLukeSkywalkerjedimaster(context) {
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-20.json", "Luke Skywalker, Grand Master")
 
     let actor = await processActor(actorData);
 
