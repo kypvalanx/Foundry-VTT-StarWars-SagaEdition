@@ -3,9 +3,9 @@ import {tests} from "./actor/actor-sheet.test.mjs";
 
 export function registerTestSuites(quench) {
     for(const batchFunction of [generationTests]){
-        //batchFunction(quench);
+        batchFunction(quench);
     }
     for(const batchFunction of [tests]){
-        batchFunction(quench);
+        //batchFunction(quench);
     }
 }
