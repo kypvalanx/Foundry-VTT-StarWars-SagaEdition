@@ -1408,7 +1408,13 @@ export class SWSEActor extends Actor {
     }
 
     get skills() {
-        return Object.values(this.system.skills);
+        return this.getCached("skills", () => {
+            return Object.entries(this.system.skills).map(entry => {
+                let value = entry[1];
+                value.label = entry[0].titleCase();
+                return value;
+            });
+        })
     }
 
     get focusSkills() {
