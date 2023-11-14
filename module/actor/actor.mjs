@@ -1469,7 +1469,11 @@ export class SWSEActor extends Actor {
         return {level: this.classes.length, classSummary, classLevels};
     }
 
-    handleLeveBasedAttributeBonuses(system) {
+    handleLevelBasedAttributeBonuses(system) {
+
+        if(system.attributeGenerationType === "Manual"){
+            return 0;
+        }
 
         let isHeroic = getInheritableAttribute({
             entity: this,
@@ -1698,7 +1702,7 @@ export class SWSEActor extends Actor {
     _reduceProvidedItemsByExistingItems(actorData) {
 
         this.system.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
-        this.system.availableItems['Ability Score Level Bonus'] = this.handleLeveBasedAttributeBonuses(actorData);
+        this.system.availableItems['Ability Score Level Bonus'] = this.handleLevelBasedAttributeBonuses(actorData);
 
         this.system.bonuses = {};
         this.system.activeFeatures = [];
@@ -2803,6 +2807,11 @@ export class SWSEActor extends Actor {
             entity.setPayload(payload[1], payload[0]);
         }
 
+        let equip = providedItem.equip;
+        if (equip) {
+            entity.system.equipped = equip
+        }
+
 
         entity.setTextDescription();
         let childOptions = JSON.parse(JSON.stringify(options))
@@ -2821,10 +2830,7 @@ export class SWSEActor extends Actor {
             }
         }
 
-        let equip = providedItem.equip;
-        if (equip) {
-            addedItem.system.equipped = equip
-        }
+
         if (createdItem) {
             // entity.delete();
         }

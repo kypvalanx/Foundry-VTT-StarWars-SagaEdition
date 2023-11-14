@@ -10,6 +10,25 @@
 
 import {getFile, processActor} from "../../module/compendium/generation.mjs";
 
+function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
+    assert.equal(actor.system.attributeGenerationType, "Manual")
+    const attributes = actor.system.attributes;
+    assert.equal(attributes.str.total, str)
+    assert.equal(attributes.dex.total, dex)
+    assert.equal(attributes.con.total, con)
+    assert.equal(attributes.int.total, int)
+    assert.equal(attributes.wis.total, wis)
+    assert.equal(attributes.cha.total, cha)
+}
+
+function assertEquippedItems(assert, actor, expectedItems) {
+    let items = actor.getEquippedItems().map(i => i.name)
+    assert.equal(items.length, expectedItems.length, `expected ${expectedItems.toString()}, actual ${items.toString()}`)
+    for (let item of expectedItems) {
+        assert.ok(items.includes(item), `couldn't find ${item}`)
+    }
+}
+
 export async function generationTests(quench) {
     console.log("GENERATION TESTS")
     quench.registerBatch("compendium.generation.spotChecks",
@@ -52,30 +71,25 @@ export async function generationTests(quench) {
                 });
 
 
-                // it("Generate Mandalorian Trooper", (context) => {
-                //     return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
-                //
-                //         const { describe, it, assert, expect, should } = context;
-                //         context.assert(actor.name === "Veteran Imperial Officer")
-                //
-                //         context.assert(actor.system.health.value === 50)
-                //         context.assert(actor.system.health.max === 50)
-                //         context.assert(actor.system.health.override === 50)
-                //
-                //         context.assert(actor.system.attributeGenerationType === "Manual")
-                //         context.assert(actor.system.attributes.str.total === 10)
-                //         context.assert(actor.system.attributes.dex.total === 8)
-                //         context.assert(actor.system.attributes.con.total === 10)
-                //         context.assert(actor.system.attributes.int.total === 14)
-                //         context.assert(actor.system.attributes.wis.total === 13)
-                //         context.assert(actor.system.attributes.cha.total === 14)
-                //
-                //         context.assert(actor.warnings.length === 0)
-                //         if (actor.warnings.length > 0) {
-                //             console.warn(actor.warnings)
-                //         }
-                //     })
-                // });
+                it("Generate Mandalorian Trooper", () => {
+                    return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
+
+                        const { describe, it, assert, expect, should } = context
+                        assert.equal(actor.name, "Mandalorian Trooper")
+
+                        assert.equal(actor.system.health.value, 40)
+                        assert.equal(actor.system.health.max, 40)
+                        assert.equal(actor.system.health.override, 40)
+                        assertAbilityScores(assert, actor, 12, 14, 12, 8, 10, 9);
+                        assertEquippedItems(assert, actor, ["Comlink", "Blaster Rifle", "Vibroblade", "Neo-Crusader Light Armor"]);
+
+
+                        context.assert.equal(actor.warnings.length, 0)
+                        if (actor.warnings.length > 0) {
+                            console.warn(actor.warnings)
+                        }
+                    })
+                });
             })
         },
         {displayName: "GENERATION: ACTOR SPOT CHECKS"})
@@ -342,7 +356,7 @@ async function testLukeSkywalkerjedimaster(context) {
     actor.delete()
 }
 
-async function validate(file, unitName, validationFunction, context) {
+async function validate(file, unitName,context, validationFunction) {
     let actorData = await getActorRawData(file, unitName)
 
     let actor = await processActor(actorData);
@@ -355,7 +369,7 @@ async function validate(file, unitName, validationFunction, context) {
 }
 
 function verifyActorImport(file, unitName, context, validationFunction) {
-    return validate(file, unitName, validationFunction, context);
+    return validate(file, unitName, context, validationFunction);
 }
 
 async function testObiWanKenobiJediSpirit(context) {
