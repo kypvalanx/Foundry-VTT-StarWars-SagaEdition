@@ -84,6 +84,7 @@ function getLocalChangesOnDocument(document, flags) {
     return values.filter(v => !!v).map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
+//
 function getChangesFromActiveEffects(document) {
     if (!document.effects) {
         return [];
@@ -99,7 +100,7 @@ function getChangesFromActiveEffects(document) {
 }
 
 function isEffectOnEmbeddedItem(document, effect) {
-    return document instanceof SWSEActor && !!effect.origin && effect.origin.includes("Item");
+    return document instanceof SWSEActor && effect.sourceName !== "None";
 }
 
 function isActiveEffect(effect, document) {
