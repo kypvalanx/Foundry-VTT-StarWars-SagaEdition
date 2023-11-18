@@ -1,3 +1,16 @@
-2023/11/17-09:36:52.541 2688 Recovering log #35
-2023/11/17-09:36:52.544 2688 Delete type=0 #35
-2023/11/17-09:36:52.544 2688 Delete type=3 #34
+2023/11/17-15:29:23.383 563c Recovering log #12
+2023/11/17-15:29:23.386 563c Level-0 table #15: started
+2023/11/17-15:29:23.397 563c Level-0 table #15: 695070 bytes OK
+2023/11/17-15:29:23.404 563c Delete type=0 #12
+2023/11/17-15:29:23.404 563c Delete type=3 #2
+2023/11/17-15:29:24.654 da8 Compacting 4@0 + 1@1 files
+2023/11/17-15:29:24.683 da8 Generated table #17@0: 4374 keys, 2140280 bytes
+2023/11/17-15:29:24.759 da8 Generated table #18@0: 1542 keys, 2125618 bytes
+2023/11/17-15:29:24.842 da8 Generated table #19@0: 4553 keys, 2050323 bytes
+2023/11/17-15:29:24.842 da8 Compacted 4@0 + 1@1 files => 6316221 bytes
+2023/11/17-15:29:24.845 da8 compacted to: files[ 0 3 1 0 0 0 0 ]
+2023/11/17-15:29:24.845 da8 Delete type=2 #7
+2023/11/17-15:29:24.846 da8 Delete type=2 #9
+2023/11/17-15:29:24.846 da8 Delete type=2 #11
+2023/11/17-15:29:24.847 da8 Delete type=2 #13
+2023/11/17-15:29:24.847 da8 Delete type=2 #15
