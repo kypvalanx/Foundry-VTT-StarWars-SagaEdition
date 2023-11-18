@@ -33,7 +33,7 @@ export function generateSkills(actor) {
     let heavyLoadAffected = [];
 
 
-    if(game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad){
+    if (game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad) {
         heavyLoadAffected = HEAVY_LOAD_SKILLS;
     }
 
@@ -78,14 +78,15 @@ export function generateSkills(actor) {
             .replace(" ", "").trim()
         let old = skill.value;
         let bonuses = [];
-        let attributeMod = actor.getAttributeMod(skill.attribute);
+        let skillAttributeMod = getSkillAttributeMod(actor, key, skill);
+
         if (actor.system.sheetType === "Auto") {
             skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key)
 
-            if(automaticTrainedSkill.includes(key)){
+            if (automaticTrainedSkill.includes(key)) {
                 skill.trained = true;
                 skill.locked = true;
-                if(!skill.isClass){
+                if (!skill.isClass) {
                     skill.blockedSkill = true;
                 }
             }
@@ -93,7 +94,7 @@ export function generateSkills(actor) {
             let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
-            bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
+            bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
 
             let trainedSkillBonus = skill.trained === true ? 5 : 0;
             bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
@@ -114,7 +115,7 @@ export function generateSkills(actor) {
 
             bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
 
-            if(skill.sizeMod){
+            if (skill.sizeMod) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
@@ -122,11 +123,11 @@ export function generateSkills(actor) {
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
-            if(skill.manualBonus){
+            if (skill.manualBonus) {
                 bonuses.push({value: skill.manualBonus, description: `Manual Bonus: ${skill.manualBonus}`});
             }
 
-            if(heavyLoadAffected.includes(key)){
+            if (heavyLoadAffected.includes(key)) {
                 bonuses.push({value: -10, description: `Heavy Load Penalty: -10`})
             }
 
@@ -146,7 +147,7 @@ export function generateSkills(actor) {
                 data[`data.skills.${key}.trained`] = false;
             }
         } else {
-            bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
+            bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
             bonuses.push({value: skill.manualBonus, description: `Miscellaneous Bonus: ${skill.manualBonus}`});
             bonuses.push({
                 value: skill.manualTrainingBonus,
@@ -162,7 +163,7 @@ export function generateSkills(actor) {
         actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
         actor.resolvedLabels.set(skill.variable, skill.label);
-        skill.abilityBonus = attributeMod;
+        skill.abilityBonus = skillAttributeMod;
         skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
         if (skill.value !== old) {
@@ -172,6 +173,49 @@ export function generateSkills(actor) {
     if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
         actor.safeUpdate(data);
     }
+}
+
+function getModifiedSkillAttributes(skillAttributes, key) {
+    let skillAttributeList = [];
+    for (let skillAttribute of skillAttributes) {
+        let value = skillAttribute.value;
+        const [skillAttributeKey, skillAttributeValue] = value.split(":");
+        if (skillAttributeKey.toLowerCase() === key) {
+            skillAttributeList.push(skillAttributeValue);
+        }
+    }
+    return skillAttributeList;
+}
+
+function getHighestSkillAttribute(actor, modifiedSkillAttributes, defaultSkillAttribute) {
+    let highestAttribute = defaultSkillAttribute;
+    let highestAttributeMod = actor.getAttributeMod(highestAttribute);
+    for (let attribute of modifiedSkillAttributes) {
+        try {
+            let attributeMod = actor.getAttributeMod(attribute);
+            if (attributeMod > highestAttributeMod) {
+                highestAttribute = attribute;
+                highestAttributeMod = attributeMod;
+            }
+        } catch (e) {
+            console.warn(`swse: Attribute mod override not valid: "${attribute}". Please check the skillAttribute changes of actor "${actor.name}". Default attribute "${defaultSkillAttribute}" will be used`);
+        }
+    }
+
+    return {highestAttribute, highestAttributeMod};
+}
+
+function getSkillAttributeMod(actor, key, skill) {
+    const defaultSkillAttribute = skill.attribute;
+    const skillAttributesChanges = getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'skillAttribute'
+    });
+
+    const modifiedSkillAttributes = getModifiedSkillAttributes(skillAttributesChanges, key);
+    const attribute = getHighestSkillAttribute(actor, modifiedSkillAttributes, defaultSkillAttribute);
+    skill.attribute = attribute.highestAttribute;
+    return attribute.highestAttributeMod;
 }
 
 /**

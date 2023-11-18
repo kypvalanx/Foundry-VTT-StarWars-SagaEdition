@@ -2,7 +2,6 @@ import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./common
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
-import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 
 /**
@@ -25,7 +24,7 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
 
 
 function getChangesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
-    if(!(entity instanceof SWSEActor)){
+    if (!(entity instanceof SWSEActor)) {
         return [];
     }
     let attributes = [];
@@ -104,11 +103,11 @@ function isEffectOnEmbeddedItem(document, effect) {
 }
 
 function isActiveEffect(effect, document) {
-    if(isEffectOnEmbeddedItem(document, effect)){
+    if (isEffectOnEmbeddedItem(document, effect)){
         return false
     }
 
-    if(effect.flags.swse && effect.flags.swse.isLevel){
+    if (effect.flags.swse && effect.flags.swse.isLevel){
         return effect.flags.swse.level <= (document.system.levelsTaken?.length || 0);
     }
 
@@ -119,7 +118,7 @@ function getChangesFromDocument(data) {
     let document = data.entity;
     let fn = () => {
         let allAttributes = [];
-        if(!data.skipLocal){
+        if (!data.skipLocal) {
             allAttributes.push(...getLocalChangesOnDocument(document, data.flags))
 
         }
@@ -137,13 +136,6 @@ function getChangesFromDocument(data) {
         skipLocal: data.skipLocal
     }, fn) : fn();
 }
-
-function functionString(fn) {
-    if (fn) {
-        return fn.toLocaleString();
-    }
-}
-
 function getChangesFromDocuments(data) {
     if (Array.isArray(data.entity)) {
         let values = [];
@@ -182,9 +174,9 @@ export function getInheritableAttribute(data = {}) {
     // really though we have to filter by attribute key, allow attribute filter,
     // run prerequisites (look at this, it looks like it's done twice?)that order can stay the same
     // i think that overrid needs to move to reduce, the reduce functions just need to acknowledge mode. TODO look at this after coffee
-    if(data.attributeKey){
+    if (data.attributeKey) {
         let attributeKeyFilter;
-        if(Array.isArray(data.attributeKey)){
+        if (Array.isArray(data.attributeKey)) {
             attributeKeyFilter = (attribute) => !!attribute && data.attributeKey.includes(attribute.key);
         } else {
             attributeKeyFilter = (attribute) => !!attribute && data.attributeKey === attribute.key
@@ -193,7 +185,7 @@ export function getInheritableAttribute(data = {}) {
     }
 
     if (data.attributeFilter) {
-        if(data.attributeFilter === "ACTOR_INHERITABLE"){
+        if (data.attributeFilter === "ACTOR_INHERITABLE") {
             values = values.filter((attribute) => !!attribute && !ITEM_ONLY_ATTRIBUTES.includes(attribute.key));
         } else {
             values = values.filter(data.attributeFilter);
