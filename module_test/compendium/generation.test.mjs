@@ -10,9 +10,23 @@
 
 import {getFile, processActor} from "../../module/compendium/generation.mjs";
 
-function assertEquals(context, expected, actual) {
-    const { describe, it, assert, expect, should } = context;
-    expect(actual).to.equal(expected)
+function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
+    assert.equal(actor.system.attributeGenerationType, "Manual")
+    const attributes = actor.system.attributes;
+    assert.equal(attributes.str.total, str)
+    assert.equal(attributes.dex.total, dex)
+    assert.equal(attributes.con.total, con)
+    assert.equal(attributes.int.total, int)
+    assert.equal(attributes.wis.total, wis)
+    assert.equal(attributes.cha.total, cha)
+}
+
+function assertEquippedItems(assert, actor, expectedItems) {
+    let items = actor.getEquippedItems().map(i => i.name)
+    assert.equal(items.length, expectedItems.length, `expected ${expectedItems.toString()}, actual ${items.toString()}`)
+    for (let item of expectedItems) {
+        assert.ok(items.includes(item), `couldn't find ${item}`)
+    }
 }
 
 export async function generationTests(quench) {
@@ -21,32 +35,60 @@ export async function generationTests(quench) {
         (context)=>{
             const { describe, it, assert, expect, should } = context;
             describe("Generation Spot Checks", ()=>{
-                it("Generate CL0 A9G-Series Archive Droid", async () => {
-                    await testArchiveDroid(context);
+                // it("Generate CL0 A9G-Series Archive Droid", async () => {
+                //     await testArchiveDroid(context);
+                // });
+                // it("Generate CL0 AS23 Aerial Survey Droid", ()=>{
+                //     testAerialSurveyDroid(context);
+                // });
+                // it("Generate CL0 ASP Labor Droid", ()=>{
+                //     testASPLaborDroid(context);
+                // });
+                // it("Generate CL0 BD-3000 Luxury Droid", ()=>{
+                //     testBD3000LuxuryDroid(context);
+                // });
+                // it("Generate CL0 Eldewn and Elsae Sarvool", ()=>{
+                //     testEldewnandElsaeSarvool(context);
+                // });
+                // it("Generate CL2 Teek (Character)", ()=>{
+                //     testTeek(context);
+                // });
+                // it("Generate CL4 SpecForce Marine", ()=>{
+                //     testSpecForceMarine(context);
+                // });
+                // it("Generate CL0 Obi-Wan Kenobi, Jedi Spirit", ()=>{
+                //     testObiWanKenobiJediSpirit(context);
+                // });
+                // it("Generate CL9 Veteran Imperial Officer", ()=>{
+                //     testVeteranImperialOfficer(context);
+                // });
+                // it("Generate CL15 Leia Organa Solo, Ex-Chief of State", ()=>{
+                //     testLeiaOrganaSoloExChiefOfState(context);
+                // });
+
+                it("Generate CL20 Luke Skywalker, Grand Master", ()=>{
+                    testLukeSkywalkerjedimaster(context);
                 });
-                it("Generate CL0 AS23 Aerial Survey Droid", ()=>{
-                    testAerialSurveyDroid(context);
-                });
-                it("Generate CL0 ASP Labor Droid", ()=>{
-                    testASPLaborDroid(context);
-                });
-                it("Generate CL0 BD-3000 Luxury Droid", ()=>{
-                    testBD3000LuxuryDroid(context);
-                });
-                it("Generate CL0 Eldewn and Elsae Sarvool", ()=>{
-                    testEldewnandElsaeSarvool(context);
-                });
-                it("Generate CL2 Teek (Character)", ()=>{
-                    testTeek(context);
-                });
-                it("Generate CL4 SpecForce Marine", ()=>{
-                    testSpecForceMarine(context);
-                });
-                it("Generate CL0 Obi-Wan Kenobi, Jedi Spirit", ()=>{
-                    testObiWanKenobiJediSpirit(context);
-                });
-                it("Generate CL9 Veteran Imperial Officer", ()=>{
-                    testVeteranImperialOfficer(context);
+
+
+                it("Generate Mandalorian Trooper", () => {
+                    return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
+
+                        const { describe, it, assert, expect, should } = context
+                        assert.equal(actor.name, "Mandalorian Trooper")
+
+                        assert.equal(actor.system.health.value, 40)
+                        assert.equal(actor.system.health.max, 40)
+                        assert.equal(actor.system.health.override, 40)
+                        assertAbilityScores(assert, actor, 12, 14, 12, 8, 10, 9);
+                        assertEquippedItems(assert, actor, ["Comlink", "Blaster Rifle", "Vibroblade", "Neo-Crusader Light Armor"]);
+
+
+                        context.assert.equal(actor.warnings.length, 0)
+                        if (actor.warnings.length > 0) {
+                            console.warn(actor.warnings)
+                        }
+                    })
                 });
             })
         },
@@ -64,21 +106,21 @@ async function testArchiveDroid(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "A9G-Series Archive Droid", actor.name)
+    context.assert(actor.name === "A9G-Series Archive Droid")
 
-    assertEquals( context, 7, actor.system.health.value)
-    assertEquals( context, 7, actor.system.health.max)
-    assertEquals( context, 7, actor.system.health.override)
+    context.assert(actor.system.health.value === 7)
+    context.assert(actor.system.health.max === 7)
+    context.assert(actor.system.health.override === 7)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "10", actor.system.attributes.str.total)
-    assertEquals( context, "11", actor.system.attributes.dex.total)
-    assertEquals( context, "-", actor.system.attributes.con.total)
-    assertEquals( context, "14", actor.system.attributes.int.total)
-    assertEquals( context, "10", actor.system.attributes.wis.total)
-    assertEquals( context, "12", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "10")
+    context.assert(actor.system.attributes.dex.total === "11")
+    context.assert(actor.system.attributes.con.total === "-")
+    context.assert(actor.system.attributes.int.total === "14")
+    context.assert(actor.system.attributes.wis.total === "10")
+    context.assert(actor.system.attributes.cha.total === "12")
 
-    assertEquals( context, "", actor.warnings)
+    context.assert(actor.warnings === "")
 
     actor.delete()
 }
@@ -87,21 +129,21 @@ async function testAerialSurveyDroid(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "AS23 Aerial Survey Droid", actor.name)
+    context.assert(actor.name === "AS23 Aerial Survey Droid")
 
-    assertEquals( context, 3, actor.system.health.value)
-    assertEquals( context, 3, actor.system.health.max)
-    assertEquals( context, 3, actor.system.health.override)
+    context.assert(actor.system.health.value === 3)
+    context.assert(actor.system.health.max === 3)
+    context.assert(actor.system.health.override === 3)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "8", actor.system.attributes.str.total)
-    assertEquals( context, "18", actor.system.attributes.dex.total)
-    assertEquals( context, "-", actor.system.attributes.con.total)
-    assertEquals( context, "12", actor.system.attributes.int.total)
-    assertEquals( context, "14", actor.system.attributes.wis.total)
-    assertEquals( context, "7", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "8")
+    context.assert(actor.system.attributes.dex.total === "18")
+    context.assert(actor.system.attributes.con.total === "-")
+    context.assert(actor.system.attributes.int.total === "12")
+    context.assert(actor.system.attributes.wis.total === "14")
+    context.assert(actor.system.attributes.cha.total === "7")
 
-    assertEquals( context, "", actor.warnings)
+    context.assert(actor.warnings === "")
 
     actor.delete()
 }
@@ -110,22 +152,22 @@ async function testASPLaborDroid(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "ASP Labor Droid", actor.name)
+    context.assert(actor.name === "ASP Labor Droid")
 
-    assertEquals( context, 5, actor.system.health.value)
-    assertEquals( context, 5, actor.system.health.max)
-    assertEquals( context, 5, actor.system.health.override)
+    context.assert(actor.system.health.value === 5)
+    context.assert(actor.system.health.max === 5)
+    context.assert(actor.system.health.override === 5)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "17", actor.system.attributes.str.total)
-    assertEquals( context, "12", actor.system.attributes.dex.total)
-    assertEquals( context, "-", actor.system.attributes.con.total)
-    assertEquals( context, "6", actor.system.attributes.int.total)
-    assertEquals( context, "11", actor.system.attributes.wis.total)
-    assertEquals( context, "5", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "17")
+    context.assert(actor.system.attributes.dex.total === "12")
+    context.assert(actor.system.attributes.con.total === "-")
+    context.assert(actor.system.attributes.int.total === "6")
+    context.assert(actor.system.attributes.wis.total === "11")
+    context.assert(actor.system.attributes.cha.total === "5")
 
-    assertEquals( context, "<span>Items from General Feats remaining: 1</span>", actor.warnings[0])
-    assertEquals( context, 1, actor.warnings.length)
+    context.assert(actor.warnings[0] === "<span>Items from General Feats remaining: 1</span>")
+    context.assert(actor.warnings.length === 1)
 
     actor.delete()
 }
@@ -134,21 +176,21 @@ async function testBD3000LuxuryDroid(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "BD-3000 Luxury Droid", actor.name)
+    context.assert(actor.name === "BD-3000 Luxury Droid")
 
-    assertEquals( context, 2, actor.system.health.value)
-    assertEquals( context, 2, actor.system.health.max)
-    assertEquals( context, 2, actor.system.health.override)
+    context.assert(actor.system.health.value === 2)
+    context.assert(actor.system.health.max === 2)
+    context.assert(actor.system.health.override === 2)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "8", actor.system.attributes.str.total)
-    assertEquals( context, "13", actor.system.attributes.dex.total)
-    assertEquals( context, "-", actor.system.attributes.con.total)
-    assertEquals( context, "12", actor.system.attributes.int.total)
-    assertEquals( context, "9", actor.system.attributes.wis.total)
-    assertEquals( context, "15", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "8")
+    context.assert(actor.system.attributes.dex.total === "13")
+    context.assert(actor.system.attributes.con.total === "-")
+    context.assert(actor.system.attributes.int.total === "12")
+    context.assert(actor.system.attributes.wis.total === "9")
+    context.assert(actor.system.attributes.cha.total === "15")
 
-    assertEquals( context, 0, actor.warnings.length)
+    context.assert(actor.warnings.length === 0)
 
     actor.delete()
 }
@@ -158,21 +200,21 @@ async function testEldewnandElsaeSarvool(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "Eldewn and Elsae Sarvool", actor.name)
+    context.assert(actor.name === "Eldewn and Elsae Sarvool")
 
-    assertEquals( context, 20, actor.system.health.value)
-    assertEquals( context, 20, actor.system.health.max)
-    assertEquals( context, 20, actor.system.health.override)
+    context.assert(actor.system.health.value === 20)
+    context.assert(actor.system.health.max === 20)
+    context.assert(actor.system.health.override === 20)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "6", actor.system.attributes.str.total)
-    assertEquals( context, "16", actor.system.attributes.dex.total)
-    assertEquals( context, "10", actor.system.attributes.con.total)
-    assertEquals( context, "12", actor.system.attributes.int.total)
-    assertEquals( context, "14", actor.system.attributes.wis.total)
-    assertEquals( context, "16", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "6")
+    context.assert(actor.system.attributes.dex.total === "16")
+    context.assert(actor.system.attributes.con.total === "10")
+    context.assert(actor.system.attributes.int.total === "12")
+    context.assert(actor.system.attributes.wis.total === "14")
+    context.assert(actor.system.attributes.cha.total === "16")
 
-    assertEquals( context, 4, actor.warnings.length)
+    context.assert(actor.warnings.length === 4)
     if(actor.warnings.length > 0){
         console.warn(actor.warnings)
     }
@@ -185,21 +227,21 @@ async function testTeek(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "Teek (Character)", actor.name)
+    context.assert(actor.name === "Teek (Character)")
 
-    assertEquals( context, 28, actor.system.health.value)
-    assertEquals( context, 28, actor.system.health.max)
-    assertEquals( context, 28, actor.system.health.override)
+    context.assert(actor.system.health.value === 28)
+    context.assert(actor.system.health.max === 28)
+    context.assert(actor.system.health.override === 28)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "13", actor.system.attributes.str.total)
-    assertEquals( context, "15", actor.system.attributes.dex.total)
-    assertEquals( context, "13", actor.system.attributes.con.total)
-    assertEquals( context, "12", actor.system.attributes.int.total)
-    assertEquals( context, "12", actor.system.attributes.wis.total)
-    assertEquals( context, "9", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "13")
+    context.assert(actor.system.attributes.dex.total === "15")
+    context.assert(actor.system.attributes.con.total === "13")
+    context.assert(actor.system.attributes.int.total === "12")
+    context.assert(actor.system.attributes.wis.total === "12")
+    context.assert(actor.system.attributes.cha.total === "9")
 
-    assertEquals( context, 0, actor.warnings.length)
+    context.assert(actor.warnings.length === 0)
     if(actor.warnings.length > 0){
         console.warn(actor.warnings)
     }
@@ -212,21 +254,21 @@ async function testSpecForceMarine(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "SpecForce Marine", actor.name)
+    context.assert(actor.name === "SpecForce Marine")
 
-    assertEquals( context, 41, actor.system.health.value)
-    assertEquals( context, 41, actor.system.health.max)
-    assertEquals( context, 41, actor.system.health.override)
+    context.assert(actor.system.health.value === 41)
+    context.assert(actor.system.health.max === 41)
+    context.assert(actor.system.health.override === 41)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "11", actor.system.attributes.str.total)
-    assertEquals( context, "14", actor.system.attributes.dex.total)
-    assertEquals( context, "14", actor.system.attributes.con.total)
-    assertEquals( context, "9", actor.system.attributes.int.total)
-    assertEquals( context, "10", actor.system.attributes.wis.total)
-    assertEquals( context, "8", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "11")
+    context.assert(actor.system.attributes.dex.total === "14")
+    context.assert(actor.system.attributes.con.total === "14")
+    context.assert(actor.system.attributes.int.total === "9")
+    context.assert(actor.system.attributes.wis.total === "10")
+    context.assert(actor.system.attributes.cha.total === "8")
 
-    assertEquals( context, 0, actor.warnings.length)
+    context.assert(actor.warnings.length === 0)
     if(actor.warnings.length > 0){
         console.warn(actor.warnings)
     }
@@ -239,21 +281,21 @@ async function testVeteranImperialOfficer(context) {
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "Veteran Imperial Officer", actor.name)
+    context.assert(actor.name === "Veteran Imperial Officer")
 
-    assertEquals( context, 50, actor.system.health.value)
-    assertEquals( context, 50, actor.system.health.max)
-    assertEquals( context, 50, actor.system.health.override)
+    context.assert(actor.system.health.value === 50)
+    context.assert(actor.system.health.max === 50)
+    context.assert(actor.system.health.override === 50)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, 10, actor.system.attributes.str.total)
-    assertEquals( context, 8, actor.system.attributes.dex.total)
-    assertEquals( context, 10, actor.system.attributes.con.total)
-    assertEquals( context, 14, actor.system.attributes.int.total)
-    assertEquals( context, 13, actor.system.attributes.wis.total)
-    assertEquals( context, 14, actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === 10)
+    context.assert(actor.system.attributes.dex.total === 8)
+    context.assert(actor.system.attributes.con.total === 10)
+    context.assert(actor.system.attributes.int.total === 14)
+    context.assert(actor.system.attributes.wis.total === 13)
+    context.assert(actor.system.attributes.cha.total === 14)
 
-    assertEquals( context, 0, actor.warnings.length)
+    context.assert(actor.warnings.length === 0)
     if(actor.warnings.length > 0){
         console.warn(actor.warnings)
     }
@@ -261,26 +303,95 @@ async function testVeteranImperialOfficer(context) {
     actor.delete()
 }
 
+async function testLeiaOrganaSoloExChiefOfState(context) {
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-15.json", "Leia Organa Solo, Ex-Chief of State")
+
+    let actor = await processActor(actorData);
+
+    context.assert(actor.name === "Veteran Imperial Officer")
+
+    context.assert(actor.system.health.value === 50)
+    context.assert(actor.system.health.max === 50)
+    context.assert(actor.system.health.override === 50)
+
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === 10)
+    context.assert(actor.system.attributes.dex.total === 8)
+    context.assert(actor.system.attributes.con.total === 10)
+    context.assert(actor.system.attributes.int.total === 14)
+    context.assert(actor.system.attributes.wis.total === 13)
+    context.assert(actor.system.attributes.cha.total === 14)
+
+    context.assert(actor.warnings.length === 0)
+    if(actor.warnings.length > 0){
+        console.warn(actor.warnings)
+    }
+
+    actor.delete()
+}
+async function testLukeSkywalkerjedimaster(context) {
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-20.json", "Luke Skywalker, Grand Master")
+
+    let actor = await processActor(actorData);
+
+    context.assert(actor.name === "Veteran Imperial Officer")
+
+    context.assert(actor.system.health.value === 50)
+    context.assert(actor.system.health.max === 50)
+    context.assert(actor.system.health.override === 50)
+
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === 10)
+    context.assert(actor.system.attributes.dex.total === 8)
+    context.assert(actor.system.attributes.con.total === 10)
+    context.assert(actor.system.attributes.int.total === 14)
+    context.assert(actor.system.attributes.wis.total === 13)
+    context.assert(actor.system.attributes.cha.total === 14)
+
+    context.assert(actor.warnings.length === 0)
+    if(actor.warnings.length > 0){
+        console.warn(actor.warnings)
+    }
+
+    actor.delete()
+}
+
+async function validate(file, unitName,context, validationFunction) {
+    let actorData = await getActorRawData(file, unitName)
+
+    let actor = await processActor(actorData);
+
+    try {
+        await validationFunction(context, actor)
+    } finally {
+        actor.delete()
+    }
+}
+
+function verifyActorImport(file, unitName, context, validationFunction) {
+    return validate(file, unitName, context, validationFunction);
+}
+
 async function testObiWanKenobiJediSpirit(context) {
     let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "Obi-Wan Kenobi, Jedi Spirit")
 
     let actor = await processActor(actorData);
 
-    assertEquals( context, "Obi-Wan Kenobi, Jedi Spirit", actor.name)
+    context.assert(actor.name === "Obi-Wan Kenobi, Jedi Spirit")
 
-    assertEquals( context, 0, actor.system.health.value)
-    assertEquals( context, 0, actor.system.health.max)
-    assertEquals( context, 0, actor.system.health.override)
+    context.assert(actor.system.health.value === 0)
+    context.assert(actor.system.health.max === 0)
+    context.assert(actor.system.health.override === 0)
 
-    assertEquals( context, "Manual", actor.system.attributeGenerationType)
-    assertEquals( context, "-", actor.system.attributes.str.total)
-    assertEquals( context, "-", actor.system.attributes.dex.total)
-    assertEquals( context, "-", actor.system.attributes.con.total)
-    assertEquals( context, "14", actor.system.attributes.int.total)
-    assertEquals( context, "15", actor.system.attributes.wis.total)
-    assertEquals( context, "16", actor.system.attributes.cha.total)
+    context.assert(actor.system.attributeGenerationType === "Manual")
+    context.assert(actor.system.attributes.str.total === "-")
+    context.assert(actor.system.attributes.dex.total === "-")
+    context.assert(actor.system.attributes.con.total === "-")
+    context.assert(actor.system.attributes.int.total === "14")
+    context.assert(actor.system.attributes.wis.total === "15")
+    context.assert(actor.system.attributes.cha.total === "16")
 
-    assertEquals( context, 0, actor.warnings.length)
+    context.assert(actor.warnings.length === 0)
     if(actor.warnings.length > 0){
         console.warn(actor.warnings)
     }

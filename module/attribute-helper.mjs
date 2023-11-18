@@ -80,9 +80,10 @@ export function getResolvedSize(entity, options = {}) {
 
 function getLocalChangesOnDocument(document, flags) {
     const values = !document.isDisabled || flags.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
-    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
+    return values.filter(v => !!v).map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
+//
 function getChangesFromActiveEffects(document) {
     if (!document.effects) {
         return [];
@@ -97,8 +98,16 @@ function getChangesFromActiveEffects(document) {
     return attributes;
 }
 
+function isEffectOnEmbeddedItem(document, effect) {
+    return document instanceof SWSEActor && effect.sourceName !== "None";
+}
+
 function isActiveEffect(effect, document) {
-    if (effect.flags.swse && effect.flags.swse.isLevel) {
+    if (isEffectOnEmbeddedItem(document, effect)){
+        return false
+    }
+
+    if (effect.flags.swse && effect.flags.swse.isLevel){
         return effect.flags.swse.level <= (document.system.levelsTaken?.length || 0);
     }
 

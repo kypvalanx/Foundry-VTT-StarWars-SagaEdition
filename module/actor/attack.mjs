@@ -376,11 +376,14 @@ export class Attack {
                     entity: actor,
                     attributeKey: "lightsabersDamageStat",
                     reduce: "VALUES"
-                })[0].toLowerCase();
-                const abilities = ["str", "dex", "con", "int", "wis", "cha"];
-                if (abilities.includes(abilitySelect)) {
-                    let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
-                    abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod: abilityMod;
+                })[0]
+                if(abilitySelect){
+                    abilitySelect = abilitySelect.toLowerCase();
+                    const abilities = ["str", "dex", "con", "int", "wis", "cha"];
+                    if (abilities.includes(abilitySelect)) {
+                        let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
+                        abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod: abilityMod;
+                    }
                 }
             }
 

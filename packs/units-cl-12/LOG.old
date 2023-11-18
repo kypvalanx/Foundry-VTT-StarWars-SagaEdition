@@ -1,3 +1,40 @@
-2023/10/11-09:20:32.409 2758 Recovering log #58
-2023/10/11-09:20:32.411 2758 Delete type=0 #58
-2023/10/11-09:20:32.411 2758 Delete type=3 #57
+2023/11/17-15:29:23.471 d48 Recovering log #24
+2023/11/17-15:29:23.474 d48 Level-0 table #27: started
+2023/11/17-15:29:23.486 d48 Level-0 table #27: 655431 bytes OK
+2023/11/17-15:29:23.489 d48 Delete type=0 #24
+2023/11/17-15:29:23.489 d48 Delete type=3 #2
+2023/11/17-15:29:24.847 da8 Compacting 4@0 + 4@1 files
+2023/11/17-15:29:24.876 da8 Generated table #29@0: 6651 keys, 2139577 bytes
+2023/11/17-15:29:24.966 da8 Generated table #30@0: 1531 keys, 2125533 bytes
+2023/11/17-15:29:25.091 da8 Generated table #31@0: 1537 keys, 2126487 bytes
+2023/11/17-15:29:25.168 da8 Generated table #32@0: 1487 keys, 2124947 bytes
+2023/11/17-15:29:25.259 da8 Generated table #33@0: 1544 keys, 2129214 bytes
+2023/11/17-15:29:25.339 da8 Generated table #34@0: 6581 keys, 1492169 bytes
+2023/11/17-15:29:25.345 da8 Compacted 4@0 + 4@1 files => 12137927 bytes
+2023/11/17-15:29:25.346 da8 compacted to: files[ 0 6 1 0 0 0 0 ]
+2023/11/17-15:29:25.346 da8 Delete type=2 #16
+2023/11/17-15:29:25.346 da8 Delete type=2 #17
+2023/11/17-15:29:25.347 da8 Delete type=2 #18
+2023/11/17-15:29:25.347 da8 Delete type=2 #19
+2023/11/17-15:29:25.347 da8 Delete type=2 #21
+2023/11/17-15:29:25.347 da8 Delete type=2 #23
+2023/11/17-15:29:25.348 da8 Delete type=2 #25
+2023/11/17-15:29:25.348 da8 Delete type=2 #27
+2023/11/17-15:29:26.877 da8 Expanding@1 1+1 (2139577+1434848 bytes) to 6+1 (12137927+1434848 bytes)
+2023/11/17-15:29:26.877 da8 Compacting 6@1 + 1@2 files
+2023/11/17-15:29:26.901 da8 Generated table #35@1: 7273 keys, 2142736 bytes
+2023/11/17-15:29:26.927 da8 Generated table #36@1: 1571 keys, 2131038 bytes
+2023/11/17-15:29:26.954 da8 Generated table #37@1: 1464 keys, 2127745 bytes
+2023/11/17-15:29:26.978 da8 Generated table #38@1: 1538 keys, 2125698 bytes
+2023/11/17-15:29:27.053 da8 Generated table #39@1: 1557 keys, 2127048 bytes
+2023/11/17-15:29:27.149 da8 Generated table #40@1: 1495 keys, 2125593 bytes
+2023/11/17-15:29:27.171 da8 Generated table #41@1: 6754 keys, 797889 bytes
+2023/11/17-15:29:27.171 da8 Compacted 6@1 + 1@2 files => 13577747 bytes
+2023/11/17-15:29:27.172 da8 compacted to: files[ 0 0 7 0 0 0 0 ]
+2023/11/17-15:29:27.172 da8 Delete type=2 #5
+2023/11/17-15:29:27.172 da8 Delete type=2 #29
+2023/11/17-15:29:27.172 da8 Delete type=2 #30
+2023/11/17-15:29:27.173 da8 Delete type=2 #31
+2023/11/17-15:29:27.173 da8 Delete type=2 #32
+2023/11/17-15:29:27.173 da8 Delete type=2 #33
+2023/11/17-15:29:27.174 da8 Delete type=2 #34

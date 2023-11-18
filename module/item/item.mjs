@@ -737,7 +737,7 @@ export class SWSEItem extends Item {
     }
 
     get finalName() {
-        return this.name;
+        return SWSEItem.buildItemName(this);
     }
 
     get isEquipable() {
@@ -1513,9 +1513,9 @@ export class SWSEItem extends Item {
         };
     }
 
-    toObject() {
-        let o = super.toObject();
-        let cost = this.system.changes.find(c => c.key === "cost");
+    toObject(source) {
+        let o = super.toObject(source);
+        let cost = this.system.changes.find(c => !!c && c.key === "cost");
         o.system.cost = (cost) ? cost["value"] : "0";
         return o;
     }
