@@ -78,7 +78,7 @@ export function generateSkills(actor) {
             .replace(" ", "").trim()
         let old = skill.value;
         let bonuses = [];
-        let attributeMod = getAttributeMod(actor, key, skill);
+        let skillAttributeMod = getSkillAttributeMod(actor, key, skill);
 
         if (actor.system.sheetType === "Auto") {
             skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key)
@@ -94,7 +94,7 @@ export function generateSkills(actor) {
             let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
-            bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
+            bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
 
             let trainedSkillBonus = skill.trained === true ? 5 : 0;
             bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
@@ -147,7 +147,7 @@ export function generateSkills(actor) {
                 data[`data.skills.${key}.trained`] = false;
             }
         } else {
-            bonuses.push({value: attributeMod, description: `Attribute Mod: ${attributeMod}`})
+            bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
             bonuses.push({value: skill.manualBonus, description: `Miscellaneous Bonus: ${skill.manualBonus}`});
             bonuses.push({
                 value: skill.manualTrainingBonus,
@@ -163,7 +163,7 @@ export function generateSkills(actor) {
         actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
         skill.label = key.titleCase().replace("Knowledge", "K.");
         actor.resolvedLabels.set(skill.variable, skill.label);
-        skill.abilityBonus = attributeMod;
+        skill.abilityBonus = skillAttributeMod;
         skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
         if (skill.value !== old) {
@@ -174,37 +174,48 @@ export function generateSkills(actor) {
         actor.safeUpdate(data);
     }
 }
-function getModifiedSkillAttribute(skillAttributes, key) {
+
+function getModifiedSkillAttributes(skillAttributes, key) {
+    let skillAttributeList = [];
     for (let skillAttribute of skillAttributes) {
         let value = skillAttribute.value;
         const [skillAttributeKey, skillAttributeValue] = value.split(":");
         if (skillAttributeKey.toLowerCase() === key) {
-            return skillAttributeValue;
+            skillAttributeList.push(skillAttributeValue);
         }
     }
-    return null;
+    return skillAttributeList;
 }
 
-function getAttributeMod(actor, key, skill) {
+function getHighestSkillAttribute(actor, modifiedSkillAttributes, defaultSkillAttribute) {
+    let highestAttribute = defaultSkillAttribute;
+    let highestAttributeMod = actor.getAttributeMod(highestAttribute);
+    for (let attribute of modifiedSkillAttributes) {
+        try {
+            let attributeMod = actor.getAttributeMod(attribute);
+            if (attributeMod > highestAttributeMod) {
+                highestAttribute = attribute;
+                highestAttributeMod = attributeMod;
+            }
+        } catch (e) {
+            console.warn(`swse: Attribute mod override not valid: "${attribute}". Please check the skillAttribute changes of actor "${actor.name}". Default attribute "${defaultSkillAttribute}" will be used`);
+        }
+    }
+
+    return {highestAttribute, highestAttributeMod};
+}
+
+function getSkillAttributeMod(actor, key, skill) {
     const defaultSkillAttribute = skill.attribute;
-    const skillAttributes = getInheritableAttribute({
+    const skillAttributesChanges = getInheritableAttribute({
         entity: actor,
         attributeKey: 'skillAttribute'
     });
 
-    const modifiedSkillAttribute = getModifiedSkillAttribute(skillAttributes, key);
-    if (modifiedSkillAttribute) {
-        skill.attribute = modifiedSkillAttribute;
-    }
-
-    try {
-        return actor.getAttributeMod(skill.attribute);
-    } catch (e) {
-        console.warn(`swse: Ability mod override not valid for skill "${key}" and ability "${skill.attribute}".
-        Using default attribute "${defaultSkillAttribute}" instead.`);
-        skill.attribute = defaultSkillAttribute;
-        return actor.getAttributeMod(skill.attribute);
-    }
+    const modifiedSkillAttributes = getModifiedSkillAttributes(skillAttributesChanges, key);
+    const attribute = getHighestSkillAttribute(actor, modifiedSkillAttributes, defaultSkillAttribute);
+    skill.attribute = attribute.highestAttribute;
+    return attribute.highestAttributeMod;
 }
 
 /**
