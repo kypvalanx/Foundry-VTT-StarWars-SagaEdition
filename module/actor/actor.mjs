@@ -77,6 +77,14 @@ export class SWSEActor extends Actor {
         }
     }
 
+    useAmmunition(type){
+        let item = this.items.find(i => i.name === type);
+        if(item && item.system.quantity > 0){
+           item.decreaseQuantity();
+           return {fail:false}
+        }
+        return {fail: true};
+    }
     getCached(key, fn) {
         if (!this.cache) {
             return fn();

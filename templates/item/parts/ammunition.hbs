@@ -1,0 +1,10 @@
+{{#if ammunition}}
+    {{log ammunition.current @root}}
+    {{#each ammunition.current as |ammo id|}}
+        <div>
+            {{ammo.type}}
+            {{ammo.current}}/{{ammo.capacity}}
+            <button data-action="reload" data-ammo-key="{{ammo.key}}">reload</button>
+        </div>
+    {{/each}}
+{{/if}}

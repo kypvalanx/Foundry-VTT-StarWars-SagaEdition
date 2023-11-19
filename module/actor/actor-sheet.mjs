@@ -296,7 +296,6 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onQuickCreate(event) {
-        console.log(event.code)
         if (!(event.code === "Enter" || event.code === "NumpadEnter")) {
             return;
         }

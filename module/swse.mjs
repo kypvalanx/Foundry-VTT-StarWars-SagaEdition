@@ -125,6 +125,7 @@ Hooks.once('init', async function () {
         'systems/swse/templates/item/parts/attribute.hbs',
         'systems/swse/templates/item/parts/attributes.hbs',
         'systems/swse/templates/item/parts/mode.hbs',
+        'systems/swse/templates/item/parts/ammunition.hbs',
         'systems/swse/templates/change/change-list.hbs',
         'systems/swse/templates/change/change.hbs',
         'systems/swse/templates/actor/vehicle/vehicle-template.hbs',

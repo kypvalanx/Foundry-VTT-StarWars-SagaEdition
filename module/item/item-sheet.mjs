@@ -103,6 +103,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
+        html.find('[data-action="reload"]').click(this._onReload.bind(this));
 
 
         //TODO switch to data action
@@ -194,6 +195,12 @@ export class SWSEItemSheet extends ItemSheet {
         let msg = new cls(messageData);
 
         return cls.create(msg.data, {});
+    }
+    _onReload(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const ammoKey = a.dataset.ammoKey;
+        this.object.ammunition.reload(ammoKey);
     }
 
 

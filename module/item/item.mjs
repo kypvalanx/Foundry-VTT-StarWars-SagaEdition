@@ -4,6 +4,7 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
+import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -64,10 +65,17 @@ export class SWSEItem extends Item {
         if (this.type === "weapon") this.prepareWeapon(this.system);
         if (this.type === "armor") this.prepareArmor(this.system);
         if (this.type === "feat") this.prepareFeatData(this.system);
+        if (this.hasAmmunition) {
+            this.ammunition = new AmmunitionDelegate(this);
+        }
 
         if (this.system.dirty){
             this.safeUpdate({"system.dirty": false});
         }
+    }
+
+    get hasAmmunition(){
+        return getInheritableAttribute({entity: this, attributeKey:"ammo", reduce:"COUNT"}) > 0;
     }
 
     updateLegacyItem() {

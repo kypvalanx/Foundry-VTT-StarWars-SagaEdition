@@ -512,7 +512,8 @@
         "availability": "",
         "size": "",
         "type": "",
-        "subtype": ""
+        "subtype": "",
+        "quantity": 1
       },
       "modifiable": {
         "items": []
