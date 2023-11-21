@@ -1,4 +1,4 @@
-{{#if attack}}
+ {{#if attack}}
     {{#unless attack.hide}}
         <div class="flex flex-col {{#if
                 attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container"
@@ -9,7 +9,7 @@
 
 
                 <div class="huge labeled-input">
-                    <input class="input" type="text" value="{{attack.name}}"
+                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
                            placeholder="" disabled/>
                         <div class="toggle control" data-toggle-id="{{attack.actorId}}-{{attack.itemId}}-{{attack.providerId}}">
                             <a>

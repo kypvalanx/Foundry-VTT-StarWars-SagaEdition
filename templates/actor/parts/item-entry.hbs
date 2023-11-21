@@ -21,6 +21,11 @@
                         {{/times}}
                     {{/unless}}
                 {{/if}}
+                {{#if item.hasAmmunition}}
+                    {{#each item.ammunition.current as |ammo id|}}
+                        ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}})
+                    {{/each}}
+                {{/if}}
             </h4>
             {{#ifContains fields "Prerequisites"}}
                 <h4 class="item-name">{{#if item.system.prerequisite}}

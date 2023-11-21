@@ -632,6 +632,13 @@ export class Attack {
         return num < defense;
     }
 
+    get ammunition(){
+        return this.item.ammunition;
+    }
+    get hasAmmunition(){
+        return this.item.hasAmmunition;
+    }
+
     isFailure(roll) {
         let term = roll.terms.find(term => term.faces === 20);
         let num = term.results[0].result;

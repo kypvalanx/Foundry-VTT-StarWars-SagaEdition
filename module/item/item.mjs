@@ -268,6 +268,12 @@ export class SWSEItem extends Item {
             finalName = `${finalName} ${suffix}`;
         }
 
+        // if (item.hasAmmunition){
+        //     for (const ammo of item.ammunition.current) {
+        //         finalName = `${finalName} (${ammo.type} ${ammo.current}/${ammo.capacity})`
+        //     }
+        // }
+
         return finalName;
     }
 
