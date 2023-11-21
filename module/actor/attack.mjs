@@ -81,6 +81,13 @@ export class Attack {
         this.lazyResolve = new Map();
     }
 
+    reduceAmmunition(count = 1){
+        if(this.item && this.item.hasAmmunition){
+            const ammo = this.item.ammunition.current[0];
+            this.item.ammunition.fire(ammo.key, count);
+        }
+    }
+
 
     getCached(key, fn) {
         if (this.lazyResolve.has(key)) {
@@ -988,6 +995,10 @@ function attackDialogue(context) {
                         if (!!attackFromBlock) {
                             attacks.push(attackFromBlock);
                         }
+                    }
+
+                    for (const attack of attacks) {
+                        attack.reduceAmmunition()
                     }
 
                     createAttackChatMessage(attacks, undefined).then(() => {

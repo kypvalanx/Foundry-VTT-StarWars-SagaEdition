@@ -52,7 +52,7 @@ export class AmmunitionDelegate {
         let system = {ammunition:{}}
         system.ammunition[key] = remainingRounds-count;
 
-        this.item.safeUpdate(system);
+        this.item.safeUpdate({system});
 
         return "SUCCESS"
     }
