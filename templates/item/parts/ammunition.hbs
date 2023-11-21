@@ -4,6 +4,10 @@
         <div>
             {{ammo.type}}
             {{ammo.current}}/{{ammo.capacity}}
+            <div class="flex-row">
+                <button data-action="increase-ammo" data-ammo-key="{{ammo.key}}">+</button>
+                <button data-action="decrease-ammo" data-ammo-key="{{ammo.key}}">-</button>
+            </div>
             <button data-action="reload" data-ammo-key="{{ammo.key}}">reload</button>
         </div>
     {{/each}}

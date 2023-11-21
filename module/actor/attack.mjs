@@ -84,7 +84,7 @@ export class Attack {
     reduceAmmunition(count = 1){
         if(this.item && this.item.hasAmmunition){
             const ammo = this.item.ammunition.current[0];
-            this.item.ammunition.fire(ammo.key, count);
+            this.item.ammunition.decreaseAmmunition(ammo.key, count);
         }
     }
 

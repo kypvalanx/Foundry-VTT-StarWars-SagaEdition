@@ -104,6 +104,8 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
+        html.find('[data-action="increase-ammo"]').click(this._onIncreaseAmmo.bind(this));
+        html.find('[data-action="decrease-ammo"]').click(this._onDecreaseAmmo.bind(this));
 
 
         //TODO switch to data action
@@ -201,6 +203,18 @@ export class SWSEItemSheet extends ItemSheet {
         const a = event.currentTarget;
         const ammoKey = a.dataset.ammoKey;
         this.object.ammunition.reload(ammoKey);
+    }
+    _onIncreaseAmmo(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const ammoKey = a.dataset.ammoKey;
+        this.object.ammunition.increaseAmmunition(ammoKey);
+    }
+    _onDecreaseAmmo(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const ammoKey = a.dataset.ammoKey;
+        this.object.ammunition.decreaseAmmunition(ammoKey);
     }
 
 

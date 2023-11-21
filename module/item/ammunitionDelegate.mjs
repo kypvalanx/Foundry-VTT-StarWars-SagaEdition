@@ -40,7 +40,7 @@ export class AmmunitionDelegate {
         return {error: "UNKNOWN AMMO STRING", ammoString}
     }
 
-    fire(key, count = 1){
+    decreaseAmmunition(key, count = 1){
         let currentAmmo = this.item.system.ammunition || {};
 
         const remainingRounds = currentAmmo[key] || 0;
@@ -51,6 +51,24 @@ export class AmmunitionDelegate {
 
         let system = {ammunition:{}}
         system.ammunition[key] = remainingRounds-count;
+
+        this.item.safeUpdate({system});
+
+        return "SUCCESS"
+    }
+    increaseAmmunition(key, count = 1){
+        let currentAmmo = this.item.system.ammunition || {};
+
+        const parsedKey = AmmunitionDelegate.parseAmmoKey(key);
+        let ammo = AmmunitionDelegate.parseAmmunitionString(parsedKey.string)
+        const remainingRounds = currentAmmo[key] || 0;
+
+        if(count + remainingRounds > ammo.capacity){
+            return "NOT ENOUGH AMMO";
+        }
+
+        let system = {ammunition:{}}
+        system.ammunition[key] = count + remainingRounds;
 
         this.item.safeUpdate({system});
 
