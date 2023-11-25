@@ -91,7 +91,7 @@ export function resolveShield(actor) {
         attributeKey: 'shieldFailureChance',
         reduce: "MAX"
     });
-    let active = !!actor.effects.find(effect => effect.statuses.has('shield') && effect.disabled === false);
+    let active = !!actor.effects.find(effect => effect.statuses && effect.statuses.has('shield') && effect.disabled === false);
     shields.value = value;
     shields.failureChance = failureChance;
     shields.active = active;
