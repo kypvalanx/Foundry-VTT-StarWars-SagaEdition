@@ -20,10 +20,12 @@ export class SWSEItem extends Item {
 
     async _preUpdate(changed, options, user) {
         super._preUpdate(changed, options, user);
-        if(changed.system?.dirty !== false){
-            changed.system = changed.system || {};
-            changed.system.dirty = true;
-        }
+        changed.system = changed.system || {};
+        changed.system.displayName = SWSEItem.buildItemName(this);
+        // if(changed.system?.dirty !== false){
+        //     changed.system = changed.system || {};
+        //     changed.system.dirty = true;
+        // }
         //console.log(changed)
     }
 
@@ -35,7 +37,6 @@ export class SWSEItem extends Item {
      */
     prepareData() {
         super.prepareData();
-        this._pendingUpdate = {};
         this.hasItemOwner = this.hasItemOwner || false;
 
         if(!Array.isArray(this.system.changes)){
@@ -46,17 +47,10 @@ export class SWSEItem extends Item {
         if(this.updateLegacyItem()){
             return;
         }
-        //this.system.attributes = this.system.attributes || {}
 
         this.cache = new SimpleCache();
-        if(this.system.dirty || !this.system.name){
-            this.name = SWSEItem.buildItemName(this);
-            if(this.name !== this.system.name){
-               // this.safeUpdate({"system.name": this.name});
-                return;
-            }
-        } else {
-            this.name = this.system.name;
+        if(this.system.displayName){
+            this.name = this.system.displayName;
         }
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
@@ -67,10 +61,6 @@ export class SWSEItem extends Item {
         if (this.type === "feat") this.prepareFeatData(this.system);
         if (this.hasAmmunition) {
             this.ammunition = new AmmunitionDelegate(this);
-        }
-
-        if (this.system.dirty){
-            this.safeUpdate({"system.dirty": false});
         }
     }
 
