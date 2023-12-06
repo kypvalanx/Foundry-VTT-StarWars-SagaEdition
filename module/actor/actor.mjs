@@ -1707,6 +1707,20 @@ export class SWSEActor extends Actor {
             .includes(`${item.finalName}:${item.type}`);
     }
 
+
+
+    /**
+     *
+     * @param item {SWSEItem}
+     * @returns {number}
+     */
+    countItem(item) {
+        const searchString = `${item.finalName}:${item.type}`;
+        return Array.from(this.items.values())
+            .map(i => `${i.finalName}:${i.type}`)
+            .filter(i => i === searchString).length;
+    }
+
     _reduceProvidedItemsByExistingItems(actorData) {
 
         this.system.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
@@ -2230,12 +2244,18 @@ export class SWSEActor extends Actor {
             }
 
             if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
-                let takeMultipleTimes = getInheritableAttribute({
+                const isAtMaximumQuantity = this.countItem(entity) === getInheritableAttribute({
+                    entity: entity,
+                    attributeKey: "takeMultipleTimesMax",
+                    reduce: "MAX"
+                });
+
+                const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
                     entity: entity,
                     attributeKey: "takeMultipleTimes"
                 }).map(a => a.value === "true").reduce((a, b) => a || b, false);
 
-                if (this.hasItem(entity) && !takeMultipleTimes) {
+                if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
                     if (!context.skipPrerequisite && !context.isUpload) {
                         await Dialog.prompt({
                             title: `You already have this ${entity.type}`,
