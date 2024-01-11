@@ -1,62 +1,11 @@
-import {appendNumericTerm, toShortAttribute} from "../common/util.mjs";
+import {appendNumericTerm} from "../common/util.mjs";
 import {SWSEItem} from "../item/item.mjs";
-import {Attack} from "./attack.mjs";
 import {compareSizes} from "./size.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import { RANGED_WEAPON_TYPES, LIGHTSABER_WEAPON_TYPES, SIMPLE_WEAPON_TYPES, weaponGroup } from "../common/constants.mjs";
+import {LIGHTSABER_WEAPON_TYPES, RANGED_WEAPON_TYPES, SIMPLE_WEAPON_TYPES, weaponGroup} from "../common/constants.mjs";
 
 
-function getCrewPosition(equipmentSlot) {
-
-    if(equipmentSlot === "pilotInstalled"){
-        return "Pilot";
-    } else if(equipmentSlot.startsWith("gunnerInstalled")){
-        return equipmentSlot.replace("gunnerInstalled", "Gunner")
-    } else {
-        console.log(equipmentSlot)
-    }
-    return undefined;
-};
-
-/**
- *
- * @param {SWSEActor} actor
- * @returns {Attack[]}
- */
-export function generateVehicleAttacks(actor) {
-    return actor.getAvailableItemsFromRelationships()
-        .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && item.system.equipped)
-        .map(weapon =>  new Attack(actor.crewman(getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parentId, actor.parent?.id, {actor: actor.items}));
-}
-
-/**
- *
- * @param {SWSEActor} actor
- * @returns {Promise<void>}
- */
-export function generateAttacks(actor) {
-    let equippedItems = actor.getEquippedItems();
-    let weaponIds = equippedItems
-        .filter(item => 'weapon' === item.type)
-        .map(item => item.id)
-
-    let beastAttackIds = actor.naturalWeapons
-        .filter(item => 'beastAttack' === item.type)
-        .map(item => item.id);
-
-    if(beastAttackIds.length > 0){
-        weaponIds.push(...beastAttackIds)
-    } else {
-        weaponIds.push("Unarmed Attack")
-    }
-
-    let attacks = weaponIds.map(id => new Attack(actor.id, id, null, actor.parent?.id, {items: actor.items}));
-
-    let items = actor.getAvailableItemsFromRelationships()
-
-    attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, actor.parent?.id, {items: actor.items})))
-    return attacks;
-}
+;
 
 
 /**

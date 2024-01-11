@@ -1,5 +1,4 @@
 import {resolveHealth, resolveShield} from "./health.mjs";
-import {generateAttacks, generateVehicleAttacks} from "./attack-handler.mjs";
 import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
@@ -40,11 +39,11 @@ import {
 } from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
-import {makeAttack} from "./attack.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {errorsFromActor, warningsFromActor} from "./warnings.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
+import {AttackDelegate, makeAttack} from "./attack/attackDelegate.mjs";
 
 
 /**
@@ -186,6 +185,8 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
+
+        this.attack = new AttackDelegate(this);
 
         if (this.type === 'character') this._prepareCharacterData(system);
         if (this.type === 'npc') this._prepareCharacterData(system);
@@ -440,7 +441,6 @@ export class SWSEActor extends Actor {
         system.defense = defense;
         system.armors = armors;
 
-        system.attacks = generateVehicleAttacks(this);
         this.initializeCharacterSettings();
     }
 
@@ -491,7 +491,6 @@ export class SWSEActor extends Actor {
         system.armors = armors;
 
         this._manageAutomaticItems(this, feats.removeFeats).then(() => {});
-        system.attacks = generateAttacks(this);
         this.initializeCharacterSettings();
     }
 
@@ -1144,6 +1143,11 @@ export class SWSEActor extends Actor {
     getEquippedItems() {
         let items = this.items;
         return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped");
+    }
+
+    get equippedWeapons(){
+        return this.getEquippedItems()
+            .filter(item => 'weapon' === item.type)
     }
 
     getInstalledWeapons() {
@@ -1996,7 +2000,7 @@ export class SWSEActor extends Actor {
         //let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
 
         if (items.length === 0) {
-            this.attack(null, {type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds})
+            this.attack.makeAttack(null, {type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds})
         } else {
             for (let item of items) {
                 item.rollItem(this).render(true);
@@ -2148,16 +2152,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    /**
-     *
-     * @param event
-     * @param context
-     * @returns {Promise<void>}
-     */
-    async attack(event, context) {
-        context.actor = this;
-        await makeAttack(context);
-    }
+
 
     resolveSlot(crew, type, cover, numericSlot) {
         let slot = {

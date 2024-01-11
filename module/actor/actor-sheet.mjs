@@ -9,7 +9,7 @@ import {
 } from "../common/util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
-import {Attack} from "./attack.mjs";
+import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {
@@ -159,13 +159,13 @@ export class SWSEActorSheet extends ActorSheet {
             div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
+        html.find("#fullAttack").on("click", () => this.object.attack.makeAttack(event, {type: "fullAttack"}));
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
 
         html.find("#selectWeight").on("click", () => this._unavailable());
         html.find("#selectHeight").on("click", () => this._unavailable());
-        html.find("#fullAttack").on("click", () => this.actor.attack(event, {type: "fullAttack"}));
 
         html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
         html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
@@ -1406,8 +1406,7 @@ export class SWSEActorSheet extends ActorSheet {
         let elem = ev.currentTarget;
         let attacks = Attack.fromJSON(elem.dataset.attacks);
 
-        this.actor.attack(ev, {type: "singleAttack", attacks});
-        return undefined;
+        this.object.attack.makeAttack(ev, {type: "singleAttack", attacks});
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {

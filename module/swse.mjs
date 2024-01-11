@@ -8,15 +8,13 @@ import {SWSEItemSheet} from "./item/item-sheet.mjs";
 import {refreshActors, registerSystemSettings} from "./settings/system.mjs";
 import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
 import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
-import {getInheritableAttribute} from "./attribute-helper.mjs";
-import {makeAttack} from "./actor/attack.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
-import {SWSECompendiumDirectory} from "./compendium/compendium-directory.mjs";
 import {toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
+import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -135,10 +133,13 @@ Hooks.once('init', async function () {
         'systems/swse/templates/settings/setting.hbs',
         'systems/swse/templates/actor/parts/attack/attack-chat-card.hbs',
         'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs',
+        'systems/swse/templates/actor/parts/attack/attack-dialogue.hbs',
+        'systems/swse/templates/actor/parts/attack/attack-dialogue-single-attack.hbs',
         'systems/swse/templates/roll/roll.hbs',
         'systems/swse/templates/roll/roll-target.hbs',
         'systems/swse/templates/roll/roll-tooltip.hbs',
-        'systems/swse/templates/active-effect/active-effect-list.hbs']);
+        'systems/swse/templates/active-effect/active-effect-list.hbs',
+        'systems/swse/templates/common/select.hbs']);
 
 });
 
@@ -541,7 +542,7 @@ function rollAttack(actorId, itemIds) {
         console.warn(msg);
         return ui.notifications.error(msg);
     }
-    return actor.attack({type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds});
+    return actor.attack.makeAttack({type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds});
 }
 
 export const getActorFromId = function (id) {

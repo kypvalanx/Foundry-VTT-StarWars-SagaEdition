@@ -1,14 +1,12 @@
 #!/usr/bin/env node
 
 import {SWSE} from "./config.mjs";
-import {dieSize, dieType, weaponGroup} from "./constants.mjs";
+import {dieSize, dieType} from "./constants.mjs";
 import {SWSEActor} from "../actor/actor.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
-import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
-import {generateAttributes} from "../actor/attribute-handler.mjs";
-import {generateSkills} from "../actor/skill-handler.mjs";
+import {Attack} from "../actor/attack/attack.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -535,7 +533,7 @@ export function handleExclusiveSelect(e, selects) {
 
 
 export function handleAttackSelect(selects) {
-    let selectedValuesBySelect = {};
+    let selectedValues = [];
 
     let hasStandard = false;
     let hasDoubleAttack = false;
@@ -546,48 +544,46 @@ export function handleAttackSelect(selects) {
             o.disabled = false
         }
 
-        if (select.value) {
-            selectedValuesBySelect[select.id] = select.value;
-            if (select.value !== "--") {
-                let selected = JSON.parse(unescape(select.value))
+        if (!select.value || select.value === "--") {
+            continue;
+        }
+        selectedValues.push( select.value);
 
-                if (selected.options.standardAttack) {
-                    hasStandard = true;
-                }
-                if (selected.options.doubleAttack) {
-                    hasDoubleAttack = true;
-                }
-                if (selected.options.tripleAttack) {
-                    hasTripleAttack = true;
-                }
-            }
+        let selected = JSON.parse(unescape(select.value))
+        if (selected.options.standardAttack) {
+            hasStandard = true;
+        }
+        if (selected.options.doubleAttack) {
+            hasDoubleAttack = true;
+        }
+        if (selected.options.tripleAttack) {
+            hasTripleAttack = true;
         }
     }
-    //disable options in other selects that match a selected select
+
+    function shouldDisableDoubleAttack(attackFromOption, selectedAttack) {
+        return attackFromOption.options.doubleAttack &&
+            (!hasStandard || (hasDoubleAttack && !selectedAttack.options.doubleAttack));
+    }
+
+    function shouldDisableTripleAttack(attackFromOption, selectedAttack) {
+        return attackFromOption.options.tripleAttack &&
+            (!hasDoubleAttack || (hasTripleAttack && !selectedAttack.options.tripleAttack) || selectedAttack.options.doubleAttack);
+    }
+
+//disable options in other selects that match a selected select
     for (let select of selects) {
-        for (let entry of Object.entries(selectedValuesBySelect)) {
-            if (select.id !== entry[0]) {
-                for (let o of select.options) {
-                    if (o.value !== "--" && o.value === entry[1]) {
-                        o.disabled = true
-                    }
-                }
-            }
-        }
-
-        let selectValue = select.value !== "--" ? JSON.parse(unescape(select.value)) : {options: {}};
+        let selectedAttack = select.value !== "--" ? Attack.fromJSON(select.value) : {options: {}};
         for (let o of select.options) {
-            if (o.value !== "--" && !o.selected) {
-                let selected = JSON.parse(unescape(o.value));
-
-                //disable this doubleattack option if no standard attacks have been selected or we already have a double attack and it's not the current selection of this select box
-                if (selected.options.doubleAttack && (!hasStandard || (hasDoubleAttack && !selectValue.options.doubleAttack))) {
-                    o.disabled = true
-                }
-                //disable this triple attack option if no double attacks have been selected or we already have a triple attack and it's not the current selection of this select box or if this select is currently selecting a double attack.
-                if (selected.options.tripleAttack && (!hasDoubleAttack || (hasTripleAttack && !selectValue.options.tripleAttack) || selectValue.options.doubleAttack)) {
-                    o.disabled = true
-                }
+            if (o.value === "--" || o.selected) {
+                continue;
+            }
+            let attackFromOption = Attack.fromJSON(o.value)//JSON.parse(unescape(o.value));
+            if (selectedValues.includes( o.value)
+                || shouldDisableDoubleAttack(attackFromOption, selectedAttack)
+                || shouldDisableTripleAttack(attackFromOption, selectedAttack)
+            ) {
+                o.disabled = true
             }
         }
 
@@ -648,73 +644,6 @@ export function getTokenDistanceInSquares(source, target) {
     let squareSize = source.scene.dimensions.size;
 
     return Math.max(xDiff, yDiff) / squareSize;
-}
-
-export function getRangeModifierBlock(range, accurate, innacurate, id, defaultValue) {
-    if (range === 'Grenades') {
-        range = 'Thrown Weapons'
-    }
-
-    //For now, standardize 'treated as' groups
-    for (let rangedGroup of weaponGroup["Ranged Weapons"]) {
-        if (rangedGroup.includes(range)) {
-            range = rangedGroup;
-            break;
-        }
-    }
-
-    let table = document.createElement("table");
-    let thead = table.appendChild(document.createElement("thead"));
-    let tbody = table.appendChild(document.createElement("tbody"));
-
-    let firstHeader = thead.appendChild(document.createElement("tr"));
-    let secondHeader = thead.appendChild(document.createElement("tr"));
-    let radioButtons = tbody.appendChild(document.createElement("tr"));
-    let selected = !defaultValue;
-
-    for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
-        let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
-        if (accurate && rangeName === 'short') {
-            rangePenaltyElement = 0;
-        }
-        if (innacurate && rangeName === 'long') {
-            continue;
-        }
-        let th1 = firstHeader.appendChild(document.createElement("th"));
-
-        let r1Div = th1.appendChild(document.createElement("div"));
-        r1Div.classList.add("swse", "padding-3", "center")
-        r1Div.innerText = `${rangeName.titleCase()} (${rangePenaltyElement})`;
-
-        let th2 = secondHeader.appendChild(document.createElement("th"));
-
-        let rangeValue = th2.appendChild(document.createElement("div"));
-        rangeValue.classList.add("swse", "padding-3", "center")
-        rangeValue.innerText = `${rangeIncrement.string.titleCase()}`;
-
-        let td = radioButtons.appendChild(document.createElement("td"));
-
-        let radioButtonDiv = td.appendChild(td.appendChild(document.createElement("div")));
-        radioButtonDiv.classList.add("swse", "center")
-
-        let label = radioButtonDiv.appendChild(document.createElement("label"));
-        label.setAttribute("for", `range-${rangeName}`);
-
-        let input = radioButtonDiv.appendChild(document.createElement("input"));
-        input.classList.add("modifier", "center", "swse", "attack-modifier");
-        input.setAttribute("type", "radio");
-        input.setAttribute("id", `range-${rangeName}`);
-        input.setAttribute("name", `range-selection-${id}`);
-        input.setAttribute("value", `${rangePenaltyElement}`);
-
-        input.dataset.source = "Range Modifier";
-        if (selected || rangeName === defaultValue) {
-            input.setAttribute("checked", true);
-            selected = false;
-        }
-    }
-
-    return table;
 }
 
 const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE, 6];
@@ -1232,12 +1161,13 @@ export function fullJoin(...args) {
 /**
  * accepts an actor, item, or effect.  returns embeded entities that may have changes.
  * @param entity
- * @returns {*|*[]}
+ * @param type
+ * @returns {SWSEItem[]}
  */
-export function equippedItems(entity) {
+export function equippedItems(entity, type) {
     let entities = [];
     if (entity.items) {
-        entities.push(...entity.items?.filter(item => !!item.system.equipped))
+        entities.push(...entity.items?.filter(item => !!item.system.equipped && (!type || item.type === type)))
     }
     return entities;
 }

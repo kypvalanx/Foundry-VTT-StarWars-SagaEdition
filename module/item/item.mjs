@@ -778,7 +778,7 @@ export class SWSEItem extends Item {
         this.setStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire());
 
         this.setStripping('stripStun', "Strip Stun", this.canStripStun());
-        system.isBaseExotic = this.isExotic();
+        system.isBaseExotic = this.isExotic;
         this.setStripping('stripDesign', "Make Exotic", !system.isBaseExotic);
 
         let size = system.size;
@@ -1183,7 +1183,7 @@ export class SWSEItem extends Item {
         }).length > 0;
     }
 
-    isExotic() {
+    get isExotic() {
         return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.subType);
     }
 

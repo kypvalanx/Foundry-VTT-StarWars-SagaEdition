@@ -6,6 +6,18 @@
   background: var(--color-background);
 }
 
+.dialog .dialog-buttons button.default {
+  background: var(--color-foreground);
+}
+
+.dialog .dialog-buttons button {
+  background: var(--color-foreground);
+}
+
+.dialog .dialog-buttons {
+  flex-grow: 0;
+}
+
 .rollable {
   &:hover,
   &:focus {
