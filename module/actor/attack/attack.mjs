@@ -341,39 +341,8 @@ export class Attack {
         }
 
         if (isMelee(item)) {
-            let abilityMod = parseInt(actor.system.attributes.str.mod);
-            let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
-            let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
-
-            if (isMySize) {
-                let grips = getInheritableAttribute({
-                    entity: item,
-                    attributeKey: "grip",
-                    reduce: "VALUES"
-                })
-
-                if (grips.includes("two handed")) {
-                    isTwoHanded = true;
-                }
-            }
-
-            if (isLightsaber(item)) {
-                let abilitySelect = getInheritableAttribute({
-                    entity: actor,
-                    attributeKey: "lightsabersDamageStat",
-                    reduce: "VALUES"
-                })[0]
-                if (abilitySelect) {
-                    abilitySelect = abilitySelect.toLowerCase();
-                    const abilities = ["str", "dex", "con", "int", "wis", "cha"];
-                    if (abilities.includes(abilitySelect)) {
-                        let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
-                        abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod : abilityMod;
-                    }
-                }
-            }
-
-            terms.push(...appendNumericTerm(isTwoHanded ? abilityMod * 2 : abilityMod, "Attribute Modifier"))
+            const meleeDamageAbilityModifier = this.getMeleeDamageAbilityModifier(actor, item);
+            terms.push(...meleeDamageAbilityModifier)
         }
 
         let weaponTypes = getPossibleProficiencies(actor, item);
@@ -395,6 +364,46 @@ export class Attack {
         roll.alter(1, toNumber(bonusDamageDice));
 
         return new SWSERollWrapper(roll);
+    }
+
+    getMeleeDamageAbilityModifier(actor, item) {
+        let abilityMod = parseInt(actor.system.attributes.str.mod);
+        let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
+        let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
+
+        if (isMySize) {
+            let grips = getInheritableAttribute({
+                entity: item,
+                attributeKey: "grip",
+                reduce: "VALUES"
+            })
+
+            if (grips.includes("two handed")) {
+                isTwoHanded = true;
+            }
+            if (abilityMod < 1) {
+                isTwoHanded = false;
+            }
+        }
+
+        if (isLightsaber(item)) {
+            let abilitySelect = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "lightsabersDamageStat",
+                reduce: "VALUES"
+            })[0]
+            if (abilitySelect) {
+                abilitySelect = abilitySelect.toLowerCase();
+                const abilities = ["str", "dex", "con", "int", "wis", "cha"];
+                if (abilities.includes(abilitySelect)) {
+                    let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
+                    abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod : abilityMod;
+                }
+            }
+        }
+
+        const meleeDamageAbilityModifier = appendNumericTerm(isTwoHanded ? Math.max(abilityMod * 2, abilityMod) : abilityMod, "Attribute Modifier");
+        return meleeDamageAbilityModifier;
     }
 
     getRangeModifierBlock(id) {
