@@ -406,20 +406,13 @@ export class Attack {
         return meleeDamageAbilityModifier;
     }
 
-    getRangeModifierBlock(id) {
+    getRangeModifierBlock() {
         let range = this.effectiveRange;
         const accurate =this.isAccurate;
         const inaccurate = this.isInaccurate
         const defaultValue = this.rangedAttackModifier
 
-
-
         let rollModifier = RollModifier.createOption("attack", "Range Modifier");
-
-
-
-        //let selected = !defaultValue;
-
 
         for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
             let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
@@ -430,41 +423,9 @@ export class Attack {
                 continue;
             }
             rollModifier.addChoice(new RollModifierChoice(`${rangeName} ${rangeIncrement.string} ${rangePenaltyElement}`, rangePenaltyElement, rangeName === defaultValue));
-            // let th1 = firstHeader.appendChild(document.createElement("th"));
-            //
-            // let r1Div = th1.appendChild(document.createElement("div"));
-            // r1Div.classList.add("swse", "padding-3", "center")
-            // r1Div.innerText = `${rangeName.titleCase()} (${rangePenaltyElement})`;
-            //
-            // let th2 = secondHeader.appendChild(document.createElement("th"));
-            //
-            // let rangeValue = th2.appendChild(document.createElement("div"));
-            // rangeValue.classList.add("swse", "padding-3", "center")
-            // rangeValue.innerText = `${rangeIncrement.string.titleCase()}`;
-            //
-            // let td = radioButtons.appendChild(document.createElement("td"));
-            //
-            // let radioButtonDiv = td.appendChild(td.appendChild(document.createElement("div")));
-            // radioButtonDiv.classList.add("swse", "center")
-            //
-            // let label = radioButtonDiv.appendChild(document.createElement("label"));
-            // label.setAttribute("for", `range-${rangeName}`);
-            //
-            // let input = radioButtonDiv.appendChild(document.createElement("input"));
-            // input.classList.add("modifier", "center", "swse", "attack-modifier");
-            // input.setAttribute("type", "radio");
-            // input.setAttribute("id", `range-${rangeName}`);
-            // input.setAttribute("name", `range-selection-${id}`);
-            // input.setAttribute("value", `${rangePenaltyElement}`);
-            //
-            // input.dataset.source = "Range Modifier";
-            // if (selected || rangeName === defaultValue) {
-            //     input.setAttribute("checked", true);
-            //     selected = false;
-            // }
         }
 
-        return rollModifier;
+        return rollModifier.hasChoices() ? [rollModifier] : [];
     }
 
     get effectiveRange() {
@@ -686,8 +647,7 @@ export class Attack {
      */
     get modifierOptions() {
         let modifiers = [];
-        let uniqueId = Math.floor(Math.random() * 50000 + Math.random() * 50000)
-        modifiers.push(this.getRangeModifierBlock(uniqueId));
+        modifiers.push(...this.getRangeModifierBlock());
         modifiers.push(RollModifier.createTextModifier("attack", "Miscellaneous Attack Bonus"));
         modifiers.push(RollModifier.createTextModifier("damage", "Miscellaneous Damage Bonus"));
         return modifiers

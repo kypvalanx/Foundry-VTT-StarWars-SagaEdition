@@ -100,6 +100,10 @@ export class RollModifier{
     addChoice(choice) {
         this.choices.push(choice);
     }
+
+    hasChoices() {
+        return this.choices.length > 0;
+    }
 }
 
 export class RollModifierChoice{

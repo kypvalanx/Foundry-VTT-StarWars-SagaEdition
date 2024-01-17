@@ -289,7 +289,7 @@ function getAttackButton(dualWeaponModifier) {
         label: "Attack",
         callback: (html) => {
             let attacks = [];
-            let attackBlocks = html.find(".attack-block");
+            let attackBlocks = html.find(".attack");
             let selects = html.find(".attack-name");
             let attackMods = getAttackMods(selects, dualWeaponModifier);
             let damageMods = [];
