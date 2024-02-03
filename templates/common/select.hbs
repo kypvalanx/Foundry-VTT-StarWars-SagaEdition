@@ -1,6 +1,6 @@
 <select class="{{classes}}">
     {{#if includeDefault}}<option value="--">--</option>{{/if}}
     {{#each options as |option id|}}
-        <option{{#each option.attributes as |attribute id|}} {{attribute.key}}={{attribute.value}}{{/each}} {{#ifEquals option.name ../selected}}selected{{/ifEquals}}>{{option.name}}</option>
+        <option{{#each option.attributes as |attribute id|}} {{attribute.key}}={{attribute.value}}{{/each}} {{#ifEquals option.name ../selected}}selected{{/ifEquals}} value={{option.value}}>{{option.name}}</option>
     {{/each}}
 </select>

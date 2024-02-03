@@ -289,8 +289,8 @@ function getAttackButton(dualWeaponModifier) {
         label: "Attack",
         callback: (html) => {
             let attacks = [];
-            let attackBlocks = html.find(".attack");
-            let selects = html.find(".attack-name");
+            let attackBlocks = html.find(".attack.panel");
+            let selects = html.find("select.attack-id");
             let attackMods = getAttackMods(selects, dualWeaponModifier);
             let damageMods = [];
             for (let attackBlock of attackBlocks) {
@@ -316,7 +316,7 @@ function getSaveMacroButton(dualWeaponModifier, actor) {
         callback: (html) => {
             let attacks = [];
             let attackBlocks = html.find(".attack-block");
-            let selects = html.find("select");
+            let selects = html.find("select.attack-id")
             let attackMods = getAttackMods(selects, dualWeaponModifier);
             let damageMods = [];
             for (let attackBlock of attackBlocks) {
@@ -514,10 +514,10 @@ function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
 
     let attackModifiers = getModifiersFromContextAndInputs($(attackBlock), ".attack-modifier", attackMods);
     attackModifiers.forEach(modifier => modifier.type = 'attack');
+    attack.withModifiers(attackModifiers);
+
     let damageModifiers = getModifiersFromContextAndInputs($(attackBlock), ".damage-modifier", damageMods);
     damageModifiers.forEach(modifier => modifier.type = 'damage');
-
-    attack.withModifiers(attackModifiers);
     attack.withModifiers(damageModifiers);
 
     return attack;

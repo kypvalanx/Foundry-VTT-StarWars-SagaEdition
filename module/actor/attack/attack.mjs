@@ -752,7 +752,7 @@ export class Attack {
     }
 
 get summary(){
-        return {attributes:[{key:"value", value:this.toJSONString}, {key:"data-item-id", value: this.itemId}], attackString:this.toJSONString, item:this.itemId, name:this.name}
+        return {attributes:[{key:"value", value:this.toJSONString}, {key:"data-item-id", value: this.itemId}], value:this.toJSONString, item:this.itemId, name:this.name}
 }
     attackOption(attack, id) {
         let attackString = attack.toJSONString
