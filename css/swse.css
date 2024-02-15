@@ -427,7 +427,27 @@
   flex-grow: 1;
 }
 
-.swse .labeled-input label {
+.swse .labeled-input-row {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  height: -webkit-fit-content;
+  height: -moz-fit-content;
+  height: fit-content;
+  position: relative;
+  -webkit-box-flex: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+}
+
+.swse .labeled-input > label, .swse .labeled-input-row > label {
   font-size: 0.75rem;
   color: var(--color-foreground);
   font-weight: 700;

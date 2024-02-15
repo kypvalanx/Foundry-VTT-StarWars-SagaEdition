@@ -144,7 +144,16 @@
   flex-grow: 1;
 }
 
-.labeled-input label{
+.labeled-input-row {
+   display: flex;
+   flex-direction: row;
+   width: fit-content;
+   height: fit-content;
+   position: relative;
+   flex-grow: 1;
+ }
+
+.labeled-input > label, .labeled-input-row > label{
   font-size: 0.75rem;
   color: var(--color-foreground);
   font-weight: 700;

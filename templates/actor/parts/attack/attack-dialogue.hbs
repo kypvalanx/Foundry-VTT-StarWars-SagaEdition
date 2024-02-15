@@ -1,5 +1,8 @@
 <div class="swse flex flex-col">
-    <h3>Select Attacks:</h3>
+    <div class="swse flex flex-row">
+        <h3>Select Attacks:</h3>
+        <div class="handedness-indicator"></div>
+    </div>
     {{#each selectedAttacks as |selectedAttack id|}}
         {{> 'systems/swse/templates/actor/parts/attack/attack-dialogue-single-attack.hbs' selectedAttack=selectedAttack availableAttacks=../availableAttacks}}
     {{/each}}

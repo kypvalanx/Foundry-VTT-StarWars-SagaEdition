@@ -100,6 +100,7 @@ export class AttackDelegate {
         const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails(attackType);
         let blockHeight = 225;
         let height = attackCount * blockHeight + 85
+        let hands = 2;
 
         //{
         //  title: "Test Dialog",
@@ -143,6 +144,7 @@ export class AttackDelegate {
                     let context = {};
                     context.attackMods = getAttackMods(selects, dualWeaponModifier);
                     context.damageMods = [];
+                    context.handMods = getHandMods(selects);
                     html.find(".attack-id").each((i, div) => populateItemStats(div, context));
                 })
             }
@@ -456,6 +458,18 @@ function getAttackMods(selects, dualWeaponModifier) {
     attackMods.forEach(attack => attack.type = "attack");
     return attackMods
 }
+function getHandMods(selects) {
+    let handsMods = []
+    for (const select of selects) {
+        const parent = $(select).parents(".attack");
+        const hands = parent.find(".hands-modifier");
+        hands.value
+        handsMods.push({value: hands.value, source: "Hands Modifier", type: "hands"});
+    }
+
+
+    return handsMods
+}
 
 function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
     let bonuses = [];
@@ -480,6 +494,7 @@ function setAttackPreviewValues(preview, attack, attackConfigOptionFields, conte
 }
 
 function populateItemStats(html, context) {
+    //context.handMods
     let value = html.value || $(html).data("value");
 
     if (value === "--") {
@@ -499,6 +514,8 @@ function populateItemStats(html, context) {
     options.find(".attack-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".hands-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".hands-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
 
     setAttackPreviewValues(total, attack, options, context);
 }

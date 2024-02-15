@@ -406,6 +406,29 @@ export class Attack {
         return meleeDamageAbilityModifier;
     }
 
+    getHandednessModifier() {
+        const compare = compareSizes(getSize(this.actor), getSize(this.item));
+        let isTwoHanded = compare === 1;
+        let isMySize = compare === 0;
+
+        let rollModifier = RollModifier.createRadio("hands", "Handedness");
+
+        if(!isTwoHanded){
+            const rollModifierChoice = new RollModifierChoice(`1 Hand`, 1, !isTwoHanded && !isMySize);
+            rollModifierChoice.icon = "fa-hand";
+            rollModifier.addChoice(rollModifierChoice);
+
+        }
+
+        if(isTwoHanded || isMySize){
+            const rollModifierChoice1 = new RollModifierChoice(`2 Hand`, 2, isTwoHanded || isMySize);
+            rollModifierChoice1.icon = "fa-hands";
+            rollModifier.addChoice(rollModifierChoice1);
+        }
+
+        return rollModifier.hasChoices() ? [rollModifier] : [];
+    }
+
     getRangeModifierBlock() {
         let range = this.effectiveRange;
         const accurate =this.isAccurate;
@@ -647,6 +670,7 @@ export class Attack {
      */
     get modifierOptions() {
         let modifiers = [];
+        modifiers.push(...this.getHandednessModifier())
         modifiers.push(...this.getRangeModifierBlock());
         modifiers.push(RollModifier.createTextModifier("attack", "Miscellaneous Attack Bonus"));
         modifiers.push(RollModifier.createTextModifier("damage", "Miscellaneous Damage Bonus"));
