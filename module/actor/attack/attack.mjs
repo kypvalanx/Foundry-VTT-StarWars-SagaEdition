@@ -295,6 +295,7 @@ export class Attack {
         return !attributes ? 0 : attributes[toShortAttribute(attributeName).toLowerCase()].mod;
     }
 
+
     get damageRoll() {
         let actor = this.actor
         let item = this.item
@@ -368,7 +369,7 @@ export class Attack {
 
     getMeleeDamageAbilityModifier(actor, item) {
         let abilityMod = parseInt(actor.system.attributes.str.mod);
-        let isTwoHanded = compareSizes(getSize(actor), getSize(item)) === 1;
+        let isTwoHanded = this.hands === 2 || compareSizes(getSize(actor), getSize(item)) === 1;
         let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
 
         if (isMySize) {
@@ -411,7 +412,7 @@ export class Attack {
         let isTwoHanded = compare === 1;
         let isMySize = compare === 0;
 
-        let rollModifier = RollModifier.createRadio("hands", "Handedness");
+        let rollModifier = RollModifier.createRadio("hands", "Handedness", this.item.id);
 
         if(!isTwoHanded){
             const rollModifierChoice = new RollModifierChoice(`1 Hand`, 1, !isTwoHanded && !isMySize);

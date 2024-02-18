@@ -100,7 +100,7 @@ export class AttackDelegate {
         const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails(attackType);
         let blockHeight = 225;
         let height = attackCount * blockHeight + 85
-        let hands = 2;
+        context.availableHands = 2;
 
         //{
         //  title: "Test Dialog",
@@ -128,24 +128,16 @@ export class AttackDelegate {
             title: getAttackWindowTitle(context),
             content: await this.getAttackDialogueContent(attackCount, attacksFromContext, doubleAttack, tripleAttack),
             buttons: {
-                attack: getAttackButton(dualWeaponModifier),
+                attack: getAttackButton(dualWeaponModifier, context.availableHands),
                 saveMacro: getSaveMacroButton(dualWeaponModifier, this.actor)
             },
             default: "attack",
             render: (html) => {
                 let selects = html.find("select.attack-id");
-                //selects.on("change", () => handleAttackSelect(selects));
-                handleAttackSelect(selects)
-
-                selects.each((i, div) => populateItemStats(div, context));
-
+                context.dialog = html;
+                this.updateAttackDialog(selects, context, dualWeaponModifier, html);
                 selects.on("change", () => {
-                    handleAttackSelect(selects)
-                    let context = {};
-                    context.attackMods = getAttackMods(selects, dualWeaponModifier);
-                    context.damageMods = [];
-                    context.handMods = getHandMods(selects);
-                    html.find(".attack-id").each((i, div) => populateItemStats(div, context));
+                    this.updateAttackDialog(selects, context, dualWeaponModifier, html);
                 })
             }
         };
@@ -162,6 +154,14 @@ export class AttackDelegate {
             new Dialog(data, options).render(true);
         }
     }
+
+    updateAttackDialog(selects, context, dualWeaponModifier, html) {
+        handleAttackSelect(selects)
+        context.attackMods = getAttackMods(selects, dualWeaponModifier);
+        context.damageMods = [];
+        selects.each((i, div) => populateItemStats(div, context));
+    }
+
     getAttackDetails(attackType) {
         let doubleAttack = [];
         let tripleAttack = [];
@@ -286,7 +286,7 @@ function getAttackWindowTitle(context) {
     return "Single Attack";
 }
 
-function getAttackButton(dualWeaponModifier) {
+function getAttackButton(dualWeaponModifier, availableHands) {
     return {
         label: "Attack",
         callback: (html) => {
@@ -305,8 +305,8 @@ function getAttackButton(dualWeaponModifier) {
             for (const attack of attacks) {
                 attack.reduceAmmunition()
             }
-
-            createAttackChatMessage(attacks, undefined).then(() => {
+            const hands = getHandsFromAttackOptions(html);
+            createAttackChatMessage(attacks, undefined, hands, availableHands).then(() => {
             });
         }
     };
@@ -458,16 +458,14 @@ function getAttackMods(selects, dualWeaponModifier) {
     attackMods.forEach(attack => attack.type = "attack");
     return attackMods
 }
-function getHandMods(selects) {
+function getHandMods(html) {
     let handsMods = []
-    for (const select of selects) {
-        const parent = $(select).parents(".attack");
-        const hands = parent.find(".hands-modifier");
-        hands.value
-        handsMods.push({value: hands.value, source: "Hands Modifier", type: "hands"});
+    const hands = html.find(".hands-modifier");
+    for(const hand of hands){
+        if(hand.checked){
+            handsMods.push({value: hand.value, source: hand.name, type: "hands"});
+        }
     }
-
-
     return handsMods
 }
 
@@ -485,11 +483,24 @@ function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
     return bonuses;
 }
 
-function setAttackPreviewValues(preview, attack, attackConfigOptionFields, context) {
-    preview.empty();
+function getHandsFromAttackOptions(options) {
+    let hands = 0;
+    options.find(".hands-modifier").each((i, option) => {
+        if ((option.type === "radio" || option.type === "checkbox") && option.checked) {
+            hands += parseInt(option.value);
+        }
+    })
+    return hands;
+}
 
-    let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(attackConfigOptionFields, ".damage-modifier", context.damageMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
-    let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(attackConfigOptionFields, ".attack-modifier", context.attackMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+function setAttackPreviewValues(preview, attack, options, context) {
+
+    populateHandsIndicator(context.dialog, context.availableHands)
+
+    preview.empty();
+    attack.hands = getHandsFromAttackOptions(options);
+    let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(options, ".damage-modifier", context.damageMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+    let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(options, ".attack-modifier", context.attackMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
     preview.append(`<div class="flex flex-col"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
 }
 
@@ -514,10 +525,23 @@ function populateItemStats(html, context) {
     options.find(".attack-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
     options.find(".damage-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
-    options.find(".hands-modifier").on("change", () => setAttackPreviewValues(total, attack, options, context))
-    options.find(".hands-modifier").on("submit", () => setAttackPreviewValues(total, attack, options, context))
+    options.find(".hands-modifier").on("click", () => setAttackPreviewValues(total, attack, options, context))
 
     setAttackPreviewValues(total, attack, options, context);
+}
+
+
+function populateHandsIndicator(html, availableHands) {
+
+    let handMods = getHandMods(html);
+    const items = [];
+    let usedHands = handMods.reduce((previousValue, currentValue) => {
+        const total = previousValue + items.includes(currentValue.source) ? 0 : parseInt(currentValue.value);
+        items.push(currentValue.source)
+        return total}, 0)
+    let total = $(html).find(".handedness-indicator");
+    total.empty();
+    total.append(`${usedHands}/${availableHands}`)
 }
 
 function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
@@ -536,6 +560,14 @@ function createAttackFromAttackBlock(attackBlock, attackMods, damageMods) {
     let damageModifiers = getModifiersFromContextAndInputs($(attackBlock), ".damage-modifier", damageMods);
     damageModifiers.forEach(modifier => modifier.type = 'damage');
     attack.withModifiers(damageModifiers);
+
+    // let handednessModifiers = getModifiersFromContextAndInputs($(attackBlock), ".hands-modifier", damageMods);
+    // handednessModifiers.forEach(modifier => modifier.type = 'hand');
+    // attack.withModifiers(handednessModifiers);
+
+    const options = $(attackBlock).find(".attack-options")[0]
+
+    attack.hands = getHandsFromAttackOptions($(options));
 
     return attack;
 }
@@ -635,7 +667,7 @@ function resolveAttack(attack, targetActors) {
     };
 }
 
-export async function createAttackChatMessage(attacks, rollMode) {
+export async function createAttackChatMessage(attacks, rollMode, hands, availableHands) {
     let targetTokens = game.user.targets
     let targetActors = [];
     for (let targetToken of targetTokens.values()) {
@@ -659,6 +691,10 @@ export async function createAttackChatMessage(attacks, rollMode) {
     }
 
     let content = `${attackRows.join("<br>")}`;
+
+    if(hands > availableHands){
+        content = `<div class="warning">${hands} hands used out of a possible ${availableHands}</div><br>` + content;
+    }
 
     let speaker = ChatMessage.getSpeaker({actor: attacks[0].actor});
 

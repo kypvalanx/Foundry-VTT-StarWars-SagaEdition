@@ -7,22 +7,23 @@ export class RollModifier{
      * @param source
      * @param {RollModifierChoice[]} choices
      */
-    constructor(type, roll, source, CSSClasses = [], choices = []) {
+    constructor(type, roll, source, id) {
         this.type = type;
         this.roll = roll;
-        this.CSSClasses = CSSClasses;
+        this.CSSClasses = [];
         this.source = source;
-        this.choices = choices;
+        this.choices = [];
+        this.id = id;
     }
 
-    static createOption(roll, source) {
-        return new RollModifier("option", roll, source);
+    static createOption(roll, source, id) {
+        return new RollModifier("option", roll, source, id);
     }
-    static createRadio(roll, source) {
-        return new RollModifier("radio", roll, source);
+    static createRadio(roll, source, id) {
+        return new RollModifier("radio", roll, source, id);
     }
-    static createTextModifier(roll, source) {
-        return new RollModifier("text", roll, source);
+    static createTextModifier(roll, source, id) {
+        return new RollModifier("text", roll, source, id);
     }
 
     /**
@@ -32,7 +33,17 @@ export class RollModifier{
     get classes(){
         let classes = []
         classes.push(...this.CSSClasses);
-        classes.push(this.roll === "attack" ? "attack-modifier" : "damage-modifier");
+        switch (this.roll) {
+            case "attack":
+                classes.push("attack-modifier");
+                break;
+            case "damage":
+                classes.push("damage-modifier");
+                break;
+            case "hands":
+                classes.push("hands-modifier");
+                break;
+        }
         return classes;
     }
 
@@ -116,7 +127,8 @@ export class RollModifier{
      * @returns {HTMLDivElement}
      */
     createRadioModifierHTML(modifier) {
-        const name = `${this.id}`
+        let random = Math.random();
+        const name = `${this.id}_${random}`
         const inputs = [];
         let i = 0;
         for (const choice of modifier.choices) {
@@ -131,6 +143,7 @@ export class RollModifier{
             const label = document.createElement("label");
             label.for = id;
             label.innerHTML = choice.display;
+            radio.classList.add(modifier.classes)
 
             const div = document.createElement("div");
             div.appendChild(radio);
