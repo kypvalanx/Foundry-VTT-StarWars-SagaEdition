@@ -156,14 +156,18 @@ function resolveMultiplicativeExpression(expression, actor) {
             }
             const first = resolveExpression(toks[i - 1], actor);
             const second = resolveExpression(toks[i + 1], actor);
-            if (toks[i] === "*" || toks[i] === "x") {
-                toks[i] = first * second;
-            } else {
-                toks[i] = first / second;
+
+            if (!isNaN(first) && !isNaN(second)) {
+                if (toks[i] === "*" || toks[i] === "x") {
+                    toks[i] = first * second;
+                } else {
+                    toks[i] = first / second;
+                }
+                toks[i - 1] = "";
+                toks[i + 1] = "";
+                return resolveExpression(toks.join(""), actor)
             }
-            toks[i - 1] = "";
-            toks[i + 1] = "";
-            return resolveExpression(toks.join(""), actor)
+            return expression;
         }
     }
 }
@@ -244,7 +248,7 @@ export function resolveExpression(expression, actor) {
 
     //exponents would be evaluated here if we wanted to do that.
 
-    if (expression.includes("*") || expression.includes("/")) {
+    if (expression.includes("*")) {
         return resolveMultiplicativeExpression(expression, actor);
     }
 
@@ -652,7 +656,7 @@ const quantityPattern = new RegExp('(.+):(.+)');
 const diePattern = new RegExp('(\\d+)d(\\d+)x?(\\d?)');
 
 function resolveValue(a) {
-    if(a === undefined){
+    if(a === undefined || a === 0){
         return [];
     }
     if(Array.isArray(a)){
@@ -1089,6 +1093,10 @@ export function getCompendium(item) {
             return game.packs.filter(pack => pack.collection.startsWith("swse.destinies"));
         case 'language':
             return game.packs.filter(pack => pack.collection.startsWith("swse.languages"));
+        case 'weapon':
+            return game.packs.filter(pack => pack.collection.startsWith("swse.weapons"));
+        case 'armor':
+            return game.packs.filter(pack => pack.collection.startsWith("swse.armor"));
     }
     return [];
 }

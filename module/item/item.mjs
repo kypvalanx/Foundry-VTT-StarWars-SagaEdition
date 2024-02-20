@@ -44,9 +44,9 @@ export class SWSEItem extends Item {
         } else{
             this.system.changes = this.system.changes || []
         }
-        if(this.updateLegacyItem()){
-            return;
-        }
+        // if(this.updateLegacyItem()){
+        //     return;
+        // }
 
         this.cache = new SimpleCache();
         if(this.system.displayName){
