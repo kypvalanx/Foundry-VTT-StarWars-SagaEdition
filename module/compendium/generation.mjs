@@ -104,7 +104,7 @@ async function importCompendium(jsonImport, forceRefresh) {
             }
 
 
-            await actor.delete();
+            //await actor.delete();
         }
     }
     // await pack.createEntity(content.entries);
