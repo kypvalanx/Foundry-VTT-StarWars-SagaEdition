@@ -2797,9 +2797,6 @@ export class SWSEActor extends Actor {
                     entity.system.possibleProviders.push(`${charClass} Starting Feats`)
                 }
             }
-            if(entity.name === 'Bonus Feat' && payload === undefined){
-                SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
-            }
             if(entity.name === 'Skill Training' && payload === undefined && options.isUpload){
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
@@ -2810,6 +2807,9 @@ export class SWSEActor extends Actor {
             if(entity.name === 'Bonus Trained Skill' && payload === undefined && options.isUpload){
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
+            }
+            if(entity.name === 'Bonus Feat' && !payload){
+                SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
             }
         }
 
