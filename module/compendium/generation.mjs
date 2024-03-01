@@ -84,7 +84,9 @@ async function importCompendium(jsonImport, forceRefresh) {
             for(let effect of item.effects){
                 for(let link of effect.flags.swse.linkData || []){
                     let groupedEffects = item.effects.filter(effect => effect.flags.swse.group === link.group)
-                    groupedEffects.forEach(e => e.addLinks(effect, link.type.toLowerCase()))
+                    for (const e of groupedEffects) {
+                        await e.addLinks(effect, link.type.toLowerCase());
+                    }
                     console.log(effect)
                 }
                 //delete effect.flags.swse.linkData

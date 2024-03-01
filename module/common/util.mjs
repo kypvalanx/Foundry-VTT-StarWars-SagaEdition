@@ -1048,55 +1048,65 @@ export function reduceArray(reduce, values, actor) {
  * @param item
  */
 export function getCompendium(item) {
-    if (item.pack) {
-        return game.packs.filter(pack => pack.collection.startsWith(item.pack));
+    let type = null;
+    const packs = [];
+    packs.push(...game.packs.filter(p => true));
+    //packs.push(...game.world.packs.filter(p => true))
+    if(typeof item === "string"){
+        type = item.toLowerCase();
+    } else {
+        if (item.pack) {
+            return packs.filter(pack => pack.collection.startsWith(item.pack));
+        }
+        type = item.type.toLowerCase();
     }
-    switch (item.type.toLowerCase()) {
+
+    switch (type) {
         case 'item':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.items")
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.items")
                 || pack.collection.startsWith("swse.armor") || pack.collection.startsWith("swse.weapons")
                 || pack.collection.startsWith("swse.equipment") || pack.collection.startsWith("swse.hazard")
                 || pack.collection.startsWith("swse.implant") || pack.collection.startsWith("swse.droid systems"));
         case 'trait':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.traits"));
+            return packs.filter(pack => pack.collection.startsWith("swse.traits"));
         case 'feat':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.feats"));
+            return packs.filter(pack => pack.collection.startsWith("swse.feats"));
         case 'species':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.species"));
+            return packs.filter(pack => pack.collection.startsWith("swse.species"));
         case 'talent':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.talents"));
+            return packs.filter(pack => pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle templates"));
+            return packs.filter(pack => pack.collection.startsWith("swse.vehicle templates"));
         case 'vehiclebasetype':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle base types"));
+            return packs.filter(pack => pack.collection.startsWith("swse.vehicle base types"));
         case 'vehiclesystem':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.vehicle systems"));
+            return packs.filter(pack => pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.templates"));
+            return packs.filter(pack => pack.collection.startsWith("swse.templates"));
         case 'affiliation':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.affiliations"));
+            return packs.filter(pack => pack.collection.startsWith("swse.affiliations"));
         case 'class':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.classes"));
+            return packs.filter(pack => pack.collection.startsWith("swse.classes"));
         case 'forceregimen':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.force regimens"));
+            return packs.filter(pack => pack.collection.startsWith("swse.force regimens"));
         case 'forcepower':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.force powers"));
+            return packs.filter(pack => pack.collection.startsWith("swse.force powers"));
         case 'forcesecret':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.force secrets"));
+            return packs.filter(pack => pack.collection.startsWith("swse.force secrets"));
         case 'forcetechnique':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.force techniques"));
+            return packs.filter(pack => pack.collection.startsWith("swse.force techniques"));
         case 'beasttype':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.beast components"));
+            return packs.filter(pack => pack.collection.startsWith("swse.beast components"));
         case 'background':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.background"));
+            return packs.filter(pack => pack.collection.startsWith("swse.background"));
         case 'destiny':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.destinies"));
+            return packs.filter(pack => pack.collection.startsWith("swse.destinies"));
         case 'language':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.languages"));
+            return packs.filter(pack => pack.collection.startsWith("swse.languages"));
         case 'weapon':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.weapons"));
+            return packs.filter(pack => pack.collection.startsWith("swse.weapons"));
         case 'armor':
-            return game.packs.filter(pack => pack.collection.startsWith("swse.armor"));
+            return packs.filter(pack => pack.collection.startsWith("swse.armor"));
     }
     return [];
 }
@@ -1482,6 +1492,23 @@ export function getDocumentByUuid(uuid) {
         } else if (tok === "Item") {
             if (i === 0) {
                 source = game.items;
+                if(!source.get(toks[i+1])){
+                    let compendiums = getCompendium("item");
+                    let item;
+                    for(let compendium of compendiums){
+                        if(compendium.find){
+                            item = compendium.find(item => item.id === toks[i+1]);
+                        }else{
+                            console.log("huh?")
+                            compendium.get(toks[i+1])
+                        }
+                        if(item) break;
+                    }
+                    if(item){
+                        source = {}
+                        source[toks[i+1]] = item;
+                    }
+                }
                 continue;
             }
             source = source.items;

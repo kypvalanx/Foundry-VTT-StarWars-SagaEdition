@@ -30,51 +30,58 @@ export class SWSEActiveEffect extends ActiveEffect {
     _onDelete(options, userId) {
         super._onDelete(options, userId);
         for(let link of this.links){
-            let doc = getDocumentByUuid(link.uuid);
-            doc.removeLink(this.uuid);
+            let doc = this.getSiblingEffectByName(link.name);
+            if(doc){
+                doc.removeLink(this.name);
+            }
         }
     }
 
-    deleteReciprocalLinks(uuid){
-        let doc2 = getDocumentByUuid(uuid);
-        this.removeLink(uuid)
-        doc2.removeLink(this.uuid)
+    getSiblingEffectByName(name) {
+        return this.parent.effects.find(e => e.name === name);
     }
 
-    addLink(type, effect){
-        let uuid = effect.uuid;
-        let links = this.flags.swse?.links || [];
-        links = links.filter(link => link.uuid !== uuid);
-        links.push({uuid, type, name:effect.name});
-        let data = {"flags.swse.links": links};
-        this.safeUpdate(data);
+    deleteReciprocalLinks(name){
+        let doc = this.getSiblingEffectByName(name);
+        //let doc2 = getDocumentByUuid(uuid);
+        this.removeLink(name)
+        doc.removeLink(this.name)
     }
-    addLinks(that, type){
+    async addLinks(that, type){
         switch (type) {
             case "parent":
-                this.addLink("child", that)
-                that.addLink("parent", this)
+                await this.addLink("child", that)
+                await that.addLink("parent", this)
                 break;
             case "child":
-                this.addLink("parent", that)
-                that.addLink("child", this)
+                await this.addLink("parent", that)
+                await that.addLink("child", this)
                 break;
             case "mirror":
-                this.addLink("mirror", that)
-                that.addLink("mirror", this)
+                await this.addLink("mirror", that)
+                await that.addLink("mirror", this)
                 break;
             case "exclusive":
-                this.addLink("exclusive", that)
-                that.addLink("exclusive", this)
+                await this.addLink("exclusive", that)
+                await that.addLink("exclusive", this)
                 break;
         }
     }
 
-    removeLink(uuid){
+    removeLink(name){
         let links = this.flags.swse?.links || [];
-        links = links.filter(link => link.uuid !== uuid);
+        links = links.filter(link => link.name !== name);
         let data = {"flags.swse.links": links};
         this.safeUpdate(data);
+    }
+
+    async addLink(type, effect){
+        //let uuid = effect.uuid;
+        let links = this.flags.swse?.links || [];
+        links = links.filter(link => link.name !== effect.name);
+        links.push({type, name:effect.name});
+        let data = {"flags.swse.links": links};
+        await this.safeUpdate(data);
     }
 
     disable(disabled, affected = []){
@@ -83,11 +90,11 @@ export class SWSEActiveEffect extends ActiveEffect {
         }
         for(let link of this.links){
             if(link.type === "exclusive" && !disabled){
-                let doc = getDocumentByUuid(link.uuid)
+                let doc = this.getSiblingEffectByName(link.name)
                 affected.push(this.id)
                 doc.disable(true, affected)
             } else if(link.type === "mirror") {
-                let doc = getDocumentByUuid(link.uuid)
+                let doc = this.getSiblingEffectByName(link.name)
                 affected.push(this.id)
                 doc.disable(disabled, affected)
             }
