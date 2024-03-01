@@ -48,6 +48,10 @@ export class SWSEActiveEffect extends ActiveEffect {
         doc.removeLink(this.name)
     }
     async addLinks(that, type){
+        if(this === that){
+            return;
+        }
+
         switch (type) {
             case "parent":
                 await this.addLink("child", that)
