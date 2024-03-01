@@ -1541,7 +1541,7 @@ export function linkEffects(effectId1, effectId2) {
     const title = "Create Link";
     const content = `<div class="flex-row">${effectBlock1}${comboBlock}${effectBlock2}</div>`
 
-    let options = {
+    let data = {
         title,
         content,
         buttons: {
@@ -1568,8 +1568,13 @@ export function linkEffects(effectId1, effectId2) {
         options: {}
     };
 
+    const options = {
+        classes: ["swse", "dialog"],
+        resizable: true,
+        popOut: true
+    };
 
-    new Dialog(options).render(true);
+    new Dialog(data, options).render(true);
 }
 
 
