@@ -1481,13 +1481,13 @@ export function getDocumentByUuid(uuid) {
         return;
     }
     let toks = uuid.split(".")
-    let source;
+    let source = game;
     for (let [i, tok] of toks.entries()) {
-        if (tok === "Actor") {
-            if (i === 0) {
-                source = game.actors;
-                continue;
-            }
+        if (tok === "Scene") {
+            source = source.scenes;
+        }else if (tok === "Token") {
+            source = source.tokens;
+        } else if (tok === "Actor") {
             source = source.actors;
         } else if (tok === "Item") {
             if (i === 0) {
