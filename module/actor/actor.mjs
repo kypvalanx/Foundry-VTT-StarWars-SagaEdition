@@ -2643,16 +2643,19 @@ export class SWSEActor extends Actor {
                 }), item, context);
 
 
-                new Dialog({
-                    title: "Adding Class Starting Feats",
-                    content: `Adding class starting feats: <ul>${featString}</ul>`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+
+                if(!this.suppressDialog) {
+                    new Dialog({
+                        title: "Adding Class Starting Feats",
+                        content: `Adding class starting feats: <ul>${featString}</ul>`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
+                    }).render(true);
+                }
             } else {
                 let ownedFeats = currentFeats.map(f => f.finalName);
                 for (let i = 0; i < availableClassFeats; i++) {

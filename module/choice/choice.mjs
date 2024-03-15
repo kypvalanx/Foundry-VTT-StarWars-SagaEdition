@@ -129,6 +129,10 @@ export async function activateChoices(item, context) {
             }
         }
 
+        if(actor.suppressDialog) {
+            return {success: false, items: []};
+        }
+
         let response = await Dialog.prompt({
             title: greetingString,
             content: content,

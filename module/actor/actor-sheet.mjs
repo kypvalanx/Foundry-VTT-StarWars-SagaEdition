@@ -774,6 +774,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         let context = {};
         context.newFromCompendium = true;
+        context.answers = data.answers;
 
         await this.object.addItems([data], undefined, context);
 
@@ -1410,6 +1411,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {
+        if(this.object.suppressDialog){return;}
         if (weaponOnly) {
             new Dialog({
                 title: "Weapon Systems Only",
