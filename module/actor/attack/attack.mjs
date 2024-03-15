@@ -446,7 +446,7 @@ export class Attack {
             if (inaccurate && rangeName === 'long') {
                 continue;
             }
-            rollModifier.addChoice(new RollModifierChoice(`${rangeName} ${rangeIncrement.string} ${rangePenaltyElement}`, rangePenaltyElement, rangeName === defaultValue));
+            rollModifier.addChoice(new RollModifierChoice(`${rangeName.titleCase}, ${rangeIncrement.string.titleCase}, ${rangePenaltyElement}`, rangePenaltyElement, rangeName === defaultValue));
         }
 
         return rollModifier.hasChoices() ? [rollModifier] : [];
