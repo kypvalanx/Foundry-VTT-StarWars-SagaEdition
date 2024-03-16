@@ -11,7 +11,7 @@
             <th>Focus</th>
             <th>Misc</th>
             <th>Armor</th>
-            <th>Manual</th>
+            <th>Bonus</th>
         </tr>
         </thead>
         <tbody>
@@ -55,8 +55,10 @@
                         {{/if}}
                     </td>
                     <td>
-                        <input class="plain small" name="system.skills.{{id}}.manualBonus" type="number"
-                               value="{{skill.manualBonus}}" placeholder="0"/>
+                        <div class="small labeled-input">
+                            <input class="input" name="system.skills.{{id}}.manualBonus" type="number"
+                                   value="{{skill.manualBonus}}" placeholder="0"/>
+                        </div>
                     </td>
                 </tr>
             {{/unless}}

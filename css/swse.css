@@ -784,12 +784,23 @@
   border: 1px solid black;
 }
 
-.swse table.skill tr {
+.swse table.skill tbody tr {
   height: 30px;
 }
 
-.swse table.skill tr th {
+.swse table.skill tbody tr th {
   text-align: left;
+}
+
+.swse table.skill thead tr {
+  height: 35px;
+}
+
+.swse table.skill thead tr th {
+  text-align: center;
+  -webkit-transform: rotate(-25deg);
+  -ms-transform: rotate(-25deg);
+  transform: rotate(-25deg);
 }
 
 .swse .warning {

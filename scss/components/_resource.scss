@@ -82,11 +82,23 @@ input[type=checkbox].direct{
   border: 1px solid black;
 }
 table.skill {
-  tr {
-    height: 30px;
+  tbody{
+    tr {
+      height: 30px;
 
-    th {
-      text-align: left;
+      th {
+        text-align: left;
+      }
+    }
+  }
+  thead{
+    tr {
+      height: 35px;
+
+      th {
+        text-align: center;
+        transform: rotate(-25deg);
+      }
     }
   }
 }
