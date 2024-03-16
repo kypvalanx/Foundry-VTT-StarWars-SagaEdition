@@ -694,8 +694,7 @@ export class Attack {
     }
 
     isMiss(roll, defense) {
-        let term = roll.terms.find(term => term.faces === 20);
-        let num = term.results[0].result;
+        let num = roll.total
         return num < defense;
     }
 
