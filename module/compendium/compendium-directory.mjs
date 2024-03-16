@@ -28,6 +28,13 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
         if(game.settings.get("swse", "enableAdvancedCompendium")) {
             new SWSECompendiumBrowser({filterString, type, pack})._render(true);
         } else {
+            let found = game.packs.get(pack);
+
+            if(found){
+                found.render(true);
+                return;
+            }
+
             let packName
             if(pack){
                 packName = pack.split(".")[1]
@@ -36,7 +43,7 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
                 packName = filterString.split(":")[1].split(/(?=[A-Z])/).join(" ").toLowerCase()
             }
 
-            let found = game.packs.find(p => p.metadata.name.includes(packName));
+            found = game.packs.find(p => p.metadata.name.includes(packName));
             if(found){
 
                 found.render(true);
