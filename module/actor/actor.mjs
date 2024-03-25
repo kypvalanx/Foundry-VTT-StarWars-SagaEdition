@@ -430,8 +430,8 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(system) {
-        this.system.attributeGenerationType = "Manual"
-        this.system.disableAttributeGenerationChange = true;
+        //this.system.attributeGenerationType = "Manual"
+        //this.system.disableAttributeGenerationChange = true;
 
         generateAttributes(this);
         generateSkills(this);
