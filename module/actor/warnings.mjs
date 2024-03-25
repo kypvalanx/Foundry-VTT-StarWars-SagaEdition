@@ -14,7 +14,7 @@ export function warningsFromActor(actor) {
         warnings.push(`Natural Armor Bonus (${naturalArmorBonus}) should not exceed Beast Level (${beastClassLevels}).`)
     }
 
-    if(!actor.system.attributeGenerationType){
+    if(!actor.system.attributeGenerationType && !actor.system.finalAttributeGenerationType){
         warnings.push(`<span class="attributeGenerationType">Please Select an attribute generation type</span>`)
     }
 
