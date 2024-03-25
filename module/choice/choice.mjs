@@ -1,6 +1,7 @@
 import {GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {fullJoin, innerJoin} from "../common/util.mjs";
+import {changeSelect, initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
 
 function skipFirstLevelChoice(choice, context) {
     return choice.isFirstLevel && !context.isFirstLevel;
@@ -138,6 +139,13 @@ export async function activateChoices(item, context) {
             content: content,
             rejectClose: async (html) => {
                 return false
+            },
+            render: (html) => {
+                if(choice.uniqueChoices){
+                    const selects = html.find(".choice");
+                    initializeUniqueSelection(selects);
+                    selects.on("change", () => uniqueSelection(selects));
+                }
             },
             callback: async (html) => {
                 let find = html.find(".choice");

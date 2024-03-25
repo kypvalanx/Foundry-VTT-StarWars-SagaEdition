@@ -241,6 +241,37 @@ export function changeSelect(event) {
     this.object.safeUpdate(update);
 }
 
+export function uniqueSelection(selects) {
+    const selectedValues = [];
+    for(const select of selects){
+        if(!select.value || select.value === "--"){
+            continue;
+        }
+        selectedValues.push( select.value);
+    }
+
+    for (const select of selects){
+        for (const option of select.options){
+
+            option.disabled = select.value !== option.value && selectedValues.includes(option.value);
+        }
+    }
+}
+
+export function initializeUniqueSelection(selects) {
+    const selected = [];
+    for (const select of selects) {
+        for (const o of select.options) {
+            if (!selected.includes(o.value)) {
+                o.selected = true;
+                break;
+            }
+        }
+        selected.push(select.value)
+    }
+    uniqueSelection(selects)
+}
+
 export function changeCheckbox(event) {
     let {system, updatePath} = getRoot.call(this);
     const target = event.target
