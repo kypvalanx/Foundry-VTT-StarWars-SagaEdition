@@ -1107,6 +1107,8 @@ export function getCompendium(item) {
             return packs.filter(pack => pack.collection.startsWith("swse.weapons"));
         case 'armor':
             return packs.filter(pack => pack.collection.startsWith("swse.armor"));
+        case 'beastattack':
+            return packs.filter(pack => pack.collection.startsWith("swse.beast components"));
     }
     return [];
 }

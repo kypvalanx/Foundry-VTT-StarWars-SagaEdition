@@ -315,6 +315,7 @@ export class Attack {
         } else {
             let damageDice = getInheritableAttribute({
                 entity: item,
+                parent: item.parent,
                 attributeKey: ["damage", "damageDie"],
                 reduce: "SUM"
             })
@@ -876,9 +877,9 @@ function getDiceTermsFromString(dieString) {
             //dice.push(new NumericTerm({number: 0}));
         } else if (!isNaN(dieTerm)) {
             if (lastOperator === "x") {
-                dice.push(new NumericTerm({number: toNumber(dieString), options: getDieFlavor("multiplier")}));
+                dice.push(new NumericTerm({number: toNumber(dieTerm), options: getDieFlavor("multiplier")}));
             } else {
-                dice.push(new NumericTerm({number: toNumber(dieString)}));
+                dice.push(new NumericTerm({number: toNumber(dieTerm)}));
             }
             lastOperator = "";
         } else if (dieTerm === "+") {
@@ -891,7 +892,7 @@ function getDiceTermsFromString(dieString) {
             dice.push(mult())
             lastOperator = "x"
         } else {
-            let toks = dieString.split("d")
+            let toks = dieTerm.split("d")
             dice.push(new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])}));
         }
     }

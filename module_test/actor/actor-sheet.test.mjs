@@ -88,6 +88,22 @@ export async function actorSheetTests(quench) {
                                 //assert.equal(actor.size, "Medium")
                             });
                         });
+
+                        it('should correctly format damage die rolls on beast actors', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Beast", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Claw", type: "beastAttack"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Medium", type: "trait"})
+                                hasItems(assert, actor.items, ["Beast", "Claw", "Medium"])
+                                assert.lengthOf(actor.items, 3)
+                                const firstAttack = actor.attack.attacks[0]
+
+                                const renderFormulaHTML = firstAttack.damageRoll.renderFormulaHTML;
+                                assert.equal( renderFormulaHTML, "1d4")
+                                // assert.equal()
+                            });
+                        });
                     })
                 })
             })
