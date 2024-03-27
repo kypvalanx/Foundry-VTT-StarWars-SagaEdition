@@ -1,8 +1,9 @@
 import {SWSEActor} from "../../module/actor/actor.mjs";
+import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
 
 async function withTestActor(param) {
     const actor = await SWSEActor.create({
-        name: "New Test Actor",
+        name: "New Test Actor DELETE ME",
         type: "character",
         img: "artwork/character-profile.jpg"
     })
@@ -10,6 +11,9 @@ async function withTestActor(param) {
         await param(actor);
     } finally {
         await actor.delete();
+        game.actors.forEach(a => {if(a.name === "New Test Actor DELETE ME"){
+          a.delete()
+        }})
     }
 }
 
@@ -100,8 +104,31 @@ export async function actorSheetTests(quench) {
                                 const firstAttack = actor.attack.attacks[0]
 
                                 const renderFormulaHTML = firstAttack.damageRoll.renderFormulaHTML;
-                                assert.equal( renderFormulaHTML, "1d4")
+                                assert.equal( renderFormulaHTML, '<span>1d4</span>')
                                 // assert.equal()
+                            });
+                        });
+
+                        it('should only take trained skills from first level class', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.setAttributes({int:18})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class",
+                                    answers: ["Force Sensitivity"]})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class", answers: ["Armor Proficiency (Light)"]})
+                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
+                                    "Bonus Feat (Weapon Proficiency (Pistols))",
+                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Jedi",
+                                    "Point-Blank Shot",
+                                    "Scoundrel",
+                                    "Soldier",
+                                    "Weapon Proficiency (Pistols)",
+                                    "Weapon Proficiency (Simple Weapons)"])
+                                assert.lengthOf(actor.items, 9)
+                                const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
+                                assert.equal(availableTrainedSkills, 8);
                             });
                         });
                     })

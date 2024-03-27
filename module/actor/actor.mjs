@@ -1278,12 +1278,12 @@ export class SWSEActor extends Actor {
         this.safeUpdate(update);
     }
 
-    setAttributes(attributes) {
+    async setAttributes(attributes) {
         let update = {};
         for (let [key, ability] of Object.entries(attributes)) {
             update[`data.attributes.${key}.base`] = ability;
         }
-        this.safeUpdate(update);
+        await this.safeUpdate(update);
     }
 
 
@@ -2677,6 +2677,14 @@ export class SWSEActor extends Actor {
     }
 
     async selectFeat(availableFeats, ownedFeats, parentItem, context) {
+        if(context.itemAnswers){
+            for(const answer of context.itemAnswers){
+                if(availableFeats.includes(answer)){
+                    return answer;
+                }
+            }
+        }
+
         let options = "";
         for (let feat of availableFeats) {
             let owned = "";
