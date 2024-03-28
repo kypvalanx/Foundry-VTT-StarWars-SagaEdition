@@ -731,6 +731,9 @@ function addValues(a, b) {
         if(typeof sum === 'string' && sum.length > 0 && `${term.value}`.startsWith("@")){
             sum += " + "
         }
+        if(typeof sum === 'number' && isNaN(term.value)){
+            continue; //TODO when this happens this should sort the string terms and numeric terms and reformat, for now i'll do this to fix equipment weight
+        }
         group[i][j] = sum + term.value;
     }
 

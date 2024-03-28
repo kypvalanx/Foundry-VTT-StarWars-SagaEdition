@@ -3123,7 +3123,10 @@ export class SWSEActor extends Actor {
             let costFactor = DROID_COST_FACTOR[resolvedSize]
             let sum = 0;
             for (let item of this.items.values()) {
-                const weight = getInheritableAttribute({entity:item, attributeKey:"weight", reduce:"SUM"})
+                let weight = getInheritableAttribute({entity:item, attributeKey:"weight", reduce:"SUM"})
+                if(isNaN(weight)){
+                    weight = 0;
+                }
                     sum += resolveWeight(weight, item.system.quantity, costFactor, this)
             }
             return sum;

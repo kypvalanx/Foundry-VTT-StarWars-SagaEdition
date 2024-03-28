@@ -131,6 +131,20 @@ export async function actorSheetTests(quench) {
                                 assert.equal(availableTrainedSkills, 8);
                             });
                         });
+
+                        it('carried weight should ignore non numeric terms that cannot be converted into numeric terms', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.setAttributes({int:18})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Blaster Pistol", type: "weapon"})
+                                hasItems(assert, actor.items, [  "Blaster Pistol"])
+                                const item = actor.items.find(i => i.name === "Blaster Pistol");
+
+                                SWSEActor.updateOrAddChange(item, "weight", "THING");
+
+                                assert.equal(actor.carriedWeight, 0);
+                            });
+                        });
                     })
                 })
             })
