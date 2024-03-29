@@ -538,7 +538,7 @@ function meetsPrerequisite(prereq, target, options) {
  * @returns {{failureList: [], doesFail: boolean, silentFail: []}}
  */
 export function meetsPrerequisites(target, prereqs, options = {}) {
-    //TODO add links to failures to upen up the fancy compendium to show the missing thing.  when you make a fancy compendium
+    //TODO add links to failures to open up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
     let failureList = [];
     let silentFail = [];

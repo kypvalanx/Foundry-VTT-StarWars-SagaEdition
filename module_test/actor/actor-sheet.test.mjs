@@ -1,6 +1,8 @@
 import {SWSEActor} from "../../module/actor/actor.mjs";
 import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
 import {safeInsert} from "../../module/common/util.mjs";
+import {SWSERollWrapper} from "../../module/common/roll.mjs";
+import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
 
 async function withTestActor(param) {
     const actor = await SWSEActor.create({
@@ -190,5 +192,57 @@ export async function actorSheetTests(quench) {
                     })
                 })
             })
+
+            describe("SWSERollWrapper", () => {
+                describe(".renderWeaponBlockFormulaHTML", () => {
+                    it("should correctly print single die rolls", () => {
+                        const terms = [];
+                        terms.push(new Die({number: 3, faces: 8}))
+                        terms.push(new OperatorTerm({operator: "+"}))
+                        terms.push(new NumericTerm({number: 9}))
+
+                        const roll = Roll.fromTerms(terms);
+
+                        assert.equal( new SWSERollWrapper(roll).renderWeaponBlockFormulaHTML, '<span>3d8</span><span> + </span><span>9</span>')
+                    })
+
+                    it("should correctly print single die rolls", () => {
+                        const terms = [];
+                        terms.push(new Die({number: 3, faces: 8}))
+                        terms.push(new OperatorTerm({operator: "+"}))
+                        terms.push(new NumericTerm({number: 9}))
+
+                        const roll = Roll.fromTerms(terms);
+
+                        const additionalTerms = [];
+                        additionalTerms.push(new Die({number: 2, faces: 8}))
+                        additionalTerms.push(new Die({number: 1, faces: 4}))
+
+
+                        assert.equal( new SWSERollWrapper(roll, additionalTerms).renderWeaponBlockFormulaHTML, '<span>3d8</span><span>/</span><span>2d8</span><span>/</span><span>1d4</span><span> + </span><span>9</span>')
+                    })
+                })
+            })
+
+            describe("attack", () => {
+                describe("getDiceTermsFromString", () => {
+                    it("should handle a simple single die", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString("1d20")
+                        assert.equal(dice[0].faces, 20)
+                        assert.equal(dice[0].number, 1)
+                    })
+
+                    it("should handle a double weapon die", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString("3d8/4d6")
+                        assert.equal(dice[0].faces, 8)
+                        assert.equal(dice[0].number, 3)
+
+                        assert.lengthOf(additionalTerms, 1);
+                        assert.equal(additionalTerms[0].faces, 6)
+                        assert.equal(additionalTerms[0].number, 4)
+                    })
+                })
+            })
+
         })
 }

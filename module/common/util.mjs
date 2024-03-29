@@ -686,7 +686,9 @@ function resolveValue(a) {
         if('+' === tok || "" === tok){
             continue;
         }
-        if (quantityPattern.test(tok)) {
+        if(tok.includes("/")){
+            results.push({value:tok});
+        } else if (quantityPattern.test(tok)) {
             let result = quantityPattern.exec(tok);
             let resolved = resolveValue(result[2])
             resolved.forEach(res => res.item = result[1])

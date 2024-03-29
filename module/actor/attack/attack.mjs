@@ -213,7 +213,7 @@ export class Attack {
 
         let weaponTypes = getPossibleProficiencies(actor, item);
         let attributeMod = this._resolveAttributeModifier(item, actor, weaponTypes);
-        let terms = getDiceTermsFromString("1d20");
+        let terms = getDiceTermsFromString("1d20").dice;
 
         if (!!provider) {
             terms.push(...appendNumericTerm(provider.system.attributes.int.mod, "Vehicle Computer Bonus"))
@@ -305,6 +305,7 @@ export class Attack {
         }
 
         let terms = [];
+        const doubleWeaponDamage = [];
         if (this.isUnarmed) {
             terms.push(...resolveUnarmedDamageDie(actor));
             terms.push(...appendNumericTerm(getInheritableAttribute({
@@ -320,7 +321,9 @@ export class Attack {
                 reduce: "SUM"
             })
             //let damageDie = damageDice[damageDice.length - 1];
-            terms.push(...getDiceTermsFromString(damageDice))
+            const {dice, additionalTerms} = getDiceTermsFromString(damageDice);
+            doubleWeaponDamage.push(...additionalTerms)
+            terms.push(...dice)
         }
 
         let halfHeroicLevel = actor?.halfHeroicLevel || 0;
@@ -365,7 +368,7 @@ export class Attack {
         })
         roll.alter(1, toNumber(bonusDamageDice));
 
-        return new SWSERollWrapper(roll);
+        return new SWSERollWrapper(roll, doubleWeaponDamage);
     }
 
     getMeleeDamageAbilityModifier(actor, item) {
@@ -858,7 +861,9 @@ function getItemStripping(item, key) {
     return undefined;
 }
 
-function getDiceTermsFromString(dieString) {
+//TODO probably don't need to export this, but right now the tests are in the wrong file
+export function getDiceTermsFromString(dieString) {
+    const additionalTerms = []
     if (!dieString) {
         return [];
     }
@@ -892,13 +897,20 @@ function getDiceTermsFromString(dieString) {
             dice.push(mult())
             lastOperator = "x"
         } else {
-            let toks = dieTerm.split("d")
-            dice.push(new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])}));
+            let diceTokens = dieTerm.split("/");
+            diceTokens.forEach((token, i) => {
+                let toks = token.split("d")
+                const die = new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])});
+                if(i === 0){
+                    dice.push(die);
+                } else {
+                    additionalTerms.push(die);
+                }
+            })
         }
     }
 
-
-    return dice;
+    return {dice, additionalTerms};
 }
 
 /**
@@ -925,7 +937,7 @@ function resolveUnarmedDamageDie(actor) {
         reduce: "SUM"
     })
     damageDie = increaseDieSize(damageDie, bonus);
-    return getDiceTermsFromString(damageDie);
+    return getDiceTermsFromString(damageDie).dice;
 }
 
 
