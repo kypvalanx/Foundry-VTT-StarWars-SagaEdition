@@ -16,26 +16,28 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
     if (choice.type === 'INTEGER') {
         item.setPayload(choiceAnswer, choice.payload);
     } else {
-        let selectedChoice = options.find(option => option.name === choiceAnswer);
-        if (selectedChoice) {
-            if (selectedChoice.payload) {
-                selectedChoice.payloads = selectedChoice.payloads || {};
-                selectedChoice.payloads["payload"] = selectedChoice.payload;
-            }
+        let selectedChoice = options.find(option => option.name.toLowerCase() === choiceAnswer.toLowerCase());
+        if (!selectedChoice) {
+            return items;
+        }
 
-            if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
-                Object.entries(selectedChoice.payloads).forEach(payload => {
-                    item.setPayload(payload[1], payload[0]);
-                })
-            }
-            if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
-                items = selectedChoice.providedItems
-            }
-            if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
-                item.system.changes = item.system.changes || [];
-                item.system.changes.push(...Object.values(selectedChoice.attributes))
+        if (selectedChoice.payload) {
+            selectedChoice.payloads = selectedChoice.payloads || {};
+            selectedChoice.payloads["payload"] = selectedChoice.payload;
+        }
 
-            }
+        if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
+            Object.entries(selectedChoice.payloads).forEach(payload => {
+                item.setPayload(payload[1], payload[0]);
+            })
+        }
+        if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
+            items = selectedChoice.providedItems
+        }
+        if (selectedChoice.attributes && Object.values(selectedChoice.attributes).length > 0) {
+            item.system.changes = item.system.changes || [];
+            item.system.changes.push(...Object.values(selectedChoice.attributes))
+
         }
     }
     return items;

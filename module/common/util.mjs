@@ -1431,11 +1431,11 @@ export function onCollapseToggle(event) {
     })
 }
 
-export function safeInsert(object, s, value) {
+export function safeInsert(object, key, value) {
     let update = {};
     let cursor = update;
     let itemCursor = object;
-    let tokens = s.split("\.")
+    let tokens = key.split("\.")
     let i = 0;
     let length = tokens.length;
     for (let tok of tokens) {

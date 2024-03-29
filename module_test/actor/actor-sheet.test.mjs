@@ -1,5 +1,6 @@
 import {SWSEActor} from "../../module/actor/actor.mjs";
 import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
+import {safeInsert} from "../../module/common/util.mjs";
 
 async function withTestActor(param) {
     const actor = await SWSEActor.create({
@@ -143,6 +144,27 @@ export async function actorSheetTests(quench) {
                                 SWSEActor.updateOrAddChange(item, "weight", "THING");
 
                                 assert.equal(actor.carriedWeight, 0);
+                            });
+                        });
+
+                        it('should allow skill focus to be selected for knowledges', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+
+                                await actor.safeUpdate(safeInsert(actor, `system.skills.knowledge (bureaucracy).trained`, true));
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Skill Focus", type: "feat",
+                                    answers: ["Knowledge (Bureaucracy)"]})
+
+                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
+                                    "Bonus Feat (Weapon Proficiency (Pistols))",
+                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Point-Blank Shot",
+                                    "Scoundrel",
+                                    "Skill Focus (Knowledge (Bureaucracy))",
+                                    "Weapon Proficiency (Pistols)",
+                                    "Weapon Proficiency (Simple Weapons)"])
                             });
                         });
                     })
