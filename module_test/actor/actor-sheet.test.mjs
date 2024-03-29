@@ -167,6 +167,26 @@ export async function actorSheetTests(quench) {
                                     "Weapon Proficiency (Simple Weapons)"])
                             });
                         });
+
+                        it('should be able to take the prestige class Imperial Knight', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+
+                                await actor.safeUpdate(safeInsert(actor, `system.skills.use the force.trained`, true));
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Light)", type: "feat"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Imperial Knight", type: "class"})
+
+                            });
+                        });
                     })
                 })
             })

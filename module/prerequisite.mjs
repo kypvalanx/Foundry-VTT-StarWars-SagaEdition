@@ -583,12 +583,25 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
 }
 
 
-export function formatPrerequisites(failureList) {
+export function formatPrerequisites(failureList, type = "html") {
+    if(type === "plain"){
+        let format = "[";
+        for (let fail of failureList) {
+            format = format + `"${fail.message}"`;
+            if (fail.children && fail.children.length > 0) {
+                format = format + formatPrerequisites(fail.children, type);
+            }
+            format = format + `,`;
+        }
+        return format + "]";
+    }
+
+
     let format = "<ul>";
     for (let fail of failureList) {
         format = format + `<li>${fail.message}`;
         if (fail.children && fail.children.length > 0) {
-            format = format + "</br>" + formatPrerequisites(fail.children);
+            format = format + "</br>" + formatPrerequisites(fail.children, type);
         }
         format = format + `</li>`;
     }

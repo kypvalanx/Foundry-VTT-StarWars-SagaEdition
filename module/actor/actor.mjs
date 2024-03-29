@@ -2296,9 +2296,14 @@ export class SWSEActor extends Actor {
                                 return [];
                             }
                         } else {
+
+                            if(this.suppressDialog){
+                                throw new Error(`You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList, "plain")}`);
+                            }
+
                             await Dialog.prompt({
                                 title: "You Don't Meet the Prerequisites!",
-                                content: "You do not meet the prerequisites:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
                                 callback: () => {
                                 }
                             });
