@@ -1,3 +1,5 @@
-2024/03/28-19:30:46.208 349c Recovering log #74
-2024/03/28-19:30:46.211 349c Delete type=0 #74
-2024/03/28-19:30:46.211 349c Delete type=3 #73
+2024/03/28-22:50:55.386 56bc Recovering log #3
+2024/03/28-22:50:55.386 56bc Level-0 table #5: started
+2024/03/28-22:50:55.388 56bc Level-0 table #5: 34497 bytes OK
+2024/03/28-22:50:55.390 56bc Delete type=0 #3
+2024/03/28-22:50:55.390 56bc Delete type=3 #2
