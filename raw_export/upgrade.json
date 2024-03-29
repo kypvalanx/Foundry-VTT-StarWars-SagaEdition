@@ -1,0 +1,2292 @@
+{
+    "entries": [
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "3000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>The Armor Reinforcement Armor Accessory increases Armor's ability to harmlessly deflect incoming attacks by coating the interior of the Armor with tough materials, adding an extra layer of defense. Reinforced Armor grants the wearer <a href=\"https://swse.fandom.com/wiki/Damage_Reduction\" title=\"Damage Reduction\">Damage Reduction<\/a> 2 against Piercing damage. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Armor Reinforcement",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>A Weapon Accessory made only to <a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols<\/a>, <a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles<\/a>, <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons<\/a>, and <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons_(Ranged)\" title=\"Exotic Weapons (Ranged)\">Exotic Weapons (Ranged)<\/a> that deal Energy damage, the Beam Splitter Weapon Accessory makes it easier to fire a powerful energy bolt by increasing the size of the bolt fired. Once per encounter, the wielder of a weapon with a Beam Splitter that uses the <a href=\"https://swse.fandom.com/wiki/Power_Blast\" title=\"Power Blast\">Power Blast<\/a> Feat to modify an attack roll deals 2 points of damage for every 1 point subtracted from the attack bonus. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Beam Splitter",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2,000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0.5 Kilograms",
+                        "key": "weight"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Rebellion_Era_Campaign_Guide\" title=\"Star Wars Saga Edition Rebellion Era Campaign Guide\">Star Wars Saga Edition Rebellion Era Campaign Guide<\/a><\/i> <\/p><p>This item is a small electrobinocular device, mounted onto a Weapon, that projects a targeting image onto a monocle or helmet display worn by the wielder. Additionally, the computer image projected by the scope can be displayed on a <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a> or transmitted by <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> to a remote location, allowing others to see what the wielder sees. <\/p><p>By using a Computerized Interface Scope, the wielder effectively reduces the <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> of the target by one category (to a minimum of Point-Blank <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>) when <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a>. The device is otherwise mechanically identical to a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a> (Standard) and does not stack with a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a> or with any other device that does not stack with a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Rebellion Era Campaign Guide"
+            },
+            "name": "Computerized Interface Scope",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>The Durasteel Bonding Weapon Accessory coats an <a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapon\" class=\"mw-redirect\" title=\"Advanced Melee Weapon\">Advanced Melee Weapon<\/a>, an <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_(Melee)\" class=\"mw-redirect\" title=\"Exotic Weapon (Melee)\">Exotic Weapon (Melee)<\/a>, or a <a href=\"https://swse.fandom.com/wiki/Simple_Weapon_(Melee)\" class=\"mw-redirect\" title=\"Simple Weapon (Melee)\">Simple Weapon (Melee)<\/a> with a thin layer of Durasteel, making it more resistant to damage and ensuring that it retains it's keen edge over time. A weapon with Durasteel Bonding increases it's own <a href=\"https://swse.fandom.com/wiki/Damage_Reduction\" title=\"Damage Reduction\">Damage Reduction<\/a> by 5 and deals an extra die of damage on a Critical Hit (this die of damage is added after damage is multiplied for the Critical Hit). This Weapon Accessory can only be placed on a weapon that deals Slashing damage. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Durasteel Bonding",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "3000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>The Enhanced Energy Projector Weapon Accessory smooths the flow of power to an <a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapon\" class=\"mw-redirect\" title=\"Advanced Melee Weapon\">Advanced Melee Weapon<\/a> or an <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_(Melee)\" class=\"mw-redirect\" title=\"Exotic Weapon (Melee)\">Exotic Weapon (Melee)<\/a> that requires a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a>, making it less likely to produce unpredictable results. A weapon with an Enhanced Energy Projector allows the wielder to reroll a natural 1 on any attack roll once per encounter, keeping the second result. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Enhanced Energy Projector",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "400",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0.2 Kilograms",
+                        "key": "weight"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Galaxy_of_Intrigue\" title=\"Star Wars Saga Edition Galaxy of Intrigue\">Star Wars Saga Edition Galaxy of Intrigue<\/a><\/i> <\/p><p>The Merr-Sonn Nonsonic is a typical example of a Flash Suppressor/Silencer. Fitting over the muzzle of any Small or larger Slugthrower, this device reduces both the sound and the muzzle flash when the weapon is fired. A Flash Suppressor/Silencer imposes a -10 penalty to <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> checks to discern the sound or spot the flash of an equipped Slugthrower. It reduces the maximum <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> of the weapon by two range increments. <\/p>",
+                "source": "Star Wars Saga Edition Galaxy of Intrigue"
+            },
+            "name": "Flash Suppressor/Silencer",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<table style=\"width:100%; margin-top:2em; border:2px solid #999; font-size:105%; text-align:center; background:#6c3636;\"> \n <tbody>\n  <tr> \n   <td><i><b>This <a href=\"https://swse.fandom.com/wiki/Homebrew_Content\" title=\"Homebrew Content\">Homebrew Content<\/a> has not been reviewed in a meaningful manner. If you wish to review this content yourself, then see <a href=\"https://swse.fandom.com/wiki/Category:Untested\" title=\"Category:Untested\">Untested<\/a> for more details.<\/b><\/i> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><i>Flashlight Equipment data created by Wikia user JediPorg12.<\/i> <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>FLASHLIGHT <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th> \n   <th>WEIGHT <\/th>\n  <\/tr> \n  <tr> \n   <td>Standard <\/td> \n   <td>100 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>0.1 kg <\/td>\n  <\/tr> \n  <tr> \n   <td>Advanced <\/td> \n   <td>1000 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>0.4 kg <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>A Flashlight is a <a href=\"https://swse.fandom.com/wiki/Visibility\" title=\"Visibility\">Visibility<\/a> device that illuminates an area with a small beam of light. Installing a Flashlight on a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> or <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a> requires 6 minutes, and a DC 5 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. Due to the nature of a Flashlight, a character cannot perform <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks made to <a href=\"https://swse.fandom.com/wiki/Sneak\" class=\"mw-redirect\" title=\"Sneak\">Sneak<\/a> while such illumination is present. A <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a> may be used to turn on or off a Flashlight. <\/p><p><b>Standard: <\/b>A Flashlight (Standard) provides illumination in a 6-square cone. <\/p><p><b>Enhanced low-light: <\/b>A Flashlight (Advanced) functions the same as a Flashlight (Standard). However, it provides illumination in a 12-square cone. <\/p>"
+            },
+            "name": "Flashlight",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<table style=\"width:100%; margin-top:2em; border:2px solid #999; font-size:105%; text-align:center; background:#6c3636;\"> \n <tbody>\n  <tr> \n   <td><i><b>This <a href=\"https://swse.fandom.com/wiki/Homebrew_Content\" title=\"Homebrew Content\">Homebrew Content<\/a> has not been reviewed in a meaningful manner. If you wish to review this content yourself, then see <a href=\"https://swse.fandom.com/wiki/Category:Untested\" title=\"Category:Untested\">Untested<\/a> for more details.<\/b><\/i> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><i>Holo-Sights Equipment data created by Wikia user JediPorg12.<\/i> <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>HOLO-SIGHTS <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th> \n   <th>WEIGHT <\/th>\n  <\/tr> \n  <tr> \n   <td>Standard <\/td> \n   <td>100 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>0.3 kg <\/td>\n  <\/tr> \n  <tr> \n   <td>Advanced <\/td> \n   <td>1000 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>0.8 kg <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>A Holo-Sight is a sighting device that makes it easier to hit medium and close range targets, affording a larger view area than a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a>. Installing a Holo-Sight on a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> or <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a> requires 10 minutes, and a DC 10 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. <\/p><p><b>Standard: <\/b>A Holo-Sight (Standard) reduces the <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> penalty by 3 (Minimum penalty of -1). However, you must <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> at your target to gain this benefit, and you lose the benefit if your line of sight to your target is lost. <\/p><p><b>Advanced: <\/b>A Holo-Sight (Advanced) functions the same as a Holo-Sight (Standard). However, after <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a> at a target, the wielder gains a +2 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to all damage rolls made at Medium or Short <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>. <\/p>"
+            },
+            "name": "Holo-Sights",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>A modification made only to <a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols<\/a>, <a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles<\/a>, <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons<\/a>, and <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons_(Ranged)\" title=\"Exotic Weapons (Ranged)\">Exotic Weapons (Ranged)<\/a> that use a trigger mechanism to fire, the Hair Trigger accessory makes it easier to fire several shots in quick succession by reducing the amount of pressure that must be placed on the trigger. Once per encounter, the wielder of a weapon with a Hair Trigger that uses the <a href=\"https://swse.fandom.com/wiki/Rapid_Shot\" title=\"Rapid Shot\">Rapid Shot<\/a> Feat to modify an attack roll may reroll the damage from the attack, keeping the better result. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Hair Trigger",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": "perception:+2",
+                        "key": "skillBonus"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "true",
+                        "key": "lowLightVision"
+                    },
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "4000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1 Kilogram",
+                        "key": "weight"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p>When installed in the helmet of a suit of armor, this electronic package allows the Armor to grant the wearer a +2 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus on <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> checks as well as Low-Light Vision. In addition, it includes an integrated hands-free <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a>. <\/p><p><a href=\"https://swse.fandom.com/wiki/Stormtrooper_Armor\" title=\"Stormtrooper Armor\">Stormtrooper Armor<\/a> and its variants include such a system (MFTAS, or Multi-Frequency Target Acquisition System), already included in its statistics. Installing the Helmet Package takes 1 hour, and a DC 20 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. <\/p>",
+                "modifications": [{
+                    "name": "Hands-Free Comlink",
+                    "type": "item"
+                }]
+            },
+            "name": "Helmet Package",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "4000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>A modification made only to <a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols<\/a>, <a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles<\/a>, <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons<\/a>, and <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons_(Ranged)\" title=\"Exotic Weapons (Ranged)\">Exotic Weapons (Ranged)<\/a> that require a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a>, the Improved Energy Cell accessory increases the efficiency of the energy flow between a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a> and the weapon's firing mechanism. A weapon with the Improved Energy Cell modification doubles the number of shots it can fire on a single <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a>. Additionally, if the weapon has the Increased Weapon Damage Modification from the <a href=\"https://swse.fandom.com/wiki/Tech_Specialist\" title=\"Tech Specialist\">Tech Specialist<\/a> Feat, the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to damage increases to +3. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Improved Energy Cell",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>TARGETING SCOPE <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th> \n   <th>WEIGHT <\/th>\n  <\/tr> \n  <tr> \n   <td>Standard <\/td> \n   <td>100 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>0.2 kg <\/td>\n  <\/tr> \n  <tr> \n   <td>Enhanced Low-Light <\/td> \n   <td>1000 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td> \n   <td>1.2 kg <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>A Targeting Scope is a sighting device that makes it easier to hit distant targets. However, it affords a very limited field of view, making it difficult to use. Installing a Targeting Scope on a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">rifle<\/a> or <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">pistol<\/a> requires 10 minutes, and a DC 10 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. <\/p><p><b>Standard: <\/b>A Targeting Scope (Standard) reduces the <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> by one category (for example, from Medium to Short <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>). However, you must <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> at your target to gain this benefit, and you lose the benefit if you change targets or lose line of sight to your target. <\/p><p><b>Enhanced low-light: <\/b>A Targeting Scope (Enhanced Low-Light) functions the same as a Targeting Scope (Standard) in normal light. However, after <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a> at a target, it allows the wielder to ignore <a href=\"https://swse.fandom.com/wiki/Concealment\" title=\"Concealment\">Concealment<\/a> (but not <a href=\"https://swse.fandom.com/wiki/Total_Concealment\" class=\"mw-redirect\" title=\"Total Concealment\">Total Concealment<\/a>) from darkness, when attacking that target. <\/p>"
+            },
+            "name": "Targeting Scope",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>Designed with the same principals as <a href=\"https://swse.fandom.com/wiki/Mesh_Armor\" title=\"Mesh Armor\">Mesh Armor<\/a>, the Mesh Underlay Armor Accessory helps channel certain types of energy away from the wearer's body, reducing the effectiveness of a potentially devastating blow. A character wearing a suit of Armor with the Mesh Underlay Armor Accessory gains a +5 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to their <a href=\"https://swse.fandom.com/wiki/Damage_Threshold\" class=\"mw-redirect\" title=\"Damage Threshold\">Damage Threshold<\/a> against <a href=\"https://swse.fandom.com/wiki/Stun\" class=\"mw-redirect\" title=\"Stun\">Stun<\/a> damage. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Mesh Underlay",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:<\/i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide<\/a><\/i> <\/p><p>An <a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapon\" class=\"mw-redirect\" title=\"Advanced Melee Weapon\">Advanced Melee Weapon<\/a> or an <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_(Melee)\" class=\"mw-redirect\" title=\"Exotic Weapon (Melee)\">Exotic Weapon (Melee)<\/a> that requires a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a> can be augmented by a Tremor Cell Weapon Accessory, allowing the wielder to subdue rather than kill an opponent by dazing it. A weapon with a Tremor Cell can be set to <a href=\"https://swse.fandom.com/wiki/Stun\" class=\"mw-redirect\" title=\"Stun\">Stun<\/a> as a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>, and deals <a href=\"https://swse.fandom.com/wiki/Stun\" class=\"mw-redirect\" title=\"Stun\">Stun<\/a> damage equal to it's normal damage. Weapons larger than Medium cannot be fitted with this Weapon Accessory. <\/p>",
+                "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide"
+            },
+            "name": "Tremor Cell",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "800",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "4 Kilograms",
+                        "key": "weight"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    }
+                ],
+                "description": "<table style=\"width:100%; margin-top:2em; border:2px solid #999; font-size:105%; text-align:center; background:#6c3636;\"> \n <tbody>\n  <tr> \n   <td><i><b>This <a href=\"https://swse.fandom.com/wiki/Homebrew_Content\" title=\"Homebrew Content\">Homebrew Content<\/a> has not been reviewed in a meaningful manner. If you wish to review this content yourself, then see <a href=\"https://swse.fandom.com/wiki/Category:Untested\" title=\"Category:Untested\">Untested<\/a> for more details.<\/b><\/i> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><i>Homebrew Reference Book: <a href=\"https://swse.fandom.com/wiki/DMF%27s_Big_List_of_SWSE_NPCs\" title=\"DMF's Big List of SWSE NPCs\">DMF's Big List of SWSE NPCs<\/a><\/i> <\/p><p>Resembling light armor padding, these pads help to insulate a shockboxer from the stunning effects of their opponent's punches, ensuring the spectators get their credits' worth out of the fight. Shockboxing Pads provide a +2 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to the wearer's <a href=\"https://swse.fandom.com/wiki/Damage_Threshold\" class=\"mw-redirect\" title=\"Damage Threshold\">Damage Threshold<\/a>, but only when resisting the effects of <a href=\"https://swse.fandom.com/wiki/Stun_Damage\" title=\"Stun Damage\">Stun Damage<\/a>. <\/p>",
+                "source": "DMF's Big List of SWSE NPCs"
+            },
+            "name": "Shockboxing Pads",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Climbing Claws are retractable spikes worked into the arms and legs of a suit of Armor. When wearing this Armor, you gain a Climb Speed equal to one-half your your armored walking speed. Additionally, you can reroll a failed&nbsp;<a href=\"https://swse.fandom.com/wiki/Climb\" title=\"Climb\">Climb<\/a> check (keeping the better of the two results) and can&nbsp;<a href=\"https://swse.fandom.com/wiki/Take_10\" class=\"mw-redirect\" title=\"Take 10\">Take 10<\/a>&nbsp;on&nbsp;<a href=\"https://swse.fandom.com/wiki/Climb\" title=\"Climb\">Climb<\/a> checks even when rushed or threatened. <\/p><p>The wearer can use Climbing Claws to attack foes in melee. They count as being Weapons two sizes smaller than the wearer, and they deal Slashing Damage equal to the base Claw Damage for a <a href=\"https://swse.fandom.com/wiki/Beast\" title=\"Beast\">Beast<\/a> of that size (see <a href=\"https://swse.fandom.com/wiki/Allies_and_Opponents\" title=\"Allies and Opponents\">Allies and Opponents<\/a>). For example, a Medium character would have Tiny Climbing Claws that deal 1d4 points of Slashing Damage. If your are proficient with the suit of Armor you're wearing, you are proficient with any Climbing Claws installed on it. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Climbing Claws (Armor Upgrade)",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "20000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A more advanced version of <a href=\"https://swse.fandom.com/wiki/Shadowskin\" title=\"Shadowskin\">Shadowskin<\/a> uses the material Reflec, which was developed by the Grand Army of the Republic and later used by various Imperial special forces units. Reflec is more effective but also more expensive than normal <a href=\"https://swse.fandom.com/wiki/Shadowskin\" title=\"Shadowskin\">Shadowskin<\/a>. A suit of Armor with Reflec Shadowskin adds a +10 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus on it's wearer's <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Reflec Shadowskin",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>This Upgrade seals your Armor against the pressure of deep ocean travel, allows you to filter breathable air out of water indefinitely, and uses fins and small jets to allow swift and easy motion through liquids. When wearing this Armor, you gain a swim speed equal to one-half your armored walking speed and can breathe in water. <\/p><p>Additionally, you can reroll a failed <a href=\"https://swse.fandom.com/wiki/Swim\" title=\"Swim\">Swim<\/a> check (keeping the better of the two results) and can <a href=\"https://swse.fandom.com/wiki/Take_10\" class=\"mw-redirect\" title=\"Take 10\">Take 10<\/a> on <a href=\"https://swse.fandom.com/wiki/Swim\" title=\"Swim\">Swim<\/a> checks even when rushed or threatened. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Aquatic Adaptation",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "5,000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Restricted",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A matte black finish of light- and sensor-absorbing material, a Shadowskin turns any armor coated with it into a stealth suit. Normally coupled with a sound dampener (included in this modification cost), it is difficult to see, hear, or detect the armor with sensors. <\/p><p>Armor with Shadowskin grants a +5 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus on all <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks made by the wearer. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Shadowskin",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "5000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Restricted, Rare",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<table style=\"width:100%; margin-top:1em; border:1px solid #999; font-size:90%; text-align:center; background:#363636\"> \n <tbody>\n  <tr> \n   <td><i>This article details the Holoshroud Armor Upgrade found in <a href=\"https://swse.fandom.com/wiki/Scum_and_Villainy\" class=\"mw-redirect\" title=\"Scum and Villainy\">Scum and Villainy<\/a>. You may be looking for the <a href=\"https://swse.fandom.com/wiki/Force_Unleashed_Campaign_Guide\" class=\"mw-redirect\" title=\"Force Unleashed Campaign Guide\">Force Unleashed Campaign Guide<\/a> Equipment of the same name, the <a href=\"https://swse.fandom.com/wiki/Holoshroud\" title=\"Holoshroud\">Holoshroud<\/a>.<\/i> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><br> <i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Holoshroud Upgrade places small holographic projectors at key points around the Armor. These projectors are linked together and designed to place a holographic image over the Armor (and its wearer). The image moves as the Armor moves, making the illusion of a different appearance difficult to penetrate. <\/p><p>The Holoshroud can store only a single image, which must be of the same basic size and shape as the Armor (generally humanoid). The image can be changed with an hour of work and a DC 20 <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> check. <\/p><p>The Holoshroud provides a +10 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus on <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks to conceal items (underneath the image) as well as any <a href=\"https://swse.fandom.com/wiki/Deception\" title=\"Deception\">Deception<\/a> checks made to create a <a href=\"https://swse.fandom.com/wiki/Deceptive_Appearance\" class=\"mw-redirect\" title=\"Deceptive Appearance\">Deceptive Appearance<\/a> matching the image. However, the Holoshroud doesn't withstand scrutiny, so any observer who uses a <a href=\"https://swse.fandom.com/wiki/Full-Round_Action\" class=\"mw-redirect\" title=\"Full-Round Action\">Full-Round Action<\/a> to search the wearer gains a +10 circumstance bonus on the opposed <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> check. Furthermore, the Holoshroud doesn't have any tactile, auditory, or olfactory component, so observers with the Scent Species Trait or using a <a href=\"https://swse.fandom.com/wiki/Sensor_Pack\" title=\"Sensor Pack\">Sensor Pack<\/a> gain a +10 circumstance bonus on their <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> checks. <\/p><p>The Holoshroud draws power from a standard <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>, which gives enough power for twenty rounds of use drawn in any increment). Such Armors are often Upgraded with the <a href=\"https://swse.fandom.com/wiki/Extra_Power_Source\" title=\"Extra Power Source\">Extra Power Source<\/a> or <a href=\"https://swse.fandom.com/wiki/Internal_Generator\" title=\"Internal Generator\">Internal Generator<\/a> modifications to extend this operating time. You can turn a Holoshroud on or off as a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Holoshroud",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th><a href=\"https://swse.fandom.com/wiki/SHIELD_RATING\" class=\"mw-redirect\" title=\"SHIELD RATING\">SHIELD RATING<\/a> <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th>\n  <\/tr> \n  <tr> \n   <td>5 <\/td> \n   <td>5,000 <\/td> \n   <td>2 <\/td> \n   <td><a href=\"https://swse.fandom.com/wiki/Restricted\" class=\"mw-redirect\" title=\"Restricted\">Restricted<\/a> <\/td>\n  <\/tr> \n  <tr> \n   <td>10 <\/td> \n   <td>10,000 <\/td> \n   <td>3 <\/td> \n   <td><a href=\"https://swse.fandom.com/wiki/Military\" class=\"mw-redirect\" title=\"Military\">Military<\/a> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>A deflector Shield Generator can be built into a suit of <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor<\/a> or <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a>, giving it the same kind of protection <a href=\"https://swse.fandom.com/wiki/Starships\" class=\"mw-redirect\" title=\"Starships\">Starships<\/a> and some Battle <a href=\"https://swse.fandom.com/wiki/Droids\" title=\"Droids\">Droids<\/a> enjoy. Due to their bulk and power requirements, it is not possible to install anything but the smallest of Shield Generators into a suit of Armor; in fact, only <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a> of at least Medium size can carry a SR 10 Shield Generator. <\/p><p>Shield Generators operate for 10 rounds on a standard <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>. (Suits of Armor with Shield Generators commonly have the <a href=\"https://swse.fandom.com/wiki/Internal_Generator\" title=\"Internal Generator\">Internal Generator<\/a> Upgrade.) Turning a Shield Generator on or off is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. When active, reduce the damage you take by the Armor's <a href=\"https://swse.fandom.com/wiki/Shield_Rating\" title=\"Shield Rating\">Shield Rating<\/a>. If the damage is equal to or greater than the Armor's <a href=\"https://swse.fandom.com/wiki/Shield_Rating\" title=\"Shield Rating\">Shield Rating<\/a>, the <a href=\"https://swse.fandom.com/wiki/Shield_Rating\" title=\"Shield Rating\">Shield Rating<\/a> is reduced by 5 points. By spending three <a href=\"https://swse.fandom.com/wiki/Swift_Actions\" title=\"Swift Actions\">Swift Actions<\/a> on the same or consecutive rounds, the wearer can make a DC 20 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check to restore lost shield power. If the check succeeds, the Armor's <a href=\"https://swse.fandom.com/wiki/Shield_Rating\" title=\"Shield Rating\">Shield Rating<\/a> increases by 5 points (up to its maximum <a href=\"https://swse.fandom.com/wiki/Shield_Rating\" title=\"Shield Rating\">Shield Rating<\/a>). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Shield Generator (Armor Upgrade)",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "3,000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0.6 Kilogram",
+                        "key": "weight"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<table style=\"width:100%; margin-top:2em; border:2px solid #999; font-size:105%; text-align:center; background:#00008B;\"> \n <tbody>\n  <tr> \n   <td><i><b>This <a href=\"https://swse.fandom.com/wiki/Homebrew_Content\" title=\"Homebrew Content\">Homebrew Content<\/a> has been <a href=\"https://swse.fandom.com/wiki/Category:Tested\" title=\"Category:Tested\">Tested<\/a> per the <a href=\"https://swse.fandom.com/wiki/Category:Untested\" title=\"Category:Untested\">Untested<\/a> guidelines. Whether or not it can be used is, as always, the prerogative of the Gamemaster.<\/b><\/i> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><i>Night Vision Device equipment data created by unknown Wikia user.<\/i> <\/p><p>A Night Vision Device grants Darkvision to its users, much like a <a href=\"https://swse.fandom.com/wiki/Helmet_Package\" title=\"Helmet Package\">Helmet Package<\/a> grants Low-Light Vision. Installing the Night Vision Device to a helmet or other headwear takes 1 hour, and a DC 20 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. <\/p><p>When installed in the helmet of a suit of armor (or worn on its own, just as <a href=\"https://swse.fandom.com/wiki/Helmet_Package\" title=\"Helmet Package\">Helmet Package<\/a> can be worn, or installed into other suit type, such as <a href=\"https://swse.fandom.com/wiki/Flight_Suit\" title=\"Flight Suit\">Flight Suit<\/a>), this electronic package allows to grant the wearer ability to ignore <a href=\"https://swse.fandom.com/wiki/Concealment\" title=\"Concealment\">Concealment<\/a> (including <a href=\"https://swse.fandom.com/wiki/Total_Concealment\" class=\"mw-redirect\" title=\"Total Concealment\">Total Concealment<\/a>) from darkness, and freely see in and through it unobstructed. It is compatible with a <a href=\"https://swse.fandom.com/wiki/Helmet_Package\" title=\"Helmet Package\">Helmet Package<\/a> and other <a href=\"https://swse.fandom.com/wiki/Detection_and_Surveillance_Devices\" title=\"Detection and Surveillance Devices\">Detection and Surveillance Devices<\/a> and <a href=\"https://swse.fandom.com/wiki/Weapon_and_Armor_Accessories\" title=\"Weapon and Armor Accessories\">Weapon and Armor Accessories<\/a>. <\/p>"
+            },
+            "name": "Night Vision Device",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "6,000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Shockweb is a powerful electrified stun field that can encase the entire surface of the Armor. It runs off an <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>, which can power it for 20 minutes. Turning the Shockweb on or off is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. <\/p><p>While the Shockweb is active, any time you are the target of a successful melee attack, <a href=\"https://swse.fandom.com/wiki/Grab\" title=\"Grab\">Grab<\/a> attack, or <a href=\"https://swse.fandom.com/wiki/Grapple\" title=\"Grapple\">Grapple<\/a> attack, the attackers takes 1d6 electrical damage and 2d6 electrical <a href=\"https://swse.fandom.com/wiki/Stun\" class=\"mw-redirect\" title=\"Stun\">Stun<\/a> damage. Each time an attacker is damaged in this way, the Shockweb discharges 1 minute of duration off its <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Shockweb",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Rangefinder built into a suit of Armor works like a Weapon <a href=\"https://swse.fandom.com/wiki/Rangefinder\" title=\"Rangefinder\">Rangefinder<\/a>, but it applies only to ranged attacks made by Weapons built into the Armor on a <a href=\"https://swse.fandom.com/wiki/Weapon_Mount\" title=\"Weapon Mount\">Weapon Mount<\/a>. Its benefits apply to other Ranged Weapons only if you Aim immediately before making the attack. <\/p><p>Any attack using a Rangefinder takes no penalty when used against a target at Short <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>. Thus, if your suit of Armor had a Rangefinder and a <a href=\"https://swse.fandom.com/wiki/Blaster_Pistol\" title=\"Blaster Pistol\">Blaster Pistol<\/a> built into a <a href=\"https://swse.fandom.com/wiki/Weapon_Mount\" title=\"Weapon Mount\">Weapon Mount<\/a>, you would take no <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> penalty on attacks against targets up to 40 squares away. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Rangefinder (Armor Upgrade)",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>VACUUM SEALS <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th>\n  <\/tr> \n  <tr> \n   <td>Standard <\/td> \n   <td>2000 <\/td> \n   <td>0 <\/td> \n   <td>Common <\/td>\n  <\/tr> \n  <tr> \n   <td>Improved <\/td> \n   <td>5000 <\/td> \n   <td>1 <\/td> \n   <td>Common <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>Any Armor can be Upgraded with Vacuum Seals, which include airtight gaskets around all joints and simple <a href=\"https://swse.fandom.com/wiki/Life_Support\" title=\"Life Support\">Life Support<\/a> Equipment that adds 2 kg of weight. This allows the Armor's wearer to survive for 10 hours in the <a href=\"https://swse.fandom.com/wiki/Vacuum\" title=\"Vacuum\">Vacuum<\/a> of space or any other hostile environment. <\/p><p><a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor<\/a> and <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a> can instead Upgrade themselves with Improved Vacuum Seals, which includes enough <a href=\"https://swse.fandom.com/wiki/Life_Support\" title=\"Life Support\">Life Support<\/a> to last up to 24 hours, and adds 10 kg of weight. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Vacuum Seals",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "900",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>This Upgrades the standard Durasteel or other defensive plates of Armor with high-strength Armorplast or a similar lightweight, high-cost material. This reduces the weight of the Armor by 50%. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Armorplast",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "400",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Radiation Shielding is necessary heavy and bulky. Only a suit of <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor<\/a> or <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a> can be modified with Radiation Shielding, and it increases the Armor's weight by 10 kg. The Radiation Shielding grants a +10 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to a wearer's <a href=\"https://swse.fandom.com/wiki/Fortitude_Defense\" class=\"mw-redirect\" title=\"Fortitude Defense\">Fortitude Defense<\/a> against <a href=\"https://swse.fandom.com/wiki/Radiation\" title=\"Radiation\">Radiation<\/a> attacks, and it reduces any damage dealt by a successful <a href=\"https://swse.fandom.com/wiki/Radiation\" title=\"Radiation\">Radiation<\/a> attack by 5 points. In addition, any time you would move -1 <a href=\"https://swse.fandom.com/wiki/Persistent\" class=\"mw-redirect\" title=\"Persistent\">Persistent<\/a> step down the <a href=\"https://swse.fandom.com/wiki/Condition_Track\" class=\"mw-redirect\" title=\"Condition Track\">Condition Track<\/a> as a result of <a href=\"https://swse.fandom.com/wiki/Radiation\" title=\"Radiation\">Radiation<\/a> damage while wearing this Armor, you can make a DC 20 <a href=\"https://swse.fandom.com/wiki/Endurance\" title=\"Endurance\">Endurance<\/a> check to negate the <a href=\"https://swse.fandom.com/wiki/Persistent_Condition\" class=\"mw-redirect\" title=\"Persistent Condition\">Persistent Condition<\/a>. You can make this check only the first time you move down the <a href=\"https://swse.fandom.com/wiki/Condition_Track\" class=\"mw-redirect\" title=\"Condition Track\">Condition Track<\/a> due to a particular <a href=\"https://swse.fandom.com/wiki/Radiation\" title=\"Radiation\">Radiation<\/a> Hazard; if you fail, you must have the <a href=\"https://swse.fandom.com/wiki/Persistent_Condition\" class=\"mw-redirect\" title=\"Persistent Condition\">Persistent Condition<\/a> cured normal (see <a href=\"https://swse.fandom.com/wiki/Treat_Radiation\" class=\"mw-redirect\" title=\"Treat Radiation\">Treat Radiation<\/a>). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Radiation Shielding",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><table class=\"wikitable\"> \n <caption>\n  Integrated Equipment Slots \n <\/caption> \n <tbody>\n  <tr> \n   <th>SLOTS <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th>\n  <\/tr> \n  <tr> \n   <td>1 <\/td> \n   <td>200 <\/td> \n   <td>1 <\/td> \n   <td>Common <\/td>\n  <\/tr> \n  <tr> \n   <td>2 <\/td> \n   <td>500 <\/td> \n   <td>1 <\/td> \n   <td>Common <\/td>\n  <\/tr> \n  <tr> \n   <td>5 <\/td> \n   <td>1000 <\/td> \n   <td>1 <\/td> \n   <td>Common <\/td>\n  <\/tr> \n  <tr> \n   <td>10 <\/td> \n   <td>2000 <\/td> \n   <td>2 <\/td> \n   <td>Common <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>An Integrated Equipment Upgrade attaches one piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> to the Armor per Slot. The <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> must be three or more sizes smaller than the Armor itself. For example, Armor for a Medium character is Medium size, so it can mount <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> up to Diminutive size (such as <a href=\"https://swse.fandom.com/wiki/Electrobinoculars\" title=\"Electrobinoculars\">Electrobinoculars<\/a>, a <a href=\"https://swse.fandom.com/wiki/Glow_Rod\" title=\"Glow Rod\">Glow Rod<\/a>, or a <a href=\"https://swse.fandom.com/wiki/Medpac\" title=\"Medpac\">Medpac<\/a>) or a Weapon up to Small size (such as a <a href=\"https://swse.fandom.com/wiki/Blaster_Pistol\" title=\"Blaster Pistol\">Blaster Pistol<\/a> or <a href=\"https://swse.fandom.com/wiki/Vibroblade\" title=\"Vibroblade\">Vibroblade<\/a>). This <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> is constantly ready for use and need not be drawn or prepared before being used. Once a suit of Armor is rigged for Integrated Equipment, it becomes increasingly easy to add new pieces of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> as built-in modules. As a result, prices and Upgrade Slot costs are given for 1, 2, 5, and 10 Slots of Integrated Equipment (see above). <\/p><p>It is easy to swap out the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> attached to Armor with this Upgrade. A single piece of Integrated Equipment can be swapped out for a different piece of gear in 10 minutes with a DC 10 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check. The price of any <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> attached to the Armor is separate from the Integrated Equipment Upgrade cost. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Integrated Equipment",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Ready Harness is a series of hooks, straps, and clips distributed around the Armor, designed to make <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> easily accessible and to settle its weight more comfortably on the wearer's frame. A Ready Harness can hold two Small sized pieces of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> (Large Weapon size), five Tiny sized pieces of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> (Medium Weapon size), or ten pieces of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> up to Diminutive size (Small Weapon size). <\/p><p>The weight of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> in the Ready Harness is halved for purposes of determining your <a href=\"https://swse.fandom.com/wiki/Encumbrance\" title=\"Encumbrance\">Encumbrance<\/a>, and such <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> can be retrieved or replaced as a <a href=\"https://swse.fandom.com/wiki/Move_Action\" class=\"mw-redirect\" title=\"Move Action\">Move Action<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Ready Harness",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "600",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Environmental Systems come in two varieties: Cold-Weather Systems and Warm-Weather Systems. It is possible to install both in the same suit of Armor, but doing so counts as two separate Upgrades. An Environmental System makes you immune to the effects of <a href=\"https://swse.fandom.com/wiki/Extreme_Cold\" class=\"mw-redirect\" title=\"Extreme Cold\">Extreme Cold<\/a> or <a href=\"https://swse.fandom.com/wiki/Extreme_Heat\" class=\"mw-redirect\" title=\"Extreme Heat\">Extreme Heat<\/a>, as appropriate. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Environmental Systems",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Diagnostics System is a series of sensors and simple computers that monitor both the armor and its wearer. Anyone making a <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check on the armor or a <a href=\"https://swse.fandom.com/wiki/Treat_Injury\" title=\"Treat Injury\">Treat Injury<\/a> check on its wearer gains a +2 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus from the Diagnostics System. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Diagnostics System",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "4000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Much like the <a href=\"https://swse.fandom.com/wiki/Corellian_Powersuit\" title=\"Corellian Powersuit\">Corellian Powersuit<\/a>, other Armors can be Upgraded to include a Powered Exoskeleton that enhances the physical strength of the wearer. Because of the weight and energy required, only a suit of <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor<\/a> or <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a> can have the Powered Exoskeleton Upgrade. <\/p><p>A Powered Exoskeleton operates for 20 rounds on a standard <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>. (Suits of Armor with a Powered Exoskeleton commonly have the <a href=\"https://swse.fandom.com/wiki/Internal_Generator\" title=\"Internal Generator\">Internal Generator<\/a> Upgrade.) Turning a Powered Exoskeleton on or off is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. When active, the Powered Exoskeleton gives the wearer a +2 <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> bonus to their <a href=\"https://swse.fandom.com/wiki/Strength\" title=\"Strength\">Strength<\/a> score. A Powered Exoskeleton adds 5 kg to the weight of the Armor. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Powered Exoskeleton",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [{
+                    "mode": 2,
+                    "value": true,
+                    "key": "itemMod"
+                }],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>WEAPON MOUNT <\/th> \n   <th>COST <\/th> \n   <th>UPGRADE POINT COST <\/th> \n   <th>AVAILABILITY <\/th>\n  <\/tr> \n  <tr> \n   <td>Standard <\/td> \n   <td>1000 <\/td> \n   <td>1 <\/td> \n   <td><a href=\"https://swse.fandom.com/wiki/Restricted\" class=\"mw-redirect\" title=\"Restricted\">Restricted<\/a> <\/td>\n  <\/tr> \n  <tr> \n   <td>Concealed <\/td> \n   <td>3000 <\/td> \n   <td>1 <\/td> \n   <td><a href=\"https://swse.fandom.com/wiki/Restricted\" class=\"mw-redirect\" title=\"Restricted\">Restricted<\/a> <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p>Armors can add any <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> using the <a href=\"https://swse.fandom.com/wiki/Integrated_Equipment\" title=\"Integrated Equipment\">Integrated Equipment<\/a> Upgrade, but dedicated Weapon Mounts allow Weapons to be added more efficiently. The number of Weapon Mounts gained for each Upgrade Slot spent is proportional to the type of Armor Upgraded; <a href=\"https://swse.fandom.com/wiki/Light_Armor\" title=\"Light Armor\">Light Armor<\/a> gains 2 Weapon Mounts, <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor<\/a> gains 3 Weapon Mounts, and <a href=\"https://swse.fandom.com/wiki/Heavy_Armor\" title=\"Heavy Armor\">Heavy Armor<\/a> gains 4 Weapon Mounts. <\/p><p>A two-handed Weapon requires 2 Weapon Mounts, a one-handed Weapon requires 1 Weapon Mounts, and a light Weapon requires only half of a Weapon Mount. You must be proficient with both the Weapon and the Armor on which it is mounted to be considered proficient with a Mounted Weapon. (Any Weapon described as gloves or gauntlets, such as <a href=\"https://swse.fandom.com/wiki/Combat_Gloves\" title=\"Combat Gloves\">Combat Gloves<\/a>, can be worn with Armor without a Weapon Mount, but only one such Weapon can be worn at a time.) <\/p><p>This Upgrade does not include the cost of the Weapons to be mounted. Such Weapons are designed only for mount use, and can't be fired as hand-held Weapons. It takes 10 minutes and a DC 10 <a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics<\/a> check to change Weapons in a Weapon Mount. A Mounted Weapon cannot be <a href=\"https://swse.fandom.com/wiki/Disarmed\" class=\"mw-redirect\" title=\"Disarmed\">Disarmed<\/a>, and it need not be drawn to be used. Weapons in mounts are obvious unless the Weapon Mount is Concealed, in which case it takes a DC 25 <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> check to notice the Weapon when not in use. A Mounted Weapon does not gain any benefit from the Armor if the Weapon takes damage. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Weapon Mount",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A miniaturized version of a <a href=\"https://swse.fandom.com/wiki/Power_Generator\" title=\"Power Generator\">Power Generator<\/a>, an Internal Generator can provide continuous power for different Upgrades on a suit of Armor, including any <a href=\"https://swse.fandom.com/wiki/Integrated_Equipment\" title=\"Integrated Equipment\">Integrated Equipment<\/a>. The Internal Generator can be activated or deactivated as a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. As long as it's active, an Internal Generator can simultaneously power up to ten different devices that have negligible power requirements (anything without a listed duration). <\/p><p>For devices with specific power requirements, an Internal Generator can store four units of energy (each the equivalent of an <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>, <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a>, or 20 rounds of power from a <a href=\"https://swse.fandom.com/wiki/Power_Generator\" title=\"Power Generator\">Power Generator<\/a>), and it automatically recharges one such unit every hour. A suit of Armor can receive this Upgrade multiple times if more energy capacity is needed, but each Internal Generator adds 10 kg to the weight of the Armor. <\/p><p>The biggest drawback to an Internal Generator is it's energy signature. If the Internal Generator powers anything but devices with negligible power requirements, any character attempting to detect the wearer with a <a href=\"https://swse.fandom.com/wiki/Sensor_Pack\" title=\"Sensor Pack\">Sensor Pack<\/a> or <span class=\"new\" title=\"Vehicle Sensors (page does not exist)\" data-uncrawlable-url=\"L3dpa2kvVmVoaWNsZV9TZW5zb3JzP2FjdGlvbj1lZGl0JnJlZGxpbms9MQ==\">Vehicle Sensors<\/span> gains a +5 circumstance bonus on the <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> or <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> check. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Internal Generator",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "250",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Gyro helps keep Armor upright and stable. While wearing Armor with this Upgrade, you gain a +5 stability bonus on checks and all <a href=\"https://swse.fandom.com/wiki/Defenses\" title=\"Defenses\">Defenses<\/a> to resist attempts to knock you <a href=\"https://swse.fandom.com/wiki/Prone\" class=\"mw-redirect\" title=\"Prone\">Prone<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Gyro",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>This Upgrade takes the same kind of hover repulsorlifts used by <a href=\"https://swse.fandom.com/wiki/Droids\" title=\"Droids\">Droids<\/a> and modifies them to allow the Armor to float up to 1 meter off the ground. The wearer can activate or deactivate the Repulsorlift as a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. While the Repulsorlift is operating, the wearer ignores the effects of <a href=\"https://swse.fandom.com/wiki/Difficult_Terrain\" title=\"Difficult Terrain\">Difficult Terrain<\/a> and takes half damage from <a href=\"https://swse.fandom.com/wiki/Falling_Damage\" title=\"Falling Damage\">Falling Damage<\/a>. A Repulsorlift operates for 10 rounds on a single <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Repulsorlift Unit",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Armor Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Jump Servos are a repulsorlift-aided system that assists in making long jumps. When wearing Armor with this Upgrade, you treat all jumps as <a href=\"https://swse.fandom.com/wiki/Running_Jumps\" class=\"mw-redirect\" title=\"Running Jumps\">Running Jumps<\/a>. Additionally, you can reroll a failed <a href=\"https://swse.fandom.com/wiki/Jump\" title=\"Jump\">Jump<\/a> check (keeping the better of the two results) and <a href=\"https://swse.fandom.com/wiki/Take_10\" class=\"mw-redirect\" title=\"Take 10\">Take 10<\/a> on <a href=\"https://swse.fandom.com/wiki/Jump\" title=\"Jump\">Jump<\/a> checks even when rushed or threatened. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Jump Servos",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "3000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>An Ion Charger encases a Melee Weapon in a light <a href=\"https://swse.fandom.com/wiki/Ion\" class=\"mw-redirect\" title=\"Ion\">Ion<\/a> field that flares to full strength anytime the Weapon strikes something. This causes the Melee Weapon to deal 2d6 <a href=\"https://swse.fandom.com/wiki/Ion\" class=\"mw-redirect\" title=\"Ion\">Ion<\/a> damage in addition to its normal Melee Damage. <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats<\/a> and <a href=\"https://swse.fandom.com/wiki/Talents\" title=\"Talents\">Talents<\/a> that add to a Weapon's damage (such as the <a href=\"https://swse.fandom.com/wiki/Rapid_Strike\" title=\"Rapid Strike\">Rapid Strike<\/a> Feat) have no effect on the <a href=\"https://swse.fandom.com/wiki/Ion\" class=\"mw-redirect\" title=\"Ion\">Ion<\/a> damage dealt by a Weapon with an Ion Charger (though they increase the Weapon's base damage as normal). <\/p><p>Ion Chargers are common on <a href=\"https://swse.fandom.com/wiki/Vibroblade\" title=\"Vibroblade\">Vibroblades<\/a>, and are often referred to as an \"Ionite Edge.\" <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Ion Charger",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "3000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Neutronium is a heavy, neutron-rich metallic alloy used to make Armor and reinforce <a href=\"https://swse.fandom.com/wiki/Starships\" class=\"mw-redirect\" title=\"Starships\">Starships<\/a>. It can also be used to harden and sharpen the striking or cutting surface of Melee Weapons other than <a href=\"https://swse.fandom.com/wiki/Lightsabers\" title=\"Lightsabers\">Lightsabers<\/a>. Any <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> given Neutronium Reinforcement gains +5 DR (Maximum DR 15), 10 Hit Points, and +100% weight. A Slashing or Piercing Melee Weapon given Neutronium Reinforcement scores a Critical Hit on a natural roll of 19 or 20. (Only a Natural 20 is an automatic hit, however.) <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Neutronium Reinforcement",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Bipod is an attached two-legged stand that steadies the barrel of a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> or <a href=\"https://swse.fandom.com/wiki/Heavy_Weapon\" class=\"mw-redirect\" title=\"Heavy Weapon\">Heavy Weapon<\/a> when <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a> or using <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a>. Preparing a Bipod for use is a Move Action, and you cannot prepare a Bipod unless you are either <a href=\"https://swse.fandom.com/wiki/Prone\" class=\"mw-redirect\" title=\"Prone\">Prone<\/a> or adjacent to low objects (or other waist- to chest-height <a href=\"https://swse.fandom.com/wiki/Cover\" title=\"Cover\">Cover<\/a>) that are between you and your target. If you move, you cannot use the Bipod until you prepare it again. <\/p><p>A Bipod counts as a mount for any Weapon that requires it (such as a <a href=\"https://swse.fandom.com/wiki/Heavy_Repeating_Blaster\" title=\"Heavy Repeating Blaster\">Heavy Repeating Blaster<\/a> or an <a href=\"https://swse.fandom.com/wiki/E-Web_Repeating_Blaster\" title=\"E-Web Repeating Blaster\">E-Web Repeating Blaster<\/a>). For other Weapons, a Bipod makes <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a> easier. If you have already <a href=\"https://swse.fandom.com/wiki/Aimed\" class=\"mw-redirect\" title=\"Aimed\">Aimed<\/a> at or attacked a particular target, each subsequent <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> Action requires only a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. (Under these circumstances, a character with the <b><a href=\"https://swse.fandom.com/wiki/Sniping_Master\" class=\"mw-redirect\" title=\"Sniping Master\">Sniping Master<\/a><\/b> Talent can <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> as a <a href=\"https://swse.fandom.com/wiki/Free_Action\" class=\"mw-redirect\" title=\"Free Action\">Free Action<\/a> once per round.) This benefit is lost if you attack or <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> at any other target. <\/p><p>A Bipod adds 20% to the weight of the Weapon (minimum 1 kilogram). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Bipod",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any Blaster Weapon can be fitted with a Pulse Charger. A Pulse Charger forces more power into the blast chamber, producing more powerful shots at the expense of lost accuracy. This Upgrade causes a -1 penalty on all attack rolls with the weapon, but the weapon deals +1 point of damage per die. <\/p><p>Thus, a <a href=\"https://swse.fandom.com/wiki/Sporting_Blaster_Pistol\" title=\"Sporting Blaster Pistol\">Sporting Blaster Pistol<\/a> with a Pulse Charger imposes a -1 penalty on attack rolls and deals 3d4+3 points of Energy damage on a hit. A blaster with a Pulse Charger has only one-half the normal number of shots from a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Pulse Charger",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any Ranged Weapon can have a Rangefinder built into it. Such a Weapon takes no penalty when used to attack a target at Short <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>. Thus, a <a href=\"https://swse.fandom.com/wiki/Blaster_Pistol\" title=\"Blaster Pistol\">Blaster Pistol<\/a> with a Rangefinder Upgrade takes no <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> penalty on attacks against targets up to 40 squares away. <\/p><p>This is essentially an improved version of a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a>, and thus its benefits do not stack with those of <a href=\"https://swse.fandom.com/wiki/Targeting_Scopes\" class=\"mw-redirect\" title=\"Targeting Scopes\">Targeting Scopes<\/a>. (However, a Weapon can have both a Rangefinder and a <a href=\"https://swse.fandom.com/wiki/Targeting_Scope\" title=\"Targeting Scope\">Targeting Scope<\/a>, using the latter only when <a href=\"https://swse.fandom.com/wiki/Aiming\" class=\"mw-redirect\" title=\"Aiming\">Aiming<\/a> at targets at Medium or Long <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>.) <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Rangefinder",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0 or 1 (See below)",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> or <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a> (as well as <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a>- or <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a>-like <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons_(Ranged)\" title=\"Exotic Weapons (Ranged)\">Exotic Weapons (Ranged)<\/a>) can have a Retractable Stock added. This Upgrade requires 1 <a href=\"https://swse.fandom.com/wiki/Upgrade_Slot\" class=\"mw-redirect\" title=\"Upgrade Slot\">Upgrade Slot<\/a> for a <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a>, but 0 <a href=\"https://swse.fandom.com/wiki/Upgrade_Slots\" title=\"Upgrade Slots\">Upgrade Slots<\/a> for a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a>. (A <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> already has a stock, which can be replaced with the Retractable Stock.) Extending or folding a Retractable Stock is a <a href=\"https://swse.fandom.com/wiki/Move_Action\" class=\"mw-redirect\" title=\"Move Action\">Move Action<\/a>. <\/p><p>When the Retractable Stock is folded, the following rules apply: <\/p><ul>\n <li>Treat the Weapon as a <a href=\"https://swse.fandom.com/wiki/Pistol\" class=\"mw-redirect\" title=\"Pistol\">Pistol<\/a> for purposes of proficiency and <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>.<\/li> \n <li>You cannot <a href=\"https://swse.fandom.com/wiki/Brace\" class=\"mw-redirect\" title=\"Brace\">Brace<\/a> the Weapon while using it in <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a> mode, even if it is an <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a>-only Weapon.<\/li>\n<\/ul><p>When the Retractable Stock is extended, the following rules apply: <\/p><ul>\n <li>Treat the Weapon as a <a href=\"https://swse.fandom.com/wiki/Rifle\" class=\"mw-redirect\" title=\"Rifle\">Rifle<\/a> for purposes of proficiency and <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a>.<\/li> \n <li>You take a -5 penalty on attack rolls with the Weapon if you use it in one hand (regardless of its size relative to you).<\/li>\n<\/ul><p>Certain Weapons come with a Retractable Stock as a standard feature, as detailed in their descriptions. No <a href=\"https://swse.fandom.com/wiki/Upgrade_Slots\" title=\"Upgrade Slots\">Upgrade Slots<\/a> are spent in this case. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Retractable Stock",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "250",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>An Overload Switch allows any Energy weapon to build a feedback loop that causes it to explode. When activated as a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>, the weapon becomes an <a href=\"https://swse.fandom.com/wiki/Improvised_Thrown_Weapon\" class=\"mw-redirect\" title=\"Improvised Thrown Weapon\">Improvised Thrown Weapon<\/a> (-5 penalty on your ranged attack roll) with a 2-square <a href=\"https://swse.fandom.com/wiki/Burst\" class=\"mw-redirect\" title=\"Burst\">Burst<\/a>. <\/p><p>A weapon whose size is two or more steps greater than yours (such as a <a href=\"https://swse.fandom.com/wiki/Human\" title=\"Human\">Human<\/a> using an <a href=\"https://swse.fandom.com/wiki/E-Web_Repeating_Blaster\" title=\"E-Web Repeating Blaster\">E-Web Repeating Blaster<\/a>) cannot be <a href=\"https://swse.fandom.com/wiki/Thrown\" class=\"mw-redirect\" title=\"Thrown\">Thrown<\/a>, so it will instead detonate at the end of your turn. <\/p><p>The overloaded weapon deals Energy damage equal to double its normal damage dice; for example, an overloaded <a href=\"https://swse.fandom.com/wiki/Blaster_Pistol\" title=\"Blaster Pistol\">Blaster Pistol<\/a> deals 6d6 points of Energy damage. Once the Overload Switch is used, the weapon is destroyed. This modification cannot be added to <a href=\"https://swse.fandom.com/wiki/Grenades\" title=\"Grenades\">Grenades<\/a>, <a href=\"https://swse.fandom.com/wiki/Mines\" title=\"Mines\">Mines<\/a>, or other <a href=\"https://swse.fandom.com/wiki/Explosives\" title=\"Explosives\">Explosives<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Overload Switch",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "800",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Weapon with a Double Trigger treats one trigger as a \"Safety,\" with the second trigger being a hair trigger that fires when the slightest pressure is applied to it. Weapons of this type can be extremely accurate, since only a small amount of pressure is needed to fire them (reducing the chance of moving the Weapon slightly while pulling the trigger), but this takes time and training. <\/p><p>If a character has the <a href=\"https://swse.fandom.com/wiki/Careful_Shot\" title=\"Careful Shot\">Careful Shot<\/a> feat, they gain a +2 bonus on attack rolls if they <a href=\"https://swse.fandom.com/wiki/Aim\" title=\"Aim\">Aim<\/a> with a Weapon that has the Double Trigger <a href=\"https://swse.fandom.com/wiki/Weapon_Upgrade\" class=\"mw-redirect\" title=\"Weapon Upgrade\">Weapon Upgrade<\/a> (rather than the normal +1 bonus provided by the feat). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Double Trigger",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Sniper Switch allows a Weapon that can be normally fired only in <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a> mode (such as an <a href=\"https://swse.fandom.com/wiki/E-Web_Repeating_Blaster\" title=\"E-Web Repeating Blaster\">E-Web Repeating Blaster<\/a>) to be used in Single-Fire mode. However, the Weapon no longer has reduced <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a> penalties when <a href=\"https://swse.fandom.com/wiki/Braced\" class=\"mw-redirect\" title=\"Braced\">Braced<\/a> because it is no longer an <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a>-only Weapon. Switching between the two firing modes is a&nbsp;<a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Sniper Switch",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "250",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A grenade's charge can be converted into a missile warhead. Once turned into a missile, the device cannot be <a href=\"https://swse.fandom.com/wiki/Thrown\" class=\"mw-redirect\" title=\"Thrown\">Thrown<\/a> as a <a href=\"https://swse.fandom.com/wiki/Grenade\" class=\"mw-redirect\" title=\"Grenade\">Grenade<\/a>. The primary advantages of Missile Loads are their greater effect and <a href=\"https://swse.fandom.com/wiki/Range\" class=\"mw-redirect\" title=\"Range\">Range<\/a> when fired from a <a href=\"https://swse.fandom.com/wiki/Missile_Launcher\" title=\"Missile Launcher\">Missile Launcher<\/a>. (The standard missile is essentially a Missile Load for a <a href=\"https://swse.fandom.com/wiki/Frag_Grenade\" title=\"Frag Grenade\">Frag Grenade<\/a>, so only <a href=\"https://swse.fandom.com/wiki/Energy_Balls\" class=\"mw-redirect\" title=\"Energy Balls\">Energy Balls<\/a>, <a href=\"https://swse.fandom.com/wiki/Ion_Grenades\" class=\"mw-redirect\" title=\"Ion Grenades\">Ion Grenades<\/a>, and <a href=\"https://swse.fandom.com/wiki/Stun_Grenades\" class=\"mw-redirect\" title=\"Stun Grenades\">Stun Grenades<\/a> can be fitted as Missile Loads.) <\/p><p>Increase the damage dice of the original <a href=\"https://swse.fandom.com/wiki/Grenade\" class=\"mw-redirect\" title=\"Grenade\">Grenade<\/a> by 50% when converted to a Missile Load. For example, an Energy Missile deals 3d8 damage, and a Stun Missile deals 6d6 <a href=\"https://swse.fandom.com/wiki/Stun\" class=\"mw-redirect\" title=\"Stun\">Stun<\/a> damage. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Missile Load",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Military",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Rapid Recycler allows a Blaster Weapon that normally fires only in Single-Shot mode to act in <a href=\"https://swse.fandom.com/wiki/Autofire\" title=\"Autofire\">Autofire<\/a> mode. (This Upgrade is not available for Weapons that have a <a href=\"https://swse.fandom.com/wiki/Burst\" class=\"mw-redirect\" title=\"Burst\">Burst<\/a> radius or <a href=\"https://swse.fandom.com/wiki/Splash\" class=\"mw-redirect\" title=\"Splash\">Splash<\/a> radius, or Weapons that specifically prohibit it.) Switching between the two firing modes is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Rapid Recycler",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100% of Weapon Cost",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Bayonet",
+                        "key": "suffix"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Bayonet Ring is a simple upgrade added to a melee weapon of Small or lesser size. Once upgraded, the weapon can be mounted on a specific type of ranged weapon. The type of ranged weapon must be chosen at the time you install the upgrade; the weapon must be of Medium size, and it cannot require a <a href=\"https://swse.fandom.com/wiki/Bipod\" title=\"Bipod\">Bipod<\/a> or other mount for any normal operation (such as a <a href=\"https://swse.fandom.com/wiki/Heavy_Repeating_Blaster\" title=\"Heavy Repeating Blaster\">Heavy Repeating Blaster<\/a>). The most common combination is placing a <a href=\"https://swse.fandom.com/wiki/Vibrodagger\" title=\"Vibrodagger\">Vibrodagger<\/a> on a <a href=\"https://swse.fandom.com/wiki/Blaster_Rifle\" title=\"Blaster Rifle\">Blaster Rifle<\/a>, but other combinations are possible as well (such as a <a href=\"https://swse.fandom.com/wiki/Stun_Baton\" title=\"Stun Baton\">Stun Baton<\/a> mounted onto a <a href=\"https://swse.fandom.com/wiki/Grenade_Launcher\" title=\"Grenade Launcher\">Grenade Launcher<\/a>, a combination preferred for riot control). <\/p><p>While the upgraded melee weapon is mounted on its ranged weapon, the combined weapon becomes Large size, and it must be wielded in two hands. In addition, the melee weapon's damage dice increase by one step: d2s to d3s, d3s to d4s, d4s to d6s, d6s to d8s, d8s to d10s, and d10s to d12s. However, its damage type and Weapon Group stay the same despite these changes, and it is otherwise treated as a <a href=\"https://swse.fandom.com/wiki/Bayonet\" title=\"Bayonet\">Bayonet<\/a> in all respects. Both the melee weapon with the Bayonet Ring Weapon Upgrade and the ranged weapon can be used separately; mounting or removing the upgraded melee weapon requires a <a href=\"https://swse.fandom.com/wiki/Move_Action\" class=\"mw-redirect\" title=\"Move Action\">Move Action<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Bayonet Ring",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Weapon Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Only slugthrowers and missile weapons can be Upgraded as Slinkers. Once a Weapon is made a Slinker, it can no longer fire normal ammunition (and Slinker ammunition costs twice the normal price). Slinkers are equipped with simple sensors and battle computers, and programmed to fly around obstacles or even around corners to strike a target. <\/p><p>If a Slinker is fired at a target with <a href=\"https://swse.fandom.com/wiki/Cover\" title=\"Cover\">Cover<\/a> (but not <a href=\"https://swse.fandom.com/wiki/Total_Cover\" class=\"mw-redirect\" title=\"Total Cover\">Total Cover<\/a>), the target does not gain the normal +5 <a href=\"https://swse.fandom.com/wiki/Cover\" title=\"Cover\">Cover<\/a> bonus to it's <a href=\"https://swse.fandom.com/wiki/Reflex_Defense\" class=\"mw-redirect\" title=\"Reflex Defense\">Reflex Defense<\/a>. If an attacker wants to fire a Slinker at a target with <a href=\"https://swse.fandom.com/wiki/Total_Cover\" class=\"mw-redirect\" title=\"Total Cover\">Total Cover<\/a> (where the attacker cannot see, such as around a corner), the attacker selects a specific target square outside their line of sight and makes an attack with a +0 bonus against anything in that square. (This tactic is effective with <a href=\"https://swse.fandom.com/wiki/Area_Attacks\" title=\"Area Attacks\">Area Attacks<\/a>, which can strike close enough to do damage even when poorly aimed.) The path from the attacker to the target square cannot have more than a single turn (maximum 90 degrees). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Slinker",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>One piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> can be built into another as an Upgrade, but it is impossible to place a larger piece of gear into a smaller piece- you can't cram a <a href=\"https://swse.fandom.com/wiki/Blaster_Cannon\" title=\"Blaster Cannon\">Blaster Cannon<\/a> into a <a href=\"https://swse.fandom.com/wiki/Lightsaber_(Weapon)\" title=\"Lightsaber (Weapon)\">Lightsaber<\/a>. Dual Gear can act as either piece of component gear without penalty. For example, a <a href=\"https://swse.fandom.com/wiki/Glow_Rod\" title=\"Glow Rod\">Glow Rod<\/a> that has been Upgraded to include a <a href=\"https://swse.fandom.com/wiki/Hold-Out_Blaster_Pistol\" title=\"Hold-Out Blaster Pistol\">Hold-Out Blaster Pistol<\/a> can illuminate or shoot, as the user desires. Normally, such <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> can't act as both pieces of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> at once. <\/p><p>You must pay the full price for the piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> being added to the primary object as Dual Gear. If either piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> requires a <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a> or other energy source, it must have its own (items combined with this modification cannot share <a href=\"https://swse.fandom.com/wiki/Power_Packs\" class=\"mw-redirect\" title=\"Power Packs\">Power Packs<\/a> or other energy sources). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Dual Gear",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1 (Basic), 2 (Deluxe)",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Galaxy_of_Intrigue\" title=\"Star Wars Saga Edition Galaxy of Intrigue\">Star Wars Saga Edition Galaxy of Intrigue<\/a><\/i> <\/p><p>Componentization is a process where a single piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> or Weapon is composed of several different pieces, each of which is disguised to appear as another type of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>, such as a <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a>, a <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a>, or even a vibroshaver. Componentization is a common upgrade for assassins, smugglers, and nobles who want to carry Weapons or other <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> into a location secretly. <\/p><p>The Basic Componentization upgrade (one <a href=\"https://swse.fandom.com/wiki/Upgrade_Slot\" class=\"mw-redirect\" title=\"Upgrade Slot\">Upgrade Slot<\/a>) breaks the item or Weapon into two component parts, each one size category smaller than the original item. An item or Weapon with the Deluxe upgrade (two <a href=\"https://swse.fandom.com/wiki/Upgrade_Slots\" title=\"Upgrade Slots\">Upgrade Slots<\/a>) breaks down into four items, each two size categories smaller than the original item. For example, a Medium <a href=\"https://swse.fandom.com/wiki/Sporting_Blaster_Rifle\" title=\"Sporting Blaster Rifle\">Sporting Blaster Rifle<\/a> can break down into two Small objects with the Basic upgrade or into four Tiny objects with the Deluxe upgrade. <\/p><p>A <a href=\"https://swse.fandom.com/wiki/Full-Round_Action\" class=\"mw-redirect\" title=\"Full-Round Action\">Full-Round Action<\/a> is required to assemble a componentized item from two parts. Two <a href=\"https://swse.fandom.com/wiki/Full-Round_Actions\" title=\"Full-Round Actions\">Full-Round Actions<\/a> are required to assemble a Componentized item from four parts. Identifying a component as part of this upgrade package requires a DC 30 <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> or DC 25 <a href=\"https://swse.fandom.com/wiki/Knowledge_(Technology)\" class=\"mw-redirect\" title=\"Knowledge (Technology)\">Knowledge (Technology)<\/a> check. <\/p>",
+                "source": "Star Wars Saga Edition Galaxy of Intrigue"
+            },
+            "name": "Componentization",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "600",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Like <a href=\"https://swse.fandom.com/wiki/Storage_Capacity\" title=\"Storage Capacity\">Storage Capacity<\/a>, this Upgrade allows gear to carry smaller gear within it. However, the gear carried in a Secret Compartment is concealed. It takes a DC 30 <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> check to notice the compartment when it is used, and a DC 25 <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> check to find it with a close, hands-on examination. <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with a Secret Compartment can hold a single item one size smaller than the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> itself. (This is actual size, not weapon size; see <a href=\"https://swse.fandom.com/wiki/Equipment_Sizes\" class=\"mw-redirect\" title=\"Equipment Sizes\">Equipment Sizes<\/a>.) Thus, a <a href=\"https://swse.fandom.com/wiki/Blaster_Pistol\" title=\"Blaster Pistol\">Blaster Pistol<\/a> (Small Weapon, Diminutive object) with a Secret Compartment can hold a Fine-sized object (such as a <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> or <a href=\"https://swse.fandom.com/wiki/Frag_Grenade\" title=\"Frag Grenade\">Frag Grenade<\/a>). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Secret Compartment",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Droidification is an extensive process that turns a common piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> into a fully functioning <a href=\"https://swse.fandom.com/wiki/Droid\" class=\"mw-redirect\" title=\"Droid\">Droid<\/a>. The <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> can either act as a <a href=\"https://swse.fandom.com/wiki/Droid\" class=\"mw-redirect\" title=\"Droid\">Droid<\/a> with access to the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> it was built from, or conceal itself as a normal piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>. While concealing itself as normal <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>, the <a href=\"https://swse.fandom.com/wiki/Droid\" class=\"mw-redirect\" title=\"Droid\">Droid<\/a> can't take any Actions, and a DC 25 <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> check is required to realize the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> is unusual. <\/p><p>Only devices can receive this Upgrade. Weapons, Armor, and <a href=\"https://swse.fandom.com/wiki/Vehicles\" title=\"Vehicles\">Vehicles<\/a> cannot be Droidified. <\/p><p><i>Example: <\/i>Deel Surool owns a <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a> he'd like to be able to call (like a pet). Since a <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a> has only one Upgrade Slot, he increases it's size to Diminutive (due to it's weight, a <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a> is a Fine item). He then pays to have it Droidified. This makes it the equivalent of an <a href=\"https://swse.fandom.com/wiki/ASP_Labor_Droid\" title=\"ASP Labor Droid\">ASP Labor Droid<\/a> with <a href=\"https://swse.fandom.com/wiki/Strength\" title=\"Strength\">Strength<\/a> 8, <a href=\"https://swse.fandom.com/wiki/Dexterity\" title=\"Dexterity\">Dexterity<\/a> 15, and a speed of 1 square. Since it is a walking <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapad<\/a>, Deel programs it to use it's unassigned <a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat<\/a> for <a href=\"https://swse.fandom.com/wiki/Skill_Training\" title=\"Skill Training\">Skill Training<\/a> in <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> (giving it <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> +3), enough to download data from an unprotected system. <\/p><p>If any additional <a href=\"https://swse.fandom.com/wiki/Droid_Equipment\" class=\"mw-redirect\" title=\"Droid Equipment\">Droid Equipment<\/a> or <a href=\"https://swse.fandom.com/wiki/Droid_Systems\" title=\"Droid Systems\">Droid Systems<\/a> are added to the Droidified <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>, it becomes obvious that the device is a <a href=\"https://swse.fandom.com/wiki/Droid\" class=\"mw-redirect\" title=\"Droid\">Droid<\/a> rather than the original item. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Droidification",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "300",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>If you have the <a href=\"https://swse.fandom.com/wiki/Quick_Draw\" title=\"Quick Draw\">Quick Draw<\/a> Feat, you may draw the item as a <a href=\"https://swse.fandom.com/wiki/Free_Action\" class=\"mw-redirect\" title=\"Free Action\">Free Action<\/a> once per turn. Any <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> that can be held and used in one hand can be Spring-Loaded. <a href=\"https://swse.fandom.com/wiki/Readying\" class=\"mw-redirect\" title=\"Readying\">Readying<\/a> a Spring-Loaded piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>. It is most common for <a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols<\/a> to be Spring-Loaded, but anything from <a href=\"https://swse.fandom.com/wiki/Grenades\" title=\"Grenades\">Grenades<\/a> to <a href=\"https://swse.fandom.com/wiki/Datapad\" title=\"Datapad\">Datapads<\/a> can use this Upgrade. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Spring-Loaded",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "400",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Environmental Sealing places gaskets, protective coatings, nonreactive materials, and airtight seals throughout a piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> to ensure that it does not fail because of environmental conditions. The <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> works normally in a <a href=\"https://swse.fandom.com/wiki/Vacuum\" title=\"Vacuum\">Vacuum<\/a>, underwater, after being packed in dirt or sand, or in a snowstorm. It does not take damage from <a href=\"https://swse.fandom.com/wiki/Atmospheric_Hazards\" class=\"mw-redirect\" title=\"Atmospheric Hazards\">Atmospheric Hazards<\/a>, <a href=\"https://swse.fandom.com/wiki/Extreme_Temperatures\" class=\"mw-redirect\" title=\"Extreme Temperatures\">Extreme Temperatures<\/a>, normal <a href=\"https://swse.fandom.com/wiki/Fire\" title=\"Fire\">Fires<\/a> (as opposed to Fire-based Weapons, which deal damage normally), or <a href=\"https://swse.fandom.com/wiki/Radiation\" title=\"Radiation\">Radiation<\/a>. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Environmental Sealing",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p><a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with the Miniaturized Upgrade weigh half as much, and is one size smaller (see <a href=\"https://swse.fandom.com/wiki/Equipment_Sizes\" class=\"mw-redirect\" title=\"Equipment Sizes\">Equipment Sizes<\/a>). A Melee Weapon that is Miniaturized has its damage dice reduced by one step (d6s become d4s, d4s become d3s, and so on) because it lacks the mass and striking surface area to deal more damage. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Miniaturized",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>An Electrograpple Handle is a magnetized section of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> designed to fly toward a specifically attuned Grapple Gauntlet (the cost of which is included in the Upgrade cost). A piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with an Electrograpple Handle can be retrieved by a character wearing the attuned Grapple Gauntlet as a <a href=\"https://swse.fandom.com/wiki/Move_Action\" class=\"mw-redirect\" title=\"Move Action\">Move Action<\/a> out to a range of 6 squares. If the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> is held or strapped down, the Grapple Gauntlet allows a <a href=\"https://swse.fandom.com/wiki/Strength\" title=\"Strength\">Strength<\/a> check with a +5 bonus to rip it free. This is used as an opposed <a href=\"https://swse.fandom.com/wiki/Strength\" title=\"Strength\">Strength<\/a> check (to remove it from someone holding it) or against the break DC of the straps restraining it. <\/p><p>This is most often used on a Weapon. This allows a character to throw a Weapon down to \"Prove\" they are disarmed, only to retrieve it at range when trouble starts. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Electrograpple Handle",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Silverplate is a special chroming process that adds a layer of tough composite material (often Dallorian Alloy) across the surface of any piece of gear. In addition to looking stylish, this gives the gear +2 DR (maximum DR 20). Armor with Silverplate does not grant its <a href=\"https://swse.fandom.com/wiki/Damage_Reduction\" title=\"Damage Reduction\">Damage Reduction<\/a> to its wearer, but does gain it against attacks directed specifically at the Armor. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Silverplate",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>This Upgrade allows gear to carry smaller gear within or on it, in an obvious compartment. <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with the Storage Capacity Upgrade can hold multiple items at least one size smaller than the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> itself, as long as their total weight is less than the <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with Storage Capacity. Thus, a <a href=\"https://swse.fandom.com/wiki/Blaster_Rifle\" title=\"Blaster Rifle\">Blaster Rifle<\/a> (Medium Weapon, Tiny object, 4.5 kilograms) with Storage Capacity might hold eight <a href=\"https://swse.fandom.com/wiki/Frag_Grenades\" class=\"mw-redirect\" title=\"Frag Grenades\">Frag Grenades<\/a> (Fine object, 0.5 kilograms each) and five <a href=\"https://swse.fandom.com/wiki/Power_Packs\" class=\"mw-redirect\" title=\"Power Packs\">Power Packs<\/a> (Fine object, 0.1 kilograms each) securely in external straps and pouches. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Storage Capacity",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "500",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Illegal",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book: <a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>A Cheater is a hand-held device designed to allow you to cheat at the popular <a href=\"https://swse.fandom.com/wiki/Gambling\" title=\"Gambling\">Gambling<\/a> game of Sabacc. Because they are <a href=\"https://swse.fandom.com/wiki/Illegal\" class=\"mw-redirect\" title=\"Illegal\">Illegal<\/a> (and likely to get you killed to boot), Cheaters usually are disguised and added to another piece of functional <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>. <\/p><p>While you use a Cheater, you gain a +2 Equipment bonus on the <a href=\"https://swse.fandom.com/wiki/Wisdom\" title=\"Wisdom\">Wisdom<\/a> check made to determine the outcome of <a href=\"https://swse.fandom.com/wiki/Gambling\" title=\"Gambling\">Gambling<\/a>. You have to make a <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> check opposed by any observers' <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> checks to conceal the use of a Cheater, but you gain a bonus on your check determined by the objects size. (Generally, Cheaters are placed in Fine-sized devices such as <a href=\"https://swse.fandom.com/wiki/Credit_Chip\" title=\"Credit Chip\">Credit Chips<\/a> or <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlinks<\/a>, granting a +10 size bonus on <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks to conceal their use.) However, if anyone ever beats your <a href=\"https://swse.fandom.com/wiki/Wisdom\" title=\"Wisdom\">Wisdom<\/a> check in a Sabacc game by 6 or more, that person realizes you must be cheating somehow (though they won't know exactly how- often leading to a demand for a search of your possessions). <\/p><p>A Cheater installed into a rigged Sabacc Card is called a Skifter. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Cheater",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "16000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "2",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any device that has an <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> score (such as a <a href=\"https://swse.fandom.com/wiki/Portable_Computer\" title=\"Portable Computer\">Portable Computer<\/a>) can have its Memory Upgraded, improving its performance and storage capacity. The Advanced Memory Upgrade increases the device's <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> by +4 and multiplies the device's storage capacity by 5. Unless otherwise specified, an unmodified computer holds a number of memory units equal to 5 x the square of the computer's <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> bonus. (A single memory unit holds the same amount of data as a <a href=\"https://swse.fandom.com/wiki/Recording_Unit\" title=\"Recording Unit\">Recording Unit<\/a>, and 10 memory units are enough to hold coordinates for a single hyperspace jump.) <\/p><p>The Advanced Memory Upgrade cannot be installed on <a href=\"https://swse.fandom.com/wiki/Droids\" title=\"Droids\">Droids<\/a> (including <a href=\"https://swse.fandom.com/wiki/Droidified\" class=\"mw-redirect\" title=\"Droidified\">Droidified<\/a> <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Advanced Memory Upgrade",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Cybernetic Prosthesis, Advanced Cybernetics",
+                        "key": "seeAlso"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Galaxy_at_War\" title=\"Star Wars Saga Edition Galaxy at War\">Star Wars Saga Edition Galaxy at War<\/a><\/i> <\/p><p><i>See also: <a href=\"https://swse.fandom.com/wiki/Cybernetic_Prosthesis\" title=\"Cybernetic Prosthesis\">Cybernetic Prosthesis<\/a>, <a href=\"https://swse.fandom.com/wiki/Advanced_Cybernetics\" title=\"Advanced Cybernetics\">Advanced Cybernetics<\/a><\/i> <\/p><p>Ion-Shielding is an upgrade specifically designed for <a href=\"https://swse.fandom.com/wiki/Cybernetic_Prostheses\" class=\"mw-redirect\" title=\"Cybernetic Prostheses\">Cybernetic Prostheses<\/a>. When installed, a <a href=\"https://swse.fandom.com/wiki/Cybernetic_Prosthesis\" title=\"Cybernetic Prosthesis\">Cybernetic Prosthesis<\/a> with the Ion-Shielding upgrade protects the host from <a href=\"https://swse.fandom.com/wiki/Ion\" class=\"mw-redirect\" title=\"Ion\">Ion<\/a> damage. If all of a creature's cybernetic enhancements have the Ion-Shielding upgrade, the host is not treated as being cybernetically enhanced for the purposes of taking <a href=\"https://swse.fandom.com/wiki/Ion\" class=\"mw-redirect\" title=\"Ion\">Ion<\/a> damage. However, if even one cybernetic enhancement does not have this Ion-Shielding, the host gains no benefit. <\/p>",
+                "source": "Star Wars Saga Edition Galaxy at War"
+            },
+            "name": "Ion-Shielding",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "4000",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any device that has an <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> score (such as a <a href=\"https://swse.fandom.com/wiki/Portable_Computer\" title=\"Portable Computer\">Portable Computer<\/a>) can have its Memory Upgraded, improving its performance and storage capacity. The basic Memory Upgrade increases the device's <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> by +2 and doubles the device's storage capacity. Unless otherwise specified, an unmodified computer holds a number of memory units equal to 5 x the square of the computer's <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> bonus. (A single memory unit holds the same amount of data as a <a href=\"https://swse.fandom.com/wiki/Recording_Unit\" title=\"Recording Unit\">Recording Unit<\/a>, and 10 memory units are enough to hold coordinates for a single hyperspace jump.) <\/p><p>An <a href=\"https://swse.fandom.com/wiki/Advanced_Memory_Upgrade\" title=\"Advanced Memory Upgrade\">Advanced Memory Upgrade<\/a> is also available, providing a +4 bonus to an Equipment's <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence<\/a> score. <\/p><p>The Memory Upgrade cannot be installed on <a href=\"https://swse.fandom.com/wiki/Droids\" title=\"Droids\">Droids<\/a> (including <a href=\"https://swse.fandom.com/wiki/Droidified\" class=\"mw-redirect\" title=\"Droidified\">Droidified<\/a> <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a>). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Memory Upgrade",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "100",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>This Upgrade allows a piece of <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> to be activated with a signal from a <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> or similar <a href=\"https://swse.fandom.com/wiki/Communications_Device\" class=\"mw-redirect\" title=\"Communications Device\">Communications Device<\/a>. Although typically associated with <a href=\"https://swse.fandom.com/wiki/Explosives\" title=\"Explosives\">Explosives<\/a> or Security Systems, Remote Activation can be used to set a <a href=\"https://swse.fandom.com/wiki/Droid\" class=\"mw-redirect\" title=\"Droid\">Droid<\/a> to activate, a <a href=\"https://swse.fandom.com/wiki/Fusion_Lantern\" title=\"Fusion Lantern\">Fusion Lantern<\/a> to flare to life, a computer to start running a program, or a holoprojector to begin a recorded holoprojection. Activating a remote is a <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a>, which includes entering the special command code (allowing a single <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> to activate multiple pieces of Remote Activation gear, one <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action<\/a> per item activated). <\/p><p>The range of Remote Activation is determined by the <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> or other <a href=\"https://swse.fandom.com/wiki/Communications_Device\" class=\"mw-redirect\" title=\"Communications Device\">Communications Device<\/a> used. Any <a href=\"https://swse.fandom.com/wiki/Comlink\" title=\"Comlink\">Comlink<\/a> can be used to activate the gear, sending a signal with a specific code along a specific frequency. A character aware of a piece of remotely activated gear can find the necessary frequency and activation code with a DC 30 <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> check. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Remote Activation",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Any <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> that runs on <a href=\"https://swse.fandom.com/wiki/Energy_Cells\" class=\"mw-redirect\" title=\"Energy Cells\">Energy Cells<\/a> or <a href=\"https://swse.fandom.com/wiki/Power_Packs\" class=\"mw-redirect\" title=\"Power Packs\">Power Packs<\/a> can be modified to have two such power sources, doubling the duration the device will function (or the number of shots a Weapon can make before being recharged). It's possible to make this modification more than once, adding an additional <a href=\"https://swse.fandom.com/wiki/Energy_Cell\" title=\"Energy Cell\">Energy Cell<\/a> or <a href=\"https://swse.fandom.com/wiki/Power_Pack\" title=\"Power Pack\">Power Pack<\/a> each time. The <a href=\"https://swse.fandom.com/wiki/Energy_Cells\" class=\"mw-redirect\" title=\"Energy Cells\">Energy Cells<\/a> or <a href=\"https://swse.fandom.com/wiki/Power_Packs\" class=\"mw-redirect\" title=\"Power Packs\">Power Packs<\/a> are typical for the device Upgraded, and each is replaced at the normal cost. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Extra Power Source",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "750",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Licensed",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p>Cloaked <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> has it's energy signatures baffled, any noises it makes muffled, it's appearance camouflaged and slenderized, and it comes with a case that allows it to be placed in an inconspicuous location. When not in use, such <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> imposes a -5 penalty on any <a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception<\/a> or <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> check made to detect it. When in use, it imposes only a -2 penalty on such checks. Weapons are obvious when in use, even if Cloaked. Cloaked Armor does not help with <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth<\/a> checks made to <a href=\"https://swse.fandom.com/wiki/Sneak\" class=\"mw-redirect\" title=\"Sneak\">Sneak<\/a>, but it applies when you make a <a href=\"https://swse.fandom.com/wiki/Deception\" title=\"Deception\">Deception<\/a> check to produce a <a href=\"https://swse.fandom.com/wiki/Deceptive_Appearance\" class=\"mw-redirect\" title=\"Deceptive Appearance\">Deceptive Appearance<\/a> (such as making the Armor appear as ordinary clothing). <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Cloaked",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        },
+        {
+            "effects": [],
+            "system": {
+                "subtype": "Universal Upgrade",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": true,
+                        "key": "itemMod"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "200",
+                        "key": "cost"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Common",
+                        "key": "availability"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "upgradePointCost"
+                    }
+                ],
+                "description": "<p><i>Reference Book:&nbsp;<a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Scum_and_Villainy\" title=\"Star Wars Saga Edition Scum and Villainy\">Star Wars Saga Edition Scum and Villainy<\/a><\/i> <\/p><p><a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment<\/a> with a Recognition System can identify its owner and won't function for anyone else. Fooling a Recognition System takes 1 minute and a DC 30 <a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer<\/a> check. The owner of gear with this Upgrade can deactivate it as a <a href=\"https://swse.fandom.com/wiki/Free_Action\" class=\"mw-redirect\" title=\"Free Action\">Free Action<\/a> (before passing a Weapon to an unarmed ally, for example); optionally, the Recognition System can have a code phrase that allows anyone to activate it. <\/p>",
+                "source": "Star Wars Saga Edition Scum and Villainy"
+            },
+            "name": "Recognition System",
+            "flags": {},
+            "permission": {"default": 0},
+            "sort": 0,
+            "type": "upgrade"
+        }
+    ],
+    "name": "Upgrade",
+    "type": "Item",
+    "version": 1711683503114
+}
