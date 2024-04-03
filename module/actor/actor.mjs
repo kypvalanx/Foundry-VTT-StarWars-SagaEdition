@@ -51,31 +51,6 @@ import {AttackDelegate, makeAttack} from "./attack/attackDelegate.mjs";
  * @extends {Actor}
  */
 export class SWSEActor extends Actor {
-    _onUpdate(data, options, userId) {
-        super._onUpdate(data, options, userId);
-
-        // for (let crewMember of this.system.crew) {
-        //     let linkedActor = getActorFromId(crewMember.id)
-        //     if (!!linkedActor) {
-        //         linkedActor.prepareData()
-        //     }
-        // }
-    }
-
-    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
-        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
-
-        //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
-        if ("effects" === collection) {
-            let activeEffect = documents[0];
-            if (activeEffect.statuses.filter(status => status.startsWith('condition')).size > 0) {
-                this.effects
-                    .filter(effect => effect !== activeEffect && effect.statuses.filter(status => status.startsWith('condition')).size > 0)
-                    .map(effect => effect.delete())
-            }
-        }
-    }
-
     useAmmunition(type){
         let item = this.items.find(i => i.name === type);
         if(item && item.system.quantity > 0){
@@ -260,43 +235,6 @@ export class SWSEActor extends Actor {
                 crewSlots.push(this.resolveSlot(crewMember, position, positionCover, numericSlot));
             })
 
-
-            // crewPositions.forEach(position => {
-            //     let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
-            //     let positionCover;
-            //
-            //     if (this.system.crewCover) {
-            //         positionCover = this.system.crewCover[position]
-            //     }
-            //     positionCover = positionCover || coverMap[position] || coverMap["default"];
-            //
-            //     if (position === 'Gunner') {
-            //         crewSlots.push(...this.resolveSlots(crewMember, position, positionCover, this.gunnerPositions.map(gp => gp.numericId)));
-            //     } else {
-            //         let crewSlot = crewSlotResolution[position];
-            //         if (crewSlot) {
-            //             crewSlots.push(...this.resolveSlots( crewMember, position, positionCover, range(0, crewSlot(this.crew) - 1)));
-            //         }
-            //     }
-            // });
-            //
-            // for (let position of providedSlots.filter(notEmpty).filter(unique)) {
-            //     let count = providedSlots.filter(s => s === position).length
-            //     let positionCover;
-            //
-            //     if (this.system.crewCover) {
-            //         positionCover = this.system.crewCover[position]
-            //     }
-            //
-            //     if (!positionCover) {
-            //         positionCover = coverMap[position];
-            //     }
-            //     if (!positionCover) {
-            //         positionCover = coverMap["default"];
-            //     }
-            //     //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
-            //     crewSlots.push(...this.resolveSlots(this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover, count -1));
-            // }
             return crewSlots;
         })
 
@@ -430,9 +368,6 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(system) {
-        //this.system.attributeGenerationType = "Manual"
-        //this.system.disableAttributeGenerationChange = true;
-
         generateAttributes(this);
         generateSkills(this);
 
