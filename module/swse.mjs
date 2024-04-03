@@ -15,6 +15,7 @@ import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
 import {makeAttack} from "./actor/attack/attackDelegate.mjs";
+import {SWSETokenDocument} from "./token/token-document.js";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -56,6 +57,7 @@ Hooks.once('init', async function () {
     CONFIG.SWSE = SWSE;
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
+    CONFIG.Token.documentClass = SWSETokenDocument;
 
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
     //CONFIG.ActiveEffect.sheetClasses["Active Sheet Classes"] = SWSEActiveEffectConfig;

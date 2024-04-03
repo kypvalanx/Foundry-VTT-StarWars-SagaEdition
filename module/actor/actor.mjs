@@ -1175,7 +1175,7 @@ export class SWSEActor extends Actor {
 
     async clearCondition() {
         let ids = this.effects
-            .filter(effect => effect.icon?.includes("condition")).map(effect => effect.id)
+            .filter(effect => effect.statuses.find(status => status.startsWith("condition"))).map(effect => effect.id)
 
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
     }
