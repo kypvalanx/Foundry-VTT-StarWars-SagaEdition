@@ -3,9 +3,10 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 export class SWSETokenDocument extends TokenDocument {
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-        //this.reset()
-            this._object.renderFlags.set({redraw: true})
-        canvas.tokens.draw();
+
+        this.reset()
+        //     this._object.renderFlags.set({redraw: true})
+        // canvas.tokens.draw();
     }
 
     _onUpdate(data, options, userId) {
