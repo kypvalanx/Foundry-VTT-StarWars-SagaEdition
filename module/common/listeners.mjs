@@ -136,8 +136,11 @@ export function onSpanTextInput(event, callback = null, type) {
     // Replace span with input element
     parent.replaceChild(newEl, el);
     let changed = false;
+    let hasRun = false;
     if (callback) {
         newEl.addEventListener("change", (...args) => {
+            if(hasRun) return;
+            hasRun = true
             changed = true;
 
             if (newEl.value === prevValue) {
@@ -149,6 +152,8 @@ export function onSpanTextInput(event, callback = null, type) {
         newEl.addEventListener("keyup", (...args) => {
             let event = args[0];
             if (['Enter', 'NumpadEnter'].includes(event.code)) {
+                if(hasRun) return;
+                hasRun = true
                 changed = true;
 
                 if (newEl.value === prevValue) {

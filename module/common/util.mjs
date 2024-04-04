@@ -1694,7 +1694,24 @@ function generateUUID(actorId, itemId, effectId) {
 export function getCleanListFromCSV(name) {
     return name.split(",").map(n => n.trim());
 }
+export function toChat(content, actor = undefined) {
+    let speaker = ChatMessage.getSpeaker({actor: actor || this.object.parent});
 
+    let messageData = {
+        user: game.user.id,
+        speaker: speaker,
+        flavor: name,
+        type: CONST.CHAT_MESSAGE_TYPES.OOC,
+        content,
+        sound: CONFIG.sounds.dice
+    }
+
+    let cls = getDocumentClass("ChatMessage");
+
+    let msg = new cls(messageData);
+
+    return cls.create(msg, {});
+}
 export function numericOverrideOptions(actor) {
     let options = [];
     options.push({
@@ -1703,6 +1720,7 @@ export function numericOverrideOptions(actor) {
         callback: async element => {
             let overrideKey = element.data('override-key');
             let overrideName = element.data('override-name');
+            let context = element.data('context');
             let value = await Dialog.prompt({
                 title: `Set ${overrideName}`,
                 content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
@@ -1717,6 +1735,13 @@ export function numericOverrideOptions(actor) {
 
             let data = {};
             data[overrideKey] = toNumber(value);
+
+            if(context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")){
+                const content = `${game.user.name} has changed health override to ${value}`
+
+                toChat(content, actor)
+            }
+
             await actor.safeUpdate(data);
         }
     })
@@ -1726,9 +1751,18 @@ export function numericOverrideOptions(actor) {
         icon: '<i class="fas fa-delete">',
         callback: element => {
 
-            let overrideKey = element.data('override-key');
-            let data = {};
+            const overrideKey = element.data('override-key');
+            const context = element.data('context');
+            const data = {};
             data[overrideKey] = null;
+
+
+            if(context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")){
+                const content = `${game.user.name} has removed the Health Override`
+
+                toChat(content, actor)
+            }
+
             actor.safeUpdate(data);
         },
         condition: element => {

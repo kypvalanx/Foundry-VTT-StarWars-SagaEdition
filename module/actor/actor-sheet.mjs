@@ -4,7 +4,7 @@ import {
     getParentByHTMLClass,
     linkEffects,
     numericOverrideOptions,
-    onCollapseToggle,
+    onCollapseToggle, toChat,
     unique
 } from "../common/util.mjs";
 import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
@@ -215,13 +215,22 @@ export class SWSEActorSheet extends ActorSheet {
     _performItemAction(event){
             const target = $(event.currentTarget)
             const value = event.currentTarget.value;
+            const context = target.data("context")
 
             if (target.data("action") === "update-level-attribute") {
-                this.updateItemEffectAttribute(value, target.data("item"), parseInt(target.data("level")), target.data("attribute"));
+
+                this.updateItemEffectAttribute(value, target.data("item"), parseInt(target.data("level")), target.data("attribute"), context);
             }
     }
 
-    updateItemEffectAttribute( value, itemId, level, attributeKey) {
+    updateItemEffectAttribute( value, itemId, level, attributeKey, context = undefined) {
+
+        if(context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")){
+            let content = `${game.user.name} has changed level ${level} health to ${value}`
+
+            toChat(content)
+        }
+
         const classObject = this.document.items.get(itemId);
         const levelEffect = classObject.level(level);
         let change = levelEffect.changes.find(change => change.key === attributeKey)
@@ -265,25 +274,10 @@ export class SWSEActorSheet extends ActorSheet {
 
                 break;
         }
-
-
-        let speaker = ChatMessage.getSpeaker({actor: this.object.parent});
-
-        let messageData = {
-            user: game.user.id,
-            speaker: speaker,
-            flavor: name,
-            type: CONST.CHAT_MESSAGE_TYPES.OOC,
-            content,
-            sound: CONFIG.sounds.dice
-        }
-
-        let cls = getDocumentClass("ChatMessage");
-
-        let msg = new cls(messageData);
-
-        return cls.create(msg.data, {});
+        return toChat(content);
     }
+
+
 
     _onCreateNewItem(event){
         let itemType = $(event.currentTarget).data("action-type")
@@ -943,7 +937,8 @@ export class SWSEActorSheet extends ActorSheet {
             if (attributeKey) {
                 if (item && level) {
 
-                    this.updateItemEffectAttribute(roll.total, item, parseInt(level), attributeKey);
+                    const context = element.dataset.context
+                    this.updateItemEffectAttribute(roll.total, item, parseInt(level), attributeKey, context);
                 } else if (item){
                     let updateTarget = this.actor.items.get(item);
                     updateTarget.setAttribute(attributeKey, roll.total);

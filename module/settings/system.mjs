@@ -150,6 +150,16 @@ export const registerSystemSettings = function () {
         type: Boolean
     });
 
+
+    game.settings.register("swse", "enableNotificationsOnHealthChange", {
+        name: "Enable Chat Notifications when you change your total health.",
+        hint: "",
+        scope: "world",
+        config: true,
+        default: false,
+        type: Boolean
+    });
+
     const r = document.querySelector(':root');
     const rs = getComputedStyle(r);
     registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--color-background');
