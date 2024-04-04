@@ -66,6 +66,11 @@ export class SWSEActor extends Actor {
         }
     }
 
+    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
+        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+        //this.reset()
+    }
+
     useAmmunition(type){
         let item = this.items.find(i => i.name === type);
         if(item && item.system.quantity > 0){

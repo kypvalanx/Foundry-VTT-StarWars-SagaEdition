@@ -1489,13 +1489,17 @@ export function getDocumentByUuid(uuid) {
     }
     let toks = uuid.split(".")
     let source = game;
+    let last = "";
     for (let [i, tok] of toks.entries()) {
+        if(!source ){
+            console.warn(`source is null at ${tok}`)
+        }
         if (tok === "Scene") {
-            source = source.scenes;
+            source = source?.scenes;
         }else if (tok === "Token") {
-            source = source.tokens;
+            source = source?.tokens;
         } else if (tok === "Actor") {
-            source = source.actors;
+            source = source?.actors;
         } else if (tok === "Item") {
             if (i === 0) {
                 source = game.items;
@@ -1518,12 +1522,18 @@ export function getDocumentByUuid(uuid) {
                 }
                 continue;
             }
-            source = source.items;
+            source = source?.items;
         } else if (tok === "ActiveEffect") {
-            source = source.effects;
+            source = source?.effects;
         } else {
-            source = source.get(tok)
+            source = source?.get(tok)
+            if(!source){
+                if(last === "Actor"){
+                    game.actors.get(tok)
+                }
+            }
         }
+        last = tok
     }
     return source;
 }

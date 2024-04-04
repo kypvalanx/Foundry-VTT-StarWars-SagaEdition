@@ -107,12 +107,18 @@ export class Attack {
      */
     get actor() {
         return this.getCached("actor", () => {
-            let find;
+
             if (this.parentId) {
-                let tokens = canvas.tokens.objects?.children || [];
-                let token = tokens.find(token => token.id === this.parentId);
-                return token.document.actor
-            } else if (this.actorId) {
+                let tokens = canvas.tokens.children || [];
+                let token = tokens.flatMap(token => token.children).find(token => token.id === this.parentId);
+                const actor = token?.document?.actor
+                if(actor){
+                    return actor;
+                }
+            }
+
+            if (this.actorId) {
+                let find;
                 find = game.actors.get(this.actorId)
 
                 if (find) {
@@ -128,7 +134,8 @@ export class Attack {
                     }
                 }
                 return find;
-            } else if (this.providerId) {
+            }
+            if (this.providerId) {
                 let provider = this.provider;
                 let quality = provider?.system?.crewQuality?.quality;
                 return SWSEActor.getCrewByQuality(quality);

@@ -29,7 +29,10 @@ export class SWSEItem extends Item {
         //console.log(changed)
     }
 
-    _onUpdateDocuments(){}
+
+    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
+        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+    }
 
 
     /**
