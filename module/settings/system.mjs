@@ -55,6 +55,7 @@ function registerCSSColor(nameSpace, key, name, hint, scope, defaultColor, r, cs
 
 
     r.style.setProperty(cssProperty, game.settings.get(nameSpace, key));
+    return key;
 }
 
 export const registerSystemSettings = function () {
@@ -162,11 +163,31 @@ export const registerSystemSettings = function () {
 
     const r = document.querySelector(':root');
     const rs = getComputedStyle(r);
-    registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--color-background');
-    registerCSSColor("swse", "cssColorShadowPrimary", "Shadow Color", "Modifies the Shadow color of sheets", "client", "#424ba4", r, '--color-shadow-primary');
-    registerCSSColor("swse", "cssColorDarkPrimary", "Text Color", "Modifies the standard text color", "client", "#191813", r, '--color-text-dark-primary');
-    registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--color-foreground');
-    registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--color-midground');
-    registerCSSColor("swse", "cssHyperlink", "Hyperlink Color", "Modifies the Hyperlink color of sheets", "client", "#132cff", r, '--color-text-hyperlink');
-    registerCSSColor("swse", "cssHeaderUnderline", "Header Underline", "Modifies the Underline color of Headers", "client", "#010e7c", r, '--color-underline-header');
+
+    const colors = [];
+    colors.push(registerCSSColor("swse", "cssBackgroundColor", "Background Color", "Modifies the Background color of sheets", "client", "#e8e8e8", r, '--color-background'));
+    colors.push(registerCSSColor("swse", "cssColorShadowPrimary", "Shadow Color", "Modifies the Shadow color of sheets", "client", "#424ba4", r, '--color-shadow-primary'));
+    colors.push(registerCSSColor("swse", "cssColorDarkPrimary", "Text Color", "Modifies the standard text color", "client", "#191813", r, '--color-text-dark-primary'));
+    colors.push(registerCSSColor("swse", "cssForegroundColor", "Foreground Color", "Modifies the Foreground color of sheets", "client", "#424ba4", r, '--color-foreground'));
+    colors.push(registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--color-midground'));
+    colors.push(registerCSSColor("swse", "cssHyperlink", "Hyperlink Color", "Modifies the Hyperlink color of sheets", "client", "#132cff", r, '--color-text-hyperlink'));
+    colors.push(registerCSSColor("swse", "cssHeaderUnderline", "Header Underline", "Modifies the Underline color of Headers", "client", "#010e7c", r, '--color-underline-header'));
+
+    game.settings.register("swse", "resetColorDefaults", {
+        name: "Reset Colors",
+        hint: "check this to reset character sheet colors",
+        scope: "client",
+        config: true,
+        default: false,
+        type: Boolean,
+
+        onChange: () => {
+            game.settings.set("swse", "resetColorDefaults", false)
+            colors.forEach( c => {
+                const setting = game.settings.settings.get(`swse.${c}`);
+                //console.log(setting.default)
+                game.settings.set("swse", c, setting.default);
+            })
+        }
+    })
 }
