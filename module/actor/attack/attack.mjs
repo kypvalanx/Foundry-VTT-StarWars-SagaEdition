@@ -87,10 +87,22 @@ export class Attack {
     }
 
     reduceAmmunition(count = 1) {
-        if (this.item && this.item.hasAmmunition) {
-            const ammo = this.item.ammunition.current[0];
-            this.item.ammunition.decreaseAmmunition(ammo.key, count);
+        if (!(this.item && this.item.hasAmmunition)) {
+            return;
         }
+
+        let ammoModifiers = getInheritableAttribute({entity: this.item, attributeKey: ["ammoUse", "ammoUseMultiplier"]})
+
+        const baseCounts = [count];
+        baseCounts.push(...ammoModifiers.filter(m => m.key === "ammoUse").map(m=>parseInt(m.value)))
+        count = Math.max(...baseCounts);
+
+        for(const mod of ammoModifiers.filter(m => m.type === "ammoUseMultiplier")){
+            count *= parseInt(mod.value, 10)
+        }
+
+        const ammo = this.item.ammunition.current[0];
+        this.item.ammunition.decreaseAmmunition(ammo.key, count);
     }
 
 

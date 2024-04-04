@@ -3,6 +3,7 @@ import {Attack} from "./attack.mjs";
 import {createAttackMacro} from "../../swse.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
+    adjustDieSize,
     appendNumericTerm,
     equippedItems,
     getBonusString,
@@ -93,36 +94,12 @@ export class AttackDelegate {
      * @param context
      * @returns {Promise<void>}
      */
-     async makeAttack(event, context) {
+     async createAttackDialog(event, context) {
         const attacksFromContext = getAttacksFromContext(context);
         const attackType = context.type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK;
         const dualWeaponModifier = this.dualWeaponModifier;
         const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails(attackType);
-        let blockHeight = 225;
-        let height = attackCount * blockHeight + 85
         context.availableHands = 2;
-
-        //{
-        //  title: "Test Dialog",
-        //  content: "<p>You must choose either Option 1, or Option 2</p>",
-        //  buttons: {
-        //   one: {
-        //    icon: '<i class="fas fa-check"></i>',
-        //    label: "Option One",
-        //    callback: () => console.log("Chose One")
-        //   },
-        //   two: {
-        //    icon: '<i class="fas fa-times"></i>',
-        //    label: "Option Two",
-        //    callback: () => console.log("Chose Two")
-        //   }
-        //  },
-        //  default: "two",
-        //  render: html => console.log("Register interactivity in the rendered dialog"),
-        //  close: html => console.log("This always is logged no matter which option is chosen")
-        // }
-
-
 
         const data = {
             title: getAttackWindowTitle(context),
@@ -143,14 +120,13 @@ export class AttackDelegate {
         };
 
         const options = {
-            height: height,
+            height: attackCount * 225 + 85,
             classes: ["swse", "dialog"],
             resizable: true,
             popOut: true
         };
 
         if(data){
-
             new Dialog(data, options).render(true);
         }
     }
@@ -416,6 +392,7 @@ function attackDialogue(context) {
  * @returns {Promise<void>}
  */
 export async function makeAttack(context) {
+    console.log(context)
 }
 
 function getAttackMods(selects, dualWeaponModifier) {
@@ -610,6 +587,20 @@ function resolveAttack(attack, targetActors) {
             conditionalDefenses: conditionalDefenses
         }
     })
+    let damageRoll = attack.damageRoll.roll;
+
+    if(critical){
+        let bonusCriticalDamageDieType = getInheritableAttribute({
+            entity: attack.item,
+            attributeKey: "bonusCriticalDamageDieType",
+            reduce: "SUM"
+        })
+
+        if(bonusCriticalDamageDieType){
+            damageRoll = adjustDieSize(damageRoll, bonusCriticalDamageDieType)
+        }
+    }
+
 
 
     let ignoreCritical = getInheritableAttribute({
@@ -618,12 +609,12 @@ function resolveAttack(attack, targetActors) {
         reduce: "OR"
     })
 
-    let damageRoll = attack.damageRoll.roll;
     if (critical && !ignoreCritical) {
         let criticalHitPreMultiplierBonuses = getInheritableAttribute({
             entity: attack.item,
             attributeKey: "criticalHitPreMultiplierBonus"
         })
+
 
         for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
 

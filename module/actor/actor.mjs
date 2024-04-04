@@ -43,7 +43,7 @@ import {activateChoices} from "../choice/choice.mjs";
 import {errorsFromActor, warningsFromActor} from "./warnings.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
-import {AttackDelegate, makeAttack} from "./attack/attackDelegate.mjs";
+import {AttackDelegate} from "./attack/attackDelegate.mjs";
 
 
 /**
@@ -1974,13 +1974,6 @@ export class SWSEActor extends Actor {
      * @param itemIds
      */
     rollOwnedItem(itemIds) {
-
-
-        // if(itemId === "Unarmed Attack"){
-        //     let attacks = generateUnarmedAttack(this)
-        //     SWSEItem.getItemDialogue(attacks, this).render(true);
-        //     return;
-        // }
         let items = [];
         for (let itemId of itemIds) {
             let actor = this;
@@ -1995,7 +1988,7 @@ export class SWSEActor extends Actor {
         //let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
 
         if (items.length === 0) {
-            this.attack.makeAttack(null, {type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds})
+            this.attack.createAttackDialog(null, {type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds})
         } else {
             for (let item of items) {
                 item.rollItem(this).render(true);

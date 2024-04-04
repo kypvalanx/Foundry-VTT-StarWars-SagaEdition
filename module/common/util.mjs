@@ -443,6 +443,19 @@ export function increaseDieSize(die, bonus) {
     return dieSize[index + bonus] || "0";
 }
 
+
+/**
+ *
+ * @param roll {Roll}
+ * @param dieSizeAdjustment {number}
+ * @returns {Roll}
+ */
+export function adjustDieSize(roll, dieSizeAdjustment){
+    let index = dieType.indexOf(`${roll.dice[0].faces}`);
+    roll.dice[0].faces = parseInt(dieType[index + dieSizeAdjustment] )|| 1;
+    return Roll.fromTerms(roll.terms);
+}
+
 export function toBoolean(value) {
     if (typeof value === "undefined") {
         return false;
@@ -1690,6 +1703,7 @@ function generateUUID(actorId, itemId, effectId) {
     }
     return response;
 }
+
 
 export function getCleanListFromCSV(name) {
     return name.split(",").map(n => n.trim());

@@ -159,7 +159,7 @@ export class SWSEActorSheet extends ActorSheet {
             div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
-        html.find("#fullAttack").on("click", () => this.object.attack.makeAttack(event, {type: "fullAttack"}));
+        html.find("#fullAttack").on("click", () => this.object.attack.createAttackDialog(event, {type: "fullAttack"}));
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
@@ -1402,7 +1402,7 @@ export class SWSEActorSheet extends ActorSheet {
         let elem = ev.currentTarget;
         let attacks = Attack.fromJSON(elem.dataset.attacks);
 
-        this.object.attack.makeAttack(ev, {type: "singleAttack", attacks});
+        this.object.attack.createAttackDialog(ev, {type: "singleAttack", attacks});
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {

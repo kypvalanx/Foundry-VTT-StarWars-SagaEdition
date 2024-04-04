@@ -41,6 +41,7 @@
                     <div class="plain input">{{attack.type}}</div>
                 </div>
                 <div class="modes">
+                    <div><button>Attack</button></div>
                     {{#each attack.modes as |mode id|}}
                         <div class="mode-selector mode-group" data-type="{{mode.type}}"
                              data-mode-path="{{mode.modePath}}"
