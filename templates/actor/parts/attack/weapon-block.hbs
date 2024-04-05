@@ -41,7 +41,14 @@
                     <div class="plain input">{{attack.type}}</div>
                 </div>
                 <div class="modes">
-                    <div><button>Attack</button></div>
+                    <div class="flex flex-col">
+                        <button>Attack</button>
+                        {{#if attack.hasAmmunition}}
+                            {{#each attack.ammunition.current as |ammo id|}}
+                        <button data-item-id="{{../attack.itemId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
+                            {{/each}}
+                        {{/if}}
+                    </div>
                     {{#each attack.modes as |mode id|}}
                         <div class="mode-selector mode-group" data-type="{{mode.type}}"
                              data-mode-path="{{mode.modePath}}"

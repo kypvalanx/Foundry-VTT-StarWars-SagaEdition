@@ -75,7 +75,7 @@ export class AmmunitionDelegate {
         return "SUCCESS"
     }
     reload(key){
-        let currentAmmo = this.item.system.ammunition || {};
+        //let currentAmmo = this.item.system.ammunition || {};
 
         const parsedKey = AmmunitionDelegate.parseAmmoKey(key);
         let ammo = AmmunitionDelegate.parseAmmunitionString(parsedKey.string)
@@ -85,7 +85,17 @@ export class AmmunitionDelegate {
         if(result.fail){
             //do something here with a popup
             console.error("INSUFFICIENT AMMO")
-            return;
+
+            let choice = new Dialog({
+                title: "Insufficient Ammunition",
+                content: `This character does not have any ammunition of type ${ammo.type} in they're inventory.`,
+                buttons: {
+                    ok: {label: "Ok", callback: () => {return false;}},
+                    ignore: {label: "Ignore", callback: () => {return true;}}
+                },
+                default: "ok"
+            }).render(true)
+            if(!choice) return;
         }
 
         let system = {ammunition:{}}

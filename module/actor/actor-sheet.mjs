@@ -205,11 +205,23 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
+        html.find('[data-action="reload"]').click(this._onReload.bind(this));
 
         html.find('.dark-side-button').click(ev => {
             this.actor.darkSideScore = $(ev.currentTarget).data("value");
         });
 
+    }
+
+
+    _onReload(event) {
+        event.preventDefault();
+        event.stopPropagation();
+        const a = event.currentTarget;
+        const ammoKey = a.dataset.ammoKey;
+        const itemId = a.dataset.itemId;
+        const item = this.object.items.get(itemId);
+        item.ammunition.reload(ammoKey);
     }
 
     _performItemAction(event){

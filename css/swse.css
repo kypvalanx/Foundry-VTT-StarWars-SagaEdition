@@ -16,10 +16,12 @@
 
 .dialog .dialog-buttons button.default {
   background: var(--color-foreground);
+  border: 2px groove var(--color-border-light-secondary);
 }
 
 .dialog .dialog-buttons button {
   background: var(--color-foreground);
+  border: 2px groove var(--color-border-light-secondary);
 }
 
 .dialog .dialog-buttons {
@@ -564,7 +566,7 @@
   color: var(--color-background);
   background: var(--color-foreground);
   text-align: center;
-  border: none;
+  border: 2px groove var(--color-border-light-secondary);
   border-radius: 10px;
   cursor: pointer;
   -webkit-transition: all 0.3s ease-in-out;
