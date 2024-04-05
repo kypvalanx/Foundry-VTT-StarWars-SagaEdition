@@ -234,6 +234,7 @@ function multiplyNumericTerms(roll, multiplier) {
         }
         previous = term;
     }
+    return Roll.fromTerms(roll.terms);
 }
 
 function addMultiplierToDice(roll, multiplier) {
@@ -559,6 +560,111 @@ async function generateAttackCard(resolvedAttacks, attack) {
     })
 }
 
+function modifyRollForPreMultiplierBonuses(attack, damageRoll) {
+    let criticalHitPreMultiplierBonuses = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "criticalHitPreMultiplierBonus"
+    })
+
+
+    for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
+
+        let value = resolveValueArray(criticalHitPreMultiplierBonus, attack.actor)
+
+        damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
+    }
+    return damageRoll;
+}
+
+function modifyRollForPostMultiplierBonus(attack, damageRoll) {
+    let postMultBonusDie = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "criticalHitPostMultiplierBonusDie",
+        reduce: "SUM"
+    })
+    damageRoll.alter(1, postMultBonusDie)
+    return damageRoll;
+}
+
+export function crunchyCrit(roll) {
+    const terms = [];
+    let max = 0;
+
+    for (let term of roll.terms) {
+        terms.push(term);
+        if (term instanceof DiceTerm) {
+            max += term.faces * term.number
+        } else if (term instanceof NumericTerm){
+            max += term.number
+        }
+    }
+    terms.push(new OperatorTerm({operator:"+"}))
+    terms.push(new NumericTerm({number: max}))
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+export function maxRollCrit(roll) {
+    const terms = [];
+
+    for(const term of roll.terms){
+        if(term instanceof DiceTerm){
+            terms.push(new NumericTerm({number: term.number*term.faces, options: {flavor: term.expression}}))
+        } else {
+            terms.push(term)
+        }
+    }
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+export function doubleDiceCrit(damageRoll, criticalMultiplier) {
+    damageRoll.alter(criticalMultiplier, 0, true)
+    return multiplyNumericTerms(damageRoll, criticalMultiplier)
+}
+
+export function doubleValueCrit(damageRoll, criticalMultiplier) {
+    damageRoll = addMultiplierToDice(damageRoll, criticalMultiplier)
+    return multiplyNumericTerms(damageRoll, criticalMultiplier)
+}
+
+function modifyRollForCriticalHit(attack, damageRoll) {
+    damageRoll = modifyRollForPreMultiplierBonuses(attack, damageRoll);
+
+    const criticalMultiplier = attack.critical;
+    switch (game.settings.get("swse", "criticalHitType")) {
+        case "Double Dice":
+            damageRoll = doubleDiceCrit(damageRoll, criticalMultiplier);
+            break;
+        case "Crunchy Crit":
+            damageRoll = crunchyCrit(damageRoll)
+            break;
+        case "Max Damage":
+            damageRoll = maxRollCrit(damageRoll)
+            break;
+        default:
+            damageRoll = doubleValueCrit(damageRoll, criticalMultiplier);
+    }
+
+    damageRoll = modifyRollForPostMultiplierBonus(attack, damageRoll);
+    return damageRoll;
+}
+
+function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
+    let bonusCriticalDamageDieType = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "bonusCriticalDamageDieType",
+        reduce: "SUM"
+    })
+
+    if (bonusCriticalDamageDieType) {
+        damageRoll = adjustDieSize(damageRoll, bonusCriticalDamageDieType)
+    }
+    return damageRoll;
+}
+
 function resolveAttack(attack, targetActors) {
     let attackRoll = attack.attackRoll.roll;
     let attackRollResult = attackRoll.roll({async: false});
@@ -590,15 +696,7 @@ function resolveAttack(attack, targetActors) {
     let damageRoll = attack.damageRoll.roll;
 
     if(critical){
-        let bonusCriticalDamageDieType = getInheritableAttribute({
-            entity: attack.item,
-            attributeKey: "bonusCriticalDamageDieType",
-            reduce: "SUM"
-        })
-
-        if(bonusCriticalDamageDieType){
-            damageRoll = adjustDieSize(damageRoll, bonusCriticalDamageDieType)
-        }
+        damageRoll = modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll);
     }
 
 
@@ -610,36 +708,7 @@ function resolveAttack(attack, targetActors) {
     })
 
     if (critical && !ignoreCritical) {
-        let criticalHitPreMultiplierBonuses = getInheritableAttribute({
-            entity: attack.item,
-            attributeKey: "criticalHitPreMultiplierBonus"
-        })
-
-
-        for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
-
-            let value = resolveValueArray(criticalHitPreMultiplierBonus, attack.actor)
-
-            damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
-        }
-
-
-        //TODO add a user option to use this kind of multiplication.  RAW the rolled dice values are doubled, not the number of dice
-        if (false) {
-            damageRoll.alter(2, 0, true)
-            multiplyNumericTerms(damageRoll, 2)
-        } else {
-            damageRoll = addMultiplierToDice(damageRoll, 2)
-            multiplyNumericTerms(damageRoll, 2)
-        }
-
-
-        let postMultBonusDie = getInheritableAttribute({
-            entity: attack.item,
-            attributeKey: "criticalHitPostMultiplierBonusDie",
-            reduce: "SUM"
-        })
-        damageRoll.alter(1, postMultBonusDie)
+        damageRoll = modifyRollForCriticalHit(attack, damageRoll);
     }
 
     let damage = damageRoll.roll({async: false});

@@ -161,6 +161,21 @@ export const registerSystemSettings = function () {
         type: Boolean
     });
 
+    game.settings.register("swse", "criticalHitType", {
+        name: "Critical Hit Mode",
+        hint: "allows you to select other types of Critical Hits Calculation.",
+        scope: "world",
+        config: true,
+        default: "Default",
+        type: String,
+        choices: {
+            "Default": "Doubles the value after rolling normal damage",
+            "Double Dice": "Doubles dice rolled",
+            "Crunchy Crit": "adds max damage to rolled damage",
+            "Max Damage": "replaces the roll with max damage"
+        }
+    });
+
     const r = document.querySelector(':root');
     const rs = getComputedStyle(r);
 
