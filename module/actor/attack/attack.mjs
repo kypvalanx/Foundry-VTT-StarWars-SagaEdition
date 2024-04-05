@@ -604,7 +604,13 @@ export class Attack {
     }
 
     get critical() {
-        return "x2" //TODO this is what was currently implemented, but it's clearly not done.  we need a better critical system that this attack object should provide
+        let bonus = getInheritableAttribute({
+            entity: this.item,
+            attributeKey: 'criticalMultiplierBonus',
+            reduce: "SUM"
+        });
+
+        return 2 + bonus
     }
 
     get type() {
@@ -637,6 +643,8 @@ export class Attack {
         // }})
         return modes;
     }
+
+
 
     get rangedAttackModifier() {
         return getAttackRange(this.range, this.isAccurate, this.isInaccurate, this.actor)
