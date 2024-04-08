@@ -99,7 +99,7 @@ function getChangesFromActiveEffects(document) {
 }
 
 function isEffectOnEmbeddedItem(document, effect) {
-    return document instanceof SWSEActor && effect.origin.includes("Item");
+    return document instanceof SWSEActor && effect.origin?.includes("Item");
 }
 
 function isActiveEffect(effect, document) {
