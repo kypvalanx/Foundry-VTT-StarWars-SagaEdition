@@ -889,10 +889,16 @@ function getItemStripping(item, key) {
 }
 
 //TODO probably don't need to export this, but right now the tests are in the wrong file
+
+/**
+ * @param dieString String
+ * @returns {{additionalTerms: *[], dice: *[]}}
+ */
 export function getDiceTermsFromString(dieString) {
     const additionalTerms = []
+    const dice = [];
     if (!dieString) {
-        return [];
+        return {dice, additionalTerms};
     }
     dieString = `${dieString}`
     let dieTerms = dieString
@@ -902,7 +908,6 @@ export function getDiceTermsFromString(dieString) {
         .replace(/x/g, " x ")
         .split(/ /g)
 
-    let dice = [];
     let lastOperator = "";
     for (let dieTerm of dieTerms) {
         if (dieTerm === "0") {

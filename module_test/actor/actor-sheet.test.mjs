@@ -241,6 +241,12 @@ export async function actorSheetTests(quench) {
                         assert.equal(additionalTerms[0].faces, 6)
                         assert.equal(additionalTerms[0].number, 4)
                     })
+                    it("should handle zero gracefully", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString(0)
+
+                        assert.lengthOf(additionalTerms, 0);
+                        assert.lengthOf(dice, 0);
+                    })
                 })
             })
 
