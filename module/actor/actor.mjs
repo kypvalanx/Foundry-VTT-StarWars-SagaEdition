@@ -68,7 +68,8 @@ export class SWSEActor extends Actor {
 
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-        if(!this.parent) this.reset()
+        //if(!this.parent) this.reset()
+        this.reset()
     }
 
     useAmmunition(type){

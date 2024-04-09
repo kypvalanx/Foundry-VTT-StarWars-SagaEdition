@@ -1496,7 +1496,7 @@ export function getParentByHTMLClass(ev, token) {
     return cursor;
 }
 
-export function getDocumentByUuid(uuid) {
+export function getDocumentByUuidOLD(uuid) {
     if(!uuid){
         return;
     }
@@ -1547,6 +1547,97 @@ export function getDocumentByUuid(uuid) {
             }
         }
         last = tok
+    }
+    return source;
+}
+
+export function getDocumentByUuid(uuid, from) {
+    if(!uuid){
+        return;
+    }
+    let toks = uuid.split(".")
+    let source = from || game;
+    if(from){
+        const newToks = [];
+        let found = false;
+        for (const tok of toks) {
+            if(found){
+                newToks.push(tok);
+            } else if(from.id === tok){
+                found = true;
+            }
+        }
+        toks = newToks;
+    }
+    let last = "";
+    for (let [i, tok] of toks.entries()) {
+        switch (tok){
+            case "Scene":
+                source = source?.scenes;
+                break;
+            case "Token":
+                source = source?.tokens;
+                break;
+            case "Actor":
+                source = source?.actors;
+                break;
+            case "Item":
+                source = source?.items;
+                break;
+            case "ActiveEffect":
+                source = source?.effects
+                break;
+            default:
+                source = source?.get(tok)
+                if(!source){
+
+                }
+        }
+        last = tok;
+
+        // if(!source ){
+        //     console.warn(`source is null at ${tok}`)
+        // }
+        // if (tok === "Scene") {
+        //     source = source?.scenes;
+        // }else if (tok === "Token") {
+        //     source = source?.tokens;
+        // } else if (tok === "Actor") {
+        //     source = source?.actors;
+        // } else if (tok === "Item") {
+        //     if (i === 0) {
+        //         source = game.items;
+        //         if(!source.get(toks[i+1])){
+        //             let compendiums = getCompendium("item");
+        //             let item;
+        //             for(let compendium of compendiums){
+        //                 if(compendium.find){
+        //                     item = compendium.find(item => item.id === toks[i+1]);
+        //                 }else{
+        //                     console.log("huh?")
+        //                     compendium.get(toks[i+1])
+        //                 }
+        //                 if(item) break;
+        //             }
+        //             if(item){
+        //                 source = {}
+        //                 source[toks[i+1]] = item;
+        //             }
+        //         }
+        //         continue;
+        //     }
+        //     source = source?.items;
+        // } else if (tok === "ActiveEffect") {
+        //     source = source?.effects;
+        // } else {
+        //     source = source?.get(tok)
+        //     if(!source){
+        //         if(last === "Actor"){
+        //             game.actors.get(tok)
+        //         }
+        //     }
+        // }
+        // last = tok
     }
     return source;
 }

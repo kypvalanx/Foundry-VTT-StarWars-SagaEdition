@@ -58,6 +58,7 @@ Hooks.once('init', async function () {
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.documentClass = SWSETokenDocument;
+    //CONFIG.Token.objectClass = SWSEToken;
 
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
     //CONFIG.ActiveEffect.sheetClasses["Active Sheet Classes"] = SWSEActiveEffectConfig;

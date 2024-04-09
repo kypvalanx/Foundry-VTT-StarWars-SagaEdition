@@ -31,6 +31,20 @@ export const lightsaberForms = ["Ataru",
     "Maho-Kai",
     "Tripzest"];
 
+export const COLORS = {
+    "red": "#FF0000",
+    "green": "#00FF00",
+    "cyan": "#00FFFF",
+    "blue": "#0000FF",
+    "crimson": "#DC143C",
+    "dark crimson": "#402327",
+    "aquamarine" : "#7fffd4",
+    "purple" : "#663399",
+    "orange" : "#BB4411",
+    "silver" : "#999999"
+
+}
+
 export const crewPositions = ['Pilot', 'Copilot', 'Gunner', 'Commander', 'System Operator', 'Engineer'];
 
 export const crewSlotResolution = {

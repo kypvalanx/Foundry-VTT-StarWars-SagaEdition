@@ -47,7 +47,7 @@ export function onEffectControl(event){
     let doc;
     let parentDoc;
     if(effectUuid){
-        doc = getDocumentByUuid(effectUuid);
+        doc = getDocumentByUuid(effectUuid, this.object);
         let toks = effectUuid.split(".");
         effectId = toks[toks.length-1]
         parentDoc = doc?.parent;
