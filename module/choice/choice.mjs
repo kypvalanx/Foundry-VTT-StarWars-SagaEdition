@@ -1,7 +1,8 @@
 import {GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {fullJoin, innerJoin} from "../common/util.mjs";
-import {changeSelect, initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
+import {initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
+import {getCompendium, getIndexEntriesByTypes} from "../compendium/compendium-util.mjs";
 
 function skipFirstLevelChoice(choice, context) {
     return choice.isFirstLevel && !context.isFirstLevel;
@@ -39,6 +40,13 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
             item.system.changes.push(...Object.values(selectedChoice.attributes))
 
         }
+        if(selectedChoice.modifications && selectedChoice.modifications.length > 0){
+            items = [];
+            for (const modification of selectedChoice.modifications) {
+                modification.modifier = true;
+                items.push(modification)
+            }
+        }
     }
     return items;
 }
@@ -73,7 +81,7 @@ export async function activateChoices(item, context) {
             content = `<p>${greetingString}</p>`;
             content += `<input class="choice" type="number" data-option-key="">`
         } else {
-            options = explodeOptions(choice.options, actor);
+            options = await explodeOptions(choice.options, actor);
 
             //let preprogrammedAnswer;
             console.log("itemAnswers: " + context.itemAnswers);
@@ -172,7 +180,12 @@ export async function activateChoices(item, context) {
     return {success: true, items};
 }
 
-function explodeOptions(options, actor) {
+export async function explodeOptions(options, actor) {
+    if(!options){
+        return [];
+    }
+
+
     if (!Array.isArray(options)) {
         let resolvedOptions = [];
         for (let [key, value] of Object.entries(options)) {
@@ -303,6 +316,13 @@ function explodeOptions(options, actor) {
                 if (!actor.talents.map(t => t.name).includes(form)) {
                     resolvedOptions.push({name: form, abilities: [], items: [], payload: form});
                 }
+            }
+        } else if (key === 'AVAILABLE_LIGHTSABER_CRYSTALS') {
+            const compendiums = getCompendium("upgrade")
+
+            let items = await getIndexEntriesByTypes(compendiums, ['upgrade'], ['Lightsaber Crystals'])
+            for(const item of items){
+                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined});
             }
         } else {
             resolvedOptions.push(value);

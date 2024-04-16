@@ -1490,10 +1490,12 @@ export class SWSEItem extends Item {
     }
 
     addItemModificationEffectFromItem(item) {
+        if (!this.canUserModify(game.user, 'update')) {
+            return;
+        }
         let changes = [];
         changes.push(...Object.values(item.system.attributes || {}))
         changes.push(...item.system.changes)
-        //could this be generated from the parent item at load?  would that be slow?
         let activeEffect = DEFAULT_MODIFICATION_EFFECT;
         activeEffect.label = item.name;
         activeEffect.changes = changes;
@@ -1501,8 +1503,18 @@ export class SWSEItem extends Item {
         activeEffect.origin = item.uuid;
         activeEffect.flags.swse.description = item.system.description;
 
-        if (this.canUserModify(game.user, 'update')) {
-            this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        const createdEffect = this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+
+        if(item.effects && item.effects.filter(i=> i).length > 0){
+            const effects = []
+            item.effects.forEach(effect => {
+                effect = effect.clone();
+                effect.origin = createdEffect.id
+                effect.flags = {};
+                effect.flags.swse = {}
+                effects.push(effect);
+            })
+            this.createEmbeddedDocuments("ActiveEffect", effects);
         }
     }
 

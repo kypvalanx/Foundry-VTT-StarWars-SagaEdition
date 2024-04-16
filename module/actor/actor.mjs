@@ -6,7 +6,6 @@ import {
     excludeItemsByType,
     filterItemsByType,
     getDocumentByUuid,
-    getIndexAndPack,
     getVariableFromActorData,
     inheritableItems,
     innerJoin,
@@ -44,6 +43,7 @@ import {errorsFromActor, warningsFromActor} from "./warnings.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
+import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 
 
 /**
@@ -2203,6 +2203,7 @@ export class SWSEActor extends Actor {
      * Checks prerequisites of an entity and offers available context
      * @param entity {SWSEItem}
      * @param context {Object}
+     * @return {SWSEItem}
      */
     async checkPrerequisitesAndResolveOptions(entity, context) {
         context.actor = this;
@@ -2251,10 +2252,7 @@ export class SWSEActor extends Actor {
                     return [];
                 }
             }
-        }
 
-
-        if (context.newFromCompendium) {
             if (!context.skipPrerequisite && !context.isUpload) {
                 //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
                 if (!equipableTypes.includes(entity.type)) {
@@ -2513,7 +2511,76 @@ export class SWSEActor extends Actor {
         }
 
 
-        return await this.resolveAddItem(entity, choices, context);
+
+        let providedItems = entity.getProvidedItems() || [];
+        //on uploads add "provide" changes for classFeats
+        if (context.isUpload) {
+            if (entity.type === "class") {
+                if (context.isFirstLevel) {
+                    let availableClassFeats = getInheritableAttribute({
+                        entity: entity,
+                        attributeKey: "availableClassFeats",
+                        reduce: "SUM"
+                    });
+                    if (!availableClassFeats) {
+                        let classFeats = getInheritableAttribute({
+                            entity: entity,
+                            attributeKey: "classFeat",
+                            reduce: "VALUES"
+                        });
+                        availableClassFeats = classFeats.length
+                    }
+                    if (availableClassFeats) {
+                        SWSEActor.updateOrAddChange(entity, "provides", `${entity.name} Starting Feats:${availableClassFeats}`, true)
+                    }
+                } else if (this._isFirstLevelOfClass(entity.name)) {
+                    entity.system.changes.push({key: "provides", value: `${entity.name} Starting Feats`})
+                }
+            }
+            for (let addProvider of providedItems.filter(i => i.type !== "trait")) {
+                SWSEActor.updateOrAddChange(entity, "provides", `${entity.name} ${entity.type} ${addProvider.type}:${addProvider.type.toUpperCase()}:${addProvider.name}`, true)
+            }
+            providedItems = providedItems.filter(i => i.type === "trait")
+        }
+
+        const modifications = [];
+        for (const providedItem of choices.items) {
+            if (providedItem.modifier) {
+                modifications.push(providedItem);
+            } else {
+                providedItems.push(providedItem)
+            }
+        }
+        providedItems.push(...choices.items);
+        // let {providedItems, modifications} = this.getProvidedItems(entity, context, choices);
+
+        const items = await this.createEmbeddedDocuments("Item", [entity.toObject(false)]);
+        const mainItem = items[0];
+        if(context.modifications){
+            modifications.push(...(context.modifications));
+        }
+        if (!!modifications) {
+            for (let modification of modifications) {
+                let {payload, itemName, entity} = await resolveEntity(modification)
+                if (entity) {
+                    await mainItem.addItemModificationEffectFromItem(entity)
+                }
+            }
+        }
+
+        let providedItemContext = Object.assign({}, context);
+        providedItemContext.newFromCompendium = false;
+        providedItemContext.provided = true;
+        await this.addItems(providedItems, mainItem, providedItemContext);
+
+
+        context.skipPrerequisite = true;
+
+
+        if (entity.type === "class") {
+            await this.addClassFeats(mainItem, providedItemContext);
+        }
+        return mainItem;
     }
 
 
@@ -2534,59 +2601,7 @@ export class SWSEActor extends Actor {
         entity.system.changes = find;
     }
 
-    async resolveAddItem(item, choices, context) {
-        context.skipPrerequisite = true;
 
-        //on uploads add "provide" changes for classFeats
-        if (item.type === "class") {
-            let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
-            let availableClassFeats = getInheritableAttribute({
-                entity: item,
-                attributeKey: "availableClassFeats",
-                reduce: "SUM"
-            });
-            let classFeats = getInheritableAttribute({
-                entity: item,
-                attributeKey: "classFeat",
-                reduce: "VALUES"
-            });
-            if (context.isUpload) {
-                if (!availableClassFeats) {
-                    availableClassFeats = classFeats.length
-                }
-                if (context.isFirstLevel && availableClassFeats) {
-                    SWSEActor.updateOrAddChange(item, "provides", `${item.name} Starting Feats:${availableClassFeats}`, true)
-                    // item.system.changes.push({key: "provides", value: `${item.name} Starting Feats:${availableClassFeats}`})
-                } else if (isFirstLevelOfClass) {
-                    item.system.changes.push({key: "provides", value: `${item.name} Starting Feats`})
-                }
-            }
-        }
-
-
-        let providedItems = item.getProvidedItems() || [];
-
-        if (context.isUpload) {
-            let addProviders = providedItems.filter(i => i.type !== "trait")
-            for (let addProvider of addProviders) {
-                SWSEActor.updateOrAddChange(item, "provides", `${item.name} ${item.type} ${addProvider.type}:${addProvider.type.toUpperCase()}:${addProvider.name}`, true)
-            }
-            providedItems = providedItems.filter(i => i.type === "trait")
-        }
-        let mainItem = await this.createEmbeddedDocuments("Item", [item.toObject(false)]);
-
-        providedItems.push(...choices.items);
-
-        let providedItemContext = Object.assign({}, context);
-        providedItemContext.newFromCompendium = false;
-        providedItemContext.provided = true;
-        await this.addItems(providedItems, mainItem[0], providedItemContext);
-
-        if (item.type === "class") {
-            await this.addClassFeats(mainItem[0], providedItemContext);
-        }
-        return mainItem[0];
-    }
 
 
     /**
@@ -2603,7 +2618,7 @@ export class SWSEActor extends Actor {
             entity: item,
             attributeKey: "classFeat",
             reduce: "VALUES"
-        }).map(feat => this.cleanItemName(feat));
+        }).map(feat => cleanItemName(feat));
 
         if (feats.length === 0) {
             return;
@@ -2663,7 +2678,7 @@ export class SWSEActor extends Actor {
                 entity: item,
                 attributeKey: "multiclassFeat",
                 reduce: "VALUES"
-            }).map(feat => this.cleanItemName(feat))))
+            }).map(feat => SWSEActor.cleanItemName(feat))))
 
             let ownedFeats = currentFeats.map(f => f.finalName);
             await this.selectFeat(availableFeats, ownedFeats, item, context);
@@ -2759,15 +2774,15 @@ export class SWSEActor extends Actor {
     }
 
 
-    async addItem(providedItem, options, parent) {
+    async addItem(itemCriteria, options, parent) {
         //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
-        let {payload, itemName, entity, createdItem} = await this.resolveEntity(providedItem);
+        let {payload, itemName, entity, createdItem} = await resolveEntity(itemCriteria);
 
         if (!entity) {
             if (options.suppressWarnings) {
-                console.debug(`attempted to add ${providedItem}`)
+                console.debug(`attempted to add ${itemCriteria}`)
             } else {
-                console.warn(`attempted to add ${providedItem}`)
+                console.warn(`attempted to add ${itemCriteria}`)
             }
             return {};
         }
@@ -2779,7 +2794,7 @@ export class SWSEActor extends Actor {
                 levels.push(...(clazz.levelsTaken || []))
             }
 
-            let nextLevel = providedItem.firstLevel ? 1 : Math.max(...levels) + 1
+            let nextLevel = itemCriteria.firstLevel ? 1 : Math.max(...levels) + 1
 
             let existing = this.itemTypes.class.find(item => item.name === entity.name)
             if (existing) {
@@ -2818,24 +2833,22 @@ export class SWSEActor extends Actor {
             }
         }
 
-
-
-        entity.addItemAttributes(providedItem.changes);
-        entity.addProvidedItems(providedItem.providedItems);
-        entity.setParent(parent, providedItem.unlocked);
-        entity.setPrerequisite(providedItem.prerequisite);
+        entity.addItemAttributes(itemCriteria.changes);
+        entity.addProvidedItems(itemCriteria.providedItems);
+        entity.setParent(parent, itemCriteria.unlocked);
+        entity.setPrerequisite(itemCriteria.prerequisite);
 
         //TODO payload should be deprecated in favor of payloads
         if (!!payload) {
             entity.setChoice(payload)
             entity.setPayload(payload);
         }
-        for (let payload of Object.entries(providedItem.payloads || {})) {
+        for (let payload of Object.entries(itemCriteria.payloads || {})) {
             entity.setChoice(payload[1]);
             entity.setPayload(payload[1], payload[0]);
         }
 
-        let equip = providedItem.equip;
+        let equip = itemCriteria.equip;
         if (equip) {
             entity.system.equipped = equip
         }
@@ -2843,73 +2856,13 @@ export class SWSEActor extends Actor {
 
         entity.setTextDescription();
         let childOptions = JSON.parse(JSON.stringify(options))
-        childOptions.itemAnswers = providedItem.answers;
-        let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
+        childOptions.itemAnswers = itemCriteria.answers;
+        childOptions.modifications = itemCriteria.modifications;
+        let addedItem = this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
         let notificationMessage = `<li>${addedItem.finalName}</li>`
-        //do stuff based on type of item
-        let modifications = providedItem.modifications;
-        if (!!modifications) {
-            for (let modification of modifications) {
-                let {payload, itemName, entity} = await this.resolveEntity(modification)
-                if (entity) {
-                    await addedItem.addItemModificationEffectFromItem(entity)
-                }
-            }
-        }
 
-
-        if (createdItem) {
-            // entity.delete();
-        }
         return {notificationMessage, addedItem};
-    }
-
-    async resolveEntity(item) {
-        let entity = undefined
-        let itemName = undefined
-        let payload = undefined
-        if (item.duplicate) {
-            entity = item.item.clone();
-        } else {
-
-            if (item.uuid) {
-                entity = await Item.implementation.fromDropData(item);
-                itemName = entity.name;
-            } else {
-                game.indicesByType = game.indicesByType || {};
-
-                let indices = await getIndexAndPack(game.indicesByType, item);
-                let response = await this.getIndexEntryByName(item.name, indices);
-
-                let entry = response.entry;
-                itemName = response.itemName;
-                payload = response.payload;
-                let lookup = response.lookup;
-                /**
-                 *
-                 * @type {SWSEItem}
-                 */
-
-                if (entry && entry._id) {
-                    entity = await Item.implementation.fromDropData({
-                        type: 'Item',
-                        uuid: `Compendium.${lookup.pack.metadata.id}.${entry._id}`
-                    });
-                }
-            }
-        }
-        let createdItem = false;
-        if (!entity && item.type === "language") {
-            entity = game.items.find(i => i.name === item.name)
-            if (!entity) {
-                let entities = await SWSEItem.create([item]);
-                entity = entities[0];
-                createdItem = true;
-            }
-        }
-
-        return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null, createdItem};
     }
 
     get warnings() {
@@ -2921,55 +2874,9 @@ export class SWSEActor extends Actor {
     }
 
 
-    /**
-     *
-     * @param item {string}
-     // * @param item.name {string}
-     // * @param item.type {string}
-     * @returns {{itemName, payload: string}}
-     */
-    resolveItemNameAndPayload(item) {
-        let itemName = item;
-        let result = /^([\w\s]*) \(([()\-\w\s*:+]*)\)/.exec(itemName);
-        let payload = "";
-        if (result) {
-            itemName = result[1];
-            payload = result[2];
-        }
-        return {itemName, payload};
-    }
 
 
-    async getIndexEntryByName(item, lookups) {
-        if (!lookups || lookups.length === 0) {
-            return
-        }
 
-        let {itemName, payload} = this.resolveItemNameAndPayload(item);
-        let cleanItemName1 = this.cleanItemName(itemName);
-
-        let entry;
-        let currentLookup;
-
-        for (let lookup of lookups) {
-            let index = lookup.index;
-            entry = await index.find(f => f.name === cleanItemName1);
-            if (!entry) {
-                let cleanItemName2 = this.cleanItemName(itemName + " (" + payload + ")");
-                entry = await index.find(f => f.name === cleanItemName2);
-                if (entry) {
-                    payload = undefined;
-                }
-            }
-            currentLookup = lookup
-            if (entry) break;
-        }
-        return {entry, payload, itemName, lookup: currentLookup};
-    }
-
-    cleanItemName(feat) {
-        return feat.replace("*", "").trim();
-    }
 
     async equipItem(item, equipType, options) {
         if (typeof item !== "object") {
