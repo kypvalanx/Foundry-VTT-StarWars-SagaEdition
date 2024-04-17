@@ -13,12 +13,12 @@ export async function processActor(actorData) {
     delete actor.system.providedItems;
     actor.prepareData();
     actor.skipPrepare = true;
-    await actor.addItems(providedItems, null, {
+    await actor.addItems({
         skipPrerequisite: true,
         generalAnswers: choiceAnswers,
         isUpload: true,
         suppressWarnings: true
-    });
+    }, providedItems, null);
     actor.skipPrepare = false;
     actor.prepareData();
     return actor;

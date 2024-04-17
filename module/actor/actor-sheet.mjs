@@ -1,14 +1,15 @@
 import {
     filterItemsByType,
-    getCleanListFromCSV, getDocumentByUuid,
+    getCleanListFromCSV,
+    getDocumentByUuid,
     getParentByHTMLClass,
     linkEffects,
     numericOverrideOptions,
-    onCollapseToggle, toChat,
+    onCollapseToggle,
+    toChat,
     unique
 } from "../common/util.mjs";
-import {crewPositions, vehicleActorTypes} from "../common/constants.mjs";
-import {getActorFromId} from "../swse.mjs";
+import {vehicleActorTypes} from "../common/constants.mjs";
 import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
@@ -778,11 +779,11 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        let context = {};
-        context.newFromCompendium = true;
-        context.answers = data.answers;
-
-        await this.object.addItems([data], undefined, context);
+        await this.object.addItems({
+            newFromCompendium: true,
+            answers: data.answers,
+            items: [data]
+        });
 
     }
 
@@ -799,7 +800,7 @@ export class SWSEActorSheet extends ActorSheet {
             droppedItem.targetEffectUuid = targetEffect.dataset.uuid;
             if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
                 linkEffects.call(this.item, droppedItem.effectUuid, droppedItem.targetEffectUuid);
-                return;
+                return false;
             }
         }
 
@@ -811,14 +812,14 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     _onAddGMBonus(){
-        this.object.addItems([{name:"GM Bonus", type:"trait"}], undefined, {})
+        this.object.addItems({items: [{name: "GM Bonus", type: "trait"}]})
     }
 
     _onAddLevelUpBonus(){
         if(this.object.isHeroic){
-            this.object.addItems([{name:"Heroic Ability Score Level Bonus", type:"trait"}], undefined, {})
+            this.object.addItems({items: [{name: "Heroic Ability Score Level Bonus", type: "trait"}]})
         } else {
-            this.object.addItems([{name:"Nonheroic Ability Score Level Bonus", type:"trait"}], undefined, {})
+            this.object.addItems({items: [{name: "Nonheroic Ability Score Level Bonus", type: "trait"}]})
         }
     }
 
