@@ -322,7 +322,7 @@ export async function explodeOptions(options, actor) {
 
             let items = await getIndexEntriesByTypes(compendiums, ['upgrade'], ['Lightsaber Crystals'])
             for(const item of items){
-                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, defaultValue: item.name === "Ilum Crystal"});
+                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, isDefault: item.name === "Ilum Crystal"});
             }
 
 
