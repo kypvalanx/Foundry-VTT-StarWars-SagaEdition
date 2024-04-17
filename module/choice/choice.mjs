@@ -322,12 +322,27 @@ export async function explodeOptions(options, actor) {
 
             let items = await getIndexEntriesByTypes(compendiums, ['upgrade'], ['Lightsaber Crystals'])
             for(const item of items){
-                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined});
+                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, defaultValue: item.name === "Ilum Crystal"});
             }
+
+
         } else {
             resolvedOptions.push(value);
         }
     }
+
+    if(resolvedOptions && Array.isArray(resolvedOptions)){
+        resolvedOptions = resolvedOptions.sort((a, b) => {
+            if (a.name < b.name) {
+                return -1;
+            }
+            if (a.name > b.name) {
+                return 1;
+            }
+            return 0;
+        })
+    }
+
     return resolvedOptions;
 }
 
