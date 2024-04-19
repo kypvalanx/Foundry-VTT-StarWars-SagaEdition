@@ -1,4 +1,4 @@
-import {GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
+import {COLORS, GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {fullJoin, innerJoin} from "../common/util.mjs";
 import {initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
@@ -127,7 +127,7 @@ export async function activateChoices(item, context) {
                 }
 
                 if (optionString !== "") {
-                    optionString = `<div><select class="choice">${optionString}</select></div>`
+                    optionString = `<div class="flex flex-row"><select class="choice">${optionString}</select><div class="custom-value"></div></div>`
                 }
             }
 
@@ -152,11 +152,30 @@ export async function activateChoices(item, context) {
                 return false
             },
             render: (html) => {
+                const selects = html.find(".choice");
                 if(choice.uniqueChoices){
-                    const selects = html.find(".choice");
                     initializeUniqueSelection(selects);
                     selects.on("change", () => uniqueSelection(selects));
                 }
+                selects.on("change", (event) => {
+                    const target = $(event.target)
+
+                    console.log(event.target.value)
+
+
+                    const option = options.find(o => o.name === event.target.value);
+
+                    const custom = target.parent().find(".custom-value")
+                    if(option.customType){
+                        if(option.customType === "color"){
+
+                            custom.append( `<input type="${option.customType}" data-custom-type="${option.customType}">`);
+                        }
+                    } else {
+                        custom.empty();
+                    }
+
+                })
             },
             callback: async (html) => {
                 let find = html.find(".choice");
@@ -166,6 +185,18 @@ export async function activateChoices(item, context) {
                         return;
                     }
                     let elementValue = foundElement.value || foundElement.innerText;
+                    const option = options.find(o => o.name === elementValue);
+                    if(option.customType){
+                        if(option.customType === "color"){
+                            const custom = $(foundElement).parent().find(".custom-value input")
+                            const value = custom[0].value;
+                            let regExp = new RegExp(`#${option.customType}#`, "g");
+                            for(const entry of Object.entries(option.payloads)){
+                                option.payloads[entry[0]] = entry[1].replace(regExp, value)
+                            }
+
+                        }
+                    }
                     items.push(...await resolveActionsFromChoice(choice, item, elementValue, options));
                 }
 
@@ -195,6 +226,11 @@ export async function explodeOptions(options, actor) {
         }
         options = resolvedOptions;
     }
+    const explodable = ['AVAILABLE_GM_BONUSES', 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY', 'AVAILABLE_LIGHTSABER_COLORS'];
+
+    options = options.sort(option => {
+        return explodable.includes(option.name) ? 1 : -1;
+    })
 
     let resolvedOptions = [];
     for (let value of options) {
@@ -327,13 +363,31 @@ export async function explodeOptions(options, actor) {
             }
 
 
+        } else if (key === 'AVAILABLE_LIGHTSABER_COLORS') {
+            const colors = Object.keys(COLORS)
+
+            const existingColors = resolvedOptions.map(option => option.name);
+            for(const lightsaberColor of colors){
+                if(!existingColors.includes(lightsaberColor)){
+                    resolvedOptions.push({name: lightsaberColor, display: lightsaberColor, abilities: [], items: [], modifications: [], payloads: {lightsaberColor}});
+                }
+            }
+
+            resolvedOptions.push({name: 'Custom', display: 'Custom', abilities: [], items: [], modifications: [], customType: 'color', payloads: {lightsaberColor: '#color#'}});
+
         } else {
+            if(resolvedOptions.length === 0){
+                value.isDefault = true;
+            }
             resolvedOptions.push(value);
         }
     }
 
     if(resolvedOptions && Array.isArray(resolvedOptions)){
         resolvedOptions = resolvedOptions.sort((a, b) => {
+            if(a.name === 'Custom'){
+                return 1;
+            }
             if (a.name < b.name) {
                 return -1;
             }
