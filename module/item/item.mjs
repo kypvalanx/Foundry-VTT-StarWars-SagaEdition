@@ -3,8 +3,9 @@ import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
-import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
+import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
 import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
+import {activateChoices} from "../choice/choice.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -200,7 +201,7 @@ export class SWSEItem extends Item {
 
     addClassLevel(level){
         let changes = [];
-        let activeEffect = DEFAULT_LEVEL_EFFECT;
+        let activeEffect = {...DEFAULT_LEVEL_EFFECT};
         activeEffect.name = `Level ${level}`;
         activeEffect.level = level;
         activeEffect.changes = changes;
@@ -918,7 +919,7 @@ export class SWSEItem extends Item {
         this.system.displayName = SWSEItem.buildItemName(this);
     }
 
-    setPayload(payload, payloadString) {
+    async setPayload(payload, payloadString) {
         let pattern = "#payload#";
         if (payloadString) {
             pattern = `#${payloadString}#`;
@@ -935,13 +936,17 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace(regExp, payload);
             }
         });
-        this._crawlAttributes(this.system, (attribute) => {
-            if (attribute.value) {
-                attribute.key = attribute.key.replace(regExp, payload);
-                if (Array.isArray(attribute.value)) {
-                    attribute.value = attribute.value.map(val => `${val}`.replace(regExp, payload));
-                } else {
-                    attribute.value = `${attribute.value}`.replace(regExp, payload);
+        await this._crawlAttributes(this, async (attribute) => {
+            if(attribute instanceof ActiveEffect){
+                await attribute.setPayload(pattern, payload);
+            } else {
+                if (attribute.value) {
+                    attribute.key = attribute.key.replace(regExp, payload);
+                    if (Array.isArray(attribute.value)) {
+                        attribute.value = attribute.value.map(val => `${val}`.replace(regExp, payload));
+                    } else {
+                        attribute.value = `${attribute.value}`.replace(regExp, payload);
+                    }
                 }
             }
         });
@@ -990,7 +995,7 @@ export class SWSEItem extends Item {
      *
      * @param parent {SWSEItem}
      */
-    setParent(parent, unlocked) {
+    async setParent(parent, unlocked) {
         if (!parent) {
             return;
         }
@@ -1006,7 +1011,7 @@ export class SWSEItem extends Item {
                 prerequisite.text = prerequisite.text.replace(/#parent#/g, parent.name);
             }
         });
-        this._crawlAttributes(this.system, (attribute) => {
+        await this._crawlAttributes(this.system, (attribute) => {
             if (attribute.value) {
                 if (typeof attribute.value === "string") {
                     attribute.value = attribute.value.replace("#parent#", parent.name);
@@ -1024,23 +1029,26 @@ export class SWSEItem extends Item {
     }
 
 
-    _crawlAttributes(system, funct) {
-        if (!system) {
+    async _crawlAttributes(item, funct) {
+
+
+        if (!item) {
             return;
         }
-        for (let change of system.changes || []) {
-            funct(change)
+        for (let change of item.system?.changes || item.changes || []) {
+            await funct(change)
         }
-        if (system.levels) {
-            for (let level of Object.values(system.levels) || []) {
+        if (item.system?.levels) {
+            for (let level of Object.values(item.system.levels) || []) {
                 for (let attribute of Object.values(level.attributes) || []) {
-                    funct(attribute)
+                    await funct(attribute)
                 }
             }
         }
-        if (system.modes) {
-            for (let mode of Object.values(system.modes) || []) {
-                this._crawlAttributes(mode, funct)
+        if (item.effects) {
+            for (let effect of item.effects || []) {
+                //this._crawlAttributes(effect, funct)
+                await funct(effect)
             }
         }
     }
@@ -1489,32 +1497,43 @@ export class SWSEItem extends Item {
         return classLevels.length;
     }
 
-    addItemModificationEffectFromItem(item) {
+    async addItemModificationEffectFromItem(item, context) {
         if (!this.canUserModify(game.user, 'update')) {
             return;
+        }
+        item.prepareData();
+        let choices = await activateChoices(item, context);
+
+        if (!choices.success) {
+            return false;
         }
         let changes = [];
         changes.push(...Object.values(item.system.attributes || {}))
         changes.push(...item.system.changes)
         let activeEffect = DEFAULT_MODIFICATION_EFFECT;
-        activeEffect.label = item.name;
+        activeEffect.name = item.name;
         activeEffect.changes = changes;
         activeEffect.icon = item.img;
         activeEffect.origin = item.uuid;
         activeEffect.flags.swse.description = item.system.description;
 
-        const createdEffect = this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
+        const createdEffect = await this.createEmbeddedDocuments("ActiveEffect", [activeEffect]);
 
-        if(item.effects && item.effects.filter(i=> i).length > 0){
+        if (item.effects && item.effects.filter(i => i).length > 0) {
             const effects = []
             item.effects.forEach(effect => {
-                effect = effect.clone();
-                effect.origin = createdEffect.id
-                effect.flags = {};
-                effect.flags.swse = {}
-                effects.push(effect);
+                let activeEffect = {...DEFAULT_MODE_EFFECT};
+                activeEffect.name = effect.name;
+                activeEffect.changes = effect.changes;
+                activeEffect.icon = effect.icon;
+                activeEffect.origin = item.uuid;
+                activeEffect.origin = createdEffect[0].id
+                activeEffect.flags.swse.providedBy = createdEffect[0].id
+                activeEffect.flags.swse.description =
+                    effect.flags.swse.description || "";
+                effects.push(activeEffect);
             })
-            this.createEmbeddedDocuments("ActiveEffect", effects);
+            await this.createEmbeddedDocuments("ActiveEffect", effects);
         }
     }
 

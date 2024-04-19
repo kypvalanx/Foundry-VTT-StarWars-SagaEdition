@@ -1606,12 +1606,12 @@ export function linkEffects(effectId1, effectId2) {
 
 export function addBlankModificationEffect() {
     if (this.canUserModify(game.user, 'update')) {
-        this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODIFICATION_EFFECT]);
+        this.createEmbeddedDocuments("ActiveEffect", [{...DEFAULT_MODIFICATION_EFFECT}]);
     }
 }
 export function addBlankMode() {
     if (this.canUserModify(game.user, 'update')) {
-        this.createEmbeddedDocuments("ActiveEffect", [DEFAULT_MODE_EFFECT]);
+        this.createEmbeddedDocuments("ActiveEffect", [{...DEFAULT_MODE_EFFECT}]);
     }
 }
 

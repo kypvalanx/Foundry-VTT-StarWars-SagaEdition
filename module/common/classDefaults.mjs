@@ -1,6 +1,6 @@
 // noinspection JSClosureCompilerSyntax
 export const DEFAULT_MODIFICATION_EFFECT = {
-    label: "New Modification",
+    name: "New Modification",
     changes: [],
     icon: "icons/svg/item-bag.svg",
     disabled: false,
@@ -11,7 +11,7 @@ export const DEFAULT_MODIFICATION_EFFECT = {
         }
     }
 };export const DEFAULT_LEVEL_EFFECT = {
-    label: "New Level",
+    name: "New Level",
     changes: [],
     icon: "icons/svg/item-bag.svg",
     disabled: false,
@@ -25,7 +25,7 @@ export const DEFAULT_MODIFICATION_EFFECT = {
 
 // noinspection JSClosureCompilerSyntax
 export const DEFAULT_MODE_EFFECT = {
-    label: "New Mode",
+    name: "New Mode",
     changes: [],
     icon: "icons/svg/item-bag.svg",
     disabled: false,

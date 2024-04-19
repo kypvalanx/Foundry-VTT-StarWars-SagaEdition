@@ -9,13 +9,13 @@ function skipFirstLevelChoice(choice, context) {
 }
 
 
-function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
+async function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
     let items = [];
     if (choice.showSelectionInName) {
         item.setChoice(choiceAnswer)
     }
     if (choice.type === 'INTEGER') {
-        item.setPayload(choiceAnswer, choice.payload);
+        await item.setPayload(choiceAnswer, choice.payload);
     } else {
         let selectedChoice = options.find(option => option.name.toLowerCase() === choiceAnswer.toLowerCase());
         if (!selectedChoice) {
@@ -24,13 +24,13 @@ function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
 
         if (selectedChoice.payload) {
             selectedChoice.payloads = selectedChoice.payloads || {};
-            selectedChoice.payloads["payload"] = selectedChoice.payload;
+            selectedChoice.payloads[choice.payload] = selectedChoice.payload;
         }
 
         if (selectedChoice.payloads && Object.values(selectedChoice.payloads).length > 0) {
-            Object.entries(selectedChoice.payloads).forEach(payload => {
-                item.setPayload(payload[1], payload[0]);
-            })
+            for (const payload of Object.entries(selectedChoice.payloads)) {
+                await item.setPayload(payload[1], payload[0]);
+            }
         }
         if (selectedChoice.providedItems && selectedChoice.providedItems.length > 0) {
             items = selectedChoice.providedItems
@@ -84,7 +84,8 @@ export async function activateChoices(item, context) {
             options = await explodeOptions(choice.options, actor);
 
             //let preprogrammedAnswer;
-            console.log("itemAnswers: " + context.itemAnswers);
+
+            //console.log("itemAnswers: " + context.itemAnswers);
             let preprogrammedAnswer = !!context.itemAnswers && context.itemAnswers.length === 1 ? context.itemAnswers[0]: undefined;
 
 
@@ -101,7 +102,7 @@ export async function activateChoices(item, context) {
                 }
             }
             if(preprogrammedAnswer){
-                items.push(...resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
+                items.push(...await resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
                 continue;
             }else{
                 console.log(choice.options, context, item);
@@ -165,7 +166,7 @@ export async function activateChoices(item, context) {
                         return;
                     }
                     let elementValue = foundElement.value || foundElement.innerText;
-                    items.push(...resolveActionsFromChoice(choice, item, elementValue, options));
+                    items.push(...await resolveActionsFromChoice(choice, item, elementValue, options));
                 }
 
                 return {success: true, items}

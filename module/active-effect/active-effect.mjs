@@ -19,6 +19,25 @@ export class SWSEActiveEffect extends ActiveEffect {
         return super._onUpdate(data, options, userId);
     }
 
+    async setPayload(pattern, payload) {
+        let regExp = new RegExp(pattern, "g");
+        for(const change of this.changes){
+            if (change.value) {
+                change.key = change.key.replace(regExp, payload);
+                if (Array.isArray(change.value)) {
+                    change.value = change.value.map(val => `${val}`.replace(regExp, payload));
+                } else {
+                    change.value = `${change.value}`.replace(regExp, payload);
+                }
+            }
+        }
+
+
+        if(!this.pack){
+            let data = {"changes" : this.changes};
+            await this.safeUpdate(data);
+        }
+    }
 
     get target() {
         if ( this.parent instanceof Actor ) return this.parent;

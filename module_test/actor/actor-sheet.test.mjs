@@ -189,6 +189,24 @@ export async function actorSheetTests(quench) {
 
                             });
                         });
+
+
+
+                        it('adding a lightsaber with a blue Ilum Crystal should reflect that in the ignite effect', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Lightsaber", type: "weapon", answers:["Ilum Crystal", "blue"]})
+
+
+                                hasItems(assert, actor.items, [  "Lightsaber"])
+
+                                const lightsaber = actor.items.find(item => item.name === "Lightsaber")
+
+                                assert.equal(lightsaber.effects.find(effect => effect.name === "Ignite").changes[0].value, "blue")
+                                console.log(lightsaber.effects)
+
+                            });
+                        });
                     })
                 })
             })

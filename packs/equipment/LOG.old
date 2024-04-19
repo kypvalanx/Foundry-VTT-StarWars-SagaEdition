@@ -1,0 +1,8 @@
+2024/04/16-07:27:45.624 2bcc Recovering log #3
+2024/04/16-07:27:45.627 2bcc Level-0 table #5: started
+2024/04/16-07:27:45.647 2bcc Level-0 table #5: 494253 bytes OK
+2024/04/16-07:27:45.647 2bcc Recovering log #43
+2024/04/16-07:27:45.650 2bcc Delete type=0 #3
+2024/04/16-07:27:45.650 2bcc Delete type=2 #13
+2024/04/16-07:27:45.650 2bcc Delete type=0 #43
+2024/04/16-07:27:45.650 2bcc Delete type=3 #2

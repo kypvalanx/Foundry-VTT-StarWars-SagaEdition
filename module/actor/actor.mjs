@@ -2583,7 +2583,7 @@ export class SWSEActor extends Actor {
         for (let modification of modifications) {
             let {payload, itemName, entity} = await resolveEntity(modification)
             if (entity) {
-                await mainItem[0].addItemModificationEffectFromItem(entity)
+                await mainItem[0].addItemModificationEffectFromItem(entity, providedItemContext)
             }
         }
         return mainItem[0];
@@ -2843,17 +2843,17 @@ export class SWSEActor extends Actor {
 
         entity.addItemAttributes(providedItem.changes);
         entity.addProvidedItems(providedItem.providedItems);
-        entity.setParent(parent, providedItem.unlocked);
+        await entity.setParent(parent, providedItem.unlocked);
         entity.setPrerequisite(providedItem.prerequisite);
 
         //TODO payload should be deprecated in favor of payloads
         if (!!payload) {
             entity.setChoice(payload)
-            entity.setPayload(payload);
+            await entity.setPayload(payload);
         }
         for (let payload of Object.entries(providedItem.payloads || {})) {
             entity.setChoice(payload[1]);
-            entity.setPayload(payload[1], payload[0]);
+            await entity.setPayload(payload[1], payload[0]);
         }
 
         let equip = providedItem.equip;
