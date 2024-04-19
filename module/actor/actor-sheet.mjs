@@ -241,7 +241,7 @@ export class SWSEActorSheet extends ActorSheet {
         if(context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")){
             let content = `${game.user.name} has changed level ${level} health to ${value}`
 
-            toChat(content)
+            toChat(content, this.object)
         }
 
         const classObject = this.document.items.get(itemId);
