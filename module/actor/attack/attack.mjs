@@ -341,8 +341,12 @@ export class Attack {
             })
             //let damageDie = damageDice[damageDice.length - 1];
             const {dice, additionalTerms} = getDiceTermsFromString(damageDice);
-            doubleWeaponDamage.push(...additionalTerms)
-            terms.push(...dice)
+            if(additionalTerms){
+                doubleWeaponDamage.push(...additionalTerms)
+            }
+            if(dice){
+                terms.push(...dice)
+            }
         }
 
         let halfHeroicLevel = actor?.halfHeroicLevel || 0;
@@ -942,7 +946,7 @@ export function getDiceTermsFromString(dieString) {
         }
     }
 
-    return {dice, additionalTerms};
+    return {dice, additionalTerms: additionalTerms || []};
 }
 
 /**
