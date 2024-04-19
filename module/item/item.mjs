@@ -1052,6 +1052,11 @@ export class SWSEItem extends Item {
             }
         }
     }
+    _onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId) {
+        super._onDeleteDescendantDocuments(parent, collection, documents, ids, options, userId);
+        const providedEffectIds = this.effects.filter(effect => ids.includes(effect.flags.swse.providedBy || "") ).map(effect => effect.id)
+            this.deleteEmbeddedDocuments("ActiveEffect", providedEffectIds);
+    }
 
     _crawlProvidedItems(data, funct) {
         if (!data) {
