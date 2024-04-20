@@ -1529,6 +1529,7 @@ export class SWSEItem extends Item {
             item.effects.forEach(effect => {
                 let activeEffect = {...DEFAULT_MODE_EFFECT};
                 activeEffect.name = effect.name;
+                activeEffect.disabled = effect.disabled;
                 activeEffect.changes = effect.changes;
                 activeEffect.icon = effect.icon;
                 activeEffect.origin = item.uuid;
