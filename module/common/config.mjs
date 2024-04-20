@@ -105,6 +105,23 @@ export function initializeStatusEffects(config){
             id: "shield",
             label: "EFFECT.StatusShield",
             icon: "icons/svg/shield.svg"
+        },
+        {
+            id: "cover",
+            label: "EFFECT.StatusCover",
+            icon: "systems/swse/icon/status/helpless.png",
+            changes: [{key: "dexterityBonus", value:"5"}]
+        },
+        {
+            id: "improvedCover",
+            label: "EFFECT.StatusImprovedCover",
+            icon: "systems/swse/icon/status/helpless.png",
+            changes: [{key: "dexterityBonus", value:"10"}]
+        },
+        {
+            id: "totalCover",
+            label: "EFFECT.StatusTotalCover",
+            icon: "systems/swse/icon/status/helpless.png"
         }
     ])
 }
