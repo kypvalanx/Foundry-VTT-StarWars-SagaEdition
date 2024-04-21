@@ -202,7 +202,7 @@ export async function actorSheetTests(quench) {
 
                                 const lightsaber = actor.items.find(item => item.name === "Lightsaber")
 
-                                assert.equal(lightsaber.effects.find(effect => effect.name === "Ignite").changes[0].value, "blue")
+                                assert.equal(lightsaber.effects.find(effect => effect.name === "Ignite").changes.find(c => c.key === "auraColor").value, "blue")
 
                             });
                         });
@@ -217,7 +217,7 @@ export async function actorSheetTests(quench) {
 
                                 const lightsaber = actor.items.find(item => item.name === "Lightsaber")
 
-                                assert.equal(lightsaber.effects.find(effect => effect.name === "Ignite").changes[0].value, "red")
+                                assert.equal(lightsaber.effects.find(effect => effect.name === "Ignite").changes.find(c => c.key === "auraColor").value, "red")
 
                             });
                         });

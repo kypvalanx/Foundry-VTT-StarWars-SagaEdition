@@ -358,8 +358,14 @@ export async function explodeOptions(options, actor) {
             const compendiums = getCompendium("upgrade")
 
             let items = await getIndexEntriesByTypes(compendiums, ['upgrade'], ['Lightsaber Crystals'])
+            const added = [];
             for(const item of items){
-                resolvedOptions.push({name: item.name, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, isDefault: item.name === "Ilum Crystal"});
+                let suffix = "";
+                if(added.includes(item.name)){
+                    suffix = ` (${item.pack})`
+                }
+                resolvedOptions.push({name: item.name + suffix, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, isDefault: item.name === "Ilum Crystal"});
+                added.push(item.name)
             }
 
 
