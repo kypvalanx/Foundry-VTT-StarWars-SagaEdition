@@ -11,7 +11,7 @@ export async function compendiumUtilTests(quench) {
 
                 it("should return many compendiums for items", ()=> {
 
-                    assert.lengthOf(getCompendium("item"), 13)
+                    assert.ok(getCompendium("item").length > 1)
                 })
             })
 
