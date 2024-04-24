@@ -1420,6 +1420,14 @@
   background-repeat: no-repeat;
 }
 
+.swse #compendium .constant-button {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  margin: 5px;
+  width: auto;
+}
+
 .swse .directory-item {
   border-bottom: thin solid #7a7971;
 }
@@ -1584,4 +1592,56 @@
 
 .swse .disabled {
   cursor: pointer;
+}
+
+#compendium .constant-button {
+  -webkit-box-flex: 0;
+  -ms-flex: 0;
+  flex: 0;
+  margin: 5px;
+  width: auto;
+}
+
+.directory-item {
+  border-bottom: thin solid #7a7971;
+}
+
+.directory-item div {
+  padding: 3px;
+}
+
+.compendium-filter {
+  position: relative;
+  padding: 4px 6px;
+  line-height: 24px;
+  border-bottom: thin solid #7a7971;
+}
+
+.compendium-filter .status-icons {
+  position: absolute;
+  font-weight: normal;
+  color: var(--color-text-dark-inactive);
+  text-align: right;
+  right: 0;
+}
+
+.selectable:hover {
+  text-shadow: 0 0 8px var(--color-shadow-primary);
+}
+
+.selectable {
+  cursor: pointer;
+}
+
+.directory-list {
+  overflow: auto;
+  height: 99%;
+}
+
+.compendium-browser {
+  height: 100%;
+}
+
+.directory-container {
+  height: 90%;
 }

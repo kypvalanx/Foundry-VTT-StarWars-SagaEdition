@@ -16,6 +16,7 @@ import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
 import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 import {SWSETokenDocument} from "./token/token-document.js";
+import {CompendiumWeb} from "./compendium/compendium-web.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -77,6 +78,21 @@ Hooks.once('init', async function () {
     // game.swse.compendiums = {
     //   spells: new CompendiumBrowser({ type: "spells" })
     // };
+
+
+    Hooks.on("renderCompendiumDirectory", (function (e, t) {
+        const featButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
+        featButton.on("click", (function () {
+            new CompendiumWeb().render(!0)
+        }))
+        e._element.append(featButton)
+
+        const talentButton = $(`<button class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
+        talentButton.on("click", (function () {
+            new CompendiumWeb().render(!0)
+        }))
+        e._element.append(talentButton)
+    }))
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
