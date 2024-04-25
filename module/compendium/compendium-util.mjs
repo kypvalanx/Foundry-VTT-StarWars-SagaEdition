@@ -3,7 +3,7 @@ import {SWSEItem} from "../item/item.mjs";
 /**
  *
  * @returns {[CompendiumCollection]}
- * @param {string} item
+ * @param {string | [string]} item
  */
 export function getCompendium(item) {
     if(!item){
@@ -13,6 +13,17 @@ export function getCompendium(item) {
     const packs = [];
     packs.push(...game.packs.filter(p => true));
     //packs.push(...game.world.packs.filter(p => true))
+    if(Array.isArray(item)){
+        let compendiums = [];
+
+        for (const itemElement of item) {
+
+            compendiums.push(...getCompendium(itemElement))
+        }
+
+        return compendiums;
+    }
+
     if (typeof item === "string") {
         type = item.toLowerCase();
     } else {
@@ -185,17 +196,17 @@ async function getIndexEntryByName(item, lookups) {
     }
     return {entry, payload, itemName, lookup: currentLookup};
 }/**
- * @param {[CompendiumCollection]} lookups
  * @param {[string]} types
  * @param {[string]} subtypes
- * @param [COmpendiumCollection] lookups
+ * @return {Map<string, SWSEItem>}
  */
-export async function getIndexEntriesByTypes(lookups, types = [],  subtypes = []) {
+export async function getIndexEntriesByTypes( types = [],  subtypes = []) {
+    const lookups = getCompendium(types);
+    const entries = new Map()
     if (!lookups || lookups.length === 0) {
-        return
+        return entries;
     }
 
-    const entries = []
 
     for (let lookup of lookups) {
         let index = lookup.index;
@@ -210,7 +221,11 @@ export async function getIndexEntriesByTypes(lookups, types = [],  subtypes = []
         } else {
             filter = items;
         }
-        entries.push(...filter)
+
+        for (const document of filter) {
+            entries.set(document.name, document);
+        }
+        //entries.push(...filter)
     }
     return entries
 }

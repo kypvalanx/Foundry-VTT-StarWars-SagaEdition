@@ -355,9 +355,7 @@ export async function explodeOptions(options, actor) {
                 }
             }
         } else if (key === 'AVAILABLE_LIGHTSABER_CRYSTALS') {
-            const compendiums = getCompendium("upgrade")
-
-            let items = await getIndexEntriesByTypes(compendiums, ['upgrade'], ['Lightsaber Crystals'])
+            let items = (await getIndexEntriesByTypes( ['upgrade'], ['Lightsaber Crystals'])).values()
             const added = [];
             for(const item of items){
                 let suffix = "";
