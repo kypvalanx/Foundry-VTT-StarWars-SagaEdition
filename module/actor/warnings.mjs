@@ -21,8 +21,8 @@ export function warningsFromActor(actor) {
     if(!actor.species && !actor.classes.find(c => c.name === 'Beast')){
         warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:species">Please Select a Species</span>`)
     }
-    if(!actor.classes){
-        warnings.push(`<span>Please Select a Class</span>`)
+    if(!actor.classes || actor.classes.length === 0){
+        warnings.push(`<span data-action="compendium-web" data-type="class">Please Select a Class</span>`)
     }
     if(actor.remainingSkills){
         warnings.push(`<span>Remaining Trained Skills: ${actor.remainingSkills}</span>`)
@@ -32,7 +32,7 @@ export function warningsFromActor(actor) {
     }
     for(let item of Object.entries(actor.system.availableItems || {})){
         if(item[1] !== 0){
-            warnings.push(`<span>Items from ${item[0]} remaining: ${item[1]}</span>`)
+            warnings.push(`<span data-action="compendium-web" data-type="feat, talent" data-provider-source="${item[0]}">Items from ${item[0]} remaining: ${item[1]}</span>`)
         }
     }
     for(let feat of actor.system.inactiveProvidedFeats || []){

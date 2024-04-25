@@ -84,7 +84,7 @@ Hooks.once('init', async function () {
         const featTalentButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
         featTalentButton.on("click", (function () {
             const options = {
-                types: ['feat']
+                types: ['feat', "talent"]
             }
             new CompendiumWeb(options).render(!0)
         }))

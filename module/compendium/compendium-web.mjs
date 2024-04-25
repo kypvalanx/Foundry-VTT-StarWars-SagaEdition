@@ -285,16 +285,23 @@ export class CompendiumWeb extends Application {
         super(...args);
 
         Hooks.on("renderApplication", async (event, target) => {
+            const options = args[0];
             this.target = target;
             await this.addFilters(target)
-            await this.populateFiltersFromArguments(args);
-            await this.renderWeb(event, target);
+            await this.populateFiltersFromArguments(target, options);
+            await this.renderWeb(event, target, options);
         })
     }
 
-    async renderWeb(e, target) {
+    async renderWeb(e, target, options) {
 
-        let items = await getIndexEntriesByTypes(['feat', 'talent'])
+        let defaultTypes = ['feat', 'talent']
+
+        if(options.type){
+            defaultTypes = options.type;
+        }
+
+        let items = await getIndexEntriesByTypes(defaultTypes)
 
 
         const dependencyMap = {}
@@ -303,7 +310,7 @@ export class CompendiumWeb extends Application {
         for (const item of items.values()) {
             //html += `<li>${item.name}</li>`
 
-            const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["FEAT", "TALENT"])
+            const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, defaultTypes)
 
             if (prerequisites && prerequisites.length > 0) {
                 dependencyMap[item.name] = prerequisites;
@@ -461,7 +468,7 @@ export class CompendiumWeb extends Application {
         }
 
         const prerequisites = [];
-        if (type.includes(prerequisite.type)) {
+        if (type.includes(prerequisite.type.toLowerCase())) {
             prerequisites.push(prerequisite);
         } else if (prerequisite.children) {
             for (const child of prerequisite.children) {
@@ -521,12 +528,19 @@ export class CompendiumWeb extends Application {
         return {level: resultingLevel, lowestNodes: nodes.distinct(), allNodes: allNodes.distinct()}
     }
 
-    async populateFiltersFromArguments(args) {
+    async populateFiltersFromArguments(target, options) {
+
+        for (const webFilter of Object.entries(options.webFilters)) {
+
+            const input = target.find(`.${webFilter[0]}`);
+            input.val(webFilter[1]);
+        }
 
     }
 
     async addFilters(target) {
         const root = target.find(".web-filters");
+        root.empty()
         for (const filter of this.filters) {
             root.append(this.createFilter(filter, target))
         }

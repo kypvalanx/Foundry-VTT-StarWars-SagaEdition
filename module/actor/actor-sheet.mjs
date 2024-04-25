@@ -23,6 +23,7 @@ import {
     onToggle
 } from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
+import {CompendiumWeb} from "../compendium/compendium-web.mjs";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -188,6 +189,21 @@ export class SWSEActorSheet extends ActorSheet {
 
         //html.find('[data-action="compendium"]').click(this._onOpenCompendium.bind(this));
         html.find('[data-action="compendium"]').click(SWSECompendiumDirectory.viewCompendiumItemsByFilter.bind(this));
+        html.find('[data-action="compendium-web"]').click((e) => {
+            let target = e.currentTarget
+            let type = target.dataset.type
+            let providerSource = target.dataset.providerSource
+            if(type){
+                type = type.split(",").map(t => t.trim())
+            }
+            let webFilters = {};
+
+            if(providerSource){
+                webFilters['provider-filter'] = providerSource
+            }
+
+            new CompendiumWeb({type, webFilters}).render(!0)
+        });
         html.find('[data-action="view"]').click(this._onItemEdit.bind(this));
         html.find('[data-action="delete"]').click(this._onItemDelete.bind(this));
         html.find('[data-action="credit"]').click(this._onCredit.bind(this));
