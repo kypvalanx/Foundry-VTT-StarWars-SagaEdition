@@ -1,68 +1,414 @@
 import {getCompendium, getIndexEntriesByTypes} from "./compendium-util.mjs";
+import {meetsPrerequisites} from "../prerequisite.mjs";
 
-export class CompendiumWeb extends Application{
+const FEAT_AND_TALENT_PROVIDER_TYPES = [{
+    "value": "General Feats",
+    "display": "General Feats"
+}, {"value": "Soldier Bonus Feats", "display": "Soldier Bonus Feats"}, {
+    "value": "Jedi Bonus Feats",
+    "display": "Jedi Bonus Feats"
+}, {"value": "Force Prodigy Bonus Feats", "display": "Force Prodigy Bonus Feats"}, {
+    "value": "Technician Bonus Feats",
+    "display": "Technician Bonus Feats"
+}, {"value": "Noble Bonus Feats", "display": "Noble Bonus Feats"}, {
+    "value": "Scout Bonus Feats",
+    "display": "Scout Bonus Feats"
+}, {"value": "Scoundrel Bonus Feats", "display": "Scoundrel Bonus Feats"}, {
+    "value": "Soldier Talent Trees",
+    "display": "Soldier Talent Trees"
+}, {
+    "value": "Melee Duelist Talent Trees",
+    "display": "Melee Duelist Talent Trees"
+}, {"value": "Jedi Knight Talent Trees", "display": "Jedi Knight Talent Trees"}, {
+    "value": "Jedi Talent Trees",
+    "display": "Jedi Talent Trees"
+}, {"value": "Officer Talent Trees", "display": "Officer Talent Trees"}, {
+    "value": "Charlatan Talent Trees",
+    "display": "Charlatan Talent Trees"
+}, {
+    "value": "Sith Apprentice Talent Trees",
+    "display": "Sith Apprentice Talent Trees"
+}, {"value": "Sith Lord Talent Trees", "display": "Sith Lord Talent Trees"}, {
+    "value": "Scoundrel Talent Trees",
+    "display": "Scoundrel Talent Trees"
+}, {"value": "Ace Pilot Talent Trees", "display": "Ace Pilot Talent Trees"}, {
+    "value": "Master Privateer Talent Trees",
+    "display": "Master Privateer Talent Trees"
+}, {"value": "Force Talent Trees", "display": "Force Talent Trees"}, {
+    "value": "Bounty Hunter Talent Trees",
+    "display": "Bounty Hunter Talent Trees"
+}, {"value": "Outlaw Talent Trees", "display": "Outlaw Talent Trees"}, {
+    "value": "Vanguard Talent Trees",
+    "display": "Vanguard Talent Trees"
+}, {"value": "Scout Talent Trees", "display": "Scout Talent Trees"}, {
+    "value": "Pathfinder Talent Trees",
+    "display": "Pathfinder Talent Trees"
+}, {"value": "Technician Talent Trees", "display": "Technician Talent Trees"}, {
+    "value": "Force Adept Talent Trees",
+    "display": "Force Adept Talent Trees"
+}, {"value": "Untested", "display": "Untested"}, {
+    "value": "Homebrew Content",
+    "display": "Homebrew Content"
+}, {"value": "Improviser Talent Trees", "display": "Improviser Talent Trees"}, {
+    "value": "Noble Talent Trees",
+    "display": "Noble Talent Trees"
+}, {
+    "value": "Elite Trooper Talent Trees",
+    "display": "Elite Trooper Talent Trees"
+}, {
+    "value": "Force Tradition Talent Trees",
+    "display": "Force Tradition Talent Trees"
+}, {"value": "Assassin Talent Trees", "display": "Assassin Talent Trees"}, {
+    "value": "Droid Talent Trees",
+    "display": "Droid Talent Trees"
+}, {"value": "Gunslinger Talent Trees", "display": "Gunslinger Talent Trees"}, {
+    "value": "Gladiator Talent Trees",
+    "display": "Gladiator Talent Trees"
+}, {"value": "Enforcer Talent Trees", "display": "Enforcer Talent Trees"}, {
+    "value": "Saboteur Talent Trees",
+    "display": "Saboteur Talent Trees"
+}, {"value": "SaintSirNicholas Creations", "display": "SaintSirNicholas Creations"}, {
+    "value": "ZenithSloth Creations",
+    "display": "ZenithSloth Creations"
+}, {"value": "Darth borehd Creations", "display": "Darth borehd Creations"}, {
+    "value": "Military Engineer Talent Trees",
+    "display": "Military Engineer Talent Trees"
+}, {
+    "value": "Infiltrator Talent Trees",
+    "display": "Infiltrator Talent Trees"
+}, {"value": "Droid Commander Talent Trees", "display": "Droid Commander Talent Trees"}, {
+    "value": "Medic Talent Trees",
+    "display": "Medic Talent Trees"
+}, {
+    "value": "Crime Lord Talent Trees",
+    "display": "Crime Lord Talent Trees"
+}, {
+    "value": "Independent Droid Talent Trees",
+    "display": "Independent Droid Talent Trees"
+}, {
+    "value": "Chellewalker Creations",
+    "display": "Chellewalker Creations"
+}, {
+    "value": "Martial Arts Master Talent Trees",
+    "display": "Martial Arts Master Talent Trees"
+}, {
+    "value": "Corporate Agent Talent Trees",
+    "display": "Corporate Agent Talent Trees"
+}, {
+    "value": "Imperial Knight Talent Trees",
+    "display": "Imperial Knight Talent Trees"
+}, {"value": "Shaper Talent Trees", "display": "Shaper Talent Trees"}, {
+    "value": "Jedi Master Talent Trees",
+    "display": "Jedi Master Talent Trees"
+}, {
+    "value": "Force Disciple Talent Trees",
+    "display": "Force Disciple Talent Trees"
+}, {
+    "value": "Sterling Hershey Creations",
+    "display": "Sterling Hershey Creations"
+}, {"value": "Galactic Senator Talent Trees", "display": "Galactic Senator Talent Trees"}, {
+    "value": "MERC 1 Creations",
+    "display": "MERC 1 Creations"
+}, {"value": "DarkwulfStudios Creations", "display": "DarkwulfStudios Creations"}];
+
+const SPECIES = [{"value": "Abinyshi", "display": "Abinyshi"}, {
+    "value": "Farghul",
+    "display": "Farghul"
+}, {"value": "Ryn", "display": "Ryn"}, {"value": "Gungan", "display": "Gungan"}, {
+    "value": "Assembler",
+    "display": "Assembler"
+}, {"value": "Charon", "display": "Charon"}, {"value": "Weequay", "display": "Weequay"}, {
+    "value": "Gamorrean",
+    "display": "Gamorrean"
+}, {"value": "Terrelian", "display": "Terrelian"}, {"value": "Ranat", "display": "Ranat"}, {
+    "value": "Dashade",
+    "display": "Dashade"
+}, {"value": "Gossam", "display": "Gossam"}, {"value": "Amaran", "display": "Amaran"}, {
+    "value": "Codru-Ji",
+    "display": "Codru-Ji"
+}, {"value": "Defel", "display": "Defel"}, {"value": "Gurlanin", "display": "Gurlanin"}, {
+    "value": "Klatooinian",
+    "display": "Klatooinian"
+}, {"value": "Kudon", "display": "Kudon"}, {"value": "Nelvaanian", "display": "Nelvaanian"}, {
+    "value": "Ranth",
+    "display": "Ranth"
+}, {"value": "Shistavanen", "display": "Shistavanen"}, {"value": "Squib", "display": "Squib"}, {
+    "value": "Kissai",
+    "display": "Kissai"
+}, {"value": "Sith Offshoot", "display": "Sith Offshoot"}, {
+    "value": "Zuguruk",
+    "display": "Zuguruk"
+}, {"value": "Yuuzhan Vong", "display": "Yuuzhan Vong"}, {"value": "Bothan", "display": "Bothan"}, {
+    "value": "Kaleesh",
+    "display": "Kaleesh"
+}, {"value": "Kilmaulsi", "display": "Kilmaulsi"}, {
+    "value": "Rattataki",
+    "display": "Rattataki"
+}, {"value": "Trogodile", "display": "Trogodile"}, {"value": "Verpine", "display": "Verpine"}, {
+    "value": "Mon Calamari",
+    "display": "Mon Calamari"
+}, {"value": "Trandoshan", "display": "Trandoshan"}, {"value": "Cerean", "display": "Cerean"}, {
+    "value": "Kaminoan",
+    "display": "Kaminoan"
+}, {"value": "Bith", "display": "Bith"}, {"value": "Chadra-Fan", "display": "Chadra-Fan"}, {
+    "value": "Bimm",
+    "display": "Bimm"
+}, {"value": "Ho'Din", "display": "Ho'Din"}, {"value": "Gran", "display": "Gran"}, {
+    "value": "Trodatome",
+    "display": "Trodatome"
+}, {"value": "Rodisar", "display": "Rodisar"}, {"value": "Quarren", "display": "Quarren"}, {
+    "value": "Zabrak",
+    "display": "Zabrak"
+}, {"value": "Arcona", "display": "Arcona"}, {"value": "Veknoid", "display": "Veknoid"}, {
+    "value": "Yarkora",
+    "display": "Yarkora"
+}, {"value": "Utai", "display": "Utai"}, {"value": "Chagrian", "display": "Chagrian"}, {
+    "value": "Iktotchi",
+    "display": "Iktotchi"
+}, {"value": "Givin", "display": "Givin"}, {"value": "Kel Dor", "display": "Kel Dor"}, {
+    "value": "Elomin",
+    "display": "Elomin"
+}, {"value": "Chiss", "display": "Chiss"}, {"value": "Ebruchi", "display": "Ebruchi"}, {
+    "value": "Huralok",
+    "display": "Huralok"
+}, {"value": "Togorian", "display": "Togorian"}, {"value": "Zygerrian", "display": "Zygerrian"}, {
+    "value": "Siniteen",
+    "display": "Siniteen"
+}, {"value": "Cyclorrian", "display": "Cyclorrian"}, {
+    "value": "Imroosian",
+    "display": "Imroosian"
+}, {"value": "Togruta", "display": "Togruta"}, {"value": "Devaronian", "display": "Devaronian"}, {
+    "value": "Pa'lowick",
+    "display": "Pa'lowick"
+}, {"value": "Gand", "display": "Gand"}, {"value": "Herglic", "display": "Herglic"}, {
+    "value": "Blood Carver",
+    "display": "Blood Carver"
+}, {"value": "Noghri", "display": "Noghri"}, {"value": "Taung", "display": "Taung"}, {
+    "value": "Nikto",
+    "display": "Nikto"
+}, {"value": "Falleen", "display": "Falleen"}, {"value": "Hysalrian", "display": "Hysalrian"}, {
+    "value": "Thisspiasian",
+    "display": "Thisspiasian"
+}, {"value": "Nimbanel", "display": "Nimbanel"}, {"value": "Paigun", "display": "Paigun"}, {
+    "value": "Mirialan",
+    "display": "Mirialan"
+}, {"value": "Ithorian", "display": "Ithorian"}, {"value": "Ewok", "display": "Ewok"}, {
+    "value": "Duros",
+    "display": "Duros"
+}, {"value": "Neimoidian", "display": "Neimoidian"}, {"value": "Kubaz", "display": "Kubaz"}, {
+    "value": "Hutt",
+    "display": "Hutt"
+}, {"value": "Omwati", "display": "Omwati"}, {"value": "Twi'lek", "display": "Twi'lek"}, {
+    "value": "Tusken Raider",
+    "display": "Tusken Raider"
+}, {"value": "Snivvian", "display": "Snivvian"}, {"value": "Devlikk", "display": "Devlikk"}, {
+    "value": "Didynon",
+    "display": "Didynon"
+}, {"value": "Sephi", "display": "Sephi"}, {"value": "Firrerreo", "display": "Firrerreo"}, {
+    "value": "Rodian",
+    "display": "Rodian"
+}, {"value": "Sullustan", "display": "Sullustan"}, {"value": "Reesarian", "display": "Reesarian"}, {
+    "value": "Baragwin",
+    "display": "Baragwin"
+}, {"value": "Aqualish", "display": "Aqualish"}, {"value": "Ortolan", "display": "Ortolan"}, {
+    "value": "Cathar",
+    "display": "Cathar"
+}, {"value": "Wookiee", "display": "Wookiee"}, {"value": "Aki-Aki", "display": "Aki-Aki"}, {
+    "value": "Selkath",
+    "display": "Selkath"
+}, {"value": "Miraluka", "display": "Miraluka"}, {"value": "Yevetha", "display": "Yevetha"}, {
+    "value": "Catuman",
+    "display": "Catuman"
+}, {"value": "Hrakian", "display": "Hrakian"}, {"value": "Human", "display": "Human"}, {
+    "value": "Octeroid",
+    "display": "Octeroid"
+}, {"value": "Zeltron", "display": "Zeltron"}, {"value": "Trianii", "display": "Trianii"}, {
+    "value": "Kessurian",
+    "display": "Kessurian"
+}, {"value": "Tridactyl", "display": "Tridactyl"}, {
+    "value": "Dybrinthe",
+    "display": "Dybrinthe"
+}, {"value": "Geonosian", "display": "Geonosian"}, {"value": "Lannik", "display": "Lannik"}, {
+    "value": "Yuzzum",
+    "display": "Yuzzum"
+}, {"value": "Draethos", "display": "Draethos"}, {"value": "Jawa", "display": "Jawa"}, {
+    "value": "Teedo",
+    "display": "Teedo"
+}, {"value": "Massassi", "display": "Massassi"}, {"value": "Murachaun", "display": "Murachaun"}, {
+    "value": "Ubese",
+    "display": "Ubese"
+}, {"value": "Polis Massan", "display": "Polis Massan"}, {
+    "value": "Chevin",
+    "display": "Chevin"
+}, {"value": "T'landa Til", "display": "T'landa Til"}, {"value": "Medical Droid", "display": "Medical Droid"}]
+
+export class CompendiumWeb extends Application {
 
     static _pattern = /\s\([\w#\s]*\)/
     static _payloadPattern = new RegExp(CompendiumWeb._pattern, "g");
 
+    filters = [
+        {
+            type: "select",
+            multiple: false,
+            selector: "provider-filter",
+            name: "Filter by Provider Source",
+            filter: this.getPossibleProviderFilter,
+            options: FEAT_AND_TALENT_PROVIDER_TYPES
+        },
+        {
+            type: "select",
+            multiple: false,
+            selector: "species-filter",
+            name: "Filter by species",
+            filter: this.getSpeciesFilter,
+            options: SPECIES
+        },
+        {
+            type: "select",
+            multiple: false,
+            selector: "actor-filter",
+            name: "Filter out by actor stats",
+            filter: this.getActorFilter,
+            options: this.getModifiableActors()
+        },
+        {
+            type: "number",
+            multiple: false,
+            selector: "base-attack-bonus-filter",
+            name: "Filter by Base Attack Bonus",
+            filter: this.getBaseAttackBonusFilter
+        }
+    ]
+
     constructor(...args) {
         super(...args);
 
-        const app = this;
-
-        Hooks.on("renderApplication", (event, target) => this.renderWeb(event, target))
+        Hooks.on("renderApplication", async (event, target) => {
+            this.target = target;
+            await this.addFilters(target)
+            await this.populateFiltersFromArguments(args);
+            await this.renderWeb(event, target);
+        })
     }
 
-    async renderWeb(e, t) {
+    async renderWeb(e, target) {
 
-        let items = await getIndexEntriesByTypes( ['feat', 'talent'])
+        let items = await getIndexEntriesByTypes(['feat', 'talent'])
 
 
-            const dependencyMap = {}
-            // let html = "<ol>"
-            for (const item of items.values()) {
-                //html += `<li>${item.name}</li>`
+        const dependencyMap = {}
 
-                const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["FEAT", "TALENT"])
+        // let html = "<ol>"
+        for (const item of items.values()) {
+            //html += `<li>${item.name}</li>`
 
-                if (prerequisites && prerequisites.length > 0) {
-                    dependencyMap[item.name] = prerequisites;
-                }
+            const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["FEAT", "TALENT"])
+
+            if (prerequisites && prerequisites.length > 0) {
+                dependencyMap[item.name] = prerequisites;
             }
+        }
+
+        //const mapo = Array.from(providerTypes.map(p => {return JSON.stringify({value:p, display:p})}));
+        //console.log(mapo.join(", "))
+
+        //let uniqueSpeciesPrerequisites = new Set();
+        let groupings = new Set();
+        let levels = new Map();
+        let deepestLevel = 0;
+
+        for (const item of items.values()) {
+
+            const {level, lowestNodes, allNodes} = this.getWebLevel(dependencyMap, item.name, 0)
+
+            deepestLevel = Math.max(deepestLevel, level)
+            levels.set(item.name, level);
+
+            const group = new Set(allNodes);
+            const bab = this.getBabRequirement(item);
+            const speciesPrerequisites = this.getSpeciesRequirement(item);
+            // for (const speciesPrerequisite of speciesPrerequisites) {
+            //     uniqueSpeciesPrerequisites.add(speciesPrerequisite)
+            // }
 
 
-            let groupings = new Set();
-            let levels = new Map();
-            let deepestLevel = 0;
+            groupings.add({
+                possibleProviders: item.system.possibleProviders,
+                baseAttackBonus: bab,
+                species: speciesPrerequisites,
+                prerequisite: item.system.prerequisite,
+                group
+            });
+        }
 
-            for (const item of items.values()) {
+        //console.log(Array.from(uniqueSpeciesPrerequisites).map(p => JSON.stringify({value: p, display: p})).join(", "))
+        for (const filter of this.filters) {
+            let value;
 
-                const {level, lowestNodes, allNodes} = this.getWebLevel(dependencyMap, item.name, 0)
+            let input = target.find(`.${filter.selector}`)
+            value = input.val()
 
-                deepestLevel = Math.max(deepestLevel, level)
-                levels.set(item.name, level);
-
-                const group = new Set(allNodes);
-
-                groupings.add(group);
+            if (value) {
+                const test = filter.filter(value);
+                groupings = groupings.filter(test);
             }
+        }
 
 
-            const root = t.find(".web-viewer");
-            root.empty()
-            for (const grouping of groupings.values()) {
-                this.createGroup(root, grouping, deepestLevel, levels, items)
-            }
+        const root = target.find(".web-viewer");
+        root.empty()
+        for (const grouping of groupings.values()) {
+            root.append(this.createGroup(grouping.group, deepestLevel, levels, items))
+        }
     }
 
-    createGroup(webviewer, grouping, deepestLevel, levels, items) {
 
+    getSpeciesRequirement(item) {
+        const speciesPrerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement)
+        return speciesPrerequisites;
+    }
 
-        let webLevels = "";
+    getBabRequirement(item) {
+        const babPrerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["BASE ATTACK BONUS"])
+
+        let babs = babPrerequisites.map(p => parseInt(p.requirement));
+        babs.push(0)
+        const bab = Math.max(...babs);
+        return bab;
+    }
+
+    getPossibleProviderFilter(value) {
+        return (index) => {
+            return index.possibleProviders?.includes(value);
+        }
+    };
+
+    getSpeciesFilter(value) {
+        return (index) => {
+            return index.species?.includes(value);
+        }
+    };
+
+    getActorFilter(value) {
+        return (index) => {
+            const actor = game.actors.get(value)
+            return !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
+        }
+    };
+
+    getBaseAttackBonusFilter(value) {
+        return (index) => {
+            return index.baseAttackBonus <= value;
+        }
+    };
+
+    createGroup(grouping, deepestLevel, levels, items) {
+
         const itemsByLevel = [];
         for (const groupingElement of grouping) {
             const level = levels.get(groupingElement);
-            if(itemsByLevel[level]){
+            if (itemsByLevel[level]) {
                 itemsByLevel[level].push(groupingElement);
             } else {
                 itemsByLevel[level] = [groupingElement]
@@ -77,23 +423,26 @@ export class CompendiumWeb extends Application{
                 webLevel.append(this.getItemBlock(items.get(item)))
             }
 
-            webGroup.append( webLevel);
+            webGroup.append(webLevel);
         }
 
-        webviewer.append(webGroup)
-        //return `<div class="web-group">${webLevels}</div>`;
+        return webGroup;
     }
 
     getItemBlock(item) {
-        const itemBlock = $(`<div>${item.name}</div>`);
+        const img = $(`<img src="${item.img}" alt="${item.name}">`);
+        // const itemBlock = $(`<div class="icon"></div>`);
 
-        itemBlock.attr("title", item.system.prerequisite?.text)
-        itemBlock.attr("draggable", "true")
-        itemBlock.attr("data-uuid", item.uuid)
-        itemBlock.on("dragstart", (event) => this._onDragStart(event))
+        img.attr("title", item.system.prerequisite?.text)
+        img.attr("draggable", "true")
+        img.attr("data-uuid", item.uuid)
+        img.on("dragstart", (event) => this._onDragStart(event))
+        img.on("dblclick", (event)=> item.sheet.render(true))
+        img.addClass(item.type)
 
         const itemArea = $(`<div class="web-item"></div>`);
-        itemArea.append(itemBlock)
+        itemArea.append(img)
+        itemArea.append($(`<div class="text">${item.name}</div>`))
         return itemArea;
     }
 
@@ -106,15 +455,15 @@ export class CompendiumWeb extends Application{
         dataTransfer.setData("text/plain", JSON.stringify(dragData));
     }
 
-    static getPrerequisitesByType(prerequisite,  type = []) {
-        if(!prerequisite){
+    static getPrerequisitesByType(prerequisite, type = []) {
+        if (!prerequisite) {
             return [];
         }
 
         const prerequisites = [];
-        if(type.includes(prerequisite.type)){
+        if (type.includes(prerequisite.type)) {
             prerequisites.push(prerequisite);
-        } else if(prerequisite.children){
+        } else if (prerequisite.children) {
             for (const child of prerequisite.children) {
                 prerequisites.push(...CompendiumWeb.getPrerequisitesByType(child, type))
             }
@@ -134,16 +483,12 @@ export class CompendiumWeb extends Application{
             baseApplication: "CompendiumWeb"
         });
     }
+
     get id() {
         return `${this.options.id}${this._original ? "-popout" : ""}`;
     }
 
-    // async _render(force = false, options = {}) {
-    //     console.log(options)
-    //     return super._render(force, options);
-    // }
-
-    async getData(options={}) {
+    async getData(options = {}) {
         return {
             cssId: this.id,
             cssClass: this.options.classes.join(" "),
@@ -152,15 +497,14 @@ export class CompendiumWeb extends Application{
     }
 
 
-
     getWebLevel(dependencyMap, name, level) {
         let dependencies = dependencyMap[name];
-        if(!dependencies){
+        if (!dependencies) {
             let payloadFree = name.replace(CompendiumWeb._payloadPattern, "");
             dependencies = dependencyMap[payloadFree]
         }
 
-        if(!dependencies){
+        if (!dependencies) {
             return {level, lowestNodes: [name], allNodes: [name]};
         }
 
@@ -175,5 +519,63 @@ export class CompendiumWeb extends Application{
         }
 
         return {level: resultingLevel, lowestNodes: nodes.distinct(), allNodes: allNodes.distinct()}
+    }
+
+    async populateFiltersFromArguments(args) {
+
+    }
+
+    async addFilters(target) {
+        const root = target.find(".web-filters");
+        for (const filter of this.filters) {
+            root.append(this.createFilter(filter, target))
+        }
+    }
+
+    /**
+     *
+     * @param filter
+     * @param target
+     * @param {string} filter.type the type of filter it will be
+     * @param {Array.<{value: string, display: string}>} filter.options things that the user can select
+     * @param {boolean} filter.multiple selections can the user choose multiple?
+     * @param {string} filter.selector the class that this filter object will use to find  the created element.
+     *
+     * @return {jQuery|HTMLElement}
+     */
+    createFilter(filter, target) {
+        let filterComponent;
+        switch (filter.type) {
+            case "select":
+                filterComponent = $(`<select></select>`)
+
+                if (filter.multiple) {
+                    filterComponent.attr("multiple", true)
+                }
+
+                filterComponent.append($(`<option value=""> -- </option>`))
+
+                for (const option of filter.options || []) {
+                    filterComponent.append($(`<option value="${option.value}">${option.display}</option>`))
+                }
+                filterComponent.on("change", (event) => this.renderWeb(event, target))
+                break;
+            case "number":
+                filterComponent = $(`<input type="number">`)
+
+                filterComponent.on("change", (event) => this.renderWeb(event, target))
+                break;
+            default:
+                filterComponent = $(`<div>unsupported filter type</div>`)
+        }
+        filterComponent.addClass(filter.selector)
+
+        const label = $(`<label>${filter.name}</label>`)
+        label.append(filterComponent)
+        return label;
+    }
+
+    getModifiableActors() {
+        return game.actors.filter(a => a.canUserModify(game.user, 'update')).map(a => {return {value: a.id, display: a.name}});
     }
 }

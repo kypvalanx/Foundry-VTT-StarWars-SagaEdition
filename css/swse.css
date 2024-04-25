@@ -1631,29 +1631,53 @@
   flex-direction: column;
 }
 
-.swse .web-item {
-  border-radius: 10px;
-  width: 240px;
-  height: 240px;
+.swse .web-filters {
   -ms-flex-line-pack: stretch;
   align-content: stretch;
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
+  -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
-  -ms-flex-direction: row;
-  flex-direction: row;
+  -ms-flex-direction: column;
+  flex-direction: column;
 }
 
-.swse .web-item div {
-  border: 1px solid black;
+.swse .web-item {
+  border-radius: 10px;
   width: 120px;
   height: 120px;
+  -ms-flex-line-pack: stretch;
+  align-content: stretch;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+}
+
+.swse .web-item img {
+  width: 60px;
+  height: 60px;
   margin-left: auto;
   margin-right: auto;
   cursor: move;
   z-index: 10;
+}
+
+.swse .web-item img.feat {
+  border: 2px solid var(--color-foreground);
+}
+
+.swse .web-item img.talent {
+  border: 2px solid #57a442;
+}
+
+.swse .web-item div.text {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 #compendium .constant-button {

@@ -90,23 +90,23 @@ Hooks.once('init', async function () {
         }))
         t.append(featTalentButton)
 
-        const featButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
-        featButton.on("click", (function () {
-            const options = {
-                types: ['feat']
-            }
-            new CompendiumWeb(options).render(!0)
-        }))
-        t.append(featButton)
-
-        const talentButton = $(`<button class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
-        talentButton.on("click", (function () {
-            const options = {
-                types: ['talent']
-            }
-            new CompendiumWeb(options).render(!0)
-        }))
-        t.append(talentButton)
+        // const featButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
+        // featButton.on("click", (function () {
+        //     const options = {
+        //         types: ['feat']
+        //     }
+        //     new CompendiumWeb(options).render(!0)
+        // }))
+        // t.append(featButton)
+        //
+        // const talentButton = $(`<button class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
+        // talentButton.on("click", (function () {
+        //     const options = {
+        //         types: ['talent']
+        //     }
+        //     new CompendiumWeb(options).render(!0)
+        // }))
+        // t.append(talentButton)
     }))
 
     // Register sheet application classes

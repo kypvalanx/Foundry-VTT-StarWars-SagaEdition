@@ -17,20 +17,36 @@
   flex-direction: column;
 }
 
-.web-item{
-  border-radius: 10px;
-  width: 240px;
-  height: 240px;
+.web-filters {
   align-content: stretch;
   display: flex;
-  flex-direction: row;
-  div {
-    border: 1px solid black;
-    width: 120px;
-    height: 120px;
+  flex-direction: column;
+}
+
+.web-item{
+  border-radius: 10px;
+  width: 120px;
+  height: 120px;
+  align-content: stretch;
+  display: flex;
+  flex-direction: column;
+  img {
+    width: 60px;
+    height: 60px;
     margin-left: auto;
     margin-right: auto;
     cursor: move;
     z-index: 10;
+  }
+
+  img.feat {
+    border: 2px solid var(--color-foreground)
+  }
+  img.talent {
+    border: 2px solid #57a442
+  }
+  div.text{
+    margin-left: auto;
+    margin-right: auto;
   }
 }
