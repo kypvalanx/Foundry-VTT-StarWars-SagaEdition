@@ -14,5 +14,8 @@
   "EFFECT.TabLinks": "Links",
   "EFFECT.ChangePriority": "Priority",
   "EFFECT.PriorityDescription": "Default priority is 1.  Priority informs the system which round the change will be resolved.  1 is resolved before 2 etc.",
-  "EFFECT.ModeDescription": "Mode informs the system how the change will be resolved."
+  "EFFECT.ModeDescription": "Mode informs the system how the change will be resolved.",
+  "SWSE.FEAT_WEB": "Select feats based on availability",
+  "SWSE.TALENT_WEB": "Select Talents based on availability",
+  "SWSE.TALENT_AND_FEAT_WEB": "Select Feats and Talents based on availability (this is processing a lot of data and may take time)"
 }

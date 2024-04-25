@@ -81,17 +81,32 @@ Hooks.once('init', async function () {
 
 
     Hooks.on("renderCompendiumDirectory", (function (e, t) {
+        const featTalentButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
+        featTalentButton.on("click", (function () {
+            const options = {
+                types: ['feat']
+            }
+            new CompendiumWeb(options).render(!0)
+        }))
+        t.append(featTalentButton)
+
         const featButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
         featButton.on("click", (function () {
-            new CompendiumWeb().render(!0)
+            const options = {
+                types: ['feat']
+            }
+            new CompendiumWeb(options).render(!0)
         }))
-        e._element.append(featButton)
+        t.append(featButton)
 
         const talentButton = $(`<button class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
         talentButton.on("click", (function () {
-            new CompendiumWeb().render(!0)
+            const options = {
+                types: ['talent']
+            }
+            new CompendiumWeb(options).render(!0)
         }))
-        e._element.append(talentButton)
+        t.append(talentButton)
     }))
 
     // Register sheet application classes
