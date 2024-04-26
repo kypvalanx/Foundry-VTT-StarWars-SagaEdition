@@ -176,6 +176,26 @@ export const registerSystemSettings = function () {
         }
     });
 
+
+
+    game.settings.register("swse", "automaticItems", {
+        name: "Automatic Feats or Talents",
+        hint: `these feats or talents will be granted to new characters automatically, enter as a comma seperated list ex. "FEAT:Toughness,TALENT:Armored Defense"`,
+        scope: "world",
+        config: true,
+        default: "",
+        type: String
+    });
+
+    game.settings.register("swse", "automaticItemsWhenItemIsAdded", {
+        name: "Bonus Feats or Talents",
+        hint: `these feats or talents will be granted when the trigger Item is added, enter as a comma seperated list ex. "FEAT:Point-Blank Shot>FEAT:Precise Shot"`,
+        scope: "world",
+        config: true,
+        default: "",
+        type: String
+    });
+
     const r = document.querySelector(':root');
     const rs = getComputedStyle(r);
 

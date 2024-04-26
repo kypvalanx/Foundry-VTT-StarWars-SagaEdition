@@ -983,14 +983,27 @@ export class SWSEItem extends Item {
         }
     }
 
-    addProvidedItems(modifiers) {
-        if (!modifiers) {
+    addProvidedItems(providedItems) {
+        if (!providedItems) {
             return;
         }
+        if(typeof this.system.providedItems === "object"){
+            this.system.providedItems = Object.values(this.system.providedItems);
+        }
+
         this.system.providedItems = this.system.providedItems || [];
-        this.system.providedItems.push(...modifiers)
+        this.system.providedItems.push(...providedItems)
     }
 
+
+    setGranted(granted){
+        this.system.supplier = {
+            id: granted,
+            name: granted,
+            type: granted,
+            unlocked: true
+        }
+    }
     /**
      *
      * @param parent {SWSEItem}

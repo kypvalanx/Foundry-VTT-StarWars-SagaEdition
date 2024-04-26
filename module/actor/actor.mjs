@@ -66,6 +66,8 @@ export class SWSEActor extends Actor {
         }
     }
 
+
+
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
         //if(!this.parent) this.reset()
@@ -2024,6 +2026,14 @@ export class SWSEActor extends Actor {
         // }
 
         super._onCreate(item, options, userId);
+
+        const automaticFeats = game.settings.get("swse", "automaticItems")
+        const featTokens = automaticFeats.split(",").map(f => {
+            f = f.trim();
+            const toks = f.split(":");
+            return {name: toks[1], type: toks[0], granted: "Automatic from system configuration"}
+        });
+        this.addItems({items: featTokens})
     }
 
 
@@ -2842,8 +2852,24 @@ export class SWSEActor extends Actor {
         }
 
         entity.addItemAttributes(providedItem.changes);
-        entity.addProvidedItems(providedItem.providedItems);
+        const providedItems = providedItem.providedItems || [];
+        const automaticItemsWhenItemIsAdded = game.settings.get("swse", "automaticItemsWhenItemIsAdded");
+        if(automaticItemsWhenItemIsAdded){
+            automaticItemsWhenItemIsAdded.split(",").forEach(entry => {
+                const toks = entry.split(">").map(e => e.trim())
+
+                const triggerItem = toks[0].split(":")
+                const bonusItem = toks[1].split(":")
+                if(entity.name.toLowerCase() === triggerItem[1].toLowerCase() && entity.type.toLowerCase() === triggerItem[0].toLowerCase()){
+                    providedItems.push({name:bonusItem[1], type:bonusItem[0]})
+                }
+
+                providedItems.push()
+            })
+        }
+        entity.addProvidedItems(providedItems);
         await entity.setParent(parent, providedItem.unlocked);
+        entity.setGranted(providedItem.granted)
         entity.setPrerequisite(providedItem.prerequisite);
 
         //TODO payload should be deprecated in favor of payloads

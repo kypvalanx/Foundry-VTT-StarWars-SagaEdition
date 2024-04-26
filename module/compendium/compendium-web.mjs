@@ -297,7 +297,7 @@ export class CompendiumWeb extends Application {
 
         let defaultTypes = ['feat', 'talent']
 
-        if(options.type){
+        if(options?.type){
             defaultTypes = options.type;
         }
 
@@ -306,9 +306,7 @@ export class CompendiumWeb extends Application {
 
         const dependencyMap = {}
 
-        // let html = "<ol>"
         for (const item of items.values()) {
-            //html += `<li>${item.name}</li>`
 
             const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, defaultTypes)
 
@@ -317,10 +315,7 @@ export class CompendiumWeb extends Application {
             }
         }
 
-        //const mapo = Array.from(providerTypes.map(p => {return JSON.stringify({value:p, display:p})}));
-        //console.log(mapo.join(", "))
 
-        //let uniqueSpeciesPrerequisites = new Set();
         let groupings = new Set();
         let levels = new Map();
         let deepestLevel = 0;
@@ -349,7 +344,6 @@ export class CompendiumWeb extends Application {
             });
         }
 
-        //console.log(Array.from(uniqueSpeciesPrerequisites).map(p => JSON.stringify({value: p, display: p})).join(", "))
         for (const filter of this.filters) {
             let value;
 
@@ -530,10 +524,12 @@ export class CompendiumWeb extends Application {
 
     async populateFiltersFromArguments(target, options) {
 
-        for (const webFilter of Object.entries(options.webFilters)) {
+        if(options.webFilters){
+            for (const webFilter of Object.entries(options.webFilters)) {
 
-            const input = target.find(`.${webFilter[0]}`);
-            input.val(webFilter[1]);
+                const input = target.find(`.${webFilter[0]}`);
+                input.val(webFilter[1]);
+            }
         }
 
     }
