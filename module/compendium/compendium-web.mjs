@@ -1,4 +1,4 @@
-import {getCompendium, getIndexEntriesByTypes} from "./compendium-util.mjs";
+import {getIndexEntriesByTypes} from "./compendium-util.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 
 const FEAT_AND_TALENT_PROVIDER_TYPES = [{
@@ -305,6 +305,7 @@ export class CompendiumWeb extends Application {
 
 
         const dependencyMap = {}
+        const invertedDependencyMap = new Map();
 
         for (const item of items.values()) {
 
@@ -312,6 +313,9 @@ export class CompendiumWeb extends Application {
 
             if (prerequisites && prerequisites.length > 0) {
                 dependencyMap[item.name] = prerequisites;
+                for (const prerequisite of prerequisites) {
+                    invertedDependencyMap.set(prerequisite, item)
+                }
             }
         }
 
@@ -366,8 +370,7 @@ export class CompendiumWeb extends Application {
 
 
     getSpeciesRequirement(item) {
-        const speciesPrerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement)
-        return speciesPrerequisites;
+        return CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement);
     }
 
     getBabRequirement(item) {
@@ -375,8 +378,7 @@ export class CompendiumWeb extends Application {
 
         let babs = babPrerequisites.map(p => parseInt(p.requirement));
         babs.push(0)
-        const bab = Math.max(...babs);
-        return bab;
+        return Math.max(...babs);
     }
 
     getPossibleProviderFilter(value) {
@@ -565,7 +567,7 @@ export class CompendiumWeb extends Application {
 
                 filterComponent.append($(`<option value=""> -- </option>`))
 
-                for (const option of filter.options || []) {
+                for (const option of filter.options.sort((a,b) => a.display > b.display ? 1 : -1) || []) {
                     filterComponent.append($(`<option value="${option.value}">${option.display}</option>`))
                 }
                 filterComponent.on("change", (event) => this.renderWeb(event, target))
