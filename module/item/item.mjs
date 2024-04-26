@@ -996,6 +996,10 @@ export class SWSEItem extends Item {
     }
 
 
+    get toJSONString(){
+        return JSON.stringify(this);
+    }
+
     setGranted(granted){
         this.system.supplier = {
             id: granted,

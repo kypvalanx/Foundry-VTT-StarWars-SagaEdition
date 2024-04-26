@@ -1,7 +1,8 @@
 <li class="item flexcol {{#if draggable}}draggable{{/if}} {{#ifEquals description
                                                                       "expandable"}}collapsible-container{{/ifEquals}}"
     data-item-id="{{item.id}}"
-    data-item-name="{{item.name}}">
+    data-item-name="{{item.name}}"
+    data-data="{{item.toJSONString}}">
     <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
         <div class="flexrow">
             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="24"

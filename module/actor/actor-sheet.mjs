@@ -398,6 +398,7 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
         dragData.uuid = elem.dataset.uuid
+        dragData.data = JSON.parse(elem.dataset.data)
 
         if(elem.dataset.type && !dragData.type){
             dragData.type = elem.dataset.type
