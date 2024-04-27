@@ -159,22 +159,18 @@ export async function activateChoices(item, context) {
                 }
                 selects.on("change", (event) => {
                     const target = $(event.target)
+                    if(options){
+                        const option = options.find(o => o.name === event.target.value);
+                        const custom = target.parent().find(".custom-value")
+                        if(option.customType){
+                            if(option.customType === "color"){
 
-                    console.log(event.target.value)
-
-
-                    const option = options.find(o => o.name === event.target.value);
-
-                    const custom = target.parent().find(".custom-value")
-                    if(option.customType){
-                        if(option.customType === "color"){
-
-                            custom.append( `<input type="${option.customType}" data-custom-type="${option.customType}">`);
+                                custom.append( `<input type="${option.customType}" data-custom-type="${option.customType}">`);
+                            }
+                        } else {
+                            custom.empty();
                         }
-                    } else {
-                        custom.empty();
                     }
-
                 })
             },
             callback: async (html) => {
@@ -185,16 +181,18 @@ export async function activateChoices(item, context) {
                         return;
                     }
                     let elementValue = foundElement.value || foundElement.innerText;
-                    const option = options.find(o => o.name === elementValue);
-                    if(option.customType){
-                        if(option.customType === "color"){
-                            const custom = $(foundElement).parent().find(".custom-value input")
-                            const value = custom[0].value;
-                            let regExp = new RegExp(`#${option.customType}#`, "g");
-                            for(const entry of Object.entries(option.payloads)){
-                                option.payloads[entry[0]] = entry[1].replace(regExp, value)
-                            }
+                    if(options){
+                        const option = options.find(o => o.name === elementValue);
+                        if(option.customType){
+                            if(option.customType === "color"){
+                                const custom = $(foundElement).parent().find(".custom-value input")
+                                const value = custom[0].value;
+                                let regExp = new RegExp(`#${option.customType}#`, "g");
+                                for(const entry of Object.entries(option.payloads)){
+                                    option.payloads[entry[0]] = entry[1].replace(regExp, value)
+                                }
 
+                            }
                         }
                     }
                     items.push(...await resolveActionsFromChoice(choice, item, elementValue, options));
