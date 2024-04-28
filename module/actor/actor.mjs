@@ -2868,8 +2868,8 @@ export class SWSEActor extends Actor {
             })
         }
         entity.addProvidedItems(providedItems);
-        await entity.setParent(parent, providedItem.unlocked);
-        entity.setGranted(providedItem.granted)
+        if (parent) await entity.setParent(parent, providedItem.unlocked);
+        else if (providedItem.granted) entity.setGranted(providedItem.granted);
         entity.setPrerequisite(providedItem.prerequisite);
 
         //TODO payload should be deprecated in favor of payloads
