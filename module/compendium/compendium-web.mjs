@@ -242,6 +242,8 @@ const SPECIES = [{"value": "Abinyshi", "display": "Abinyshi"}, {
     "display": "Chevin"
 }, {"value": "T'landa Til", "display": "T'landa Til"}, {"value": "Medical Droid", "display": "Medical Droid"}]
 
+const SKIP_LINK = ["Weapon Focus", "Dual Weapon Mastery I", "Double Attack", "Martial Arts I", "Dodge", "Weapon Proficiency", "Skill Focus", "Point-Blank Shot"];
+
 export class CompendiumWeb extends Application {
 
     static _pattern = /\s\([\w#\s]*\)/
@@ -290,6 +292,9 @@ export class CompendiumWeb extends Application {
             await this.addFilters(target)
             await this.populateFiltersFromArguments(target, options);
             await this.renderWeb(event, target, options);
+
+            //currently disabled.  will allow arrows to be drawn in the future
+            //await this.drawArrows(target)
         })
     }
 
@@ -303,71 +308,203 @@ export class CompendiumWeb extends Application {
 
         let items = await getIndexEntriesByTypes(defaultTypes)
 
+        const skipLinking = this.getSkippedUuids(items);
 
-        const dependencyMap = {}
+        const dependencyMap = new Map()
         const invertedDependencyMap = new Map();
+        const itemFilterMeta = new Map();
+
+        const rootItems = [];
 
         for (const item of items.values()) {
 
+            itemFilterMeta.set(item.uuid, this.getMeta(item))
             const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, defaultTypes)
 
             if (prerequisites && prerequisites.length > 0) {
-                dependencyMap[item.name] = prerequisites;
+                //dependencyMap[item.name] = prerequisites;
                 for (const prerequisite of prerequisites) {
-                    invertedDependencyMap.set(prerequisite, item)
+                    const requiredItem = this.getItemByPrerequisite(prerequisite, items);
+                    if(requiredItem && item){
+                        if(invertedDependencyMap.has(requiredItem.uuid)){
+                            invertedDependencyMap.get(requiredItem.uuid).push(item.uuid)
+                        } else {
+                            invertedDependencyMap.set(requiredItem.uuid, [item.uuid])
+                        }
+
+                        if(dependencyMap.has(item.uuid)){
+                            dependencyMap.get(item.uuid).push(requiredItem.uuid)
+                        } else {
+                            dependencyMap.set(item.uuid, [requiredItem.uuid])
+                        }
+                    }
+                }
+            } else {
+                rootItems.push(item);
+            }
+        }
+
+
+        // for (const filter of this.filters) {
+        //     let value;
+        //
+        //     let input = target.find(`.${filter.selector}`)
+        //     value = input.val()
+        //
+        //     if (value) {
+        //         const test = filter.filter(value);
+        //         groupings = groupings.filter(test);
+        //     }
+        // }
+
+        const rootUuids = rootItems.map(r => r.uuid);
+        const groupedIds = []
+        const groups = []
+
+        for (const rootUuid of rootUuids) {
+            if(groupedIds.includes(rootUuid) || skipLinking.includes(rootUuid)){
+                continue;
+            }
+
+            const groupNodes = [rootUuid]
+            const rootNodes = [rootUuid]
+
+            let children = invertedDependencyMap.get(rootUuid)
+            if (!children) {
+                groups.push({groupNodes,rootNodes})
+                continue;
+            }
+
+            let newNodes = children;
+            while(newNodes.length>0){
+                let activeNodes = newNodes;
+                //currentGroup.push(...activeNodes)
+                newNodes = [];
+                for (const activeNode of activeNodes) {
+                    if(!groupedIds.includes(activeNode)){
+                        if(!skipLinking.includes(activeNode)){
+                            groupedIds.push(activeNode)
+                        }
+                        groupNodes.push(activeNode)
+                        if(dependencyMap.has(activeNode)){
+                            newNodes.push(...dependencyMap.get(activeNode))
+                        }
+                        if(invertedDependencyMap.has(activeNode) && !skipLinking.includes(activeNode)){
+                            newNodes.push(...invertedDependencyMap.get(activeNode))
+                        }
+                        if(rootUuids.includes(activeNode)){
+                            rootNodes.push(activeNode)
+                        }
+                    }
                 }
             }
+
+            groups.push({groupNodes: groupNodes.distinct(), rootNodes})
+
         }
 
 
-        let groupings = new Set();
-        let levels = new Map();
-        let deepestLevel = 0;
+        //console.log(groups)
 
-        for (const item of items.values()) {
+        const depths = new Map()
+        const root = target.find(".web-viewer");
+        root.empty()
+        let deepestBranch = 0;
+        for (const group of groups) {
+            for (const groupNode of group.groupNodes) {
+                const depth = this.getDepth(groupNode, dependencyMap);
+                depths.set(groupNode, depth)
 
-            const {level, lowestNodes, allNodes} = this.getWebLevel(dependencyMap, item.name, 0)
-
-            deepestLevel = Math.max(deepestLevel, level)
-            levels.set(item.name, level);
-
-            const group = new Set(allNodes);
-            const bab = this.getBabRequirement(item);
-            const speciesPrerequisites = this.getSpeciesRequirement(item);
-            // for (const speciesPrerequisite of speciesPrerequisites) {
-            //     uniqueSpeciesPrerequisites.add(speciesPrerequisite)
-            // }
-
-
-            groupings.add({
-                possibleProviders: item.system.possibleProviders,
-                baseAttackBonus: bab,
-                species: speciesPrerequisites,
-                prerequisite: item.system.prerequisite,
-                group
-            });
-        }
-
-        for (const filter of this.filters) {
-            let value;
-
-            let input = target.find(`.${filter.selector}`)
-            value = input.val()
-
-            if (value) {
-                const test = filter.filter(value);
-                groupings = groupings.filter(test);
+                deepestBranch = Math.max(deepestBranch, depth)
             }
         }
 
-
-        const root = target.find(".web-viewer");
-        root.empty()
-        for (const grouping of groupings.values()) {
-            root.append(this.createGroup(grouping.group, deepestLevel, levels, items))
+        let groupNumber = 0;
+        for (const group of groups) {
+            root.append(await this.createGroup(group.groupNodes, deepestBranch, depths, items, groupNumber, invertedDependencyMap))
+            groupNumber = groupNumber + 1
         }
+
+        //
+        // for (const grouping of groupings.values()) {
+        // }
+        //
+        // let groupings = new Set();
+        // let levels = new Map();
+        // let deepestLevel = 0;
+        //
+        // for (const item of items.values()) {
+        //
+        //     const {level, lowestNodes, allNodes} = this.getWebLevel(dependencyMap, item.name, 0)
+        //
+        //     deepestLevel = Math.max(deepestLevel, level)
+        //     levels.set(item.name, level);
+        //
+        //     const group = new Set(allNodes);
+        //     const bab = this.getBabRequirement(item);
+        //     const speciesPrerequisites = this.getSpeciesRequirement(item);
+        //     // for (const speciesPrerequisite of speciesPrerequisites) {
+        //     //     uniqueSpeciesPrerequisites.add(speciesPrerequisite)
+        //     // }
+        //
+        //
+        //     groupings.add({
+        //         possibleProviders: item.system.possibleProviders,
+        //         baseAttackBonus: bab,
+        //         species: speciesPrerequisites,
+        //         prerequisite: item.system.prerequisite,
+        //         group
+        //     });
+        // }
+
+
+
+        // const root = target.find(".web-viewer");
+        // root.empty()
+        // for (const grouping of groupings.values()) {
+        //     root.append(this.createGroup(grouping.group, deepestLevel, levels, items))
+        // }
     }
 
+    getMeta(item) {
+        const bab = this.getBabRequirement(item);
+        const speciesPrerequisites = this.getSpeciesRequirement(item);
+
+        return {
+            possibleProviders: item.system.possibleProviders,
+            baseAttackBonus: bab,
+            species: speciesPrerequisites,
+            prerequisite: item.system.prerequisite
+        };
+    }
+
+    getDepth(groupNode, dependencyMap) {
+        const children = dependencyMap.get(groupNode);
+        if(!children || children.length === 0){
+            return 0;
+        }
+        return Math.max(...children.map(child => this.getDepth(child, dependencyMap))) +1
+    }
+
+    getSkippedUuids(items) {
+        return items.values().filter(i => SKIP_LINK.includes(i.name)).map(i => i.uuid).toArray()
+    }
+
+
+    /**
+     *
+     * @param prerequisite
+     * @param items
+     * @return {*}
+     */
+    getItemByPrerequisite(prerequisite, items) {
+        let key = `${prerequisite.type.toUpperCase()}:${prerequisite.requirement}`;
+        if(!items.has(key)){
+            let payloadFree = prerequisite.requirement.replace(CompendiumWeb._payloadPattern, "");
+            key = `${prerequisite.type.toUpperCase()}:${payloadFree}`;
+        }
+        return items.get(key);
+    }
 
     getSpeciesRequirement(item) {
         return CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement);
@@ -406,7 +543,7 @@ export class CompendiumWeb extends Application {
         }
     };
 
-    createGroup(grouping, deepestLevel, levels, items) {
+    async createGroup(grouping, deepestLevel, levels, items, groupNumber, invertedDependencyMapping) {
 
         const itemsByLevel = [];
         for (const groupingElement of grouping) {
@@ -422,8 +559,9 @@ export class CompendiumWeb extends Application {
         for (let i = 0; i <= deepestLevel; i++) {
 
             const webLevel = $(`<div class="web-level"></div>`);
-            for (const item of itemsByLevel[i] || []) {
-                webLevel.append(this.getItemBlock(items.get(item)))
+            for (const uuid of itemsByLevel[i] || []) {
+                const invertedDependencies = invertedDependencyMapping.get(uuid) || []
+                webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies))
             }
 
             webGroup.append(webLevel);
@@ -432,12 +570,19 @@ export class CompendiumWeb extends Application {
         return webGroup;
     }
 
-    getItemBlock(item) {
+    getItemBlock(item, groupNumber, invertedDependencies = []) {
         const img = $(`<img src="${item.img}" alt="${item.name}">`);
         // const itemBlock = $(`<div class="icon"></div>`);
 
         img.attr("title", item.system.prerequisite?.text)
         img.attr("draggable", "true")
+        img.attr("id", `${item.uuid.replaceAll("\.", "-")}-${groupNumber}`);
+        img.addClass(`${item.uuid.replaceAll("\.", "-")}-${groupNumber}`);
+        if(invertedDependencies && invertedDependencies.length > 0){
+            img.attr("data-draw-to", invertedDependencies.map(d=>`${d.replaceAll("\.", "-")}-${groupNumber}`).join(","))
+            img.addClass("mappable")
+
+        }
         img.attr("data-uuid", item.uuid)
         img.on("dragstart", (event) => this._onDragStart(event))
         img.on("dblclick", (event)=> item.sheet.render(true))
@@ -589,5 +734,55 @@ export class CompendiumWeb extends Application {
 
     getModifiableActors() {
         return game.actors.filter(a => a.canUserModify(game.user, 'update')).map(a => {return {value: a.id, display: a.name}});
+    }
+
+    async drawArrows(target) {
+        const found = target.find(".mappable")
+        const webviewer = target.find(".web-viewer")
+        //const arrows = $(`<div class="arrows"></div>`)
+        for (const from of found) {
+            let drawto = from.dataset.drawTo?.split(",")
+            for (const drawtoElement of drawto) {
+                const to = $(target.find(`#${drawtoElement}`))[0]
+                if(to){
+                    //this.connect(from, to, "black", 2)
+                    //console.log(`<svg width="500" height="500"><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`)
+                    //arrows.append($(`<svg><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`))
+                    //new LeaderLine(from, to)
+                }
+            }
+        }
+        //webviewer.append(arrows)
+    }
+     getOffset( el ) {
+        var rect = el.getBoundingClientRect();
+        return {
+            left: rect.left + window.pageXOffset,
+            top: rect.top + window.pageYOffset,
+            width: rect.width || el.offsetWidth,
+            height: rect.height || el.offsetHeight
+        };
+    }
+    connect(div1, div2, color, thickness) { // draw a line connecting elements
+        const off1 = this.getOffset(div1);
+        var off2 = this.getOffset(div2);
+        // bottom right
+        var x1 = off1.left + off1.width;
+        var y1 = off1.top + off1.height;
+        // top right
+        var x2 = off2.left + off2.width;
+        var y2 = off2.top;
+        // distance
+        var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
+        // center
+        var cx = ((x1 + x2) / 2) - (length / 2);
+        var cy = ((y1 + y2) / 2) - (thickness / 2);
+        // angle
+        var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
+        // make hr
+        var htmlLine = "<div style='padding:0px; margin:0px; height:" + thickness + "px; background-color:" + color + "; line-height:1px; position:absolute; left:" + cx + "px; top:" + cy + "px; width:" + length + "px; -moz-transform:rotate(" + angle + "deg); -webkit-transform:rotate(" + angle + "deg); -o-transform:rotate(" + angle + "deg); -ms-transform:rotate(" + angle + "deg); transform:rotate(" + angle + "deg);' />";
+        //
+        // alert(htmlLine);
+        document.body.innerHTML += htmlLine;
     }
 }

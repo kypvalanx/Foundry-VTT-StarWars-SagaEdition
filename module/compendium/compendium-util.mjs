@@ -223,7 +223,7 @@ export async function getIndexEntriesByTypes( types = [],  subtypes = []) {
         }
 
         for (const document of filter) {
-            entries.set(document.name, document);
+            entries.set(`${document.type.toUpperCase()}:${document.name}`, document);
         }
         //entries.push(...filter)
     }
