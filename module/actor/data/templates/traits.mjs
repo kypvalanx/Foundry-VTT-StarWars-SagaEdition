@@ -14,8 +14,16 @@ export class TraitsFields {
                 initial: "",
                 label: "XP",
             }),
-            baseAttack: new fields.NumberField({}),
-            grapple: new fields.NumberField({}),
+            baseAttack: new fields.NumberField({
+                initial: 0,
+                integer: true,
+                label: "Base Attack",
+            }),
+            grapple: new fields.NumberField({
+                initial: 0,
+                integer: true,
+                label: "Grapple",
+            }),
         };
     }
 
@@ -138,11 +146,14 @@ export class TraitsFunctions {
 
         let activeTraits = filterItemsByType(inheritableItems(actor), "trait");
         system.traits = activeTraits.sort(ALPHA_FINAL_NAME);
+
+        this.baseAttack = actor.baseAttackBonus;
+        this.grapple = actor.grapple;
     }
 
-    // _prepareNpcTraitsDerivedData() {
-    // 	let system = this;
-    // 	let actor = this.parent;
-    // 	// No derived trait data for npc characters
-    // }
+    _prepareNpcTraitsDerivedData() {
+    	// let system = this;
+    	// let actor = this.parent;
+    	// No derived trait data for npc characters
+    }
 }

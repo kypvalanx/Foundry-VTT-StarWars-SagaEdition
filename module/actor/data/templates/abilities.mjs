@@ -46,7 +46,7 @@ export class AbilityFields {
 export class AbilityFunctions {
     _prepareAbilityDerivedData() {
         let actor = this.parent;
-        let abilityGenType = this.settings.abilityGeneration.value;
+        let abilityGenType = this.settings.abilityGeneration?.value;
 
         // Loop through ability scores, and add their modifiers to our sheet output.
         for (let [key, ability] of Object.entries(this.abilities)) {

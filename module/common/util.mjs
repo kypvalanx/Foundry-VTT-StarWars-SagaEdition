@@ -664,7 +664,14 @@ export function getTokenDistanceInSquares(source, target) {
     return Math.max(xDiff, yDiff) / squareSize;
 }
 
-const ATTRIBUTE_RESOLUTION_ORDER = [CONST.ACTIVE_EFFECT_MODES.ADD, CONST.ACTIVE_EFFECT_MODES.DOWNGRADE, CONST.ACTIVE_EFFECT_MODES.UPGRADE, CONST.ACTIVE_EFFECT_MODES.MULTIPLY, CONST.ACTIVE_EFFECT_MODES.OVERRIDE, 6];
+const ATTRIBUTE_RESOLUTION_ORDER = [
+    CONST.ACTIVE_EFFECT_MODES.ADD,
+    CONST.ACTIVE_EFFECT_MODES.DOWNGRADE,
+    CONST.ACTIVE_EFFECT_MODES.UPGRADE,
+    CONST.ACTIVE_EFFECT_MODES.MULTIPLY,
+    CONST.ACTIVE_EFFECT_MODES.OVERRIDE,
+    6,
+];
 
 const quantityPattern = new RegExp('(.+):(.+)');
 const diePattern = new RegExp('(\\d+)d(\\d+)x?(\\d?)');
@@ -1128,7 +1135,20 @@ export function getItemParentId(id) {
  * these types are always inherited by actors if they meet prerequisites.
  * @type {string[]}
  */
-const CONDITIONALLY_INHERITABLE_TYPES = ["background", "destiny", "trait", "feat", "talent", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "vehicleBaseType", "beastAttack",
+const CONDITIONALLY_INHERITABLE_TYPES = [
+    "background",
+    "destiny",
+    "trait",
+    "feat",
+    "talent",
+    "forcePower",
+    "secret",
+    "forceTechnique",
+    "affiliation",
+    "regimen",
+    "species",
+    "vehicleBaseType",
+    "beastAttack",
     "beastSense",
     "beastType",
     "beastQuality"];

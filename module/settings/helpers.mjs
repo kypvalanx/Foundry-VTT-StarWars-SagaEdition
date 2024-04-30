@@ -76,6 +76,16 @@ export const registerHandlebarsHelpers = function () {
         return (arg1 === arg2) ? options.fn(this) : options.inverse(this);
     });
 
+    Handlebars.registerHelper("unlessContains", function(arg1, arg2, options) {
+        if(Array.isArray(arg1)) {
+            return arg1.includes(arg2) ? options.inverse(this) : options.fn(this);
+        }
+        if(Array.isArray(arg2)) {
+            return arg2.includes(arg1) ? options.inverse(this) : options.fn(this);
+        }
+
+        return arg1 !== arg2 ? options.fn(this) : options.inverse(this);
+    });
 
     Handlebars.registerHelper('ifGT', function(arg1, arg2, options) {
         return (arg1 > arg2) ? options.fn(this) : options.inverse(this);
@@ -107,8 +117,10 @@ export const registerHandlebarsHelpers = function () {
 
     Handlebars.registerHelper('times', function(n, block) {
         let accum = '';
-        for(let i = 0; i < n; ++i)
+        for(let i = 0; i < n;++i) {
+            block.data.index = i;
             accum += block.fn(i);
+        };
         return accum;
     });
 
@@ -174,4 +186,46 @@ export const registerHandlebarsHelpers = function () {
         }
         return `${str} Tons`;
     });
-}
+
+    Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
+        lvalue = parseFloat(lvalue);
+        rvalue = parseFloat(rvalue);
+
+        return {
+            "+": lvalue + rvalue,
+            "-": lvalue - rvalue,
+            "*": lvalue * rvalue,
+            "/": lvalue / rvalue,
+            "%": lvalue % rvalue,
+        }[operator];
+    }
+    );
+
+    Handlebars.registerHelper("objectField", function(object, key, fieldname) {
+        return object[key][fieldname];
+    });
+
+    Handlebars.registerHelper("parseRollsFrom", function (content) {
+        const htmlRollWrapper = `<span class="rollable" data-roll="${{}}"></span>`
+    });
+
+    /**
+     * Register a debug helper for Handlebars to be able to log data or inspect data in the browser console
+     *
+     * Usage:
+     *   {{debug someObj.data}} => logs someObj.data to the console
+     *   {{debug someObj.data true}} => logs someObj.data to the console and stops at a debugger point
+     *
+     * Source: https://gist.github.com/elgervb/5c38c8d70870f92ef6338a291edf88e9
+     *
+     * @param {any} data to log to console
+     * @param {boolean} breakpoint whether or not to set a breakpoint to inspect current state in debugger
+     */
+    Handlebars.registerHelper("debug", function(data, breakpoint) {
+        console.log(data);
+        if(breakpoint === true) {
+            debugger;
+        }
+        return "";
+    });
+};

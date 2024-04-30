@@ -4,7 +4,7 @@ import CommonActorData from "./commondata.mjs";
 import {AbilityFunctions} from "./templates/abilities.mjs";
 import {DefenseFields, DefenseFunctions} from "./templates/defenses.mjs";
 import {DetailFunctions, DetailFields} from "./templates/details.mjs";
-import {HealthFunctions} from "./templates/health.mjs";
+import {HealthFields, HealthFunctions} from "./templates/health.mjs";
 import {ShieldFunctions} from "./templates/shields.mjs";
 import {SkillFunctions, SkillFields} from "./templates/skills.mjs";
 import {TraitsFields, TraitsFunctions} from "./templates/traits.mjs";
@@ -26,6 +26,7 @@ export class NpcDataModel extends SystemDataModel.mixin(...npcFunctionClasses) {
     static defineSchema() {
         return {
             ...CommonActorData.commonData,
+            ...HealthFields.npc,
             defense: new fields.SchemaField({
                 ...DefenseFields.npc,
             }),
@@ -37,20 +38,20 @@ export class NpcDataModel extends SystemDataModel.mixin(...npcFunctionClasses) {
             }),
             ...TraitsFields.npc,
             settings: new fields.SchemaField({
-                isNPC: new fields.SchemaField({
+                // isNPC: new fields.SchemaField({
+                //     value: new fields.BooleanField({
+                //         initial: true,
+                //         label: "Is NPC",
+                //     }),
+                // }),
+                WhisperRollsToGM: new fields.SchemaField({
                     value: new fields.BooleanField({
-                        initial: false,
-                        label: "Is NPC",
-                    }),
-                }),
-                ignorePrerequisites: new fields.SchemaField({
-                    value: new fields.BooleanField({
-                        initial: false,
-                        label: "Ignore Prerequisites",
+                        initial: true,
+                        label: "Whisper Rolls to GM",
                     }),
                 }),
             }),
-            attacks: new fields.ArrayField({}),
+            //attacks: new fields.ArrayField({new fields.ObjectField({})}),
         };
     }
 
@@ -58,8 +59,6 @@ export class NpcDataModel extends SystemDataModel.mixin(...npcFunctionClasses) {
      * @override
      */
     prepareBaseData() {
-        this.settings.isNPC.value = true;
-        this.settings.ignorePrerequisites.value = true;
     }
 
     /**
@@ -73,5 +72,23 @@ export class NpcDataModel extends SystemDataModel.mixin(...npcFunctionClasses) {
      * access the actual document properties, e.g. this.parent.items to access the items
      * collection.
      */
-    prepareDerivedData() {}
+    prepareDerivedData() {
+        //Abilities
+        this._prepareAbilityDerivedData();
+
+        this.#initializeNpcSettings();
+    }
+    
+    #initializeNpcSettings() {
+        const system = this;
+        // let npcsetting = system.settings.isNPC;
+        // npcsetting.type = "boolean";
+        // npcsetting.path = "system.settings.isNPC.value";
+        // npcsetting.label = "Is NPC";
+        
+        let whisperGMSetting = system.settings.WhisperRollsToGM;
+        whisperGMSetting.type = "boolean";
+        whisperGMSetting.path = "system.settings.WhisperRollsToGM.value";
+        whisperGMSetting.label = "Whisper Rolls to GM";
+    }
 }
