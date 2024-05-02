@@ -610,7 +610,7 @@ export class CompendiumWeb extends Application {
         const itemArea = $(`<div class="web-item"></div>`);
         itemArea.append(img)
         if(item.type === "talent"){
-            itemArea.append($(`<div class="text">${item.system.talentTree}</div>`))
+            itemArea.append($(`<div class="text talent">${item.system.talentTree}:</div>`))
         }
         itemArea.append($(`<div class="text">${item.name}</div>`))
         return itemArea;
