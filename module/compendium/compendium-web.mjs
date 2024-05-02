@@ -269,8 +269,12 @@ export class CompendiumWeb extends Application {
                     index.hide ||= !index.possibleProviders?.includes(value);
                 }
             },
-            options: () => {
-                return FEAT_AND_TALENT_PROVIDER_TYPES;
+            options: async (types) => {
+               // const map = ;
+                return [...await getIndexEntriesByTypes(types)].flatMap(([key, item]) => item.system.possibleProviders).distinct().filter(i => !!i).map(book => {
+                    return {value: book, display: book}
+                });
+                //return FEAT_AND_TALENT_PROVIDER_TYPES;
             }
         },
         {
@@ -343,13 +347,17 @@ export class CompendiumWeb extends Application {
         super(...args);
 
         Hooks.on("renderApplication", async (event, target) => {
+            if(event.appId !== this.appId){ //is this really the best way to do this?  weird that applications aren't more contained
+                return;
+            }
+
             this.options = args[0];
             this.target = target;
 
             this.types = ['feat', 'talent']
 
-            if (this.options?.type) {
-                this.types = options.type;
+            if (this.options?.types) {
+                this.types = this.options.types;
             }
 
             await this.addFilters(target,this.types)
