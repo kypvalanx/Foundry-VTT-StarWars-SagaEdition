@@ -6,24 +6,23 @@ import {SWSEItem} from "../item/item.mjs";
  * @param {string | [string]} item
  */
 export function getCompendium(item) {
-    if(!item){
+    if (!item) {
         return [];
     }
-    let type = null;
-    const packs = [];
-    packs.push(...game.packs.filter(p => true));
-    //packs.push(...game.world.packs.filter(p => true))
-    if(Array.isArray(item)){
+    if (Array.isArray(item)) {
         let compendiums = [];
 
         for (const itemElement of item) {
-
             compendiums.push(...getCompendium(itemElement))
         }
 
         return compendiums;
     }
 
+    const packs = [];
+    packs.push(...game.packs.filter(p => true));
+
+    let type = null;
     if (typeof item === "string") {
         type = item.toLowerCase();
     } else {
@@ -40,49 +39,49 @@ export function getCompendium(item) {
                 || pack.collection.startsWith("swse.equipment") || pack.collection.startsWith("swse.hazard")
                 || pack.collection.startsWith("swse.implant") || pack.collection.startsWith("swse.droid systems"));
         case 'trait':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.traits"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.traits"));
         case 'feat':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.feats"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.feats"));
         case 'species':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.species"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.species"));
         case 'talent':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.talents"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.vehicle templates"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle templates"));
         case 'vehiclebasetype':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.vehicle base types"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle base types"));
         case 'vehiclesystem':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.vehicle systems"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle systems"));
         case 'template':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.templates"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.templates"));
         case 'affiliation':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.affiliations"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.affiliations"));
         case 'class':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.classes"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.classes"));
         case 'forceregimen':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.force regimens"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force regimens"));
         case 'forcepower':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.force powers"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force powers"));
         case 'forcesecret':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.force secrets"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force secrets"));
         case 'forcetechnique':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.force techniques"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force techniques"));
         case 'beasttype':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.beast components"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast components"));
         case 'background':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.background"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.background"));
         case 'destiny':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.destinies"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.destinies"));
         case 'language':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.languages"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.languages"));
         case 'weapon':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.weapons"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.weapons"));
         case 'armor':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.armor"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.armor"));
         case 'beastattack':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.beast components"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast components"));
         case 'upgrade':
-            return packs.filter(pack => pack.collection.startsWith("world.") ||pack.collection.startsWith("swse.upgrades"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.upgrades"));
     }
     return [];
 }
@@ -195,37 +194,34 @@ async function getIndexEntryByName(item, lookups) {
         if (entry) break;
     }
     return {entry, payload, itemName, lookup: currentLookup};
-}/**
+}
+
+/**
  * @param {[string]} types
  * @param {[string]} subtypes
  * @return {Map<string, SWSEItem>}
  */
-export async function getIndexEntriesByTypes( types = [],  subtypes = []) {
-    const lookups = getCompendium(types);
+export async function getIndexEntriesByTypes(types = [], subtypes = []) {
+    const compendiums = getCompendium(types);
     const entries = new Map()
-    if (!lookups || lookups.length === 0) {
+    if (!compendiums || compendiums.length === 0) {
         return entries;
     }
 
+    for (let compendium of compendiums) {
+        const ids = compendium.index
+            .filter(item => types.includes(item.type))
+            .map(item => item._id);
 
-    for (let lookup of lookups) {
-        let index = lookup.index;
+        let items = await compendium.getDocuments({_id__in: ids});
 
-
-        const ids = index.filter(f => types.includes(f.type)).map(i => i._id);
-
-        let items = await lookup.getDocuments({ _id__in: ids });
-        let filter;
-        if(subtypes.length > 0){
-            filter = items.filter(item => subtypes.includes(item.system.subtype));
-        } else {
-            filter = items;
+        if (subtypes.length > 0) {
+            items = items.filter(item => subtypes.includes(item.system.subtype));
         }
 
-        for (const document of filter) {
-            entries.set(`${document.type.toUpperCase()}:${document.name}`, document);
+        for (const item of items) {
+            entries.set(`${item.type.toUpperCase()}:${item.name}`, item);
         }
-        //entries.push(...filter)
     }
     return entries
 }
