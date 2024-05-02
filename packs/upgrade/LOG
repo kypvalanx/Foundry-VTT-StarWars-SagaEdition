@@ -1,3 +1,5 @@
-2024/04/28-16:07:21.896 755c Recovering log #61
-2024/04/28-16:07:21.900 755c Delete type=0 #61
-2024/04/28-16:07:21.900 755c Delete type=3 #60
+2024/05/02-15:15:53.214 1cd4 Recovering log #3
+2024/05/02-15:15:53.215 1cd4 Level-0 table #5: started
+2024/05/02-15:15:53.220 1cd4 Level-0 table #5: 153758 bytes OK
+2024/05/02-15:15:53.222 1cd4 Delete type=0 #3
+2024/05/02-15:15:53.222 1cd4 Delete type=3 #2

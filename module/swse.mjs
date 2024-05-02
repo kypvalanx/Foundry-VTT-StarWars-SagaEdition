@@ -7,7 +7,7 @@ import {SWSEItem} from "./item/item.mjs";
 import {SWSEItemSheet} from "./item/item-sheet.mjs";
 import {refreshActors, registerSystemSettings} from "./settings/system.mjs";
 import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
-import {deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
+import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
 import {toNumber} from "./common/util.mjs";
@@ -34,7 +34,7 @@ Hooks.once('init', async function () {
         rollVariable,
         rollItem,
         makeAttack,
-        generateCompendiums, deleteEmptyCompendiums,
+        generateCompendiums, deleteEmptyCompendiums, clearEmptyCompendiums,
         refreshActors,
         applications: {
             SWSECompendiumBrowser

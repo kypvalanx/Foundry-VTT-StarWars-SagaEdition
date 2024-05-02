@@ -32,6 +32,17 @@ export async function getFile(jsonImport) {
     return response;
 }
 
+export function clearEmptyCompendiums(){
+    for(const pack of game.packs.filter(pack => pack.index.size === 0)){
+        try{
+
+            pack.deleteCompendium()
+        } catch (e) {
+            console.warn(e)
+        }
+    }
+}
+
 async function importCompendium(jsonImport, forceRefresh) {
     let response = await getFile(jsonImport);
 
