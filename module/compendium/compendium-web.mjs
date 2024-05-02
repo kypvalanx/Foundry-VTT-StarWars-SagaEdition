@@ -245,6 +245,17 @@ export class CompendiumWeb extends Application {
                     }
                 }
             }
+        },
+        {
+            type: "text",
+            multiple: false,
+            selector: "name-filter",
+            name: "Filter by Name",
+            mutation: (value) => {
+                return (index) => {
+                    index.hide ||= !(index.name.toLowerCase().includes(value.toLowerCase()) || (index.talentTree && index.talentTree.toLowerCase().includes(value.toLowerCase())));
+                }
+            }
         }
     ]
 
@@ -411,11 +422,13 @@ export class CompendiumWeb extends Application {
 
 
         return {
+            name: item.name,
             possibleProviders: item.system.possibleProviders,
             book: item.system.source,
             homebrew: item.isHomeBrew,
             baseAttackBonus: bab,
             species: speciesPrerequisites,
+            talentTree:item.system.talentTree,
             prerequisite: item.system.prerequisite
         };
     }
@@ -655,6 +668,11 @@ export class CompendiumWeb extends Application {
                 break;
             case "number":
                 filterComponent = $(`<input type="number">`)
+
+                filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
+                break;
+            case "text":
+                filterComponent = $(`<input type="text">`)
 
                 filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
                 break;
