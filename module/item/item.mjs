@@ -164,6 +164,16 @@ export class SWSEItem extends Item {
             });
         })
     }
+
+    get isHomeBrew(){
+        return this.getCached("isHomebrew", () => {
+            return getInheritableAttribute({
+                attributeKey: "isHomebrew",
+                entity: this,
+                reduce: "OR"
+            });
+        })
+    }
     get levelsTaken(){
         return this.system.levelsTaken || []
     }
