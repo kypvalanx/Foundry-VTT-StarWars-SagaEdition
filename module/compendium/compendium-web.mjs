@@ -249,37 +249,93 @@ export class CompendiumWeb extends Application {
     static _pattern = /\s\([\w#\s]*\)/
     static _payloadPattern = new RegExp(CompendiumWeb._pattern, "g");
 
+    /**
+     *
+     * @type {[{mutation: function(*): function(*): void,
+     *          multiple: boolean,
+     *          name: string,
+     *          options: function(): [{display: string, value: string}],
+     *          selector: string,
+     *          type: string}]}
+     */
     filters = [
         {
             type: "select",
             multiple: false,
             selector: "provider-filter",
             name: "Filter by Provider Source",
-            filter: this.getPossibleProviderFilter,
-            options: FEAT_AND_TALENT_PROVIDER_TYPES
+            mutation: (value) => {
+                return (index) => {
+                    index.hide ||= !index.possibleProviders?.includes(value);
+                }
+            },
+            options: () => {
+                return FEAT_AND_TALENT_PROVIDER_TYPES;
+            }
         },
         {
             type: "select",
             multiple: false,
             selector: "species-filter",
             name: "Filter by species",
-            filter: this.getSpeciesFilter,
-            options: SPECIES
+            mutation: (value, exclude) => {
+                return (index) => {
+                    if (exclude) {
+                        index.hide ||= index.species?.includes(value);
+                    } else {
+                        index.hide ||= !index.species?.includes(value);
+                    }
+                }
+            },
+            options: () => {
+                return SPECIES;
+            },
+            allowExclude: true
         },
         {
             type: "select",
             multiple: false,
             selector: "actor-filter",
             name: "Filter out by actor stats",
-            filter: this.getActorFilter,
-            options: this.getModifiableActors()
+            mutation:  (value) => {
+                return (index) => {
+                    const actor = game.actors.get(value)
+                    index.hide ||= !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
+                }
+            },
+            options:  () => {
+                return game.actors.filter(a => a.canUserModify(game.user, 'update')).map(a => {
+                    return {value: a.id, display: a.name}
+                });
+            }
         },
         {
             type: "number",
             multiple: false,
             selector: "base-attack-bonus-filter",
             name: "Filter by Base Attack Bonus",
-            filter: this.getBaseAttackBonusFilter
+            mutation: (value) => {
+                return (index) => {
+                    index.hide ||= !(index.baseAttackBonus <= parseInt(value));
+                }
+            }
+        },
+        {
+            type: "select",
+            multiple: false,
+            selector: "book-filter",
+            name: "Filter by Book",
+            mutation: (value) => {
+                return (index) => {
+                    index.hide ||= index.book !== value;
+                }
+            },
+            options: async (types) => {
+                return [...await getIndexEntriesByTypes(types)].map(([key, item]) => item.system.source).distinct().filter(i => !!i).map(book => {
+                    return {value: book, display: book}
+                });
+            },
+            allowExclude: true
         }
     ]
 
@@ -287,28 +343,31 @@ export class CompendiumWeb extends Application {
         super(...args);
 
         Hooks.on("renderApplication", async (event, target) => {
-            const options = args[0];
+            this.options = args[0];
             this.target = target;
-            await this.addFilters(target)
-            await this.populateFiltersFromArguments(target, options);
-            await this.renderWeb(event, target, options);
+
+            this.types = ['feat', 'talent']
+
+            if (this.options?.type) {
+                this.types = options.type;
+            }
+
+            await this.addFilters(target,this.types)
+            await this.populateFiltersFromArguments(target, this.options);
+            await this.renderWeb(event, target, this.types);
 
             //currently disabled.  will allow arrows to be drawn in the future
             //await this.drawArrows(target)
         })
     }
 
-    async renderWeb(e, target, options) {
+    async renderWeb(e, target, types) {
 
-        let defaultTypes = ['feat', 'talent']
 
-        if(options?.type){
-            defaultTypes = options.type;
-        }
+        let items = await getIndexEntriesByTypes(types)
 
-        let items = await getIndexEntriesByTypes(defaultTypes)
-
-        const skipLinking = this.getSkippedUuids(items);
+        //console.log(items)
+        //const skipLinking = this.getSkippedUuids(items);
 
         const dependencyMap = new Map()
         const invertedDependencyMap = new Map();
@@ -318,21 +377,21 @@ export class CompendiumWeb extends Application {
 
         for (const item of items.values()) {
 
-            itemFilterMeta.set(item.uuid, this.getMeta(item))
-            const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, defaultTypes)
+            itemFilterMeta.set(item.uuid, this.getMeta(item, target))
+            const prerequisites = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, types)
 
             if (prerequisites && prerequisites.length > 0) {
                 //dependencyMap[item.name] = prerequisites;
                 for (const prerequisite of prerequisites) {
                     const requiredItem = this.getItemByPrerequisite(prerequisite, items);
-                    if(requiredItem && item){
-                        if(invertedDependencyMap.has(requiredItem.uuid)){
+                    if (requiredItem && item) {
+                        if (invertedDependencyMap.has(requiredItem.uuid)) {
                             invertedDependencyMap.get(requiredItem.uuid).push(item.uuid)
                         } else {
                             invertedDependencyMap.set(requiredItem.uuid, [item.uuid])
                         }
 
-                        if(dependencyMap.has(item.uuid)){
+                        if (dependencyMap.has(item.uuid)) {
                             dependencyMap.get(item.uuid).push(requiredItem.uuid)
                         } else {
                             dependencyMap.set(item.uuid, [requiredItem.uuid])
@@ -345,70 +404,74 @@ export class CompendiumWeb extends Application {
         }
 
 
-        // for (const filter of this.filters) {
-        //     let value;
-        //
-        //     let input = target.find(`.${filter.selector}`)
-        //     value = input.val()
-        //
-        //     if (value) {
-        //         const test = filter.filter(value);
-        //         groupings = groupings.filter(test);
-        //     }
-        // }
+
+        for (const filter of this.filters) {
+            const value = target.find(`.${filter.selector}.value`).val()
+            const find = target.find(`.${filter.selector}.exclude`);
+            let exclude = find.is(":checked")
+            if (value) {
+                const test = filter.mutation(value, exclude);
+                [...itemFilterMeta].map(([key, meta]) => meta).forEach(test);
+            }
+        }
+
+        const skipLinking = [...invertedDependencyMap]
+            .filter(([key, values]) => values && values.filter(value => this.shouldDraw(value, itemFilterMeta, invertedDependencyMap)).length > 10)
+            .map(([key, values]) => key)
+
+
+        //console.log(skipLinking, skipLinking.length, skipLinking2, skipLinking2.length)
 
         const rootUuids = rootItems.map(r => r.uuid);
         const groupedIds = []
         const groups = []
 
         for (const rootUuid of rootUuids) {
-            if(groupedIds.includes(rootUuid) || skipLinking.includes(rootUuid)){
+            if (groupedIds.includes(rootUuid) || skipLinking.includes(rootUuid)) {
                 continue;
             }
 
             const groupNodes = [rootUuid]
-            const rootNodes = [rootUuid]
+            //const rootNodes = [rootUuid]
 
             let children = invertedDependencyMap.get(rootUuid)
             if (!children) {
-                groups.push({groupNodes,rootNodes})
+                groups.push({groupNodes})
                 continue;
             }
 
             let newNodes = children;
-            while(newNodes.length>0){
+            while (newNodes.length > 0) {
                 let activeNodes = newNodes;
-                //currentGroup.push(...activeNodes)
                 newNodes = [];
                 for (const activeNode of activeNodes) {
-                    if(!groupedIds.includes(activeNode)){
-                        if(!skipLinking.includes(activeNode)){
-                            groupedIds.push(activeNode)
-                        }
-                        groupNodes.push(activeNode)
-                        if(dependencyMap.has(activeNode)){
-                            newNodes.push(...dependencyMap.get(activeNode))
-                        }
-                        if(invertedDependencyMap.has(activeNode) && !skipLinking.includes(activeNode)){
-                            newNodes.push(...invertedDependencyMap.get(activeNode))
-                        }
-                        if(rootUuids.includes(activeNode)){
-                            rootNodes.push(activeNode)
-                        }
+                    if (groupedIds.includes(activeNode)) {
+                        continue;
                     }
+                    const shouldLink = !skipLinking.includes(activeNode);
+                    if (shouldLink) {
+                        groupedIds.push(activeNode)
+                    }
+                    groupNodes.push(activeNode)
+                    if (dependencyMap.has(activeNode)) {
+                        newNodes.push(...dependencyMap.get(activeNode))
+                    }
+                    if (invertedDependencyMap.has(activeNode) && shouldLink) {
+                        newNodes.push(...invertedDependencyMap.get(activeNode))
+                    }
+                    // if (rootUuids.includes(activeNode)) {
+                    //     rootNodes.push(activeNode)
+                    // }
                 }
             }
 
-            groups.push({groupNodes: groupNodes.distinct(), rootNodes})
-
+            groups.push({groupNodes: groupNodes.distinct()})
         }
 
 
         //console.log(groups)
 
         const depths = new Map()
-        const root = target.find(".web-viewer");
-        root.empty()
         let deepestBranch = 0;
         for (const group of groups) {
             for (const groupNode of group.groupNodes) {
@@ -419,59 +482,23 @@ export class CompendiumWeb extends Application {
             }
         }
 
+        const root = target.find(".web-viewer");
+        root.empty()
         let groupNumber = 0;
         for (const group of groups) {
-            root.append(await this.createGroup(group.groupNodes, deepestBranch, depths, items, groupNumber, invertedDependencyMap))
+            root.append(await this.createGroup(group.groupNodes, deepestBranch, depths, items, groupNumber, invertedDependencyMap, itemFilterMeta))
             groupNumber = groupNumber + 1
         }
-
-        //
-        // for (const grouping of groupings.values()) {
-        // }
-        //
-        // let groupings = new Set();
-        // let levels = new Map();
-        // let deepestLevel = 0;
-        //
-        // for (const item of items.values()) {
-        //
-        //     const {level, lowestNodes, allNodes} = this.getWebLevel(dependencyMap, item.name, 0)
-        //
-        //     deepestLevel = Math.max(deepestLevel, level)
-        //     levels.set(item.name, level);
-        //
-        //     const group = new Set(allNodes);
-        //     const bab = this.getBabRequirement(item);
-        //     const speciesPrerequisites = this.getSpeciesRequirement(item);
-        //     // for (const speciesPrerequisite of speciesPrerequisites) {
-        //     //     uniqueSpeciesPrerequisites.add(speciesPrerequisite)
-        //     // }
-        //
-        //
-        //     groupings.add({
-        //         possibleProviders: item.system.possibleProviders,
-        //         baseAttackBonus: bab,
-        //         species: speciesPrerequisites,
-        //         prerequisite: item.system.prerequisite,
-        //         group
-        //     });
-        // }
-
-
-
-        // const root = target.find(".web-viewer");
-        // root.empty()
-        // for (const grouping of groupings.values()) {
-        //     root.append(this.createGroup(grouping.group, deepestLevel, levels, items))
-        // }
     }
 
     getMeta(item) {
         const bab = this.getBabRequirement(item);
         const speciesPrerequisites = this.getSpeciesRequirement(item);
 
+
         return {
             possibleProviders: item.system.possibleProviders,
+            book: item.system.possibleProviders,
             baseAttackBonus: bab,
             species: speciesPrerequisites,
             prerequisite: item.system.prerequisite
@@ -480,14 +507,14 @@ export class CompendiumWeb extends Application {
 
     getDepth(groupNode, dependencyMap) {
         const children = dependencyMap.get(groupNode);
-        if(!children || children.length === 0){
+        if (!children || children.length === 0) {
             return 0;
         }
-        return Math.max(...children.map(child => this.getDepth(child, dependencyMap))) +1
+        return Math.max(...children.map(child => this.getDepth(child, dependencyMap))) + 1
     }
 
     getSkippedUuids(items) {
-        return items.values().filter(i => SKIP_LINK.includes(i.name)).map(i => i.uuid).toArray()
+        return [...items].filter(([key, item]) => SKIP_LINK.includes(item.name)).map(([key, item]) => item.uuid) || []
     }
 
 
@@ -499,7 +526,7 @@ export class CompendiumWeb extends Application {
      */
     getItemByPrerequisite(prerequisite, items) {
         let key = `${prerequisite.type.toUpperCase()}:${prerequisite.requirement}`;
-        if(!items.has(key)){
+        if (!items.has(key)) {
             let payloadFree = prerequisite.requirement.replace(CompendiumWeb._payloadPattern, "");
             key = `${prerequisite.type.toUpperCase()}:${payloadFree}`;
         }
@@ -507,7 +534,8 @@ export class CompendiumWeb extends Application {
     }
 
     getSpeciesRequirement(item) {
-        return CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement);
+        const prerequisitesByType = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]);
+        return prerequisitesByType.map(p => p.requirement);
     }
 
     getBabRequirement(item) {
@@ -517,33 +545,7 @@ export class CompendiumWeb extends Application {
         babs.push(0)
         return Math.max(...babs);
     }
-
-    getPossibleProviderFilter(value) {
-        return (index) => {
-            return index.possibleProviders?.includes(value);
-        }
-    };
-
-    getSpeciesFilter(value) {
-        return (index) => {
-            return index.species?.includes(value);
-        }
-    };
-
-    getActorFilter(value) {
-        return (index) => {
-            const actor = game.actors.get(value)
-            return !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
-        }
-    };
-
-    getBaseAttackBonusFilter(value) {
-        return (index) => {
-            return index.baseAttackBonus <= value;
-        }
-    };
-
-    async createGroup(grouping, deepestLevel, levels, items, groupNumber, invertedDependencyMapping) {
+    async createGroup(grouping, deepestLevel, levels, items, groupNumber, invertedDependencyMapping, metaMapping) {
 
         const itemsByLevel = [];
         for (const groupingElement of grouping) {
@@ -555,19 +557,36 @@ export class CompendiumWeb extends Application {
             }
         }
 
+        let shouldDrawGroup = false;
         const webGroup = $(`<div class="web-group"></div>`);
         for (let i = 0; i <= deepestLevel; i++) {
 
             const webLevel = $(`<div class="web-level"></div>`);
             for (const uuid of itemsByLevel[i] || []) {
+                if (!(this.shouldDraw(uuid, metaMapping, invertedDependencyMapping))) continue;
+                shouldDrawGroup = true;
                 const invertedDependencies = invertedDependencyMapping.get(uuid) || []
                 webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies))
             }
 
             webGroup.append(webLevel);
         }
+        if (shouldDrawGroup)
+            return webGroup;
 
-        return webGroup;
+    }
+
+    shouldDraw(uuid, metaMapping, invertedDependencyMapping) {
+        const meta = metaMapping.get(uuid);
+        if (!meta.hide) {
+            return true;
+        }
+        for (const mapping of invertedDependencyMapping.get(uuid) || []) {
+            if (this.shouldDraw(mapping, metaMapping, invertedDependencyMapping)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     getItemBlock(item, groupNumber, invertedDependencies = []) {
@@ -578,18 +597,21 @@ export class CompendiumWeb extends Application {
         img.attr("draggable", "true")
         img.attr("id", `${item.uuid.replaceAll("\.", "-")}-${groupNumber}`);
         img.addClass(`${item.uuid.replaceAll("\.", "-")}-${groupNumber}`);
-        if(invertedDependencies && invertedDependencies.length > 0){
-            img.attr("data-draw-to", invertedDependencies.map(d=>`${d.replaceAll("\.", "-")}-${groupNumber}`).join(","))
+        if (invertedDependencies && invertedDependencies.length > 0) {
+            img.attr("data-draw-to", invertedDependencies.map(d => `${d.replaceAll("\.", "-")}-${groupNumber}`).join(","))
             img.addClass("mappable")
 
         }
         img.attr("data-uuid", item.uuid)
         img.on("dragstart", (event) => this._onDragStart(event))
-        img.on("dblclick", (event)=> item.sheet.render(true))
+        img.on("dblclick", (event) => item.sheet.render(true))
         img.addClass(item.type)
 
         const itemArea = $(`<div class="web-item"></div>`);
         itemArea.append(img)
+        if(item.type === "talent"){
+            itemArea.append($(`<div class="text">${item.system.talentTree}</div>`))
+        }
         itemArea.append($(`<div class="text">${item.name}</div>`))
         return itemArea;
     }
@@ -609,7 +631,7 @@ export class CompendiumWeb extends Application {
         }
 
         const prerequisites = [];
-        if (type.includes(prerequisite.type.toLowerCase())) {
+        if (type.map(t => t.toLowerCase()).includes(prerequisite.type.toLowerCase())) {
             prerequisites.push(prerequisite);
         } else if (prerequisite.children) {
             for (const child of prerequisite.children) {
@@ -671,7 +693,7 @@ export class CompendiumWeb extends Application {
 
     async populateFiltersFromArguments(target, options) {
 
-        if(options.webFilters){
+        if (options.webFilters) {
             for (const webFilter of Object.entries(options.webFilters)) {
 
                 const input = target.find(`.${webFilter[0]}`);
@@ -681,11 +703,11 @@ export class CompendiumWeb extends Application {
 
     }
 
-    async addFilters(target) {
+    async addFilters(target, types) {
         const root = target.find(".web-filters");
         root.empty()
         for (const filter of this.filters) {
-            root.append(this.createFilter(filter, target))
+            root.append(await this.createFilter(filter, target, types))
         }
     }
 
@@ -700,7 +722,7 @@ export class CompendiumWeb extends Application {
      *
      * @return {jQuery|HTMLElement}
      */
-    createFilter(filter, target) {
+    async createFilter(filter, target, types) {
         let filterComponent;
         switch (filter.type) {
             case "select":
@@ -712,30 +734,42 @@ export class CompendiumWeb extends Application {
 
                 filterComponent.append($(`<option value=""> -- </option>`))
 
-                for (const option of filter.options.sort((a,b) => a.display > b.display ? 1 : -1) || []) {
+                for (const option of (await filter.options(types)).sort((a, b) => a.display > b.display ? 1 : -1) || []) {
                     filterComponent.append($(`<option value="${option.value}">${option.display}</option>`))
                 }
-                filterComponent.on("change", (event) => this.renderWeb(event, target))
+                filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
                 break;
             case "number":
                 filterComponent = $(`<input type="number">`)
 
-                filterComponent.on("change", (event) => this.renderWeb(event, target))
+                filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
                 break;
             default:
                 filterComponent = $(`<div>unsupported filter type</div>`)
         }
+       const containerId = `${filter.selector}`
+
         filterComponent.addClass(filter.selector)
+        filterComponent.addClass("value")
+        filterComponent.attr("id", containerId)
 
-        const label = $(`<label>${filter.name}</label>`)
-        label.append(filterComponent)
-        return label;
+        const container = $(`<div class="labeled-input"><label for="${containerId}">${filter.name}</label></div>`);
+
+        container.append(filterComponent)
+
+        const topContainer = $(`<div class="flex-row flex"></div>`);
+        topContainer.append(container)
+        if (filter.allowExclude) {
+            const excludeComponent = $(`<input type="checkbox" class="${filter.selector} exclude">`)
+            excludeComponent.on("change", (event) => this.renderWeb(event, target, this.types))
+
+            const excludeContainer = $(`<div class="labeled-input"><label>exclude</label></div>`);
+            excludeContainer.append(excludeComponent)
+            topContainer.append(excludeContainer)
+        }
+
+        return topContainer;
     }
-
-    getModifiableActors() {
-        return game.actors.filter(a => a.canUserModify(game.user, 'update')).map(a => {return {value: a.id, display: a.name}});
-    }
-
     async drawArrows(target) {
         const found = target.find(".mappable")
         const webviewer = target.find(".web-viewer")
@@ -744,7 +778,7 @@ export class CompendiumWeb extends Application {
             let drawto = from.dataset.drawTo?.split(",")
             for (const drawtoElement of drawto) {
                 const to = $(target.find(`#${drawtoElement}`))[0]
-                if(to){
+                if (to) {
                     //this.connect(from, to, "black", 2)
                     //console.log(`<svg width="500" height="500"><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`)
                     //arrows.append($(`<svg><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`))
@@ -754,7 +788,8 @@ export class CompendiumWeb extends Application {
         }
         //webviewer.append(arrows)
     }
-     getOffset( el ) {
+
+    getOffset(el) {
         var rect = el.getBoundingClientRect();
         return {
             left: rect.left + window.pageXOffset,
@@ -763,6 +798,7 @@ export class CompendiumWeb extends Application {
             height: rect.height || el.offsetHeight
         };
     }
+
     connect(div1, div2, color, thickness) { // draw a line connecting elements
         const off1 = this.getOffset(div1);
         var off2 = this.getOffset(div2);
@@ -773,12 +809,12 @@ export class CompendiumWeb extends Application {
         var x2 = off2.left + off2.width;
         var y2 = off2.top;
         // distance
-        var length = Math.sqrt(((x2-x1) * (x2-x1)) + ((y2-y1) * (y2-y1)));
+        var length = Math.sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)));
         // center
         var cx = ((x1 + x2) / 2) - (length / 2);
         var cy = ((y1 + y2) / 2) - (thickness / 2);
         // angle
-        var angle = Math.atan2((y1-y2),(x1-x2))*(180/Math.PI);
+        var angle = Math.atan2((y1 - y2), (x1 - x2)) * (180 / Math.PI);
         // make hr
         var htmlLine = "<div style='padding:0px; margin:0px; height:" + thickness + "px; background-color:" + color + "; line-height:1px; position:absolute; left:" + cx + "px; top:" + cy + "px; width:" + length + "px; -moz-transform:rotate(" + angle + "deg); -webkit-transform:rotate(" + angle + "deg); -o-transform:rotate(" + angle + "deg); -ms-transform:rotate(" + angle + "deg); transform:rotate(" + angle + "deg);' />";
         //
