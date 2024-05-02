@@ -1645,7 +1645,7 @@
 
 .swse .web-item {
   border-radius: 10px;
-  width: 120px;
+  min-width: 120px;
   height: 120px;
   -ms-flex-line-pack: stretch;
   align-content: stretch;
@@ -1656,6 +1656,7 @@
   -webkit-box-direction: normal;
   -ms-flex-direction: column;
   flex-direction: column;
+  padding: 3px;
 }
 
 .swse .web-item img {
@@ -1685,6 +1686,10 @@
   position: absolute;
   width: 1px;
   background-color: red;
+}
+
+.swse .text {
+  margin: 3px;
 }
 
 .swse .text.talent {

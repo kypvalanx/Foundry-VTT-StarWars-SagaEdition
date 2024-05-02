@@ -25,11 +25,12 @@
 
 .web-item{
   border-radius: 10px;
-  width: 120px;
+  min-width: 120px;
   height: 120px;
   align-content: stretch;
   display: flex;
   flex-direction: column;
+  padding: 3px;
   img {
     width: 60px;
     height: 60px;
@@ -57,7 +58,9 @@ line {
   width:1px;
   background-color:red;
 }
-
+.text {
+  margin: 3px;
+}
 .text.talent {
   background-color: var(--color-foreground);
   color: var(--color-background);
