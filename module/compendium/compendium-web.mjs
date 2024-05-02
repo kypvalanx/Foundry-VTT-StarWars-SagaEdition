@@ -1,116 +1,6 @@
 import {getIndexEntriesByTypes} from "./compendium-util.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 
-const FEAT_AND_TALENT_PROVIDER_TYPES = [{
-    "value": "General Feats",
-    "display": "General Feats"
-}, {"value": "Soldier Bonus Feats", "display": "Soldier Bonus Feats"}, {
-    "value": "Jedi Bonus Feats",
-    "display": "Jedi Bonus Feats"
-}, {"value": "Force Prodigy Bonus Feats", "display": "Force Prodigy Bonus Feats"}, {
-    "value": "Technician Bonus Feats",
-    "display": "Technician Bonus Feats"
-}, {"value": "Noble Bonus Feats", "display": "Noble Bonus Feats"}, {
-    "value": "Scout Bonus Feats",
-    "display": "Scout Bonus Feats"
-}, {"value": "Scoundrel Bonus Feats", "display": "Scoundrel Bonus Feats"}, {
-    "value": "Soldier Talent Trees",
-    "display": "Soldier Talent Trees"
-}, {
-    "value": "Melee Duelist Talent Trees",
-    "display": "Melee Duelist Talent Trees"
-}, {"value": "Jedi Knight Talent Trees", "display": "Jedi Knight Talent Trees"}, {
-    "value": "Jedi Talent Trees",
-    "display": "Jedi Talent Trees"
-}, {"value": "Officer Talent Trees", "display": "Officer Talent Trees"}, {
-    "value": "Charlatan Talent Trees",
-    "display": "Charlatan Talent Trees"
-}, {
-    "value": "Sith Apprentice Talent Trees",
-    "display": "Sith Apprentice Talent Trees"
-}, {"value": "Sith Lord Talent Trees", "display": "Sith Lord Talent Trees"}, {
-    "value": "Scoundrel Talent Trees",
-    "display": "Scoundrel Talent Trees"
-}, {"value": "Ace Pilot Talent Trees", "display": "Ace Pilot Talent Trees"}, {
-    "value": "Master Privateer Talent Trees",
-    "display": "Master Privateer Talent Trees"
-}, {"value": "Force Talent Trees", "display": "Force Talent Trees"}, {
-    "value": "Bounty Hunter Talent Trees",
-    "display": "Bounty Hunter Talent Trees"
-}, {"value": "Outlaw Talent Trees", "display": "Outlaw Talent Trees"}, {
-    "value": "Vanguard Talent Trees",
-    "display": "Vanguard Talent Trees"
-}, {"value": "Scout Talent Trees", "display": "Scout Talent Trees"}, {
-    "value": "Pathfinder Talent Trees",
-    "display": "Pathfinder Talent Trees"
-}, {"value": "Technician Talent Trees", "display": "Technician Talent Trees"}, {
-    "value": "Force Adept Talent Trees",
-    "display": "Force Adept Talent Trees"
-}, {"value": "Untested", "display": "Untested"}, {
-    "value": "Homebrew Content",
-    "display": "Homebrew Content"
-}, {"value": "Improviser Talent Trees", "display": "Improviser Talent Trees"}, {
-    "value": "Noble Talent Trees",
-    "display": "Noble Talent Trees"
-}, {
-    "value": "Elite Trooper Talent Trees",
-    "display": "Elite Trooper Talent Trees"
-}, {
-    "value": "Force Tradition Talent Trees",
-    "display": "Force Tradition Talent Trees"
-}, {"value": "Assassin Talent Trees", "display": "Assassin Talent Trees"}, {
-    "value": "Droid Talent Trees",
-    "display": "Droid Talent Trees"
-}, {"value": "Gunslinger Talent Trees", "display": "Gunslinger Talent Trees"}, {
-    "value": "Gladiator Talent Trees",
-    "display": "Gladiator Talent Trees"
-}, {"value": "Enforcer Talent Trees", "display": "Enforcer Talent Trees"}, {
-    "value": "Saboteur Talent Trees",
-    "display": "Saboteur Talent Trees"
-}, {"value": "SaintSirNicholas Creations", "display": "SaintSirNicholas Creations"}, {
-    "value": "ZenithSloth Creations",
-    "display": "ZenithSloth Creations"
-}, {"value": "Darth borehd Creations", "display": "Darth borehd Creations"}, {
-    "value": "Military Engineer Talent Trees",
-    "display": "Military Engineer Talent Trees"
-}, {
-    "value": "Infiltrator Talent Trees",
-    "display": "Infiltrator Talent Trees"
-}, {"value": "Droid Commander Talent Trees", "display": "Droid Commander Talent Trees"}, {
-    "value": "Medic Talent Trees",
-    "display": "Medic Talent Trees"
-}, {
-    "value": "Crime Lord Talent Trees",
-    "display": "Crime Lord Talent Trees"
-}, {
-    "value": "Independent Droid Talent Trees",
-    "display": "Independent Droid Talent Trees"
-}, {
-    "value": "Chellewalker Creations",
-    "display": "Chellewalker Creations"
-}, {
-    "value": "Martial Arts Master Talent Trees",
-    "display": "Martial Arts Master Talent Trees"
-}, {
-    "value": "Corporate Agent Talent Trees",
-    "display": "Corporate Agent Talent Trees"
-}, {
-    "value": "Imperial Knight Talent Trees",
-    "display": "Imperial Knight Talent Trees"
-}, {"value": "Shaper Talent Trees", "display": "Shaper Talent Trees"}, {
-    "value": "Jedi Master Talent Trees",
-    "display": "Jedi Master Talent Trees"
-}, {
-    "value": "Force Disciple Talent Trees",
-    "display": "Force Disciple Talent Trees"
-}, {
-    "value": "Sterling Hershey Creations",
-    "display": "Sterling Hershey Creations"
-}, {"value": "Galactic Senator Talent Trees", "display": "Galactic Senator Talent Trees"}, {
-    "value": "MERC 1 Creations",
-    "display": "MERC 1 Creations"
-}, {"value": "DarkwulfStudios Creations", "display": "DarkwulfStudios Creations"}];
-
 const SPECIES = [{"value": "Abinyshi", "display": "Abinyshi"}, {
     "value": "Farghul",
     "display": "Farghul"
@@ -270,11 +160,9 @@ export class CompendiumWeb extends Application {
                 }
             },
             options: async (types) => {
-               // const map = ;
                 return [...await getIndexEntriesByTypes(types)].flatMap(([key, item]) => item.system.possibleProviders).distinct().filter(i => !!i).map(book => {
                     return {value: book, display: book}
                 });
-                //return FEAT_AND_TALENT_PROVIDER_TYPES;
             }
         },
         {
@@ -291,8 +179,11 @@ export class CompendiumWeb extends Application {
                     }
                 }
             },
-            options: () => {
-                return SPECIES;
+            options: async (types) => {
+
+                return [...await getIndexEntriesByTypes(types)].flatMap(([key, item]) => CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"])).map(p => p.requirement).distinct().map(s => {return {display:s, value:s}})
+
+                //return SPECIES;
             },
             allowExclude: true
         },
@@ -305,6 +196,7 @@ export class CompendiumWeb extends Application {
                 return (index) => {
                     const actor = game.actors.get(value)
                     index.hide ||= !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
+                    //index.actorHas
                 }
             },
             options:  () => {
@@ -336,10 +228,23 @@ export class CompendiumWeb extends Application {
             },
             options: async (types) => {
                 return [...await getIndexEntriesByTypes(types)].map(([key, item]) => item.system.source).distinct().filter(i => !!i).map(book => {
-                    return {value: book, display: book}
+                    return {value: book, display: book.replace("Star Wars Saga Edition", "SWSE").replace("Clone Wars Saga Edition", "CWSE")}
                 });
             },
             allowExclude: true
+        },
+        {
+            type: "boolean",
+            multiple: false,
+            selector: "homebrew-filter",
+            name: "Filter out Homebrew",
+            mutation: (value) => {
+                return (index) => {
+                    if(value){
+                        index.hide ||= index.homebrew;
+                    }
+                }
+            }
         }
     ]
 
@@ -411,12 +316,13 @@ export class CompendiumWeb extends Application {
             }
         }
 
+///combine getmeta with this filtering block in the future.  for now it works and i want to release  perfect is enemy of good and all that
 
 
         for (const filter of this.filters) {
-            const value = target.find(`.${filter.selector}.value`).val()
-            const find = target.find(`.${filter.selector}.exclude`);
-            let exclude = find.is(":checked")
+            const input = target.find(`.${filter.selector}.value`);
+            const value = filter.type === "boolean" ? input.is(":checked") : input.val()
+            let exclude = target.find(`.${filter.selector}.exclude`).is(":checked")
             if (value) {
                 const test = filter.mutation(value, exclude);
                 [...itemFilterMeta].map(([key, meta]) => meta).forEach(test);
@@ -506,7 +412,8 @@ export class CompendiumWeb extends Application {
 
         return {
             possibleProviders: item.system.possibleProviders,
-            book: item.system.possibleProviders,
+            book: item.system.source,
+            homebrew: item.isHomeBrew,
             baseAttackBonus: bab,
             species: speciesPrerequisites,
             prerequisite: item.system.prerequisite
@@ -542,8 +449,7 @@ export class CompendiumWeb extends Application {
     }
 
     getSpeciesRequirement(item) {
-        const prerequisitesByType = CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]);
-        return prerequisitesByType.map(p => p.requirement);
+        return CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"]).map(p => p.requirement);
     }
 
     getBabRequirement(item) {
@@ -749,6 +655,11 @@ export class CompendiumWeb extends Application {
                 break;
             case "number":
                 filterComponent = $(`<input type="number">`)
+
+                filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
+                break;
+            case "boolean":
+                filterComponent = $(`<input type="checkbox">`)
 
                 filterComponent.on("change", (event) => this.renderWeb(event, target, this.types))
                 break;
