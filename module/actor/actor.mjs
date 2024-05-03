@@ -1872,7 +1872,7 @@ export class SWSEActor extends Actor {
         let actorData = this.system;
         if (!type && !backupType) {
             if (!KNOWN_WEIRD_UNITS.includes(this.name)) {
-                console.warn("tried to reduce undefined on: " + this.name, this)
+                //console.warn("tried to reduce undefined on: " + this.name, this)
             }
             return;
         }

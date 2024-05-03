@@ -20,7 +20,7 @@ import {CompendiumWeb} from "./compendium/compendium-web.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
-    console.warn("It's Quenching time!")
+    //console.warn("It's Quenching time!")
     registerTestSuites(quench);
 })
 
