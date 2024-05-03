@@ -28,7 +28,7 @@ export class SWSERollWrapper {
             if(term.options.flavor){
                 expression = `<span title="${term.options.flavor}">${expression1}</span>`
             }
-            if(term instanceof Die){
+            if(term instanceof foundry.dice.terms.Die){
                 for(const additionalTerm of this.additionalTerms){
                     expression += `<span>/</span><span>${additionalTerm.expression}</span>`
                 }

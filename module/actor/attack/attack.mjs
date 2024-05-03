@@ -381,7 +381,7 @@ export class Attack {
         terms = terms
             .filter(term => !!term);
 
-        terms = terms.length > 0 ? terms : [new NumericTerm({number: 0})]
+        terms = terms.length > 0 ? terms : [new foundry.dice.terms.NumericTerm({number: 0})]
         let roll = Roll.fromTerms(terms);
 
         let bonusDamageDice = getInheritableAttribute({
@@ -936,7 +936,7 @@ export function getDiceTermsFromString(dieString) {
             let diceTokens = dieTerm.split("/");
             diceTokens.forEach((token, i) => {
                 let toks = token.split("d")
-                const die = new Die({number: parseInt(toks[0]), faces: parseInt(toks[1])});
+                const die = new foundry.dice.terms.Die({number: parseInt(toks[0]), faces: parseInt(toks[1])});
                 if(i === 0){
                     dice.push(die);
                 } else {

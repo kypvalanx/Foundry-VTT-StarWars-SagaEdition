@@ -1620,15 +1620,15 @@ export function getDieFlavor(flavor) {
 }
 
 export function plus() {
-    return new OperatorTerm({operator: "+"});
+    return new foundry.dice.terms.OperatorTerm({operator: "+"});
 }
 
 export function mult() {
-    return new OperatorTerm({operator: "*"});
+    return new foundry.dice.terms.OperatorTerm({operator: "*"});
 }
 
 export function minus() {
-    return new OperatorTerm({operator: "-"});
+    return new foundry.dice.terms.OperatorTerm({operator: "-"});
 }
 
 export function appendTerms(value, flavor) {
@@ -1681,7 +1681,7 @@ export function appendNumericTerm(value, flavor) {
         return [];
     }
     return [num > -1 ? plus() : minus(),
-        new NumericTerm({number: Math.abs(num), options: getDieFlavor(flavor)})];
+        new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: getDieFlavor(flavor)})];
 }
 
 function generateUUID(actorId, itemId, effectId) {
