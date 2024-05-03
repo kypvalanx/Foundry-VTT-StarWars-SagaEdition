@@ -1645,7 +1645,7 @@
 
 .swse .web-item {
   border-radius: 10px;
-  min-width: 60px;
+  min-width: 120px;
   min-height: 60px;
   -ms-flex-line-pack: stretch;
   align-content: stretch;
