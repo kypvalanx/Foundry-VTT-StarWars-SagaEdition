@@ -25,15 +25,15 @@
 
 .web-item{
   border-radius: 10px;
-  min-width: 120px;
-  height: 120px;
+  min-width: 60px;
+  min-height: 60px;
   align-content: stretch;
   display: flex;
   flex-direction: column;
   padding: 3px;
   img {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     margin-left: auto;
     margin-right: auto;
     cursor: move;
@@ -60,6 +60,7 @@ line {
 }
 .text {
   margin: 3px;
+  font-size: smaller;
 }
 .text.talent {
   background-color: var(--color-foreground);
