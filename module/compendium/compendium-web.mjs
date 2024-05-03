@@ -132,9 +132,9 @@ export class CompendiumWeb extends Application {
             mutation: (value, exclude) => {
                 return (index) => {
                     if (exclude) {
-                        index.hide ||= index.book !== value;
+                        index.hide ||= index.book === value;
                     } else {
-                        index.hide ||= !index.book !== value;
+                        index.hide ||= index.book !== value;
                     }
                 }
             },
