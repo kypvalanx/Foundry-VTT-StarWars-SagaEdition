@@ -129,9 +129,13 @@ export class CompendiumWeb extends Application {
             multiple: false,
             selector: "book-filter",
             name: "Filter by Book",
-            mutation: (value) => {
+            mutation: (value, exclude) => {
                 return (index) => {
-                    index.hide ||= index.book !== value;
+                    if (exclude) {
+                        index.hide ||= index.book !== value;
+                    } else {
+                        index.hide ||= !index.book !== value;
+                    }
                 }
             },
             options: async (types) => {
