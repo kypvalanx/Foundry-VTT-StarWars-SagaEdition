@@ -3,11 +3,11 @@
   "title": "Star Wars: Saga Edition",
   "description": "The Star Wars: Saga Edition system for FoundryVTT!",
   "version": "0.7.29",
-  "minimumCoreVersion": "10",
+  "minimumCoreVersion": "11",
   "compatibility": {
     "minimum": 10,
     "verified": 11,
-    "maximum": 11
+    "maximum": 12
   },
   "templateVersion": 2,
   "authors": [
@@ -91,7 +91,7 @@
       "entity": "Item"
     },
     {
-      "name": "droid systems",
+      "name": "droid-systems",
       "label": "Droid Systems",
       "path": "packs/droid-system",
       "type": "Item",
@@ -107,7 +107,7 @@
       "entity": "Item"
     },
     {
-      "name": "force powers",
+      "name": "force-powers",
       "label": "Force Powers",
       "path": "packs/force-powers",
       "type": "Item",
@@ -115,7 +115,7 @@
       "entity": "Item"
     },
     {
-      "name": "force regimens",
+      "name": "force-regimens",
       "label": "Force Regimens",
       "path": "packs/force-regimens",
       "type": "Item",
@@ -123,7 +123,7 @@
       "entity": "Item"
     },
     {
-      "name": "force secrets",
+      "name": "force-secrets",
       "label": "Force Secrets",
       "path": "packs/force-secrets",
       "type": "Item",
@@ -131,7 +131,7 @@
       "entity": "Item"
     },
     {
-      "name": "force techniques",
+      "name": "force-techniques",
       "label": "Force Techniques",
       "path": "packs/force-techniques",
       "type": "Item",
@@ -179,7 +179,7 @@
       "entity": "Item"
     },
     {
-      "name": "vehicle base types",
+      "name": "vehicle-base-types",
       "label": "Vehicle Base Types",
       "path": "packs/vehicle-base-types",
       "type": "Item",
@@ -187,7 +187,7 @@
       "entity": "Item"
     },
     {
-      "name": "vehicle systems",
+      "name": "vehicle-systems",
       "label": "Vehicle Systems",
       "path": "packs/vehicle-systems",
       "type": "Item",
@@ -195,7 +195,7 @@
       "entity": "Item"
     },
     {
-      "name": "beast components",
+      "name": "beast-components",
       "label": "Beast Components",
       "path": "packs/beast-components",
       "type": "Item",
@@ -227,7 +227,7 @@
       "entity": "Item"
     },
     {
-      "name": "units cl  0",
+      "name": "units-cl-0",
       "label": "Units CL  0",
       "path": "packs/units-cl-0",
       "type": "Actor",
@@ -235,7 +235,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  1",
+      "name": "units-cl-1",
       "label": "Units CL  1",
       "path": "packs/units-cl-1",
       "type": "Actor",
@@ -243,7 +243,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  2",
+      "name": "units-cl-2",
       "label": "Units CL  2",
       "path": "packs/units-cl-2",
       "type": "Actor",
@@ -251,7 +251,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  3",
+      "name": "units-cl-3",
       "label": "Units CL  3",
       "path": "packs/units-cl-3",
       "type": "Actor",
@@ -259,7 +259,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  4",
+      "name": "units-cl-4",
       "label": "Units CL  4",
       "path": "packs/units-cl-4",
       "type": "Actor",
@@ -267,7 +267,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  5",
+      "name": "units-cl-5",
       "label": "Units CL  5",
       "path": "packs/units-cl-5",
       "type": "Actor",
@@ -275,7 +275,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  6",
+      "name": "units-cl-6",
       "label": "Units CL  6",
       "path": "packs/units-cl-6",
       "type": "Actor",
@@ -283,7 +283,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  7",
+      "name": "units-cl-7",
       "label": "Units CL  7",
       "path": "packs/units-cl-7",
       "type": "Actor",
@@ -291,7 +291,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  8",
+      "name": "units-cl-8",
       "label": "Units CL  8",
       "path": "packs/units-cl-8",
       "type": "Actor",
@@ -299,7 +299,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl  9",
+      "name": "units-cl-9",
       "label": "Units CL  9",
       "path": "packs/units-cl-9",
       "type": "Actor",
@@ -307,7 +307,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 10",
+      "name": "units-cl-10",
       "label": "Units CL 10",
       "path": "packs/units-cl-10",
       "type": "Actor",
@@ -315,7 +315,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 11",
+      "name": "units-cl-11",
       "label": "Units CL 11",
       "path": "packs/units-cl-11",
       "type": "Actor",
@@ -323,7 +323,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 12",
+      "name": "units-cl-12",
       "label": "Units CL 12",
       "path": "packs/units-cl-12",
       "type": "Actor",
@@ -331,7 +331,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 13",
+      "name": "units-cl-13",
       "label": "Units CL 13",
       "path": "packs/units-cl-13",
       "type": "Actor",
@@ -339,7 +339,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 14",
+      "name": "units-cl-14",
       "label": "Units CL 14",
       "path": "packs/units-cl-14",
       "type": "Actor",
@@ -347,7 +347,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 15",
+      "name": "units-cl-15",
       "label": "Units CL 15",
       "path": "packs/units-cl-15",
       "type": "Actor",
@@ -355,7 +355,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 16",
+      "name": "units-cl-16",
       "label": "Units CL 16",
       "path": "packs/units-cl-16",
       "type": "Actor",
@@ -363,7 +363,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 17",
+      "name": "units-cl-17",
       "label": "Units CL 17",
       "path": "packs/units-cl-17",
       "type": "Actor",
@@ -371,7 +371,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 18",
+      "name": "units-cl-18",
       "label": "Units CL 18",
       "path": "packs/units-cl-18",
       "type": "Actor",
@@ -379,7 +379,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 19",
+      "name": "units-cl-19",
       "label": "Units CL 19",
       "path": "packs/units-cl-19",
       "type": "Actor",
@@ -387,7 +387,7 @@
       "entity": "Actor"
     },
     {
-      "name": "units cl 20",
+      "name": "units-cl-20",
       "label": "Units CL 20",
       "path": "packs/units-cl-20",
       "type": "Actor",
@@ -405,8 +405,10 @@
       "path": "lang/en.json"
     }
   ],
-  "gridDistance": 1,
-  "gridUnits": "squares",
+  "grid": {
+    "distance": 1,
+    "units": "squares"
+  },
   "primaryTokenAttribute": "health",
   "secondaryTokenAttribute": "shields",
   "url": "https://github.com/kypvalanx/Foundry-VTT-StarWars-SagaEdition",
