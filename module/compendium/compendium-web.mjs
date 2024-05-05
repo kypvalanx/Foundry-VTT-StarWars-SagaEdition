@@ -106,7 +106,7 @@ export class CompendiumWeb extends Application {
                     index.hide ||= !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
 
                     for (const item of actor.items) {
-                        if(item.uuid === index.uuid){
+                        if(item.name === index.name){
                             index.hasItem = true;
                             break;
                         }
