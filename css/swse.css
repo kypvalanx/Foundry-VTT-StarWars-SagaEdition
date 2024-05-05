@@ -1681,6 +1681,10 @@
   margin-right: auto;
 }
 
+.swse .web-item.owned {
+  background-color: #bcc3fd;
+}
+
 .swse line {
   z-index: 9;
   position: absolute;

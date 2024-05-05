@@ -104,7 +104,13 @@ export class CompendiumWeb extends Application {
                 return (index) => {
                     const actor = game.actors.get(value)
                     index.hide ||= !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
-                    //index.actorHas
+
+                    for (const item of actor.items) {
+                        if(item.uuid === index.uuid){
+                            index.hasItem = true;
+                            break;
+                        }
+                    }
                 }
             },
             options: () => {
@@ -296,6 +302,7 @@ export class CompendiumWeb extends Application {
 
 
         return {
+            uuid: item.uuid,
             name: item.name,
             possibleProviders: item.system.possibleProviders,
             book: item.system.source,
@@ -362,7 +369,7 @@ export class CompendiumWeb extends Application {
                 if (!(this.shouldDraw(uuid, metaMapping, invertedDependencyMapping))) continue;
                 shouldDrawGroup = true;
                 const invertedDependencies = invertedDependencyMapping.get(uuid) || []
-                webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies))
+                webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies, metaMapping.get(uuid)))
             }
 
             webGroup.append(webLevel);
@@ -385,7 +392,7 @@ export class CompendiumWeb extends Application {
         return false;
     }
 
-    getItemBlock(item, groupNumber, invertedDependencies = []) {
+    getItemBlock(item, groupNumber, invertedDependencies = [], metaData) {
         const img = $(`<img src="${item.img}" alt="${item.name}">`);
         // const itemBlock = $(`<div class="icon"></div>`);
 
@@ -409,6 +416,11 @@ export class CompendiumWeb extends Application {
             itemArea.append($(`<div class="text talent">${item.system.talentTree}:</div>`))
         }
         itemArea.append($(`<div class="text">${item.name}</div>`))
+
+        if(metaData.hasItem){
+            itemArea.addClass("owned");
+        }
+
         return itemArea;
     }
 
