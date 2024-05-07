@@ -43,7 +43,8 @@ export class CompendiumWeb extends Application {
             await this.renderWeb(event, target, this.types);
 
             //currently disabled.  will allow arrows to be drawn in the future
-            //await this.drawArrows(target)
+            // const start = Date.now()
+            // this.drawArrows(target).then(() => console.log( Date.now() - start))
         })
     }
 
@@ -226,6 +227,7 @@ export class CompendiumWeb extends Application {
             }
         }
 
+
 ///combine getmeta with this filtering block in the future.  for now it works and i want to release  perfect is enemy of good and all that
 
 
@@ -242,6 +244,8 @@ export class CompendiumWeb extends Application {
         const skipLinking = [...invertedDependencyMap]
             .filter(([key, values]) => values && values.filter(value => this.shouldDraw(value, itemFilterMeta, invertedDependencyMap)).length > 10)
             .map(([key, values]) => key)
+
+        this.pruneBisections(invertedDependencyMap)
 
         const rootUuids = rootItems.map(r => r.uuid);
         const groupedIds = []
@@ -360,7 +364,11 @@ export class CompendiumWeb extends Application {
 
     async createGroup(grouping, deepestLevel, levels, items, groupNumber, invertedDependencyMapping, metaMapping) {
         const itemsByLevel = [];
+        let shouldDrawGroup = false;
         for (const groupingElement of grouping) {
+            if (!(this.shouldDraw(groupingElement, metaMapping, invertedDependencyMapping))) continue;
+
+            shouldDrawGroup = true;
             const level = levels.get(groupingElement);
             if (itemsByLevel[level]) {
                 itemsByLevel[level].push(groupingElement);
@@ -369,22 +377,39 @@ export class CompendiumWeb extends Application {
             }
         }
 
-        let shouldDrawGroup = false;
+        if (!shouldDrawGroup) {
+            return;
+        }
+
+        for (let i = 0; i < itemsByLevel.length; i++) {
+            for (let j = 0; j < itemsByLevel[i].length; j++) {
+
+            }
+        }
+
+
         const webGroup = $(`<div class="web-group"></div>`);
-        for (let i = 0; i <= deepestLevel; i++) {
+        for (const level of itemsByLevel) {
 
             const webLevel = $(`<div class="web-level"></div>`);
-            for (const uuid of itemsByLevel[i] || []) {
-                if (!(this.shouldDraw(uuid, metaMapping, invertedDependencyMapping))) continue;
-                shouldDrawGroup = true;
-                const invertedDependencies = invertedDependencyMapping.get(uuid) || []
-                webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies, metaMapping.get(uuid)))
+            for (let uuid of level) {
+            //for (const uuid of itemsByLevel[i] || []) {
+                //const uuid = itemsByLevel[i][j]
+                if(uuid){
+                    const invertedDependencies = invertedDependencyMapping.get(uuid) || []
+                    webLevel.append(this.getItemBlock(await fromUuid(uuid), groupNumber, invertedDependencies, metaMapping.get(uuid)))
+                } else {
+
+                    webLevel.append( $(`<div class="web-item"></div>`));
+                }
             }
 
             webGroup.append(webLevel);
         }
-        if (shouldDrawGroup)
-            return webGroup;
+            const wrapper = $(`<div class="web-grouper" ><div style="width: 0; height: 0"><canvas class="web-canvas" style="overflow: visible"></canvas></div></div>`)
+            wrapper.append(webGroup)
+            return wrapper;
+
 
     }
 
@@ -560,21 +585,110 @@ export class CompendiumWeb extends Application {
     }
 
     async drawArrows(target) {
-        const found = target.find(".mappable")
-        const webviewer = target.find(".web-viewer")
-        //const arrows = $(`<div class="arrows"></div>`)
-        for (const from of found) {
-            let drawto = from.dataset.drawTo?.split(",")
-            for (const drawtoElement of drawto) {
-                const to = $(target.find(`#${drawtoElement}`))[0]
-                if (to) {
-                    //this.connect(from, to, "black", 2)
-                    //console.log(`<svg width="500" height="500"><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`)
-                    //arrows.append($(`<svg><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`))
-                    //new LeaderLine(from, to)
+
+
+
+        const grouper = target.find(".web-grouper")
+
+        grouper.each((index, grouperElement) => {
+            const grouper = $(grouperElement)
+            const found = grouper.find(".mappable")
+            const webviewer = target
+            const webCanvas = grouper.find(".web-canvas")
+            webCanvas.attr("width", webviewer.width())
+            webCanvas.attr("height", webviewer.height())
+
+            const ctx = webCanvas[0].getContext("2d");
+
+
+            //const arrows = $(`<div class="arrows"></div>`)
+            for (const from of found) {
+                let drawto = from.dataset.drawTo?.split(",")
+                for (const drawtoElement of drawto) {
+                    const to = $(target.find(`#${drawtoElement}`))[0]
+                    if (to) {
+                        this.drawLine(webCanvas[0], ctx, from, to)
+
+                        //this.connect(from, to, "black", 2)
+                        //console.log(`<svg width="500" height="500"><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`)
+                        //arrows.append($(`<svg><line x1="${from.offsetLeft}" y1="${from.offsetTop }" x2="${to.offsetLeft }" y2="${to.offsetTop}" stroke="black"/></svg>`))
+                        //new LeaderLine(from, to)
+                    }
                 }
             }
+            //webviewer.append(arrows)
+
+        })
+
+
+        for (const grouperElement of grouper) {
+
         }
-        //webviewer.append(arrows)
+
+
+    }
+
+    drawLine(canvas, ctx, from, to) {
+        const canvasXOffset = $(canvas).offset().left;
+        const canvasYOffset = $(canvas).offset().top;
+        const fromX = $(from).width()/2 + $(from).offset().left - canvasXOffset;
+        const fromY = $(from).height()/2 + $(from).offset().top - canvasYOffset;
+        ctx.moveTo(fromX, fromY);
+        const toX = $(to).width()/2 + $(to).offset().left - canvasXOffset;
+        const toY = $(to).height()/2 + $(to).offset().top - canvasYOffset;
+        ctx.lineTo(toX, toY);
+        ctx.stroke();
+    }
+
+    pruneBisections(invertedDependencyMap) {
+        const keys = invertedDependencyMap.keys();
+        for (const key of keys) {
+            const bisected = this.findBisected(key, invertedDependencyMap);
+            if(bisected.length > 0){
+                const existing = invertedDependencyMap.get(key);
+                invertedDependencyMap.set(key, existing.filter(dep => !bisected.includes(dep)))
+                //console.log(invertedDependencyMap.get(key), bisected, existing)
+            }
+        }
+    }
+
+    findBisected(key, invertedDependencyMap) {
+        const bisected = [];
+        const deps = invertedDependencyMap.get(key);
+        for (const dep of deps) {
+            if(this.isBisected(key, dep, invertedDependencyMap)){
+                bisected.push(dep);
+            }
+        }
+
+        return bisected;
+    }
+
+    isBisected(key, dep, invertedDependencyMap) {
+        const nonChildrenDescendents = this.allNonChildDescendents(key, invertedDependencyMap)
+
+        return nonChildrenDescendents.includes(dep);
+    }
+
+    allNonChildDescendents(key, invertedDependencyMap) {
+        const descendents = [];
+        for (const child of invertedDependencyMap.get(key)) {
+            descendents.push(...this.getDescendents(child, invertedDependencyMap))
+        }
+
+
+        return descendents;
+    }
+
+    getDescendents(key, invertedDependencyMap) {
+        const descendents = [];
+        const children = invertedDependencyMap.get(key);
+        if(children){
+            descendents.push(...children)
+            for (const child of children) {
+                descendents.push(...this.getDescendents(child, invertedDependencyMap))
+            }
+        }
+        return descendents;
     }
 }
