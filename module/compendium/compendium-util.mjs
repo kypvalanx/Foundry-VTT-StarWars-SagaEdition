@@ -202,29 +202,36 @@ async function getIndexEntryByName(item, lookups) {
  * @return {Map<string, SWSEItem>}
  */
 export async function getIndexEntriesByTypes(types = [], subtypes = []) {
-    const compendiums = getCompendium(types);
-    const entries = new Map()
-    if (!compendiums || compendiums.length === 0) {
-        return entries;
-    }
-
-    for (let compendium of compendiums) {
-        const ids = compendium.index
-            .filter(item => types.includes(item.type))
-            .map(item => item._id);
-
-        let items = await compendium.getDocuments({_id__in: ids});
-
-        if (subtypes.length > 0) {
-            items = items.filter(item => subtypes.includes(item.system.subtype));
+    async function fn() {
+        const compendiums = getCompendium(types);
+        const entries = new Map()
+        if (!compendiums || compendiums.length === 0) {
+            return entries;
         }
 
-        for (const item of items) {
-            entries.set(`${item.type.toUpperCase()}:${item.name}`, item);
+        for (let compendium of compendiums) {
+            const ids = compendium.index
+                .filter(item => types.includes(item.type))
+                .map(item => item._id);
+
+            let items = await compendium.getDocuments({_id__in: ids});
+
+            if (subtypes.length > 0) {
+                items = items.filter(item => subtypes.includes(item.system.subtype));
+            }
+
+            for (const item of items) {
+                entries.set(`${item.type.toUpperCase()}:${item.name}`, item);
+            }
         }
+        return entries
     }
-    return entries
+    if(this && this.getCached){
+        return this.getCached(`itemsByType:{types:${types},subtypes${subtypes}`, fn)
+    }
+    return await fn();
 }
+
 
 export function cleanItemName(feat) {
     return feat.replace("*", "").trim();
