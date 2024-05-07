@@ -665,9 +665,9 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     return damageRoll;
 }
 
-function resolveAttack(attack, targetActors) {
+async function resolveAttack(attack, targetActors) {
     let attackRoll = attack.attackRoll.roll;
-    let attackRollResult = attackRoll.roll({async: false});
+    let attackRollResult = await attackRoll.roll();
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
 
@@ -695,10 +695,9 @@ function resolveAttack(attack, targetActors) {
     })
     let damageRoll = attack.damageRoll.roll;
 
-    if(critical){
+    if (critical) {
         damageRoll = modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll);
     }
-
 
 
     let ignoreCritical = getInheritableAttribute({
@@ -711,7 +710,7 @@ function resolveAttack(attack, targetActors) {
         damageRoll = modifyRollForCriticalHit(attack, damageRoll);
     }
 
-    let damage = damageRoll.roll({async: false});
+    let damage = await damageRoll.roll();
     let targetIds = targetActors.map(target => target.id);
     return {
         attack: attackRollResult,
@@ -741,7 +740,7 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
     let rolls = [];
     let rollOrder = 1;
     for (let attack of attacks) {
-        let resolvedAttack = resolveAttack(attack, targetActors);
+        let resolvedAttack = await resolveAttack(attack, targetActors);
         resolvedAttack.attack.dice.forEach(die => die.options.rollOrder = rollOrder);
         rolls.push(resolvedAttack.attack)
         resolvedAttack.damage.dice.forEach(die => die.options.rollOrder = rollOrder);
@@ -762,7 +761,7 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
     if (attacks.length > 1) {
         flavor = "Full Attack " + flavor;
     }
-    const pool = PoolTerm.fromRolls(rolls);
+    const pool = foundry.dice.terms.PoolTerm.fromRolls(rolls);
     let roll = Roll.fromTerms([pool]);
 
     let flags = {};
@@ -775,7 +774,6 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
         user: game.user.id,
         speaker: speaker,
         flavor: flavor,
-        type: CONST.CHAT_MESSAGE_TYPES.ROLL,
         content,
         sound: CONFIG.sounds.dice,
         roll,
@@ -784,6 +782,7 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
 
     let cls = getDocumentClass("ChatMessage");
     let msg = new cls(messageData);
+
     if (rollMode) msg.applyRollMode(rollMode);
 
     return cls.create(msg, {rollMode});

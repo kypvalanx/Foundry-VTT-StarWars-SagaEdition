@@ -13,6 +13,14 @@ export const registerHandlebarsHelpers = function () {
         }
         return outStr;
     });
+
+    Handlebars.registerHelper('typeOf', function() {
+        const funcNameRegex = /class (\w+)/;
+        const string = arguments[0].constructor.toString();
+        const results = (funcNameRegex).exec(string);
+        return (results && results.length > 1) ? results[1] : "";
+    });
+
     Handlebars.registerHelper('arr', function() {
         // Covnert arguments to array, ommiting the last item, which is the options obect
         return Array.prototype.slice.call(arguments,0,-1);

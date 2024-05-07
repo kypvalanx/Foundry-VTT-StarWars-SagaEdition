@@ -1,6 +1,6 @@
 <!--roll-->
 {{#each roll.terms as |term i|}}
-    {{#if term.faces}}
+    {{#ifEquals (typeOf term) "die"}}
         <section class="tooltip-part">
             <div class="dice">
                 <header class="part-header flexrow">
@@ -14,5 +14,5 @@
                 </ol>
             </div>
         </section>
-    {{/if}}
+    {{/ifEquals}}
 {{/each}}

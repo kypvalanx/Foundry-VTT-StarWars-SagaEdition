@@ -51,33 +51,19 @@ Hooks.once('init', async function () {
         decimals: 2
     };
 
-    CONFIG.testMode=document.location.search ==="?test=true";
-
-
     // Define custom Entity classes
     CONFIG.SWSE = SWSE;
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.documentClass = SWSETokenDocument;
-    //CONFIG.Token.objectClass = SWSEToken;
 
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
-    //CONFIG.ActiveEffect.sheetClasses["Active Sheet Classes"] = SWSEActiveEffectConfig;
 
     DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
-    //DocumentSheetConfig.unregisterSheet(ActiveEffect, "core", ActiveEffectConfig)
 
     registerSystemSettings();
     registerHandlebarsHelpers();
     initializeStatusEffects(CONFIG)
-    if(game.settings.get("swse", "enableAdvancedCompendium")){
-        //CONFIG.ui.compendium = SWSECompendiumDirectory;
-    }
-
-    // Create compendium browsers
-    // game.swse.compendiums = {
-    //   spells: new CompendiumBrowser({ type: "spells" })
-    // };
 
 
     Hooks.on("renderCompendiumDirectory", (function (e, t) {
@@ -115,7 +101,6 @@ Hooks.once('init', async function () {
     Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
     Items.unregisterSheet("core", ItemSheet);
     Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
-    //ActiveEffects.reg
 
 
     await loadTemplates([
@@ -359,7 +344,7 @@ Hooks.on("ready", function () {
 
 Hooks.on("canvasInit", function () {
     canvas.grid.diagonalRule = game.settings.get("swse", "enable5105Measurement");
-    SquareGrid.prototype.measureDistances = measureDistances;
+    foundry.grid.SquareGrid.prototype.measureDistances = measureDistances;
 })
 
 
