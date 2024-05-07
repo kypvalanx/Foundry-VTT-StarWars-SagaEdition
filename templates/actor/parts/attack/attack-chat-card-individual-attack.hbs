@@ -12,9 +12,11 @@
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.attack critical=attack.critical fail=attack.fail}}
 <div>Damage:</div>
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.damage damageType=attack.damageType}}
-{{#each attack.notes as |note i|}}
-    <div>{{note}}</div>
-{{/each}}
+<div class="dice-roll">
+    {{#each attack.notes as |note i|}}
+        <div class="dice-formula">{{note.value}}</div>
+    {{/each}}
+</div>
 <br>
 <div class="buttons flex flex-row">
     <button data-action="apply-attack" data-type="damage" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}"><i class="fas fa-explosion"></i><br><span class="button-text">Damage</span></button>
