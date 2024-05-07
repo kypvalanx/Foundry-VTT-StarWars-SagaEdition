@@ -1,5 +1,6 @@
 import {getIndexEntriesByTypes} from "./compendium-util.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
+import {SimpleCache} from "../common/simple-cache.mjs";
 
 export class CompendiumWeb extends Application {
 
@@ -22,6 +23,7 @@ export class CompendiumWeb extends Application {
     constructor(...args) {
         super(...args);
 
+        this.cache = new SimpleCache()
         Hooks.on("renderApplication", async (event, target) => {
             if (event.appId !== this.appId) { //is this really the best way to do this?  weird that applications aren't more contained
                 return;
@@ -66,7 +68,7 @@ export class CompendiumWeb extends Application {
                 }
             },
             options: async (types) => {
-                return [...await getIndexEntriesByTypes(types)].flatMap(([key, item]) => item.system.possibleProviders).distinct().filter(i => !!i).map(book => {
+                return [...await getIndexEntriesByTypes.call(this, types)].flatMap(([key, item]) => item.system.possibleProviders).distinct().filter(i => !!i).map(book => {
                     return {value: book, display: book}
                 });
             }
@@ -87,7 +89,7 @@ export class CompendiumWeb extends Application {
             },
             options: async (types) => {
 
-                return [...await getIndexEntriesByTypes(types)].flatMap(([key, item]) => CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"])).map(p => p.requirement).distinct().map(s => {
+                return [...await getIndexEntriesByTypes.call(this, types)].flatMap(([key, item]) => CompendiumWeb.getPrerequisitesByType(item.system.prerequisite, ["SPECIES"])).map(p => p.requirement).distinct().map(s => {
                     return {display: s, value: s}
                 })
 
@@ -145,7 +147,7 @@ export class CompendiumWeb extends Application {
                 }
             },
             options: async (types) => {
-                return [...await getIndexEntriesByTypes(types)].map(([key, item]) => item.system.source).distinct().filter(i => !!i).map(book => {
+                return [...await getIndexEntriesByTypes.call(this, types)].map(([key, item]) => item.system.source).distinct().filter(i => !!i).map(book => {
                     return {
                         value: book,
                         display: book.replace("Star Wars Saga Edition", "SWSE").replace("Clone Wars Saga Edition", "CWSE")
@@ -180,8 +182,15 @@ export class CompendiumWeb extends Application {
         }
     ]
 
+    getCached(key, fn) {
+        if (!this.cache) {
+            return fn();
+        }
+        return this.cache.getCached(key, fn)
+    }
+
     async renderWeb(e, target, types) {
-        let items = await getIndexEntriesByTypes(types)
+        let items = await getIndexEntriesByTypes.call(this, types)
 
         const dependencyMap = new Map()
         const invertedDependencyMap = new Map();
