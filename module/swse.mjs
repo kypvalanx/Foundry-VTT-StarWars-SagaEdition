@@ -34,7 +34,7 @@ Hooks.once('init', async function () {
         rollVariable,
         rollItem,
         makeAttack,
-        generateCompendiums, deleteEmptyCompendiums, clearEmptyCompendiums,
+        generateCompendiums, deleteEmptyCompendiums, clearEmptyCompendiums, deleteActorsByName,
         refreshActors,
         applications: {
             SWSECompendiumBrowser
@@ -161,6 +161,10 @@ Hooks.once('init', async function () {
         'systems/swse/templates/common/select.hbs']);
 
 });
+
+function deleteActorsByName(name){
+    game.actors.filter(actor => actor.name === name).forEach(actor => actor.delete())
+}
 
 function getHitOptionHTML(target, attack, tokenId) {
     let hit = target.system.defense.reflex.total <= attack;
