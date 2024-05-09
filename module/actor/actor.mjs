@@ -1709,6 +1709,14 @@ export class SWSEActor extends Actor {
             .includes(`${item.finalName}:${item.type}`);
     }
 
+    hasAnyOf(items){
+        for(const item of items){
+            if(this.hasItem(item)){
+                return true;
+            }
+        }
+        return false;
+    }
 
 
     /**

@@ -227,7 +227,7 @@ export class AttackDelegate {
 function multiplyNumericTerms(roll, multiplier) {
     let previous;
     for (let term of roll.terms) {
-        if (term instanceof NumericTerm) {
+        if (term instanceof foundry.dice.terms.NumericTerm) {
             if (previous && previous.operator !== "*" && previous.operator !== "/") {
                 term.number = term.number * multiplier;
             }
@@ -242,9 +242,9 @@ function addMultiplierToDice(roll, multiplier) {
 
     for (let term of roll.terms) {
         terms.push(term);
-        if (term instanceof DiceTerm) {
-            terms.push(new OperatorTerm({operator: '*'}));
-            terms.push(new NumericTerm({number: `${multiplier}`}))
+        if (term instanceof foundry.dice.terms.DiceTerm) {
+            terms.push(new foundry.dice.terms.OperatorTerm({operator: '*'}));
+            terms.push(new foundry.dice.terms.NumericTerm({number: `${multiplier}`}))
         }
     }
 
@@ -592,14 +592,14 @@ export function crunchyCrit(roll) {
 
     for (let term of roll.terms) {
         terms.push(term);
-        if (term instanceof DiceTerm) {
+        if (term instanceof foundry.dice.terms.DiceTerm) {
             max += term.faces * term.number
-        } else if (term instanceof NumericTerm){
+        } else if (term instanceof foundry.dice.terms.NumericTerm){
             max += term.number
         }
     }
-    terms.push(new OperatorTerm({operator:"+"}))
-    terms.push(new NumericTerm({number: max}))
+    terms.push(new foundry.dice.terms.OperatorTerm({operator:"+"}))
+    terms.push(new foundry.dice.terms.NumericTerm({number: max}))
 
     return Roll.fromTerms(terms
         .filter(term => !!term))
@@ -609,8 +609,8 @@ export function maxRollCrit(roll) {
     const terms = [];
 
     for(const term of roll.terms){
-        if(term instanceof DiceTerm){
-            terms.push(new NumericTerm({number: term.number*term.faces, options: {flavor: term.expression}}))
+        if(term instanceof foundry.dice.terms.DiceTerm){
+            terms.push(new foundry.dice.terms.NumericTerm({number: term.number*term.faces, options: {flavor: term.expression}}))
         } else {
             terms.push(term)
         }

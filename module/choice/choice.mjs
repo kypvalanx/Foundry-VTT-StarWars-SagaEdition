@@ -77,6 +77,11 @@ export async function activateChoices(item, context) {
         let content;
         let options;
         if ('INTEGER' === choice.type) {
+            let preprogrammedAnswer = !!context.itemAnswers && context.itemAnswers.length === 1 ? context.itemAnswers[0]: undefined;
+            if(preprogrammedAnswer){
+                items.push(...await resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
+                continue;
+            }
             greetingString = choice.description;
             content = `<p>${greetingString}</p>`;
             content += `<input class="choice" type="number" data-option-key="">`

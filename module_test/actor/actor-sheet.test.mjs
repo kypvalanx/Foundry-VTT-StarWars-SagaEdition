@@ -4,7 +4,7 @@ import {safeInsert} from "../../module/common/util.mjs";
 import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
 
-async function withTestActor(param) {
+async function withTestActor(param, options= {}) {
     const actor = await SWSEActor.create({
         name: "New Test Actor DELETE ME",
         type: "character",
@@ -15,7 +15,24 @@ async function withTestActor(param) {
     } finally {
         await actor.delete();
         game.actors.forEach(a => {if(a.name === "New Test Actor DELETE ME"){
-          a.delete()
+            a.delete()
+        }})
+    }
+}
+
+
+async function withTestVehicle(param, options= {}) {
+    const actor = await SWSEActor.create({
+        name: "New Test Actor DELETE ME",
+        type: "character",
+        img: "artwork/character-profile.jpg"
+    })
+    try {
+        await param(actor);
+    } finally {
+        await actor.delete();
+        game.actors.forEach(a => {if(a.name === "New Test Actor DELETE ME"){
+            a.delete()
         }})
     }
 }
@@ -190,8 +207,6 @@ export async function actorSheetTests(quench) {
                             });
                         });
 
-
-
                         it('adding a lightsaber with a blue Ilum Crystal should reflect that in the ignite effect', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
@@ -221,6 +236,16 @@ export async function actorSheetTests(quench) {
 
                             });
                         });
+
+                        it('should accept a first level of a heroic class and should grant associated feats and traits', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                hasItems(assert, actor.items, ["Jedi", "Bonus Feat (Force Sensitivity)", "Bonus Feat (Weapon Proficiency (Lightsabers))", "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)"])
+                                assert.lengthOf(actor.items, 7)
+                            });
+                        });
                     })
                 })
             })
@@ -229,9 +254,9 @@ export async function actorSheetTests(quench) {
                 describe(".renderWeaponBlockFormulaHTML", () => {
                     it("should correctly print single die rolls", () => {
                         const terms = [];
-                        terms.push(new Die({number: 3, faces: 8}))
-                        terms.push(new OperatorTerm({operator: "+"}))
-                        terms.push(new NumericTerm({number: 9}))
+                        terms.push(new foundry.dice.terms.Die({number: 3, faces: 8}))
+                        terms.push(new foundry.dice.terms.OperatorTerm({operator: "+"}))
+                        terms.push(new foundry.dice.terms.NumericTerm({number: 9}))
 
                         const roll = Roll.fromTerms(terms);
 
@@ -240,15 +265,15 @@ export async function actorSheetTests(quench) {
 
                     it("should correctly print single die rolls", () => {
                         const terms = [];
-                        terms.push(new Die({number: 3, faces: 8}))
-                        terms.push(new OperatorTerm({operator: "+"}))
-                        terms.push(new NumericTerm({number: 9}))
+                        terms.push(new foundry.dice.terms.Die({number: 3, faces: 8}))
+                        terms.push(new foundry.dice.terms.OperatorTerm({operator: "+"}))
+                        terms.push(new foundry.dice.terms.NumericTerm({number: 9}))
 
                         const roll = Roll.fromTerms(terms);
 
                         const additionalTerms = [];
-                        additionalTerms.push(new Die({number: 2, faces: 8}))
-                        additionalTerms.push(new Die({number: 1, faces: 4}))
+                        additionalTerms.push(new foundry.dice.terms.Die({number: 2, faces: 8}))
+                        additionalTerms.push(new foundry.dice.terms.Die({number: 1, faces: 4}))
 
 
                         assert.equal( new SWSERollWrapper(roll, additionalTerms).renderWeaponBlockFormulaHTML, '<span>3d8</span><span>/</span><span>2d8</span><span>/</span><span>1d4</span><span> + </span><span>9</span>')

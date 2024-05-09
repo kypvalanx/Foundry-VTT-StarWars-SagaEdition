@@ -30,7 +30,7 @@ function assertEquippedItems(assert, actor, expectedItems) {
 }
 
 export async function generationTests(quench) {
-    console.log("GENERATION TESTS")
+
     quench.registerBatch("compendium.generation.spotChecks",
         (context)=>{
             const { describe, it, assert, expect, should } = context;
@@ -66,33 +66,81 @@ export async function generationTests(quench) {
                 //     testLeiaOrganaSoloExChiefOfState(context);
                 // });
 
-                it("Generate CL20 Luke Skywalker, Grand Master", ()=>{
-                    testLukeSkywalkerjedimaster(context);
-                });
 
+                it("Generate Rancor Correctly", async ()=>{
+                    let actorData = await getActorRawData("systems/swse/module_test/resources/rancor.json", "Rancor")
 
-                it("Generate Mandalorian Trooper", () => {
-                    return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
+                    let actor = await processActor(actorData);
 
-                        const { describe, it, assert, expect, should } = context
-                        assert.equal(actor.name, "Mandalorian Trooper")
+                    assert.equal(actor.name, "Rancor")
 
-                        assert.equal(actor.system.health.value, 40)
-                        assert.equal(actor.system.health.max, 40)
-                        assert.equal(actor.system.health.override, 40)
-                        assertAbilityScores(assert, actor, 12, 14, 12, 8, 10, 9);
-                        assertEquippedItems(assert, actor, ["Comlink", "Blaster Rifle", "Vibroblade", "Neo-Crusader Light Armor"]);
+                    assert.equal(actor.system.health.value, 138, "health")
+                    assert.equal(actor.system.health.max, 138)
+                    assert.equal(actor.system.health.override, 138)
 
+                    assert.equal(actor.system.defense.fortitude.total, 16)
+                    assert.equal(actor.system.defense.reflex.total, 17, "reflex")
+                    assert.equal(actor.system.defense.will.total, 8)
+                    assert.equal(actor.system.defense.damageThreshold.total, 26, "damage threshold")
 
-                        context.assert.equal(actor.warnings.length, 0)
-                        if (actor.warnings.length > 0) {
-                            console.warn(actor.warnings)
-                        }
-                    })
-                });
-            })
+                    assert.equal(actor.system.attributeGenerationType, "Manual")
+                    assert.equal(actor.system.attributes.str.total, 26)
+                    assert.equal(actor.system.attributes.dex.total, 9)
+                    assert.equal(actor.system.attributes.con.total, 23)
+                    assert.equal(actor.system.attributes.int.total, 2)
+                    assert.equal(actor.system.attributes.wis.total, 7)
+                    assert.equal(actor.system.attributes.cha.total, 15)
+                })
+
+                // it("Generate CL20 Luke Skywalker, Grand Master", async ()=>{
+                //         let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-20.json", "Luke Skywalker, Grand Master")
+                //
+                //     let actor = await processActor(actorData);
+                //
+                //         context.assert(actor.name === "Veteran Imperial Officer")
+                //
+                //         context.assert(actor.system.health.value === 50)
+                //         context.assert(actor.system.health.max === 50)
+                //         context.assert(actor.system.health.override === 50)
+                //
+                //         context.assert(actor.system.attributeGenerationType === "Manual")
+                //         context.assert(actor.system.attributes.str.total === 10)
+                //         context.assert(actor.system.attributes.dex.total === 8)
+                //         context.assert(actor.system.attributes.con.total === 10)
+                //         context.assert(actor.system.attributes.int.total === 14)
+                //         context.assert(actor.system.attributes.wis.total === 13)
+                //         context.assert(actor.system.attributes.cha.total === 14)
+                //
+                //         context.assert(actor.warnings.length === 0)
+                //         if (actor.warnings.length > 0) {
+                //             console.warn(actor.warnings)
+                //         }
+                //
+                //         actor.delete()
+                // });
+                //
+                // it("Generate Mandalorian Trooper", () => {
+                //     return verifyActorImport("systems\\swse\\raw_export\\Units-CL-3.json", "Mandalorian Trooper", context, (context, actor) => {
+                //
+                //         const { describe, it, assert, expect, should } = context
+                //         assert.equal(actor.name, "Mandalorian Trooper")
+                //
+                //         assert.equal(actor.system.health.value, 40)
+                //         assert.equal(actor.system.health.max, 40)
+                //         assert.equal(actor.system.health.override, 40)
+                //         assertAbilityScores(assert, actor, 12, 14, 12, 8, 10, 9);
+                //         assertEquippedItems(assert, actor, ["Comlink", "Blaster Rifle", "Vibroblade", "Neo-Crusader Light Armor"]);
+                //
+                //
+                //         context.assert.equal(actor.warnings.length, 0)
+                //         if (actor.warnings.length > 0) {
+                //             console.warn(actor.warnings)
+                //         }
+                //     })
+                // });
+            });
         },
-        {displayName: "GENERATION: ACTOR SPOT CHECKS"})
+        {displayName: "GENERATION: ACTOR SPOT CHECKS"});
 }
 
 async function getActorRawData(file, unitName) {
@@ -329,33 +377,6 @@ async function testLeiaOrganaSoloExChiefOfState(context) {
 
     actor.delete()
 }
-async function testLukeSkywalkerjedimaster(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-20.json", "Luke Skywalker, Grand Master")
-
-    let actor = await processActor(actorData);
-
-    context.assert(actor.name === "Veteran Imperial Officer")
-
-    context.assert(actor.system.health.value === 50)
-    context.assert(actor.system.health.max === 50)
-    context.assert(actor.system.health.override === 50)
-
-    context.assert(actor.system.attributeGenerationType === "Manual")
-    context.assert(actor.system.attributes.str.total === 10)
-    context.assert(actor.system.attributes.dex.total === 8)
-    context.assert(actor.system.attributes.con.total === 10)
-    context.assert(actor.system.attributes.int.total === 14)
-    context.assert(actor.system.attributes.wis.total === 13)
-    context.assert(actor.system.attributes.cha.total === 14)
-
-    context.assert(actor.warnings.length === 0)
-    if(actor.warnings.length > 0){
-        console.warn(actor.warnings)
-    }
-
-    actor.delete()
-}
-
 async function validate(file, unitName,context, validationFunction) {
     let actorData = await getActorRawData(file, unitName)
 

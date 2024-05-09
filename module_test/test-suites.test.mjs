@@ -6,7 +6,7 @@ import {compendiumUtilTests} from "./compendium/compendium-utils.test.mjs";
 
 export function registerTestSuites(quench) {
     for(const batchFunction of [generationTests]){
-        //batchFunction(quench);
+        batchFunction(quench);
     }
     for(const batchFunction of [actorSheetTests]){
         batchFunction(quench);
