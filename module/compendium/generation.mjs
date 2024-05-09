@@ -8,7 +8,8 @@ export async function processActor(actorData) {
     }
     let actor = actors[0];
     let choiceAnswers = [];
-    choiceAnswers.push(actor.system.size);
+    const size = actor.system.size;
+    choiceAnswers.push(size);
     let providedItems = actor.system.providedItems;
     delete actor.system.providedItems;
     actor.prepareData();
@@ -19,8 +20,33 @@ export async function processActor(actorData) {
         isUpload: true,
         suppressWarnings: true
     }, providedItems, null);
+
     actor.skipPrepare = false;
     actor.prepareData();
+
+
+
+    if(actor.hasAnyOf([
+        {finalName: "Colossal (Cruiser)", type: "trait"},
+        {finalName: "Colossal (Station)", type: "trait"},
+        {finalName: "Colossal", type: "trait"},
+        {finalName: "Gargantuan", type: "trait"},
+        {finalName: "Huge", type: "trait"},
+        {finalName: "Large", type: "trait"},
+        {finalName: "Medium", type: "trait"},
+        {finalName: "Small", type: "trait"},
+        {finalName: "Tiny", type: "trait"},
+        {finalName: "Diminutive", type: "trait"},
+        {finalName: "Fine", type: "trait"}]) !== size){
+
+        await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
+    }
+
+    if(actor.isBeast){
+        const proposedArmor = actor.system.defense.reflex.expected - actor.system.defense.reflex.total
+
+        await actor.sheet._onDropItem(null, {name: "Natural Armor", type: "trait", answers:[proposedArmor]})
+    }
     return actor;
 }
 

@@ -782,7 +782,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _onDropItem(ev, data) {
-        ev.preventDefault();
+        if(ev) ev.preventDefault();
         if (!this.actor.isOwner) return false;
         //the dropped item has an owner
         if (data.actorId) {

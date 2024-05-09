@@ -146,7 +146,7 @@ export const registerHandlebarsHelpers = function () {
 
         let response = '';
 
-        for(let value of values){
+        for(let value of values || []){
             if(Array.isArray(value)){
                 response += `<option value="${value[0]}" ${value[0] === selected ? 'selected' : ""}>${value[1]}</option>`;
             } else {

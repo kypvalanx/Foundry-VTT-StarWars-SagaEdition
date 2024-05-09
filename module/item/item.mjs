@@ -1545,7 +1545,7 @@ export class SWSEItem extends Item {
         let activeEffect = DEFAULT_MODIFICATION_EFFECT;
         activeEffect.name = item.name;
         activeEffect.changes = changes;
-        activeEffect.icon = item.img;
+        activeEffect.img = item.img;
         activeEffect.origin = item.uuid;
         activeEffect.flags.swse.description = item.system.description;
 
@@ -1558,7 +1558,7 @@ export class SWSEItem extends Item {
                 activeEffect.name = effect.name;
                 activeEffect.disabled = effect.disabled;
                 activeEffect.changes = effect.changes;
-                activeEffect.icon = effect.icon;
+                activeEffect.img = effect.img;
                 activeEffect.origin = item.uuid;
                 activeEffect.origin = createdEffect[0].id
                 activeEffect.flags.swse.providedBy = createdEffect[0].id

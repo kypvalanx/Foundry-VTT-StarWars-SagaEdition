@@ -47,11 +47,11 @@ export function getCompendium(item) {
         case 'talent':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.talents"));
         case 'vehicletemplate':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle templates"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-templates"));
         case 'vehiclebasetype':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle base types"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-base-types"));
         case 'vehiclesystem':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle systems"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-systems"));
         case 'template':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.templates"));
         case 'affiliation':
@@ -59,15 +59,15 @@ export function getCompendium(item) {
         case 'class':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.classes"));
         case 'forceregimen':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force regimens"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force-regimens"));
         case 'forcepower':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force powers"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force-powers"));
         case 'forcesecret':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force secrets"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force-secrets"));
         case 'forcetechnique':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force techniques"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.force-techniques"));
         case 'beasttype':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast components"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast-components"));
         case 'background':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.background"));
         case 'destiny':
@@ -79,7 +79,7 @@ export function getCompendium(item) {
         case 'armor':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.armor"));
         case 'beastattack':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast components"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.beast-components"));
         case 'upgrade':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.upgrades"));
     }

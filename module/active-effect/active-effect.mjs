@@ -158,12 +158,12 @@ export class SWSEActiveEffect extends ActiveEffect {
         return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
-    static async _onCreateDocuments(documents, context) {
-        super._onCreateDocuments(documents, context).then(
+    static async _onCreateOperation(documents, context) {
+        super._onCreateOperation(documents, context).then(
             game.items.directory.render())
     }
     static async _onDeleteDocuments(documents, context) {
-        super._onCreateDocuments(documents, context).then(
+        super._onDeleteDocuments(documents, context).then(
             game.items.directory.render())
     }
 
