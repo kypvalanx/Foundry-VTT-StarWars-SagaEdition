@@ -139,28 +139,7 @@ export class SWSEActor extends Actor {
         system.gravity = system.gravity || "Normal"
 
 
-        if (this.id) {
-            if (this.type === "npc") {
-                this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
-                return;
-            } else if (this.type === "npc-vehicle") {
-                this.safeUpdate({
-                    "type": "vehicle",
-                    "data.isNPC": true
-                }, {updateChanges: false});
-                return;
-            } else if (system.isNPC && this.prototypeToken.actorLink) {
-                let children = canvas.tokens?.objects?.children || [];
-                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
-                this.setActorLinkOnActorAndTokens(documents, false);
-                return;
-            } else if (!system.isNPC && !this.prototypeToken.actorLink) {
-                let children = canvas.tokens?.objects?.children || [];
-                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
-                this.setActorLinkOnActorAndTokens(documents, true);
-                return;
-            }
-        }
+
 
         system.condition = 0;
         let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
@@ -202,6 +181,26 @@ export class SWSEActor extends Actor {
             if (oldLink !== JSON.stringify(system)) {
                 let actorLinks = linkedActor.actorLinks;
                 linkedActor.safeUpdate({"system.actorLinks": actorLinks});
+            }
+        }
+
+        if (this.id) {
+            if (this.type === "npc") {
+                this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
+            } else if (this.type === "npc-vehicle") {
+                this.safeUpdate({
+                    "type": "vehicle",
+                    "data.isNPC": true
+                }, {updateChanges: false});
+
+            } else if (system.isNPC && this.prototypeToken.actorLink) {
+                let children = canvas.tokens?.objects?.children || [];
+                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                this.setActorLinkOnActorAndTokens(documents, false);
+            } else if (!system.isNPC && !this.prototypeToken.actorLink) {
+                let children = canvas.tokens?.objects?.children || [];
+                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                this.setActorLinkOnActorAndTokens(documents, true);
             }
         }
     }
@@ -1279,7 +1278,7 @@ export class SWSEActor extends Actor {
     async setAttributes(attributes) {
         let update = {};
         for (let [key, ability] of Object.entries(attributes)) {
-            update[`data.attributes.${key}.base`] = ability;
+            update[`system.attributes.${key}.base`] = ability;
         }
         await this.safeUpdate(update);
     }

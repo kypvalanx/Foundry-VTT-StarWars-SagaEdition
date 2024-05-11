@@ -17,5 +17,6 @@
   "EFFECT.ModeDescription": "Mode informs the system how the change will be resolved.",
   "SWSE.FEAT_WEB": "Select feats based on availability",
   "SWSE.TALENT_WEB": "Select Talents based on availability",
-  "SWSE.TALENT_AND_FEAT_WEB": "Select Feats and Talents based on availability (this is processing a lot of data and may take time)"
+  "SWSE.TALENT_AND_FEAT_WEB": "Select Feats and Talents based on availability (this is processing a lot of data and may take time)",
+  "TYPES.Actor.character": "character"
 }

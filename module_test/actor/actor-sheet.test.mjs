@@ -121,6 +121,8 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Medium", type: "trait"})
                                 hasItems(assert, actor.items, ["Beast", "Claw", "Medium"])
                                 assert.lengthOf(actor.items, 3)
+
+                                actor.prepareData()
                                 const firstAttack = actor.attack.attacks[0]
 
                                 const renderFormulaHTML = firstAttack.damageRoll.renderFormulaHTML;
@@ -137,7 +139,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class",
                                     answers: ["Force Sensitivity"]})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class", answers: ["Armor Proficiency (Light)"]})
-                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
+                                 hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
                                     "Bonus Feat (Weapon Proficiency (Pistols))",
                                     "Bonus Feat (Weapon Proficiency (Simple Weapons))",
                                     "Jedi",
@@ -146,7 +148,7 @@ export async function actorSheetTests(quench) {
                                     "Soldier",
                                     "Weapon Proficiency (Pistols)",
                                     "Weapon Proficiency (Simple Weapons)"])
-                                assert.lengthOf(actor.items, 9)
+                                 assert.lengthOf(actor.items, 9)
                                 const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
                                 assert.equal(availableTrainedSkills, 8);
                             });
