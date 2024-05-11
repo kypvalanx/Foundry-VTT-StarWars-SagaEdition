@@ -109,11 +109,10 @@ export async function activateChoices(item, context) {
             if(preprogrammedAnswer){
                 items.push(...await resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
                 continue;
-            }else{
-                console.log(choice.options, context, item);
             }
 
             if(context.isUpload){
+                console.log(choice.options, context, item);
                 console.info("Failed to resolve choices: ",item, context)
                 continue;
             }
