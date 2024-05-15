@@ -1906,19 +1906,19 @@ export class SWSEActor extends Actor {
     }
 
 
-    rollVariable(variable) {
+    async rollVariable(variable) {
         let rollStr = this.resolvedVariables.get(variable);
         let label = this.resolvedLabels.get(variable);
         let notes = this.resolvedNotes.get(variable) || [];
         let flavor = label ? `${this.name} rolls for ${label}!` : '';
 
         if (variable.startsWith('@Initiative')) {
-            this.rollInitiative({createCombatants: true, rerollInitiative: true, initiativeOptions: {formula: rollStr}})
+            await this.rollInitiative({createCombatants: true, rerollInitiative: true, initiativeOptions: {formula: rollStr}})
             return;
         }
 
         let roll = new Roll(rollStr);
-        roll.roll({async: false})
+        await roll.roll({async: false})
 
         let tooltipSections = this.getTooltipSections(roll)
 
