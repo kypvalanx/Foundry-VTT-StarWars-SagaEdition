@@ -583,7 +583,7 @@ export const getActorFromId = function (id) {
     return actor;
 };
 
-function rollVariable(actorId, variable) {
+async function rollVariable(actorId, variable) {
     const actor = getActorFromId(actorId);
     if (!actor) {
         const msg = `${actorId} not found`;
@@ -591,7 +591,7 @@ function rollVariable(actorId, variable) {
         return ui.notifications.error(msg);
     }
 
-    return actor.rollVariable(variable);
+    return await actor.rollVariable(variable);
 }
 
 Hooks.on('renderChatMessage', (chatItem, html) => {

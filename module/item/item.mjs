@@ -523,7 +523,7 @@ export class SWSEItem extends Item {
     }
 
     static getItemSize(swseItem) {
-        let size = swseItem.system?.size || swseItem.data?.size || swseItem.data?.data?.size
+        let size = getInheritableAttribute({entity: swseItem, attributeKey: "size", reduce: "FIRST"}) || swseItem.system?.size //|| swseItem.data?.size || swseItem.data?.data?.size
         if (SWSEItem.getItemStripping(swseItem, "makeColossal")?.value) {
             size = changeSize(size, 1)
         }
