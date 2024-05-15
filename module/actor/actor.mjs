@@ -1918,7 +1918,7 @@ export class SWSEActor extends Actor {
         }
 
         let roll = new Roll(rollStr);
-        await roll.roll({async: false})
+        await roll.roll()
 
         let tooltipSections = this.getTooltipSections(roll)
 
@@ -1935,7 +1935,7 @@ export class SWSEActor extends Actor {
     </div>`
 
 
-        let speaker = ChatMessage.getSpeaker({actor: this.actor});
+        let speaker = ChatMessage.getSpeaker();
         let messageData = {
             user: game.user.id,
             speaker,
@@ -2008,7 +2008,7 @@ export class SWSEActor extends Actor {
     }
 
     async sendRollToChat(template, formula, modifications, notes, name, actor) {
-        let roll = new Roll(formula).roll({async: false});
+        let roll = await new Roll(formula).roll();
         roll.toMessage({
             speaker: ChatMessage.getSpeaker({actor}),
             flavor: name

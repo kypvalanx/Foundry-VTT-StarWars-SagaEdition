@@ -940,7 +940,7 @@ export class SWSEActorSheet extends ActorSheet {
      * @param {Event} event   The originating click event
      * @private
      */
-    _onRoll(event) {
+    async _onRoll(event) {
         event.preventDefault();
         const element = event.currentTarget;
 
@@ -960,7 +960,7 @@ export class SWSEActorSheet extends ActorSheet {
         for (let rollStr of rolls) {
             let roll = new Roll(rollStr, this.actor.system);
             let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
-            roll = roll.roll({async: false});
+            roll = await roll.roll();
             let item = dataset.item;
             let level = dataset.level
             const attributeKey = dataset.itemAttribute;
@@ -969,7 +969,7 @@ export class SWSEActorSheet extends ActorSheet {
 
                     const context = element.dataset.context
                     this.updateItemEffectAttribute(roll.total, item, parseInt(level), attributeKey, context);
-                } else if (item){
+                } else if (item) {
                     let updateTarget = this.actor.items.get(item);
                     updateTarget.setAttribute(attributeKey, roll.total);
                 }
@@ -1197,8 +1197,8 @@ export class SWSEActorSheet extends ActorSheet {
                     html.find("#reRoll").each((i, button) => {
                         button.addEventListener("click", () => {
                             let rollFormula = CONFIG.SWSE.Abilities.defaultAbilityRoll;
-                            html.find(".movable").each((i, item) => {
-                                let roll = new Roll(rollFormula).roll({async: false});
+                            html.find(".movable").each(async (i, item) => {
+                                let roll = await new Roll(rollFormula).roll();
                                 let title = "";
                                 for (let term of roll.terms) {
                                     for (let result of term.results) {
