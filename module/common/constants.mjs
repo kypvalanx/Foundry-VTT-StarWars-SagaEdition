@@ -7,6 +7,184 @@ export const skills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather 
     "Knowledge (Social Sciences)", "Knowledge (Tactics)", "Knowledge (Technology)", "Mechanics", "Perception",
     "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force"];
 
+export const skillDetails = {
+    "Acrobatics": {
+        value: 0,
+        attribute: "dex",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Acrobatics"
+    },
+    "Climb": {
+        value: 0,
+        attribute: "str",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Climb"
+    },
+    "Deception": {
+        value: 0,
+        attribute: "cha",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Deception"
+    },
+    "Endurance": {
+        value: 0,
+        attribute: "con",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Endurance"
+    },
+    "Gather Information": {
+        value: 0,
+        attribute: "cha",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Gather_Information"
+    },
+    "Initiative": {
+        value: 0,
+        attribute: "dex",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Initiative"
+    },
+    "Jump": {
+        value: 0,
+        attribute: "str",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Jump"
+    },
+    "Knowledge (Bureaucracy)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Galactic Lore)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Life Sciences)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Physical Sciences)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Social Sciences)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Tactics)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Knowledge (Technology)": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Knowledge"
+    },
+    "Mechanics": {
+        value: 0,
+        attribute: "int",
+        uut: false,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Mechanics"
+    },
+    "Perception": {
+        value: 0,
+        attribute: "wis",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Perception"
+    },
+    "Persuasion": {
+        value: 0,
+        attribute: "cha",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Persuasion"
+    },
+    "Pilot": {
+        value: 0,
+        attribute: "dex",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Pilot"
+    },
+    "Ride": {
+        value: 0,
+        attribute: "dex",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Ride"
+    },
+    "Stealth": {
+        value: 0,
+        attribute: "dex",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Stealth"
+    },
+    "Survival": {
+        value: 0,
+        attribute: "wis",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Survival"
+    },
+    "Swim": {
+        value: 0,
+        attribute: "str",
+        uut: true,
+        acp: true,
+        link: "https://swse.fandom.com/wiki/Swim"
+    },
+    "Treat Injury": {
+        value: 0,
+        attribute: "wis",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Treat_Injury"
+    },
+    "Use Computer": {
+        value: 0,
+        attribute: "int",
+        uut: true,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Use_Computer"
+    },
+    "Use the Force": {
+        value: 0,
+        attribute: "cha",
+        uut: false,
+        acp: false,
+        link: "https://swse.fandom.com/wiki/Use_the_Force"
+    }
+}
+
 export const HEAVY_LOAD_SKILLS = ["acrobatics",
     "climb",
     "endurance",

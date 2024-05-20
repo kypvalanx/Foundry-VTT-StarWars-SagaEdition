@@ -1162,8 +1162,8 @@ export class SWSEItem extends Item {
         }
 
 
-        await this.safeUpdate({"data.items": [...foundIds]});
-        await item.safeUpdate({"data.hasItemOwner": true});
+        await this.safeUpdate({"system.items": [...foundIds]});
+        await item.safeUpdate({"system.hasItemOwner": true});
     }
 
     async revokeOwnership(item) {
@@ -1171,8 +1171,8 @@ export class SWSEItem extends Item {
             return;
         }
         let items = this.items?.filter(i => i._id !== item.data._id);
-        await this.safeUpdate({"data.items": items});
-        await item.safeUpdate({"data.hasItemOwner": false});
+        await this.safeUpdate({"system.items": items});
+        await item.safeUpdate({"system.hasItemOwner": false});
     }
 
     canReduceRange() {
@@ -1234,7 +1234,7 @@ export class SWSEItem extends Item {
         let current = this.system.quantity;
 
         let quantity = current + 1;
-        this.safeUpdate({"data.quantity": quantity});
+        this.safeUpdate({"system.quantity": quantity});
     }
 
     decreaseQuantity() {
@@ -1242,7 +1242,7 @@ export class SWSEItem extends Item {
         let current = this.system.quantity;
 
         let quantity = Math.max(0, current - 1);
-        this.safeUpdate({"data.quantity": quantity});
+        this.safeUpdate({"system.quantity": quantity});
     }
 
     toggleUse(key, value) {

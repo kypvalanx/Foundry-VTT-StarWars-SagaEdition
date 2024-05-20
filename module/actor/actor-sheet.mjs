@@ -355,7 +355,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onGravityChange(event) {
         event.stopPropagation();
-        await this.object.safeUpdate({"data.gravity": event.currentTarget.value})
+        await this.object.safeUpdate({"system.gravity": event.currentTarget.value})
     }
 
     async _onShield(event) {
@@ -616,8 +616,8 @@ export class SWSEActorSheet extends ActorSheet {
 
     _updateObject(event, formData) {
         // Translate CR
-        const cr = formData["data.details.cr.base"];
-        if (typeof cr === "string") formData["data.details.cr.base"] = CR.fromString(cr);
+        const cr = formData["system.details.cr.base"];
+        if (typeof cr === "string") formData["system.details.cr.base"] = CR.fromString(cr);
 
         // Update from elements with 'data-name'
         {
