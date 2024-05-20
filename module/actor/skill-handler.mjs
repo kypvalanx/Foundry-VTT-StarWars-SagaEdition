@@ -29,7 +29,6 @@ export function generateSkills(actor) {
     let halfCharacterLevel
     let halfCharacterLevelRoundedUp
     let skillFocus
-    let automaticTrainedSkill;
     let heavyLoadAffected = [];
 
 
@@ -63,11 +62,7 @@ export function generateSkills(actor) {
             entity: actor,
             attributeKey: "skillReRoll"
         });
-        automaticTrainedSkill = getInheritableAttribute({
-            entity: actor,
-            attributeKey: "automaticTrainedSkill",
-            reduce: "VALUES_TO_LOWERCASE"
-        });
+
         halfCharacterLevel = actor.getHalfCharacterLevel();
         halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
         skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
@@ -82,14 +77,6 @@ export function generateSkills(actor) {
 
         if (actor.system.sheetType === "Auto") {
             skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key)
-
-            if (automaticTrainedSkill.includes(key)) {
-                skill.trained = true;
-                skill.locked = true;
-                if (!skill.isClass) {
-                    skill.blockedSkill = true;
-                }
-            }
 
             let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
@@ -240,11 +227,11 @@ export function getAvailableTrainedSkillCount(actor) {
     let automaticTrainedSkill = getInheritableAttribute({
         entity: actor,
         attributeKey: "automaticTrainedSkill",
-        reduce: "VALUES_TO_LOWERCASE"
-    }).filter(value => value === "#payload#").length;
+        reduce: "VALUES"
+    }).length;
     let otherSkills = getInheritableAttribute({
         entity: actor,
-        attributeKey: "trainedSkills",
+        attributeKey: ["trainedSkills"],
         reduce: "SUM"
     });
     return resolveValueArray([classSkills, otherSkills, automaticTrainedSkill]);

@@ -23,10 +23,13 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
 }
 
 
-function getChangesFromEmbeddedItems(entity, predicate, embeddedItemOverride) {
+function getChangesFromEmbeddedItems(entity, data) {
     if (!(entity instanceof SWSEActor)) {
         return [];
     }
+    const predicate = data.itemFilter
+    const embeddedItemOverride = data.embeddedItemOverride
+
     let attributes = [];
     let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
     items = items.filter(i => !!i)
@@ -123,7 +126,7 @@ function getChangesFromDocument(data) {
 
         }
 
-        allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
+        allAttributes.push(...getChangesFromEmbeddedItems(document, data));
         allAttributes.push(...getChangesFromActiveEffects(document));
         return allAttributes;
     };

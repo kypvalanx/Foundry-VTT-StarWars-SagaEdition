@@ -1,4 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
+import {getAvailableTrainedSkillCount} from "./skill-handler.mjs";
 
 export function warningsFromActor(actor) {
     let warnings = [];
@@ -24,11 +25,14 @@ export function warningsFromActor(actor) {
     if(!actor.classes || actor.classes.length === 0){
         warnings.push(`<span data-action="compendium-web" data-type="class">Please Select a Class</span>`)
     }
-    if(actor.remainingSkills){
-        warnings.push(`<span>Remaining Trained Skills: ${actor.remainingSkills}</span>`)
+
+    const availableTrainedSkills = getAvailableTrainedSkillCount(actor) -  actor.trainedSkills.length;
+
+    if(availableTrainedSkills > 0){
+        warnings.push(`<span>Remaining Trained Skills: ${availableTrainedSkills}</span>`)
     }
-    if(actor.tooManySkills){
-        warnings.push(`<span>Too Many Skills Selected: ${actor.tooManySkills}</span>`)
+    if(availableTrainedSkills < 0){
+        warnings.push(`<span>Too Many Skills Selected: ${Math.abs(availableTrainedSkills)}</span>`)
     }
     for(let item of Object.entries(actor.system.availableItems || {})){
         if(item[1] !== 0){
