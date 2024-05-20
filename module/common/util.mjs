@@ -1141,14 +1141,11 @@ const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower"
     "beastType",
     "beastQuality"];
 
-export function inheritableItems(entity, attributeKey) {
+export function inheritableItems(entity) {
     let fn = () => {
-        let possibleInheritableItems = equippedItems(entity);
-        possibleInheritableItems.push(...filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES));
+        let possibleInheritableItems = filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES);
 
-        //possibleInheritableItems = possibleInheritableItems.filter(i => i.system.changes.map(c => c.key).includes(attributeKey))
-
-        let actualInheritable = [];
+        let actualInheritable = equippedItems(entity);
         actualInheritable.push(...filterItemsByType(entity.items || [], ALWAYS_INHERITABLE_TYPES));
         let shouldRetry = possibleInheritableItems.length > 0;
         let shouldResolveSkills = false;
@@ -1177,7 +1174,7 @@ export function inheritableItems(entity, attributeKey) {
         return actualInheritable;
     }
 
-    return entity.getCached ? entity.getCached(`inheritableItems#${attributeKey}`, fn) : fn();
+    return entity.getCached ? entity.getCached(`inheritableItems`, fn) : fn();
 }
 
 test()

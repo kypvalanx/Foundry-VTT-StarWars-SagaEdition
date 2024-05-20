@@ -1,4 +1,4 @@
-import {filterItemsByType, resolveValueArray, toNumber} from "../common/util.mjs";
+import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {HEAVY_LOAD_SKILLS, NEW_LINE, skillDetails, skills} from "../common/constants.mjs";
@@ -61,7 +61,6 @@ export function generateSkills(actor) {
     let halfCharacterLevel
     let halfCharacterLevelRoundedUp
     let skillFocus
-    let automaticTrainedSkill;
     let heavyLoadAffected = [];
 
 
@@ -95,11 +94,7 @@ export function generateSkills(actor) {
             entity: actor,
             attributeKey: "skillReRoll"
         });
-        automaticTrainedSkill = getInheritableAttribute({
-            entity: actor,
-            attributeKey: "automaticTrainedSkill",
-            reduce: "VALUES_TO_LOWERCASE"
-        });
+
         halfCharacterLevel = actor.getHalfCharacterLevel();
         halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
         skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
@@ -139,14 +134,7 @@ export function generateSkills(actor) {
 
             skill.isClass = resSkill === 'Use the Force' ? actor.isForceSensitive : classSkills.has(key)
 
-            if (automaticTrainedSkill.includes(key)) {
-                skill.trained = true;
-                skill.locked = true;
-                if (!skill.isClass) {
-                    skill.blockedSkill = true;
-                }
-            }
-
+            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
@@ -168,7 +156,6 @@ export function generateSkills(actor) {
             let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
             bonuses.push({value: skillFocusBonus, description: `Skill Focus Bonus: ${skillFocusBonus}`})
 
-            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
             bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
 
             if (skill.sizeMod) {
@@ -221,7 +208,6 @@ export function generateSkills(actor) {
         actor.resolvedLabels.set(skill.variable, skill.label);
         skill.abilityBonus = skillAttributeMod;
         skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
-
 
         if (skill.value !== old) {
             data[`system.skills.${key}.value`] = skill.value;
@@ -281,7 +267,7 @@ function getSkillAttributeMod(actor, key, skill) {
 /**
  *
  * @param actor {SWSEActor}
- * @returns {Promise<number>}
+ * @returns {number}
  */
 export function getAvailableTrainedSkillCount(actor) {
     let intBonus = actor.getAttributeMod("int")
@@ -296,18 +282,17 @@ export function getAvailableTrainedSkillCount(actor) {
             break;
         }
     }
-    let classSkills = Math.max(resolveValueArray([classBonus, intBonus]), 1);
     let automaticTrainedSkill = getInheritableAttribute({
         entity: actor,
         attributeKey: "automaticTrainedSkill",
-        reduce: "VALUES_TO_LOWERCASE"
-    }).filter(value => value === "#payload#").length;
+        reduce: "VALUES"
+    }).length;
     let otherSkills = getInheritableAttribute({
         entity: actor,
         attributeKey: "trainedSkills",
         reduce: "SUM"
     });
-    return resolveValueArray([classSkills, otherSkills, automaticTrainedSkill]);
+    return Math.max(resolveValueArray([classBonus, intBonus, otherSkills, automaticTrainedSkill]), 0);
 }
 
 function getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel) {
