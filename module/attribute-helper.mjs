@@ -133,7 +133,8 @@ function getChangesFromDocument(data) {
         fn: "getChangesFromDocument",
         predicate: data.itemFilter,
         embeddedItemOverride: data.embeddedItemOverride,
-        skipLocal: data.skipLocal
+        skipLocal: data.skipLocal,
+        attributeKey: data.attributeKey
     }, fn) : fn();
 }
 function getChangesFromDocuments(data) {

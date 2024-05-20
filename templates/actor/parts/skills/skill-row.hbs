@@ -1,0 +1,51 @@
+<tr class="draggable {{skill.rowColor}}" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
+    <th>
+        <a class="rollable" title="Roll 1d20 + {{skill.value}}"
+           data-label="{{skill.key}}" data-roll="1d20 + {{skill.value}}"
+           data-notes="{{skill.notes}}">
+            <i class="fas fa-dice-d20"></i>
+        </a>
+        {{#unless skill.uut}}(TRAINED ONLY){{/unless}}
+        <a href="{{skill.link}}">{{skill.label}}</a>
+    </th>
+    <td title="{{skill.title}}">{{skill.value}}</td>
+    <td>
+        <div class="background-text-container">{{toUpperCase skill.attribute}} ({{skill.abilityBonus}})</div>
+    </td>
+    <td>
+        {{#if skill.isClass}}
+            <label title="trained skills get an additional +5">
+                <input class="skill"
+                       type="checkbox"
+                       data-id="{{skill.key}}"
+                       data-name="system.skills.{{skill.key}}.trained"
+                    {{#if skill.trained}}checked{{/if}} {{#if skill.locked}}disabled{{/if}}/>
+            </label>
+        {{/if}}
+        <!--                        {{skill.trainedBonus}}-->
+    </td>
+    <!--                    <td>-->
+    <!--                        {{skill.focusBonus}}-->
+    <!--                    </td>-->
+    <!--                    <td>-->
+    <!--                        {{skill.miscBonus}}-->
+    <!--                    </td>-->
+    <!--                    <td>-->
+        <!--                        {{#if skill.acp}}-->
+    <!--                            {{skill.armorPenalty}}-->
+        <!--                        {{/if}}-->
+    <!--                    </td>-->
+    <td>
+        <div class="small labeled-input">
+            <input class="input" name="system.skills.{{skill.key}}.manualBonus" type="number"
+                   value="{{skill.manualBonus}}" placeholder="0"/>
+        </div>
+    </td>
+</tr>
+{{#if skill.situationalSkills}}
+    {{#each skill.situationalSkills as |skill id|}}
+        {{#unless skill.hide}}
+            {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill}}
+        {{/unless}}
+    {{/each}}
+{{/if}}

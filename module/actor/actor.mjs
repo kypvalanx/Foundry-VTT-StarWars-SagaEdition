@@ -19,7 +19,7 @@ import {
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
-import {generateSkills, getAvailableTrainedSkillCount} from "./skill-handler.mjs";
+import {generateSkills, getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
     CLASSES_BY_STARTING_FEAT,
@@ -44,6 +44,8 @@ import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
+
+
 
 
 /**
@@ -164,6 +166,7 @@ export class SWSEActor extends Actor {
         }
 
         this.attack = new AttackDelegate(this);
+        this.skill = new SkillDelegate(this);
 
         if (this.type === 'character') this._prepareCharacterData(system);
         if (this.type === 'npc') this._prepareCharacterData(system);
@@ -190,7 +193,7 @@ export class SWSEActor extends Actor {
             } else if (this.type === "npc-vehicle") {
                 this.safeUpdate({
                     "type": "vehicle",
-                    "data.isNPC": true
+                    "system.isNPC": true
                 }, {updateChanges: false});
 
             } else if (system.isNPC && this.prototypeToken.actorLink) {
@@ -431,7 +434,7 @@ export class SWSEActor extends Actor {
         //this.system.disableAttributeGenerationChange = true;
 
         generateAttributes(this);
-        generateSkills(this);
+        //system.skills = generateSkills(this);
 
         system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
@@ -459,7 +462,7 @@ export class SWSEActor extends Actor {
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats || [];
         this.system.feats = feats.activeFeats;
-        generateSkills(this);
+        //system.skills = generateSkills(this);
 
 
         let remainingSkills = getAvailableTrainedSkillCount(this);
@@ -2019,12 +2022,12 @@ export class SWSEActor extends Actor {
         if (item.type === "character") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
         if (item.type === "npc") await this.safeUpdate({
             "type": "character",
-            "data.isNPC": true
+            "system.isNPC": true
         }, {updateChanges: false});
         if (item.type === "vehicle") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
         if (item.type === "npc-vehicle") await this.safeUpdate({
             "type": "vehicle",
-            "data.isNPC": true
+            "system.isNPC": true
         }, {updateChanges: false});
 
 

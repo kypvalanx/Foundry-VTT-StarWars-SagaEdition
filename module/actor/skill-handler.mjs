@@ -1,12 +1,44 @@
-import {resolveValueArray, toNumber} from "../common/util.mjs";
+import {filterItemsByType, resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
-import {HEAVY_LOAD_SKILLS, NEW_LINE} from "../common/constants.mjs";
+import {HEAVY_LOAD_SKILLS, NEW_LINE, skillDetails, skills} from "../common/constants.mjs";
+import {DEFAULT_SKILL} from "../common/classDefaults.mjs";
 
+export class SkillDelegate {
+    constructor(swseActor) {
+        this.actor = swseActor;
+    }
+
+    /**
+     *
+     * @return {[]}
+     */
+    get skills(){
+        return generateSkills(this.actor)
+    }
+}
+function applyGroupedSkills(skills, groupedSkillMap) {
+    //add groupers
+    skills.push(...Array.from(groupedSkillMap.keys()).flat())
+    //remove
+    const groupedSkills = Array.from(groupedSkillMap.values().map(skill => skill.grouped)).flat().distinct()
+
+    skills = skills.filter(s => !groupedSkills.includes(s)).sort()
+
+    return skills;
+}
+
+function createNewSkill(skill, actualSkill = {}, customSkill = {}) {
+
+    return {...DEFAULT_SKILL, ...(skillDetails[skill] || {}), ...customSkill, ...actualSkill}
+
+}
 
 /**
  *
  * @param actor
+ *
+ * @return {[]}
  */
 export function generateSkills(actor) {
     let data = {};
@@ -73,7 +105,20 @@ export function generateSkills(actor) {
         skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
     }
 
-    for (let [key, skill] of Object.entries(actor.system.skills)) {
+    const groupedSkillMap = new Map();
+    groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
+
+    const skillMap = new Map();
+
+    const resolvedSkills = applyGroupedSkills(skills, groupedSkillMap);
+    for (let resSkill of resolvedSkills) {
+        let key = resSkill.toLowerCase();
+
+        const customSkill = groupedSkillMap.get(resSkill)
+        const skill = createNewSkill(resSkill, actor.system.skills[key] || {}, customSkill)
+        skill.key = key;
+
+
         let dirtyKey = key.toLowerCase()
             .replace(" ", "").trim()
         let old = skill.value;
@@ -81,7 +126,18 @@ export function generateSkills(actor) {
         let skillAttributeMod = getSkillAttributeMod(actor, key, skill);
 
         if (actor.system.sheetType === "Auto") {
-            skill.isClass = key === 'use the force' ? actor.isForceSensitive : classSkills.has(key)
+
+            if(customSkill){
+                for(const playerClass of actor.itemTypes.class){
+                    if(customSkill.classes && customSkill.classes.includes(playerClass.name)){
+                        classSkills.add(key)
+                    }
+                }
+
+               // skill.situationalSkills = customSkill.grouped.map();
+            }
+
+            skill.isClass = resSkill === 'Use the Force' ? actor.isForceSensitive : classSkills.has(key)
 
             if (automaticTrainedSkill.includes(key)) {
                 skill.trained = true;
@@ -91,7 +147,6 @@ export function generateSkills(actor) {
                 }
             }
 
-            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
@@ -113,6 +168,7 @@ export function generateSkills(actor) {
             let skillFocusBonus = skillFocuses.includes(key) ? skillFocus : 0;
             bonuses.push({value: skillFocusBonus, description: `Skill Focus Bonus: ${skillFocusBonus}`})
 
+            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
             bonuses.push(...getVehicleSkillBonuses(key, actor, shipModifier, applicableRerolls));
 
             if (skill.sizeMod) {
@@ -144,7 +200,7 @@ export function generateSkills(actor) {
 
 
             if (classSkills.size === 0 && skill.trained) {
-                data[`data.skills.${key}.trained`] = false;
+                data[`system.skills.${key}.trained`] = false;
             }
         } else {
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
@@ -161,18 +217,22 @@ export function generateSkills(actor) {
         skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
         skill.variable = `@${actor.cleanSkillName(key)}`;
         actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-        skill.label = key.titleCase().replace("Knowledge", "K.");
+        skill.label = key.titleCase();//.replace("Knowledge", "K.");
         actor.resolvedLabels.set(skill.variable, skill.label);
         skill.abilityBonus = skillAttributeMod;
         skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
 
+
         if (skill.value !== old) {
-            data[`data.skills.${key}.value`] = skill.value;
+            data[`system.skills.${key}.value`] = skill.value;
         }
+
+        skillMap.set(key, skill);
     }
     if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
         actor.safeUpdate(data);
     }
+    return Array.from(skillMap.values());
 }
 
 function getModifiedSkillAttributes(skillAttributes, key) {

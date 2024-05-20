@@ -36,6 +36,15 @@ export const DEFAULT_MODE_EFFECT = {
     }
 };
 
+export const DEFAULT_SKILL = {
+    value: 0,
+    attribute: "dex",
+    uut: false,
+    trained: false,
+    acp: false,
+    link: "https://swse.fandom.com/wiki/Skills"
+}
+
 export function getDefaultDataByType(itemType) {
     switch (itemType) {
         case "language":
