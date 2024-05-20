@@ -2845,14 +2845,14 @@ export class SWSEActor extends Actor {
                     entity.system.possibleProviders.push(`${charClass} Starting Feats`)
                 }
             }
-            if(entity.name === 'Skill Training' && payload === undefined && options.isUpload){
+            if(entity.name === 'Skill Training'){
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
             }
         }
 
         if (entity.type === "trait"){
-            if(entity.name === 'Bonus Trained Skill' && payload === undefined && options.isUpload){
+            if(entity.name === 'Bonus Trained Skill'){
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
             }

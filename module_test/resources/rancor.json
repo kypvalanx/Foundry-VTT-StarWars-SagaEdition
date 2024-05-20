@@ -1,0 +1,115 @@
+{
+    "entries": [{
+        "effects": [],
+        "system": {
+            "skills": {"perception": {"trained": true}},
+            "providedItems": [
+                {
+                    "name": "Beasts",
+                    "type": "affiliation"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class",
+                    "firstLevel": true
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Beast",
+                    "type": "class"
+                },
+                {
+                    "name": "Cleave",
+                    "type": "feat"
+                },
+                {
+                    "name": "Crush",
+                    "type": "feat"
+                },
+                {
+                    "name": "Pin",
+                    "type": "feat"
+                },
+                {
+                    "name": "Power Attack",
+                    "type": "feat"
+                },
+                {
+                    "name": "Toughness",
+                    "type": "feat"
+                }
+            ],
+            "size": "Huge",
+            "defense": {
+                "will": {"expected": 8},
+                "reflex": {"expected": 17},
+                "fortitude": {"expected": 16}
+            },
+            "sizeOverride": "Huge",
+            "attributeGenerationType": "Manual",
+            "changes": [],
+            "description": "",
+            "cl": 11,
+            "health": {
+                "max": 138,
+                "override": 138,
+                "value": 138
+            },
+            "attributes": {
+                "str": {"manual": "26"},
+                "wis": {"manual": "7"},
+                "con": {"manual": "23"},
+                "dex": {"manual": "9"},
+                "cha": {"manual": "15"},
+                "int": {"manual": "2"}
+            }
+        },
+        "name": "Rancor",
+        "flags": {},
+        "permission": {"default": 0},
+        "sort": 0,
+        "type": "npc"
+    }],
+    "name": "Units-CL-11",
+    "type": "Actor",
+    "version": 1716231948264
+}
