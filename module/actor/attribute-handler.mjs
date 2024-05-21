@@ -90,11 +90,7 @@ export function generateAttributes(actor) {
             //data[`system.attributes.${key}.mod`] = attribute.mod;
         }
 
-        let conditionBonus = getInheritableAttribute({
-            entity: actor,
-            attributeKey: "condition",
-            reduce: "FIRST"
-        })
+        let conditionBonus = system.condition;
 
         if("OUT" === conditionBonus || !conditionBonus){
             conditionBonus = "0";
