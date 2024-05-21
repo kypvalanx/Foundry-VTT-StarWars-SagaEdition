@@ -34,6 +34,18 @@ function createNewSkill(skill, actualSkill = {}, customSkill = {}) {
 
 }
 
+function configureSkill(skill, nonZeroBonuses, actor, key, skillAttributeMod) {
+    skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
+    skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
+    skill.variable = `@${actor.cleanSkillName(key)}`;
+    actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+    skill.label = key.replace(/(\()/, "( ").titleCase().replace(/\( /, "(")//.replace("Knowledge", "K.");
+    skill.key = key.toLowerCase().replace(/([()])/g, "")
+    actor.resolvedLabels.set(skill.variable, skill.label);
+    skill.abilityBonus = skillAttributeMod;
+    skill.rowColor = skill.key === "initiative" || key === "perception" ? "highlighted-skill" : "";
+}
+
 /**
  *
  * @param actor
@@ -101,7 +113,7 @@ export function generateSkills(actor) {
     }
 
     const groupedSkillMap = new Map();
-    groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
+    //groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
 
     const skillMap = new Map();
 
@@ -119,17 +131,16 @@ export function generateSkills(actor) {
         let old = skill.value;
         let bonuses = [];
         let skillAttributeMod = getSkillAttributeMod(actor, key, skill);
+        let situationalSkillNames = customSkill?.grouped || []
 
         if (actor.system.sheetType === "Auto") {
-
+            skill.situationalSkills = [];
             if(customSkill){
                 for(const playerClass of actor.itemTypes.class){
                     if(customSkill.classes && customSkill.classes.includes(playerClass.name)){
                         classSkills.add(key)
                     }
                 }
-
-               // skill.situationalSkills = customSkill.grouped.map();
             }
 
             skill.isClass = resSkill === 'Use the Force' ? actor.isForceSensitive : classSkills.has(key)
@@ -200,14 +211,28 @@ export function generateSkills(actor) {
             bonuses.push({value: skill.manualArmorBonus, description: `Armor Penalty: ${skill.manualArmorBonus}`});
         }
         let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
-        skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
-        skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
-        skill.variable = `@${actor.cleanSkillName(key)}`;
-        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-        skill.label = key.titleCase();//.replace("Knowledge", "K.");
-        actor.resolvedLabels.set(skill.variable, skill.label);
-        skill.abilityBonus = skillAttributeMod;
-        skill.rowColor = key === "initiative" || key === "perception" ? "highlighted-skill" : "";
+        configureSkill(skill, nonZeroBonuses, actor, key, skillAttributeMod);
+
+        for (const situationalSkillName of situationalSkillNames) {
+            const modifiedSkill = JSON.parse(JSON.stringify(skill));
+            modifiedSkill.isClass = false;
+            delete modifiedSkill.situationalSkills
+            delete modifiedSkill.grouped
+            delete modifiedSkill.classes
+
+            const resolvedName = situationalSkillName.startsWith(key) ? situationalSkillName : `${key} (${situationalSkillName})`
+            const situationalBonuses = [...nonZeroBonuses]
+            //if(modifiedSkill.manualBonus){
+            const situationalKey = resolvedName.toLowerCase().replace(/([()])/g, "")
+            modifiedSkill.manualBonus = actor.system.skills[situationalKey].manualBonus || 0
+
+            situationalBonuses.push({value: modifiedSkill.manualBonus, description: "Situational Manual Bonus"})
+            //}
+
+
+            configureSkill(modifiedSkill, situationalBonuses, actor, resolvedName, skillAttributeMod);
+            skill.situationalSkills.push(modifiedSkill)
+        }
 
         if (skill.value !== old) {
             data[`system.skills.${key}.value`] = skill.value;
