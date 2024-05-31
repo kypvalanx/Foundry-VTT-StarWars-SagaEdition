@@ -1667,7 +1667,7 @@ export function appendDieTerm(value, flavor) {
         return [];
     }
     return [number > -1 ? plus() : minus(),
-        new Die({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+        new foundry.dice.terms.Die({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
 }
 
 export function appendNumericTerm(value, flavor) {
