@@ -1399,11 +1399,14 @@ export class SWSEActor extends Actor {
         if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
             return false;
         } else {
-            return getInheritableAttribute({
-                entity: this,
-                attributeKey: "isDroid",
-                reduce: "OR"
-            });
+            for(const species of this.itemTypes.species){
+                for(const change of species.system.changes){
+                    if(change.key === "isDroid" && (change.value === true || change.value === "true")){
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 
