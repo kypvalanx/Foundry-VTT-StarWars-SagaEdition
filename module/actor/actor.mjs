@@ -2228,16 +2228,20 @@ export class SWSEActor extends Actor {
                 const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
                     entity: entity,
                     attributeKey: "takeMultipleTimes"
-                }).map(a => a.value === "true").reduce((a, b) => a || b, false);
+                }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
 
                 if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
-                    if (!context.skipPrerequisite && !context.isUpload) {
-                        await Dialog.prompt({
-                            title: `You already have this ${entity.type}`,
-                            content: `You have already taken the ${entity.finalName} ${entity.type}`,
-                            callback: () => {
-                            }
-                        })
+                    if (!context.skipPrerequisite && !context.isUpload ) {
+                        if(this.suppressDialog){
+                            console.warn(`attempted to add ${entity.finalName} but could not because cannot be taken more than once${takenOnceAndCannotBeTakenMultipleTimes}, maximum quantity: ${isAtMaximumQuantity}`, entity)
+                        } else {
+                            await Dialog.prompt({
+                                title: `You already have this ${entity.type}`,
+                                content: `You have already taken the ${entity.finalName} ${entity.type}`,
+                                callback: () => {
+                                }
+                            })
+                        }
                     }
                     return false;
                 }

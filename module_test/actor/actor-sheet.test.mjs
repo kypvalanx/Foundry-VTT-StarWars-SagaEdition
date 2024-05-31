@@ -248,6 +248,52 @@ export async function actorSheetTests(quench) {
                                 assert.lengthOf(actor.items, 7)
                             });
                         });
+
+                        it('should accept multiple applications of talents that can be taken multiple times', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
+
+                                hasItems(assert, actor.items, [
+                                    "Bonus Feat (Point-Blank Shot)",
+                                    "Bonus Feat (Weapon Proficiency (Pistols))",
+                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Point-Blank Shot",
+                                    "Scoundrel",
+                                    "Sneak Attack",
+                                    "Sneak Attack",
+                                    "Weapon Proficiency (Pistols)",
+                                    "Weapon Proficiency (Simple Weapons)"])
+                                assert.lengthOf(actor.items, 9)
+                            });
+                        });
+
+
+
+                        it('should change how reflex defense is resolved when armored defense is detected', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+
+                                assert.equal(actor.system.defense.reflex.total, 15) //4 heroic levels +1 from soldier
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Padded Flight Suit", type: "item", equip: true})
+
+                                assert.equal(actor.system.defense.reflex.total, 14) //3 from armor + 1 from soldier
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armored Defense", type: "talent"})
+                                assert.equal(actor.system.defense.reflex.total, 15)//4 heroic levels +1 from soldier
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Improved Armored Defense", type: "talent"})
+                                assert.equal(actor.system.defense.reflex.total, 16)//4 heroic levels +1 from soldier + floor(3/2)
+                            });
+                        });
                     })
                 })
             })
