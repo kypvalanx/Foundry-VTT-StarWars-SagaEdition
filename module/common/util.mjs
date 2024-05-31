@@ -1135,24 +1135,11 @@ export function getItemParentId(id) {
  * these types are always inherited by actors if they meet prerequisites.
  * @type {string[]}
  */
-const CONDITIONALLY_INHERITABLE_TYPES = [
-    "background",
-    "destiny",
-    "trait",
-    "feat",
-    "talent",
-    "forcePower",
-    "secret",
-    "forceTechnique",
-    "affiliation",
-    "regimen",
-    "species",
-    "vehicleBaseType",
-    "beastAttack",
+const CONDITIONALLY_INHERITABLE_TYPES = ["trait", "feat", "talent"];
+const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "vehicleBaseType", "beastAttack",
     "beastSense",
     "beastType",
     "beastQuality"];
-const ALWAYS_INHERITABLE_TYPES = ["class"];
 
 export function inheritableItems(entity) {
     let fn = () => {
