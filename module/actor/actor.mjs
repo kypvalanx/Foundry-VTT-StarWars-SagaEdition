@@ -19,7 +19,7 @@ import {
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
-import {generateSkills, getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
+import {getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
     CLASSES_BY_STARTING_FEAT,
@@ -953,11 +953,11 @@ export class SWSEActor extends Actor {
     static getCrewByQuality(quality) {
         let attackBonus = 0;
         let checkModifier = 0;
-        let cLModifier = 0;
+        //let cLModifier = 0;
         if (quality && quality !== "-") {
             attackBonus = crewQuality[quality.titleCase()]["Attack Bonus"];
             checkModifier = crewQuality[quality.titleCase()]["Check Modifier"];
-            cLModifier = crewQuality[quality.titleCase()]["CL Modifier"];
+            //cLModifier = crewQuality[quality.titleCase()]["CL Modifier"];
         }
         let resolvedSkills = {}
         skills.forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
@@ -1490,47 +1490,9 @@ export class SWSEActor extends Actor {
             return 0;
         }
 
-        let isHeroic = getInheritableAttribute({
-            entity: this,
-            attributeKey: "isHeroic",
-            reduce: "OR"
-        });
         let characterLevel = this.classes.length;
 
         return (characterLevel - (characterLevel % 4)) /4
-
-        // let hasUpdate = false;
-        // if (!system.levelAttributeBonus) {
-        //     system.levelAttributeBonus = {};
-        //     hasUpdate = true;
-        // }
-        //
-        // for (let bonusAttributeLevel = 4; bonusAttributeLevel < 21; bonusAttributeLevel += 4) {
-        //     if (bonusAttributeLevel > characterLevel) {
-        //         if (system.levelAttributeBonus[bonusAttributeLevel]) {
-        //             system.levelAttributeBonus[bonusAttributeLevel] = null;
-        //             hasUpdate = true;
-        //         }
-        //     } else {
-        //         if (!system.levelAttributeBonus[bonusAttributeLevel]) {
-        //             system.levelAttributeBonus[bonusAttributeLevel] = {};
-        //             hasUpdate = true;
-        //         } else {
-        //             let total = (system.levelAttributeBonus[bonusAttributeLevel].str || 0)
-        //                 + (system.levelAttributeBonus[bonusAttributeLevel].dex || 0)
-        //                 + (system.levelAttributeBonus[bonusAttributeLevel].con || 0)
-        //                 + (system.levelAttributeBonus[bonusAttributeLevel].int || 0)
-        //                 + (system.levelAttributeBonus[bonusAttributeLevel].wis || 0)
-        //                 + (system.levelAttributeBonus[bonusAttributeLevel].cha || 0)
-        //             system.levelAttributeBonus[bonusAttributeLevel].warn = total !== (isHeroic ? 2 : 1);
-        //         }
-        //     }
-        // }
-        //
-        // if (hasUpdate && this.id) {
-        //     return this.safeUpdate({'data.levelAttributeBonus': system.levelAttributeBonus});
-        // }
-        // return undefined;
     }
 
     ignoreCon() {
