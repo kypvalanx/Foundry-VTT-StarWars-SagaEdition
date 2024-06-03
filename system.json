@@ -9,7 +9,6 @@
     "verified": 12,
     "maximum": 12
   },
-  "templateVersion": 2,
   "authors": [
     {
       "name": "Andy Lijewski",
@@ -394,9 +393,6 @@
       "system": "swse",
       "entity": "Actor"
     }
-  ],
-  "disabledPacks": [
-
   ],
   "languages": [
     {
