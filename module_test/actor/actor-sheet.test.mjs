@@ -4,7 +4,7 @@ import {safeInsert} from "../../module/common/util.mjs";
 import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
 
-async function withTestActor(param, options= {}) {
+export async function withTestActor(param, options= {}) {
     const actor = await SWSEActor.create({
         name: "New Test Actor DELETE ME",
         type: "character",
