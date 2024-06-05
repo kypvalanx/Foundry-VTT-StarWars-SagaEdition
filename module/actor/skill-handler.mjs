@@ -14,18 +14,21 @@ export class SkillDelegate {
      * @return {[]}
      */
     get skills(){
-        return generateSkills(this.actor)
+        return generateSkills(this.actor, {})
     }
 }
 function applyGroupedSkills(skills, groupedSkillMap) {
+    const skillsCopy = [...skills];
+    if (!groupedSkillMap) {
+        return skillsCopy;
+    }
     //add groupers
-    skills.push(...Array.from(groupedSkillMap.keys()).flat())
+    skillsCopy.push(...Array.from(groupedSkillMap.keys()).flat())
     //remove
     const groupedSkills = Array.from(groupedSkillMap.values().map(skill => skill.grouped)).flat().distinct()
 
-    skills = skills.filter(s => !groupedSkills.includes(s)).sort()
+    return skillsCopy.filter(s => !groupedSkills.includes(s)).sort()
 
-    return skills;
 }
 
 function createNewSkill(skill, actualSkill = {}, customSkill = {}) {
@@ -34,32 +37,29 @@ function createNewSkill(skill, actualSkill = {}, customSkill = {}) {
 
 }
 
-function configureSkill(skill, nonZeroBonuses, actor, key, skillAttributeMod) {
+function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) {
     skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
     skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
-    skill.variable = `@${actor.cleanSkillName(key)}`;
+    skill.variable = `@${actor.cleanSkillName(label)}`;
     actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-    skill.label = key.replace(/(\()/, "( ").titleCase().replace(/\( /, "(")//.replace("Knowledge", "K.");
-    skill.key = key.toLowerCase().replace(/([()])/g, "")
+    skill.label = label
+    skill.key = label.toLowerCase().replace(/([()])/g, "")
     actor.resolvedLabels.set(skill.variable, skill.label);
     skill.abilityBonus = skillAttributeMod;
-    skill.rowColor = skill.key === "initiative" || key === "perception" ? "highlighted-skill" : "";
+    skill.rowColor = skill.key === "Initiative" || label === "Perception" ? "highlighted-skill" : "";
 }
 
 /**
  *
  * @param actor
  *
+ * @param options
  * @return {[]}
  */
-export function generateSkills(actor) {
+export function generateSkills(actor, options = {}) {
     let data = {};
 
-    let conditionBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "condition",
-        reduce: "FIRST"
-    })
+    let conditionBonus = actor.condition
 
     if ("OUT" === conditionBonus || !conditionBonus) {
         conditionBonus = "0";
@@ -86,7 +86,7 @@ export function generateSkills(actor) {
             entity: actor,
             attributeKey: "skillBonus",
             reduce: "VALUES"
-        }).map(skill => (skill?.replace(" ", "") || "").toLowerCase())
+        })
         untrainedSkillBonuses = getInheritableAttribute({
             entity: actor,
             attributeKey: "untrainedSkillBonus",
@@ -112,22 +112,37 @@ export function generateSkills(actor) {
         skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
     }
 
-    const groupedSkillMap = new Map();
-    //groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
 
     const skillMap = new Map();
 
-    const resolvedSkills = applyGroupedSkills(skills, groupedSkillMap);
+    const resolvedSkills = applyGroupedSkills(skills, options.groupedSkillMap);
+
+    const nonSituationalSkills = [];
+    const distinctSkillBonuses = skillBonusAttr.map(bonus => bonus.split(":")[0]).distinct()
+    for (const distinctSkillBonus of distinctSkillBonuses) {
+        let isSub = false;
+        for (const resolvedSkill of resolvedSkills) {
+            if (distinctSkillBonus.startsWith(resolvedSkill)) {
+                isSub = true
+                break;
+            }
+        }
+        if(!isSub){
+            nonSituationalSkills.push(distinctSkillBonus)
+        }
+    }
+
+    resolvedSkills.push(...nonSituationalSkills);
+
+
+
     for (let resSkill of resolvedSkills) {
         let key = resSkill.toLowerCase();
 
-        const customSkill = groupedSkillMap.get(resSkill)
+        const customSkill = options.groupedSkillMap?.get(resSkill)
         const skill = createNewSkill(resSkill, actor.system.skills[key] || {}, customSkill)
         skill.key = key;
 
-
-        let dirtyKey = key.toLowerCase()
-            .replace(" ", "").trim()
         let old = skill.value;
         let bonuses = [];
         let skillAttributeMod = getSkillAttributeMod(actor, key, skill);
@@ -173,7 +188,9 @@ export function generateSkills(actor) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
-            let miscBonuses = skillBonusAttr.filter(bonus => bonus.startsWith(dirtyKey)).map(bonus => bonus.split(":")[1]);
+            let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resSkill).map(bonus => bonus.split(":")[1]);
+
+            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus => bonus !== resSkill && bonus.startsWith(resSkill)).map(bonus => bonus.split(":")[0]))
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
@@ -211,7 +228,7 @@ export function generateSkills(actor) {
             bonuses.push({value: skill.manualArmorBonus, description: `Armor Penalty: ${skill.manualArmorBonus}`});
         }
         let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
-        configureSkill(skill, nonZeroBonuses, actor, key, skillAttributeMod);
+        configureSkill(skill, nonZeroBonuses, actor, resSkill, skillAttributeMod);
 
         for (const situationalSkillName of situationalSkillNames) {
             const modifiedSkill = JSON.parse(JSON.stringify(skill));
@@ -220,11 +237,16 @@ export function generateSkills(actor) {
             delete modifiedSkill.grouped
             delete modifiedSkill.classes
 
-            const resolvedName = situationalSkillName.startsWith(key) ? situationalSkillName : `${key} (${situationalSkillName})`
+
+            const resolvedName = situationalSkillName.startsWith(resSkill) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
             const situationalBonuses = [...nonZeroBonuses]
             //if(modifiedSkill.manualBonus){
             const situationalKey = resolvedName.toLowerCase().replace(/([()])/g, "")
-            modifiedSkill.manualBonus = actor.system.skills[situationalKey].manualBonus || 0
+
+            console.log(key, " || ", situationalSkillNames, " || ", situationalKey, " || ", resolvedName, " || ", skillBonusAttr)
+            let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resolvedName).map(bonus => {return {value: bonus.split(":")[1], description: "Situational Bonuses"}});
+            situationalBonuses.push(...miscBonuses)
+            modifiedSkill.manualBonus = actor.system.skills[situationalKey]?.manualBonus || 0
 
             situationalBonuses.push({value: modifiedSkill.manualBonus, description: "Situational Manual Bonus"})
             //}

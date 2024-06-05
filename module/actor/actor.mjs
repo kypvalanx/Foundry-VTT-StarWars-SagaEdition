@@ -208,6 +208,10 @@ export class SWSEActor extends Actor {
         }
     }
 
+    get condition(){
+        return this.system.condition;
+    }
+
     get crewSlots() {
         return this.getCached("crewSlots", () => {
             let crewSlots = []
@@ -1283,6 +1287,13 @@ export class SWSEActor extends Actor {
         for (let [key, ability] of Object.entries(attributes)) {
             update[`system.attributes.${key}.base`] = ability;
         }
+        await this.safeUpdate(update);
+    }
+
+    async addChange(change){
+        let update = {};
+        update[`system.changes`] = this.system.changes || [];
+        update[`system.changes`].push(change);
         await this.safeUpdate(update);
     }
 
