@@ -1,4 +1,14 @@
-<tr class="draggable {{skill.rowColor}}" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
+<tr class="draggable {{skill.rowColor}} collapsable" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill" >
+    <th>
+        {{#if skill.situationalSkills}}
+            <div class="toggle control" data-toggle-id="{{@root.actor._id}}-{{skill.key}}">
+            <a>
+                <i class="fas {{#if
+                        (lookup toggles (concat @root.actor._id "-" skill.key))}}fa-minus{{else}}fa-plus{{/if}}"></i>
+            </a>
+        </div>
+        {{/if}}
+    </th>
     <th>
         <a class="rollable" title="Roll 1d20 + {{skill.value}}"
            data-label="{{skill.key}}" data-roll="1d20 + {{skill.value}}"
@@ -43,9 +53,11 @@
     </td>
 </tr>
 {{#if skill.situationalSkills}}
-    {{#each skill.situationalSkills as |skill id|}}
-        {{#unless skill.hide}}
-            {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill}}
-        {{/unless}}
-    {{/each}}
+    {{#if (lookup toggles (concat @root.actor._id "-" skill.key))}}
+        {{#each skill.situationalSkills as |skill id|}}
+            {{#unless skill.hide}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill}}
+            {{/unless}}
+        {{/each}}
+    {{/if}}
 {{/if}}

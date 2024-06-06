@@ -5,6 +5,7 @@
         <thead>
         <tr>
             <th></th>
+            <th></th>
             <th>Total</th>
             <th>Ability</th>
             <th>Trained</th>
@@ -17,7 +18,7 @@
         <tbody>
         {{#each actor.skill.skills as |skill id|}}
             {{#unless skill.hide}}
-                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill toggles=../actor.system.toggles}}
             {{/unless}}
         {{/each}}
         </tbody>
