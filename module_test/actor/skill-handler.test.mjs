@@ -1,5 +1,6 @@
 import {withTestActor} from "./actor-sheet.test.mjs";
 import {generateSkills} from "../../module/actor/skill-handler.mjs";
+import {defaultSkills} from "../../module/common/constants.mjs";
 
 export async function skillHandlerTest(quench) {
     quench.registerBatch("actor.skill-handler",
@@ -9,7 +10,7 @@ export async function skillHandlerTest(quench) {
                 it('should successfully build skills', async function () {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
-                        let skills = generateSkills(actor, undefined)
+                        let skills = generateSkills(actor, {skills: defaultSkills})
                         assert.lengthOf(skills, 25)
                     });
                 });
@@ -20,8 +21,7 @@ export async function skillHandlerTest(quench) {
 
                         let groupedSkillMap = new Map();
                         groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
-                        let options = {groupedSkillMap}
-                        let skills = generateSkills(actor, options)
+                        let skills = generateSkills(actor, {groupedSkillMap})
                         assert.lengthOf(skills, 23)
                         let skill = skills.find(skill => skill.label === "Athletics")
                         assert.lengthOf(skill.situationalSkills, 3)
@@ -32,7 +32,7 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.setAttributes({int:18})
-                        let skills = generateSkills(actor, undefined)
+                        let skills = generateSkills(actor, {skills: defaultSkills})
                         assert.lengthOf(skills, 25)
                         assert.equal(skills.filter(s => s.label === "Knowledge (Bureaucracy)")[0].value, 4)
                     });
@@ -42,7 +42,7 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Knowledge (Bureaucracy):4"})
-                        let skills = generateSkills(actor, undefined)
+                        let skills = generateSkills(actor, {skills: defaultSkills})
                         assert.lengthOf(skills, 25)
                         assert.equal(skills.filter(s => s.label === "Knowledge (Bureaucracy)")[0].value, 4)
                     });
@@ -52,7 +52,7 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Knowledge (Bureaucracy) (Watercooler Talk):4"})
-                        let skills = generateSkills(actor, undefined)
+                        let skills = generateSkills(actor, {skills: defaultSkills})
                         assert.lengthOf(skills, 25)
                         const knowledgeBureaucracy = skills.filter(s => s.label === "Knowledge (Bureaucracy)")[0];
                         assert.equal(knowledgeBureaucracy.value, 0)
@@ -65,7 +65,7 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Competitive Origami:4"})
-                        let skills = generateSkills(actor, undefined)
+                        let skills = generateSkills(actor, {skills: defaultSkills})
                         assert.lengthOf(skills, 26)
                         const skill = skills.filter(s => s.label === "Competitive Origami")[0];
                         assert.equal(skill.value, 4)
