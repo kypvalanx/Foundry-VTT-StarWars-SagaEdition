@@ -59,7 +59,7 @@ function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) 
     skill.variable = `@${actor.cleanSkillName(label)}`;
     actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
     skill.label = label
-    skill.key = label.toLowerCase().replace(/([()])/g, "")
+    skill.key = label.toLowerCase()
     actor.resolvedLabels.set(skill.variable, skill.label);
     skill.abilityBonus = skillAttributeMod;
     skill.rowColor = label === "Initiative" || label === "Perception" ? "highlighted-skill" : "";
@@ -257,7 +257,7 @@ export function generateSkills(actor, options = {}) {
             const resolvedName = situationalSkillName.startsWith(resSkill) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
             const situationalBonuses = [...nonZeroBonuses]
             //if(modifiedSkill.manualBonus){
-            const situationalKey = resolvedName.toLowerCase().replace(/([()])/g, "")
+            const situationalKey = resolvedName.toLowerCase()
 
             let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resolvedName).map(bonus => {return {value: bonus.split(":")[1], description: "Situational Bonuses"}});
             situationalBonuses.push(...miscBonuses)
