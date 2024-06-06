@@ -1,7 +1,14 @@
 import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
-import {HEAVY_LOAD_SKILLS, NEW_LINE, skillDetails, skills} from "../common/constants.mjs";
+import {
+    HEAVY_LOAD_SKILLS,
+    HOMEBREW_DARTHAUTHOR_SKILLS,
+    HOMEBREW_LILLITERALIST_SKILLS,
+    NEW_LINE,
+    skillDetails,
+    skills
+} from "../common/constants.mjs";
 import {DEFAULT_SKILL} from "../common/classDefaults.mjs";
 
 export class SkillDelegate {
@@ -14,7 +21,16 @@ export class SkillDelegate {
      * @return {[]}
      */
     get skills(){
-        return generateSkills(this.actor, {})
+        let groupedSkillMap = new Map();
+        if(game.settings.get("swse", "homebrewUseLilLiteralistSkills")){
+            groupedSkillMap = HOMEBREW_LILLITERALIST_SKILLS;
+        }
+
+        if(game.settings.get("swse", "homebrewUseDarthauthorSkills")){
+            groupedSkillMap = HOMEBREW_DARTHAUTHOR_SKILLS;
+        }
+
+        return generateSkills(this.actor, {groupedSkillMap})
     }
 }
 function applyGroupedSkills(skills, groupedSkillMap) {
@@ -115,7 +131,7 @@ export function generateSkills(actor, options = {}) {
 
     const skillMap = new Map();
 
-    const resolvedSkills = applyGroupedSkills(skills, options.groupedSkillMap);
+    const resolvedSkills = applyGroupedSkills(options.skills || skills(), options.groupedSkillMap);
 
     const nonSituationalSkills = [];
     const distinctSkillBonuses = skillBonusAttr.map(bonus => bonus.split(":")[0]).distinct()

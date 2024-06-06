@@ -2,10 +2,37 @@ export const dieSize = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "2d6", "2d8", "3
 export const dieType = ["1", "2", "3", "4", "6", "8", "10", "12"];
 export const sizeArray = ["Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)"];
 export const d20 = "1d20";
-export const skills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
+export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
     "Knowledge (Bureaucracy)", "Knowledge (Galactic Lore)", "Knowledge (Life Sciences)", "Knowledge (Physical Sciences)",
     "Knowledge (Social Sciences)", "Knowledge (Tactics)", "Knowledge (Technology)", "Mechanics", "Perception",
     "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force"];
+
+export function skills(){
+    let skills = [...defaultSkills];
+    let groupedSkillMap;
+    if(game.settings.get("swse", "homebrewUseLilLiteralistSkills")){
+        groupedSkillMap = HOMEBREW_LILLITERALIST_SKILLS;
+    }
+
+    if(game.settings.get("swse", "homebrewUseDarthauthorSkills")){
+        groupedSkillMap = HOMEBREW_DARTHAUTHOR_SKILLS;
+    }
+
+    if(groupedSkillMap){
+        const grouped = [];
+        for (const [key, value] of groupedSkillMap) {
+            skills.push(key)
+            if(value.grouped){
+                grouped.push(...value.grouped)
+            }
+        }
+        if(grouped){
+            skills = skills.filter(s => !grouped.includes(s))
+        }
+    }
+
+    return skills;
+}
 
 export const skillDetails = {
     "Acrobatics": {
@@ -403,3 +430,28 @@ export const CLASSES_BY_STARTING_FEAT = {
 export const KNOWN_WEIRD_UNITS = [
     "Eldewn and Elsae Sarvool"
 ]
+export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([["Athletics", {
+    grouped: ["Climb", "Swim"],
+    classes: ["Scout", "Soldier", "Force Prodigy"],
+    uut: true
+}],
+    ["Agility", {
+        grouped: ["Jump", "Acrobatics"],
+        classes: ["Scout", "Soldier", "Jedi", "Scoundrel", "Force Prodigy"],
+        uut: true
+    }],
+    ["Diplomacy", {
+        grouped: ["Gather Information", "Persuasion"],
+        classes: ["Noble", "Scoundrel", "Technician"],
+        uut: true
+    }],
+    ["Knowledge (Force)", {
+        classes: ["Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy"],
+        uut: false
+    }]]);
+export const HOMEBREW_LILLITERALIST_SKILLS = new Map([["Athletics", {
+    grouped: ["Jump", "Climb", "Swim"],
+    classes: ["Scout", "Soldier", "Jedi"],
+    attribute: "str",
+    uut: true
+}]]);

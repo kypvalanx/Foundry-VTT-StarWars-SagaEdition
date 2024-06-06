@@ -964,7 +964,7 @@ export class SWSEActor extends Actor {
             //cLModifier = crewQuality[quality.titleCase()]["CL Modifier"];
         }
         let resolvedSkills = {}
-        skills.forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
+        skills().forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
         return {
             baseAttackBonus: attackBonus,
             system: {
@@ -2731,7 +2731,7 @@ export class SWSEActor extends Actor {
         let explode = [];
         for (let feat of feats) {
             if ("Skill Focus" === feat) {
-                skills.forEach(skill => {
+                skills().forEach(skill => {
                     if (skill && !this.focusSkills.includes(skill.toLowerCase())) {
                         explode.push(`${feat} (${skill})`);
                     }

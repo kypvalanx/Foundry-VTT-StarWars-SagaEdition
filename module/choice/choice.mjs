@@ -287,7 +287,7 @@ export async function explodeOptions(options, actor) {
                 attributeKey: "skillFocus",
                 reduce: "VALUES"
             });
-            for (let skill of skills) {
+            for (let skill of skills()) {
                 if (!skillFocuses.includes(skill)) {
                     resolvedOptions.push({
                         name: skill.titleCase(),
