@@ -228,16 +228,16 @@ export const registerSystemSettings = function () {
 
 
     game.settings.register("swse", "homebrewUseLilLiteralistSkills", {
-        name: "Climb, Jump, and Swim are all incorporated into a new skill called Athletics, a class skill for Jedi, Scouts, and Soldiers.",
-        hint: "",
+        name: "Homebrew: Lil'Literalist's Skill",
+        hint: "Climb, Jump, and Swim are all incorporated into a new skill called Athletics, a class skill for Jedi, Scouts, and Soldiers.",
         scope: "world",
         config: true,
         default: false,
         type: Boolean
     });
     game.settings.register("swse", "homebrewUseDarthauthorSkills", {
-        name: "Acrobatics and Jump are now one skill. Climb and Swim are one skill. Gather Information and Persuasion are one skill. Knowledge (Force) is a skill.",
-        hint: "",
+        name: "Homebrew: Darthauthor's Skill",
+        hint: "Acrobatics and Jump are now one skill. Climb and Swim are one skill. Gather Information and Persuasion are one skill. Knowledge (Force) is a skill.",
         scope: "world",
         config: true,
         default: false,
