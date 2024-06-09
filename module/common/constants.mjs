@@ -7,16 +7,20 @@ export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "
     "Knowledge (Social Sciences)", "Knowledge (Tactics)", "Knowledge (Technology)", "Mechanics", "Perception",
     "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force"];
 
-export function skills(){
-    let skills = [...defaultSkills];
-    let groupedSkillMap;
-    if(game.settings.get("swse", "homebrewUseLilLiteralistSkills")){
-        groupedSkillMap = HOMEBREW_LILLITERALIST_SKILLS;
+export function getGroupedSkillMap() {
+    if (game.settings.get("swse", "homebrewUseLilLiteralistSkills")) {
+        return HOMEBREW_LILLITERALIST_SKILLS;
     }
 
-    if(game.settings.get("swse", "homebrewUseDarthauthorSkills")){
-        groupedSkillMap = HOMEBREW_DARTHAUTHOR_SKILLS;
+    if (game.settings.get("swse", "homebrewUseDarthauthorSkills")) {
+        return HOMEBREW_DARTHAUTHOR_SKILLS;
     }
+    return undefined;
+}
+
+export function skills(){
+    let skills = [...defaultSkills];
+    let groupedSkillMap = getGroupedSkillMap();
 
     if(groupedSkillMap){
         const grouped = [];
