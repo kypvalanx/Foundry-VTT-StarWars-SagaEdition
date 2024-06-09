@@ -2,6 +2,7 @@ import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {
+    getGroupedSkillMap,
     HEAVY_LOAD_SKILLS,
     HOMEBREW_DARTHAUTHOR_SKILLS,
     HOMEBREW_LILLITERALIST_SKILLS,
@@ -21,14 +22,7 @@ export class SkillDelegate {
      * @return {[]}
      */
     get skills(){
-        let groupedSkillMap = new Map();
-        if(game.settings.get("swse", "homebrewUseLilLiteralistSkills")){
-            groupedSkillMap = HOMEBREW_LILLITERALIST_SKILLS;
-        }
-
-        if(game.settings.get("swse", "homebrewUseDarthauthorSkills")){
-            groupedSkillMap = HOMEBREW_DARTHAUTHOR_SKILLS;
-        }
+        let groupedSkillMap = getGroupedSkillMap()
 
         return generateSkills(this.actor, {groupedSkillMap})
     }
