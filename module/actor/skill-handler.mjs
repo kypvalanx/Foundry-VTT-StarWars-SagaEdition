@@ -4,8 +4,6 @@ import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {
     getGroupedSkillMap,
     HEAVY_LOAD_SKILLS,
-    HOMEBREW_DARTHAUTHOR_SKILLS,
-    HOMEBREW_LILLITERALIST_SKILLS,
     NEW_LINE,
     skillDetails,
     skills
