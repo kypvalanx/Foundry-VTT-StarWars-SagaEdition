@@ -1,8 +1,8 @@
 export const naturalSort = function (arr, propertyKey = "") {
     const collator = new Intl.Collator(game.settings.get("core", "language"), {numeric: true});
     return arr.sort((a, b) => {
-        const propA = propertyKey ? getProperty(a, propertyKey) : a;
-        const propB = propertyKey ? getProperty(b, propertyKey) : b;
+        const propA = propertyKey ? foundry.utils.getProperty(a, propertyKey) : a;
+        const propB = propertyKey ? foundry.utils.getProperty(b, propertyKey) : b;
         return collator.compare(propA, propB);
     });
 };
@@ -127,7 +127,7 @@ export class SWSECompendiumBrowser extends Application {
         // Save results
         if (options.save) {
             const forceRefreshData = {} //duplicate(game.settings.get("pf1", "compendiumForceRefresh"));
-            setProperty(forceRefreshData, `diff.${this.type}`, this._currentCompendiums);
+            foundry.utils.setProperty(forceRefreshData, `diff.${this.type}`, this._currentCompendiums);
             return true //game.settings.set("pf1", "compendiumForceRefresh", forceRefreshData);
         }
     }
@@ -331,11 +331,11 @@ export class SWSECompendiumBrowser extends Application {
     shouldSkip(p) {
         // Check disabled status
         const config = game.settings.get("core", "compendiumConfiguration")[p.collection];
-        const disabled = getProperty(config, "swse.disabled") === true;
+        const disabled = foundry.utils.getProperty(config, "swse.disabled") === true;
         if (disabled) return true;
 
         // Skip if set to private and the user is not a GM
-        if (p.private && !game.user.isGM) return true;
+        if (!p.visible && !game.user.isGM) return true;
 
         // Don't skip the compendium
         return false;
@@ -442,7 +442,7 @@ export class SWSECompendiumBrowser extends Application {
         if (this.shouldForceRefresh() || !this._data.loaded) await this.loadData();
         await this.updateForceRefreshData({save: true, refresh: false});
 
-        const data = duplicate(this._data.data);
+        const data = foundry.utils.duplicate(this._data.data);
         data.searchString = this.searchString;
 
         return data;
