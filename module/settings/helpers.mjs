@@ -132,7 +132,7 @@ export const registerHandlebarsHelpers = function () {
         if(Array.isArray(arg1)){
             values = arg1;
         } else if('type' === arg1){
-            values = Object.keys(game.system.template.Item).filter(type => type !== "base")
+            values = Object.keys(game.system.documentTypes).filter(type => type !== "base")
         } else if('subtype' === arg1){
             values = SUBTYPES[arg2] || [];
         } else if(Object.entries(arg1).length > 0){

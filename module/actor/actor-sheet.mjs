@@ -1040,9 +1040,11 @@ export class SWSEActorSheet extends ActorSheet {
         const button = event.currentTarget;
         if (button.disabled) return;
 
-        const li = $(button).closest(".item");
-
-        let itemId = li.data("itemId");
+        let itemId = event.currentTarget.dataset.itemId
+        if(!itemId){
+            const li = event.currentTarget.closest(".item");
+            itemId = li.dataset.itemId;
+        }
         let itemToDelete = this.actor.items.get(itemId);
         if (game.keyboard.downKeys.has("Shift")) {
             await this.object.removeItem(itemId);
@@ -1095,21 +1097,33 @@ export class SWSEActorSheet extends ActorSheet {
      */
     _onItemEdit(event) {
         event.preventDefault();
-        const li = event.currentTarget.closest(".item");
-        const item = this.actor.items.get(li.dataset.itemId);
+        let itemId = event.currentTarget.dataset.itemId
+        if(!itemId){
+            const li = event.currentTarget.closest(".item");
+            itemId = li.dataset.itemId;
+        }
+        const item = this.actor.items.get(itemId);
         item.sheet.render(true);
     }
 
     _onDecreaseItemQuantity(event) {
         event.preventDefault();
-        const li = event.currentTarget.closest(".item");
-        const item = this.actor.items.get(li.dataset.itemId);
+        let itemId = event.currentTarget.dataset.itemId
+        if(!itemId){
+            const li = event.currentTarget.closest(".item");
+            itemId = li.dataset.itemId;
+        }
+        const item = this.actor.items.get(itemId);
         item.decreaseQuantity();
     }
     _onIncreaseItemQuantity(event) {
         event.preventDefault();
-        const li = event.currentTarget.closest(".item");
-        const item = this.actor.items.get(li.dataset.itemId);
+        let itemId = event.currentTarget.dataset.itemId
+        if(!itemId){
+            const li = event.currentTarget.closest(".item");
+            itemId = li.dataset.itemId;
+        }
+        const item = this.actor.items.get(itemId);
         item.increaseQuantity();
     }
 

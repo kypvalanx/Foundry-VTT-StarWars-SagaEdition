@@ -28,9 +28,7 @@
                disabled/>
     </div>
 
-    <div class="large labeled-input item clickable" {{#if actor.species}}
-         data-item-id="{{actor.species.id}}" {{else}}data-action="compendium" data-type="Item"
-         data-filter="-type:species"{{/if}}>
+    <div class="large labeled-input item clickable">
         <label for="species" class="text">Species</label>
         <input class="input" id="species" type="text"
                value="{{#if actor.species}}{{actor.species.name}}{{else}}Add Species{{/if}}" placeholder="" disabled/>
