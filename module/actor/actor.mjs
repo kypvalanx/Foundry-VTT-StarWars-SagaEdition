@@ -46,8 +46,6 @@ import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 
 
-
-
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -2553,9 +2551,6 @@ export class SWSEActor extends Actor {
             }
             providedItems = providedItems.filter(i => i.type === "trait")
         }
-        let mainItem = await this.createEmbeddedDocuments("Item", [entity.toObject(false)]);
-
-
         providedItems.push(...choices.items);
 
         const modifications = context.modifications || [];
@@ -2568,25 +2563,34 @@ export class SWSEActor extends Actor {
             }
         }
 
-        providedItems = nonMods;
+        let shouldLazyLoad = entity.type !== "class" && modifications.length === 0 && nonMods.length === 0;
+        let addedItem;
+        const toBeAdded = [];
 
-        let providedItemContext = Object.assign({}, context);
-        providedItemContext.newFromCompendium = false;
-        providedItemContext.provided = true;
-        providedItemContext.skipPrerequisite = true;
-        await this.addItems(providedItemContext, providedItems, mainItem[0]);
+        if(shouldLazyLoad){
+            toBeAdded.push(entity.toObject(false))
+        } else {
+            let providedItemContext = Object.assign({}, context);
+            providedItemContext.newFromCompendium = false;
+            providedItemContext.provided = true;
+            providedItemContext.skipPrerequisite = true;
+            addedItem = (await this.createEmbeddedDocuments("Item", [entity.toObject(false)]))[0];
+            await this.addItems(providedItemContext, nonMods, addedItem);
 
-        if (entity.type === "class") {
-            await this.addClassFeats(mainItem[0], providedItemContext);
-        }
+            if (entity.type === "class") {
+                await this.addClassFeats(addedItem, providedItemContext);
+            }
 
-        for (let modification of modifications) {
-            let {payload, itemName, entity} = await resolveEntity(modification)
-            if (entity) {
-                await mainItem[0].addItemModificationEffectFromItem(entity, providedItemContext)
+            for (let modification of modifications) {
+                let {payload, itemName, entity} = await resolveEntity(modification)
+                if (entity) {
+                    await addedItem.addItemModificationEffectFromItem(entity, providedItemContext)
+                }
             }
         }
-        return mainItem[0];
+
+
+        return {addedItem: addedItem, toBeAdded: toBeAdded};
     }
 
 
@@ -2769,13 +2773,20 @@ export class SWSEActor extends Actor {
 
         let notificationMessages = "";
         let addedItems = [];
+        const lazyAdd = [];
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
-            const {notificationMessage, addedItem} = await this.addItem(providedItem, criteria, parent);
+            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, criteria, parent);
+            if(toBeAdded){
+                lazyAdd.push(...toBeAdded);
+            }
             notificationMessages += notificationMessage;
             if (addedItem) {
                 addedItems.push(addedItem);
             }
+        }
+        if(lazyAdd.length > 0){
+            addedItems.push(...await this.createEmbeddedDocuments("Item", lazyAdd))
         }
         if (criteria.returnAdded) {
             return addedItems;
@@ -2883,15 +2894,11 @@ export class SWSEActor extends Actor {
         let childOptions = JSON.parse(JSON.stringify(options))
         childOptions.itemAnswers = providedItem.answers;
         childOptions.modifications = providedItem.modifications;
-        let addedItem = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
+        let {addedItem, toBeAdded} = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
-        if(!addedItem){
-            return {};
-        }
+        let notificationMessage = addedItem ? `<li>${addedItem.finalName}</li>` : "";
 
-        let notificationMessage = `<li>${addedItem.finalName}</li>`
-
-        return {notificationMessage, addedItem};
+        return {notificationMessage, addedItem, toBeAdded};
     }
 
     get warnings() {
