@@ -2790,9 +2790,9 @@ export class SWSEActor extends Actor {
 
         if (!entity) {
             if (options.suppressWarnings) {
-                console.debug(`attempted to add ${providedItem}`)
+                console.debug(`attempted to add ${JSON.stringify(providedItem)}`)
             } else {
-                console.warn(`attempted to add ${providedItem}`)
+                console.warn(`attempted to add ${JSON.stringify(providedItem)}`)
             }
             return {};
         }
