@@ -1,8 +1,9 @@
 export const naturalSort = function (arr, propertyKey = "") {
+    const collator = new Intl.Collator(game.settings.get("core", "language"), {numeric: true});
     return arr.sort((a, b) => {
         const propA = propertyKey ? getProperty(a, propertyKey) : a;
         const propB = propertyKey ? getProperty(b, propertyKey) : b;
-        return new Intl.Collator(game.settings.get("core", "language"), {numeric: true}).compare(propA, propB);
+        return collator.compare(propA, propB);
     });
 };
 
