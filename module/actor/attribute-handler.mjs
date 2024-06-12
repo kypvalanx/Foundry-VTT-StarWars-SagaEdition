@@ -12,8 +12,7 @@ export function generateAttributes(actor) {
 
     system.lockAttributes = actor.shouldLockAttributes
     let attributeGenType = actor.system.finalAttributeGenerationType;
-
-    let data = {};
+    //let data = {};
 
     for (let [key, attribute] of Object.entries(system.attributes)) {
         let longKey = getLongKey(key);
@@ -72,13 +71,13 @@ export function generateAttributes(actor) {
                 let difference = estimate - attribute.total
                 attribute.total = estimate;
 
-                data[`system.attributes.${key}.base`] = attribute.base + difference;
-                data[`system.attributes.${key}.estimate`] = null;
+                actor._pendingUpdates[`system.attributes.${key}.base`] = attribute.base + difference;
+                actor._pendingUpdates[`system.attributes.${key}.estimate`] = null;
             }
 
 
             if(attribute.total !== oldTotal){
-                //data[`system.attributes.${key}.total`] = attribute.total;
+                actor._pendingUpdates[`system.attributes.${key}.total`] = attribute.total;
             }
         }
 
@@ -87,7 +86,7 @@ export function generateAttributes(actor) {
         attribute.mod = Math.floor((toNumber(attribute.total) + toNumber(attribute.customBonus) - 10) / 2);
 
         if(attribute.mod !== old){
-            //data[`system.attributes.${key}.mod`] = attribute.mod;
+            actor._pendingUpdates[`system.attributes.${key}.mod`] = attribute.mod;
         }
 
         let conditionBonus = system.condition;
@@ -105,9 +104,9 @@ export function generateAttributes(actor) {
     }
 
 
-    if(Object.values(data).length > 0 && !actor.pack && !actor.flags.core?.sourceId?.includes(actor._id)){
-        if(actor._id){
-            actor.safeUpdate(data);
-        }
-    }
+    // if(Object.values(data).length > 0 && !actor.pack && !actor.flags.core?.sourceId?.includes(actor._id)){
+    //     if(actor._id){
+    //         actor.safeUpdate(data);
+    //     }
+    // }
 }
