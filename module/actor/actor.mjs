@@ -122,6 +122,7 @@ export class SWSEActor extends Actor {
      * Augment the basic actor data with additional dynamic data.
      */
     prepareData() {
+        this._pendingUpdates = {};
         if (this.skipPrepare) {
             return;
         }
@@ -162,15 +163,14 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
-
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
 
         if (this.type === 'character') this._prepareCharacterData(system);
-        if (this.type === 'npc') this._prepareCharacterData(system);
+        //if (this.type === 'npc') this._prepareCharacterData(system);
         if (this.type === 'computer') this._prepareComputerData(system);
         if (this.type === 'vehicle') this._prepareVehicleData(system);
-        if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
+        //if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
         for (let link of this.actorLinks) {
             let linkedActor = getDocumentByUuid(link.uuid);
@@ -203,6 +203,11 @@ export class SWSEActor extends Actor {
                 let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
+        }
+
+
+        if (Object.values(this._pendingUpdates).length > 0 && !!this._id && !this.pack && game.actors.get(this._id)) {
+            this.safeUpdate(this._pendingUpdates);
         }
     }
 
@@ -2070,7 +2075,7 @@ export class SWSEActor extends Actor {
         if(find?.system.prerequisite){
             console.error(find);
         }
-        return find;
+        return find || false;
     }
 
     get isForceSensitive() {

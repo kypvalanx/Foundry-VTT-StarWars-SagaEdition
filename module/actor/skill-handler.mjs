@@ -65,7 +65,7 @@ function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) 
  * @return {[]}
  */
 export function generateSkills(actor, options = {}) {
-    let data = {};
+    //let data = {};
 
     let conditionBonus = actor.condition
 
@@ -223,7 +223,8 @@ export function generateSkills(actor, options = {}) {
 
 
             if (classSkills.size === 0 && skill.trained) {
-                data[`system.skills.${key}.trained`] = false;
+                actor._pendingUpdates[`system.skills.${key}.trained`] = false
+                //data[`system.skills.${key}.trained`] = false;
             }
         } else {
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
@@ -264,14 +265,15 @@ export function generateSkills(actor, options = {}) {
         }
 
         if (skill.value !== old) {
-            data[`system.skills.${key}.value`] = skill.value;
+            actor._pendingUpdates[`system.skills.${key}.value`] = skill.value
+            //data[`system.skills.${key}.value`] = skill.value;
         }
 
         skillMap.set(key, skill);
     }
-    if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
-        actor.safeUpdate(data);
-    }
+    // if (Object.values(data).length > 0 && !!actor._id && !actor.pack && game.actors.get(actor._id)) {
+    //     //actor.safeUpdate(data);
+    // }
     return Array.from(skillMap.values());
 }
 

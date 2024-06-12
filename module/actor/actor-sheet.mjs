@@ -36,6 +36,7 @@ export class SWSEActorSheet extends ActorSheet {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
+        this.options.submitOnChange = false;
     }
 
 
