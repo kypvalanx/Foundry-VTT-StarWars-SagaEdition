@@ -130,7 +130,7 @@ export function generateSkills(actor, options = {}) {
     for (const distinctSkillBonus of distinctSkillBonuses) {
         let isSub = false;
         for (const resolvedSkill of resolvedSkills) {
-            if (distinctSkillBonus.startsWith(resolvedSkill)) {
+            if (distinctSkillBonus.toLowerCase().startsWith(resolvedSkill.toLowerCase())) {
                 isSub = true
                 break;
             }
@@ -196,9 +196,9 @@ export function generateSkills(actor, options = {}) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
-            let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resSkill).map(bonus => bonus.split(":")[1]);
+            let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0].toLowerCase() === resSkill.toLowerCase()).map(bonus => bonus.split(":")[1]);
 
-            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus => bonus !== resSkill && bonus.startsWith(resSkill)).map(bonus => bonus.split(":")[0]))
+            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus => bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
