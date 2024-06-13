@@ -72,6 +72,32 @@ export async function skillHandlerTest(quench) {
                         assert.lengthOf(skill.situationalSkills, 0)
                     });
                 });
+
+                it('skill tags should not be case sensitive', async function () {
+                    await withTestActor(async actor => {
+                        actor.suppressDialog = true
+                        await actor.addChange({key:"skillBonus", value:"stealth:0"})
+                        let skills = generateSkills(actor, {skills: defaultSkills})
+                        assert.lengthOf(skills, 25)
+                        const skill = skills.filter(s => s.label === "Stealth")[0];
+                        assert.equal(!!skill, true)
+                        assert.equal(skill.value, 0)
+                        assert.lengthOf(skill.situationalSkills, 0)
+                    });
+                });
+
+                it('skill tags should not be case sensitive', async function () {
+                    await withTestActor(async actor => {
+                        actor.suppressDialog = true
+                        await actor.addChange({key:"skillBonus", value:"stealth:6"})
+                        let skills = generateSkills(actor, {skills: defaultSkills})
+                        assert.lengthOf(skills, 25)
+                        const skill = skills.filter(s => s.label === "Stealth")[0];
+                        assert.equal(!!skill, true)
+                        assert.equal(skill.value, 6)
+                        assert.lengthOf(skill.situationalSkills, 0)
+                    });
+                });
             });
     })
 }

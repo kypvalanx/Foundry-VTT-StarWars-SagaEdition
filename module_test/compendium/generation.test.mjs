@@ -90,6 +90,8 @@ export async function generationTests(quench) {
                     assert.equal(actor.system.attributes.int.total, 2)
                     assert.equal(actor.system.attributes.wis.total, 7)
                     assert.equal(actor.system.attributes.cha.total, 15)
+
+                    actor.delete()
                 })
 
                 // it("Generate CL20 Luke Skywalker, Grand Master", async ()=>{

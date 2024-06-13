@@ -76,7 +76,7 @@ export class SWSEActor extends Actor {
         for(const entry of Object.entries(toBeAdded)){
             let cursor = changed;
             let lastCursor = cursor;
-            const paths = entry.key.split("\. ")
+            const paths = entry[0].split("\. ")
             for (const path of paths) {
                 if(!cursor[path]){
                     cursor[path] = {};
@@ -84,7 +84,7 @@ export class SWSEActor extends Actor {
                 lastCursor = cursor;
                 cursor = cursor[path];
             }
-            lastCursor = entry.value;
+            lastCursor = entry[1];
 
         }
     }
