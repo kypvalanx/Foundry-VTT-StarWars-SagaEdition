@@ -66,6 +66,28 @@ export class SWSEActor extends Actor {
         }
     }
 
+    _onUpdate(changed, options, userId) {
+        this.depthMerge(changed, this._pendingUpdates)
+        return super._onUpdate(changed, options, userId);
+
+    }
+
+    depthMerge(changed, toBeAdded) {
+        for(const entry of Object.entries(toBeAdded)){
+            let cursor = changed;
+            let lastCursor = cursor;
+            const paths = entry.key.split("\. ")
+            for (const path of paths) {
+                if(!cursor[path]){
+                    cursor[path] = {};
+                }
+                lastCursor = cursor;
+                cursor = cursor[path];
+            }
+            lastCursor = entry.value;
+
+        }
+    }
 
 
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
@@ -203,11 +225,6 @@ export class SWSEActor extends Actor {
                 let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
-        }
-
-
-        if (Object.values(this._pendingUpdates).length > 0 && !!this._id && !this.pack && game.actors.get(this._id)) {
-            this.safeUpdate(this._pendingUpdates);
         }
     }
 

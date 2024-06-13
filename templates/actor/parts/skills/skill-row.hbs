@@ -25,10 +25,11 @@
     <td>
         {{#if skill.isClass}}
             <label title="trained skills get an additional +5">
-                <input class="skill"
+                <input class="skill direct"
                        type="checkbox"
                        data-id="{{skill.key}}"
                        data-name="system.skills.{{skill.key}}.trained"
+                       name="system.skills.{{skill.key}}.trained"
                     {{#if skill.trained}}checked{{/if}} {{#if skill.locked}}disabled{{/if}}/>
             </label>
         {{/if}}

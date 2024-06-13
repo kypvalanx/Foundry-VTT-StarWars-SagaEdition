@@ -223,11 +223,11 @@ function getSystem() {
     return {system: this.object.system, updatePath: 'system'}
 }
 
-function getRoot() {
+function getRoot(path) {
     if (this.object instanceof SWSEActiveEffect) {
         return {root: this.object, updatePath: ''}
     }
-    return {root: this.object.system, updatePath: 'system.'}
+    return {root: this.object.system, updatePath: path.startsWith("system.")? '' : 'system.'}
 }
 
 export function changeText(event) {
@@ -278,8 +278,8 @@ export function initializeUniqueSelection(selects) {
 }
 
 export function changeCheckbox(event) {
-    let {system, updatePath} = getRoot.call(this);
     const target = event.target
+    let {system, updatePath} = getRoot.call(this, target.name);
     const type = $(target).data("type");
     const checked = type === "inverse" ? !target.checked : target.checked;
     const update = safeInsert(this.object, `${updatePath}${target.name}`, checked)
