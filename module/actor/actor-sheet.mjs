@@ -87,15 +87,10 @@ export class SWSEActorSheet extends ActorSheet {
         return data;
     }
 
-    get isUpdating(){
-        return this.updating;
-    }
-
     /** @override */
     activateListeners(html) {
         super.activateListeners(html);
 
-        if (this.isUpdating) return;
         //disable submit on enter
         $(document).ready(function() {
             $(window).keydown(function(event){
