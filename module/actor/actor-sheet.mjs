@@ -406,7 +406,9 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
         dragData.uuid = elem.dataset.uuid
-        dragData.data = JSON.parse(elem.dataset.data)
+        if(elem.dataset.data){
+            dragData.data = JSON.parse(elem.dataset.data)
+        }
 
         if(elem.dataset.type && !dragData.type){
             dragData.type = elem.dataset.type
@@ -1243,7 +1245,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         });
         if (response) {
-            sheet.actor.setAttributes(response);
+            sheet.object.setAttributes(response);
         }
     }
 
