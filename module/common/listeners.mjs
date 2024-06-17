@@ -223,17 +223,21 @@ function getSystem() {
     return {system: this.object.system, updatePath: 'system'}
 }
 
-function getRoot(path) {
+function getRoot(path = "") {
     if (this.object instanceof SWSEActiveEffect) {
         return {root: this.object, updatePath: ''}
     }
-    return {root: this.object.system, updatePath: path.startsWith("system.")? '' : 'system.'}
+    return {root: this.object.system, updatePath: ""}
 }
 
 export function changeText(event) {
     let {system, updatePath} = getRoot.call(this);
     const target = event.target
-    const update = safeInsert(this.object, `${updatePath}${target.name}`, target.value)
+    const name = target.name || $(target).data("name");
+    if(!name){
+        return;
+    }
+    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
 
     this.object.safeUpdate(update);
 }
@@ -241,7 +245,11 @@ export function changeText(event) {
 export function changeSelect(event) {
     let {system, updatePath} = getRoot.call(this);
     const target = event.target
-    const update = safeInsert(this.object, `${updatePath}${target.name}`, target.value)
+    const name = target.name || $(target).data("name");
+    if(!name){
+        return;
+    }
+    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
 
     this.object.safeUpdate(update);
 }
@@ -279,10 +287,14 @@ export function initializeUniqueSelection(selects) {
 
 export function changeCheckbox(event) {
     const target = event.target
-    let {system, updatePath} = getRoot.call(this, target.name);
+    const name = target.name || $(target).data("name");
+    if(!name){
+        return;
+    }
+    let {system, updatePath} = getRoot.call(this, name);
     const type = $(target).data("type");
     const checked = type === "inverse" ? !target.checked : target.checked;
-    const update = safeInsert(this.object, `${updatePath}${target.name}`, checked)
+    const update = safeInsert(this.object, `${updatePath}${name}`, checked)
 
     this.object.safeUpdate(update);
 }
