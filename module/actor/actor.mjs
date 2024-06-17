@@ -196,6 +196,7 @@ export class SWSEActor extends Actor {
 
         for (let link of this.actorLinks) {
             let linkedActor = getDocumentByUuid(link.uuid);
+            if(!linkedActor) continue;
             let reciLink = linkedActor.actorLinks.find(link => link.uuid === this.uuid)
 
             const oldLink = JSON.stringify(reciLink);

@@ -112,10 +112,17 @@ export class SWSEActorSheet extends ActorSheet {
         new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
 
 
-        html.find("select.direct").on("change", changeSelect.bind(this));
-        html.find("input[type=text].direct").on("change", changeText.bind(this));
-        html.find("input[type=number].direct").on("change", changeText.bind(this));
-        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
+        html.find("select").on("change", changeSelect.bind(this));
+        (function (numberInputs) {
+            numberInputs.on("change", changeText.bind(this));
+            numberInputs.on("keydown", (event) => {
+                const key = event.which;
+                if (key === 13) {
+                    changeText.call(this, event);
+                }
+            })
+        }).call(this, html.find("input[type=number],input[type=text]"));
+        html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             onSpanTextInput.call(this, event, this._adjustItemAttributeBySpan.bind(this), "text");
@@ -127,13 +134,13 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("span.text-box.item-action").on("click", (event) => {
             onSpanTextInput.call(this, event, this._performItemAction.bind(this), "text");
         });
-        html.find("input.input").on("keyup", (event) => {
-
-            if (event.code === 'Enter' || event.code === 'NumpadEnter') {
-                this._adjustActorPropertyBySpan.bind(this)
-
-            }
-        });
+        // html.find("input.input").on("keyup", (event) => {
+        //
+        //     if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+        //         this._adjustActorPropertyBySpan.bind(this)
+        //
+        //     }
+        // });
         // html.find("input.plain").on("keypress", (event) => {
         //     if (event.code === 'Enter' || event.code === 'NumpadEnter') {
         //         event.stopPropagation();
