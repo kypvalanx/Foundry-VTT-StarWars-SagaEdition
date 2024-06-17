@@ -797,14 +797,11 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        this.updating = true;
         await this.object.addItems({
             newFromCompendium: true,
             answers: data.answers,
             items: [data]
         });
-        this.updating = false;
-        await this._render(true);
     }
 
     async _onDropActiveEffect(event, data) {
