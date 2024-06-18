@@ -3,21 +3,21 @@
     <div style="width:100%" class="flexrow">
         <div class="key">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
-                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.key"{{/if}} value="{{change.key}}"/>
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.key"{{/if}} value="{{change.key}}"/>
         </div>
 
         <div class="mode" title="{{localize EFFECT.ModeDescription}}">
-            <select class="direct" {{#if inherited}}disabled{{else}}name="changes.{{index}}.mode"{{/if}} data-dtype="Number">
+            <select class="direct" {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.mode"{{/if}} data-dtype="Number">
                 {{selectOptions modes selected=change.mode}}
             </select>
         </div>
         <div class="priority" title="{{localize EFFECT.PriorityDescription}}">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="number"
-                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.priority"{{/if}} value="{{#unless change.priority}}1{{else}}{{change.priority}}{{/unless}}"/>
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.priority"{{/if}} value="{{#unless change.priority}}1{{else}}{{change.priority}}{{/unless}}"/>
         </div>
         <div class="value">
             <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
-                   {{#if inherited}}disabled{{else}}name="changes.{{index}}.value"{{/if}} value="{{change.value}}"/>
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.value"{{/if}} value="{{change.value}}"/>
         </div>
         <div class="change-controls">
             <a class="change-control toggle" style="display:none" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if
