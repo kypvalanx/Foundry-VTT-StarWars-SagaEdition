@@ -56,8 +56,8 @@
 
     {{!-- Sheet Tab Navigation --}}
     <nav class="sheet-tabs tabs" data-group="primary">
-        <a class="item" data-tab="summary"><!--<i class="fas fa-book"></i>--> {{localize "ITEM.TabSummary"}}</a>
-        <a class="item" data-tab="effects"><!--<i class="fas fa-cogs"></i>--> {{localize "ITEM.TabChanges"}}</a>
+        <a class="item" data-tab="summary">{{localize "ITEM.TabSummary"}}</a>
+        <a class="item" data-tab="changes">{{localize "ITEM.TabChanges"}}</a>
         <a class="item" data-tab="provided">Provided</a>
         {{#if item.hasPrerequisites}}<a class="item" data-tab="prerequisites">Prerequisites</a>{{/if}}
         {{#if item.strippable}}<a class="item" data-tab="stripping">Stripping</a>{{/if}}
@@ -171,9 +171,9 @@
             </ol>
         </div>
 
-        {{!-- Attributes Tab --}}
-        <div class="tab attributes" data-group="primary" data-tab="effects">
-            {{> 'systems/swse/templates/change/change-list.hbs' changes=item.changes inheritedChanges=item.inheritedChanges}}
+        {{!-- Changes Tab --}}
+        <div class="tab attributes" data-group="primary" data-tab="changes">
+            {{> 'systems/swse/templates/change/change-list.hbs' changes=item.changes inheritedChanges=item.inheritedChanges changepath='system.changes'}}
         </div>
 
         {{!-- Provided Tab --}}

@@ -9,11 +9,11 @@
 </header>
 <ol class="change-list">
     {{#each changes as |change i|}}
-        {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i modes=../modes}}
+        {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i modes=../modes changepath=../changepath}}
     {{/each}}
-        {{#if inheritedChanges}}
-            {{#each inheritedChanges as |change i|}}
-                {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true modes=../modes}}
-            {{/each}}
-        {{/if}}
+    {{#if inheritedChanges}}
+        {{#each inheritedChanges as |change i|}}
+            {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true modes=../modes changepath=../changepath}}
+        {{/each}}
+    {{/if}}
 </ol>

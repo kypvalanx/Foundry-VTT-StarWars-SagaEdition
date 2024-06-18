@@ -144,7 +144,7 @@ export const registerHandlebarsHelpers = function () {
         if(Array.isArray(arg1)){
             values = arg1;
         } else if('type' === arg1){
-            values = Object.keys(game.system.documentTypes).filter(type => type !== "base")
+            values = Object.keys(game.system.documentTypes.Item).filter(type => type !== "base")
         } else if('subtype' === arg1){
             values = SUBTYPES[arg2] || [];
         } else if(Object.entries(arg1).length > 0){
@@ -160,9 +160,9 @@ export const registerHandlebarsHelpers = function () {
 
         for(let value of values || []){
             if(Array.isArray(value)){
-                response += `<option value="${value[0]}" ${value[0] === selected ? 'selected' : ""}>${value[1]}</option>`;
+                response += `<option value="${value[0]}" ${value[0] === selected ? 'selected' : ""}>${value[1].titleCase()}</option>`;
             } else {
-                response += `<option value="${value}" ${value === selected ? 'selected' : ""}>${value}</option>`;
+                response += `<option value="${value}" ${value === selected ? 'selected' : ""}>${value.titleCase()}</option>`;
             }
         }
         return response;
