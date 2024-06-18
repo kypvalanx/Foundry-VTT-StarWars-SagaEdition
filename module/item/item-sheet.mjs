@@ -150,9 +150,16 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
 
-        html.find("select.direct").on("change", changeSelect.bind(this));
-        html.find("input[type=text].direct").on("change", changeText.bind(this));
-        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
+        html.find("select").on("change", changeSelect.bind(this));
+        const numberInputs =  html.find("input[type=number],input[type=text]")
+        numberInputs.on("change", changeText.bind(this));
+        numberInputs.on("keydown", (event) => {
+            const key = event.which;
+            if (key === 13) {
+                changeText.call(this, event);
+            }
+        })
+        html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
     }
 
