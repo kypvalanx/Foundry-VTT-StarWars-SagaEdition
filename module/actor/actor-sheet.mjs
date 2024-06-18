@@ -113,15 +113,14 @@ export class SWSEActorSheet extends ActorSheet {
 
 
         html.find("select").on("change", changeSelect.bind(this));
-        (function (numberInputs) {
-            numberInputs.on("change", changeText.bind(this));
-            numberInputs.on("keydown", (event) => {
-                const key = event.which;
-                if (key === 13) {
-                    changeText.call(this, event);
-                }
-            })
-        }).call(this, html.find("input[type=number],input[type=text]"));
+        const numberInputs =  html.find("input[type=number],input[type=text]")
+        numberInputs.on("change", changeText.bind(this));
+        numberInputs.on("keydown", (event) => {
+            const key = event.which;
+            if (key === 13) {
+                changeText.call(this, event);
+            }
+        })
         html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
