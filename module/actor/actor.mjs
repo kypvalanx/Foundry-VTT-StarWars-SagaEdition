@@ -964,7 +964,7 @@ export class SWSEActor extends Actor {
 
         let darkSideTaint = getInheritableAttribute({entity: item, attributeKey: "darksideTaint", reduce: "SUM"})
 
-        system.finalDarksideScore = system.darkSideScore + darkSideTaint
+        system.finalDarksideScore = parseInt(system.darkSideScore) + parseInt(darkSideTaint)
     }
 
     get hasCrew() {
