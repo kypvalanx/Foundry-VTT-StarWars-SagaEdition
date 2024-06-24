@@ -5,8 +5,9 @@ import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
 
 export async function withTestActor(param, options= {}) {
+    const name = "New Test Actor DELETE ME";
     const actor = await SWSEActor.create({
-        name: "New Test Actor DELETE ME",
+        name: name,
         type: "character",
         img: "artwork/character-profile.jpg"
     })
@@ -14,24 +15,26 @@ export async function withTestActor(param, options= {}) {
         await param(actor);
     } finally {
         await actor.delete();
-        game.actors.forEach(a => {if(a.name === "New Test Actor DELETE ME"){
+        game.actors.forEach(a => {if(a.name === name){
             a.delete()
         }})
     }
 }
 
 
-async function withTestVehicle(param, options= {}) {
+
+export async function withTestVehicle(param, options= {}) {
+    const name = "New Test Actor DELETE ME";
     const actor = await SWSEActor.create({
-        name: "New Test Actor DELETE ME",
-        type: "character",
+        name: name,
+        type: "vehicle",
         img: "artwork/character-profile.jpg"
     })
     try {
         await param(actor);
     } finally {
         await actor.delete();
-        game.actors.forEach(a => {if(a.name === "New Test Actor DELETE ME"){
+        game.actors.forEach(a => {if(a.name === name){
             a.delete()
         }})
     }
@@ -44,14 +47,14 @@ function getMockEvent() {
     return newVar;
 }
 
-function hasItems(assert, items, strings) {
+export function hasItems(assert, items, strings) {
     items = items.map(i => i.name).sort()
     strings = strings.sort()
     assert.sameMembers(items, strings)
 }
 
 export async function actorSheetTests(quench) {
-    quench.registerBatch("actor.actor-sheet.classes",
+    quench.registerBatch("actor.actor-sheet.character",
         (context) => {
             const {describe, it, assert, expect, should} = context;
             describe("Actor", () => {

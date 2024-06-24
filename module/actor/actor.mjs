@@ -2237,16 +2237,20 @@ export class SWSEActor extends Actor {
         //Check that the item being added can be added to this actor type and that it hasn't been added too many times
         if (context.newFromCompendium) {
             if (!this.isPermittedForActorType(entity.type)) {
-                new Dialog({
-                    title: "Inappropriate Item",
-                    content: `You can't add a ${entity.type} to a ${this.type}.`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
+                if(this.suppressDialog){
+                    console.warn(`attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, entity)
+                } else {
+                    new Dialog({
+                        title: "Inappropriate Item",
+                        content: `You can't add a ${entity.type} to a ${this.type}.`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
                         }
-                    }
-                }).render(true);
+                    }).render(true);
+                }
                 return false;
             }
 
@@ -2912,6 +2916,7 @@ export class SWSEActor extends Actor {
         }
 
         entity.setTextDescription();
+        entity.handleLegacyData()
 
 
         let childOptions = JSON.parse(JSON.stringify(options))
