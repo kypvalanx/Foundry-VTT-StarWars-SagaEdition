@@ -3,7 +3,11 @@
     <h1 class="resource-label">Dark Side Score: {{actor.system.finalDarksideScore}}</h1>
     <div class="flex flex-row flex-wrap">
         {{#each actor.system.darkSideArray as | value|}}
-        <div class="dark-side-button button{{#if value.active}} active{{/if}}" data-value="{{value.value}}">{{value.value}}</div>
+<!--        <div class="dark-side-button button{{#if value.active}} active{{/if}}" data-value="{{value.value}}">{{value.value}}</div>-->
+            <label>
+                {{value.value}}
+                <input class="dark-side-button{{#ifGT ../actor.system.finalDarksideScore value.value}} lessthan{{/ifGT}}" type="radio" name="system.darkSideScore" {{#ifEquals ../actor.system.finalDarksideScore value.value}}checked{{/ifEquals}} value="{{value.value}}">
+            </label>
         {{/each}}
     </div>
 </div>

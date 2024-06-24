@@ -298,3 +298,17 @@ export function changeCheckbox(event) {
 
     this.object.safeUpdate(update);
 }
+
+export function changeRadio(event) {
+    const target = event.target
+    const name = target.name || $(target).data("name");
+    if(!name){
+        return;
+    }
+    let {system, updatePath} = getRoot.call(this, name);
+    const type = $(target).data("type");
+
+    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
+
+    this.object.safeUpdate(update);
+}

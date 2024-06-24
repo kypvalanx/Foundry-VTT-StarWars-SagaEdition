@@ -14,7 +14,7 @@ import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {
-    changeCheckbox,
+    changeCheckbox, changeRadio,
     changeSelect,
     changeText,
     onChangeControl,
@@ -122,6 +122,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         })
         html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
+        html.find("input[type=radio]").on("click", changeRadio.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             onSpanTextInput.call(this, event, this._adjustItemAttributeBySpan.bind(this), "text");
