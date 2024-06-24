@@ -908,6 +908,12 @@ export class SWSEItem extends Item {
         this.system.textDescription = this.stripHTML(this.system.description);
     }
 
+    handleLegacyData(){
+        if((!this.system.changes || this.system.changes.length === 0) && this.system.attributes && this.system.attributes.length > 0){
+             this.system.changes = this.system.attributes;
+        }
+    }
+
     setSourceString() {
         let sourceString = '';
 
