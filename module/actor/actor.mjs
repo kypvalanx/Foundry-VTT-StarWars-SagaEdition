@@ -2638,11 +2638,6 @@ export class SWSEActor extends Actor {
         entity.system.changes = find;
     }
 
-    async resolveAddItem(entity, choices, context) {
-
-    }
-
-
     /**
      * Adds Feats provided by a class and provides choices to the player when one is available
      * @param item {SWSEItem}

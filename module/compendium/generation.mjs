@@ -83,7 +83,7 @@ async function importCompendium(jsonImport, forceRefresh) {
 
 
 
-    const compendiumName = content.name.replace(" ", "-");
+    const compendiumName = content.name.replace(" ", "-").replace(" ", "-");
     const entity = content.type;
 
     let pack = await game.packs.get(`world.${compendiumName.toLowerCase()}`);
