@@ -22,7 +22,7 @@ export async function vehicleSheetTests(quench) {
                 describe("._sheet", () => {
                     describe("._onDropItem", () => {
 
-                        it('should accept a first level of a heroic class and should grant associated feats and traits', async function () {
+                        it('should accept a vehicle base type', async function () {
                             await withTestVehicle(async actor => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Light Freighter", type: "vehicleBaseType"})

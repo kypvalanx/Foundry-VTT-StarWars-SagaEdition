@@ -2226,6 +2226,7 @@ export class SWSEActor extends Actor {
      * @param context.isUpload {boolean} is this part of a bulk upload (TODO we should probably deprecate this and do a better job of generating the upload data)
      * @param context.isFirstLevel {boolean} does this item represent the first level for a character?
      * @param context.provided {boolean} is this a new item from the compendium
+     * @param context.isAdd {boolean} is this check part of an add?
      */
     async checkPrerequisitesAndResolveOptions(entity, context) {
         context.actor = this;
@@ -2235,7 +2236,7 @@ export class SWSEActor extends Actor {
         }
 
         //Check that the item being added can be added to this actor type and that it hasn't been added too many times
-        if (context.newFromCompendium) {
+        if (context.isAdd) {
             if (!this.isPermittedForActorType(entity.type)) {
                 if(this.suppressDialog){
                     console.warn(`attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, entity)
@@ -2284,60 +2285,60 @@ export class SWSEActor extends Actor {
             }
 
             if (!context.skipPrerequisite && !context.isUpload) {
-                //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
-                if (!equipableTypes.includes(entity.type)) {
-                    let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
-                    if (meetsPrereqs.doesFail) {
-                        if (context.offerOverride) {
-                            let override = await Dialog.wait({
-                                title: "You Don't Meet the Prerequisites!",
-                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                                buttons: {
-                                    ok: {
-                                        icon: '<i class="fas fa-check"></i>',
-                                        label: 'Ok',
-                                        callback: () => {
-                                            return false
-                                        }
-                                    },
-                                    override: {
-                                        icon: '<i class="fas fa-check"></i>',
-                                        label: 'Override',
-                                        callback: () => {
-                                            return true
-                                        }
+            //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
+            if (!equipableTypes.includes(entity.type)) {
+                let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
+                if (meetsPrereqs.doesFail) {
+                    if (context.offerOverride) {
+                        let override = await Dialog.wait({
+                            title: "You Don't Meet the Prerequisites!",
+                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok',
+                                    callback: () => {
+                                        return false
+                                    }
+                                },
+                                override: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Override',
+                                    callback: () => {
+                                        return true
                                     }
                                 }
-                            });
-                            if (!override) {
-                                return false;
                             }
-                        } else {
-
-                            if(this.suppressDialog){
-                                throw new Error(`You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList, "plain")}`);
-                            }
-
-                            await Dialog.prompt({
-                                title: "You Don't Meet the Prerequisites!",
-                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                                callback: () => {
-                                }
-                            });
-
+                        });
+                        if (!override) {
                             return false;
                         }
+                    } else {
 
-                    } else if (meetsPrereqs.failureList.length > 0) {
+                        if(this.suppressDialog){
+                            throw new Error(`You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList, "plain")}`);
+                        }
+
                         await Dialog.prompt({
-                                title: "You MAY Meet the Prerequisites!",
-                                content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                                callback: () => {
-                                }
+                            title: "You Don't Meet the Prerequisites!",
+                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                            callback: () => {
                             }
-                        );
+                        });
+
+                        return false;
                     }
+
+                } else if (meetsPrereqs.failureList.length > 0) {
+                    await Dialog.prompt({
+                            title: "You MAY Meet the Prerequisites!",
+                            content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
+                            callback: () => {
+                            }
+                        }
+                    );
                 }
+            }
             }
 
             if (entity.type === 'talent') {
@@ -2780,6 +2781,7 @@ export class SWSEActor extends Actor {
      * @returns {string | [SWSEItem]}
      */
     async addItems(criteria = {}, items, parent) {
+        criteria.isAdd = true;
         const providedItems = [];
         if(criteria.items){
             for(const item of criteria.items.filter(item => !!item)){
@@ -2798,7 +2800,7 @@ export class SWSEActor extends Actor {
         const lazyAdd = [];
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
-            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, criteria, parent);
+            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, parent, criteria);
             if(toBeAdded){
                 lazyAdd.push(...toBeAdded);
             }
@@ -2817,7 +2819,14 @@ export class SWSEActor extends Actor {
     }
 
 
-    async addItem(providedItem, options, parent) {
+    /**
+     *
+     * @param providedItem
+     * @param parentItem
+     * @param options
+     * @return {Promise<{addedItem, notificationMessage: (string|string), toBeAdded: *[]}|{}|{addedItem: undefined, notificationMessage: string}>}
+     */
+    async addItem(providedItem, parentItem, options) {
         //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
         let {payload, itemName, entity, createdItem} = await resolveEntity(providedItem);
 
@@ -2891,7 +2900,7 @@ export class SWSEActor extends Actor {
             })
         }
         entity.addProvidedItems(providedItems);
-        if (parent) await entity.setParent(parent, providedItem.unlocked);
+        if (parentItem) await entity.setParent(parentItem, providedItem.unlocked);
         else if (providedItem.granted) entity.setGranted(providedItem.granted);
         entity.setPrerequisite(providedItem.prerequisite);
 
@@ -2987,20 +2996,11 @@ export class SWSEActor extends Actor {
             item = this.items.get(item);
         }
         item.equip(equipType);
-        // let update = {};
-        // update['system.equippedIds'] = [{id: itemId, type: equipType, slot, position}]
-        //     .concat(this.system.equippedIds.filter(value => !!value && value !== itemId && value?.id !== itemId));
-        //
-        // await this.safeUpdate(update);
     }
 
     async unequipItem(itemId) {
         let item = this.items.get(itemId);
         item.unequip();
-        // let update = {};
-        // update['system.equippedIds'] = this.system.equippedIds.filter(value => value !== itemId && value?.id !== itemId);
-        //
-        // await this.safeUpdate(update);
     }
 
     getEquipTypes() {

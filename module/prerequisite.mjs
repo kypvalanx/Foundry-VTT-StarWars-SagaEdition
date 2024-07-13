@@ -534,20 +534,18 @@ function meetsPrerequisite(prereq, target, options) {
  * @param {string} prereqs[].type always available
  * @param {string} prereqs[].requirement available on all types except AND, OR, and NULL
  * @param {number} prereqs[].count available on OR
+ * @param options
  * @param {Object[]} prereqs[].children available on AND and OR
  * @returns {{failureList: [], doesFail: boolean, silentFail: []}}
  */
 export function meetsPrerequisites(target, prereqs, options = {}) {
     //TODO add links to failures to open up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
-    let failureList = [];
-    let silentFail = [];
-    let successList = [];
-    if (!prereqs || (target.system.ignorePrerequisites && !options.existingTraitPrerequisite)) {
-        return {doesFail: false, failureList, silentFail, successList};
+    if (!prereqs || (target.system.ignorePrerequisites && options.isAdd) || options.skipPrerequisite || options.isUpload) {
+        return {doesFail: false, failureList:[], silentFail:[], successList:[]};
     }
     if (!target) {
-        return {doesFail: true, failureList, silentFail, successList};
+        return {doesFail: true, failureList:[], silentFail:[], successList:{}};
     }
 
     if(!options.prerequisiteCache){
@@ -558,6 +556,10 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     if (!options.embeddedItemOverride) {
         options.embeddedItemOverride = inheritableItems(target)
     }
+
+    let failureList = [];
+    let silentFail = [];
+    let successList = [];
     for (let prereq of prereqs) {
         let response = meetsPrerequisite(prereq, target, options);
         failureList.push(...response.failureList)
