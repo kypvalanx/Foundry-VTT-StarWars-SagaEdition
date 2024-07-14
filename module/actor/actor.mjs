@@ -27,7 +27,7 @@ import {
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
-    equipableTypes,
+    EQUIPABLE_TYPES,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
     KNOWN_WEIRD_UNITS,
     LIMITED_TO_ONE_TYPES,
@@ -45,6 +45,22 @@ import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 
+function suppressibleDialog(entity, message, title, suppress) {
+    if (suppress) {
+        console.warn(message, entity)
+    } else {
+        new Dialog({
+            title: title,
+            content: message,
+            buttons: {
+                ok: {
+                    icon: '<i class="fas fa-check"></i>',
+                    label: 'Ok'
+                }
+            }
+        }).render(true);
+    }
+}
 
 /**
  * Extend the base Actor entity
@@ -73,12 +89,12 @@ export class SWSEActor extends Actor {
     }
 
     depthMerge(changed, toBeAdded) {
-        for(const entry of Object.entries(toBeAdded)){
+        for (const entry of Object.entries(toBeAdded)) {
             let cursor = changed;
             let lastCursor = cursor;
             const paths = entry[0].split("\. ")
             for (const path of paths) {
-                if(!cursor[path]){
+                if (!cursor[path]) {
                     cursor[path] = {};
                 }
                 lastCursor = cursor;
@@ -96,14 +112,15 @@ export class SWSEActor extends Actor {
         this.reset()
     }
 
-    useAmmunition(type){
+    useAmmunition(type) {
         let item = this.items.find(i => i.name === type);
-        if(item && item.system.quantity > 0){
-           item.decreaseQuantity();
-           return {fail:false}
+        if (item && item.system.quantity > 0) {
+            item.decreaseQuantity();
+            return {fail: false}
         }
         return {fail: true};
     }
+
     getCached(key, fn) {
         if (!this.cache) {
             return fn();
@@ -119,7 +136,7 @@ export class SWSEActor extends Actor {
 
     async safeUpdate(data = {}, context = {}) {
         if (this.canUserModify(game.user, 'update') && !this.pack && !!game.actors.get(this.id)) {
-            try{
+            try {
                 await this.update(data, context);
             } catch (e) {
 
@@ -162,8 +179,6 @@ export class SWSEActor extends Actor {
         system.gravity = system.gravity || "Normal"
 
 
-
-
         system.condition = 0;
         let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
 
@@ -196,7 +211,7 @@ export class SWSEActor extends Actor {
 
         for (let link of this.actorLinks) {
             let linkedActor = getDocumentByUuid(link.uuid);
-            if(!linkedActor) continue;
+            if (!linkedActor) continue;
             let reciLink = linkedActor.actorLinks.find(link => link.uuid === this.uuid)
 
             const oldLink = JSON.stringify(reciLink);
@@ -229,7 +244,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    get condition(){
+    get condition() {
         return this.system.condition;
     }
 
@@ -515,7 +530,8 @@ export class SWSEActor extends Actor {
         system.defense = defense;
         system.armors = armors;
 
-        this._manageAutomaticItems(this, feats.removeFeats).then(() => {});
+        this._manageAutomaticItems(this, feats.removeFeats).then(() => {
+        });
         this.initializeCharacterSettings();
     }
 
@@ -1170,7 +1186,7 @@ export class SWSEActor extends Actor {
         return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped");
     }
 
-    get equippedWeapons(){
+    get equippedWeapons() {
         return this.getEquippedItems()
             .filter(item => 'weapon' === item.type)
     }
@@ -1311,7 +1327,7 @@ export class SWSEActor extends Actor {
         await this.safeUpdate(update);
     }
 
-    async addChange(change){
+    async addChange(change) {
         let update = {};
         update[`system.changes`] = this.system.changes || [];
         update[`system.changes`].push(change);
@@ -1390,10 +1406,10 @@ export class SWSEActor extends Actor {
                 let heroicLevel = 0;
                 for (let co of classObjects) {
                     if (getInheritableAttribute({
-                            entity: co,
-                            attributeKey: "isHeroic",
-                            reduce: "OR"
-                        })) {
+                        entity: co,
+                        attributeKey: "isHeroic",
+                        reduce: "OR"
+                    })) {
                         heroicLevel += co.system.levelsTaken.length;
                     }
                 }
@@ -1431,9 +1447,9 @@ export class SWSEActor extends Actor {
         if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
             return false;
         } else {
-            for(const species of this.itemTypes.species){
-                for(const change of species.system.changes){
-                    if(change.key === "isDroid" && (change.value === true || change.value === "true")){
+            for (const species of this.itemTypes.species) {
+                for (const change of species.system.changes) {
+                    if (change.key === "isDroid" && (change.value === true || change.value === "true")) {
                         return true;
                     }
                 }
@@ -1518,13 +1534,13 @@ export class SWSEActor extends Actor {
 
     handleLevelBasedAttributeBonuses(system) {
 
-        if(system.attributeGenerationType === "Manual"){
+        if (system.attributeGenerationType === "Manual") {
             return 0;
         }
 
         let characterLevel = this.classes.length;
 
-        return (characterLevel - (characterLevel % 4)) /4
+        return (characterLevel - (characterLevel % 4)) / 4
     }
 
     ignoreCon() {
@@ -1708,9 +1724,9 @@ export class SWSEActor extends Actor {
             .includes(`${item.finalName}:${item.type}`);
     }
 
-    hasAnyOf(items){
-        for(const item of items){
-            if(this.hasItem(item)){
+    hasAnyOf(items) {
+        for (const item of items) {
+            if (this.hasItem(item)) {
                 return true;
             }
         }
@@ -1819,7 +1835,7 @@ export class SWSEActor extends Actor {
                 }
             }
 
-            if(!type && innerJoin(bonusTalentTrees, providers).length > 0){
+            if (!type && innerJoin(bonusTalentTrees, providers).length > 0) {
                 bonusTreeTalents.push(talent);
                 continue;
             }
@@ -1887,7 +1903,7 @@ export class SWSEActor extends Actor {
         const availableItem = actorData.availableItems[type] || 0;
         actorData.availableItems[type] = availableItem - reduceBy;
 
-        if(backupType && actorData.availableItems[type] < 0){
+        if (backupType && actorData.availableItems[type] < 0) {
             let availableBackup = actorData.availableItems[backupType] || 0;
             actorData.availableItems[type] = availableBackup + actorData.availableItems[type];
             actorData.availableItems[type] = 0;
@@ -1913,7 +1929,11 @@ export class SWSEActor extends Actor {
         let flavor = label ? `${this.name} rolls for ${label}!` : '';
 
         if (variable.startsWith('@Initiative')) {
-            await this.rollInitiative({createCombatants: true, rerollInitiative: true, initiativeOptions: {formula: rollStr}})
+            await this.rollInitiative({
+                createCombatants: true,
+                rerollInitiative: true,
+                initiativeOptions: {formula: rollStr}
+            })
             return;
         }
 
@@ -1998,7 +2018,10 @@ export class SWSEActor extends Actor {
         //let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
 
         if (items.length === 0) {
-            this.attack.createAttackDialog(null, {type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds})
+            this.attack.createAttackDialog(null, {
+                type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"),
+                items: itemIds
+            })
         } else {
             for (let item of items) {
                 item.rollItem(this).render(true);
@@ -2090,7 +2113,7 @@ export class SWSEActor extends Actor {
 
     get shouldLockAttributes() {
         const find = this.items.find(trait => trait.type === "trait" && trait.name === 'Disable Attribute Modification');
-        if(find?.system.prerequisite){
+        if (find?.system.prerequisite) {
             console.error(find);
         }
         return find || false;
@@ -2156,8 +2179,6 @@ export class SWSEActor extends Actor {
         let sourceIds = attributes.map(item => item.source).distinct()
         return sourceIds.map(sourceId => this.items.get(sourceId));
     }
-
-
 
 
     resolveSlot(crew, type, cover, numericSlot) {
@@ -2235,110 +2256,84 @@ export class SWSEActor extends Actor {
             return false;
         }
 
+        if (!context.isUpload) {
+
+        }
+
         //Check that the item being added can be added to this actor type and that it hasn't been added too many times
         if (context.isAdd) {
-            if (!this.isPermittedForActorType(entity.type)) {
-                if(this.suppressDialog){
-                    console.warn(`attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, entity)
-                } else {
-                    new Dialog({
-                        title: "Inappropriate Item",
-                        content: `You can't add a ${entity.type} to a ${this.type}.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                }
-                return false;
-            }
+            if (!context.skipPrerequisite && !context.isUpload) {
+                if (!this.isPermittedForActorType(entity.type)) {
+                    suppressibleDialog.call(this, entity,
+                        `Attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, `Inappropriate Item`,
+                        this.suppressDialog);
 
-            if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
-                const isAtMaximumQuantity = this.countItem(entity) === getInheritableAttribute({
-                    entity: entity,
-                    attributeKey: "takeMultipleTimesMax",
-                    reduce: "MAX"
-                });
-
-                const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
-                    entity: entity,
-                    attributeKey: "takeMultipleTimes"
-                }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
-
-                if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
-                    if (!context.skipPrerequisite && !context.isUpload ) {
-                        if(this.suppressDialog){
-                            console.warn(`attempted to add ${entity.finalName} but could not because cannot be taken more than once${takenOnceAndCannotBeTakenMultipleTimes}, maximum quantity: ${isAtMaximumQuantity}`, entity)
-                        } else {
-                            await Dialog.prompt({
-                                title: `You already have this ${entity.type}`,
-                                content: `You have already taken the ${entity.finalName} ${entity.type}`,
-                                callback: () => {
-                                }
-                            })
-                        }
-                    }
                     return false;
                 }
-            }
+                if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
+                    const maximumQuantity = getInheritableAttribute({
+                        entity: entity,
+                        attributeKey: "takeMultipleTimesMax",
+                        reduce: "MAX"
+                    });
+                    const timesTaken = this.countItem(entity);
+                    const isAtMaximumQuantity = timesTaken === maximumQuantity;
 
-            if (!context.skipPrerequisite && !context.isUpload) {
-            //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
-            if (!equipableTypes.includes(entity.type)) {
-                let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
-                if (meetsPrereqs.doesFail) {
-                    if (context.offerOverride) {
-                        let override = await Dialog.wait({
-                            title: "You Don't Meet the Prerequisites!",
-                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok',
-                                    callback: () => {
-                                        return false
-                                    }
-                                },
-                                override: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Override',
-                                    callback: () => {
-                                        return true
-                                    }
-                                }
-                            }
-                        });
-                        if (!override) {
-                            return false;
-                        }
-                    } else {
+                    const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
+                        entity: entity,
+                        attributeKey: "takeMultipleTimes"
+                    }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
 
-                        if(this.suppressDialog){
-                            throw new Error(`You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList, "plain")}`);
-                        }
-
-                        await Dialog.prompt({
-                            title: "You Don't Meet the Prerequisites!",
-                            content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                            callback: () => {
-                            }
-                        });
+                    if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
+                        suppressibleDialog.call(this, entity,
+                            `Attempted to add ${entity.finalName} but could not because ${entity.finalName} can't be taken more than ${timesTaken} time${timesTaken > 1 ? 's' : ''}`, `Already Taken ${timesTaken} Time${timesTaken > 1 ? 's' : ''}`,
+                            this.suppressDialog);
 
                         return false;
                     }
-
-                } else if (meetsPrereqs.failureList.length > 0) {
-                    await Dialog.prompt({
-                            title: "You MAY Meet the Prerequisites!",
-                            content: "You MAY meet the prerequisites. Check the remaining reqs:<br/>" + formatPrerequisites(meetsPrereqs.failureList),
-                            callback: () => {
-                            }
-                        }
-                    );
                 }
-            }
+
+                //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
+                if (!EQUIPABLE_TYPES.includes(entity.type)) {
+                    let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
+                    if (meetsPrereqs.doesFail) {
+                        if (context.offerOverride) {
+                            let override = await Dialog.wait({
+                                title: "You Don't Meet the Prerequisites!",
+                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                                buttons: {
+                                    ok: {
+                                        icon: '<i class="fas fa-check"></i>',
+                                        label: 'Ok',
+                                        callback: () => {
+                                            return false
+                                        }
+                                    },
+                                    override: {
+                                        icon: '<i class="fas fa-check"></i>',
+                                        label: 'Override',
+                                        callback: () => {
+                                            return true
+                                        }
+                                    }
+                                }
+                            });
+                            if (!override) {
+                                return false;
+                            }
+                        } else {
+                            suppressibleDialog.call(this, entity,
+                                `You do not meet the prerequisites:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You Don't Meet the Prerequisites!`,
+                                this.suppressDialog);
+                            return false;
+                        }
+
+                    } else if (meetsPrereqs.failureList.length > 0) {
+                        suppressibleDialog.call(this, entity,
+                            `You MAY meet the prerequisites. Check the remaining reqs:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You <b>MAY</b> Meet the Prerequisites!`,
+                            this.suppressDialog);
+                    }
+                }
             }
 
             if (entity.type === 'talent') {
@@ -2402,10 +2397,12 @@ export class SWSEActor extends Actor {
 
                 let optionString = "";
                 let possibleProviders = entity.system.possibleProviders;
-                for (let provider of possibleProviders) {
-                    if (this.system.availableItems[provider] > 0) {
-                        possibleFeatTypes.push(provider);
-                        optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
+                if (this.system.availableItems) {
+                    for (let provider of possibleProviders) {
+                        if (this.system.availableItems[provider] > 0) {
+                            possibleFeatTypes.push(provider);
+                            optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
+                        }
                     }
                 }
 
@@ -2542,6 +2539,7 @@ export class SWSEActor extends Actor {
         }
 
 
+        let providedItems = entity.getProvidedItems() || [];
         //on uploads add "provide" changes for classFeats
 
         if (context.isUpload) {
@@ -2567,14 +2565,8 @@ export class SWSEActor extends Actor {
                 }
 
             }
-        }
 
-
-        let providedItems = entity.getProvidedItems() || [];
-
-        if (context.isUpload) {
-            let addProviders = providedItems.filter(i => i.type !== "trait")
-            for (let addProvider of addProviders) {
+            for (let addProvider of providedItems.filter(i => i.type !== "trait")) {
                 SWSEActor.updateOrAddChange(entity, "provides", `${entity.name} ${entity.type} ${addProvider.type}:${addProvider.type.toUpperCase()}:${addProvider.name}`, true)
             }
             providedItems = providedItems.filter(i => i.type === "trait")
@@ -2595,7 +2587,7 @@ export class SWSEActor extends Actor {
         let addedItem;
         const toBeAdded = [];
 
-        if(shouldLazyLoad){
+        if (shouldLazyLoad) {
             toBeAdded.push(entity.toObject(false))
         } else {
             let providedItemContext = Object.assign({}, context);
@@ -2677,8 +2669,7 @@ export class SWSEActor extends Actor {
                 }), item);
 
 
-
-                if(!this.suppressDialog) {
+                if (!this.suppressDialog) {
                     new Dialog({
                         title: "Adding Class Starting Feats",
                         content: `Adding class starting feats: <ul>${featString}</ul>`,
@@ -2711,9 +2702,9 @@ export class SWSEActor extends Actor {
     }
 
     async selectFeat(availableFeats, ownedFeats, parentItem, context) {
-        if(context.itemAnswers){
-            for(const answer of context.itemAnswers){
-                if(availableFeats.includes(answer)){
+        if (context.itemAnswers) {
+            for (const answer of context.itemAnswers) {
+                if (availableFeats.includes(answer)) {
                     return answer;
                 }
             }
@@ -2783,14 +2774,14 @@ export class SWSEActor extends Actor {
     async addItems(criteria = {}, items, parent) {
         criteria.isAdd = true;
         const providedItems = [];
-        if(criteria.items){
-            for(const item of criteria.items.filter(item => !!item)){
+        if (criteria.items) {
+            for (const item of criteria.items.filter(item => !!item)) {
                 providedItems.push(item)
             }
         }
 
-        if(items){
-            for(const item of items.filter(item => !!item)){
+        if (items) {
+            for (const item of items.filter(item => !!item)) {
                 providedItems.push(item)
             }
         }
@@ -2801,7 +2792,7 @@ export class SWSEActor extends Actor {
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
             const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, parent, criteria);
-            if(toBeAdded){
+            if (toBeAdded) {
                 lazyAdd.push(...toBeAdded);
             }
             notificationMessages += notificationMessage;
@@ -2809,7 +2800,7 @@ export class SWSEActor extends Actor {
                 addedItems.push(addedItem);
             }
         }
-        if(lazyAdd.length > 0){
+        if (lazyAdd.length > 0) {
             addedItems.push(...await this.createEmbeddedDocuments("Item", lazyAdd))
         }
         if (criteria.returnAdded) {
@@ -2867,18 +2858,18 @@ export class SWSEActor extends Actor {
                     entity.system.possibleProviders.push(`${charClass} Starting Feats`)
                 }
             }
-            if(entity.name === 'Skill Training'){
+            if (entity.name === 'Skill Training') {
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
             }
         }
 
-        if (entity.type === "trait"){
-            if(entity.name === 'Bonus Trained Skill'){
+        if (entity.type === "trait") {
+            if (entity.name === 'Bonus Trained Skill') {
                 SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
                 SWSEActor.removeChange(entity, "automaticTrainedSkill");
             }
-            if(entity.name === 'Bonus Feat' && !payload){
+            if (entity.name === 'Bonus Feat' && !payload) {
                 SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
             }
         }
@@ -2886,14 +2877,14 @@ export class SWSEActor extends Actor {
         entity.addItemAttributes(providedItem.changes);
         const providedItems = providedItem.providedItems || [];
         const automaticItemsWhenItemIsAdded = game.settings.get("swse", "automaticItemsWhenItemIsAdded");
-        if(automaticItemsWhenItemIsAdded){
+        if (automaticItemsWhenItemIsAdded) {
             automaticItemsWhenItemIsAdded.split(",").forEach(entry => {
                 const toks = entry.split(">").map(e => e.trim())
 
                 const triggerItem = toks[0].split(":")
                 const bonusItem = toks[1].split(":")
-                if(entity.name.toLowerCase() === triggerItem[1].toLowerCase() && entity.type.toLowerCase() === triggerItem[0].toLowerCase()){
-                    providedItems.push({name:bonusItem[1], type:bonusItem[0]})
+                if (entity.name.toLowerCase() === triggerItem[1].toLowerCase() && entity.type.toLowerCase() === triggerItem[0].toLowerCase()) {
+                    providedItems.push({name: bonusItem[1], type: bonusItem[0]})
                 }
 
                 providedItems.push()
@@ -2940,6 +2931,7 @@ export class SWSEActor extends Actor {
     get errors() {
         return errorsFromActor(this);
     }
+
     async equipItem(item, equipType, options) {
         if (typeof item !== "object") {
             item = this.items.get(item);
@@ -3071,19 +3063,20 @@ export class SWSEActor extends Actor {
 
         return this.getCached("weight", fn)
     }
-    get carriedWeight(){
+
+    get carriedWeight() {
         // let fn = () => {
-            const resolvedSize = sizeArray[getResolvedSize(this)];
-            let costFactor = DROID_COST_FACTOR[resolvedSize]
-            let sum = 0;
-            for (let item of this.items.values()) {
-                let weight = getInheritableAttribute({entity:item, attributeKey:"weight", reduce:"SUM"})
-                if(isNaN(weight)){
-                    weight = 0;
-                }
-                    sum += resolveWeight(weight, item.system.quantity, costFactor, this)
+        const resolvedSize = sizeArray[getResolvedSize(this)];
+        let costFactor = DROID_COST_FACTOR[resolvedSize]
+        let sum = 0;
+        for (let item of this.items.values()) {
+            let weight = getInheritableAttribute({entity: item, attributeKey: "weight", reduce: "SUM"})
+            if (isNaN(weight)) {
+                weight = 0;
             }
-            return sum;
+            sum += resolveWeight(weight, item.system.quantity, costFactor, this)
+        }
+        return sum;
         // }
         //
         // return this.getCached("weight", fn)
