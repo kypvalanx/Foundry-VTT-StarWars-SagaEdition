@@ -280,7 +280,7 @@ export const weaponGroup = {
     "Melee Weapons": ["Advanced Melee Weapons", "Lightsabers", "Simple Melee Weapons", "Exotic Melee Weapons", "Melee Natural Weapons"]
 };
 
-export const equipableTypes = ["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"];
+export const EQUIPABLE_TYPES = ["armor", "weapon", "equipment", "upgrade", "trait", "template", "vehicleSystem"];
 export const LIMITED_TO_ONE_TYPES = ["feat", "talent"]
 
 
