@@ -144,7 +144,7 @@
 
                 {{!-- Owned Powers Tab --}}
                 <div class="tab items" data-group="primary" data-tab="force">
-                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="forcePowers" bigLabel="Force Powers" items=actor.powers draggable=false quantity=true usable=true delete="always" description="expandable" createNew='forcePower' quickCreate='forcePower' compendiumFilter='-type:forcePower'}}
+                    {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="forcePowers" bigLabel="Force Powers" items=actor.powers draggable=false quantity=true rollable="@UseTheForce" usable=true delete="always" description="expandable" createNew='forcePower' quickCreate='forcePower' compendiumFilter='-type:forcePower'}}
 
                     <br/>
                     <div>

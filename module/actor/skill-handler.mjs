@@ -22,9 +22,20 @@ export class SkillDelegate {
     get skills(){
         let groupedSkillMap = getGroupedSkillMap()
 
-        return generateSkills(this.actor, {groupedSkillMap})
+        return this.getCached("SKILLS", ()=>{
+            return generateSkills(this.actor, {groupedSkillMap});
+        })
+    }
+
+    getCached(key, fn) {
+        if (!this.actor.cache) {
+            return fn();
+        }
+        return this.actor.cache.getCached(key, fn)
     }
 }
+
+
 function applyGroupedSkills(skills, groupedSkillMap) {
     const skillsCopy = [...skills];
     if (!groupedSkillMap) {
@@ -149,6 +160,7 @@ export function generateSkills(actor, options = {}) {
 
         const customSkill = options.groupedSkillMap?.get(resSkill)
         const skill = createNewSkill(resSkill, actor.system.skills[key] || {}, customSkill)
+        actor.system.skills[key] = skill;
         skill.key = key;
 
         let old = skill.value;

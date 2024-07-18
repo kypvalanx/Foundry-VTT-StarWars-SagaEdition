@@ -1,5 +1,5 @@
-<li class="item flexcol {{#if draggable}}draggable{{/if}} {{#ifEquals description
-                                                                      "expandable"}}collapsible-container{{/ifEquals}}"
+<li class="item flexcol {{#if draggable}}draggable{{/if}}
+    {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}"
     data-item-id="{{item.id}}"
     data-item-name="{{item.name}}"
     data-data="{{item.toJSONString}}">
@@ -21,6 +21,9 @@
                                    {{#if (lookup ../item.system.uses this)}}checked{{/if}}/>
                         {{/times}}
                     {{/unless}}
+                {{/if}}
+                {{#if rollable}}
+                    {{> 'systems/swse/templates/common/rollable.hbs' rollable=rollable itemid=item.id type='forcepower'}}
                 {{/if}}
                 {{#if item.hasAmmunition}}
                     {{#each item.ammunition.current as |ammo id|}}

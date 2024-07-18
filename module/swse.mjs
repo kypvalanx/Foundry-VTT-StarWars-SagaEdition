@@ -155,7 +155,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/roll/roll-target.hbs',
         'systems/swse/templates/roll/roll-tooltip.hbs',
         'systems/swse/templates/active-effect/active-effect-list.hbs',
-        'systems/swse/templates/common/select.hbs']);
+        'systems/swse/templates/common/select.hbs',
+        'systems/swse/templates/common/rollable.hbs']);
 
 });
 
@@ -588,7 +589,41 @@ async function rollVariable(actorId, variable) {
         return ui.notifications.error(msg);
     }
 
-    return await actor.rollVariable(variable);
+    let rollStr = actor.resolvedVariables.get(variable);
+    let label = actor.resolvedLabels.get(variable);
+    let notes = actor.resolvedNotes.get(variable) || [];
+    let flavor = label ? `${actor.name} rolls for ${label}!` : '';
+
+    if (variable.startsWith('@Initiative') && game.combat) {
+        await actor.rollInitiative({
+            createCombatants: true,
+            rerollInitiative: true,
+            initiativeOptions: {formula: rollStr}
+        })
+    } else {
+        let roll = new Roll(rollStr);
+        await roll.roll()
+
+        let content = buildRollContent(rollStr, roll, notes);
+
+
+        let speaker = ChatMessage.getSpeaker();
+        let messageData = {
+            user: game.user.id,
+            speaker,
+            flavor,
+            style: CONST.CHAT_MESSAGE_TYPES.ROLL,
+            content,
+            sound: CONFIG.sounds.dice,
+            roll
+        }
+
+        let cls = getDocumentClass("ChatMessage");
+        let msg = new cls(messageData);
+        let rollMode = false;
+
+        cls.create(msg, {rollMode});
+    }
 }
 
 Hooks.on('renderChatMessage', (chatItem, html) => {

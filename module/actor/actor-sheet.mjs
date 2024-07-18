@@ -14,7 +14,8 @@ import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {
-    changeCheckbox, changeRadio,
+    changeCheckbox,
+    changeRadio,
     changeSelect,
     changeText,
     onChangeControl,
@@ -24,8 +25,46 @@ import {
 } from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
+import {buildRollContent} from "./actor.mjs";
 
 // noinspection JSClosureCompilerSyntax
+
+function getRollFromDataSet(dataset) {
+    if (dataset.roll) {
+        return dataset.roll;
+    }
+    if (dataset.key) {
+        return this.object.resolvedVariables.get(dataset.key)
+    }
+    if (dataset.variable) {
+        return this.object.resolvedVariables.get(dataset.variable)
+    }
+}
+
+function getLabelFromDataSet(dataset) {
+    if (dataset.label) {
+        return dataset.label;
+    }
+    if (dataset.key) {
+        return this.object.resolvedLabels.get(dataset.key)
+    }
+    if (dataset.variable) {
+        return this.object.resolvedLabels.get(dataset.variable)
+    }
+}
+
+function getNotesFromDataSet(dataset) {
+    if (dataset.notes) {
+        return dataset.notes;
+    }
+    if (dataset.key) {
+        return this.object.resolvedNotes.get(dataset.key)
+    }
+    if (dataset.variable) {
+        return this.object.resolvedNotes.get(dataset.variable)
+    }
+    return [];
+}
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -81,7 +120,7 @@ export class SWSEActorSheet extends ActorSheet {
         let data = super.getData(options);
 
         data.modes = Object.entries(CONST.ACTIVE_EFFECT_MODES).reduce((obj, e) => {
-            obj[e[1]] = game.i18n.localize("EFFECT.MODE_"+e[0]);
+            obj[e[1]] = game.i18n.localize("EFFECT.MODE_" + e[0]);
             return obj;
         }, {})
         return data;
@@ -92,9 +131,9 @@ export class SWSEActorSheet extends ActorSheet {
         super.activateListeners(html);
 
         //disable submit on enter
-        $(document).ready(function() {
-            $(window).keydown(function(event){
-                if(event.keyCode === 13) {
+        $(document).ready(function () {
+            $(window).keydown(function (event) {
+                if (event.keyCode === 13) {
                     event.preventDefault();
                     return false;
                 }
@@ -107,13 +146,12 @@ export class SWSEActorSheet extends ActorSheet {
         if (!this.isEditable) return;
 
 
-
         html.find(".toggle").on("click", onToggle.bind(this))
         new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
 
 
         html.find("select").on("change", changeSelect.bind(this));
-        const numberInputs =  html.find("input[type=number],input[type=text]")
+        const numberInputs = html.find("input[type=number],input[type=text]")
         numberInputs.on("change", changeText.bind(this));
         numberInputs.on("keydown", (event) => {
             const key = event.which;
@@ -201,12 +239,12 @@ export class SWSEActorSheet extends ActorSheet {
             let target = e.currentTarget
             let type = target.dataset.type
             let providerSource = target.dataset.providerSource
-            if(type){
+            if (type) {
                 type = type.split(",").map(t => t.trim())
             }
             let webFilters = {};
 
-            if(providerSource){
+            if (providerSource) {
                 webFilters['provider-filter'] = providerSource
             }
 
@@ -249,20 +287,20 @@ export class SWSEActorSheet extends ActorSheet {
         item.ammunition.reload(ammoKey);
     }
 
-    _performItemAction(event){
-            const target = $(event.currentTarget)
-            const value = event.currentTarget.value;
-            const context = target.data("context")
+    _performItemAction(event) {
+        const target = $(event.currentTarget)
+        const value = event.currentTarget.value;
+        const context = target.data("context")
 
-            if (target.data("action") === "update-level-attribute") {
+        if (target.data("action") === "update-level-attribute") {
 
-                this.updateItemEffectAttribute(value, target.data("item"), parseInt(target.data("level")), target.data("attribute"), context);
-            }
+            this.updateItemEffectAttribute(value, target.data("item"), parseInt(target.data("level")), target.data("attribute"), context);
+        }
     }
 
-    updateItemEffectAttribute( value, itemId, level, attributeKey, context = undefined) {
+    updateItemEffectAttribute(value, itemId, level, attributeKey, context = undefined) {
 
-        if(context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")){
+        if (context === "health" && game.settings.get("swse", "enableNotificationsOnHealthChange")) {
             let content = `${game.user.name} has changed level ${level} health to ${value}`
 
             toChat(content, this.object)
@@ -290,12 +328,12 @@ export class SWSEActorSheet extends ActorSheet {
         const type = a.dataset.actionType;
 
         let content = "";
-        switch (type){
+        switch (type) {
             case "defense":
                 let defense = this.actor.system.defense;
                 content += `<h3>Defenses</h3>`
 
-                for (let value of Object.values(defense)){
+                for (let value of Object.values(defense)) {
                     content += this.defenseToTableRow(value)
                 }
 
@@ -303,7 +341,7 @@ export class SWSEActorSheet extends ActorSheet {
                 content += `<tr><th>Damage Reduction</th><td>${defense.damageReduction}</td></tr>`
 
                 let bonusString = ""
-                for(let bonus of defense.situationalBonuses){
+                for (let bonus of defense.situationalBonuses) {
                     bonusString += bonus;
                 }
 
@@ -315,8 +353,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
 
-
-    _onCreateNewItem(event){
+    _onCreateNewItem(event) {
         let itemType = $(event.currentTarget).data("action-type")
 
         this.actor.createEmbeddedDocuments('Item', [{
@@ -338,11 +375,11 @@ export class SWSEActorSheet extends ActorSheet {
         this.actor.createEmbeddedDocuments('Item',
             getCleanListFromCSV(element[0].value).map(name => {
                 return {
-                name: name,
-                type: itemType,
-                data: defaultDataByType
-            }
-        }));
+                    name: name,
+                    type: itemType,
+                    data: defaultDataByType
+                }
+            }));
     }
 
     _onCredit(event) {
@@ -379,7 +416,7 @@ export class SWSEActorSheet extends ActorSheet {
             case 'toggle':
                 let ids = this.object.effects
                     .filter(effect => effect.icon?.includes("/shield.svg")).map(effect => effect.id)
-                if(ids.length === 0){
+                if (ids.length === 0) {
                     let statusEffect = CONFIG.statusEffects.find(e => e.id === "shield")
                     await this.object.activateStatusEffect(statusEffect);
                 } else {
@@ -406,11 +443,11 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.variable = elem.dataset.variable;
         dragData.label = elem.dataset.label;
         dragData.uuid = elem.dataset.uuid
-        if(elem.dataset.data){
+        if (elem.dataset.data) {
             dragData.data = JSON.parse(elem.dataset.data)
         }
 
-        if(elem.dataset.type && !dragData.type){
+        if (elem.dataset.type && !dragData.type) {
             dragData.type = elem.dataset.type
         }
 
@@ -432,7 +469,7 @@ export class SWSEActorSheet extends ActorSheet {
         dragData.draggableId = event.target.id;
 
 
-        if(elem.dataset.effectId){
+        if (elem.dataset.effectId) {
             dragData.effectId = elem.dataset.effectId
             dragData.effectUuid = elem.dataset.uuid
             dragData.type = "ActiveEffect";
@@ -772,7 +809,7 @@ export class SWSEActorSheet extends ActorSheet {
 
         const postion = $(targetItemContainer).data('position');
         const slot = $(targetItemContainer).data('slot');
-        if(!postion){
+        if (!postion) {
             console.error("no position associated with the activated crew slot")
             return;
         }
@@ -784,15 +821,15 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-                //if (!this.object.crewMembers.find(crewMember => crewMember.position === postion && crewMember.slot === slot)) {
-                    //await this.removeCrewFromPositions(actor, actor.id, crewPositions);
+        //if (!this.object.crewMembers.find(crewMember => crewMember.position === postion && crewMember.slot === slot)) {
+        //await this.removeCrewFromPositions(actor, actor.id, crewPositions);
         //await this.object.removeActorLink(actor)
-        await this.object.addActorLink(actor,postion, slot);
-                //}
+        await this.object.addActorLink(actor, postion, slot);
+        //}
     }
 
     async _onDropItem(ev, data) {
-        if(ev) ev.preventDefault();
+        if (ev) ev.preventDefault();
         if (!this.actor.isOwner) return false;
         //the dropped item has an owner
         if (data.actorId) {
@@ -815,7 +852,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onDropActiveEffect(event, data) {
         let targetEffect = getParentByHTMLClass(event, "effect")
-        if(targetEffect){
+        if (targetEffect) {
             let droppedItem;
             try {
                 droppedItem = JSON.parse(event.dataTransfer.getData("text/plain"));
@@ -824,7 +861,7 @@ export class SWSEActorSheet extends ActorSheet {
                 return false;
             }
             droppedItem.targetEffectUuid = targetEffect.dataset.uuid;
-            if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
+            if (droppedItem.effectUuid && droppedItem.targetEffectUuid) {
                 linkEffects.call(this.item, droppedItem.effectUuid, droppedItem.targetEffectUuid);
                 return false;
             }
@@ -832,17 +869,17 @@ export class SWSEActorSheet extends ActorSheet {
 
 
         const effect = await ActiveEffect.implementation.fromDropData(data);
-        if ( !this.actor.isOwner || !effect ) return false;
-        if ( this.actor.uuid === effect.parent?.uuid ) return false;
+        if (!this.actor.isOwner || !effect) return false;
+        if (this.actor.uuid === effect.parent?.uuid) return false;
         return ActiveEffect.create(effect.toObject(), {parent: this.actor});
     }
 
-    _onAddGMBonus(){
+    _onAddGMBonus() {
         this.object.addItems({items: [{name: "GM Bonus", type: "trait"}]})
     }
 
-    _onAddLevelUpBonus(){
-        if(this.object.isHeroic){
+    _onAddLevelUpBonus() {
+        if (this.object.isHeroic) {
             this.object.addItems({items: [{name: "Heroic Ability Score Level Bonus", type: "trait"}]})
         } else {
             this.object.addItems({items: [{name: "Nonheroic Ability Score Level Bonus", type: "trait"}]})
@@ -874,15 +911,15 @@ export class SWSEActorSheet extends ActorSheet {
             let unequipTypes = ["unequipped", "uninstalled"];
 
 
-            if(unequipTypes.includes(containerId)){
+            if (unequipTypes.includes(containerId)) {
                 await this.object.unequipItem(itemId, ev);
-            } else if(containerId === "new-gunner"){
+            } else if (containerId === "new-gunner") {
                 if (item.system.subtype.toLowerCase() !== "weapon systems") {
                     this.onlyAllowsWeaponsDialog();
                     return;
                 }
                 //let types = this.object.system.equippedIds.filter(e => e.type.startsWith("gunnerInstalled")).map(e => e.type === "gunnerInstalled" ? 0 : parseInt(e.type.replace("gunnerInstalled", ""))).filter(unique);
-                let types = this.object.getEquipTypes().filter(e=> !!e);
+                let types = this.object.getEquipTypes().filter(e => !!e);
                 let equipType;
                 for (let i = 0; i <= types.length; i++) {
                     equipType = `gunnerInstalled${i}`;
@@ -890,17 +927,17 @@ export class SWSEActorSheet extends ActorSheet {
                         break;
                     }
                 }
-                await this.object.equipItem(itemId, equipType, {event:ev, offerOverride:true});
+                await this.object.equipItem(itemId, equipType, {event: ev, offerOverride: true});
 
-            } else if(equipTypes.includes(containerId)){
+            } else if (equipTypes.includes(containerId)) {
                 if (item.system.subtype.toLowerCase() === "weapon systems") {
                     this.onlyAllowsWeaponsDialog(false);
                 } else {
-                    await this.object.equipItem(itemId, containerId, {event:ev});
+                    await this.object.equipItem(itemId, containerId, {event: ev});
                 }
-            } else if(weaponSystemOnlyTypes.includes(containerId)){
+            } else if (weaponSystemOnlyTypes.includes(containerId)) {
                 if (item.system.subtype.toLowerCase() === "weapon systems") {
-                    await this.object.equipItem(itemId, containerId, {event:ev, offerOverride:true});
+                    await this.object.equipItem(itemId, containerId, {event: ev, offerOverride: true});
                 } else {
                     this.onlyAllowsWeaponsDialog();
                 }
@@ -910,8 +947,6 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
     }
-
-
 
 
     /* -------------------------------------------- */
@@ -953,69 +988,60 @@ export class SWSEActorSheet extends ActorSheet {
         event.preventDefault();
         const element = event.currentTarget;
 
-        let draggable = getParentByHTMLClass(event, "draggable")
-        if (draggable) {
-            this.actor.rollVariable(draggable.dataset.variable)
-            return;
-        }
-
         const dataset = element.dataset;
-        if (!dataset.roll) return;
+        dataset.type;  //lets you know if it's a roll for a thing
+        const item = dataset.item || dataset.itemId; //lets you know if there's an item aassociated with the roll.
+        const level = dataset.level;
+        const context = dataset.context
+        const changeKey = dataset.itemAttribute;
+        const name = dataset.name;
+        const variable = dataset.key || dataset.variable
+        const rawFormula = getRollFromDataSet.call(this, dataset);
 
-        let rolls = [dataset.roll];
-        if (dataset.roll.includes(",")) {
-            rolls = dataset.roll.split(",");
-        }
-        for (let rollStr of rolls) {
-            let roll = new Roll(rollStr, this.actor.system);
-            let label = dataset.label ? `${this.name} rolls for ${label}!` : '';
-            roll = await roll.roll();
-            let item = dataset.item;
-            let level = dataset.level
-            const attributeKey = dataset.itemAttribute;
-            if (attributeKey) {
-                if (item && level) {
+        if (!rawFormula) return;
+        let label = getLabelFromDataSet.call(this, dataset);
+        let notes = getNotesFromDataSet.call(this, dataset);
 
-                    const context = element.dataset.context
-                    this.updateItemEffectAttribute(roll.total, item, parseInt(level), attributeKey, context);
-                } else if (item) {
-                    let updateTarget = this.actor.items.get(item);
-                    updateTarget.setAttribute(attributeKey, roll.total);
-                }
-            } else if (dataset.name) {
-                let updateCandidate = this.actor;
-                if (item) {
-                    updateCandidate = this.actor.items.get(item);
-                }
+        let flavor = label ? `${this.object.name} rolls for ${label}!` : '';
 
-                let update = {};
-                update[dataset.name] = roll.total;
-                updateCandidate.safeUpdate(update);
+        for (let formula of rawFormula.split(",")) {
+
+            if (!!variable && variable.startsWith('@initiative') && game.combat) {
+                await this.object.rollInitiative({
+                    createCombatants: false,
+                    rerollInitiative: true
+                    //,initiativeOptions: {formula: formula}
+                })
             } else {
-                let speaker = ChatMessage.getSpeaker({actor: this.actor});
-                // roll.toMessage({
-                //     speaker: speaker,
-                //     flavor: label, flags: {f1: "thing"}
-                // });
+                let roll = new Roll(formula, this.actor.system);
+                const rollResult = await roll.roll();
 
+                if (changeKey) {
+                    if (item && level) {
+                        this.updateItemEffectAttribute(rollResult.total, item, parseInt(level), changeKey, context);
+                    } else if (item) {
+                        let updateTarget = this.actor.items.get(item);
+                        updateTarget.setAttribute(changeKey, rollResult.total);
+                    }
+                } else if (name) {
+                    let updateCandidate = this.actor;
+                    if (item) {
+                        updateCandidate = this.actor.items.get(item);
+                    }
 
-                let messageData = {
-                    user: game.user.id,
-                    speaker: speaker,
-                    flavor: label,
-                    type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-                    content: roll.total,
-                    sound: CONFIG.sounds.dice,
-                    roll
+                    const newVar = {};
+                    newVar[name] = rollResult.total;
+                    updateCandidate.safeUpdate(newVar);
+                } else {
+                    const context = {rollResult};
+
+                    let content = buildRollContent(formula, roll, notes);
+                    await toChat(content, this.object, flavor, context);
                 }
 
-                let cls = getDocumentClass("ChatMessage");
-                let msg = new cls(messageData);
-                //if (rollMode) msg.applyRollMode(rollMode);
-
-                return cls.create(msg.data);
             }
         }
+        //let label = dataset.key ?  `${this.object.name} rolls for ${this.object.resolvedLabels.get(dataset.key)}!` : `${this.object.name} rolls for ${dataset.label}!`;
     }
 
     async _onCrewControl(event) {
@@ -1050,7 +1076,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (button.disabled) return;
 
         let itemId = event.currentTarget.dataset.itemId
-        if(!itemId){
+        if (!itemId) {
             const li = event.currentTarget.closest(".item");
             itemId = li.dataset.itemId;
         }
@@ -1072,6 +1098,7 @@ export class SWSEActorSheet extends ActorSheet {
             });
         }
     }
+
     async removeClassLevel(event, sheet) {
         event.preventDefault();
         const button = event.currentTarget;
@@ -1107,7 +1134,7 @@ export class SWSEActorSheet extends ActorSheet {
     _onItemEdit(event) {
         event.preventDefault();
         let itemId = event.currentTarget.dataset.itemId
-        if(!itemId){
+        if (!itemId) {
             const li = event.currentTarget.closest(".item");
             itemId = li.dataset.itemId;
         }
@@ -1118,17 +1145,18 @@ export class SWSEActorSheet extends ActorSheet {
     _onDecreaseItemQuantity(event) {
         event.preventDefault();
         let itemId = event.currentTarget.dataset.itemId
-        if(!itemId){
+        if (!itemId) {
             const li = event.currentTarget.closest(".item");
             itemId = li.dataset.itemId;
         }
         const item = this.actor.items.get(itemId);
         item.decreaseQuantity();
     }
+
     _onIncreaseItemQuantity(event) {
         event.preventDefault();
         let itemId = event.currentTarget.dataset.itemId
-        if(!itemId){
+        if (!itemId) {
             const li = event.currentTarget.closest(".item");
             itemId = li.dataset.itemId;
         }
@@ -1144,6 +1172,7 @@ export class SWSEActorSheet extends ActorSheet {
         const item = this.actor.items.get(li.dataset.itemId);
         item.toggleUse(key, toggle)
     }
+
     _onToggleSecondWind(event) {
         event.preventDefault();
         let toggle = event.currentTarget.checked
@@ -1459,7 +1488,9 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {
-        if(this.object.suppressDialog){return;}
+        if (this.object.suppressDialog) {
+            return;
+        }
         if (weaponOnly) {
             new Dialog({
                 title: "Weapon Systems Only",
@@ -1502,9 +1533,9 @@ export class SWSEActorSheet extends ActorSheet {
     defenseToTableRow(value) {
         const strings = Object.keys(value);
         let rows = []
-        if (strings.includes('name') && strings.includes('total')){
+        if (strings.includes('name') && strings.includes('total')) {
             rows.push(`<tr><th>${value.name}</th><td>${value.total}</td></tr>`)
-            for(let defenseModifier of value.defenseModifiers || []){
+            for (let defenseModifier of value.defenseModifiers || []) {
                 rows.push(this.defenseToTableRow(defenseModifier))
             }
         }

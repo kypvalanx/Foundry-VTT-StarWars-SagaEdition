@@ -182,4 +182,7 @@ export const registerHandlebarsHelpers = function () {
         }
         return `${str} Tons`;
     });
+
+    //Handlebars.registerHelper('getLabel', function(value, options) {})
+    //.registerHelper('getNotes', function(value, options) {})
 }
