@@ -19,7 +19,7 @@ import {
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
-import {getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
+import {generateSkills, getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
     CLASSES_BY_STARTING_FEAT,
@@ -27,7 +27,7 @@ import {
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
-    EQUIPABLE_TYPES,
+    EQUIPABLE_TYPES, getGroupedSkillMap,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
     KNOWN_WEIRD_UNITS,
     LIMITED_TO_ONE_TYPES,
@@ -60,6 +60,39 @@ function suppressibleDialog(entity, message, title, suppress) {
             }
         }).render(true);
     }
+}
+
+export function buildRollContent(formula, roll, notes = []) {
+    const tooltip = getTooltipSections(roll)
+    return `<div class="message-content">
+        <div class="dice-roll">
+            <div class="dice-result">
+                <div class="dice-formula">${formula}</div>
+                <div class="dice-tooltip">${tooltip}</div>
+                <h4 class="dice-total">${roll.total}</h4>
+            </div>
+        </div>
+        <div>${notes.map(note => `<div>${note}</div>`).join("")}</div>
+    </div>`
+}
+function getTooltipSections(roll) {
+    let sections = [];
+
+    for (let term of roll.terms) {
+        if (term instanceof Die) {
+            let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
+            let partTotal = `<span class="part-total">${term.total}</span>`
+            let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
+            let diceRolls = [];
+            for (let result of term.results) {
+                diceRolls.push(`<li class="roll die d20">${result.result}</li>`)
+            }
+
+            sections.push(`<section class="tooltip-part"><div class="dice">${partHeader}<ol class="dice-rolls">${diceRolls.join("")}</ol></div></section>`)
+        }
+    }
+
+    return sections.join("");
 }
 
 /**
@@ -201,7 +234,8 @@ export class SWSEActor extends Actor {
 
         }
         this.attack = new AttackDelegate(this);
-        this.skill = new SkillDelegate(this);
+        //this.skill = new SkillDelegate(this);
+        generateSkills(this, {groupedSkillMap: getGroupedSkillMap()})
 
         if (this.type === 'character') this._prepareCharacterData(system);
         //if (this.type === 'npc') this._prepareCharacterData(system);
@@ -1920,85 +1954,6 @@ export class SWSEActor extends Actor {
     cleanSkillName(key) {
         return this._uppercaseFirstLetters(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
     }
-
-
-    async rollVariable(variable) {
-        let rollStr = this.resolvedVariables.get(variable);
-        let label = this.resolvedLabels.get(variable);
-        let notes = this.resolvedNotes.get(variable) || [];
-        let flavor = label ? `${this.name} rolls for ${label}!` : '';
-
-        if (variable.startsWith('@Initiative')) {
-            await this.rollInitiative({
-                createCombatants: true,
-                rerollInitiative: true,
-                initiativeOptions: {formula: rollStr}
-            })
-            return;
-        }
-
-        let roll = new Roll(rollStr);
-        await roll.roll()
-
-        let tooltipSections = this.getTooltipSections(roll)
-
-
-        let content = `<div class="message-content">
-        <div class="dice-roll">
-            <div class="dice-result">
-                <div class="dice-formula">${rollStr}</div>
-                <div class="dice-tooltip">${tooltipSections}</div>
-                <h4 class="dice-total">${roll.total}</h4>
-            </div>
-        </div>
-        <div>${notes.map(note => `<div>${note}</div>`).join("")}</div>
-    </div>`
-
-
-        let speaker = ChatMessage.getSpeaker();
-        let messageData = {
-            user: game.user.id,
-            speaker,
-            flavor,
-            type: CONST.CHAT_MESSAGE_TYPES.ROLL,
-            content,
-            sound: CONFIG.sounds.dice,
-            roll
-        }
-
-        let cls = getDocumentClass("ChatMessage");
-        let msg = new cls(messageData);
-        let rollMode = false;
-        // if (rollMode) msg.applyRollMode(rollMode);
-
-        return cls.create(msg, {rollMode});
-
-        // roll.toMessage({
-        //     speaker: ChatMessage.getSpeaker({actor: this}),
-        //     flavor: label
-        // });
-    }
-
-    getTooltipSections(roll) {
-        let sections = [];
-
-        for (let term of roll.terms) {
-            if (term instanceof Die) {
-                let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
-                let partTotal = `<span class="part-total">${term.total}</span>`
-                let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
-                let diceRolls = [];
-                for (let result of term.results) {
-                    diceRolls.push(`<li class="roll die d20">${result.result}</li>`)
-                }
-
-                sections.push(`<section class="tooltip-part"><div class="dice">${partHeader}<ol class="dice-rolls">${diceRolls.join("")}</ol></div></section>`)
-            }
-        }
-
-        return sections.join("");
-    }
-
     /**
      *
      * @param itemIds
@@ -2257,240 +2212,233 @@ export class SWSEActor extends Actor {
         }
 
         if (!context.isUpload) {
-
-        }
-
-        //Check that the item being added can be added to this actor type and that it hasn't been added too many times
-        if (context.isAdd) {
-            if (!context.skipPrerequisite && !context.isUpload) {
-                if (!this.isPermittedForActorType(entity.type)) {
-                    suppressibleDialog.call(this, entity,
-                        `Attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, `Inappropriate Item`,
-                        this.suppressDialog);
-
-                    return false;
-                }
-                if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
-                    const maximumQuantity = getInheritableAttribute({
-                        entity: entity,
-                        attributeKey: "takeMultipleTimesMax",
-                        reduce: "MAX"
-                    });
-                    const timesTaken = this.countItem(entity);
-                    const isAtMaximumQuantity = timesTaken === maximumQuantity;
-
-                    const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
-                        entity: entity,
-                        attributeKey: "takeMultipleTimes"
-                    }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
-
-                    if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
+            //Check that the item being added can be added to this actor type and that it hasn't been added too many times
+            if (context.isAdd) {
+                if (!context.skipPrerequisite && !context.isUpload) {
+                    if (!this.isPermittedForActorType(entity.type)) {
                         suppressibleDialog.call(this, entity,
-                            `Attempted to add ${entity.finalName} but could not because ${entity.finalName} can't be taken more than ${timesTaken} time${timesTaken > 1 ? 's' : ''}`, `Already Taken ${timesTaken} Time${timesTaken > 1 ? 's' : ''}`,
+                            `Attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, `Inappropriate Item`,
                             this.suppressDialog);
 
                         return false;
                     }
-                }
+                    if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
+                        const maximumQuantity = getInheritableAttribute({
+                            entity: entity,
+                            attributeKey: "takeMultipleTimesMax",
+                            reduce: "MAX"
+                        });
+                        const timesTaken = this.countItem(entity);
+                        const isAtMaximumQuantity = timesTaken === maximumQuantity;
 
-                //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
-                if (!EQUIPABLE_TYPES.includes(entity.type)) {
-                    let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
-                    if (meetsPrereqs.doesFail) {
-                        if (context.offerOverride) {
-                            let override = await Dialog.wait({
-                                title: "You Don't Meet the Prerequisites!",
-                                content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                                buttons: {
-                                    ok: {
-                                        icon: '<i class="fas fa-check"></i>',
-                                        label: 'Ok',
-                                        callback: () => {
-                                            return false
-                                        }
-                                    },
-                                    override: {
-                                        icon: '<i class="fas fa-check"></i>',
-                                        label: 'Override',
-                                        callback: () => {
-                                            return true
-                                        }
-                                    }
-                                }
-                            });
-                            if (!override) {
-                                return false;
-                            }
-                        } else {
+                        const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
+                            entity: entity,
+                            attributeKey: "takeMultipleTimes"
+                        }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
+
+                        if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
                             suppressibleDialog.call(this, entity,
-                                `You do not meet the prerequisites:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You Don't Meet the Prerequisites!`,
+                                `Attempted to add ${entity.finalName} but could not because ${entity.finalName} can't be taken more than ${timesTaken} time${timesTaken > 1 ? 's' : ''}`, `Already Taken ${timesTaken} Time${timesTaken > 1 ? 's' : ''}`,
                                 this.suppressDialog);
+
                             return false;
                         }
+                    }
 
-                    } else if (meetsPrereqs.failureList.length > 0) {
+                    //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
+                    if (!EQUIPABLE_TYPES.includes(entity.type)) {
+                        let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
+                        if (meetsPrereqs.doesFail) {
+                            if (context.offerOverride) {
+                                let override = await Dialog.wait({
+                                    title: "You Don't Meet the Prerequisites!",
+                                    content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                                    buttons: {
+                                        ok: {
+                                            icon: '<i class="fas fa-check"></i>',
+                                            label: 'Ok',
+                                            callback: () => {
+                                                return false
+                                            }
+                                        },
+                                        override: {
+                                            icon: '<i class="fas fa-check"></i>',
+                                            label: 'Override',
+                                            callback: () => {
+                                                return true
+                                            }
+                                        }
+                                    }
+                                });
+                                if (!override) {
+                                    return false;
+                                }
+                            } else {
+                                suppressibleDialog.call(this, entity,
+                                    `You do not meet the prerequisites:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You Don't Meet the Prerequisites!`,
+                                    this.suppressDialog);
+                                return false;
+                            }
+
+                        } else if (meetsPrereqs.failureList.length > 0) {
+                            suppressibleDialog.call(this, entity,
+                                `You MAY meet the prerequisites. Check the remaining reqs:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You <b>MAY</b> Meet the Prerequisites!`,
+                                this.suppressDialog);
+                        }
+                    }
+                }
+
+                if (entity.type === 'talent') {
+                    let possibleTalentTrees = new Set();
+                    let possibleProviders = new Set();
+                    let optionString = "";
+
+                    let actorsBonusTrees = getInheritableAttribute({
+                        entity: this,
+                        attributeKey: 'bonusTalentTree',
+                        reduce: "VALUES"
+                    });
+                    if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
+                        for (let [id, item] of Object.entries(this.system.availableItems)) {
+                            if (id.includes("Talent") && item > 0) {
+                                optionString += `<option value="${id}">${id}</option>`
+                                possibleTalentTrees.add(id);
+                            }
+                        }
+                    } else {
+                        for (let talentTree of entity.system.possibleProviders.filter(unique)) {
+                            possibleProviders.add(talentTree);
+                            let count = this.system.availableItems[talentTree];
+                            if (count && count > 0) {
+                                optionString += `<option value="${talentTree}">${talentTree}</option>`
+                                possibleTalentTrees.add(talentTree);
+                            }
+                        }
+                    }
+
+
+                    if (possibleTalentTrees.size === 0) {
                         suppressibleDialog.call(this, entity,
-                            `You MAY meet the prerequisites. Check the remaining reqs:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You <b>MAY</b> Meet the Prerequisites!`,
+                            `Attempting to add ${entity.finalName}. You don't have more talents available of these types: <br/><ul><li>${Array.from(possibleProviders).join("</li><li>")}</li></ul>`, `Insufficient Talents`,
                             this.suppressDialog);
-                    }
-                }
-            }
-
-            if (entity.type === 'talent') {
-                let possibleTalentTrees = new Set();
-                let allTreesOnTalent = new Set();
-                let optionString = "";
-
-                let actorsBonusTrees = getInheritableAttribute({
-                    entity: this,
-                    attributeKey: 'bonusTalentTree',
-                    reduce: "VALUES"
-                });
-                if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
-                    for (let [id, item] of Object.entries(this.system.availableItems)) {
-                        if (id.includes("Talent") && item > 0) {
-                            optionString += `<option value="${id}">${id}</option>`
-                            possibleTalentTrees.add(id);
-                        }
-                    }
-                } else {
-                    for (let talentTree of entity.system.possibleProviders.filter(unique)) {
-                        allTreesOnTalent.add(talentTree);
-                        let count = this.system.availableItems[talentTree];
-                        if (count && count > 0) {
-                            optionString += `<option value="${talentTree}">${talentTree}</option>`
-                            possibleTalentTrees.add(talentTree);
-                        }
-                    }
-                }
-
-
-                if (possibleTalentTrees.size === 0) {
-                    await Dialog.prompt({
-                        title: "You don't have more talents available of these types",
-                        content: "You don't have more talents available of these types: <br/><ul><li>" + Array.from(allTreesOnTalent).join("</li><li>") + "</li></ul>",
-                        callback: () => {
-                        }
-                    });
-                    return [];
-                } else if (possibleTalentTrees.size > 1) {
-                    let content = `<p>Select an unused talent source.</p>
+                        return [];
+                    } else if (possibleTalentTrees.size > 1) {
+                        let content = `<p>Select an unused talent source.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
 
-                    await Dialog.prompt({
-                        title: "Select an unused talent source.",
-                        content: content,
-                        callback: async (html) => {
-                            let key = html.find("#choice")[0].value;
-                            possibleTalentTrees = new Set();
-                            possibleTalentTrees.add(key);
-                        }
-                    });
+                        await Dialog.prompt({
+                            title: "Select an unused talent source.",
+                            content: content,
+                            callback: async (html) => {
+                                let key = html.find("#choice")[0].value;
+                                possibleTalentTrees = new Set();
+                                possibleTalentTrees.add(key);
+                            }
+                        });
+                    }
+                    entity.system.activeCategory = Array.from(possibleTalentTrees)[0];
+
                 }
-                entity.system.activeCategory = Array.from(possibleTalentTrees)[0];
 
-            }
+                if (entity.type === 'feat' && !context.provided) {
+                    let possibleFeatTypes = [];
 
-            if (entity.type === 'feat' && !context.provided) {
-                let possibleFeatTypes = [];
-
-                let optionString = "";
-                let possibleProviders = entity.system.possibleProviders;
-                if (this.system.availableItems) {
-                    for (let provider of possibleProviders) {
-                        if (this.system.availableItems[provider] > 0) {
-                            possibleFeatTypes.push(provider);
-                            optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
+                    let optionString = "";
+                    let possibleProviders = entity.system.possibleProviders;
+                    if (this.system.availableItems) {
+                        for (let provider of possibleProviders) {
+                            if (this.system.availableItems[provider] > 0) {
+                                possibleFeatTypes.push(provider);
+                                optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
+                            }
                         }
                     }
-                }
 
-                if (possibleFeatTypes.length === 0) {
-                    await Dialog.prompt({
-                        title: "You don't have more feats available of these types",
-                        content: "You don't have more feat available of these types: <br/><ul><li>" + Array.from(possibleProviders).join("</li><li>") + "</li></ul>",
-                        callback: () => {
-                        }
-                    });
-                    return [];
-                } else if (possibleFeatTypes.length > 1) {
-                    let content = `<p>Select an unused feat type.</p>
+                    if (possibleFeatTypes.length === 0) {
+                        suppressibleDialog.call(this, entity,
+                            `Attempting to add ${entity.finalName}. You don't have more feats available of these types: <br/><ul><li>${Array.from(possibleProviders).join("</li><li>")}</li></ul>`, `Insufficient Feats`,
+                            this.suppressDialog);
+                        return [];
+                    } else if (possibleFeatTypes.length > 1) {
+                        let content = `<p>Select an unused feat type.</p>
                         <div><select id='choice'>${optionString}</select> 
                         </div>`;
 
-                    await Dialog.prompt({
-                        title: "Select an unused feat source.",
-                        content: content,
-                        callback: async (html) => {
-                            let key = html.find("#choice")[0].value;
-                            possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
-                        }
-                    });
+                        await Dialog.prompt({
+                            title: "Select an unused feat source.",
+                            content: content,
+                            callback: async (html) => {
+                                let key = html.find("#choice")[0].value;
+                                possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
+                            }
+                        });
+                    }
+
+                    entity.system.activeCategory = possibleFeatTypes;
                 }
 
-                entity.system.activeCategory = possibleFeatTypes;
-            }
+                if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret') {
+                    let viewable = viewableEntityFromEntityType(entity.type);
 
-            if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret') {
-                let viewable = viewableEntityFromEntityType(entity.type);
+                    let foundCategory = false
+                    for (let category of entity.system.categories || []) {
+                        if (!!this.system.availableItems[category.value]) {
+                            foundCategory = true;
+                            entity.system.activeCategory = category.value;
+                            break;
+                        }
+                    }
 
-                let foundCategory = false
-                for (let category of entity.system.categories || []) {
-                    if (!!this.system.availableItems[category.value]) {
-                        foundCategory = true;
-                        entity.system.activeCategory = category.value;
-                        break;
+                    if (!foundCategory && !this.system.availableItems[viewable]) {
+                        await Dialog.prompt({
+                            title: `You can't take any more ${viewable.titleCase()}`,
+                            content: `You can't take any more ${viewable.titleCase()}`,
+                            callback: () => {
+                            }
+                        });
+                        return false;
+                    }
+                    entity.system.activeCategory = entity.system.activeCategory || viewable;
+                }
+
+                if (entity.type === "background" || entity.type === "destiny") {
+                    if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
+                        new Dialog({
+                            title: `${entity.type.titleCase()} Selection`,
+                            content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok'
+                                }
+                            }
+                        }).render(true);
+                        return false
                     }
                 }
 
-                if (!foundCategory && !this.system.availableItems[viewable]) {
-                    await Dialog.prompt({
-                        title: `You can't take any more ${viewable.titleCase()}`,
-                        content: `You can't take any more ${viewable.titleCase()}`,
-                        callback: () => {
-                        }
-                    });
-                    return false;
-                }
-                entity.system.activeCategory = entity.system.activeCategory || viewable;
-            }
-
-            if (entity.type === "background" || entity.type === "destiny") {
-                if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
-                    new Dialog({
-                        title: `${entity.type.titleCase()} Selection`,
-                        content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
+                if (entity.type === "vehicleBaseType" || entity.type === "species") {
+                    let type = entity.type;
+                    let viewable = type.replace(/([A-Z])/g, " $1");
+                    if (filterItemsByType(this.items.values(), type).length > 0) {
+                        new Dialog({
+                            title: `${viewable.titleCase()} Selection`,
+                            content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
+                            buttons: {
+                                ok: {
+                                    icon: '<i class="fas fa-check"></i>',
+                                    label: 'Ok'
+                                }
                             }
-                        }
-                    }).render(true);
-                    return false
+                        }).render(true);
+                        return false
+                    }
                 }
-            }
 
-            if (entity.type === "vehicleBaseType" || entity.type === "species") {
-                let type = entity.type;
-                let viewable = type.replace(/([A-Z])/g, " $1");
-                if (filterItemsByType(this.items.values(), type).length > 0) {
-                    new Dialog({
-                        title: `${viewable.titleCase()} Selection`,
-                        content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                    return false
-                }
             }
-
         }
+
         if (entity.type === "class") {
             context.isFirstLevel = this.classes.length === 0;
             if (!context.skipPrerequisite && !context.isUpload) {

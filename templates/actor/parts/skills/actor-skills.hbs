@@ -16,7 +16,7 @@
         </tr>
         </thead>
         <tbody>
-        {{#each actor.skill.skills as |skill id|}}
+        {{#each actor.system.skills as |skill id|}}
             {{#unless skill.hide}}
                 {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill toggles=../actor.system.toggles}}
             {{/unless}}

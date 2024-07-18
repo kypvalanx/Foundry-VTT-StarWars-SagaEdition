@@ -1710,14 +1710,22 @@ function generateUUID(actorId, itemId, effectId) {
 export function getCleanListFromCSV(name) {
     return name.split(",").map(n => n.trim());
 }
-export function toChat(content, actor = undefined) {
+
+function getChatType(context) {
+    if(context.inCharacter){
+        return CONST.CHAT_MESSAGE_TYPES.IC
+    }
+    return CONST.CHAT_MESSAGE_TYPES.OOC;
+}
+
+export function toChat(content, actor = undefined, flavor="", context={}) {
     let speaker = ChatMessage.getSpeaker({actor: actor || this.object.parent});
 
     let messageData = {
         user: game.user.id,
         speaker: speaker,
-        flavor: name,
-        type: CONST.CHAT_MESSAGE_TYPES.OOC,
+        flavor: flavor,
+        style: getChatType(context),
         content,
         sound: CONFIG.sounds.dice
     }

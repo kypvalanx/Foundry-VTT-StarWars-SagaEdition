@@ -12,7 +12,7 @@
     <th>
         <a class="rollable" title="Roll 1d20 + {{skill.value}}"
            data-label="{{skill.key}}" data-roll="1d20 + {{skill.value}}"
-           data-notes="{{skill.notes}}">
+           data-notes="{{skill.notes}}" data-key="@{{skill.key}}">
             <i class="fas fa-dice-d20"></i>
         </a>
         {{#unless skill.uut}}(TRAINED ONLY){{/unless}}
