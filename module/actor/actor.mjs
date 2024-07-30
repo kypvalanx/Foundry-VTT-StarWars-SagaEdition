@@ -276,6 +276,10 @@ export class SWSEActor extends Actor {
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
         }
+
+        if(Object.values(this._pendingUpdates).length > 0){
+            this.safeUpdate(this._pendingUpdates);
+        }
     }
 
     get condition() {
@@ -1657,7 +1661,7 @@ export class SWSEActor extends Actor {
      */
     getAttributeMod(ability) {
         if (!ability) return;
-        return this.system.attributes[ability.toLowerCase()].mod;
+        return this.system.attributes[ability.toLowerCase()]?.mod;
     }
 
     /**

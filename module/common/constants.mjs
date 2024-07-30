@@ -6,6 +6,7 @@ export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "
     "Knowledge (Bureaucracy)", "Knowledge (Galactic Lore)", "Knowledge (Life Sciences)", "Knowledge (Physical Sciences)",
     "Knowledge (Social Sciences)", "Knowledge (Tactics)", "Knowledge (Technology)", "Mechanics", "Perception",
     "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force"];
+export const defaultVehicleSkills = ["Pilot (Pilot)", "Initiative (Pilot)", "Stealth (Pilot)", "Deception (Pilot)", "Pilot (Copilot)", "Use Computer (Commander)", "Knowledge (Tactics) (Commander)", "Mechanics (System Operator)", "Use Computer (System Operator)", "Mechanics (Engineer)"];
 
 export function getGroupedSkillMap() {
     if (game.settings.get("swse", "homebrewUseLilLiteralistSkills")) {
@@ -18,8 +19,8 @@ export function getGroupedSkillMap() {
     return undefined;
 }
 
-export function skills(){
-    let skills = [...defaultSkills];
+export function skills(actorType = "character"){
+    let skills = actorType==="character" ? [...defaultSkills] : [...defaultVehicleSkills];
     let groupedSkillMap = getGroupedSkillMap();
 
     if(groupedSkillMap){

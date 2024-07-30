@@ -302,7 +302,12 @@ function _resolveRef(actor, conditionBonus) {
 
 
 function getArmorBonus(actor) {
-    let armorReflexDefenseBonus = getArmorReflexDefenseBonus(actor) || 0;
+    let armorReflexDefenseBonus = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "armorReflexDefenseBonus",
+        reduce: "SUM",
+        attributeFilter: attr => !attr.modifier
+    })
     if (["vehicle", "npc-vehicle"].includes(actor.type)) {
         if (actor.pilot) {
             let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.system.attributes).find(a => a.key === "isHeroic").value).length;
@@ -498,15 +503,6 @@ function _getEquipmentFortBonus(actor) {
         }
     }
     return bonus;
-}
-
-function getArmorReflexDefenseBonus(actor) {
-    let bonuses = equippedItems(actor).map(i => i.armorReflexDefenseBonus).filter(bonus => !!bonus)
-
-    if (bonuses.length === 0) {
-        return undefined;
-    }
-    return Math.max(...bonuses)
 }
 
 function _getEquipmentMaxDexBonus(actor) {

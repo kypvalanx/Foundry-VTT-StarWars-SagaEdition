@@ -134,7 +134,7 @@ export function generateSkills(actor, options = {}) {
 
     const skillMap = new Map();
 
-    const resolvedSkills = applyGroupedSkills(options.skills || skills(), options.groupedSkillMap);
+    const resolvedSkills = applyGroupedSkills(options.skills || skills(actor.type), options.groupedSkillMap);
 
     const nonSituationalSkills = [];
     const distinctSkillBonuses = skillBonusAttr.map(bonus => bonus.split(":")[0]).distinct()

@@ -1134,7 +1134,7 @@ const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower"
     "beastType",
     "beastQuality"];
 
-export function inheritableItems(entity) {
+export function inheritableItems(entity, options={}) {
     let fn = () => {
         let possibleInheritableItems = filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES);
 
@@ -1167,7 +1167,7 @@ export function inheritableItems(entity) {
         return actualInheritable;
     }
 
-    return entity.getCached ? entity.getCached(`inheritableItems`, fn) : fn();
+    return entity.getCached && !options.skipCache ? entity.getCached(`inheritableItems`, fn) : fn();
 }
 
 test()
