@@ -196,13 +196,17 @@ export function getInheritableAttribute(data = {}) {
         }
     }
 
-    if (!data.recursive && data.parent) {
+
+    if (!data.recursive) {
         values = values.filter(attr => {
             let parent = data.parent;
 
             if (!parent) {
                 let parentId = getItemParentId(attr.source)
                 parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
+            }
+            if(!parent){
+                return true;
             }
             if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail) {
                 return false;
