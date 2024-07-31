@@ -277,24 +277,21 @@ export async function actorSheetTests(quench) {
 
 
 
-                        it('should change how reflex defense is resolved when armored defense is detected', async function () {
+                        it('should resolve beast attacks correctly', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Beast", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Medium", type: "trait"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Bite", type: "beastAttack"})
 
-                                assert.equal(actor.system.defense.reflex.total, 15) //4 heroic levels +1 from soldier
+                                let attacks = actor.attack.attacks
 
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Padded Flight Suit", type: "item", equip: true})
+                                assert.equal(attacks.length, 1)
 
-                                assert.equal(actor.system.defense.reflex.total, 14) //3 from armor + 1 from soldier
+                                let attack = attacks[0];
 
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armored Defense", type: "talent"})
-                                assert.equal(actor.system.defense.reflex.total, 15)//4 heroic levels +1 from soldier
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Improved Armored Defense", type: "talent"})
-                                assert.equal(actor.system.defense.reflex.total, 16)//4 heroic levels +1 from soldier + floor(3/2)
+
+                                assert.equal(attack.damageRoll.roll._formula, "1d6")
                             });
                         });
                     })

@@ -1138,10 +1138,6 @@ export class SWSEActor extends Actor {
                     })
                 }
             } else {
-                if (!this.traits) {
-                    return;
-                }
-
                 let attributes = getInheritableAttribute({
                     entity: this,
                     attributeKey: 'speed', reduce: "VALUES"
