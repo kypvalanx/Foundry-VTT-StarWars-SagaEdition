@@ -76,7 +76,7 @@ export function getResolvedSize(entity, options = {}) {
         let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
         return sizeIndex + sizeBonus + miscBonus;
     }
-    return entity.getCache ? entity.getCache("resolvedSize", fn) : fn()
+    return entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey, fn) : fn()
 
 }
 

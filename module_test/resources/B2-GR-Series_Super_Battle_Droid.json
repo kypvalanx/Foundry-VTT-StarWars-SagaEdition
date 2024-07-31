@@ -1,0 +1,188 @@
+{
+    "entries": [{
+        "effects": [],
+        "system": {
+            "skills": {
+                "initiative": {"trained": true},
+                "perception": {"trained": true}
+            },
+            "providedItems": [
+                {
+                    "name": "The Confederacy of Independent Systems",
+                    "type": "affiliation"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class",
+                    "firstLevel": true
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Nonheroic",
+                    "type": "class"
+                },
+                {
+                    "name": "Soldier",
+                    "type": "class"
+                },
+                {
+                    "name": "4th-Degree Droid Model",
+                    "answers": ["Large"],
+                    "type": "species"
+                },
+                {
+                    "name": "Basic",
+                    "type": "language"
+                },
+                {
+                    "name": "Binary",
+                    "type": "language"
+                },
+                {
+                    "name": "Expert Grappler",
+                    "type": "talent"
+                },
+                {
+                    "name": "Armor Proficiency (Light)",
+                    "type": "feat"
+                },
+                {
+                    "name": "Crush",
+                    "type": "feat"
+                },
+                {
+                    "name": "Martial Arts I",
+                    "type": "feat"
+                },
+                {
+                    "name": "Martial Arts II",
+                    "type": "feat"
+                },
+                {
+                    "name": "Pin",
+                    "type": "feat"
+                },
+                {
+                    "payloads": {"payload": "Initiative"},
+                    "name": "Skill Focus",
+                    "type": "feat"
+                },
+                {
+                    "payloads": {"payload": "Perception"},
+                    "name": "Skill Training",
+                    "type": "feat"
+                },
+                {
+                    "payloads": {"payload": "Simple Weapons"},
+                    "name": "Weapon Proficiency",
+                    "type": "feat"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Walking",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Claw",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Claw",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Remote Receiver",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Backup Processor",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Internal Comlink",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Locked Access",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Vocabulator",
+                    "type": "item"
+                },
+                {
+                    "equip": "equipped",
+                    "name": "Quadanium Plating",
+                    "type": "item"
+                }
+            ],
+            "cost": 6310,
+            "size": "Large",
+            "defense": {},
+            "sizeOverride": "Large",
+            "attributeGenerationType": "Manual",
+            "changes": [{
+                "mode": 2,
+                "value": "Military",
+                "key": "availability"
+            }],
+            "description": "",
+            "cl": 4,
+            "health": {
+                "max": 42,
+                "override": 42,
+                "value": 42
+            },
+            "attributes": {
+                "str": {"manual": "20"},
+                "wis": {"manual": "14"},
+                "con": {"manual": "-"},
+                "dex": {"manual": "14"},
+                "cha": {"manual": "6"},
+                "int": {"manual": "10"}
+            }
+        },
+        "name": "B2-GR-Series Super Battle Droid",
+        "flags": {},
+        "permission": {"default": 0},
+        "sort": 0,
+        "type": "npc"
+    }],
+    "name": "Units-CL-4",
+    "type": "Actor",
+    "version": 1722388135304
+}

@@ -9,6 +9,8 @@
 //test()
 
 import {getFile, processActor} from "../../module/compendium/generation.mjs";
+import {getResolvedSize} from "../../module/attribute-helper.mjs";
+import {sizeArray} from "../../module/common/constants.mjs";
 
 function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
     assert.equal(actor.system.attributeGenerationType, "Manual")
@@ -94,6 +96,34 @@ export async function generationTests(quench) {
                     actor.delete()
                 })
 
+                it("Generate B2-GR-Series Super Battle Droid Correctly", async ()=>{
+                    let actorData = await getActorRawData("systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json", "B2-GR-Series Super Battle Droid")
+
+                    let actor = await processActor(actorData);
+
+                    assert.equal(actor.name, "B2-GR-Series Super Battle Droid")
+
+                    assert.equal(sizeArray[getResolvedSize(actor)], "Large")
+
+                    assert.equal(actor.system.health.value, 42, "health")
+                    assert.equal(actor.system.health.max, 42)
+                    assert.equal(actor.system.health.override, 42)
+
+                    assert.equal(actor.system.defense.fortitude.total, 18)
+                    assert.equal(actor.system.defense.reflex.total, 19, "reflex")
+                    assert.equal(actor.system.defense.will.total, 13)
+                    assert.equal(actor.system.defense.damageThreshold.total, 23, "damage threshold")
+
+                    assert.equal(actor.system.attributeGenerationType, "Manual")
+                    assert.equal(actor.system.attributes.str.total, 20)
+                    assert.equal(actor.system.attributes.dex.total, 14)
+                    assert.equal(actor.system.attributes.con.total, "-")
+                    assert.equal(actor.system.attributes.int.total, 10)
+                    assert.equal(actor.system.attributes.wis.total, 14)
+                    assert.equal(actor.system.attributes.cha.total, 6)
+
+                    actor.delete()
+                })
                 // it("Generate CL20 Luke Skywalker, Grand Master", async ()=>{
                 //         let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-20.json", "Luke Skywalker, Grand Master")
                 //
@@ -300,7 +330,7 @@ async function testTeek(context) {
 }
 
 async function testSpecForceMarine(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-4.json", "SpecForce Marine")
+    let actorData = await getActorRawData("systems\\swse\\raw_export\\B2-GR-Series_Super_Battle_Droid.json", "SpecForce Marine")
 
     let actor = await processActor(actorData);
 

@@ -785,5 +785,5 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
 
     if (rollMode) msg.applyRollMode(rollMode);
 
-    return cls.create(msg, {rollMode});
+    return cls.create(msg, {rollMode: rollMode});
 }

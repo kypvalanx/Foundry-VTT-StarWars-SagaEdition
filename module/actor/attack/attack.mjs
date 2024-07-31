@@ -915,7 +915,7 @@ export function getDiceTermsFromString(dieString) {
     let lastOperator = "";
     for (let dieTerm of dieTerms) {
         if (dieTerm === "0") {
-            //dice.push(new NumericTerm({number: 0}));
+            dice.push(new NumericTerm({number: 0}));
         } else if (!isNaN(dieTerm)) {
             if (lastOperator === "x") {
                 dice.push(new NumericTerm({number: toNumber(dieTerm), options: getDieFlavor("multiplier")}));
