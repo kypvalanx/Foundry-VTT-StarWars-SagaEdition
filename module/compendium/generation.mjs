@@ -51,6 +51,24 @@ export async function processActor(actorData) {
     }
     return actor;
 }
+export async function processItem(itemData) {
+    let items = await SWSEItem.create([itemData]);
+    if (!(items && items.length === 1)) {
+        return;
+    }
+    let item = items[0];
+    for(let effect of item.effects){
+        for(let link of effect.flags.swse.linkData || []){
+            let groupedEffects = item.effects.filter(effect => effect.flags.swse.group === link.group)
+            for (const e of groupedEffects) {
+                await e.addLinks(effect, link.type.toLowerCase());
+            }
+            console.log(effect)
+        }
+        //delete effect.flags.swse.linkData
+    }
+    return item;
+}
 
 export async function getFile(jsonImport) {
     let response = await fetch(jsonImport);
@@ -118,21 +136,27 @@ async function importCompendium(jsonImport, forceRefresh) {
 
 
     if ('Item' === entity) {
-        let items = await SWSEItem.create(content.entries);
-        for (let item of items) {
-            for(let effect of item.effects){
-                for(let link of effect.flags.swse.linkData || []){
-                    let groupedEffects = item.effects.filter(effect => effect.flags.swse.group === link.group)
-                    for (const e of groupedEffects) {
-                        await e.addLinks(effect, link.type.toLowerCase());
-                    }
-                    console.log(effect)
-                }
-                //delete effect.flags.swse.linkData
-            }
+        for (let itemData of content.entries) {
+            const item = await processItem(itemData);
+
             await collection.importDocument(item);
             item.delete();
         }
+        // let items = await SWSEItem.create(content.entries);
+        // for (let item of items) {
+        //     for(let effect of item.effects){
+        //         for(let link of effect.flags.swse.linkData || []){
+        //             let groupedEffects = item.effects.filter(effect => effect.flags.swse.group === link.group)
+        //             for (const e of groupedEffects) {
+        //                 await e.addLinks(effect, link.type.toLowerCase());
+        //             }
+        //             console.log(effect)
+        //         }
+        //         //delete effect.flags.swse.linkData
+        //     }
+        //     await collection.importDocument(item);
+        //     item.delete();
+        // }
     } else if ('Actor' === entity) {
         for (let actorData of content.entries) {
             const actor = await processActor(actorData);
@@ -145,7 +169,7 @@ async function importCompendium(jsonImport, forceRefresh) {
             }
 
 
-            //await actor.delete();
+            await actor.delete();
         }
     }
     // await pack.createEntity(content.entries);

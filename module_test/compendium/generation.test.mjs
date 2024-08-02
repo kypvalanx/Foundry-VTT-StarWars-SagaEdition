@@ -8,7 +8,7 @@
 
 //test()
 
-import {getFile, processActor} from "../../module/compendium/generation.mjs";
+import {getFile, processActor, processItem} from "../../module/compendium/generation.mjs";
 import {getResolvedSize} from "../../module/attribute-helper.mjs";
 import {sizeArray} from "../../module/common/constants.mjs";
 
@@ -33,7 +33,7 @@ function assertEquippedItems(assert, actor, expectedItems) {
 
 export async function generationTests(quench) {
 
-    quench.registerBatch("compendium.generation.spotChecks",
+    quench.registerBatch("compendium.generation.actors",
         (context)=>{
             const { describe, it, assert, expect, should } = context;
             describe("Generation Spot Checks", ()=>{
@@ -70,7 +70,7 @@ export async function generationTests(quench) {
 
 
                 it("Generate Rancor Correctly", async ()=>{
-                    let actorData = await getActorRawData("systems/swse/module_test/resources/rancor.json", "Rancor")
+                    let actorData = await getEntityRawData("systems/swse/module_test/resources/rancor.json", "Rancor")
 
                     let actor = await processActor(actorData);
 
@@ -97,7 +97,7 @@ export async function generationTests(quench) {
                 })
 
                 it("Generate B2-GR-Series Super Battle Droid Correctly", async ()=>{
-                    let actorData = await getActorRawData("systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json", "B2-GR-Series Super Battle Droid")
+                    let actorData = await getEntityRawData("systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json", "B2-GR-Series Super Battle Droid")
 
                     let actor = await processActor(actorData);
 
@@ -173,16 +173,33 @@ export async function generationTests(quench) {
             });
         },
         {displayName: "GENERATION: ACTOR SPOT CHECKS"});
+
+    quench.registerBatch("compendium.generation.species",
+        (context)=>{
+            const { describe, it, assert, expect, should } = context;
+            describe("Species Verification", ()=>{
+                it("Generate Human Species Correctly", async ()=>{
+                    let itemData = await getEntityRawData("systems/swse/module_test/resources/Human.json", "Human")
+
+                    let item = await processItem(itemData);
+
+                    assert.equal(item.name, "Human")
+
+                    item.delete();
+                })
+            });
+        },
+        {displayName: "GENERATION: SPECIES"})
 }
 
-async function getActorRawData(file, unitName) {
+async function getEntityRawData(file, unitName) {
     let response = await getFile(file);
     const content = await response.json();
     return content.entries.find(entry=> entry.name === unitName);
 }
 
 async function testArchiveDroid(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "A9G-Series Archive Droid")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "A9G-Series Archive Droid")
 
     let actor = await processActor(actorData);
 
@@ -205,7 +222,7 @@ async function testArchiveDroid(context) {
     actor.delete()
 }
 async function testAerialSurveyDroid(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "AS23 Aerial Survey Droid")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "AS23 Aerial Survey Droid")
 
     let actor = await processActor(actorData);
 
@@ -228,7 +245,7 @@ async function testAerialSurveyDroid(context) {
     actor.delete()
 }
 async function testASPLaborDroid(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "ASP Labor Droid")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "ASP Labor Droid")
 
     let actor = await processActor(actorData);
 
@@ -252,7 +269,7 @@ async function testASPLaborDroid(context) {
     actor.delete()
 }
 async function testBD3000LuxuryDroid(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "BD-3000 Luxury Droid")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "BD-3000 Luxury Droid")
 
     let actor = await processActor(actorData);
 
@@ -276,7 +293,7 @@ async function testBD3000LuxuryDroid(context) {
 }
 
 async function testEldewnandElsaeSarvool(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "Eldewn and Elsae Sarvool")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "Eldewn and Elsae Sarvool")
 
     let actor = await processActor(actorData);
 
@@ -303,7 +320,7 @@ async function testEldewnandElsaeSarvool(context) {
 }
 
 async function testTeek(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-2.json", "Teek (Character)")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-2.json", "Teek (Character)")
 
     let actor = await processActor(actorData);
 
@@ -330,7 +347,7 @@ async function testTeek(context) {
 }
 
 async function testSpecForceMarine(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\B2-GR-Series_Super_Battle_Droid.json", "SpecForce Marine")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\B2-GR-Series_Super_Battle_Droid.json", "SpecForce Marine")
 
     let actor = await processActor(actorData);
 
@@ -357,7 +374,7 @@ async function testSpecForceMarine(context) {
 }
 
 async function testVeteranImperialOfficer(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-9.json", "Veteran Imperial Officer")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-9.json", "Veteran Imperial Officer")
 
     let actor = await processActor(actorData);
 
@@ -384,7 +401,7 @@ async function testVeteranImperialOfficer(context) {
 }
 
 async function testLeiaOrganaSoloExChiefOfState(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-15.json", "Leia Organa Solo, Ex-Chief of State")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-15.json", "Leia Organa Solo, Ex-Chief of State")
 
     let actor = await processActor(actorData);
 
@@ -410,7 +427,7 @@ async function testLeiaOrganaSoloExChiefOfState(context) {
     actor.delete()
 }
 async function validate(file, unitName,context, validationFunction) {
-    let actorData = await getActorRawData(file, unitName)
+    let actorData = await getEntityRawData(file, unitName)
 
     let actor = await processActor(actorData);
 
@@ -426,7 +443,7 @@ function verifyActorImport(file, unitName, context, validationFunction) {
 }
 
 async function testObiWanKenobiJediSpirit(context) {
-    let actorData = await getActorRawData("systems\\swse\\raw_export\\Units-CL-0.json", "Obi-Wan Kenobi, Jedi Spirit")
+    let actorData = await getEntityRawData("systems\\swse\\raw_export\\Units-CL-0.json", "Obi-Wan Kenobi, Jedi Spirit")
 
     let actor = await processActor(actorData);
 

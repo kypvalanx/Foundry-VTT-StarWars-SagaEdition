@@ -1,4 +1,4 @@
-import {onCollapseToggle, safeInsert} from "../common/util.mjs";
+import {onCollapseToggle} from "../common/util.mjs";
 import {
     _adjustPropertyBySpan,
     onChangeControl, _onLinkControl,

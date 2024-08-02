@@ -1,0 +1,386 @@
+{
+    "entries": [{
+        "img": "systems/swse/icon/species/default.png",
+        "effects": [],
+        "system": {
+            "providedItems": [
+                {
+                    "name": "Humans",
+                    "type": "trait"
+                },
+                {
+                    "name": "Medium",
+                    "type": "trait"
+                },
+                {
+                    "name": "Charisma (+1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Venerable",
+                                "requirement": "Venerable",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Old",
+                                "requirement": "Old",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Venerable, Old, or Middle age",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Strength (-2)",
+                    "prerequisite": {
+                        "text": "Old",
+                        "requirement": "Old",
+                        "type": "TRAIT"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Strength (-3)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Venerable",
+                                "requirement": "Venerable",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Venerable, or Child",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Wisdom (+1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Venerable",
+                                "requirement": "Venerable",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Old",
+                                "requirement": "Old",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Venerable, Old, or Middle age",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Strength (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Middle age, or Young adult",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Dexterity (-2)",
+                    "prerequisite": {
+                        "text": "Old",
+                        "requirement": "Old",
+                        "type": "TRAIT"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Dexterity (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Middle age, Child, or Young adult",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Charisma (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Young adult, or Child",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Wisdom (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Young adult, or Child",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Intelligence (+1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Old",
+                                "requirement": "Old",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Venerable",
+                                "requirement": "Venerable",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Old, Venerable, or Middle age",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Dexterity (-3)",
+                    "prerequisite": {
+                        "text": "Venerable",
+                        "requirement": "Venerable",
+                        "type": "TRAIT"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Intelligence (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Child, or Young adult",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Constitution (-1)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Young adult",
+                                "requirement": "Young adult",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Middle age",
+                                "requirement": "Middle age",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Young adult, or Middle age",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Constitution (-2)",
+                    "prerequisite": {
+                        "text": "Old",
+                        "requirement": "Old",
+                        "type": "TRAIT"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Constitution (-3)",
+                    "prerequisite": {
+                        "children": [
+                            {
+                                "text": "Child",
+                                "requirement": "Child",
+                                "type": "TRAIT"
+                            },
+                            {
+                                "text": "Venerable",
+                                "requirement": "Venerable",
+                                "type": "TRAIT"
+                            }
+                        ],
+                        "count": 1,
+                        "text": "Child, or Venerable",
+                        "type": "OR"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Base Speed (6)",
+                    "type": "trait"
+                },
+                {
+                    "name": "Young adult",
+                    "prerequisite": {
+                        "high": "15",
+                        "low": "12",
+                        "text": "12-15",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Old",
+                    "prerequisite": {
+                        "high": "79",
+                        "low": "60",
+                        "text": "60-79",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Child",
+                    "prerequisite": {
+                        "high": "11",
+                        "low": "1",
+                        "text": "1-11",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Adult",
+                    "prerequisite": {
+                        "high": "40",
+                        "low": "16",
+                        "text": "16-40",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Venerable",
+                    "prerequisite": {
+                        "high": "",
+                        "low": "80",
+                        "text": "80+",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                },
+                {
+                    "name": "Middle age",
+                    "prerequisite": {
+                        "high": "59",
+                        "low": "41",
+                        "text": "41-59",
+                        "type": "AGE"
+                    },
+                    "type": "trait"
+                }
+            ],
+            "changes": [],
+            "description": "<p><i>See also: <a href=\"https://swse.fandom.com/wiki/Near-Humans\" title=\"Near-Humans\">Near-Humans<\/a><\/i> <\/p><p>Humans dominate the <a href=\"https://swse.fandom.com/wiki/Core_Worlds\" class=\"mw-redirect\" title=\"Core Worlds\">Core Worlds<\/a> and can be found in virtually every corner of the galaxy. They are the ancestors of early spacefaring pioneers, conquerors, traders, travelers, and refugees. Humans have always been people on the move. As a result, they can be found on almost every inhabited planet. As a Species, Humans are physically, culturally, and politically diverse. Hardy or fine, light-skinned or dark, Humans remain one of the most dominant Species throughout all eras of play. <\/p><h3><span class=\"mw-headline\" id=\"Human_Characteristics\">Human Characteristics<\/span><\/h3><p><b>Personality:<\/b> Human personality runs the gamut of possibilities, though members of this Species tend to be highly adaptable, tenacious, and willing to keep striving no matter the odds. They are flexible and ambitious, diverse in their tastes, morals, customs, and habits. <\/p><p><b><a href=\"https://swse.fandom.com/wiki/Age_Groups\" class=\"mw-redirect\" title=\"Age Groups\">Age Groups<\/a>:<\/b> Humans age at the following stages: <\/p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>CHILD <\/th> \n   <th>YOUNG ADULT <\/th> \n   <th>ADULT <\/th> \n   <th>MIDDLE AGE <\/th> \n   <th>OLD <\/th> \n   <th>VENERABLE <\/th>\n  <\/tr> \n  <tr> \n   <td>1-11 Years <\/td> \n   <td>12-15 Years <\/td> \n   <td>16-40 Years <\/td> \n   <td>41-59 Years <\/td> \n   <td>60-79 Years <\/td> \n   <td>80+ Years <\/td>\n  <\/tr>\n <\/tbody>\n<\/table><p><b>Homeworlds:<\/b> Various, including <a href=\"https://swse.fandom.com/wiki/Coruscant\" title=\"Coruscant\">Coruscant<\/a>, <a href=\"https://swse.fandom.com/wiki/Corellia\" title=\"Corellia\">Corellia<\/a>, <a href=\"https://swse.fandom.com/wiki/Naboo\" title=\"Naboo\">Naboo<\/a>, <a href=\"https://swse.fandom.com/wiki/Tatooine\" title=\"Tatooine\">Tatooine<\/a>, and <a href=\"https://swse.fandom.com/wiki/Alderaan\" title=\"Alderaan\">Alderaan<\/a>. <\/p><p><b>Languages:<\/b> Humans speak, read, and write Basic. They often learn other languages as well, including obscure ones. <\/p><p><b>Example Names:<\/b> Anakin, Arani, Bail, Ben, Biggs, Boba, Corran, Dack, Dané, Galak, Garm, Han, Jango, Jodo, Lando, Leia, Luke, Mace, Mara, Obi-Wan, Owen, Padmé, Qui-Gon, Sia-Lan, Rann, Talon, Vor'en, Wedge, Winter. <\/p><p><b>Adventurers:<\/b> Humans aren't afraid to try anything, and Human adventurers are the most audacious, daring, and ambitious members of an audacious, daring, and ambitious Species. A Human can earn glory by amassing power, wealth, and fame. More than any other <a href=\"https://swse.fandom.com/wiki/Species\" title=\"Species\">Species<\/a>, Humans champion causes rather than territories or groups. <\/p><h3><span class=\"mw-headline\" id=\"Human_Species_Traits\">Human Species Traits<\/span><\/h3><p>Humans share the following Species Traits: <\/p>",
+            "categories": [
+                {"value": "Humans"},
+                {"value": "Bonus Feat"},
+                {"value": "Medium"},
+                {"value": "Species"},
+                {"value": "Bonus Trained Skill"}
+            ]
+        },
+        "name": "Human",
+        "flags": {},
+        "permission": {"default": 0},
+        "sort": 0,
+        "type": "species"
+    }],
+    "name": "Species",
+    "type": "Item",
+    "version": 1722455677693
+}
