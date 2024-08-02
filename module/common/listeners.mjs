@@ -1,5 +1,5 @@
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
-import {addBlankMode, addBlankModificationEffect, getDocumentByUuid, safeInsert} from "./util.mjs";
+import {addBlankMode, addBlankModificationEffect, getDocumentByUuid} from "./util.mjs";
 
 export function onChangeControl(event) {
     event.preventDefault();
@@ -237,7 +237,9 @@ export function changeText(event) {
     if(!name){
         return;
     }
-    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
+    const update = {}
+
+    update[`${updatePath}${name}`] = target.value
 
     this.object.safeUpdate(update);
 }
@@ -249,7 +251,9 @@ export function changeSelect(event) {
     if(!name){
         return;
     }
-    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
+    const update = {}
+
+    update[`${updatePath}${name}`] = target.value
 
     this.object.safeUpdate(update);
 }
@@ -294,7 +298,9 @@ export function changeCheckbox(event) {
     let {system, updatePath} = getRoot.call(this, name);
     const type = $(target).data("type");
     const checked = type === "inverse" ? !target.checked : target.checked;
-    const update = safeInsert(this.object, `${updatePath}${name}`, checked)
+    const update = {}
+
+    update[`${updatePath}${name}`] = checked
 
     this.object.safeUpdate(update);
 }
@@ -306,9 +312,10 @@ export function changeRadio(event) {
         return;
     }
     let {system, updatePath} = getRoot.call(this, name);
-    const type = $(target).data("type");
 
-    const update = safeInsert(this.object, `${updatePath}${name}`, target.value)
+    const update = {}
+
+    update[`${updatePath}${name}`] =  target.value
 
     this.object.safeUpdate(update);
 }

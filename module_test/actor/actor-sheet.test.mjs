@@ -1,6 +1,5 @@
 import {SWSEActor} from "../../module/actor/actor.mjs";
 import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
-import {safeInsert} from "../../module/common/util.mjs";
 import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
 
@@ -176,7 +175,10 @@ export async function actorSheetTests(quench) {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
 
-                                await actor.safeUpdate(safeInsert(actor, `system.skills.knowledge (bureaucracy).trained`, true));
+                                const update = {};
+                                update[`system.skills.knowledge (bureaucracy).trained`] = true;
+
+                                await actor.safeUpdate(update);
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Skill Focus", type: "feat",
                                     answers: ["Knowledge (Bureaucracy)"]})
@@ -203,7 +205,9 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
 
-                                await actor.safeUpdate(safeInsert(actor, `system.skills.use the force.trained`, true));
+                                const update = {};
+                                update[`system.skills.use the force.trained`] = true;
+                                await actor.safeUpdate(update);
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Light)", type: "feat"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
 

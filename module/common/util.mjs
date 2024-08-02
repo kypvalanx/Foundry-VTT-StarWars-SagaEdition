@@ -1350,30 +1350,6 @@ export function onCollapseToggle(event) {
     })
 }
 
-export function safeInsert(object, key, value) {
-    let update = {};
-    let cursor = update;
-    let itemCursor = object;
-    let tokens = key.split("\.")
-    let i = 0;
-    let length = tokens.length;
-    for (let tok of tokens) {
-        if (i === length - 1) {
-            cursor[tok] = value;
-        } else if (Array.isArray(itemCursor[tok])) {
-            cursor[tok] = itemCursor[tok];
-            cursor = cursor[tok];
-            itemCursor = itemCursor[tok]
-        } else {
-            cursor[tok] = cursor[tok] || {};
-            cursor = cursor[tok];
-            itemCursor = itemCursor[tok]
-        }
-        i++;
-    }
-    return update;
-}
-
 export function convertOverrideToMode(changes) {
     if (changes) {
         for (const change of changes.entries()) {
