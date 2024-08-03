@@ -2,7 +2,7 @@
     {{#unless attack.hide}}
         <div class="flex flex-col {{#if
                 attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container"
-             data-attacks="[{{attack.toJSONString}}]" data-item-id="{{attack.itemId}}"
+             data-attacks="[{{attack.toJSONString}}]" data-item-id="{{attack.weaponId}}"
              data-provider-id="{{attack.providerId}}" data-actor-id="{{attack.actorId}}"
              data-label="{{attack.name}}" data-img="{{attack.img}}">
             <div class="flex flex-row">
@@ -11,16 +11,16 @@
                 <div class="huge labeled-input">
                     <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
                            placeholder="" disabled/>
-                        <div class="toggle control" data-toggle-id="{{attack.actorId}}-{{attack.itemId}}-{{attack.providerId}}">
+                        <div class="toggle control" data-toggle-id="{{attack.actorId}}-{{attack.weaponId}}-{{attack.providerId}}">
                             <a>
                                 <i class="fas {{#if
-                                        (lookup toggles (concat attack.actorId "-" attack.itemId "-" attack.providerId))}}fa-minus{{else}}fa-plus{{/if}}"></i>
+                                        (lookup toggles (concat attack.actorId "-" attack.weaponId "-" attack.providerId))}}fa-minus{{else}}fa-plus{{/if}}"></i>
                             </a>
                         </div>
                 </div>
             </div>
             <div class="attack-block collapsible" style="display: {{#if
-                    (lookup toggles (concat attack.actorId "-" attack.itemId "-" attack.providerId))}}grid{{else}}none{{/if}}">
+                    (lookup toggles (concat attack.actorId "-" attack.weaponId "-" attack.providerId))}}grid{{else}}none{{/if}}">
 
                 <div class="to-hit"><label for="attack">Attack</label>
                     <div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div>
@@ -45,16 +45,16 @@
                         <button>Attack</button>
                         {{#if attack.hasAmmunition}}
                             {{#each attack.ammunition.current as |ammo id|}}
-                        <button data-item-id="{{../attack.itemId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
+                        <button data-item-id="{{../attack.weaponId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
                             {{/each}}
                         {{/if}}
                     </div>
                     {{#each attack.modes as |mode id|}}
                         <div class="mode-selector mode-group" data-type="{{mode.type}}"
                              data-mode-path="{{mode.modePath}}"
-                             data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}"
+                             data-mode="{{mode.name}}" data-item-id="{{../../attack.weaponId}}"
                              data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
-                            <label for="{{mode.name}} {{../../attack.itemId}}">{{mode.name}}</label>
+                            <label for="{{mode.name}} {{../../attack.weaponId}}">{{mode.name}}</label>
                             <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable"
                                    data-action="effect-control" data-effect-uuid="{{mode.uuid}}"/>
                         </div>

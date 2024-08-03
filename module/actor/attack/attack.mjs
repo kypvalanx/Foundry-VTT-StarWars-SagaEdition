@@ -45,10 +45,17 @@ export class Attack {
         SINGLE_ATTACK: "SINGLE_ATTACK"
     };
 
-
-    constructor(actorId, itemId, providerId, parentId, options) {
+    /**
+     *
+     * @param actorId {String} the actor that this attack belongs to.
+     * @param weaponId {String} the weapon that is being used.
+     * @param providerId {String}
+     * @param parentId {String} the parent actor of the weapon
+     * @param options
+     */
+    constructor(actorId, weaponId, providerId, parentId, options) {
         this.actorId = actorId;
-        this.itemId = itemId;
+        this.weaponId = weaponId;
         this.providerId = providerId;
         this.parentId = parentId;
         this.options = options;
@@ -62,17 +69,17 @@ export class Attack {
         if (Array.isArray(json)) {
             let attks = [];
             for (let atk of json) {
-                attks.push(new Attack(atk.actorId, atk.itemId, atk.providerId, atk.parentId, atk.options))
+                attks.push(new Attack(atk.actorId, atk.weaponId, atk.providerId, atk.parentId, atk.options))
             }
             return attks;
         }
-        return new Attack(json.actorId, json.itemId, json.providerId, json.parentId, json.options)
+        return new Attack(json.actorId, json.weaponId, json.providerId, json.parentId, json.options)
     }
 
     get toJSON() {
         return {
             actorId: this.actorId,
-            itemId: this.itemId,
+            weaponId: this.weaponId,
             providerId: this.providerId,
             parentId: this.parentId,
             options: this.options
@@ -176,11 +183,11 @@ export class Attack {
                 return undefined;
             }
 
-            if ('Unarmed Attack' === this.itemId) {
+            if ('Unarmed Attack' === this.weaponId) {
                 return new UnarmedAttack(this.actorId);
             }
 
-            return actor.items.get(this.itemId);
+            return actor.items.get(this.weaponId);
         })
     }
 
@@ -762,7 +769,7 @@ export class Attack {
     }
 
     clone() {
-        return new Attack(this.actorId, this.itemId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
+        return new Attack(this.actorId, this.weaponId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
     }
 
     checkExistingDynamicModes(existingModes, newMode) {
@@ -812,7 +819,7 @@ export class Attack {
     }
 
 get summary(){
-        return {attributes:[{key:"value", value:this.toJSONString}, {key:"data-item-id", value: this.itemId}], value:this.toJSONString, item:this.itemId, name:this.name}
+        return {attributes:[{key:"value", value:this.toJSONString}, {key:"data-item-id", value: this.weaponId}], value:this.toJSONString, item:this.weaponId, name:this.name}
 }
     attackOption(attack, id) {
         let attackString = attack.toJSONString
