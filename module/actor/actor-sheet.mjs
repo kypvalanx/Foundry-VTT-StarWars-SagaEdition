@@ -807,14 +807,14 @@ export class SWSEActorSheet extends ActorSheet {
             return;
         }
 
-        const postion = $(targetItemContainer).data('position');
+        const position = $(targetItemContainer).data('position');
         const slot = $(targetItemContainer).data('slot');
-        if (!postion) {
+        if (!position) {
             console.error("no position associated with the activated crew slot")
             return;
         }
 
-        if (postion === 'Astromech Droid') {
+        if (position === 'Astromech Droid') {
             if (actor.species.name !== 'Astromech Droid' && actor.species.name !== '2nd-Degree Droid Model') {
                 this.onlyAllowsAstromechsDialog();
                 return;
@@ -824,7 +824,7 @@ export class SWSEActorSheet extends ActorSheet {
         //if (!this.object.crewMembers.find(crewMember => crewMember.position === postion && crewMember.slot === slot)) {
         //await this.removeCrewFromPositions(actor, actor.id, crewPositions);
         //await this.object.removeActorLink(actor)
-        await this.object.addActorLink(actor, postion, slot);
+        await this.object.addActorLink(actor, position, slot);
         //}
     }
 

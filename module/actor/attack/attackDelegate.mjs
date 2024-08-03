@@ -79,13 +79,12 @@ export class AttackDelegate {
 
     /**
      *
-     * @param {SWSEActor} actor
+     * @param {SWSEActor} vehicle
      * @returns {Attack[]}
      */
-    generateVehicleAttacks(actor) {
-        return actor.getAvailableItemsFromRelationships()
-            .filter(item => item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && item.system.equipped)
-            .map(weapon => new Attack(actor.crewman(this.getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parentId, actor.parent?.id, {}));
+    generateVehicleAttacks(vehicle) {
+        return vehicle.getAvailableItemsFromRelationships()
+            .map(weapon => new Attack(vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parent.id, vehicle.parent?.id, {}));
     }
 
     /**

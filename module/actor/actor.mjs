@@ -2156,18 +2156,7 @@ export class SWSEActor extends Actor {
 
     getAvailableItemsFromRelationships() {
         if (['vehicle', 'npc-vehicle'].includes(this.type)) {
-            let availableItems = []
-            let itemIds = this.system.equippedIds
-
-            for (let itemId of itemIds) {
-                let item = this.items.find(item => item._id === itemId.id);
-                if (item) {
-                    item.parentId = this._id
-                    item.position = itemId.position;
-                    availableItems.push(item)
-                }
-            }
-            return availableItems;
+            return this.items.filter(item => item.type === "vehicleSystem" && item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && !!item.system.equipped)
         }
         if (['character', 'npc'].includes(this.type)) {
             let availableItems = []
