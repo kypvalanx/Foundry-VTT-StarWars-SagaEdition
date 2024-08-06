@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import {SWSE} from "./config.mjs";
-import {dieSize, dieType} from "./constants.mjs";
+import {dieSize_vanilla, dieType} from "./constants.mjs";
 import {SWSEActor} from "../actor/actor.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
@@ -430,6 +430,10 @@ export function increaseDieType(die, bonus = 0) {
     return `${quantity}d${size}` || "0";
 }
 
+function getDieSizeArray() {
+    return dieSize_vanilla; //dieSize TODO add alternate die arrays
+}
+
 /**
  *
  * @param die {string}
@@ -437,11 +441,13 @@ export function increaseDieType(die, bonus = 0) {
  * @returns {string}
  */
 export function increaseDieSize(die, bonus) {
-    let index = dieSize.indexOf(`${die}`);
+    const dieSizeArray = getDieSizeArray()
+
+    let index = dieSizeArray.indexOf(`${die}`);
     if (index === -1) {
         return "0";
     }
-    return dieSize[index + bonus] || "0";
+    return dieSizeArray[index + bonus] || "0";
 }
 
 
