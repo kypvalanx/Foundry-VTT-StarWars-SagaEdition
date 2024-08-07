@@ -1,6 +1,6 @@
 import {SimpleCache} from "../../common/simple-cache.mjs";
 import {Attack} from "./attack.mjs";
-import {createAttackMacro} from "../../swse.mjs";
+import {createAttackMacro, getActorFromId} from "../../swse.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
@@ -395,7 +395,9 @@ function attackDialogue(context) {
  * @returns {Promise<void>}
  */
 export async function makeAttack(context) {
-    console.log(context)
+    const actorId = context.attacks[0].actorId;
+    const actor = getActorFromId(actorId)
+    actor.attack.createAttackDialog(null, context);
 }
 
 function getAttackMods(selects, dualWeaponModifier) {

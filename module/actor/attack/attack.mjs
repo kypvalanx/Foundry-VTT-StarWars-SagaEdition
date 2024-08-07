@@ -73,7 +73,7 @@ export class Attack {
      * @return {Attack}
      */
     static create(criteria) {
-        return new Attack(criteria.actorId, criteria.weaponId, criteria.operatorId || criteria.actorId, criteria.parentId || criteria.actorId, JSON.parse(JSON.stringify(criteria.options || {})));
+        return new Attack(criteria.actorId, criteria.weaponId, criteria.operatorId, criteria.parentId || criteria.actorId, JSON.parse(JSON.stringify(criteria.options || {})));
     }
 
     static fromJSON(json) {
@@ -180,7 +180,23 @@ export class Attack {
      * @returns {ActorData}
      */
     get provider() {
-        return getActor(this.operatorId);
+        return getActor(this.parentId);
+    }
+
+    /**
+     *
+     * @returns {ActorData}
+     */
+    get operator() {
+        return getActor(this.operatorId) || SWSEActor.getCrewByQuality(getActor(this.parentId).system?.crewQuality?.quality);
+    }
+
+    /**
+     *
+     * @returns {ActorData}
+     */
+    get parent() {
+        return getActor(this.parentId);
     }
 
 
@@ -242,33 +258,23 @@ export class Attack {
     }
 
     get attackRoll() {
-        let actor = this.actor;
-        let item = this.item;
-        let provider = this.provider;
+        //let actor = this.actor;
+        const weapon = this.item;
+        const parent = this.parent;
+        const operator = this.operator;
 
-        if (!actor || !item) {
+        if (!operator || !weapon) {
             return;
         }
 
-        let weaponTypes = getPossibleProficiencies(actor, item);
-        let attributeMod = this._resolveAttributeModifier(item, actor, weaponTypes);
+        let weaponTypes = getPossibleProficiencies(operator, weapon);
+        let attributeMod = this._resolveAttributeModifier(weapon, operator, weaponTypes);
         let terms = getDiceTermsFromString("1d20").dice;
 
-        if (!!provider) {
-            terms.push(...appendNumericTerm(provider.system.attributes.int.mod, "Vehicle Computer Bonus"))
-
-            if (item.position === 'pilot' && actor.system.skills.pilot.trained) {
-                terms.push(...appendNumericTerm(2, "Trained Pilot Bonus"))
-            }
-            ///terms.push(...appendNumericTerm(providerData.condition === "OUT" ? -10 : providerData.condition, "Condition Modifier"));
-        }
-
-        terms.push(...appendNumericTerm(actor.baseAttackBonus, "Base Attack Bonus"));
-
-        if (!provider) {
-
+        terms.push(...appendNumericTerm(operator.baseAttackBonus, "Base Attack Bonus"));
+        if (!parent || parent === operator) {
             let conditionBonus = getInheritableAttribute({
-                entity: actor,
+                entity: operator,
                 attributeKey: "condition",
                 reduce: "FIRST"
             })
@@ -278,9 +284,15 @@ export class Attack {
             }
 
             terms.push(...appendNumericTerm(attributeMod, "Attribute Modifier"));
-            terms.push(...getProficiencyBonus(actor, weaponTypes));
+            terms.push(...getProficiencyBonus(operator, weaponTypes));
             terms.push(...appendNumericTerm(toNumber(conditionBonus), "Condition Modifier"));
-            terms.push(...getFocusAttackBonuses(actor, weaponTypes));
+            terms.push(...getFocusAttackBonuses(operator, weaponTypes));
+        } else {
+            terms.push(...appendNumericTerm(parent.system.attributes.int.mod, "Vehicle Computer Bonus"))
+
+            if (weapon.position === 'pilot' && operator.system.skills.pilot.trained) {
+                terms.push(...appendNumericTerm(2, "Trained Pilot Bonus"))
+            }
         }
 
         for (let mod of this.modifiers("attack")) {
@@ -288,18 +300,16 @@ export class Attack {
         }
 
 
-        terms.push(...appendNumericTerm(generateArmorCheckPenalties(actor), "Armor Check Penalty"));
+        terms.push(...appendNumericTerm(generateArmorCheckPenalties(operator), "Armor Check Penalty"));
 
         //toHitModifiers only apply to the weapon they are on.  a toHitModifier change that is not on a weapon always applies
         getInheritableAttribute({
-            entity: [item, actor],
+            entity: [weapon, operator],
             attributeKey: "toHitModifier",
-            parent: !!provider ? provider : actor,
+            parent: !!parent ? parent : operator,
             itemFilter: ((item) => item.type !== 'weapon')
         }).forEach(val => {
-            let value = val.value;
-            let flavor = val.modifier;
-            terms.push(...appendNumericTerm(value, flavor));
+            terms.push(...appendNumericTerm(val.value, val.modifier));
         })
 
         return new SWSERollWrapper(Roll.fromTerms(terms
@@ -552,8 +562,9 @@ export class Attack {
     }
 
     get notes() {
-        let itemData = this.item;
-        let provider = this.provider;
+        const itemData = this.item;
+        const provider = this.provider;
+        const operator = this.operator;
         let notes = getInheritableAttribute({
             entity: itemData,
             attributeKey: 'special'
@@ -567,8 +578,8 @@ export class Attack {
             notes.push({href: "https://swse.fandom.com/wiki/Ion_Damage", value: "Ion Damage"})
         }
 
-        if (!!provider) {
-            notes.push({value: `Weapon Emplacement on ${provider.name}`})
+        if (!!provider && provider.name !== operator.name) {
+            notes.push({value: `Weapon Emplacement on ${provider.name} operated by ${operator.name + (operator instanceof SWSEActor ? "" : " Crewman")}`})
         }
         return notes;
     }
