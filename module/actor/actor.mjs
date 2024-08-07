@@ -1046,8 +1046,7 @@ export class SWSEActor extends Actor {
                 skills: resolvedSkills
             },
             items: [],
-            name: quality,
-            id: quality
+            name: quality
         }
     }
 

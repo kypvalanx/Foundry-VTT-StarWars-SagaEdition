@@ -49,17 +49,31 @@ export class Attack {
      *
      * @param actorId {String} the actor that this attack belongs to.
      * @param weaponId {String} the weapon that is being used.
-     * @param providerId {String}
+     * @param operatorId {String} the actor that is using the weapon
      * @param parentId {String} the parent actor of the weapon
-     * @param options
+     * @param options {object}
      */
-    constructor(actorId, weaponId, providerId, parentId, options) {
+    constructor(actorId, weaponId, operatorId, parentId, options= {}) {
         this.actorId = actorId;
         this.weaponId = weaponId;
-        this.providerId = providerId;
+        this.operatorId = operatorId;
         this.parentId = parentId;
         this.options = options;
         this.cache = new SimpleCache()
+    }
+
+    /**
+     *
+     * @param criteria
+     * @param criteria.actorId {String} the actor that this attack belongs to.
+     * @param criteria.weaponId {String} the weapon that is being used.
+     * @param criteria.operatorId {String} the actor that is using the weapon
+     * @param criteria.parentId {String} the parent actor of the weapon
+     * @param criteria.options {object}
+     * @return {Attack}
+     */
+    static create(criteria) {
+        return new Attack(criteria.actorId, criteria.weaponId, criteria.operatorId || criteria.actorId, criteria.parentId || criteria.actorId, JSON.parse(JSON.stringify(criteria.options || {})));
     }
 
     static fromJSON(json) {
@@ -69,18 +83,18 @@ export class Attack {
         if (Array.isArray(json)) {
             let attks = [];
             for (let atk of json) {
-                attks.push(new Attack(atk.actorId, atk.weaponId, atk.providerId, atk.parentId, atk.options))
+                attks.push(this.create(atk))
             }
             return attks;
         }
-        return new Attack(json.actorId, json.weaponId, json.providerId, json.parentId, json.options)
+        return this.create(json)
     }
 
     get toJSON() {
         return {
             actorId: this.actorId,
             weaponId: this.weaponId,
-            providerId: this.providerId,
+            operatorId: this.operatorId,
             parentId: this.parentId,
             options: this.options
         };
@@ -137,8 +151,7 @@ export class Attack {
             }
 
             if (this.actorId) {
-                let find;
-                find = game.actors.get(this.actorId)
+                let find = game.actors.get(this.actorId)
 
                 if (find) {
                     return find;
@@ -154,7 +167,7 @@ export class Attack {
                 }
                 return find;
             }
-            if (this.providerId) {
+            if (this.operatorId) {
                 let provider = this.provider;
                 let quality = provider?.system?.crewQuality?.quality;
                 return SWSEActor.getCrewByQuality(quality);
@@ -167,7 +180,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get provider() {
-        return getActor(this.providerId);
+        return getActor(this.operatorId);
     }
 
 
@@ -769,7 +782,7 @@ export class Attack {
     }
 
     clone() {
-        return new Attack(this.actorId, this.weaponId, this.providerId, this.parentId, JSON.parse(JSON.stringify(this.options)))
+        return Attack.create(this)
     }
 
     checkExistingDynamicModes(existingModes, newMode) {
