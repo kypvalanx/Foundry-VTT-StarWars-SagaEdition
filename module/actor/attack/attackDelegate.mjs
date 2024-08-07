@@ -57,11 +57,12 @@ export class AttackDelegate {
             weaponIds.push("Unarmed Attack")
         }
 
-        let attacks = weaponIds.map(id => new Attack(actor.id, id, null, actor.parent?.id, {}));
+        const actorId = actor.id;
+        let attacks = weaponIds.map(id => Attack.create({actorId: actorId, weaponId: id}));
 
         let items = actor.getAvailableItemsFromRelationships()
 
-        attacks.push(...items.map(item => new Attack(actor.id, item._id, item.parentId, actor.parent?.id, {})))
+        attacks.push(...items.map(item => Attack.create({actorId: actorId, weaponId: item.id, operatorId: actorId, parentId: item.parent?.id, options: {}})))
         return attacks;
     }
 
@@ -84,7 +85,9 @@ export class AttackDelegate {
      */
     generateVehicleAttacks(vehicle) {
         return vehicle.getAvailableItemsFromRelationships()
-            .map(weapon => new Attack(vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).id, weapon._id, weapon.parent.id, vehicle.parent?.id, {}));
+            .map(weapon => {
+                return Attack.create({actorId: vehicle.id, weaponId: weapon.id, parentId:weapon.parent?.id, operatorId:vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).id})
+            });
     }
 
     /**
