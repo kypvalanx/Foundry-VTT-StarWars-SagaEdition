@@ -35,7 +35,7 @@ export class UnarmedAttack {
         return true;
     }
 
-    get attributes() {
+    get changes() {
         return {0: {key: "damageType", value:"Bludgeoning"}}
     }
 }
