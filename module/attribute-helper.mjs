@@ -82,7 +82,10 @@ export function getResolvedSize(entity, options = {}) {
 
 
 function getLocalChangesOnDocument(document, flags) {
-    const values = !document.isDisabled || flags.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
+    let values = !document.isDisabled || flags.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
+    if (!Array.isArray(values)){
+        values = Object.values(values)
+    }
     return values.filter(v => !!v).map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 

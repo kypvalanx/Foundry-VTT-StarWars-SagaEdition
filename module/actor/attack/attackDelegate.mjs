@@ -58,7 +58,7 @@ export class AttackDelegate {
         }
 
         const actorId = actor.id;
-        let attacks = weaponIds.map(id => Attack.create({actorId: actorId, weaponId: id}));
+        let attacks = weaponIds.map(id => Attack.create({actorId: actorId, operatorId: actorId, weaponId: id}));
 
         let items = actor.getAvailableItemsFromRelationships()
 
@@ -100,6 +100,7 @@ export class AttackDelegate {
         const attacksFromContext = getAttacksFromContext(context);
         const attackType = context.type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK;
         const dualWeaponModifier = this.dualWeaponModifier;
+        const multipleAttackModifiers = this.multipleAttackModifiers;
         const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails(attackType);
         context.availableHands = 2;
 
@@ -107,16 +108,16 @@ export class AttackDelegate {
             title: getAttackWindowTitle(context),
             content: await this.getAttackDialogueContent(attackCount, attacksFromContext, doubleAttack, tripleAttack),
             buttons: {
-                attack: getAttackButton(dualWeaponModifier, context.availableHands),
-                saveMacro: getSaveMacroButton(dualWeaponModifier, this.actor)
+                attack: getAttackButton(dualWeaponModifier, context.availableHands, multipleAttackModifiers),
+                saveMacro: getSaveMacroButton(dualWeaponModifier, this.actor, multipleAttackModifiers)
             },
             default: "attack",
             render: (html) => {
                 let selects = html.find("select.attack-id");
                 context.dialog = html;
-                this.updateAttackDialog(selects, context, dualWeaponModifier, html);
+                this.updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers);
                 selects.on("change", () => {
-                    this.updateAttackDialog(selects, context, dualWeaponModifier, html);
+                    this.updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers);
                 })
             }
         };
@@ -133,9 +134,9 @@ export class AttackDelegate {
         }
     }
 
-    updateAttackDialog(selects, context, dualWeaponModifier, html) {
+    updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers) {
         handleAttackSelect(selects)
-        context.attackMods = getAttackMods(selects, dualWeaponModifier);
+        context.attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
         context.damageMods = [];
         selects.each((i, div) => populateItemStats(div, context));
     }
@@ -187,6 +188,13 @@ export class AttackDelegate {
             reduce: "NUMERIC_VALUES"
         });
         return dualWeaponModifiers.reduce((a, b) => Math.max(a, b), -10)
+    }
+
+    get multipleAttackModifiers(){
+        return getInheritableAttribute({
+            entity: this.actor,
+            attributeKey: "multipleAttackModifier"
+        })
     }
 
     shouldHaveSecondAttackFromWeaponChoice(equippedWeapons) {
@@ -265,14 +273,14 @@ function getAttackWindowTitle(context) {
     return "Single Attack";
 }
 
-function getAttackButton(dualWeaponModifier, availableHands) {
+function getAttackButton(dualWeaponModifier, availableHands, multipleAttackModifiers) {
     return {
         label: "Attack",
         callback: (html) => {
             let attacks = [];
             let attackBlocks = html.find(".attack.panel");
             let selects = html.find("select.attack-id");
-            let attackMods = getAttackMods(selects, dualWeaponModifier);
+            let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
             let damageMods = [];
             for (let attackBlock of attackBlocks) {
                 let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
@@ -291,14 +299,14 @@ function getAttackButton(dualWeaponModifier, availableHands) {
     };
 }
 
-function getSaveMacroButton(dualWeaponModifier, actor) {
+function getSaveMacroButton(dualWeaponModifier, actor, multipleAttackModifiers) {
     return {
         label: "Save Macro",
         callback: (html) => {
             let attacks = [];
             let attackBlocks = html.find(".attack-block");
             let selects = html.find("select.attack-id")
-            let attackMods = getAttackMods(selects, dualWeaponModifier);
+            let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
             let damageMods = [];
             for (let attackBlock of attackBlocks) {
                 let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
@@ -400,8 +408,7 @@ export async function makeAttack(context) {
     actor.attack.createAttackDialog(null, context);
 }
 
-function getAttackMods(selects, dualWeaponModifier) {
-    let attackMods = []
+function getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers) {
     let isDoubleAttack = false;
     let isTripleAttack = false;
     let standardAttacks = 0;
@@ -427,17 +434,26 @@ function getAttackMods(selects, dualWeaponModifier) {
     }
 
 
+
+
+    let attackMods = []
     if (isDoubleAttack) {
-        attackMods.push({value: -5, source: "Double Attack"});
+        attackMods.push({value: -5, source: "Double Attack", type: "attack"});
     }
     if (isTripleAttack) {
-        attackMods.push({value: -5, source: "Triple Attack"});
+        attackMods.push({value: -5, source: "Triple Attack", type: "attack"});
     }
 
     if (standardAttacks > 1 || (standardAttacks > 0 && beastAttacks > 0)) {
-        attackMods.push({value: dualWeaponModifier, source: "Dual Weapon"});
+        attackMods.push({value: dualWeaponModifier, source: "Dual Weapon", type: "attack"});
     }
-    attackMods.forEach(attack => attack.type = "attack");
+
+    if(multipleAttackModifiers && multipleAttackModifiers.length > 0 && attackMods.length > 0){
+        for (const multipleAttackModifier of multipleAttackModifiers) {
+            attackMods.push({value: multipleAttackModifier, source: "Attack Modifier", type: "attack"});
+        }
+    }
+
     return attackMods
 }
 function getHandMods(html) {
