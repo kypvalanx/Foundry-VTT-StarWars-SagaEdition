@@ -88,7 +88,7 @@ export class SWSECompendiumBrowser extends Application {
     }
 
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             template: "systems/swse/templates/compendium/compendium-browser.hbs",
             classes: ["swse", "app"],
             width: 720,

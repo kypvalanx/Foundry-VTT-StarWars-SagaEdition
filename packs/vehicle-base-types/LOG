@@ -1,5 +1,3 @@
-2024/06/27-09:17:17.810 5e2c Recovering log #3
-2024/06/27-09:17:17.810 5e2c Level-0 table #5: started
-2024/06/27-09:17:17.811 5e2c Level-0 table #5: 11624 bytes OK
-2024/06/27-09:17:17.813 5e2c Delete type=0 #3
-2024/06/27-09:17:17.813 5e2c Delete type=3 #2
+2024/08/08-10:47:33.252 4d38 Recovering log #73
+2024/08/08-10:47:33.254 4d38 Delete type=0 #73
+2024/08/08-10:47:33.254 4d38 Delete type=3 #72

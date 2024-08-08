@@ -233,6 +233,7 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
+        generateAttributes(this);
         this.attack = new AttackDelegate(this);
         //this.skill = new SkillDelegate(this);
         generateSkills(this, {groupedSkillMap: getGroupedSkillMap()})
@@ -508,12 +509,6 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(system) {
-        //this.system.attributeGenerationType = "Manual"
-        //this.system.disableAttributeGenerationChange = true;
-
-        generateAttributes(this);
-        //system.skills = generateSkills(this);
-
         system.shields = resolveShield(this);
         let {defense, armors} = resolveDefenses(this);
         system.defense = defense;
@@ -530,10 +525,6 @@ export class SWSEActor extends Actor {
         system.levelSummary = level;
         system.classSummary = classSummary;
         system.classLevels = classLevels;
-
-        //this.system.weight = this.weight
-
-        generateAttributes(this);
 
         this.handleDarksideArray(this);
 
