@@ -47,7 +47,7 @@ Hooks.once('init', async function () {
      * @type {String}
      */
     CONFIG.Combat.initiative = {
-        formula: "1d20 + @skills.initiative.value",
+        formula: "1d20 + @initiative",
         decimals: 2
     };
 
@@ -596,9 +596,8 @@ async function rollVariable(actorId, variable) {
 
     if (variable.startsWith('@Initiative') && game.combat) {
         await actor.rollInitiative({
-            createCombatants: true,
-            rerollInitiative: true,
-            initiativeOptions: {formula: rollStr}
+            createCombatants: false,
+            rerollInitiative: true
         })
     } else {
         let roll = new Roll(rollStr);

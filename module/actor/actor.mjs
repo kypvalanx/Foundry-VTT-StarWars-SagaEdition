@@ -19,7 +19,7 @@ import {
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
-import {generateSkills, getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
+import {getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
     CLASSES_BY_STARTING_FEAT,
@@ -27,7 +27,7 @@ import {
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
-    EQUIPABLE_TYPES, getGroupedSkillMap,
+    EQUIPABLE_TYPES,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
     KNOWN_WEIRD_UNITS,
     LIMITED_TO_ONE_TYPES,
@@ -235,8 +235,9 @@ export class SWSEActor extends Actor {
         }
         generateAttributes(this);
         this.attack = new AttackDelegate(this);
-        //this.skill = new SkillDelegate(this);
-        generateSkills(this, {groupedSkillMap: getGroupedSkillMap()})
+        this.skill = new SkillDelegate(this);
+
+//        generateSkills(this, {groupedSkillMap: getGroupedSkillMap()})
 
         if (this.type === 'character') this._prepareCharacterData(system);
         //if (this.type === 'npc') this._prepareCharacterData(system);
@@ -381,6 +382,10 @@ export class SWSEActor extends Actor {
 
     }
 
+    getRollData() {
+        this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
+        return super.getRollData();
+    }
 
     get crewQuality() {
         return this.getCached("crewQuality", () => {
