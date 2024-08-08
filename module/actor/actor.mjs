@@ -233,7 +233,7 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
-        generateAttributes(this);
+        generateAttributes(this); //TODO, make this lazy
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
 
