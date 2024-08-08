@@ -58,10 +58,10 @@ function createNewSkill(skill, actualSkill = {}, customSkill = {}) {
 
 function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) {
     skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
-    skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value));
+    skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value), actor);
     skill.variable = `@${actor.cleanSkillName(label)}`;
     actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
-    skill.label = label
+    skill.label = label.titleCase()
     skill.key = label.toLowerCase()
     actor.resolvedLabels.set(skill.variable, skill.label);
     skill.abilityBonus = skillAttributeMod;
@@ -93,6 +93,7 @@ export function generateSkills(actor, options = {}) {
     let halfCharacterLevelRoundedUp
     let skillFocus
     let heavyLoadAffected = [];
+    let automaticTrainedSkills = [];
 
 
     if (game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.heavyLoad) {
@@ -125,6 +126,11 @@ export function generateSkills(actor, options = {}) {
             entity: actor,
             attributeKey: "skillReRoll"
         });
+        automaticTrainedSkills = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "automaticTrainedSkill",
+            reduce: "VALUES"
+        }).map(s => s.toLowerCase());
 
         halfCharacterLevel = actor.getHalfCharacterLevel();
         halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
@@ -185,6 +191,12 @@ export function generateSkills(actor, options = {}) {
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
 
+
+
+            if(automaticTrainedSkills.includes(skill.key)){
+                skill.trained = true;
+            }
+
             let trainedSkillBonus = skill.trained === true ? 5 : 0;
             bonuses.push({value: trainedSkillBonus, description: `Trained Skill Bonus: ${trainedSkillBonus}`})
 
@@ -234,6 +246,7 @@ export function generateSkills(actor, options = {}) {
             actor.resolvedNotes.set(skill.variable, skill.notes)
 
 
+
             if (classSkills.size === 0 && skill.trained) {
                 actor._pendingUpdates[`system.skills.${key}.trained`] = false
                 //data[`system.skills.${key}.trained`] = false;
@@ -259,7 +272,7 @@ export function generateSkills(actor, options = {}) {
             delete modifiedSkill.classes
 
 
-            const resolvedName = situationalSkillName.startsWith(resSkill) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
+            const resolvedName = situationalSkillName.startsWith(resSkill.toLowerCase()) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
             const situationalBonuses = [...nonZeroBonuses]
             //if(modifiedSkill.manualBonus){
             const situationalKey = resolvedName.toLowerCase()

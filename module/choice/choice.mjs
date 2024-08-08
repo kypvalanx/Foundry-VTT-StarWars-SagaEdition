@@ -127,7 +127,7 @@ export async function activateChoices(item, context) {
                 greetingString = choice.description;
 
                 for (let option of Object.values(options)) {
-                    optionString += `<option value="${option.name}"${option.isDefault ? " selected" : ""}>${option.name}</option>`
+                    optionString += `<option value="${option.name}"${option.isDefault ? ` selected="selected"` : ""}>${option.name}</option>`
                 }
 
                 if (optionString !== "") {
@@ -233,6 +233,8 @@ export async function explodeOptions(options, actor) {
     options = options.sort(option => {
         return explodable.includes(option.name) ? 1 : -1;
     })
+    const hasDefault = !!options.find(o => o.isDefault)
+
 
     let resolvedOptions = [];
     for (let value of options) {
@@ -382,7 +384,7 @@ export async function explodeOptions(options, actor) {
             resolvedOptions.push({name: 'Custom', display: 'Custom', abilities: [], items: [], modifications: [], customType: 'color', payloads: {lightsaberColor: '#color#'}});
 
         } else {
-            if(resolvedOptions.length === 0){
+            if(resolvedOptions.length === 0 && !hasDefault){
                 value.isDefault = true;
             }
             resolvedOptions.push(value);
