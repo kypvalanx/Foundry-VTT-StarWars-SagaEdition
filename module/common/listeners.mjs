@@ -7,23 +7,27 @@ export function onChangeControl(event) {
     let element = $(event.currentTarget);
     let type = element.data("action-type")
     const {changes, updatePath} = getChanges.call(this);
-    if ('add' === type) {
-        let update = {};
-        update[updatePath] = changes;
-        update[updatePath].push({key: "", mode:2, value: ""});
-        this.object.safeUpdate(update);
-    }
-    if ('delete' === type) {
-        let index = element.data("index")
-        let update = {};
-        update[updatePath] = [];
-        for (let i = 0; i < changes.length; i++) {
-            if (index !== i) {
-                update[updatePath].push(changes[i]);
+    let update;
+    switch (type) {
+        case 'add':
+            update = {};
+            update[updatePath] = changes;
+            update[updatePath].push({key: "", mode: 2, value: ""});
+            break;
+        case 'delete':
+            let index = element.data("index")
+            update = {};
+            update[updatePath] = [];
+            for (let i = 0; i < changes.length; i++) {
+                if (index !== i) {
+                    update[updatePath].push(changes[i]);
+                }
             }
-        }
-        this.object.safeUpdate(update);
+            break;
+        default:
+            return;
     }
+    this.object.safeUpdate(update);
 }
 
 export function _onLinkControl(event) {

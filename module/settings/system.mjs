@@ -152,6 +152,16 @@ export const registerSystemSettings = function () {
     });
 
 
+
+    game.settings.register("swse", "enableHomebrewContent", {
+        name: "Enable Homebrew content from the wiki.",
+        hint: "",
+        scope: "world",
+        config: true,
+        default: true,
+        type: Boolean
+    });
+
     game.settings.register("swse", "enableNotificationsOnHealthChange", {
         name: "Enable Chat Notifications when you change your total health.",
         hint: "",

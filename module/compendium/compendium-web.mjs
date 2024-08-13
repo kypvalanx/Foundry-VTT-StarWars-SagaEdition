@@ -30,6 +30,7 @@ export class CompendiumWeb extends Application {
             }
 
             this.options = args[0];
+            this.options.homebrewEnabled = game.settings.get("swse", "enableHomebrewContent");
             this.target = target;
 
             this.types = ['feat', 'talent']
@@ -82,7 +83,11 @@ export class CompendiumWeb extends Application {
             mutation: (value, exclude) => {
                 return (index) => {
                     if (exclude) {
-                        index.hide ||= index.species?.includes(value);
+                        if(value){
+                            index.hide ||= index.species?.includes(value);
+                        } else {
+                            index.hide ||= !index.species;
+                        }
                     } else {
                         index.hide ||= !index.species?.includes(value);
                     }
@@ -235,7 +240,7 @@ export class CompendiumWeb extends Application {
             const input = target.find(`.${filter.selector}.value`);
             const value = filter.type === "boolean" ? input.is(":checked") : input.val()
             let exclude = target.find(`.${filter.selector}.exclude`).is(":checked")
-            if (value) {
+            if (value || exclude) {
                 const test = filter.mutation(value, exclude);
                 [...itemFilterMeta].map(([key, meta]) => meta).forEach(test);
             }
@@ -504,6 +509,11 @@ export class CompendiumWeb extends Application {
             }
         }
 
+        if(!options.homebrewEnabled){
+            const input = target.find(`.homebrew-filter`);
+            input.prop('checked', true);
+            input.prop('disabled', true);
+        }
     }
 
     async addFilters(target, types) {
