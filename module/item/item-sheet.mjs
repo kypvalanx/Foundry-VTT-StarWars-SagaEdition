@@ -16,10 +16,14 @@ import {
 } from "../common/listeners.mjs";
 
 export class SWSEItemSheet extends ItemSheet {
-
+    constructor(...args) {
+        super(...args);
+        this._pendingUpdates = {};
+        //this.options.submitOnChange = false;
+    }
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "item"],
             width: 520,
             height: 480,
@@ -102,7 +106,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
-        html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));
+        //html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));  TODO remove
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
         html.find('[data-action="increase-ammo"]').click(this._onIncreaseAmmo.bind(this));
         html.find('[data-action="decrease-ammo"]').click(this._onDecreaseAmmo.bind(this));
@@ -150,16 +154,16 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
 
-        html.find("select").on("change", changeSelect.bind(this));
-        const numberInputs =  html.find("input[type=number],input[type=text]")
-        numberInputs.on("change", changeText.bind(this));
-        numberInputs.on("keydown", (event) => {
-            const key = event.which;
-            if (key === 13) {
-                changeText.call(this, event);
-            }
-        })
-        html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
+        // html.find("select").on("change", changeSelect.bind(this));
+        // const numberInputs =  html.find("input[type=number],input[type=text]")
+        // numberInputs.on("change", changeText.bind(this));
+        // numberInputs.on("keydown", (event) => {
+        //     const key = event.which;
+        //     if (key === 13) {
+        //         changeText.call(this, event);
+        //     }
+        // })
+        // html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
     }
 
@@ -683,26 +687,22 @@ export class SWSEItemSheet extends ItemSheet {
     _onProvidedItemControl(event) {
         let element = $(event.currentTarget);
 
-        let system = this.item.system || this.item._source.system
+        let system = this.object.system || this.object._source.system
         let entityId = element.data("entityId")
         let updateData = {};
         switch (element.data("type")){
             case "delete-item":
-                updateData.providedItems = {};
                 if(Array.isArray(system.providedItems)){
-                    system.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
+                    system.providedItems.forEach((item, i) => updateData[`system.providedItems`][i] = item)
                 }
-                updateData.providedItems[entityId] = null;
+                updateData[`system.providedItems.${entityId}`] = null;
                 break;
             case "add-item":
-                // updateData.providedItems = {};
-                // if(Array.isArray(system.providedItems)){
-                //     system.providedItems.forEach((item, i) => updateData.providedItems[i] = item)
-                // }
-                // updateData.providedItems[entityId] = null; TODO work on this tomorrow
+                updateData[`system.providedItems`] = (Array.isArray(system.providedItems) ? system.providedItems : Object.values(system.providedItems || {})) || [];
+                updateData[`system.providedItems`].push({name:"", type:"trait"})
                 break;
         }
-        this.item.updateData(updateData);
+        this.object.safeUpdate(updateData);
     }
 
 

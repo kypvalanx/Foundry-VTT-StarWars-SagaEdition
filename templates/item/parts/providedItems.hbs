@@ -1,4 +1,13 @@
+
+<header class="change-list-header flexrow">
+    <div>{{ localize "ITEM.Name" }}</div>
+    <div>{{ localize "ITEM.Type" }}</div>
+    <div class="change-controls">
+        <a data-action="provided-item-control" data-type="add-item"><i class="far fa-plus-square"></i></a>
+    </div>
+</header>
 <ul>
+    <li class="provided-item flexrow subtle"></li>
     {{#if item.system}}
         {{#each item.system.providedItems as |providedItem id|}}
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
@@ -8,7 +17,4 @@
             {{> 'systems/swse/templates/item/parts/providedItem.hbs' providedItem=providedItem key=id}}
         {{/each}}
     {{/if}}
-    <li class="provided-item flexrow subtle"><a data-action="provided-item-control" data-type="add-item"><i class="fas fa-plus"></i>
-        add a new
-        provided item.</a></li>
 </ul>
