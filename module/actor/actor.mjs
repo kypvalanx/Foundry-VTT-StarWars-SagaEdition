@@ -2195,6 +2195,24 @@ export class SWSEActor extends Actor {
             return false;
         }
 
+        if(!game.settings.get("swse", "enableHomebrewContent")){
+            const isHomebrew = getInheritableAttribute({
+                entity:entity,
+                attributeKey: "isHomebrew",
+                reduce:"OR"
+            });
+
+            if(isHomebrew){
+                suppressibleDialog.call(this, entity,
+                    `Attempted to add ${entity.finalName} but could not because Homebrew Content is currently disabled`, `Inappropriate Item`,
+                    this.suppressDialog);
+
+                return false;
+            }
+        }
+
+
+
         if (!context.isUpload) {
             //Check that the item being added can be added to this actor type and that it hasn't been added too many times
             if (context.isAdd) {
