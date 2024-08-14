@@ -1,3 +1,5 @@
+import {getInheritableAttribute} from "../attribute-helper.mjs";
+
 export const naturalSort = function (arr, propertyKey = "") {
     const collator = new Intl.Collator(game.settings.get("core", "language"), {numeric: true});
     return arr.sort((a, b) => {
@@ -424,7 +426,7 @@ export class SWSECompendiumBrowser extends Application {
                 name: item.name,
                 type: item.type,
                 img: item.img,
-                data: item.system,
+                system: item.system,
                 uuid: `Compendium.${pack.metadata.id}.${item._id}`,
                 pack: pack.collection,
                 talentTree: item.system?.talentTree,
@@ -563,6 +565,20 @@ export class SWSECompendiumBrowser extends Application {
         }
 
         this.postFilters = this.generateFilters(filterStrings);
+        const enableHomebrewContent = game.settings.get("swse", "enableHomebrewContent");
+        if(!enableHomebrewContent){
+            this.postFilters.push({
+                type: 'homebrew',
+                test: (item) => {
+                    const inheritableAttribute = !getInheritableAttribute({
+                        entity:item,
+                        attributeKey: "isHomebrew",
+                        reduce:"OR"
+                    });
+                    return inheritableAttribute
+                }
+            })
+        }
 
         let groomedString = searchTerms.join(" ").trim();
         let query = new RegExp(RegExp.escape(groomedString), "i");
