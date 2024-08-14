@@ -2825,7 +2825,7 @@ export class SWSEActor extends Actor {
         entity.addProvidedItems(providedItems);
         if (parentItem) await entity.setParent(parentItem, providedItem.unlocked);
         else if (providedItem.granted) entity.setGranted(providedItem.granted);
-        entity.setPrerequisite(providedItem.prerequisite);
+        entity.setPrerequisite(providedItem.prerequisite); //TODO this only sets if it's defined... idk if i like how this works
 
         //TODO payload should be deprecated in favor of payloads
         if (!!payload) {

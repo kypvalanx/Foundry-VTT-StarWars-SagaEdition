@@ -831,6 +831,20 @@ export class SWSEActorSheet extends ActorSheet {
     async _onDropItem(ev, data) {
         if (ev) ev.preventDefault();
         if (!this.actor.isOwner) return false;
+
+        //first check if the item being dropped is dropped on an item on the list.
+        const itemOnSheet = getParentByHTMLClass(ev, "acceptsTemplates")
+        if(itemOnSheet){
+            console.log(itemOnSheet, itemOnSheet.dataset)
+            const item = this.object.items.get(itemOnSheet.dataset.itemId);
+            const response = await item.handleDroppedItem(data, {silent: true});
+            if(response.success){
+                return;
+            }
+        }
+
+
+
         //the dropped item has an owner
         if (data.actorId) {
             if (data.actorId === this.actor.id) {

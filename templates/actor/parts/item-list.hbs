@@ -52,7 +52,7 @@
             min-height}} min-height: {{min-height}};{{/if}}">
         <ol class="items-list">
             {{#each items as |item id|}}
-                {{> 'systems/swse/templates/actor/parts/item-entry.hbs' item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description overrideDelete=../overrideDelete usable=../usable rollable=../rollable}}
+                {{> 'systems/swse/templates/actor/parts/item-entry.hbs'  acceptsTemplates=../acceptsTemplates item=item fields=../fields draggable=../draggable quantity=../quantity delete=../delete description=../description overrideDelete=../overrideDelete usable=../usable rollable=../rollable}}
             {{/each}}
         </ol>
     </div>

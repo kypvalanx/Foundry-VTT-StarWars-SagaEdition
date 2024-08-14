@@ -58,7 +58,11 @@ async function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
  * if choices run, modify parent item and return future items
  *
  * @param item
- * @param context
+ * @param context Object
+ * @param context.suppressDialog Boolean
+ * @param context.isUpload Boolean
+ * @param context.actor SWSEActor
+ * @param context.itemAnswers Array
  * @returns {Promise<{success: boolean, items: []}>}
  */
 export async function activateChoices(item, context) {
@@ -145,7 +149,7 @@ export async function activateChoices(item, context) {
             }
         }
 
-        if(actor.suppressDialog) {
+        if(actor.suppressDialog || context.suppressDialog) {
             return {success: false, items: []};
         }
 
