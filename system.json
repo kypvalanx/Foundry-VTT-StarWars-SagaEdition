@@ -1,5 +1,6 @@
 {
   "name": "swse",
+  "id": "swse",
   "title": "Star Wars: Saga Edition",
   "description": "The Star Wars: Saga Edition system for FoundryVTT!",
   "version": "12.1.1",
