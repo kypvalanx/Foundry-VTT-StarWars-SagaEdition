@@ -290,50 +290,10 @@ export class SWSEItemSheet extends ItemSheet {
         if(effect){
             droppedItem.targetEffectUuid = effect.dataset.uuid;
         }
-        await this.handleDroppedItem(droppedItem);
+        await this.object.handleDroppedItem(droppedItem);
     }
 
-    async handleDroppedItem(droppedItem) {
-        //let actor = this.actor;
-        let item = undefined;
 
-        // if(actor){
-        //     item = actor?.items.get(droppedItem.itemId);
-        // }
-
-        if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
-            linkEffects.call(this.item, droppedItem.effectUuid, droppedItem.targetEffectUuid);
-            return;
-        }
-
-        if(droppedItem.uuid){
-            item = await Item.implementation.fromDropData(droppedItem);
-        }
-        if(!item){
-            return;
-        }
-
-        let isItemMod = Object.values(item.system.attributes ? item.system.attributes : []).find(attr => attr.key === "itemMod") || Object.values(item.system.changes).find(attr => attr.key === "itemMod");
-        if (!!isItemMod?.value || isItemMod?.value === "true") {
-            let meetsPrereqs = meetsPrerequisites(this.object, item.system.prerequisite)
-
-            if (meetsPrereqs.doesFail) {
-                new Dialog({
-                    title: "You Don't Meet the Prerequisites!",
-                    content: `You do not meet the prerequisites for the ${droppedItem.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                    buttons: {
-                        ok: {
-                            icon: '<i class="fas fa-check"></i>',
-                            label: 'Ok'
-                        }
-                    }
-                }).render(true);
-                return;
-            }
-            this.item.addItemModificationEffectFromItem(item);
-           // await this.item.takeOwnership(ownedItem);
-        }
-    }
 
 
 

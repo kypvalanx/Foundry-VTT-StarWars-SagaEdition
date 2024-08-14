@@ -1,5 +1,5 @@
 <li class="item flexcol {{#if draggable}}draggable{{/if}}
-    {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}"
+    {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}{{#if acceptsTemplates}} acceptsTemplates{{/if}}"
     data-item-id="{{item.id}}"
     data-item-name="{{item.name}}"
     data-data="{{item.toJSONString}}">

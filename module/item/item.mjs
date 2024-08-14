@@ -1,4 +1,4 @@
-import {convertOverrideToMode, increaseDieSize, increaseDieType, toNumber} from "../common/util.mjs";
+import {convertOverrideToMode, increaseDieSize, increaseDieType, linkEffects, toNumber} from "../common/util.mjs";
 import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
@@ -6,6 +6,7 @@ import {SimpleCache} from "../common/simple-cache.mjs";
 import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
 import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
 import {activateChoices} from "../choice/choice.mjs";
+import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -913,6 +914,52 @@ export class SWSEItem extends Item {
              this.system.changes = this.system.attributes;
         }
     }
+    async handleDroppedItem(droppedItem, options = {}) {
+        //let actor = this.actor;
+        let item = undefined;
+
+        // if(actor){
+        //     item = actor?.items.get(droppedItem.itemId);
+        // }
+
+        if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
+            linkEffects.call(this, droppedItem.effectUuid, droppedItem.targetEffectUuid);
+            return {};
+        }
+
+        if(droppedItem.uuid){
+            item = await Item.implementation.fromDropData(droppedItem);
+        }
+        if(!item){
+            return {};
+        }
+
+        let isItemMod = Object.values(item.system.attributes ? item.system.attributes : []).find(attr => attr.key === "itemMod") || Object.values(item.system.changes).find(attr => attr.key === "itemMod");
+        if (!!isItemMod?.value || isItemMod?.value === "true") {
+            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite)
+
+            if (meetsPrereqs.doesFail) {
+                if(!options.silent){
+                    new Dialog({
+                        title: "You Don't Meet the Prerequisites!",
+                        content: `You do not meet the prerequisites for the ${droppedItem.finalName} class:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
+                        buttons: {
+                            ok: {
+                                icon: '<i class="fas fa-check"></i>',
+                                label: 'Ok'
+                            }
+                        }
+                    }).render(true);
+                }
+                return {success:false};
+            }
+            await this.addItemModificationEffectFromItem(item, options);
+
+            return {success:true}
+            // await this.item.takeOwnership(ownedItem);
+        }
+        return {success:false};
+    }
 
     setSourceString() {
         let sourceString = '';
@@ -1535,7 +1582,9 @@ export class SWSEItem extends Item {
         return classLevels.length;
     }
 
-    async addItemModificationEffectFromItem(item, context) {
+
+
+    async addItemModificationEffectFromItem(item, context={}) {
         if (!this.canUserModify(game.user, 'update')) {
             return;
         }
