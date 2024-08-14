@@ -17,6 +17,7 @@ import {registerTestSuites} from "../module_test/test-suites.test.mjs";
 import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 import {SWSETokenDocument} from "./token/token-document.js";
 import {CompendiumWeb} from "./compendium/compendium-web.mjs";
+import {SWSECompendiumDirectory} from "./compendium/compendium-directory.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -65,6 +66,9 @@ Hooks.once('init', async function () {
     registerHandlebarsHelpers();
     initializeStatusEffects(CONFIG)
 
+    // if(game.settings.get("swse", "enableAdvancedCompendium")){
+    //     CONFIG.ui.compendium = SWSECompendiumDirectory;
+    // }
 
     Hooks.on("renderCompendiumDirectory", (function (e, t) {
         const featTalentButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
