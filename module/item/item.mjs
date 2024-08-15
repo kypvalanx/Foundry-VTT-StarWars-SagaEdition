@@ -1336,6 +1336,42 @@ export class SWSEItem extends Item {
 
     }
 
+    getRollFlavor(roll){
+        if (this.type === "forcePower"){
+            let description = getInheritableAttribute({entity: this, attributeKey: "forcePowerShortDescription", reduce: "VALUES"}).join(" ");
+
+            if(description){
+                let response = `<div>${description}</div>`
+                const cumulative = getInheritableAttribute({entity: this, attributeKey: "cumulativeChecks", reduce: "OR"})
+
+                let checks = {};
+                getInheritableAttribute({entity: this, attributeKey: "check", reduce: "VALUES"})
+                    .forEach(check => {
+                        const toks = check.split(":");
+                        checks[parseInt(toks[0])] = toks[1]
+                    })
+
+                const overcomeChecks = Object.keys(checks).filter(dc => roll >= dc)
+
+                if (overcomeChecks.length > 0) {
+                    if(cumulative){
+                        for (const overcomeCheck of overcomeChecks) {
+                            response.concat(`<div><div><b>DC ${overcomeCheck}</b> ${checks[overcomeCheck]}</div></div>`)
+                        }
+                    } else {
+                        const topCheck = Math.max(...overcomeChecks);
+                        response = response.concat(`<div><div><b>DC ${topCheck}</b> ${checks[topCheck]}</div></div>`)
+                    }
+                }
+                return response
+            }
+
+            return `<div>${this.system.description}</div>`
+        }
+
+        return "";
+    }
+
     static getItemDialogue(attack, actor) {
         let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
