@@ -301,8 +301,7 @@
 }
 
 .swse .sheet-body,
-.swse .sheet-body .tab,
-.swse .sheet-body .tab .editor {
+.swse .sheet-body .tab {
   height: 100%;
 }
 
@@ -312,12 +311,6 @@
 
 .swse .tox .tox-edit-area {
   padding: 0 8px;
-}
-
-.swse .editor {
-  min-height: 300px;
-  padding-left: 4px;
-  padding-right: 4px;
 }
 
 .swse .tox-tinymce {

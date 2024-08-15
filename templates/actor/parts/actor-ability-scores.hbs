@@ -2,24 +2,31 @@
 <div class="ability-scores panel">
     <div class="flex-row">
         <div class="medium"></div>
+        {{#ifEquals actor.system.finalAttributeGenerationType "Semi-Manual"}}<div class="small small-header">Base Score</div>{{/ifEquals}}
         <div class="small small-header">Score</div>
         <div class="small small-header">Temp</div>
         <div class="small small-header">Mod</div>
     </div>
     {{#each actor.system.attributes as |attribute id|}}
         {{#unless attribute.skip}}
-            <div class="draggable flex-row" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability">
-                <div class="rollable medium labeled-input">
+            <div class="flex-row">
+                <div class="rollable medium labeled-input draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability">
                     <input class="input rollable" type="text" value="{{attribute.label}}"
                            placeholder="" disabled title="Roll 1d20 + {{attribute.roll}}" data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"/>
                 </div>
+            {{#ifEquals ../actor.system.finalAttributeGenerationType "Semi-Manual"}}
                 <div class="small labeled-input">
-                    <input class="input" type="text" value="{{attribute.total}}"
-                           placeholder="0"  name="system.attributes.{{id}}.manual"
-                           {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}}disabled{{/unlessEquals}}/>
+                    <input class="input" type="number" value="{{attribute.manual}}"
+                           placeholder="0"  name="system.attributes.{{id}}.manual"/>
+                </div>
+            {{/ifEquals}}
+                <div class="small labeled-input">
+                    <input class="input" type="number" value="{{attribute.total}}"
+                           placeholder="0"{{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}} name="system.attributes.{{id}}.manual" {{/ifEquals}}
+                           {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}} disabled{{/unlessEquals}}/>
                 </div>
                 <div class="small labeled-input">
-                    <input class="input" type="text" value="{{attribute.customBonus}}"
+                    <input class="input" type="number" value="{{attribute.customBonus}}"
                            placeholder="" name="system.attributes.{{id}}.customBonus"/>
                 </div>
                 <div class="small labeled-input">
@@ -43,10 +50,7 @@
             {{/ifEquals}}
             {{#unlessEquals actor.system.finalAttributeGenerationType "Manual"}}
                 {{#if actor.system.remainingLevelUpBonuses}}
-<!--                    <div data-action="level-up-bonus"-->
-<!--                         title="Select Level Up Attribute Bonus for Level"><a><i-->
-<!--                            class="fas fa-exclamation"></i></a></div>-->
-                    <button class="flex-0" style="flex-basis:180px" data-action="level-up-bonus" title="Select Level Up Attribute Bonus for Level">Level Up Bonus</button>
+                    <button type="button" class="flex-0 editor" style="flex-basis:180px" data-action="level-up-bonus" title="Select Level Up Attribute Bonus for Level">Level Up Bonus</button>
                 {{/if}}
             {{/unlessEquals}}
         </div>
