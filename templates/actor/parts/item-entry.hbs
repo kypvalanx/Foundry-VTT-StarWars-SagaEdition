@@ -10,7 +10,7 @@
             <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">
                 {{item.finalName}}
                 {{#if rollable}}
-                    {{> 'systems/swse/templates/common/rollable.hbs' rollable=rollable label=(concat 'Rolling Use the Force for ' item.finalName) itemId=item.id type='forcepower'}}
+                    {{> 'systems/swse/templates/common/rollable.hbs' rollable=rollable label=(concat 'Use the Force for ' item.finalName) itemId=item.id type='forcepower'}}
                 {{/if}}
                 {{#if quantity}}
                     {{#unless usable}}
