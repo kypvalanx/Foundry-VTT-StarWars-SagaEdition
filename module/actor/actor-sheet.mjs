@@ -843,14 +843,16 @@ export class SWSEActorSheet extends ActorSheet {
         if (ev) ev.preventDefault();
         if (!this.actor.isOwner) return false;
 
-        //first check if the item being dropped is dropped on an item on the list.
-        const itemOnSheet = getParentByHTMLClass(ev, "acceptsTemplates")
-        if(itemOnSheet){
-            console.log(itemOnSheet, itemOnSheet.dataset)
-            const item = this.object.items.get(itemOnSheet.dataset.itemId);
-            const response = await item.handleDroppedItem(data, {silent: true});
-            if(response.success){
-                return;
+        if(ev){
+            //first check if the item being dropped is dropped on an item on the list.
+            const itemOnSheet = getParentByHTMLClass(ev, "acceptsTemplates")
+            if(itemOnSheet){
+                console.log(itemOnSheet, itemOnSheet.dataset)
+                const item = this.object.items.get(itemOnSheet.dataset.itemId);
+                const response = await item.handleDroppedItem(data, {silent: true});
+                if(response.success){
+                    return;
+                }
             }
         }
 
