@@ -42,10 +42,10 @@
                 </div>
                 <div class="modes">
                     <div class="flex flex-col">
-                        <button>Attack</button>
+                        <button type="button">Attack</button>
                         {{#if attack.hasAmmunition}}
                             {{#each attack.ammunition.current as |ammo id|}}
-                        <button data-item-id="{{../attack.weaponId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
+                        <button type="button" data-item-id="{{../attack.weaponId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
                             {{/each}}
                         {{/if}}
                     </div>

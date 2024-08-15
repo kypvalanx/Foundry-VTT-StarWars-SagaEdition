@@ -62,6 +62,18 @@ export const registerHandlebarsHelpers = function () {
         return array.filter(result => result.active).reduce((accumulator, currentValue) => accumulator + currentValue.result, 0);
     })
 
+    Handlebars.registerHelper('unlessEquals', function(...args) {
+        const arg1 = args[0];
+        const options = args[args.length - 1];
+
+        for (let i = 1; i < args.length - 1; i++) {
+            if(arg1 === args[i]) {
+                return options.inverse(this);
+            }
+        }
+        return options.fn(this);
+    });
+
     Handlebars.registerHelper('ifEquals', function(arg1, arg2, options) {
         if(Array.isArray(arg1)){
             return arg1.includes(arg2) ? options.fn(this) : options.inverse(this);
@@ -96,10 +108,6 @@ export const registerHandlebarsHelpers = function () {
         return (arg1 + 1 === arg2.length) ? options.fn(this) : options.inverse(this);
     });
 
-    Handlebars.registerHelper('unlessEquals', function(arg1, arg2, options) {
-        return (arg1 !== arg2) ? options.fn(this) : options.inverse(this);
-    });
-
 
     Handlebars.registerHelper('unlessBoth', function(arg1, arg2, options) {
         return !(arg1 && arg2) ? options.fn(this) : options.inverse(this);
@@ -129,6 +137,11 @@ export const registerHandlebarsHelpers = function () {
     Handlebars.registerHelper('options', function(arg1, arg2){
         let values = undefined
         let selected;
+
+        if(arg2.hash){
+            selected = arg2.hash.selected;
+        }
+
         if(Array.isArray(arg1)){
             values = arg1;
         } else if('type' === arg1){
@@ -149,6 +162,10 @@ export const registerHandlebarsHelpers = function () {
         for(let value of values || []){
             if(Array.isArray(value)){
                 response += `<option value="${value[0]}" ${value[0] === selected ? 'selected' : ""}>${value[1].titleCase()}</option>`;
+            } if(!!value.value) {
+                const display = value.display || value.value;
+                const tooltip = value.tooltip ? ` title="${value.tooltip}"` : null;
+                response += `<option value="${value.value}" ${value.value === selected ? 'selected' : ""}${tooltip}>${display.titleCase()}</option>`;
             } else {
                 response += `<option value="${value}" ${value === selected ? 'selected' : ""}>${value.titleCase()}</option>`;
             }

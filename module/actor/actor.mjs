@@ -948,13 +948,23 @@ export class SWSEActor extends Actor {
             path: "system.attributeGenerationType",
             label: "Attribute Generation Type",
             value: this.system.attributeGenerationType || "Default",
-            options: {
-                Default: "Default",
-                Manual: "Manual",
-                Roll: "Roll",
-                "Point Buy": "Point Buy",
-                "Standard Array": "Standard Array"
-            }
+            options: [
+                {value: "Default", display: "Default", tooltip: "Uses System Preference"},
+                {value: "Manual", display: "Manual", tooltip: "Your Attributes are exactly as you enter them"},
+                {value: "Semi-Manual", display: "Semi-Manual", tooltip: "Enter Base Stat and bonuses will be applied from species, class, etc"},
+                {value: "Roll", display: "Roll", tooltip: "Roll and assign stats"},
+                {value: "Point Buy", display: "Point Buy", tooltip: "Point buy rules. droids should be expected to have a lower point buy value because they have one fewer stats"},
+                {value: "Standard Array", display: "Standard Array", tooltip: "Assign the Standard Array"}
+            ]
+            //     {
+            //
+            //     Default: "Default",
+            //     Manual: "Manual",
+            //     "Semi-Manual": "Semi-Manual",
+            //     Roll: "Roll",
+            //     "Point Buy": "Point Buy",
+            //     "Standard Array": "Standard Array"
+            // }
         })
     }
 

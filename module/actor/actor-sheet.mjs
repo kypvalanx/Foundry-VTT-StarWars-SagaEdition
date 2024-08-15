@@ -75,7 +75,7 @@ export class SWSEActorSheet extends ActorSheet {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
-        this.options.submitOnChange = false;
+        //this.options.submitOnChange = false;
     }
 
 
@@ -130,15 +130,15 @@ export class SWSEActorSheet extends ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-        //disable submit on enter
-        $(document).ready(function () {
-            $(window).keydown(function (event) {
-                if (event.keyCode === 13) {
-                    event.preventDefault();
-                    return false;
-                }
-            });
-        });
+        //disable submit on enter  TODO: figure out if this is still needed, i think it may not be.
+        // $(document).ready(function () {
+        //     $(window).keydown(function (event) {
+        //         if (event.keyCode === 13) {
+        //             event.preventDefault();
+        //             return false;
+        //         }
+        //     });
+        // });
 
         html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
 
@@ -150,17 +150,17 @@ export class SWSEActorSheet extends ActorSheet {
         new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
 
 
-        html.find("select").on("change", changeSelect.bind(this));
-        const numberInputs = html.find("input[type=number],input[type=text]")
-        numberInputs.on("change", changeText.bind(this));
-        numberInputs.on("keydown", (event) => {
-            const key = event.which;
-            if (key === 13) {
-                changeText.call(this, event);
-            }
-        })
-        html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
-        html.find("input[type=radio]").on("click", changeRadio.bind(this));
+        //html.find("select").on("change", changeSelect.bind(this));
+        //const numberInputs = html.find("input[type=number],input[type=text]")
+        // numberInputs.on("change", changeText.bind(this));
+        // numberInputs.on("keydown", (event) => {
+        //     const key = event.which;
+        //     if (key === 13) {
+        //         changeText.call(this, event);
+        //     }
+        // })
+        // html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
+        // html.find("input[type=radio]").on("click", changeRadio.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             onSpanTextInput.call(this, event, this._adjustItemAttributeBySpan.bind(this), "text");
@@ -219,6 +219,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
         html.find(".assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
         html.find(".assignManual").on("click", async event => this._selectAttributesManually(event, this));
+        html.find(".assignSemiManual").on("click", async event => this._selectAttributesManually(event, this));
         html.find(".leveledAttributeBonus").each((i, button) => {
             button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
         })
@@ -888,11 +889,11 @@ export class SWSEActorSheet extends ActorSheet {
         return ActiveEffect.create(effect.toObject(), {parent: this.actor});
     }
 
-    _onAddGMBonus() {
+    _onAddGMBonus(event) {
         this.object.addItems({items: [{name: "GM Bonus", type: "trait"}]})
     }
 
-    _onAddLevelUpBonus() {
+    _onAddLevelUpBonus(event) {
         if (this.object.isHeroic) {
             this.object.addItems({items: [{name: "Heroic Ability Score Level Bonus", type: "trait"}]})
         } else {

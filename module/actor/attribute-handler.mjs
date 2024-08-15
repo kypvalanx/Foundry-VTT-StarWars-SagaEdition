@@ -40,6 +40,9 @@ export function generateAttributes(actor) {
             if (!isNaN(attributeMax)) {
                 attribute.base = Math.min(attribute.base, attributeMax);
             }
+            if(attributeGenType === 'Semi-Manual'){
+                attribute.base = attribute.manual
+            }
 
             let bonuses = getInheritableAttribute({
                 entity: actor,

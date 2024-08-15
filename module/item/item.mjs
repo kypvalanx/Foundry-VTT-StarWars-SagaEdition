@@ -1340,8 +1340,8 @@ export class SWSEItem extends Item {
         let templateType = "attack";
         const template = `systems/swse/templates/chat/${templateType}-card.hbs`;
 
-        let content = `<p><button class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
-                       <p><button class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
+        let content = `<p><button type="button" class="roll" data-roll="${attack.th}" data-name="${attack.name} Attack Roll">${attack.name} Roll Attack</button></p>
+                       <p><button type="button" class="roll" data-roll="${attack.dam}" data-name="${attack.name} Damage Roll">${attack.name} Roll Damage</button></p>`
 
         return new Dialog({
             title: 'Attacks',

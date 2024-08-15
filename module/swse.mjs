@@ -71,7 +71,7 @@ Hooks.once('init', async function () {
     // }
 
     Hooks.on("renderCompendiumDirectory", (function (e, t) {
-        const featTalentButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
+        const featTalentButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
         featTalentButton.on("click", (function () {
             const options = {
                 types: ['feat', "talent"]
@@ -80,7 +80,7 @@ Hooks.once('init', async function () {
         }))
         t.append(featTalentButton)
 
-        const featButton = $(`<button class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
+        const featButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
         featButton.on("click", (function () {
             const options = {
                 types: ['feat']
@@ -89,7 +89,7 @@ Hooks.once('init', async function () {
         }))
         t.append(featButton)
 
-        const talentButton = $(`<button class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
+        const talentButton = $(`<button type="button" class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
         talentButton.on("click", (function () {
             const options = {
                 types: ['talent']

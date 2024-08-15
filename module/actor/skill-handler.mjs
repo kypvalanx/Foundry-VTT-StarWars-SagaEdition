@@ -84,7 +84,7 @@ export function generateSkills(actor, options = {}) {
         conditionBonus = "0";
     }
     let classSkills
-    let skillBonusAttr
+    let skillBonusAttr = [];
     let untrainedSkillBonuses
     let skillFocuses
     let shipModifier

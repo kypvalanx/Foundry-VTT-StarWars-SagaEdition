@@ -47,9 +47,9 @@
   flex: 0;
 }
 
+//.sheet-body .tab .editor,
 .sheet-body,
-.sheet-body .tab,
-.sheet-body .tab .editor {
+.sheet-body .tab {
   height: 100%;
 }
 
@@ -62,11 +62,11 @@
     padding: 0 8px;
   }
 }
-.editor {
-  min-height: 300px;
-  padding-left: 4px;
-  padding-right: 4px;
-}
+//.editor {
+//  min-height: 300px;
+//  padding-left: 4px;
+//  padding-right: 4px;
+//}
 
 .tox-tinymce {
   min-height: 300px;
