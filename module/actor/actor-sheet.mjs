@@ -53,15 +53,25 @@ function getLabelFromDataSet(dataset) {
     }
 }
 
+/**
+ *
+ * @param dataset
+ * @return {[]}
+ */
 function getNotesFromDataSet(dataset) {
+    let notes;
     if (dataset.notes) {
-        return dataset.notes;
+        notes =  dataset.notes;
+    } else if (dataset.key) {
+        notes =  this.object.resolvedNotes.get(dataset.key)
+    } else if (dataset.variable) {
+        notes = this.object.resolvedNotes.get(dataset.variable)
     }
-    if (dataset.key) {
-        return this.object.resolvedNotes.get(dataset.key)
-    }
-    if (dataset.variable) {
-        return this.object.resolvedNotes.get(dataset.variable)
+    if(notes){
+        if(!Array.isArray(notes)){
+            notes = [notes]
+        }
+        return notes;
     }
     return [];
 }
@@ -1027,36 +1037,43 @@ export class SWSEActorSheet extends ActorSheet {
                     rerollInitiative: true
                     //,initiativeOptions: {formula: formula}
                 })
-            } else {
-                let roll = new Roll(formula, this.actor.system);
-                const rollResult = await roll.roll();
 
-                if (changeKey) {
-                    if (item && level) {
-                        this.updateItemEffectAttribute(rollResult.total, item, parseInt(level), changeKey, context);
-                    } else if (item) {
-                        let updateTarget = this.actor.items.get(item);
-                        updateTarget.setAttribute(changeKey, rollResult.total);
-                    }
-                } else if (name) {
-                    let updateCandidate = this.actor;
-                    if (item) {
-                        updateCandidate = this.actor.items.get(item);
-                    }
+                return;
+            }
 
-                    const newVar = {};
-                    newVar[name] = rollResult.total;
-                    updateCandidate.safeUpdate(newVar);
-                } else {
-                    const context = {rollResult};
+            let roll = new Roll(formula, this.actor.system);
+            const rollResult = await roll.roll();
 
-                    let content = buildRollContent(formula, roll, notes);
-                    await toChat(content, this.object, flavor, context);
+            if (changeKey) {
+                if (item && level) {
+                    this.updateItemEffectAttribute(rollResult.total, item, parseInt(level), changeKey, context);
+                } else if (item) {
+                    let updateTarget = this.actor.items.get(item);
+                    updateTarget.setAttribute(changeKey, rollResult.total);
+                }
+            } else if (name) {
+                let updateCandidate = this.actor;
+                if (item) {
+                    updateCandidate = this.actor.items.get(item);
                 }
 
+                const newVar = {};
+                newVar[name] = rollResult.total;
+                updateCandidate.safeUpdate(newVar);
+            } else {
+                const context = {rollResult};
+                let itemFlavor = "";
+                if (item) {
+                    let activeItem = this.actor.items.get(item);
+                    if(activeItem) {
+                        itemFlavor = activeItem.getRollFlavor(rollResult.total);
+                    }
+                }
+
+                let content = buildRollContent(formula, roll, notes, itemFlavor);
+                await toChat(content, this.object, flavor, context);
             }
         }
-        //let label = dataset.key ?  `${this.object.name} rolls for ${this.object.resolvedLabels.get(dataset.key)}!` : `${this.object.name} rolls for ${dataset.label}!`;
     }
 
     async _onCrewControl(event) {

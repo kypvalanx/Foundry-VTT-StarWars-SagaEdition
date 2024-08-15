@@ -1688,9 +1688,9 @@ export function getCleanListFromCSV(name) {
 
 function getChatType(context) {
     if(context.inCharacter){
-        return CONST.CHAT_MESSAGE_TYPES.IC
+        return CONST.CHAT_MESSAGE_STYLES.IC
     }
-    return CONST.CHAT_MESSAGE_TYPES.OOC;
+    return CONST.CHAT_MESSAGE_STYLES.OOC;
 }
 
 export function toChat(content, actor = undefined, flavor="", context={}) {

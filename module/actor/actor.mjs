@@ -62,9 +62,10 @@ function suppressibleDialog(entity, message, title, suppress) {
     }
 }
 
-export function buildRollContent(formula, roll, notes = []) {
+export function buildRollContent(formula, roll, notes = [], itemFlavor) {
     const tooltip = getTooltipSections(roll)
     return `<div class="message-content">
+${itemFlavor}
         <div class="dice-roll">
             <div class="dice-result">
                 <div class="dice-formula">${formula}</div>
@@ -79,7 +80,7 @@ function getTooltipSections(roll) {
     let sections = [];
 
     for (let term of roll.terms) {
-        if (term instanceof Die) {
+        if (term instanceof foundry.dice.terms.Die) {
             let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
             let partTotal = `<span class="part-total">${term.total}</span>`
             let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
