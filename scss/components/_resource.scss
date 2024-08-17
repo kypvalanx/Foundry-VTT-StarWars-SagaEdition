@@ -105,12 +105,12 @@ table.skill {
 
 .warning{
   opacity: 50%;
-  background-color: yellow;
+  background-color: var(--color-level-warning);
 }
 
 .error{
   opacity: 90%;
-  background-color: red;
+  background-color: var(--color-level-error);
   color: white;
 }
 

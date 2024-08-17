@@ -800,12 +800,12 @@
 
 .swse .warning {
   opacity: 50%;
-  background-color: yellow;
+  background-color: var(--color-level-warning);
 }
 
 .swse .error {
   opacity: 90%;
-  background-color: red;
+  background-color: var(--color-level-error);
   color: white;
 }
 
@@ -1693,6 +1693,10 @@
 .swse .text.talent {
   background-color: var(--color-foreground);
   color: var(--color-background);
+}
+
+.chat-message {
+  background: var(--color-background);
 }
 
 #compendium .constant-button {

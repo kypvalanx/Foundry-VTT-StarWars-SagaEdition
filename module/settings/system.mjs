@@ -217,6 +217,8 @@ export const registerSystemSettings = function () {
     colors.push(registerCSSColor("swse", "cssMidgroundColor", "Midground Color", "Modifies the Midground color of sheets", "client", "#bcc3fd", r, '--color-midground'));
     colors.push(registerCSSColor("swse", "cssHyperlink", "Hyperlink Color", "Modifies the Hyperlink color of sheets", "client", "#132cff", r, '--color-text-hyperlink'));
     colors.push(registerCSSColor("swse", "cssHeaderUnderline", "Header Underline", "Modifies the Underline color of Headers", "client", "#010e7c", r, '--color-underline-header'));
+    colors.push(registerCSSColor("swse", "cssErrorBackground", "Error Background", "Modifies the Background color of Errors", "client", "#CE0707FF", r, '--color-level-error'));
+    colors.push(registerCSSColor("swse", "cssWarningBackground", "Warning Background", "Modifies the Background color of Warnings", "client", "#EE9B3AFF", r, '--color-level-warning'));
 
     game.settings.register("swse", "resetColorDefaults", {
         name: "Reset Colors",
