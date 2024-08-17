@@ -24,7 +24,7 @@ export class SWSETokenDocument extends TokenDocument {
         // canvas.tokens.draw();
 
         this.reset()
-        this._object.updateLightSource()
+        //this._object.updateLightSource()
     }
 
     _onUpdate(data, options, userId) {
