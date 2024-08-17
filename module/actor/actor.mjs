@@ -223,8 +223,8 @@ export class SWSEActor extends Actor {
         this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
 
         if (Array.isArray(this.system.attributeGenerationType)) {
-            this.safeUpdate({"system.attributeGenerationType": this.system.attributeGenerationType[0]})
-            return;
+            console.error("this should not happen.  multiple attribute generation types found, using first.")
+            this.system.attributeGenerationType = this.system.attributeGenerationType[0];
         }
         this.system.sheetType = "Auto"
         if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet") {
@@ -280,9 +280,9 @@ export class SWSEActor extends Actor {
             }
         }
 
-        if(Object.values(this._pendingUpdates).length > 0){
-            this.safeUpdate(this._pendingUpdates);
-        }
+        // if(Object.values(this._pendingUpdates).length > 0){
+        //     this.safeUpdate(this._pendingUpdates);
+        // }
     }
 
     get condition() {
