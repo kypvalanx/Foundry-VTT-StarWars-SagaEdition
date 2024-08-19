@@ -47,7 +47,7 @@
   flex: 0;
 }
 
-//.sheet-body .tab .editor,
+.sheet-body .tab .editor:has(> div.editor-content),
 .sheet-body,
 .sheet-body .tab {
   height: 100%;

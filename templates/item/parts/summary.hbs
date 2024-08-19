@@ -4,8 +4,7 @@
         {{> 'systems/swse/templates/item/parts/ammunition.hbs' ammunition=item.ammunition}}
     </div>
     <div class="middle-right-sidebar">
-        <div class="flex-col">
-
+{{log editable}}
             {{#if item.system}}
                 {{editor item.system.description target="system.description" button=true owner=owner
                          editable=editable}}
@@ -21,6 +20,5 @@
                     </div>
                 {{/if}}
             {{/each}}
-        </div>
     </div>
 </div>
