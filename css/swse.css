@@ -300,6 +300,7 @@
   flex: 0;
 }
 
+.swse .sheet-body .tab .editor:has(> div.editor-content),
 .swse .sheet-body,
 .swse .sheet-body .tab {
   height: 100%;

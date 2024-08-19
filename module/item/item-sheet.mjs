@@ -653,7 +653,7 @@ export class SWSEItemSheet extends ItemSheet {
         switch (element.data("type")){
             case "delete-item":
                 if(Array.isArray(system.providedItems)){
-                    system.providedItems.forEach((item, i) => updateData[`system.providedItems`][i] = item)
+                    system.providedItems.forEach((item, i) => updateData[`system.providedItems.${i}`] = item)
                 }
                 updateData[`system.providedItems.${entityId}`] = null;
                 break;
