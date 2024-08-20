@@ -1,6 +1,6 @@
 {{!-- Condition Block --}}
 <div class="condition-block panel flex flex-col">
-    <h1 class="resource-label">Condition</h1>
+    <h1 class="resource-label">Condition{{#if actor.system.condition}} <button type="button" data-action="recover">Recover {{actor.recoveryActions}}/{{actor.totalRecoveryActions}}</button>{{/if}}</h1>
     <table>
         <thead>
         <tr>
