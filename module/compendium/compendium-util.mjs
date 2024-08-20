@@ -161,7 +161,8 @@ export async function resolveEntity(item) {
         }
     }
 
-    return {payload, itemName: itemName || entity?.name, entity: entity ? entity.clone() : null, createdItem};
+    const resolvedEntity = entity ? entity.clone() : null;
+    return {payload, itemName: itemName || entity?.name, entity: resolvedEntity, createdItem};
 }
 
 
