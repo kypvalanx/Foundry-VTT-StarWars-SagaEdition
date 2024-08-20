@@ -278,6 +278,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
+        html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
 
@@ -506,6 +507,17 @@ export class SWSEActorSheet extends ActorSheet {
     async _selectAge(event, sheet) {
         let options = this.buildAgeDialog(sheet);
         await Dialog.prompt(options);
+    }
+
+    async recover(event, sheet) {
+        let actions = this.object.recoveryActions + 1;
+        if(actions === this.object.totalRecoveryActions){
+            actions = 0;
+            this.object.reduceCondition(-1)
+        }
+        const update= {};
+        update[`system.recoveryActions`] = actions;
+        this.object.safeUpdate(update)
     }
 
 

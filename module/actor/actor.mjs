@@ -1265,8 +1265,9 @@ export class SWSEActor extends Actor {
     }
 
     async clearCondition() {
-        let ids = this.effects
-            .filter(effect => effect.statuses.find(status => status.startsWith("condition"))).map(effect => effect.id)
+        const effects = this.effects
+            .filter(effect => effect.statuses.find(status => status.startsWith("condition")));
+        let ids = effects.map(effect => effect.id)
 
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
     }
@@ -1275,10 +1276,14 @@ export class SWSEActor extends Actor {
         this.shields = Math.max(this.shields - number, 0);
     }
 
-    reduceCondition() {
+    reduceCondition(number = 1) {
         let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
-        let newCondition = SWSE.conditionTrack[i + 1]
-        this.setCondition(newCondition);
+        if(i+number === 0){
+            this.clearCondition()
+        }else {
+            let newCondition = SWSE.conditionTrack[i + number]
+            this.setCondition(newCondition);
+        }
     }
 
 
@@ -1341,7 +1346,7 @@ export class SWSEActor extends Actor {
 
         if (options.affectDamageThreshold) {
             if (totalDamage > this.system.defense.damageThreshold.total) {
-                this.reduceCondition()
+                this.reduceCondition(1)
             }
         }
 
@@ -1362,6 +1367,14 @@ export class SWSEActor extends Actor {
         const content = `${this.name} has has healed ${options.heal} damage.`
         toChat(content, this)
         this.safeUpdate(update);
+    }
+
+    get recoveryActions(){
+        return this.system.recoveryActions || 0;
+    }
+
+    get totalRecoveryActions(){
+        return 3;
     }
 
     async setAttributes(attributes) {
