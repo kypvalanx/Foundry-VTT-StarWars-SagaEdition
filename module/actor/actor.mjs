@@ -10,7 +10,7 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveWeight,
+    resolveWeight, toChat,
     toNumber,
     toShortAttribute,
     unique,
@@ -1349,6 +1349,8 @@ export class SWSEActor extends Actor {
 
         if (totalDamage > 0) {
             update[`system.health.value`] = this.system.health.value - totalDamage;
+            const content = `${this.name} has has taken ${totalDamage} damage.`
+            toChat(content, this)
         }
         this.safeUpdate(update);
     }
@@ -1356,6 +1358,9 @@ export class SWSEActor extends Actor {
     applyHealing(options) {
         let update = {};
         update[`system.health.value`] = this.system.health.value + toNumber(options.heal);
+
+        const content = `${this.name} has has healed ${options.heal} damage.`
+        toChat(content, this)
         this.safeUpdate(update);
     }
 
