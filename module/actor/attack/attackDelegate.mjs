@@ -123,7 +123,7 @@ export class AttackDelegate {
         };
 
         const options = {
-            height: attackCount * 225 + 85,
+            height: attackCount * 272 + 130,
             classes: ["swse", "dialog"],
             resizable: true,
             popOut: true
