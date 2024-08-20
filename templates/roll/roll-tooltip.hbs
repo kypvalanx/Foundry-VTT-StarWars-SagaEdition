@@ -1,10 +1,10 @@
 <!--roll-->
 {{#each roll.terms as |term i|}}
-    {{#ifEquals (typeOf term) "die"}}
+    {{#ifEquals (typeOf term) "Die"}}
         <section class="tooltip-part">
             <div class="dice">
                 <header class="part-header flexrow">
-                    <span class="part-formula">{{term.number}}d{{term.faces}}</span>
+                    <span class="part-formula">{{term._number}}d{{term._faces}}</span>
                     <span class="part-total">{{sumActiveResults term.results}}</span>
                 </header>
                 <ol class="dice-rolls">
