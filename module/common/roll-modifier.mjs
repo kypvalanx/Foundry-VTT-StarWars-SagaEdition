@@ -9,7 +9,11 @@ export class RollModifier{
      */
     constructor(type, roll, source, id) {
         this.type = type;
-        this.roll = roll;
+        if(Array.isArray(roll)){
+            this.roll = roll;
+        } else {
+            this.roll = [roll];
+        }
         this.CSSClasses = [];
         this.source = source;
         this.choices = [];
@@ -33,16 +37,18 @@ export class RollModifier{
     get classes(){
         let classes = []
         classes.push(...this.CSSClasses);
-        switch (this.roll) {
-            case "attack":
-                classes.push("attack-modifier");
-                break;
-            case "damage":
-                classes.push("damage-modifier");
-                break;
-            case "hands":
-                classes.push("hands-modifier");
-                break;
+        for (const rollElement of this.roll) {
+            switch (rollElement) {
+                case "attack":
+                    classes.push("attack-modifier");
+                    break;
+                case "damage":
+                    classes.push("damage-modifier");
+                    break;
+                case "hands":
+                    classes.push("hands-modifier");
+                    break;
+            }
         }
         return classes;
     }
@@ -64,7 +70,7 @@ export class RollModifier{
     createTextModifierHTML(modifier) {
         const name = `${this.id}`
         let input = document.createElement("input");
-        input.classList.add(modifier.classes)
+        input.classList.add(...modifier.classes)
         input.dataset.source = modifier.source
         input.type = modifier.type;
         input.name = name;
@@ -111,12 +117,12 @@ export class RollModifier{
         const name = `${this.id}`
         const input = document.createElement("select");
         input.name = name
-        input.classList.add(modifier.classes)
+        input.classList.add(...modifier.classes)
         input.dataset.source = modifier.source
         for (const choice of modifier.choices) {
             let option = document.createElement("option");
             option.innerHTML = choice.display;
-            option.value = choice.value;
+            option.value = JSON.stringify(choice.value);
             option.selected = choice.isDefault;
             input.add(option)
         }
@@ -138,12 +144,12 @@ export class RollModifier{
             radio.name = name;
             radio.type = "radio"
             radio.innerHTML = choice.display;
-            radio.value = choice.value;
+            radio.value = JSON.stringify(choice.value);
             radio.defaultChecked = choice.isDefault;
             const label = document.createElement("label");
             label.for = id;
             label.innerHTML = choice.display;
-            radio.classList.add(modifier.classes)
+            radio.classList.add(...modifier.classes)
 
             const div = document.createElement("div");
             div.appendChild(radio);

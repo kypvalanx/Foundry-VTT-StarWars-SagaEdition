@@ -9,7 +9,7 @@
                 </header>
                 <ol class="dice-rolls">
                     {{#each term.results as |result i|}}
-                        <li class="roll die d{{term.faces}} {{#unless term.active}}inactive{{/unless}}">{{result.result}}</li>
+                        <li class="roll die d{{term._faces}} {{#unless term.active}}inactive{{/unless}}">{{result.result}}</li>
                     {{/each}}
                 </ol>
             </div>

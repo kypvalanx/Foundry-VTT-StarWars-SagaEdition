@@ -1472,7 +1472,11 @@ export function getDocumentByUuid(uuid, from) {
                 source = source?.tokens;
                 break;
             case "Actor":
-                source = source?.actors;
+                if(source?.actor){
+                    source = source?.actor
+                } else if(source?.actors){
+                    source = source?.actors;
+                }
                 break;
             case "Item":
                 source = source?.items;
@@ -1481,9 +1485,8 @@ export function getDocumentByUuid(uuid, from) {
                 source = source?.effects
                 break;
             default:
-                source = source?.get(tok)
-                if(!source){
-
+                if (source?.id !== tok) {
+                    source = source?.get(tok)
                 }
         }
         last = tok;
@@ -1603,10 +1606,6 @@ export function addBlankMode() {
     }
 }
 
-export function getDieFlavor(flavor) {
-    return {flavor};
-}
-
 export function plus() {
     return new foundry.dice.terms.OperatorTerm({operator: "+"});
 }
@@ -1656,20 +1655,27 @@ export function appendDieTerm(value, flavor) {
         return [];
     }
     return [number > -1 ? plus() : minus(),
-        new foundry.dice.terms.Die({number: Math.abs(number), faces, options: getDieFlavor(flavor)})];
+        new foundry.dice.terms.Die({number: Math.abs(number), faces, options: {flavor}})];
 }
 
 export function appendNumericTerm(value, flavor) {
     if (!value) {
         return [];
     }
-
-    let num = parseInt(value);
-    if (num === 0) {
+    let num;
+    let toks = [];
+    if(typeof value === 'string'){
+        toks = value.split(":")
+        num = parseInt(toks[0]);
+    } else {
+        num = value;
+    }
+    if (num === 0 || toks.length > 1) {
         return [];
     }
+
     return [num > -1 ? plus() : minus(),
-        new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: getDieFlavor(flavor)})];
+        new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: {flavor: flavor}})];
 }
 
 function generateUUID(actorId, itemId, effectId) {
