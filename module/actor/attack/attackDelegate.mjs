@@ -57,12 +57,12 @@ export class AttackDelegate {
             weaponIds.push("Unarmed Attack")
         }
 
-        const actorId = actor.id;
-        let attacks = weaponIds.map(id => Attack.create({actorId: actorId, operatorId: actorId, weaponId: id}));
+        const actorUUID = actor.uuid;
+        let attacks = weaponIds.map(id => Attack.create({actorId: actorUUID, operatorId: actorUUID, weaponId: id}));
 
         let items = actor.getAvailableItemsFromRelationships()
 
-        attacks.push(...items.map(item => Attack.create({actorId: actorId, weaponId: item.id, operatorId: actorId, parentId: item.parent?.id, options: {}})))
+        attacks.push(...items.map(item => Attack.create({actorId: actorUUID, weaponId: item.id, operatorId: actorUUID, parentId: item.parent?.id, options: {}})))
         return attacks;
     }
 
@@ -471,7 +471,11 @@ function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
     let bonuses = [];
     options.find(inputCriteria).each((i, modifier) => {
             if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
-                bonuses.push({source: $(modifier).data("source"), value: getBonusString(modifier.value)});
+                if(modifier.value){
+                    const value = JSON.parse(modifier.value);
+                    const bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
+                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(bonus)});
+                }
             }
         }
     )

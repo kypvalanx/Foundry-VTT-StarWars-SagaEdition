@@ -13,6 +13,6 @@
         {{/unless}}
     {{/each}}
     {{#each actor.attack.attacks as |attack id|}}
-        {{> 'systems/swse/templates/actor/parts/attack/weapon-block.hbs' attack = attack actor = ../actor toggles=../actor.system.toggles}}
+        {{> 'systems/swse/templates/actor/parts/attack/weapon-block.hbs' attack=attack actor=../actor toggles=../actor.system.toggles id=id}}
     {{/each}}
 </div>

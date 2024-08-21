@@ -19,7 +19,7 @@ import {
     appendNumericTerm,
     appendTerms,
     getAttackRange,
-    getDieFlavor,
+    getDocumentByUuid,
     getEntityFromCompendiums,
     getOrdinal,
     increaseDieSize,
@@ -151,7 +151,7 @@ export class Attack {
             }
 
             if (this.actorId) {
-                let find = game.actors.get(this.actorId)
+                let find = getDocumentByUuid(this.actorId)
 
                 if (find) {
                     return find;
@@ -267,25 +267,19 @@ export class Attack {
             return;
         }
 
-        let weaponTypes = getPossibleProficiencies(operator, weapon);
-        let attributeMod = this._resolveAttributeModifier(weapon, operator, weaponTypes);
-        let terms = getDiceTermsFromString("1d20").dice;
+        const terms = getDiceTermsFromString("1d20").dice;
 
         terms.push(...appendNumericTerm(operator.baseAttackBonus, "Base Attack Bonus"));
+        terms.push(...appendNumericTerm(this.getConditionModifier(operator), "Condition Modifier"));
+
+        if(parent !== operator){
+            terms.push(...appendNumericTerm(this.getConditionModifier(parent), "Vehicle Condition Modifier"));
+        }
+
         if (!parent || parent === operator) {
-            let conditionBonus = getInheritableAttribute({
-                entity: operator,
-                attributeKey: "condition",
-                reduce: "FIRST"
-            })
-
-            if ("OUT" === conditionBonus || !conditionBonus) {
-                conditionBonus = "0";
-            }
-
-            terms.push(...appendNumericTerm(attributeMod, "Attribute Modifier"));
+            let weaponTypes = getPossibleProficiencies(operator, weapon);
+            terms.push(...appendNumericTerm(this._resolveAttributeModifier(weapon, operator, weaponTypes), "Attribute Modifier"));
             terms.push(...getProficiencyBonus(operator, weaponTypes));
-            terms.push(...appendNumericTerm(toNumber(conditionBonus), "Condition Modifier"));
             terms.push(...getFocusAttackBonuses(operator, weaponTypes));
         } else {
             terms.push(...appendNumericTerm(parent.system.attributes.int.mod, "Vehicle Computer Bonus"))
@@ -303,17 +297,48 @@ export class Attack {
         terms.push(...appendNumericTerm(generateArmorCheckPenalties(operator), "Armor Check Penalty"));
 
         //toHitModifiers only apply to the weapon they are on.  a toHitModifier change that is not on a weapon always applies
-        getInheritableAttribute({
+        const inheritableAttribute = getInheritableAttribute({
             entity: [weapon, operator],
             attributeKey: "toHitModifier",
             parent: !!parent ? parent : operator,
             itemFilter: ((item) => item.type !== 'weapon')
-        }).forEach(val => {
-            terms.push(...appendNumericTerm(val.value, val.modifier));
+        });
+        inheritableAttribute.forEach(val => {
+            terms.push(...appendNumericTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
         })
 
-        return new SWSERollWrapper(Roll.fromTerms(terms
-            .filter(term => !!term)));
+        const primaryTerms = [];
+        let cache;
+        for (const term of terms) {
+            if(term.operator){
+                cache = term;
+                continue;
+            }
+
+            if (!term.options.requirements) {
+                if(cache){
+                    primaryTerms.push(cache)
+                    cache = undefined;
+                }
+                primaryTerms.push(term)
+            }
+        }
+
+        return new SWSERollWrapper(Roll.fromTerms(primaryTerms
+            .filter(term => !!term)), []);
+    }
+
+    getConditionModifier(operator) {
+        let conditionBonus = getInheritableAttribute({
+            entity: operator,
+            attributeKey: "condition",
+            reduce: "FIRST"
+        })
+
+        if ("OUT" === conditionBonus || !conditionBonus) {
+            conditionBonus = "0";
+        }
+        return toNumber(conditionBonus);
     }
 
     _resolveAttributeModifier(item, actor, weaponTypes) {
@@ -460,8 +485,7 @@ export class Attack {
             }
         }
 
-        const meleeDamageAbilityModifier = appendNumericTerm(isTwoHanded ? Math.max(abilityMod * 2, abilityMod) : abilityMod, "Attribute Modifier");
-        return meleeDamageAbilityModifier;
+        return appendNumericTerm(isTwoHanded ? Math.max(abilityMod * 2, abilityMod) : abilityMod, "Attribute Modifier");
     }
 
     getHandednessModifier() {
@@ -487,24 +511,63 @@ export class Attack {
         return rollModifier.hasChoices() ? [rollModifier] : [];
     }
 
+    get rangeDamageModifiers(){
+        const modifiers = getInheritableAttribute({
+            entity: [this.item, this.operator],
+            attributeKey: "bonusDamage",
+            parent: !!this.parent ? this.parent : this.operator,
+            itemFilter: ((item) => item.type !== 'weapon')
+        });
+        return this.filterBonusesByType(modifiers, "range");
+    }
+
+    get rangeAttackModifiers(){
+        const modifiers = getInheritableAttribute({
+            entity: [this.item, this.operator],
+            attributeKey: "toHitModifier",
+            parent: !!this.parent ? this.parent : this.operator,
+            itemFilter: ((item) => item.type !== 'weapon')
+        });
+        return this.filterBonusesByType(modifiers, "range");
+    }
+
+    filterBonusesByType(modifiers, range) {
+        const response = [];
+        modifiers.forEach(modifier => {
+            if (typeof modifier.value === "string") {
+                const toks = modifier.value.split(":")
+                if (toks.length > 2 && toks[1].toLowerCase() === range) {
+                    response.push({type: toks[2].toLowerCase(), bonus: parseInt(toks[0])})
+                }
+            }
+        })
+        return response;
+    }
+
     getRangeModifierBlock() {
         let range = this.effectiveRange;
         const accurate =this.isAccurate;
         const inaccurate = this.isInaccurate
-        const defaultValue = this.rangedAttackModifier
+        const defaultRange = this.defaultRange
+        const damageModifiers = this.rangeDamageModifiers
+        const attackModifiers = this.rangeAttackModifiers
 
-        let rollModifier = RollModifier.createOption("attack", "Range Modifier");
+        let rollModifier = RollModifier.createOption(["attack", "damage"], "Range Modifier");
 
         for (let [rangeName, rangeIncrement] of Object.entries(SWSE.Combat.range[range] || {})) {
-            let rangePenaltyElement = SWSE.Combat.rangePenalty[rangeName];
+            let rangePenalty = SWSE.Combat.rangePenalty[rangeName];
             if (accurate && rangeName === 'short') {
-                rangePenaltyElement = 0;
+                rangePenalty = 0;
             }
             if (inaccurate && rangeName === 'long') {
                 continue;
             }
+            const damageBonus = damageModifiers.filter(modifier=>modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a,b) => a + b, 0);
+            const attackBonus = attackModifiers.filter(modifier=>modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a,b) => a + b, 0) + rangePenalty;
 
-            rollModifier.addChoice(new RollModifierChoice(`${rangeName.titleCase()}, ${rangeIncrement.string.titleCase()}, ${rangePenaltyElement}`, rangePenaltyElement === 0 ? "+0" : rangePenaltyElement, rangeName === defaultValue));
+            const display = `${rangeName.titleCase()}, ${rangeIncrement.string.titleCase()}, ${rangePenalty}`;
+            const value = {attack: attackBonus === 0 ? "+0" : attackBonus, damage: damageBonus};
+            rollModifier.addChoice(new RollModifierChoice(display, value, rangeName === defaultRange));
         }
 
         return rollModifier.hasChoices() ? [rollModifier] : [];
@@ -681,7 +744,7 @@ export class Attack {
 
 
 
-    get rangedAttackModifier() {
+    get defaultRange() {
         return getAttackRange(this.range, this.isAccurate, this.isInaccurate, this.actor)
     }
 
@@ -909,7 +972,7 @@ function getActor(actorId) {
     if (!actorId) {
         return;
     }
-    let find = game.actors.find(actor => actor._id === actorId);
+    let find = getDocumentByUuid(actorId);
     if (!find) {
         find = getEntityFromCompendiums("Actor", actorId)
     }
@@ -949,7 +1012,7 @@ export function getDiceTermsFromString(dieString) {
             dice.push(new foundry.dice.terms.NumericTerm({number: 0}));
         } else if (!isNaN(dieTerm)) {
             if (lastOperator === "x") {
-                dice.push(new foundry.dice.terms.NumericTerm({number: toNumber(dieTerm), options: getDieFlavor("multiplier")}));
+                dice.push(new foundry.dice.terms.NumericTerm({number: toNumber(dieTerm), options: {flavor: "multiplier"}}));
             } else {
                 dice.push(new foundry.dice.terms.NumericTerm({number: toNumber(dieTerm)}));
             }
