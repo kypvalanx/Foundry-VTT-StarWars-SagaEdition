@@ -24,6 +24,15 @@
                        {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
             {{/times}}
         </div>
+
+        <div class="labeled-input medium">
+            <label for="firstAid" class="top" title="You can usually only accept first aid once per day">First Aid Per Day</label>
+            <input id="firstAid" type="text" placeholder="" disabled/>
+            {{#times actor.system.firstAid.perDay}}
+                <input class="left-control-{{this}}" data-action="toggle-first-aid" type="checkbox" data-name="system.firstDay.toggles.{{this}}"
+                       {{#if (lookup ../actor.system.firstDay.toggles this)}}checked{{/if}}>
+            {{/times}}
+        </div>
     </div>
 
 

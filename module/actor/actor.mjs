@@ -553,6 +553,9 @@ export class SWSEActor extends Actor {
         });
         this.system.secondWind.perDay = bonusSecondWind + (this.isHeroic ? 1 : 0)
 
+        this.system.firstAid = this.system.secondWind || {}
+        this.system.firstAid.perDay = 1
+
 
         system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
