@@ -11,25 +11,25 @@
         <div class="divider"></div>
         <div class="labeled-input medium">
             <label for="currentHealth" class="text">Current</label>
-            <input class="right-input" id="currentHealth" type="number" name="system.health.value"
+            <input class="middle-input" id="currentHealth" type="number" name="system.health.value"
                    value="{{actor.health.value}}" data-dtype="Number"/>
         </div>
 
         <div class="labeled-input medium">
             <label for="secondWind" class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second
-                Winds Per Day</label>
-            <input id="secondWind" type="text" placeholder="" disabled/>
+                Winds/Day</label>
+            <input class="middle-input" id="secondWind" type="text" placeholder="" disabled/>
             {{#times actor.system.secondWind.perDay}}
-                <input class="left-control-{{this}}" data-action="toggle-second-wind" type="checkbox" data-name="system.secondWind.toggles.{{this}}"
+                <input class="left-control-{{this}}" data-action="toggle-second-wind" title="Spent" type="checkbox" data-name="system.secondWind.toggles.{{this}}"
                        {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
             {{/times}}
         </div>
 
         <div class="labeled-input medium">
-            <label for="firstAid" class="top" title="You can usually only accept first aid once per day">First Aid Per Day</label>
-            <input id="firstAid" type="text" placeholder="" disabled/>
+            <label for="firstAid" class="top" title="You can usually only accept first aid once per day">First Aid/Day</label>
+            <input class="right-input" id="firstAid" type="text" placeholder="" disabled/>
             {{#times actor.system.firstAid.perDay}}
-                <input class="left-control-{{this}}" data-action="toggle-first-aid" type="checkbox" data-name="system.firstDay.toggles.{{this}}"
+                <input class="left-control-{{this}}" data-action="toggle-first-aid" title="Performed" type="checkbox" data-name="system.firstDay.toggles.{{this}}"
                        {{#if (lookup ../actor.system.firstDay.toggles this)}}checked{{/if}}>
             {{/times}}
         </div>
@@ -87,14 +87,22 @@
         </div>
     </div>
 
-    <div class="flex flex-row">
-        <div class="resource-block"><label class="top">Force Points</label>
-            <input class="plain small" type="number" name="system.forcePoints" value="{{actor.system.forcePoints}}"
+    <div class="flex-row">
+        <div class="labeled-input">
+            <label for="forcePoints">Force Points</label>
+            <input id="forcePoints" class="left-input" type="number" name="system.forcePoints.quantity" value="{{actor.system.forcePoints.quantity}}"
                    data-dtype="Number"/>
+            <div class="control-0">
+                <a class="rollable" title="Roll {{actor.system.forcePoints.roll}}" data-label="Force Point" data-roll="{{actor.system.forcePoints.roll}}"><i class="fas fa-dice-d20"></i></a>
+            </div>
         </div>
-        <div class="resource-block"><label class="top">Destiny Points</label>
-            <input class="plain small" type="number" name="system.destinyPoints" value="{{actor.system.destinyPoints}}"
+        <div class="labeled-input">
+            <label for="forcePoints">Destiny Points</label>
+            <input id="forcePoints" class="right-input" type="number" name="system.destinyPoints" value="{{actor.system.destinyPoints}}"
                    data-dtype="Number"/>
+<!--            <div class="control-0">-->
+<!--                <a class="rollable" title="Roll {{actor.system.forcePoints.roll}}" data-label="Force Point" data-roll="{{actor.system.forcePoints.roll}}"><i class="fas fa-dice-d20"></i></a>-->
+<!--            </div>-->
         </div>
     </div>
 

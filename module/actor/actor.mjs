@@ -556,6 +556,20 @@ export class SWSEActor extends Actor {
         this.system.firstAid = this.system.secondWind || {}
         this.system.firstAid.perDay = 1
 
+        const forcePoints = Number.isInteger(this.system.forcePoints) ? this.system.forcePoints : (this.system.forcePoints.quantity || 0);
+        this.system.forcePoints = typeof this.system.forcePoints === 'object' ? this.system.forcePoints : {};
+        this.system.forcePoints.quantity = forcePoints;
+
+        const forceDieSize = getInheritableAttribute({
+            entity: this,
+            attributeKey: "forceDieSize",
+            reduce: "FIRST"
+        });
+        const forceDie = !!forceDieSize ? forceDieSize : 6
+
+        const forceDieCount = level > 14 ? 3 : (level > 7 ? 2 : 1);
+        this.system.forcePoints.roll = `${forceDieCount}d${forceDie}kh`
+
 
         system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
