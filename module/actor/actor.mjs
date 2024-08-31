@@ -2059,7 +2059,7 @@ export class SWSEActor extends Actor {
             const toks = f.split(":");
             return {name: toks[1], type: toks[0], granted: "Automatic from system configuration"}
         });
-        this.addItems({items: featTokens})
+        this.addItems({items: featTokens, provided: true})
     }
 
 
@@ -2259,10 +2259,10 @@ export class SWSEActor extends Actor {
 
 
 
-        if (!context.isUpload) {
+        if (!context.isUpload && !context.provided) {
             //Check that the item being added can be added to this actor type and that it hasn't been added too many times
             if (context.isAdd) {
-                if (!context.skipPrerequisite && !context.isUpload) {
+                if (!context.skipPrerequisite) {
                     if (!this.isPermittedForActorType(entity.type)) {
                         suppressibleDialog.call(this, entity,
                             `Attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, `Inappropriate Item`,
