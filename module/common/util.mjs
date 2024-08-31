@@ -1486,7 +1486,7 @@ export function getDocumentByUuid(uuid, from) {
                     if(!cursor){
                         cursor = source?.get(`${last}.${tok}`)
                     }
-                    if(cursor){
+                    if(cursor || i === toks.length-1){
                         source = cursor
                     }
                 }
