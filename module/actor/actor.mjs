@@ -556,8 +556,8 @@ export class SWSEActor extends Actor {
         this.system.firstAid = this.system.secondWind || {}
         this.system.firstAid.perDay = 1
 
-        const forcePoints = Number.isInteger(this.system.forcePoints) ? this.system.forcePoints : (this.system.forcePoints.quantity || 0);
-        this.system.forcePoints = typeof this.system.forcePoints === 'object' ? this.system.forcePoints : {};
+        const forcePoints = Number.isInteger(this.system.forcePoints) ? this.system.forcePoints : (this.system.forcePoints?.quantity || 0);
+        this.system.forcePoints = (typeof this.system.forcePoints === 'object') ? this.system.forcePoints || {} : {};
         this.system.forcePoints.quantity = forcePoints;
 
         const forceDieSize = getInheritableAttribute({

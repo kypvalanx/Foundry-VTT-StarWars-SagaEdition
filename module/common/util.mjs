@@ -1477,13 +1477,24 @@ export function getDocumentByUuid(uuid, from) {
             case "ActiveEffect":
                 source = source?.effects
                 break;
+            case "Compendium":
+                source = source?.packs;
+                break;
             default:
                 if (source?.id !== tok) {
-                    source = source?.get(tok)
+                    let cursor = source?.get(tok);
+                    if(!cursor){
+                        cursor = source?.get(`${last}.${tok}`)
+                    }
+                    if(cursor){
+                        source = cursor
+                    }
                 }
         }
         last = tok;
-
+        if(!source){
+            return;
+        }
         // if(!source ){
         //     console.warn(`source is null at ${tok}`)
         // }
