@@ -59,7 +59,7 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             case 'DARK SIDE SCORE':
-                if (!(target.darkSideScore < resolveValueArray([prereq.requirement], target))) {
+                if (!(target.system.darkside.score < resolveValueArray([prereq.requirement], target))) {
                     successList.push({prereq, count: 1});
                     break;
                 }

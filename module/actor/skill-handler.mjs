@@ -66,6 +66,7 @@ function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) 
     actor.resolvedLabels.set(skill.variable, skill.label);
     skill.abilityBonus = skillAttributeMod;
     skill.rowColor = label === "Initiative" || label === "Perception" ? "highlighted-skill" : "";
+    skill.situationalSkills = [];
 }
 
 /**

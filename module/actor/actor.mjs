@@ -44,6 +44,7 @@ import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
+import {DarksideDelegate} from "./darkside-delegate.js";
 
 function suppressibleDialog(entity, message, title, suppress) {
     if (suppress) {
@@ -249,8 +250,9 @@ export class SWSEActor extends Actor {
         for (let link of this.actorLinks) {
             let linkedActor = getDocumentByUuid(link.uuid);
             if (!linkedActor) continue;
-            let reciLink = linkedActor.actorLinks.find(link => link.uuid === this.uuid)
+            let reciLink = linkedActor.actorLinks?.find(link => link.uuid === this.uuid)
 
+            if(!reciLink) continue;
             const oldLink = JSON.stringify(reciLink);
             let system = this.getCachedLinkData(this.type, link.position, this, reciLink)
 
@@ -532,7 +534,7 @@ export class SWSEActor extends Actor {
         system.classSummary = classSummary;
         system.classLevels = classLevels;
 
-        this.handleDarksideArray(this);
+        this.system.darkside = new DarksideDelegate(this);
 
         let feats = this.resolveFeats();
         this.feats = feats.activeFeats || [];
@@ -1028,23 +1030,6 @@ export class SWSEActor extends Actor {
         return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
-    handleDarksideArray(item) {
-        let system = item.system;
-        for (let i = 0; i <= system.attributes.wis.total; i++) {
-            system.darkSideArray = system.darkSideArray || [];
-
-            if (system.darkSideScore < i) {
-                system.darkSideArray.push({value: i, active: false})
-            } else {
-                system.darkSideArray.push({value: i, active: true})
-            }
-        }
-
-        let darkSideTaint = getInheritableAttribute({entity: item, attributeKey: "darksideTaint", reduce: "SUM"})
-
-        system.finalDarksideScore = parseInt(system.darkSideScore) + parseInt(darkSideTaint)
-    }
-
     get hasCrew() {
         if (!["vehicle", "npc-vehicle"].includes(this.type)) {
             return false;
@@ -1479,6 +1464,7 @@ export class SWSEActor extends Actor {
             if (this.classes) {
                 const classObjects = filterItemsByType(this.items.values(), "class");
                 let heroicLevel = 0;
+                let charLevel = 0;
                 for (let co of classObjects) {
                     if (getInheritableAttribute({
                         entity: co,
@@ -1487,8 +1473,10 @@ export class SWSEActor extends Actor {
                     })) {
                         heroicLevel += co.system.levelsTaken.length;
                     }
+                    charLevel += co.system.levelsTaken.length;
                 }
                 this.resolvedVariables.set("@heroicLevel", heroicLevel);
+                this.resolvedVariables.set("@charLevel", charLevel);
                 return heroicLevel;
             }
             return 0;
@@ -2132,14 +2120,6 @@ export class SWSEActor extends Actor {
                 reduce: "SUM"
             });
         })
-    }
-
-    get darkSideScore() {
-        return this.system.finalDarksideScore;
-    }
-
-    set darkSideScore(score) {
-        this.safeUpdate({'data.darkSideScore': score})
     }
 
     /**
