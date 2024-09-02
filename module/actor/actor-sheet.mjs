@@ -274,7 +274,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
-        //html.find('[data-action="age"]').click(this._selectAge.bind(this));
         html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
 
         html.find('[data-action="level-up-bonus"]').click(this._onAddLevelUpBonus.bind(this));
@@ -283,11 +282,6 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
-
-        html.find('.dark-side-button').click(ev => {
-            this.actor.darkSideScore = $(ev.currentTarget).data("value");
-        });
-
     }
 
 
