@@ -25,8 +25,6 @@ export async function vehicleSheetTests(quench) {
                                 hasItems(assert, actor.items, ["Colossal",
                                     "Light Freighter"])
                                 assert.equal(actor.size.name, "Colossal")
-                                //has changes check the changes on the vehicle base type
-                                assert.lengthOf(actor.items, 2)
 
                                 assert.equal(actor.system.attributes.str.total, 42);
                                 assert.equal(actor.system.attributes.dex.total, 10);

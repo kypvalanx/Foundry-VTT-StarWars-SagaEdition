@@ -5,31 +5,20 @@ import {choiceTests} from "./choice/choice.test.mjs";
 import {compendiumUtilTests} from "./compendium/compendium-utils.test.mjs";
 import {skillHandlerTest} from "./actor/skill-handler.test.mjs";
 import {vehicleSheetTests} from "./actor/actor-sheet.vehicle.test.mjs";
+import {utilTests} from "./common/util.test.js";
+
+const registeredTests = [
+    generationTests,
+    actorSheetTests,
+    vehicleSheetTests,
+    skillHandlerTest,
+    attackDelegateTests,
+    choiceTests,
+    utilTests,
+    compendiumUtilTests];
 
 export function registerTestSuites(quench) {
-    for(const batchFunction of [generationTests]){
+    for(const batchFunction of registeredTests){
         batchFunction(quench);
     }
-    for(const batchFunction of [actorSheetTests]){
-        batchFunction(quench);
-    }
-    for(const batchFunction of [vehicleSheetTests]){
-        batchFunction(quench);
-    }
-    for(const batchFunction of [skillHandlerTest]){
-        batchFunction(quench);
-    }
-    for(const batchFunction of [attackDelegateTests]){
-        batchFunction(quench);
-    }
-    for(const batchFunction of [choiceTests]){
-        batchFunction(quench);
-    }
-    // for(const batchFunction of [utilTests]){
-    //     batchFunction(quench);
-    // }
-    for(const batchFunction of [compendiumUtilTests]){
-        batchFunction(quench);
-    }
-
 }

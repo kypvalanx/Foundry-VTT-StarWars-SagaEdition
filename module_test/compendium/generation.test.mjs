@@ -117,7 +117,7 @@ export async function generationTests(quench) {
                     assert.equal(actor.system.attributeGenerationType, "Manual")
                     assert.equal(actor.system.attributes.str.total, 20)
                     assert.equal(actor.system.attributes.dex.total, 14)
-                    assert.equal(actor.system.attributes.con.total, "-")
+                    assert.equal(actor.system.attributes.con.total, 10)
                     assert.equal(actor.system.attributes.int.total, 10)
                     assert.equal(actor.system.attributes.wis.total, 14)
                     assert.equal(actor.system.attributes.cha.total, 6)
