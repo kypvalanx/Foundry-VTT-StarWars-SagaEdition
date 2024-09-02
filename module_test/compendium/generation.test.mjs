@@ -14,7 +14,7 @@ import {sizeArray} from "../../module/common/constants.mjs";
 
 function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
     assert.equal(actor.system.attributeGenerationType, "Manual")
-    const attributes = actor.system.attributes;
+    const attributes = actor.attributes;
     assert.equal(attributes.str.total, str)
     assert.equal(attributes.dex.total, dex)
     assert.equal(attributes.con.total, con)

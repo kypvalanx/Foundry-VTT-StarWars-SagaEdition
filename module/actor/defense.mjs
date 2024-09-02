@@ -475,15 +475,21 @@ function _selectRefBonus(actor, heroicLevel, armorBonus) {
 }
 
 function _getDexMod(actor) {
-    return actor.system.attributes.dex.mod;
+    return actor.attributes.dex.mod;
 }
 
 function _getWisMod(actor) {
-    return actor.system.attributes.wis?.mod || 0;
+    return actor.attributes.wis?.mod || 0;
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @return {*}
+ * @private
+ */
 function _getFortStatMod(actor) {
-    let attributes = actor.system.attributes;
+    let attributes = actor.attributes;
     return actor.ignoreCon() ? attributes.str.mod : attributes.con.mod;
 }
 

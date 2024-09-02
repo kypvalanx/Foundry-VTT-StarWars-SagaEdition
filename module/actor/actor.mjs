@@ -235,7 +235,7 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
-        generateAttributes(this); //TODO, make this lazy
+        //generateAttributes(this);//TODO, make this lazy
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
 
@@ -473,7 +473,7 @@ export class SWSEActor extends Actor {
 
     get grapple() {
         return this.getCached("grapple", () => {
-            return this.baseAttackBonus + Math.max(this.system.attributes.str.mod, this.system.attributes.dex.mod) + getInheritableAttribute({
+            return this.baseAttackBonus + Math.max(this.attributes.str.mod, this.attributes.dex.mod) + getInheritableAttribute({
                 entity: this,
                 attributeKey: "grappleBonus",
                 reduce: "SUM"
@@ -536,12 +536,6 @@ export class SWSEActor extends Actor {
 
         this.system.darkside = new DarksideDelegate(this);
 
-        let feats = this.resolveFeats();
-        this.feats = feats.activeFeats || [];
-        this.system.feats = feats.activeFeats;
-        //system.skills = generateSkills(this);
-
-
         let remainingSkills = getAvailableTrainedSkillCount(this);
         remainingSkills = remainingSkills - this.trainedSkills.length;
         this.remainingSkills = remainingSkills < 0 ? false : remainingSkills;
@@ -575,7 +569,6 @@ export class SWSEActor extends Actor {
 
         system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
 
-        system.inactiveProvidedFeats = feats.inactiveProvidedFeats
 
         this._reduceProvidedItemsByExistingItems(system);
 
@@ -584,8 +577,6 @@ export class SWSEActor extends Actor {
         system.defense = defense;
         system.armors = armors;
 
-        this._manageAutomaticItems(this, feats.removeFeats).then(() => {
-        });
         this.initializeCharacterSettings();
     }
 
@@ -640,6 +631,14 @@ export class SWSEActor extends Actor {
         return this.getCached("actorLinks", () => {
             return Array.isArray(this.system.actorLinks) ? this.system.actorLinks || [] : [];
         })
+    }
+
+    get feats(){
+        return this.resolveFeats().activeFeats
+    }
+
+    get inactiveFeats(){
+        return this.resolveFeats().inactiveProvidedFeats
     }
 
     /**
@@ -1239,22 +1238,24 @@ export class SWSEActor extends Actor {
     }
 
     resolveFeats() {
-        let feats = filterItemsByType(this.items.values(), "feat");
-        let activeFeats = filterItemsByType(inheritableItems(this), "feat");
-        let removeFeats = [];
-        let inactiveProvidedFeats = [];
-        for (let feat of feats) {
-            let active = activeFeats.includes(feat)
-            if (!active) {
-                if (!feat.system.supplier) {
-                    removeFeats.push(feat);
-                } else {
-                    inactiveProvidedFeats.push(feat);
+        return this.getCached("feats", () => {
+            let feats = filterItemsByType(this.items.values(), "feat");
+            let activeFeats = filterItemsByType(inheritableItems(this), "feat");
+            let removeFeats = [];
+            let inactiveProvidedFeats = [];
+            for (let feat of feats) {
+                let active = activeFeats.includes(feat)
+                if (!active) {
+                    if (!feat.system.supplier) {
+                        removeFeats.push(feat);
+                    } else {
+                        inactiveProvidedFeats.push(feat);
+                    }
                 }
             }
-        }
 
-        return {activeFeats, removeFeats, inactiveProvidedFeats};
+            return {activeFeats, removeFeats, inactiveProvidedFeats};
+        })
     }
 
     getVariable(variableName) {
@@ -1395,14 +1396,17 @@ export class SWSEActor extends Actor {
     }
 
 
-    getAttributes() {
-        return this.system.attributes;
+    get attributes() {
+        return this.getCached("attributes", () => {
+            generateAttributes(this)
+            return this.system.attributes;
+        })
     }
 
 
     getAttributeBases() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.system.attributes)) {
+        for (let [key, attribute] of Object.entries(this.attributes)) {
             response[key] = attribute.base;
         }
         return response;
@@ -1410,7 +1414,7 @@ export class SWSEActor extends Actor {
 
     getAttributeBonuses() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.system.attributes)) {
+        for (let [key, attribute] of Object.entries(this.attributes)) {
             response[key] = attribute.bonus;
         }
         return response;
@@ -1426,9 +1430,14 @@ export class SWSEActor extends Actor {
         return SWSEActor.getActorAttribute(swseActor, attributeName);
     }
 
-
-    static getActorAttribute(swseActor, attributeName) {
-        let attributes = swseActor.system.attributes;
+    /**
+     *
+     * @param actor {SWSEActor}
+     * @param attributeName
+     * @return {*}
+     */
+    static getActorAttribute(actor, attributeName) {
+        let attributes = actor.attributes;
         let attribute = attributes[toShortAttribute(attributeName).toLowerCase()];
 
         return attribute.total;
@@ -1557,14 +1566,6 @@ export class SWSEActor extends Actor {
         return this.system.inactiveProvidedFeats;
     }
 
-    // get shield() {
-    //     return getInheritableAttribute({
-    //         entity: this,
-    //         attributeKey: "shieldRating",
-    //         reduce: "MAX"
-    //     })
-    // }
-
     /**
      *
      * @param item {SWSEItem}
@@ -1607,7 +1608,7 @@ export class SWSEActor extends Actor {
     }
 
     ignoreCon() {
-        let skip = this.system.attributes.con?.skip;
+        let skip = this.attributes.con?.skip;
         return skip === undefined ? true : skip;
     }
 
@@ -1686,7 +1687,7 @@ export class SWSEActor extends Actor {
      */
     getAttributeMod(ability) {
         if (!ability) return;
-        return this.system.attributes[ability.toLowerCase()]?.mod;
+        return this.attributes[ability.toLowerCase()]?.mod;
     }
 
     /**
@@ -1703,34 +1704,6 @@ export class SWSEActor extends Actor {
             return firstClasses[0];
         }
         return undefined;
-    }
-
-    async _manageAutomaticItems(actor, removeFeats) {
-        let itemIds = Array.from(actor.items.values()).flatMap(i => [i.id, i.flags.core?.sourceId?.split(".")[3]]).filter(i => i !== undefined);
-
-        let removal = [];
-        removeFeats.forEach(f => removal.push(f._id))
-        for (let item of actor.items) {
-            let itemSystem = item.system;
-            if (itemSystem.isSupplied) {
-                //console.log(itemIds, itemData.supplier)
-                if (!itemIds.includes(itemSystem.supplier.id) || !itemSystem.supplier) {
-                    removal.push(item._id)
-                }
-
-                if (item.name === 'Precise Shot' && itemSystem.supplier.name === 'Point-Blank Shot' && !game.settings.get('swse', 'mergePointBlankShotAndPreciseShot')) {
-                    removal.push(item._id);
-                }
-            }
-        }
-        if (removal.length > 0) {
-            try {
-                await this.deleteEmbeddedDocuments("Item", removal);
-            } catch (e) {
-                console.log(e);
-                //this will be run in to if multiple sessions try to delete teh same item
-            }
-        }
     }
 
 
@@ -3051,21 +3024,21 @@ export class SWSEActor extends Actor {
 
     get heavyLoad() {
         const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.system.attributes.str.total * 0.5, 2)
+        return Math.pow(this.attributes.str.total * 0.5, 2)
             * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
             * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
 
     get strainCapacity() {
         const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.system.attributes.str.total, 2) * 0.5
+        return Math.pow(this.attributes.str.total, 2) * 0.5
             * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
             * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
 
     get maximumCapacity() {
         const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.system.attributes.str.total, 2)
+        return Math.pow(this.attributes.str.total, 2)
             * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
             * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
     }
