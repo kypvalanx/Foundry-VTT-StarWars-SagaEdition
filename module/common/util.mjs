@@ -903,7 +903,7 @@ function upgradeValues(a, b) {
     {return a}return b;
 }
 
-function resolveExpressionReduce(values, actor) {
+export function resolveExpressionReduce(values, actor) {
     const resolutionSorting = {};
     for (const value of values) {
         const priority = value.priority || 1;
@@ -1176,118 +1176,7 @@ export function inheritableItems(entity, options={}) {
     return entity.getCached && !options.skipCache ? entity.getCached(`inheritableItems`, fn) : fn();
 }
 
-test()
 
-//test()
-
-function assertEquals(expected, actual) {
-    if (expected === actual) {
-        //console.log("passed")
-    } else {
-        console.warn(`expected "${expected}", but got "${actual}"`)
-    }
-}
-
-function test() {
-
-    console.log("running util tests...");
-    const ADD = CONST.ACTIVE_EFFECT_MODES.ADD
-    const MULTIPLY = CONST.ACTIVE_EFFECT_MODES.MULTIPLY
-    const UPGRADE = CONST.ACTIVE_EFFECT_MODES.UPGRADE
-    const DOWNGRADE = CONST.ACTIVE_EFFECT_MODES.DOWNGRADE
-    const OVERRIDE = CONST.ACTIVE_EFFECT_MODES.OVERRIDE
-    const CUSTOM = CONST.ACTIVE_EFFECT_MODES.CUSTOM
-    const POST_ROLL_MULTIPLY = 6;
-
-    // assertEquals(`["item name"]`, JSON.stringify(getCleanListFromCSV("item name  ")))
-    // assertEquals(`["item name","item name two"]`, JSON.stringify(getCleanListFromCSV("  item name, item name two")))
-    //
-    // assertEquals("1d10 + 2d8 + 3d6 + 1", addValues("1d6+2d8+1d10", "2d6 +1"))
-    // assertEquals(7, addValues(4, 3));
-    // assertEquals(7, addValues(3, 4));
-    // assertEquals("HelloWorld", addValues("Hello", "World"))
-    // assertEquals(13, addValues(7, {value: 6}))
-    // assertEquals("2d6", addValues("1d6", "1d6"))
-    // assertEquals("1d6 + 4", addValues(4, "1d6"))
-    // assertEquals("1d6 + 2", addValues("1d6", 2))
-    // assertEquals("7d10x2 + 4", addValues(4, "7d10x2"))
-    // assertEquals("14d10x2", addValues("7d10x2", "7d10x2"))
-    //
-    // assertEquals(2, multiplyValues(1, 2))
-    // assertEquals("2d6", multiplyValues("1d6", 2))
-    // assertEquals("4d8 + 2d6", multiplyValues("1d6 + 2d8", 2))
-    // assertEquals("14d10x2", multiplyValues("7d10x2", 2))
-    // assertEquals("HELLO WORLD", multiplyValues("HELLO WORLD", 2))
-    //
-    //
-    // assertEquals(0, resolveExpressionReduce([], {}))
-    // assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}], {}))
-    // assertEquals("7d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}], {}))
-    // assertEquals("14d10x2", resolveExpressionReduce([{value: "7d10x2", mode: ADD}, {value: "7d10x2", mode: ADD}], {}))
-    // assertEquals("5 + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
-    // assertEquals("5 + @WISMOD + @WISMOD", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "@WISMOD", mode: ADD}, {value: "@WISMOD", mode: ADD}], {}))
-    assertEquals(0, resolveExpressionReduce([{value: 5, mode: MULTIPLY}], {}))
-    assertEquals(25, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 5, mode: MULTIPLY}], {}))
-    assertEquals(7, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: UPGRADE}], {}))
-    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: UPGRADE}], {}))
-    assertEquals("1d8", resolveExpressionReduce([{value: 5, mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
-    //assertEquals("5d8 + 3d6", resolveExpressionReduce([{value: "2d6 + 5d8 + 1d6", mode: ADD}, {value: "1d8", mode: UPGRADE}], {}))
-    assertEquals(5, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 7, mode: DOWNGRADE}], {}))
-    assertEquals(3, resolveExpressionReduce([{value: 5, mode: ADD}, {value: 3, mode: DOWNGRADE}], {}))
-    assertEquals(13, resolveExpressionReduce([{value: 5, mode: ADD, priority: -1}, {
-        value: 5,
-        mode: ADD,
-        priority: 2
-    }, {value: 3, mode: 2}], {}))
-    assertEquals(8, resolveExpressionReduce([{value: 50, mode: MULTIPLY, priority: -1}, {
-        value: 5,
-        mode: ADD,
-        priority: 2
-    }, {value: 3, mode: 2}], {}))
-
-
-    assertEquals(`["ammo:155"]`, JSON.stringify(resolveExpressionReduce([{value: "ammo:100", mode: ADD},{value: "ammo:55", mode: ADD}], {})))
-    assertEquals(`["ammo:100","ammo2:55"]`, JSON.stringify(resolveExpressionReduce([{value: "ammo:100", mode: ADD},{value: "ammo2:55", mode: ADD}], {})))
-
-
-
-    assertEquals(5, resolveWeight("5", 1, 5))
-    assertEquals(5, resolveWeight("5 kg", 1, 5))
-    assertEquals(5, resolveWeight("5 KG", 1, 5))
-    assertEquals(5, resolveWeight("5 KiloGrams", 1, 5))
-    assertEquals(5000, resolveWeight("5 Ton", 1, 5))
-    assertEquals(5, resolveWeight(5, 1, 5))
-    assertEquals(15, resolveWeight(5, 3, 5))
-    assertEquals(0, resolveWeight(5, 0, 5))
-    assertEquals(200, resolveWeight("(40 x Cost Factor) kg", 1, 5))
-
-    //console.log(resolveExpression("MAX(@WISMOD,@CHAMOD)", null, null))
-    assertEquals(12, resolveValueArray(["2", 4, "*2"], null))
-    assertEquals(2, resolveValueArray(["+2"], null))
-    assertEquals(24, resolveValueArray(["2", 4, "*2", "*4", "/2"], null))
-
-    assertEquals(2, resolveExpression("+2", null))
-    assertEquals(-5, resolveExpression("-5", null))
-    assertEquals(-10, resolveExpression("-5-5", null))
-    assertEquals("3d6 + 3", resolveExpression("3d6+3", null))
-    assertEquals(0, resolveExpression("-5--5", null))
-    assertEquals(5, resolveExpression("MAX(1,5)", null))
-    assertEquals(1, resolveExpression("MIN(1,5)", null))
-    assertEquals(8, resolveExpression("MAX(1,5)+3", null))
-    assertEquals(8, resolveExpression("MAX(1,MAX(2,5))+3", null))
-    assertEquals(1, resolveExpression("1+2-3+5-4", null))
-    assertEquals(-9, resolveExpression("1+2-(3+5)-4", null))
-    assertEquals(27, resolveExpression("3*9", null))
-    assertEquals(39, resolveExpression("3+4*9", null))
-    assertEquals(-24, resolveExpression("-3*8", null))
-    assertEquals(-24, resolveExpression("3*-8", null))
-
-    // console.log( '[1,2,3,4,5]' === JSON.stringify(innerJoin([1,2,3,4,5])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4])))
-    // console.log( '[2,3,4]' === JSON.stringify(innerJoin(...[[1,2,3,4,5], [2,3,4]])))
-    // console.log( '[3]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [3])))
-    // console.log( '[]' === JSON.stringify(innerJoin([1,2,3,4,5], [2,3,4], [1])))
-}
 
 export function resolveWeight(weight, quantity = 1, costFactor = 1, actor) {
     weight = `${weight}`.toLowerCase();
