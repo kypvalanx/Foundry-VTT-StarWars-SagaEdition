@@ -48,6 +48,9 @@ function getMockEvent() {
 
 export function hasItems(assert, items, strings) {
     items = items.map(i => i.name).sort()
+    strings.push(...(game.settings.get("swse", "automaticItems").split(",").map(f => {
+        return (f.trim().split(":"))[1]
+    })))
     strings = strings.sort()
     assert.sameMembers(items, strings)
 }
@@ -66,7 +69,6 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                                 hasItems(assert, actor.items, ["Jedi", "Bonus Feat (Force Sensitivity)", "Bonus Feat (Weapon Proficiency (Lightsabers))", "Bonus Feat (Weapon Proficiency (Simple Weapons))",
                                     "Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)"])
-                                assert.lengthOf(actor.items, 7)
                             });
                         });
 
@@ -110,7 +112,6 @@ export async function actorSheetTests(quench) {
                                     "Wheeled Speed (10)",
                                     "Wheeled Speed (6)",
                                     "Wheeled Speed (8)"])
-                                assert.lengthOf(actor.items, 32)
                                 //assert.equal(actor.size, "Medium")
                             });
                         });
@@ -122,7 +123,6 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Claw", type: "beastAttack"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Medium", type: "trait"})
                                 hasItems(assert, actor.items, ["Beast", "Claw", "Medium"])
-                                assert.lengthOf(actor.items, 3)
 
                                 actor.prepareData()
                                 const firstAttack = actor.attack.attacks[0]
@@ -150,7 +150,6 @@ export async function actorSheetTests(quench) {
                                     "Soldier",
                                     "Weapon Proficiency (Pistols)",
                                     "Weapon Proficiency (Simple Weapons)"])
-                                 assert.lengthOf(actor.items, 9)
                                 const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
                                 assert.equal(availableTrainedSkills, 8);
                             });
@@ -252,7 +251,6 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                                 hasItems(assert, actor.items, ["Jedi", "Bonus Feat (Force Sensitivity)", "Bonus Feat (Weapon Proficiency (Lightsabers))", "Bonus Feat (Weapon Proficiency (Simple Weapons))",
                                     "Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)"])
-                                assert.lengthOf(actor.items, 7)
                             });
                         });
 
@@ -275,7 +273,6 @@ export async function actorSheetTests(quench) {
                                     "Sneak Attack",
                                     "Weapon Proficiency (Pistols)",
                                     "Weapon Proficiency (Simple Weapons)"])
-                                assert.lengthOf(actor.items, 9)
                             });
                         });
 
