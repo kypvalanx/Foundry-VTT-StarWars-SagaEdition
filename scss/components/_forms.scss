@@ -234,8 +234,9 @@
   cursor: pointer;
 }
 
-input[type=text], input[type=number], select {
-  padding: 14px 6px;
+input[type=text], input[type=number], select, div.input {
+  padding-left: 6px;
+  height: 32px;
   font-size: 1.25rem;
   border: 2px var(--color-foreground) solid;
   border-radius: 10px;

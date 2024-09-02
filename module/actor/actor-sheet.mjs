@@ -274,10 +274,12 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="to-chat"]').click(this._onToChat.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="gm-bonus"]').click(this._onAddGMBonus.bind(this));
+        //html.find('[data-action="age"]').click(this._selectAge.bind(this));
+        html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
+
         html.find('[data-action="level-up-bonus"]').click(this._onAddLevelUpBonus.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
-        html.find('[data-action="age"]').on("click", event => this._selectAge(event, this));
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
@@ -554,14 +556,14 @@ export class SWSEActorSheet extends ActorSheet {
         if (traits === '') {
             traits = `<div>This species has no traits related to age.</div>`;
         }
-        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"><div>${traits}</div>`
+        let content = `<p>Enter your age. Adults have no modifiers:</p><input class="range" id="age" placeholder="Age" type="number" value="${age}"/><div>${traits}</div>`
 
         return {
             title: "Age Selection",
             content: content,
             callback: async (html) => {
                 let key = html.find("#age")[0].value;
-                sheet.actor.setAge(key);
+                sheet.object.setAge(key);
             },
             render: async (html) => {
                 let ageInput = html.find("#age");
