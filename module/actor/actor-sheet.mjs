@@ -1374,7 +1374,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     async _selectAttributeLevelBonuses(event, sheet) {
         let level = $(event.currentTarget).data("level");
-        let bonus = sheet.actor.getAttributeLevelBonus(level);
+        let bonus = sheet.object.getAttributeLevelBonus(level);
 
         let combined = {};
         for (let val of Object.keys(CONFIG.SWSE.Abilities.droidSkip)) {
@@ -1428,7 +1428,7 @@ export class SWSEActorSheet extends ActorSheet {
             }
         });
         if (response) {
-            sheet.actor.setAttributeLevelBonus(level, response);
+            sheet.object.setAttributeLevelBonus(level, response);
         }
     }
 

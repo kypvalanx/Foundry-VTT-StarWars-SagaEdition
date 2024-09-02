@@ -2062,15 +2062,6 @@ export class SWSEActor extends Actor {
         this.addItems({items: featTokens, provided: true})
     }
 
-
-    getAttributeGenerationType() {
-        return this.system.attributeGenerationType;
-    }
-
-    setAttributeGenerationType(attributeGenerationType) {
-        this.safeUpdate({'data.attributeGenerationType': attributeGenerationType})
-    }
-
     get credits() {
         return this.system.credits || 0;
     }
