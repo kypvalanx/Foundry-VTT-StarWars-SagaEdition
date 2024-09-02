@@ -451,9 +451,3 @@ function resolveOptions(actor, excludingKey, includeKey, options = {}) {
     return resolvable;
 }
 
-
-test()
-
-function test() {
-    console.log("running choice tests");
-}
