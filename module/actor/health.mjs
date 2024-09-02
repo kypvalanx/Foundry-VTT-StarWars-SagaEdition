@@ -98,9 +98,15 @@ export function resolveShield(actor) {
     return shields;
 }
 
+/**
+ *
+ * @param actor {SWSEActor}
+ * @param ignoreCon
+ * @return {*|number}
+ */
 function resolveAttributeMod(actor, ignoreCon) {
     if (ignoreCon) {
         return 0;
     }
-    return actor.system.attributes.con.mod;
+    return actor.attributes.con.mod;
 }

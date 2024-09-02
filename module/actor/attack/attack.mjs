@@ -365,7 +365,7 @@ export class Attack {
      * @param {string} attributeName
      */
     _getCharacterAttributeModifier(actor, attributeName) {
-        let attributes = actor.system.attributes;
+        let attributes = actor.attributes;
         return !attributes ? 0 : attributes[toShortAttribute(attributeName).toLowerCase()].mod;
     }
 

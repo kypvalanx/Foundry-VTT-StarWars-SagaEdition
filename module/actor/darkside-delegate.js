@@ -15,9 +15,8 @@ export class DarksideDelegate{
     }
 
     get array(){
-        const system = this.actor.system;
         const darksideArray  = [];
-        for (let i = 0; i <= system.attributes.wis.total; i++) {
+        for (let i = 0; i <= this.actor.attributes.wis.total; i++) {
             darksideArray.push({value: i, active: this.score >= i})
         }
         return darksideArray;

@@ -106,7 +106,6 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
-        //html.find('[data-action="attribute-control"]').click(this._onAttributeControl.bind(this));  TODO remove
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
         html.find('[data-action="increase-ammo"]').click(this._onIncreaseAmmo.bind(this));
         html.find('[data-action="decrease-ammo"]').click(this._onDecreaseAmmo.bind(this));
@@ -548,86 +547,6 @@ export class SWSEItemSheet extends ItemSheet {
                 break;
         }
         this.item.safeUpdate(updateData);
-    }
-
-
-
-    _onAttributeControl(event){
-        let element = $(event.currentTarget);
-        let level = element.data('level');
-
-        let modeId = element.data('modeId');
-        modeId = modeId !== undefined ? `${modeId}` : undefined;
-
-        let attributeId = element.data('attributeId');
-        attributeId = attributeId !== undefined ? `${attributeId}` : undefined;
-
-        let type = element.data("type");
-        switch (type) {
-            case "attribute-add":
-            {
-                let system = this.item.system;
-                if (level) {
-                    system = system.levels[level].data;
-                }
-
-                if (modeId) {
-                    for (let tok of modeId.split(".")) {
-                        system = system.modes[tok];
-                    }
-                }
-                let attributes = system.attributes;
-                let cursor = 0;
-                while (attributes[cursor]) {
-                    cursor++;
-                }
-                this.createItemAttribute(cursor, level, modeId)
-            }
-            case "remove-attribute": {
-
-                let updateData = {};
-                //updateData.system = {};
-                let data = updateData //.system;
-
-                if (level) {
-                    data.levels = {}
-                    data.levels[level] = {}
-                    data.levels[level].data = {}
-                    data = data.levels[level].data
-                }
-
-                if (attributeId) {
-                    if(modeId){
-                        let modes = modeId.split(".")
-
-                        for (let mode of modes) {
-                            data.modes = {};
-                            data.modes[mode] = {};
-                            data = data.modes[mode];
-                        }
-                    }
-
-                    data.attributes = {};
-                    data.attributes[attributeId] = null;
-                } else if (modeId) {
-                    let modes = modeId.split(".")
-
-                    let iterations = modes.length;
-                    for (let mode of modes) {
-                        data.modes = {};
-                        if (!--iterations) {
-                            data.modes[mode] = null;
-                        } else {
-                            data.modes[mode] = {};
-                            data = data.modes[mode];
-                        }
-                    }
-                }
-
-                this.item.updateData(updateData);
-                this.render();
-            }
-        }
     }
 
     _onClassControl(event) {

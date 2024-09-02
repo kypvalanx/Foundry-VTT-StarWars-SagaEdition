@@ -20,7 +20,11 @@ export function generateAttributes(actor) {
             continue;
         }
 
-        if(attributeGenType === 'Manual'){
+        attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.type))
+
+        if(attribute.skip){
+            attribute.total = 10
+        } else if(attributeGenType === 'Manual'){
             attribute.total = attribute.manual || 10;
         } else {
             let attributeBase = getInheritableAttribute({
@@ -100,7 +104,6 @@ export function generateAttributes(actor) {
 
         attribute.roll = attribute.mod + parseInt(conditionBonus);
         attribute.label = key.toUpperCase();
-        attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.type))
         actor.setResolvedVariable("@" + attribute.label + "ROLL", "1d20 + " + attribute.roll, attribute.label, attribute.label);
         actor.setResolvedVariable("@" + attribute.label + "MOD", attribute.roll, attribute.label, attribute.label);
         actor.setResolvedVariable("@" + attribute.label + "TOTAL", attribute.total, attribute.label, attribute.label);

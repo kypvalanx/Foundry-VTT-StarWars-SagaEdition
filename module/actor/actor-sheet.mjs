@@ -1328,7 +1328,7 @@ export class SWSEActorSheet extends ActorSheet {
      * @private
      */
     async _selectAttributesManually(event, sheet) {
-        let existingValues = sheet.actor.getAttributes();
+        let existingValues = sheet.actor.attributes;
         let combined = {};
         for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val].base, skip: existingValues[val].skip};
