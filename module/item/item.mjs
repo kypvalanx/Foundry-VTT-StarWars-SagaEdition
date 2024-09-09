@@ -359,8 +359,6 @@ export class SWSEItem extends Item {
         const map = getInheritableAttribute({
             entity: this,
             attributeKey: "levelUpHitPoints",
-
-
         }).map(attr => !attr ? null : attr.value);
         return map.length > 0 ? map[0]: 0;
     }

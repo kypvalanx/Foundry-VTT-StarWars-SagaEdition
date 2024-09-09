@@ -19,7 +19,8 @@
             <label for="secondWind" class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second
                 Winds/Day</label>
             <input class="middle-input" id="secondWind" type="text" placeholder="" disabled/>
-            {{#times actor.system.secondWind.perDay}}
+            {{log actor.secondWind}}
+            {{#times actor.secondWind.perDay}}
                 <input class="left-control-{{this}}" data-action="toggle-second-wind" title="Spent" type="checkbox" data-name="system.secondWind.toggles.{{this}}"
                        {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
             {{/times}}
@@ -28,7 +29,7 @@
         <div class="labeled-input medium">
             <label for="firstAid" class="top" title="You can usually only accept first aid once per day">First Aid/Day</label>
             <input class="right-input" id="firstAid" type="text" placeholder="" disabled/>
-            {{#times actor.system.firstAid.perDay}}
+            {{#times actor.firstAid.perDay}}
                 <input class="left-control-{{this}}" data-action="toggle-first-aid" title="Performed" type="checkbox" data-name="system.firstDay.toggles.{{this}}"
                        {{#if (lookup ../actor.system.firstDay.toggles this)}}checked{{/if}}>
             {{/times}}
@@ -40,17 +41,17 @@
         <div class="labeled-input">
             <label for="damageThreshold">Damage Threshold</label>
             <input class="left-input" id="damageThreshold" type="text"
-                   value="{{actor.system.defense.damageThreshold.total}}" placeholder="" disabled/>
+                   value="{{actor.defense.damageThreshold.total}}" placeholder="" disabled/>
         </div>
         <div class="labeled-input">
             <label for="dtFort">Fort</label>
             <input class="middle-input" id="dtFort" type="text"
-                   value="{{actor.system.defense.fortitude.total}}" placeholder="" disabled/>
+                   value="{{actor.defense.fortitude.total}}" placeholder="" disabled/>
         </div>
         <div class="labeled-input">
             <label for="dtMisc">Misc</label>
             <input class="right-input" id="dtMisc" type="number" name="system.defense.damageThreshold.misc"
-                   value="{{actor.system.defense.damageThreshold.misc}}" placeholder=""/>
+                   value="{{actor.defense.damageThreshold.misc}}" placeholder=""/>
         </div>
     </div>
 
@@ -58,7 +59,7 @@
         <div class="labeled-input">
             <label for="damageReduction">Damage Reduction</label>
             <input class="" id="damageReduction" type="text"
-                   value="{{actor.system.defense.damageReduction}}" placeholder="" disabled/>
+                   value="{{actor.defense.damageReduction}}" placeholder="" disabled/>
         </div>
     </div>
 
@@ -90,44 +91,41 @@
     <div class="flex-row">
         <div class="labeled-input">
             <label for="forcePoints">Force Points</label>
-            <input id="forcePoints" class="left-input" type="number" name="system.forcePoints.quantity" value="{{actor.system.forcePoints.quantity}}"
+            <input id="forcePoints" class="left-input" type="number" name="system.forcePoints.quantity" value="{{actor.forcePoints.quantity}}"
                    data-dtype="Number"/>
             <div class="control-0">
-                <a class="rollable" title="Roll {{actor.system.forcePoints.roll}}" data-label="Force Point" data-roll="{{actor.system.forcePoints.roll}}"><i class="fas fa-dice-d20"></i></a>
+                <a class="rollable" title="Roll {{actor.forcePoints.roll}}" data-label="Force Point" data-roll="{{actor.forcePoints.roll}}"><i class="fas fa-dice-d20"></i></a>
             </div>
         </div>
         <div class="labeled-input">
             <label for="forcePoints">Destiny Points</label>
             <input id="forcePoints" class="right-input" type="number" name="system.destinyPoints" value="{{actor.system.destinyPoints}}"
                    data-dtype="Number"/>
-<!--            <div class="control-0">-->
-<!--                <a class="rollable" title="Roll {{actor.system.forcePoints.roll}}" data-label="Force Point" data-roll="{{actor.system.forcePoints.roll}}"><i class="fas fa-dice-d20"></i></a>-->
-<!--            </div>-->
         </div>
     </div>
 
     <h1 class="top-label label resource-label">Shields</h1>
     <div class="flex-row">
-        <div class="labeled-input numeric-override" data-override="{{actor.system.shields.override}}" data-override-name="Total Shields" data-override-key="system.shields.override">
+        <div class="labeled-input numeric-override" data-override="{{actor.shields.override}}" data-override-name="Total Shields" data-override-key="system.shields.override">
             <label for="maxShields" class="text">Total</label>
             <input class="left-input" id="maxShields" type="text"
-                   value="{{actor.system.shields.max}}" placeholder="" disabled/>
+                   value="{{actor.shields.max}}" placeholder="" disabled/>
         </div>
         <div class="divider"></div>
-        {{#if actor.system.shields.failureChance}}
-            <div class="labeled-input"><label>Failure Chance</label><div class="plain input static">{{actor.system.shields.failureChance}}</div><</div>
+        {{#if actor.shields.failureChance}}
+            <div class="labeled-input"><label>Failure Chance</label><div class="plain input static">{{actor.shields.failureChance}}</div><</div>
 
             <div class="labeled-input">
                 <label for="failureChance">Failure Chance</label>
                 <input class="middle-input" id="failureChance" type="text"
-                       value="{{actor.system.defense.fort.total}}" placeholder="" disabled/>
+                       value="{{actor.defense.fort.total}}" placeholder="" disabled/>
             </div>
         {{/if}}
         <div class="labeled-input">
             <label for="currentShield" class="text">Current</label>
-            <input class="right-input" id="currentShield" type="number" name="system.shields.value" value="{{actor.system.shields.value}}" data-dtype="Number"/>
+            <input class="right-input" id="currentShield" type="number" name="system.shields.value" value="{{actor.shields.value}}" data-dtype="Number"/>
 
-            <div class="control-2" title="Toggle Shield {{#if actor.system.shields.active}}Off{{else}}On{{/if}}"><a data-action="shield" data-action-type="toggle" class="{{#if actor.system.shields.active}}cursor{{/if}}"><i class="fas fa-shield-virus"></i></a></div>
+            <div class="control-2" title="Toggle Shield {{#if actor.shields.active}}Off{{else}}On{{/if}}"><a data-action="shield" data-action-type="toggle" class="{{#if actor.shields.active}}cursor{{/if}}"><i class="fas fa-shield-virus"></i></a></div>
             <div class="control-1" title="Shield +5"><a data-action="shield" data-action-type="plus"><i class="fas fa-plus"></i></a></div>
             <div class="control-0" title="Shield -5"><a data-action="shield" data-action-type="minus"><i class="fas fa-minus"></i></a></div>
         </div>

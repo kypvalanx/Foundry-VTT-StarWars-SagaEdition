@@ -1,5 +1,5 @@
 import {SWSEActor} from "./actor.mjs";
-import {equippedItems, resolveValueArray, toNumber} from "../common/util.mjs";
+import {equippedItems, filterItemsByType, resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 
@@ -44,43 +44,48 @@ function generateArmorBlock(actor, armor) {
  * @returns
  */
 export function resolveDefenses(actor) {
-    if(!actor){
-        return {};
+    const fn = () => {
+        if(!actor){
+            return {};
+        }
+        let conditionBonus = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "condition",
+            reduce: "FIRST"
+        })
+
+        if("OUT" === conditionBonus || !conditionBonus){
+            conditionBonus = "0";
+        }
+
+        //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
+
+        let defense = actor.system.defense || {};
+
+        defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
+        if(actor.type !== "vehicle"){
+            defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
+        }
+        defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
+        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
+        defense.situationalBonuses = _getSituationalBonuses(actor);
+
+        defense.damageReduction = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "damageReduction",
+            reduce: "SUM"
+        })
+
+        let armors = []
+
+        for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+            armors.push(generateArmorBlock(actor, armor));
+        }
+        return {defense, armors};
+
     }
-     let conditionBonus = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "condition",
-        reduce: "FIRST"
-    })
 
-    if("OUT" === conditionBonus || !conditionBonus){
-        conditionBonus = "0";
-    }
-
-    //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
-
-    let defense = actor.system.defense || {};
-
-    defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
-    if(actor.type !== "vehicle"){
-        defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
-    }
-    defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
-    defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
-    defense.situationalBonuses = _getSituationalBonuses(actor);
-
-    defense.damageReduction = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "damageReduction",
-        reduce: "SUM"
-    })
-
-    let armors = []
-
-    for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
-        armors.push(generateArmorBlock(actor, armor));
-    }
-    return {defense, armors};
+    return actor?.getCached ? actor.getCached("defenses", fn) : fn();
 }
 
 /**

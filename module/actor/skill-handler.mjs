@@ -352,29 +352,32 @@ function getSkillAttributeMod(actor, key, skill) {
  * @returns {number}
  */
 export function getAvailableTrainedSkillCount(actor) {
-    let intBonus = actor.getAttributeMod("int")
-    let classBonus = 0;
-    for (let co of actor.itemTypes.class) {
-        if (co.levelsTaken.includes(1)) {
-            classBonus = getInheritableAttribute({
-                entity: co,
-                attributeKey: "trainedSkillsFirstLevel",
-                reduce: "SUM"
-            })
-            break;
+    return actor.getCached("trained skills", () => {
+        let intBonus = actor.getAttributeMod("int")
+        let classBonus = 0;
+        for (let co of actor.itemTypes.class) {
+            if (co.levelsTaken.includes(1)) {
+                classBonus = getInheritableAttribute({
+                    entity: co,
+                    attributeKey: "trainedSkillsFirstLevel",
+                    reduce: "SUM"
+                })
+                break;
+            }
         }
-    }
-    let automaticTrainedSkill = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "automaticTrainedSkill",
-        reduce: "VALUES"
-    }).length;
-    let otherSkills = getInheritableAttribute({
-        entity: actor,
-        attributeKey: "trainedSkills",
-        reduce: "SUM"
-    });
-    return Math.max(resolveValueArray([classBonus, intBonus, otherSkills, automaticTrainedSkill]), 0);
+        let automaticTrainedSkill = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "automaticTrainedSkill",
+            reduce: "VALUES"
+        }).length;
+        let otherSkills = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "trainedSkills",
+            reduce: "SUM"
+        });
+        return Math.max(resolveValueArray([classBonus, intBonus, otherSkills, automaticTrainedSkill]), 0);
+    })
+
 }
 
 function getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel) {

@@ -22,22 +22,22 @@
             <div class="attack-block collapsible" style="display: {{#if
                     (lookup toggles (concat "attack-" id))}}grid{{else}}none{{/if}}">
 
-                <div class="to-hit"><label for="attack">Attack</label>
+                <div class="to-hit labeled-input"><label for="attack">Attack</label>
                     <div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div>
                 </div>
-                <div class="damage"><label for="damage">Damage</label>
+                <div class="damage labeled-input"><label for="damage">Damage</label>
                     <div class="plain input">{{{attack.damageRoll.renderWeaponBlockFormulaHTML}}}</div>
                 </div>
-                <div class="attack-notes" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
+                <div class="attack-notes labeled-input" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
                     <div class="plain input">{{{attack.notesHTML}}}</div>
                 </div>
-                <div class="range"><label for="range">Range</label>
+                <div class="range labeled-input"><label for="range">Range</label>
                     <div class="plain input">{{attack.rangeDisplay}}</div>
                 </div>
-                <div class="critical-multiplier"><label for="critical">Crit.</label>
+                <div class="critical-multiplier labeled-input"><label for="critical">Crit.</label>
                     <div class="plain input">{{attack.critical}}</div>
                 </div>
-                <div class="type"><label for="type">Type</label>
+                <div class="type labeled-input"><label for="type">Type</label>
                     <div class="plain input">{{attack.type}}</div>
                 </div>
                 <div class="modes">

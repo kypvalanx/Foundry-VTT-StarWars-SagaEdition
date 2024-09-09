@@ -34,7 +34,7 @@ export function warningsFromActor(actor) {
     if(availableTrainedSkills < 0){
         warnings.push(`<span>Too Many Skills Selected: ${Math.abs(availableTrainedSkills)}</span>`)
     }
-    for(let item of Object.entries(actor.system.availableItems || {})){
+    for(let item of Object.entries(actor.availableItems || {})){
         if(item[1] !== 0){
             warnings.push(`<span data-action="compendium-web" data-type="feat, talent" data-provider-source="${item[0]}">Items from ${item[0]} remaining: ${item[1]}</span>`)
         }

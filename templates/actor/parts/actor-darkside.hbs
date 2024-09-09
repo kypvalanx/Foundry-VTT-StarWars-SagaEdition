@@ -1,11 +1,11 @@
 {{!-- Darkside Block --}}
 <div class="dark-side-block panel">
-    <h1 class="resource-label">Dark Side Score: {{actor.system.darkside.finalScore}}</h1>
+    <h1 class="resource-label">Dark Side Score: {{actor.darkside.finalScore}}</h1>
     <div class="flex flex-row flex-wrap">
-        {{#each actor.system.darkside.array as | value|}}
+        {{#each actor.darkside.array as | value|}}
             <label>
                 {{value.value}}
-                <input class="dark-side-button{{#ifGT ../actor.system.darkside.finalScore value.value}} lessthan{{/ifGT}}" type="radio" name="system.darkSideScore" {{#ifEquals ../actor.system.darkside.finalScore value.value}}checked{{/ifEquals}} value="{{value.value}}">
+                <input class="dark-side-button{{#ifGT ../actor.darkside.finalScore value.value}} lessthan{{/ifGT}}" type="radio" name="system.darkSideScore" {{#ifEquals ../actor.darkside.finalScore value.value}}checked{{/ifEquals}} value="{{value.value}}">
             </label>
         {{/each}}
     </div>

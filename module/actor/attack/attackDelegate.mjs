@@ -60,7 +60,7 @@ export class AttackDelegate {
         const actorUUID = actor.uuid;
         let attacks = weaponIds.map(id => Attack.create({actorId: actorUUID, operatorId: actorUUID, weaponId: id}));
 
-        let items = actor.getAvailableItemsFromRelationships()
+        let items = actor.getItemsFromRelationships()
 
         attacks.push(...items.map(item => Attack.create({actorId: actorUUID, weaponId: item.id, operatorId: actorUUID, parentId: item.parent?.id, options: {}})))
         return attacks;
@@ -84,7 +84,7 @@ export class AttackDelegate {
      * @returns {Attack[]}
      */
     generateVehicleAttacks(vehicle) {
-        return vehicle.getAvailableItemsFromRelationships()
+        return vehicle.getItemsFromRelationships()
             .map(weapon => {
                 return Attack.create({actorId: vehicle.id, weaponId: weapon.id, parentId:weapon.parent?.id, operatorId:vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).id})
             });
