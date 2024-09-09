@@ -534,24 +534,51 @@ export class SWSEActor extends Actor {
         system.classSummary = classSummary;
         system.classLevels = classLevels;
 
-        this.system.darkside = new DarksideDelegate(this);
+        this.darkside = new DarksideDelegate(this);
 
-        let remainingSkills = getAvailableTrainedSkillCount(this);
-        remainingSkills = remainingSkills - this.trainedSkills.length;
-        this.remainingSkills = remainingSkills < 0 ? false : remainingSkills;
-        this.tooManySKills = remainingSkills < 0 ? Math.abs(remainingSkills) : false;
+        this.initializeCharacterSettings();
+    }
 
-        this.system.secondWind = this.system.secondWind || {}
+    get defense(){
+        let {defense, armors} = resolveDefenses(this);
+        return defense;
+    }
+
+    get armors(){
+        let {defense, armors} = resolveDefenses(this);
+        return armors;
+    }
+
+    get armorItems() {
+        return this.getCached("armors", () => {
+            return filterItemsByType(this.items.values(), "armor");
+        })
+    }
+
+    get shields(){
+        return this.getCached("shields", () => {
+            return resolveShield(this)
+        })
+    }
+
+    get secondWind(){
+        let secondWind = this.system.secondWind || {}
         const bonusSecondWind = getInheritableAttribute({
             entity: this,
             attributeKey: "bonusSecondWind",
             reduce: "SUM"
         });
-        this.system.secondWind.perDay = bonusSecondWind + (this.isHeroic ? 1 : 0)
+        secondWind.perDay = bonusSecondWind + (this.isHeroic ? 1 : 0)
+        return secondWind;
+    }
 
-        this.system.firstAid = this.system.secondWind || {}
-        this.system.firstAid.perDay = 1
+    get firstAid(){
+        let firstAid = this.system.firstAid || {}
+        firstAid.perDay = 1
+        return firstAid;
+    }
 
+    get forcePoints(){
         const forcePoints = Number.isInteger(this.system.forcePoints) ? this.system.forcePoints : (this.system.forcePoints?.quantity || 0);
         this.system.forcePoints = (typeof this.system.forcePoints === 'object') ? this.system.forcePoints || {} : {};
         this.system.forcePoints.quantity = forcePoints;
@@ -563,22 +590,23 @@ export class SWSEActor extends Actor {
         });
         const forceDie = !!forceDieSize ? forceDieSize : 6
 
-        const forceDieCount = level > 14 ? 3 : (level > 7 ? 2 : 1);
+        const forceDieCount = this.system.levelSummary > 14 ? 3 : (this.system.levelSummary > 7 ? 2 : 1);
         this.system.forcePoints.roll = `${forceDieCount}d${forceDie}kh`
 
-
-        system.hideForce = 0 === this.feats.filter(feat => feat.name === 'Force Training').length
-
-
-        this._reduceProvidedItemsByExistingItems(system);
-
-        system.shields = resolveShield(this);
-        let {defense, armors} = resolveDefenses(this);
-        system.defense = defense;
-        system.armors = armors;
-
-        this.initializeCharacterSettings();
+        return this.system.forcePoints;
     }
+
+    // get remainingSkills(){
+    //     let remainingSkills = getAvailableTrainedSkillCount(this);
+    //     remainingSkills = remainingSkills - this.trainedSkills.length;
+    //     return remainingSkills < 0 ? false : remainingSkills;
+    // }
+    // get tooManySkills(){
+    //
+    //     let remainingSkills = getAvailableTrainedSkillCount(this);
+    //     remainingSkills = remainingSkills - this.trainedSkills.length;
+    //     return remainingSkills < 0 ? Math.abs(remainingSkills) : false;
+    // }
 
     get hyperdrive() {
         return this.getCached("hyperdrive", () => {
@@ -769,16 +797,6 @@ export class SWSEActor extends Actor {
         const classObjects = filterItemsByType(this.items.values(), "class");
         let classes = [];
         for (let co of classObjects) {
-            // const levelUpHitPoints = getInheritableAttribute({
-            //     entity: co,
-            //     attributeKey: "levelUpHitPoints",
-            //     reduce: "FIRST"
-            // });
-            // const firstLevelHitPoints = getInheritableAttribute({
-            //     entity: co,
-            //     attributeKey: "firstLevelHitPoints",
-            //     reduce: "FIRST"
-            // });
             for (let [i, characterLevel] of co.levelsTaken.entries()) {
                 const levelOfClass = i + 1;
                 let leveledClass = {}
@@ -796,6 +814,7 @@ export class SWSEActor extends Actor {
             }
         }
 
+        classes = classes.sort((a, b) => a.characterLevel > b.characterLevel ? 1 : -1);
         if (classes.length > 0) {
             classes[classes.length - 1].isLatest = true;
         }
@@ -811,12 +830,6 @@ export class SWSEActor extends Actor {
     get weapons() {
         return this.getCached("weapons", () => {
             return filterItemsByType(this.items.values(), "weapon");
-        })
-    }
-
-    get armors() {
-        return this.getCached("armors", () => {
-            return filterItemsByType(this.items.values(), "armor");
         })
     }
 
@@ -1596,9 +1609,9 @@ export class SWSEActor extends Actor {
         return {level: this.classes.length, classSummary, classLevels};
     }
 
-    handleLevelBasedAttributeBonuses(system) {
+    get handleLevelBasedAttributeBonuses() {
 
-        if (system.attributeGenerationType === "Manual") {
+        if (this.system.attributeGenerationType === "Manual") {
             return 0;
         }
 
@@ -1642,7 +1655,7 @@ export class SWSEActor extends Actor {
         return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation", "beastAttack", "beastSense", "beastType", "beastQuality")
             .filter(item => !item.system.hasItemOwner);
     }
-
+//TODO, this is a better title case. i should move this
     _uppercaseFirstLetters(s) {
         const words = s.split(" ");
 
@@ -1782,153 +1795,154 @@ export class SWSEActor extends Actor {
             .filter(i => i === searchString).length;
     }
 
-    _reduceProvidedItemsByExistingItems(actorData) {
+    get availableItems(){
+        return this.getCached("availableItems", () => {
+            const availableItems = {};
+            availableItems['Ability Score Level Bonus'] = this.handleLevelBasedAttributeBonuses;
 
-        this.system.availableItems = {}; //TODO maybe allow for a link here that opens the correct compendium and searches for you
-        this.system.availableItems['Ability Score Level Bonus'] = this.handleLevelBasedAttributeBonuses(actorData);
+            let dynamicGroups = {};
+            let specificProvided = {};
 
-        this.system.bonuses = {};
-        this.system.activeFeatures = [];
-        let dynamicGroups = {};
-        let specificProvided = {};
-
-        for (let provided of getInheritableAttribute({
-            entity: this,
-            attributeKey: "provides"
-        })) {
-            let key = provided.value;
-            let value = 1;
-            if (key.includes(":")) {
-                let toks = key.split(":");
-                key = toks[0];
-                if (toks.length === 2) {
-                    value = resolveExpression(toks[1], this)
-                } else if (toks.length === 3) {
-                    key = toks[0]
-                    value = 1;
-                    specificProvided[toks[1] + ":" + toks[2]] = toks[0];
-                }
-            }
-
-            if (key.endsWith("Starting Feats")) {
-                //this means we need to check the source of the provision to figure out what feats are included
-                let providingItem = this.items.get(provided.source);
-
-                dynamicGroups[key] = this._explodeFeatNames(getInheritableAttribute({
-                    entity: providingItem,
-                    attributeKey: "classFeat",
-                    reduce: "VALUES"
-                }));
-            }
-            this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] + value : value;
-        }
-
-        for (let consumed of getInheritableAttribute({
-            entity: this,
-            attributeKey: "consumes",
-            reduce: "VALUES"
-        })) {
-            let key = consumed;
-            let value = 1;
-            if (key.includes(":")) {
-                let toks = key.split(":");
-                key = toks[0];
-                if (toks.length === 2) {
-                    value = resolveExpression(toks[1], this)
-                }
-            }
-            this.system.availableItems[key] = this.system.availableItems[key] ? this.system.availableItems[key] - value : 0 - value;
-        }
-
-        let classLevel = this.classes?.length;
-        this.system.availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (this.system.availableItems['General Feats'] ? this.system.availableItems['General Feats'] : 0);
-
-        let bonusTalentTrees = getInheritableAttribute({
-            entity: this,
-            attributeKey: "bonusTalentTree",
-            reduce: "VALUES"
-        });
-
-        let bonusTreeTalents = [];
-
-        for (let talent of this.talents || []) {
-            if (talent.system.supplier?.id) {
-                continue;
-            }
-            let type = talent.system.activeCategory || talent.system.talentTreeSource;
-            let providers = talent.system.possibleProviders || [];
-            providers.push(talent.system.bonusTalentTree)
-
-
-            if (!type) {
-                type = specificProvided[`TALENT:${talent.finalName}`] || type;
-            }
-
-            if (!type) {
-                let types = innerJoin(providers, Object.keys(this.system.availableItems))
-                if (types && types.length > 0) {
-                    type = types[0]
-                }
-            }
-
-            if (!type && innerJoin(bonusTalentTrees, providers).length > 0) {
-                bonusTreeTalents.push(talent);
-                continue;
-            }
-
-            this.reduceAvailableItem(type);  //talentTreeSource is the old one
-
-        }
-
-        for (let talent of bonusTreeTalents) {
-            let type = Object.keys(this.system.availableItems).find(item => item.includes("Talent"))
-            this.reduceAvailableItem(type);
-        }
-
-        for (let feat of this.feats) {
-            if (feat.system.supplier.id) {
-                continue;
-            }
-            let type = 'General Feats';
-
-            type = feat.system.activeCategory || feat.system.bonusFeatCategory || type;  //bonusFeatCategory is the old one
-
-            if (!type || type === 'General Feats') {
-                type = specificProvided[`FEAT:${feat.finalName}`] || type;
-            }
-
-            if (!type || type === 'General Feats') {
-                let bonusFeatCategories = feat.system.possibleProviders.filter(category => category !== "General Feats");
-                if (bonusFeatCategories && bonusFeatCategories.length === 1) {
-                    type = bonusFeatCategories[0]
-                } else if (bonusFeatCategories && bonusFeatCategories.length > 1) {
-                    let selection = innerJoin(bonusFeatCategories, Object.keys(this.system.availableItems))
-                    type = selection[0] || type;
-                }
-            }
-
-            if (!type || type === 'General Feats') {
-                for (let entry of Object.entries(dynamicGroups)) {
-                    if (entry[1].includes(feat.finalName)) {
-                        type = entry[0];
-                        break;
+            const provides = getInheritableAttribute({
+                entity: this,
+                attributeKey: "provides"
+            });
+            for (let provided of provides) {
+                let key = provided.value;
+                let value = 1;
+                if (key.includes(":")) {
+                    let toks = key.split(":");
+                    key = toks[0];
+                    if (toks.length === 2) {
+                        value = resolveExpression(toks[1], this)
+                    } else if (toks.length === 3) {
+                        key = toks[0]
+                        value = 1;
+                        specificProvided[toks[1] + ":" + toks[2]] = toks[0];
                     }
                 }
+
+                if (key.endsWith("Starting Feats")) {
+                    //this means we need to check the source of the provision to figure out what feats are included
+                    let providingItem = this.items.get(provided.source);
+
+                    dynamicGroups[key] = this._explodeFeatNames(getInheritableAttribute({
+                        entity: providingItem,
+                        attributeKey: "classFeat",
+                        reduce: "VALUES"
+                    }));
+                }
+                availableItems[key] = availableItems[key] ? availableItems[key] + value : value;
             }
 
-            this.reduceAvailableItem(type, 1, "General Feats");
-        }
-        this.reduceAvailableItem("Force Secret", this.secrets.length);
-        this.reduceAvailableItem("Force Technique", this.techniques.length);
-        for (let forcePower of this.powers) {
-            this.reduceAvailableItem(forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
-        }
+            for (let consumed of getInheritableAttribute({
+                entity: this,
+                attributeKey: "consumes",
+                reduce: "VALUES"
+            })) {
+                let key = consumed;
+                let value = 1;
+                if (key.includes(":")) {
+                    let toks = key.split(":");
+                    key = toks[0];
+                    if (toks.length === 2) {
+                        value = resolveExpression(toks[1], this)
+                    }
+                }
+                availableItems[key] = availableItems[key] ? availableItems[key] - value : 0 - value;
+            }
 
-        this.system.remainingLevelUpBonuses = this.system.availableItems['Ability Score Level Bonus'];
+            let classLevel = this.classes?.length;
+            availableItems['General Feats'] = 1 + Math.floor(classLevel / 3) + (availableItems['General Feats'] ? availableItems['General Feats'] : 0);
+
+            let bonusTalentTrees = getInheritableAttribute({
+                entity: this,
+                attributeKey: "bonusTalentTree",
+                reduce: "VALUES"
+            });
+
+            let bonusTreeTalents = [];
+
+            for (let talent of this.talents || []) {
+                if (talent.system.supplier?.id) {
+                    continue;
+                }
+                let type = talent.system.activeCategory || talent.system.talentTreeSource;
+                let providers = talent.system.possibleProviders || [];
+                providers.push(talent.system.bonusTalentTree)
+
+
+                if (!type) {
+                    type = specificProvided[`TALENT:${talent.finalName}`] || type;
+                }
+
+                if (!type) {
+                    let types = innerJoin(providers, Object.keys(availableItems))
+                    if (types && types.length > 0) {
+                        type = types[0]
+                    }
+                }
+
+                if (!type && innerJoin(bonusTalentTrees, providers).length > 0) {
+                    bonusTreeTalents.push(talent);
+                    continue;
+                }
+
+                this.reduceAvailableItem(availableItems, type);  //talentTreeSource is the old one
+
+            }
+
+            for (let talent of bonusTreeTalents) {
+                let type = Object.keys(availableItems).find(item => item.includes("Talent"))
+                this.reduceAvailableItem(availableItems, type);
+            }
+
+            for (let feat of this.feats) {
+                if (feat.system.supplier.id) {
+                    continue;
+                }
+                let type = 'General Feats';
+
+                type = feat.system.activeCategory || feat.system.bonusFeatCategory || type;  //bonusFeatCategory is the old one
+
+                if (!type || type === 'General Feats') {
+                    type = specificProvided[`FEAT:${feat.finalName}`] || type;
+                }
+
+                if (!type || type === 'General Feats') {
+                    let bonusFeatCategories = feat.system.possibleProviders.filter(category => category !== "General Feats");
+                    if (bonusFeatCategories && bonusFeatCategories.length === 1) {
+                        type = bonusFeatCategories[0]
+                    } else if (bonusFeatCategories && bonusFeatCategories.length > 1) {
+                        let selection = innerJoin(bonusFeatCategories, Object.keys(availableItems))
+                        type = selection[0] || type;
+                    }
+                }
+
+                if (!type || type === 'General Feats') {
+                    for (let entry of Object.entries(dynamicGroups)) {
+                        if (entry[1].includes(feat.finalName)) {
+                            type = entry[0];
+                            break;
+                        }
+                    }
+                }
+
+                this.reduceAvailableItem(availableItems, type, 1, "General Feats");
+            }
+            this.reduceAvailableItem(availableItems, "Force Secret", this.secrets.length);
+            this.reduceAvailableItem(availableItems, "Force Technique", this.techniques.length);
+            for (let forcePower of this.powers) {
+                this.reduceAvailableItem(availableItems, forcePower.system.activeCategory || "Force Powers", forcePower.system.quantity, "Force Powers");
+            }
+
+            return availableItems;
+        });
+
     }
 
-    reduceAvailableItem(type, reduceBy = 1, backupType) {
-        let actorData = this.system;
+
+    reduceAvailableItem(availableItems, type, reduceBy = 1, backupType) {
         if (!type && !backupType) {
             if (!KNOWN_WEIRD_UNITS.includes(this.name)) {
                 //console.warn("tried to reduce undefined on: " + this.name, this)
@@ -1936,20 +1950,20 @@ export class SWSEActor extends Actor {
             return;
         }
 
-        const availableItem = actorData.availableItems[type] || 0;
-        actorData.availableItems[type] = availableItem - reduceBy;
+        const availableItem = availableItems[type] || 0;
+        availableItems[type] = availableItem - reduceBy;
 
-        if (backupType && actorData.availableItems[type] < 0) {
-            let availableBackup = actorData.availableItems[backupType] || 0;
-            actorData.availableItems[type] = availableBackup + actorData.availableItems[type];
-            actorData.availableItems[type] = 0;
+        if (backupType && availableItems[type] < 0) {
+            let availableBackup = availableItems[backupType] || 0;
+            availableItems[type] = availableBackup + availableItems[type];
+            availableItems[type] = 0;
         }
 
-        if (actorData.availableItems[type] === 0) {
-            delete actorData.availableItems[type];
+        if (availableItems[type] === 0) {
+            delete availableItems[type];
         }
-        if (actorData.availableItems[backupType] === 0) {
-            delete actorData.availableItems[backupType];
+        if (availableItems[backupType] === 0) {
+            delete availableItems[backupType];
         }
     }
 
@@ -2035,9 +2049,6 @@ export class SWSEActor extends Actor {
         this.safeUpdate({'system.shields.value': shields < 0 ? 0 : shields})
     }
 
-    get shields() {
-        return this.system.shields.value;
-    }
 
     setAge(age) {
         this.safeUpdate({'system.age': age}).then(r => {})
@@ -2139,7 +2150,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    getAvailableItemsFromRelationships() {
+    getItemsFromRelationships() {
         if (['vehicle', 'npc-vehicle'].includes(this.type)) {
             return this.items.filter(item => item.type === "vehicleSystem" && item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && !!item.system.equipped)
         }
@@ -2177,6 +2188,7 @@ export class SWSEActor extends Actor {
      * @param context.isFirstLevel {boolean} does this item represent the first level for a character?
      * @param context.provided {boolean} is this a new item from the compendium
      * @param context.isAdd {boolean} is this check part of an add?
+     * TODO refactor this
      */
     async checkPrerequisitesAndResolveOptions(entity, context) {
         context.actor = this;
@@ -2291,7 +2303,7 @@ export class SWSEActor extends Actor {
                         reduce: "VALUES"
                     });
                     if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
-                        for (let [id, item] of Object.entries(this.system.availableItems)) {
+                        for (let [id, item] of Object.entries(this.availableItems)) {
                             if (id.includes("Talent") && item > 0) {
                                 optionString += `<option value="${id}">${id}</option>`
                                 possibleTalentTrees.add(id);
@@ -2300,7 +2312,7 @@ export class SWSEActor extends Actor {
                     } else {
                         for (let talentTree of entity.system.possibleProviders.filter(unique)) {
                             possibleProviders.add(talentTree);
-                            let count = this.system.availableItems[talentTree];
+                            let count = this.availableItems[talentTree];
                             if (count && count > 0) {
                                 optionString += `<option value="${talentTree}">${talentTree}</option>`
                                 possibleTalentTrees.add(talentTree);
@@ -2338,9 +2350,9 @@ export class SWSEActor extends Actor {
 
                     let optionString = "";
                     let possibleProviders = entity.system.possibleProviders;
-                    if (this.system.availableItems) {
+                    if (this.availableItems) {
                         for (let provider of possibleProviders) {
-                            if (this.system.availableItems[provider] > 0) {
+                            if (this.availableItems[provider] > 0) {
                                 possibleFeatTypes.push(provider);
                                 optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
                             }
@@ -2375,14 +2387,14 @@ export class SWSEActor extends Actor {
 
                     let foundCategory = false
                     for (let category of entity.system.categories || []) {
-                        if (!!this.system.availableItems[category.value]) {
+                        if (!!this.availableItems[category.value]) {
                             foundCategory = true;
                             entity.system.activeCategory = category.value;
                             break;
                         }
                     }
 
-                    if (!foundCategory && !this.system.availableItems[viewable]) {
+                    if (!foundCategory && !this.availableItems[viewable]) {
                         await Dialog.prompt({
                             title: `You can't take any more ${viewable.titleCase()}`,
                             content: `You can't take any more ${viewable.titleCase()}`,

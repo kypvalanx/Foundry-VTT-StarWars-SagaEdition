@@ -140,9 +140,6 @@ export class CharacterDataModel extends SystemDataModel.mixin(
 		system.availableItems["Ability Score Level Bonus"] =
 			(characterLevel - (characterLevel % 4)) / 4;
 
-		system.bonuses = {};
-		system.activeFeatures = [];
-
 		//All provided feats, talents, ability score bonuses
 		system.#_validateGetProvided(specificProvided, dynamicGroups);
 
