@@ -247,6 +247,8 @@ export class SWSEActor extends Actor {
         if (this.type === 'vehicle') this._prepareVehicleData(system);
         //if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
+        this.initializeCharacterSettings();
+
         for (let link of this.actorLinks) {
             let linkedActor = getDocumentByUuid(link.uuid);
             if (!linkedActor) continue;
@@ -517,26 +519,25 @@ export class SWSEActor extends Actor {
      * @private
      */
     _prepareVehicleData(system) {
-        system.shields = resolveShield(this);
-        let {defense, armors} = resolveDefenses(this);
-        system.defense = defense;
-        system.armors = armors;
 
-        this.initializeCharacterSettings();
     }
 
     /**
      * Prepare Character type specific data
      */
     _prepareCharacterData(system) {
-        let {level, classSummary, classLevels} = this._generateClassData(system);
-        system.levelSummary = level;
-        system.classSummary = classSummary;
-        system.classLevels = classLevels;
-
         this.darkside = new DarksideDelegate(this);
 
-        this.initializeCharacterSettings();
+    }
+
+    get levelSummary(){
+        return this.classes.length;
+    }
+    get classSummary(){
+        return this._generateClassData(this.system).classSummary;
+    }
+    get classLevels(){
+        return this._generateClassData(this.system).classLevels;
     }
 
     get defense(){
@@ -590,7 +591,7 @@ export class SWSEActor extends Actor {
         });
         const forceDie = !!forceDieSize ? forceDieSize : 6
 
-        const forceDieCount = this.system.levelSummary > 14 ? 3 : (this.system.levelSummary > 7 ? 2 : 1);
+        const forceDieCount = this.levelSummary > 14 ? 3 : (this.levelSummary > 7 ? 2 : 1);
         this.system.forcePoints.roll = `${forceDieCount}d${forceDie}kh`
 
         return this.system.forcePoints;

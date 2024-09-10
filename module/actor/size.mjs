@@ -42,7 +42,7 @@ export function changeSize(size, modifier) {
     }
     return sizeArray[index];
 }
-
+//TODO idk why this is here and not part of item.  i'll look at it later
 export function getSize(actor) {
     if(actor.items) {
         for (let item of actor.items || []) {
@@ -50,8 +50,8 @@ export function getSize(actor) {
                 return item.name;
             }
         }
-    } else if(actor.system.stripping){
-        let strippings = Object.values(actor.system.stripping).filter(stripping => stripping.enabled && stripping.value).map(stripping => stripping.label)
+    } else if(actor.stripping){
+        let strippings = Object.values(actor.stripping).filter(stripping => stripping.enabled && stripping.value).map(stripping => stripping.label)
 
         if(strippings.includes("Make Weapon Colossal")){
             return "Colossal";
