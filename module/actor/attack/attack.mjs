@@ -678,7 +678,7 @@ export class Attack {
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : item.system.subtype;
 
 
-        if (getItemStripping(item, "reduceRange")?.value) {
+        if (item.stripping["reduceRange"]?.value) {
             resolvedSubtype = reduceWeaponRange(resolvedSubtype);
         }
 
@@ -978,15 +978,6 @@ function getActor(actorId) {
     }
     return find;
 }
-
-function getItemStripping(item, key) {
-    if (item && item.system.stripping) {
-        return item.system.stripping[key];
-    }
-    return undefined;
-}
-
-//TODO probably don't need to export this, but right now the tests are in the wrong file
 
 /**
  * @param dieString String

@@ -60,13 +60,11 @@ export class SWSEItem extends Item {
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
+        this.ammunition = new AmmunitionDelegate(this);
+
         if (this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
-        if (this.type === "weapon") this.prepareWeapon(this.system);
-        if (this.type === "armor") this.prepareArmor(this.system);
         if (this.type === "feat") this.prepareFeatData(this.system);
-        if (this.hasAmmunition) {
-            this.ammunition = new AmmunitionDelegate(this);
-        }
+
     }
 
     get hasAmmunition(){
@@ -272,12 +270,6 @@ export class SWSEItem extends Item {
         if (suffix) {
             finalName = `${finalName} ${suffix}`;
         }
-
-        // if (item.hasAmmunition){
-        //     for (const ammo of item.ammunition.current) {
-        //         finalName = `${finalName} (${ammo.type} ${ammo.current}/${ammo.capacity})`
-        //     }
-        // }
 
         return finalName;
     }
@@ -517,31 +509,34 @@ export class SWSEItem extends Item {
     }
 
     get size() {
-        let swseItem = this;
-        return SWSEItem.getItemSize(swseItem);
+        return SWSEItem.getItemSize(this);
+    }
+
+    get baseSize(){
+        return getInheritableAttribute({entity: this, attributeKey: "size", reduce: "FIRST"}) || this.system?.size
     }
 
     static getItemSize(swseItem) {
-        let size = getInheritableAttribute({entity: swseItem, attributeKey: "size", reduce: "FIRST"}) || swseItem.system?.size //|| swseItem.data?.size || swseItem.data?.data?.size
-        if (SWSEItem.getItemStripping(swseItem, "makeColossal")?.value) {
+        let size =  swseItem.baseSize
+        if (swseItem.stripping["makeColossal"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeGargantuan")?.value) {
+        if (swseItem.stripping["makeGargantuan"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeHuge")?.value) {
+        if (swseItem.stripping["makeHuge"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeLarge")?.value) {
+        if (swseItem.stripping["makeLarge"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeMedium")?.value) {
+        if (swseItem.stripping["makeMedium"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeSmall")?.value) {
+        if (swseItem.stripping["makeSmall"]?.value) {
             size = changeSize(size, 1)
         }
-        if (SWSEItem.getItemStripping(swseItem, "makeTiny")?.value) {
+        if (swseItem.stripping["makeTiny"]?.value) {
             size = changeSize(size, 1)
         }
 
@@ -567,8 +562,6 @@ export class SWSEItem extends Item {
             entity: this,
             attributeKey: "armorType",
             reduce: "VALUES",
-
-
         }))[0] || this.subType;
 
         if (armorType === 'Heavy Armor' || this.getStripping("makeHeavy")?.value) {
@@ -781,44 +774,9 @@ export class SWSEItem extends Item {
         }
     }
 
-    prepareWeapon(system) {
-        system.upgradePoints = toNumber(this.getBaseUpgradePoints(system.name));
-
-        system.stripping = system.stripping || {};
-
-        this.setStripping('reduceRange', "Reduce Range", this.canReduceRange());
-
-        this.setStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire());
-
-        this.setStripping('stripStun', "Strip Stun", this.canStripStun());
-        system.isBaseExotic = this.isExotic;
-        this.setStripping('stripDesign', "Make Exotic", !system.isBaseExotic);
-
-        let size = system.size;
-
-        system.resolvedSize = system.size;
-
-        this.setStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
-        this.setStripping('makeSmall', "Make Weapon Small", size === 'Tiny');
-        this.setStripping('makeMedium', "Make Weapon Medium", size === 'Small');
-        this.setStripping('makeLarge', "Make Weapon Large", size === 'Medium');
-        this.setStripping('makeHuge', "Make Weapon Huge", size === 'Large');
-        this.setStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge');
-        this.setStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan');
-
-        for (let stripped of Object.values(system.stripping)) {
-            system.upgradePoints += stripped.value ? 1 : 0;
-        }
-        let upgradePointCost = getInheritableAttribute({
-            entity: this,
-            attributeKey: "upgradePointCost", reduce: "SUM"
-        });
-        system.upgradePoints -= upgradePointCost;
-    }
-
     get upgradePoints(){
         let upgradePoints = this.getBaseUpgradePoints();
-        for (let stripped of Object.values(this.system.stripping || {})) {
+        for (let stripped of Object.values(this.stripping || {})) {
             upgradePoints += stripped.value ? 1 : 0;
         }
         let upgradePointCost = getInheritableAttribute({
@@ -828,79 +786,72 @@ export class SWSEItem extends Item {
         return upgradePoints - upgradePointCost;
     }
 
-    setStripping(key, label, enabled, type, low, high) {
+    createStripping(key, label, enabled, type, low, high) {
+        const stripping = {};
+        this.system.stripping = this.system.stripping || {}
         this.system.stripping[key] = this.system.stripping[key] || {};
-        this.system.stripping[key].label = label;
-        this.system.stripping[key].enabled = enabled;
-        this.system.stripping[key].value =
+        stripping.label = label;
+        stripping.enabled = enabled;
+        stripping.value =
             enabled ? (this.system.stripping[key].value || (type === 'boolean' ? false : (type === 'string' ? "" : 0))) : false;
-        this.system.stripping[key].type = type ? type : "boolean"
-        this.system.stripping[key].low = low;
-        this.system.stripping[key].high = high;
-        return this.system.stripping[key].value;
+        stripping.type = type ? type : "boolean"
+        stripping.low = low;
+        stripping.high = high;
+        return stripping;
     }
 
     getStripping(key) {
-        let swseItem = this;
-        return SWSEItem.getItemStripping(swseItem, key);
+        return this.stripping[key];
     }
 
-    static getItemStripping(swseItem, key) {
-        let stripping = swseItem.system.stripping;
-        if (stripping) {
-            return stripping[key];
-        }
-    }
+    get stripping(){
+        return this.getCached("stripping", ()=> {
+            const strippings = {}
+            if (this.type === "armor"){
+                let makeMedium = this.createStripping('makeMedium', "Make Armor Medium", this.system.subtype === 'Light Armor');
+                strippings['makeMedium'] = makeMedium;
+                strippings['makeHeavy'] = this.createStripping('makeHeavy', "Make Armor Heavy", this.system.subtype === 'Medium Armor' || makeMedium.value);
+                let defensiveMaterial = Math.min(getInheritableAttribute({
+                        entity: this,
+                        attributeKey: "armorReflexDefenseBonus",
+                        reduce: "MAX",
+                    }),
+                    getInheritableAttribute({
+                        entity: this,
+                        attributeKey: "equipmentFortitudeDefenseBonus",
+                        reduce: "MAX",
+                    }));
+                strippings['reduceDefensiveMaterial'] = this.createStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
 
-    prepareArmor(system) {
-        system.upgradePoints = this.getBaseUpgradePoints(system.name);
+                let jointProtection = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "maximumDexterityBonus",
+                    reduce: "MIN",
+                });
 
-        system.stripping = system.stripping || {};
+                strippings['reduceJointProtection'] = this.createStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
+            } else if (this.type === "weapon"){
+                strippings['reduceRange'] = this.createStripping('reduceRange', "Reduce Range", this.canReduceRange);
 
-        let makeMedium = this.setStripping('makeMedium', "Make Armor Medium", system.subtype === 'Light Armor');
-        this.setStripping('makeHeavy', "Make Armor Heavy", system.subtype === 'Medium Armor' || makeMedium);
+                strippings['stripAutofire'] = this.createStripping('stripAutofire', "Strip Autofire", this.canStripAutoFire);
 
-        let defensiveMaterial = Math.min(getInheritableAttribute({
-                entity: this,
-                attributeKey: "armorReflexDefenseBonus",
-                reduce: "MAX",
+                strippings['stripStun'] = this.createStripping('stripStun', "Strip Stun", this.canStripStun);
+                strippings['stripDesign'] = this.createStripping('stripDesign', "Make Exotic", !this.isExotic);
 
+                let size = this.baseSize;
 
-            }),
-            getInheritableAttribute({
-                entity: this,
-                attributeKey: "equipmentFortitudeDefenseBonus",
-                reduce: "MAX",
-
-
-            }));
-
-        let jointProtection = getInheritableAttribute({
-            entity: this,
-            attributeKey: "maximumDexterityBonus",
-            reduce: "MIN",
-
-
-        });
-
-        this.setStripping('reduceDefensiveMaterial', "Reduce Defensive Material", defensiveMaterial > 0, "number", 0, defensiveMaterial);
-        this.setStripping('reduceJointProtection', "Reduce Joint Protection", jointProtection > 0, "number", 0, jointProtection);
-
-
-        for (let stripped of Object.values(system.stripping)) {
-            system.upgradePoints += toNumber(stripped.value);
-        }
-        try {
-            if (system.items && system.items.length > 0) {
-                for (let mod of system.items) {
-                    if (mod.system?.upgrade?.pointCost !== undefined) {
-                        system.upgradePoints -= mod.system.upgrade.pointCost;
-                    }
-                }
+                strippings['makeTiny'] = this.createStripping('makeTiny', "Make Weapon Tiny", size === 'Diminutive');
+                strippings['makeSmall'] = this.createStripping('makeSmall', "Make Weapon Small", size === 'Tiny');
+                strippings['makeMedium'] = this.createStripping('makeMedium', "Make Weapon Medium", size === 'Small');
+                strippings['makeLarge'] = this.createStripping('makeLarge', "Make Weapon Large", size === 'Medium');
+                strippings['makeHuge'] = this.createStripping('makeHuge', "Make Weapon Huge", size === 'Large');
+                strippings['makeGargantuan'] = this.createStripping('makeGargantuan', "Make Weapon Gargantuan", size === 'Huge');
+                strippings['makeColossal'] = this.createStripping('makeColossal', "Make Weapon Colossal", size === 'Gargantuan');
             }
-        } catch (e) {
-            console.warn("mods may not be initialized", e)
-        }
+
+
+            return strippings || {};
+        });
     }
 
     setTextDescription() {
@@ -913,18 +864,12 @@ export class SWSEItem extends Item {
         }
     }
     async handleDroppedItem(droppedItem, options = {}) {
-        //let actor = this.actor;
-        let item = undefined;
-
-        // if(actor){
-        //     item = actor?.items.get(droppedItem.itemId);
-        // }
-
         if(droppedItem.effectUuid && droppedItem.targetEffectUuid){
             linkEffects.call(this, droppedItem.effectUuid, droppedItem.targetEffectUuid);
             return {};
         }
 
+        let item = undefined;
         if(droppedItem.uuid){
             item = await Item.implementation.fromDropData(droppedItem);
         }
@@ -1108,8 +1053,6 @@ export class SWSEItem extends Item {
 
 
     async _crawlAttributes(item, funct) {
-
-
         if (!item) {
             return;
         }
@@ -1226,9 +1169,19 @@ export class SWSEItem extends Item {
         await item.safeUpdate({"system.hasItemOwner": false});
     }
 
-    canReduceRange() {
+    get canReduceRange() {
         let subtypes = ["pistols", "rifles", "ranged weapons", "grenades", "heavy weapons", "simple ranged weapons", "thrown"];
-        return subtypes.includes(this.system.subtype?.toLowerCase()) || subtypes.includes(this.system.attributes?.treatedAsForRange?.toLowerCase())
+        const subtype = this.system.subtype?.toLowerCase();
+        if(subtypes.includes(subtype)){
+            return true;
+        }
+        const treatedAs = getInheritableAttribute({entity: this, attributeKey: "treatedAs", reduce: "VALUES_TO_LOWERCASE"})
+        for(const assumedType of treatedAs) {
+            if(subtypes.includes(assumedType)){
+                return true;
+            }
+        }
+        return false;
     }
 
     addChange(attribute) {
@@ -1245,29 +1198,15 @@ export class SWSEItem extends Item {
         this.safeUpdate(data);
     }
 
-    canStripAutoFire() {
-        let ratesOfFire = getInheritableAttribute({
-            entity: this,
-            attributeKey: 'ratesOfFire'
-        });
+    get canStripAutoFire() {
+        let ratesOfFire = this.effects.contents.map(c => c.name)
         if (ratesOfFire.length === 0) {
             return false;
         }
-        let ss = false;
-        let af = false;
-        for (let rof of ratesOfFire) {
-            if (rof.value.includes("Single-Shot")) {
-                ss = true;
-            }
-            if (rof.value.includes("Autofire")) {
-                af = true;
-            }
-        }
-        return af && ss;
-        //return this.system.attributes.ratesOfFire && this.system.attributes.ratesOfFire.value.includes("Single-Shot") && this.system.attributes.ratesOfFire.value.includes("Autofire");
+        return ratesOfFire.includes("Autofire") && ratesOfFire.includes("Single-Shot");
     }
 
-    canStripStun() {
+    get canStripStun() {
         return getInheritableAttribute({
             entity: this,
             attributeKey: 'stunDamage'
@@ -1278,7 +1217,7 @@ export class SWSEItem extends Item {
     }
 
     get isExotic() {
-        return ['Exotic Ranged Weapons' || 'Exotic Melee Weapons'].includes(this.subType);
+        return ['Exotic Ranged Weapons', 'Exotic Melee Weapons'].includes(this.subType);
     }
 
     increaseQuantity() {

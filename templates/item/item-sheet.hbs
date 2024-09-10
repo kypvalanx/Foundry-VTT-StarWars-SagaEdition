@@ -80,7 +80,7 @@
                 <label class="resource-label">Upgrade Points: </label>
                 <label class="attribute-value">{{item.upgradePoints}}</label>
                 <table>
-                    {{#each item.system.stripping as |stripping id|}}
+                    {{#each item.stripping as |stripping id|}}
                         {{#if stripping.enabled}}
                             <tr>
                                 <th><label>{{stripping.label}}</label></th>
