@@ -68,21 +68,26 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     let functions = [{name: "MAX", function: a => Math.max(...a)},
         {name: "MIN", function: a => Math.min(...a)}];
     let result;
+    let fName;
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
+        fName = func.name;
         if (!!result) {
-            return result;
+            break;
         }
     }
+    if(result){
+        const substring = expression.substring(0, deepestStart - fName.length);
+        const substring1 = expression.substring(deepestEnd + 1);
+        const newVar = substring + result + substring1;
+        console.log(substring, result, substring1)
+        return newVar;
+    }
+
     //console.error("unresolved Function: ", expression, deepestStart, deepestEnd, actor)
 }
 
-/**
- *
- * @param expression
- * @param actor {SWSEActor}
- */
-function resolveParensAndFunctions(expression, actor) {
+function getDeepestParens(expression) {
     let depth = 0;
     let deepest = 0;
     let deepestStart = 0;
@@ -95,18 +100,33 @@ function resolveParensAndFunctions(expression, actor) {
                 deepestStart = index;
             }
         } else if (expression.charAt(index) === ")") {
-            if (depth === deepest) {
-                deepestEnd = index;
-            }
             depth--;
         }
     }
-    let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
-    if (!!result) {
-        return result;
+
+
+    for (let index = deepestStart+1; index < expression.length; index++) {
+        if (expression.charAt(index) === ")") {
+            deepestEnd = index;
+            break;
+        }
     }
+    return {deepestStart, deepestEnd};
+}
+
+/**
+ *
+ * @param expression
+ * @param actor {SWSEActor}
+ */
+function resolveParensAndFunctions(expression, actor) {
+    let {deepestStart, deepestEnd} = getDeepestParens(expression);
     if (deepestStart > deepestEnd) {
         return;
+    }
+    let result = resolveFunctions(expression, deepestStart, deepestEnd, actor);
+    if (!!result) {
+        return resolveExpression(result, actor);
     }
     const subExpression = expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1);
     //subExpression.split(", ").map(t => resolveExpression(t, actor))
@@ -683,7 +703,7 @@ const quantityPattern = new RegExp('(.+):(.+)');
 const diePattern = new RegExp('(\\d+)d(\\d+)x?(\\d?)');
 
 function resolveValue(a) {
-    if(a === undefined || a === 0){
+    if(a === undefined){
         return [];
     }
     if(Array.isArray(a)){

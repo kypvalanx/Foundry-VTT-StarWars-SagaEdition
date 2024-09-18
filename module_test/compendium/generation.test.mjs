@@ -80,10 +80,10 @@ export async function generationTests(quench) {
                     assert.equal(actor.system.health.max, 138)
                     assert.equal(actor.system.health.override, 138)
 
-                    assert.equal(actor.system.defense.fortitude.total, 16)
-                    assert.equal(actor.system.defense.reflex.total, 17, "reflex")
-                    assert.equal(actor.system.defense.will.total, 8)
-                    assert.equal(actor.system.defense.damageThreshold.total, 26, "damage threshold")
+                    assert.equal(actor.defense.fortitude.total, 16)
+                    assert.equal(actor.defense.reflex.total, 17, "reflex")
+                    assert.equal(actor.defense.will.total, 8)
+                    assert.equal(actor.defense.damageThreshold.total, 26, "damage threshold")
 
                     assert.equal(actor.system.attributeGenerationType, "Manual")
                     assert.equal(actor.system.attributes.str.total, 26)
@@ -109,10 +109,10 @@ export async function generationTests(quench) {
                     assert.equal(actor.system.health.max, 42)
                     assert.equal(actor.system.health.override, 42)
 
-                    assert.equal(actor.system.defense.fortitude.total, 18)
-                    assert.equal(actor.system.defense.reflex.total, 19, "reflex")
-                    assert.equal(actor.system.defense.will.total, 13)
-                    assert.equal(actor.system.defense.damageThreshold.total, 23, "damage threshold")
+                    assert.equal(actor.defense.fortitude.total, 18)
+                    assert.equal(actor.defense.reflex.total, 19, "reflex")
+                    assert.equal(actor.defense.will.total, 13)
+                    assert.equal(actor.defense.damageThreshold.total, 23, "damage threshold")
 
                     assert.equal(actor.system.attributeGenerationType, "Manual")
                     assert.equal(actor.system.attributes.str.total, 20)
