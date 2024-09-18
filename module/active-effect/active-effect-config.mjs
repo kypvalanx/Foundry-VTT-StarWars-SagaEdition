@@ -27,7 +27,8 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
     static get defaultOptions() {
         return mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "effect"],
-            closeOnSubmit: false
+            closeOnSubmit: false,
+            submitOnChange:true
         });
     }
     getData(options={}) {
@@ -57,10 +58,10 @@ export class SWSEActiveEffectConfig extends ActiveEffectConfig {
         });
 
 
-        html.find("select.direct").on("change", changeSelect.bind(this));
-        html.find("input[type=text].direct").on("change", changeText.bind(this));
-        html.find("input[type=number].direct").on("change", changeText.bind(this));
-        html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
+        // html.find("select.direct").on("change", changeSelect.bind(this));
+        // html.find("input[type=text].direct").on("change", changeText.bind(this));
+        // html.find("input[type=number].direct").on("change", changeText.bind(this));
+        // html.find("input[type=checkbox].direct").on("click", changeCheckbox.bind(this));
         html.find('[data-action="change-control"]').click(onChangeControl.bind(this));
         html.find('[data-action="link-control"]').click(_onLinkControl.bind(this));
 
