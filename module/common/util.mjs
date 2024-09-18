@@ -57,9 +57,7 @@ function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
     if (preceeding.endsWith(func.name)) {
         let payload = expression.substring(deepestStart + 1, deepestEnd);
         let toks = payload.split(",").map(a => resolveExpression(a.trim(), actor));
-        let result = func.function(toks);
-        //let max = Math.max(...toks);
-        return result;
+        return func.function(toks);
 
     }
 }
