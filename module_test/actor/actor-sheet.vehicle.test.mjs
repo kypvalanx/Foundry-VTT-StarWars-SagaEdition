@@ -26,9 +26,9 @@ export async function vehicleSheetTests(quench) {
                                     "Light Freighter"])
                                 assert.equal(actor.size.name, "Colossal")
 
-                                assert.equal(actor.system.attributes.str.total, 42);
-                                assert.equal(actor.system.attributes.dex.total, 10);
-                                assert.equal(actor.system.attributes.int.total, 12);
+                                assert.equal(actor.attributes.str.total, 42);
+                                assert.equal(actor.attributes.dex.total, 10);
+                                assert.equal(actor.attributes.int.total, 12);
                                 assert.equal(actor.health.max, 120);
 
                                 //assert.equal(actor.system.defense.reflex.total, 10)
@@ -58,7 +58,7 @@ export async function vehicleSheetTests(quench) {
 
                                 assert.equal(reflexDefense["SUM"], -10)
                                 assert.equal(armorReflexDefenseBonus["SUM"], 12)
-                                assert.equal(actor.system.defense.reflex.total, 12)
+                                assert.equal(actor.defense.reflex.total, 12)
 
                             });
                         });

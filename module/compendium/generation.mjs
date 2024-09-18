@@ -43,7 +43,7 @@ export async function processActor(actorData) {
     }
 
     if(actor.isBeast){
-        const proposedArmor = actor.system.defense.reflex.expected - actor.system.defense.reflex.total
+        const proposedArmor = actor.defense.reflex.expected - actor.defense.reflex.total
         if(proposedArmor){
 
             await actor.sheet._onDropItem(null, {name: "Natural Armor", type: "trait", answers:[proposedArmor]})
