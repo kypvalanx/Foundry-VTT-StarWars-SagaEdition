@@ -19,7 +19,6 @@
             <label for="secondWind" class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second
                 Winds/Day</label>
             <input class="middle-input" id="secondWind" type="text" placeholder="" disabled/>
-            {{log actor.secondWind}}
             {{#times actor.secondWind.perDay}}
                 <input class="left-control-{{this}}" data-action="toggle-second-wind" title="Spent" type="checkbox" data-name="system.secondWind.toggles.{{this}}"
                        {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>

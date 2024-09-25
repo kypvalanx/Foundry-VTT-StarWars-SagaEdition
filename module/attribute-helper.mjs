@@ -90,8 +90,8 @@ function getLocalChangesOnDocument(document, flags) {
 }
 
 //
-function getChangesFromActiveEffects(document) {
-    if (!document.effects) {
+function getChangesFromActiveEffects(document, data) {
+    if (!document.effects || data.recursive) {
         return [];
     }
 
@@ -109,9 +109,9 @@ function isEffectOnEmbeddedItem(document, effect) {
 }
 
 function isActiveEffect(effect, document) {
-    if (isEffectOnEmbeddedItem(document, effect)){
-        return false
-    }
+    // if (isEffectOnEmbeddedItem(document, effect)){
+    //     return false
+    // }
 
     if (effect.flags.swse && effect.flags.swse.isLevel){
         return effect.flags.swse.level <= (document.system.levelsTaken?.length || 0);
@@ -130,7 +130,7 @@ function getChangesFromDocument(data) {
         }
 
         allAttributes.push(...getChangesFromEmbeddedItems(document, data));
-        allAttributes.push(...getChangesFromActiveEffects(document));
+        allAttributes.push(...getChangesFromActiveEffects(document, data));
         return allAttributes;
     };
 
