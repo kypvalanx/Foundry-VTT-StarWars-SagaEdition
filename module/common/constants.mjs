@@ -20,19 +20,19 @@ export function getGroupedSkillMap() {
     return undefined;
 }
 
-export function skills(actorType = "character"){
-    let skills = actorType==="character" ? [...defaultSkills] : [...defaultVehicleSkills];
+export function skills(actorType = "character") {
+    let skills = actorType === "character" ? [...defaultSkills] : [...defaultVehicleSkills];
     let groupedSkillMap = getGroupedSkillMap();
 
-    if(groupedSkillMap){
+    if (groupedSkillMap) {
         const grouped = [];
         for (const [key, value] of groupedSkillMap) {
             skills.push(key)
-            if(value.grouped){
+            if (value.grouped) {
                 grouped.push(...value.grouped)
             }
         }
-        if(grouped){
+        if (grouped) {
             skills = skills.filter(s => !grouped.includes(s))
         }
     }
@@ -249,10 +249,10 @@ export const COLORS = {
     "blue": "#0000FF",
     "crimson": "#DC143C",
     "dark crimson": "#402327",
-    "aquamarine" : "#7fffd4",
-    "purple" : "#663399",
-    "orange" : "#BB4411",
-    "silver" : "#999999"
+    "aquamarine": "#7fffd4",
+    "purple": "#663399",
+    "orange": "#BB4411",
+    "silver": "#999999"
 
 }
 
@@ -260,7 +260,7 @@ export const crewPositions = ['Pilot', 'Copilot', 'Gunner', 'Commander', 'System
 
 export const crewSlotResolution = {
     'Pilot': (crew) => (crew > 0) ? 1 : 0,
-    'Copilot':(crew) => (crew > 1) ? 1 : 0,
+    'Copilot': (crew) => (crew > 1) ? 1 : 0,
     'Commander': (crew) => (crew > 2) ? 1 : 0,
     'System Operator': (crew) => (crew > 2) ? 1 : 0,
     'Engineer': (crew) => (crew > 2) ? 1 : 0,
@@ -436,25 +436,43 @@ export const CLASSES_BY_STARTING_FEAT = {
 export const KNOWN_WEIRD_UNITS = [
     "Eldewn and Elsae Sarvool"
 ]
-export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([["Athletics", {
-    grouped: ["Climb", "Swim"],
-    classes: ["Scout", "Soldier", "Force Prodigy"],
-    uut: true
-}],
-    ["Agility", {
-        grouped: ["Jump", "Acrobatics"],
-        classes: ["Scout", "Soldier", "Jedi", "Scoundrel", "Force Prodigy"],
-        uut: true
-    }],
-    ["Diplomacy", {
-        grouped: ["Gather Information", "Persuasion"],
-        classes: ["Noble", "Scoundrel", "Technician"],
-        uut: true
-    }],
-    ["Knowledge (Force)", {
-        classes: ["Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy"],
-        uut: false
-    }]]);
+export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
+    [
+        "Athletics",
+        {
+            grouped: ["Climb", "Swim"],
+            classes: ["Scout", "Soldier", "Force Prodigy"],
+            attribute: "str",
+            uut: true
+        }
+    ],
+    [
+        "Agility",
+        {
+            grouped: ["Jump", "Acrobatics"],
+            classes: ["Scout", "Soldier", "Jedi", "Scoundrel", "Force Prodigy"],
+            attribute: "dex",
+            uut: true
+        }
+    ],
+    [
+        "Diplomacy",
+        {
+            grouped: ["Gather Information", "Persuasion"],
+            classes: ["Noble", "Scoundrel", "Technician"],
+            attribute: "cha",
+            uut: true
+        }
+    ],
+    [
+        "Knowledge (Force)",
+        {
+            classes: ["Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy"],
+            attribute: "int",
+            uut: false
+        }
+    ]
+]);
 export const HOMEBREW_LILLITERALIST_SKILLS = new Map([["Athletics", {
     grouped: ["Jump", "Climb", "Swim"],
     classes: ["Scout", "Soldier", "Jedi"],
