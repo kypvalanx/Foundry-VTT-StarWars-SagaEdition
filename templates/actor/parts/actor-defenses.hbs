@@ -10,7 +10,7 @@
         <div class="large large-header">Class<br/></div>
         <div class="large large-header">Misc<br/></div>
     </div>
-    {{#each actor.system.defense as |def id|}}
+    {{#each actor.defense as |def id|}}
         {{#unless def.skip}}
             {{#if def.defenseBlock}}
                 {{> 'systems/swse/templates/actor/parts/actor-defense-block.hbs'def=def toggles=../actor.system.toggles}}

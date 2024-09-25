@@ -529,10 +529,11 @@ function _getEquipmentMaxDexBonus(actor) {
     return bonus;
 }
 
-test()
-
-function test(){
-    resolveDefenses()
-    let actor = {}
-    //resolveDefenses(actor)
-}
+//TODO, move to a proper quench test
+// test()
+//
+// function test(){
+//     resolveDefenses()
+//     let actor = {}
+//     //resolveDefenses(actor)
+// }
