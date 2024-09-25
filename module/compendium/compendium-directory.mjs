@@ -43,7 +43,7 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
                 packName = pack.split(".")[1]
             }
             if(!packName && filterString){
-                packName = filterString.split(":")[1].split(/(?=[A-Z])/).join(" ").toLowerCase()
+                packName = filterString.split(":")[1].split(/(?=[A-Z])/).join("-").toLowerCase()
             }
 
             found = game.packs.find(p => p.metadata.name.includes(packName));
