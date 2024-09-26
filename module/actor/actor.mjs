@@ -1238,7 +1238,7 @@ export class SWSEActor extends Actor {
 
     getEquippedItems() {
         let items = this.items;
-        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped");
+        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped").filter(item => this.isEquipable(item));
     }
 
     get equippedWeapons() {
