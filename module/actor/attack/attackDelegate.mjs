@@ -475,10 +475,18 @@ function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
     let bonuses = [];
     options.find(inputCriteria).each((i, modifier) => {
             if (hasValidValue(modifier)) {
-                const value = JSON.parse(modifier.value);
-                let bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
-                if (Number.isInteger(value)) {
-                    bonus = value;
+                let bonus
+                try {
+                    const value = JSON.parse(modifier.value);
+                    if (Number.isInteger(value)) {
+                        bonus = value;
+                    } else {
+                        bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
+                    }
+                } catch (e) {
+                    //if (Number.isInteger(value)) {
+                        bonus = modifier.value;
+                    //}
                 }
                 bonuses.push({source: $(modifier).data("source"), value: getBonusString(bonus)});
             }
