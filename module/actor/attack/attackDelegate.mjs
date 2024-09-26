@@ -484,9 +484,7 @@ function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
                         bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
                     }
                 } catch (e) {
-                    //if (Number.isInteger(value)) {
                         bonus = modifier.value;
-                    //}
                 }
                 bonuses.push({source: $(modifier).data("source"), value: getBonusString(bonus)});
             }
