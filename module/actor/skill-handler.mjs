@@ -38,8 +38,8 @@ export class SkillDelegate {
 
 function applyGroupedSkills(skills, groupedSkillMap) {
     const skillsCopy = [...skills];
-    if (!groupedSkillMap) {
-        return skillsCopy;
+    if (!groupedSkillMap || groupedSkillMap.keys().length === 0){
+        return skillsCopy.sort();
     }
     //add groupers
     skillsCopy.push(...Array.from(groupedSkillMap.keys()).flat())
