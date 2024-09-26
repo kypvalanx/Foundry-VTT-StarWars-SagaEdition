@@ -467,15 +467,20 @@ function getHandMods(html) {
     return handsMods
 }
 
+function hasValidValue(modifier) {
+    return modifier.value && (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox"));
+}
+
 function getModifiersFromContextAndInputs(options, inputCriteria, modifiers) {
     let bonuses = [];
     options.find(inputCriteria).each((i, modifier) => {
-            if (((modifier.type === "radio" || modifier.type === "checkbox") && modifier.checked) || !(modifier.type === "radio" || modifier.type === "checkbox")) {
-                if(modifier.value){
-                    const value = JSON.parse(modifier.value);
-                    const bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
-                    bonuses.push({source: $(modifier).data("source"), value: getBonusString(bonus)});
+            if (hasValidValue(modifier)) {
+                const value = JSON.parse(modifier.value);
+                let bonus = ".damage-modifier" === inputCriteria ? value["damage"] : value["attack"];
+                if (Number.isInteger(value)) {
+                    bonus = value;
                 }
+                bonuses.push({source: $(modifier).data("source"), value: getBonusString(bonus)});
             }
         }
     )
