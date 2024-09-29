@@ -108,13 +108,22 @@ function isEffectOnEmbeddedItem(document, effect) {
     return document instanceof SWSEActor && effect.origin?.includes("Item");
 }
 
+function getClassItemFromClassLevel(effect) {
+    if(effect.parent instanceof SWSEItem){
+        return effect.parent
+    }
+    const split = effect.origin.split(".");
+    return effect.parent.items.get(split[split.length - 1]);
+}
+
 function isActiveEffect(effect, document) {
     // if (isEffectOnEmbeddedItem(document, effect)){
     //     return false
     // }
 
     if (effect.flags.swse && effect.flags.swse.isLevel){
-        return effect.flags.swse.level <= (document.system.levelsTaken?.length || 0);
+        const classItem = getClassItemFromClassLevel(effect);
+        return effect.flags.swse.level <= (classItem.system.levelsTaken?.length || 0);
     }
 
     return effect.flags.swse?.itemModifier || effect.disabled === false;
