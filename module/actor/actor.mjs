@@ -174,7 +174,7 @@ export class SWSEActor extends Actor {
             try {
                 await this.update(data, context);
             } catch (e) {
-
+                console.warn("failed update")
             }
         }
     }
@@ -1411,11 +1411,16 @@ export class SWSEActor extends Actor {
 
 
     get attributes() {
+        return this._attributes();
+    }
+
+    _attributes(options){
         return this.getCached("attributes", () => {
-            generateAttributes(this)
+            generateAttributes(this, options)
             return this.system.attributes;
         })
     }
+
 
 
     getAttributeBases() {
@@ -1450,8 +1455,8 @@ export class SWSEActor extends Actor {
      * @param attributeName
      * @return {*}
      */
-    static getActorAttribute(actor, attributeName) {
-        let attributes = actor.attributes;
+    static getActorAttribute(actor, attributeName, options) {
+        let attributes = actor._attributes(options);
         let attribute = attributes[toShortAttribute(attributeName).toLowerCase()];
 
         return attribute.total;

@@ -325,7 +325,7 @@ function meetsPrerequisite(prereq, target, options) {
                     }
                 } else {
                     let toks = prereq.requirement.split(" ");
-                    let actorAttribute = SWSEActor.getActorAttribute(target, toks[0]);
+                    let actorAttribute = SWSEActor.getActorAttribute(target, toks[0], options);
                     let number = parseInt(toks[1]);
                     if (!(actorAttribute < number)) {
                         successList.push({prereq, count: 1});
@@ -523,7 +523,11 @@ function meetsPrerequisite(prereq, target, options) {
         }
         return {failureList, successList}
     }
-    return !!options.prerequisiteCache ? options.prerequisiteCache.getCached({type: prereq.type, requirement: prereq.requirement}, fn): fn()
+    return !!options.prerequisiteCache ? options.prerequisiteCache.getCached({
+        type: prereq.type,
+        requirement: prereq.requirement,
+        options: options
+    }, fn) : fn()
 }
 
 /**
@@ -536,36 +540,39 @@ function meetsPrerequisite(prereq, target, options) {
  * @param {number} prereqs[].count available on OR
  * @param options
  * @param {Object[]} prereqs[].children available on AND and OR
- * @returns {{failureList: [], doesFail: boolean, silentFail: []}}
+ * @returns {{failureList: [], doesFail: boolean, successList: []}}
  */
 export function meetsPrerequisites(target, prereqs, options = {}) {
     //TODO add links to failures to open up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
     if (!prereqs || (target.system.ignorePrerequisites && options.isAdd) || options.skipPrerequisite || options.isUpload) {
-        return {doesFail: false, failureList:[], silentFail:[], successList:[]};
+        return {doesFail: false, failureList: [], successList: []};
     }
     if (!target) {
-        return {doesFail: true, failureList:[], silentFail:[], successList:{}};
+        return {doesFail: true, failureList: [], successList: []};
     }
 
-    if(!options.prerequisiteCache){
+    if (!options.prerequisiteCache) {
         options.prerequisiteCache = new SimpleCache();
     }
 
     prereqs = ensureArray(prereqs)
-    if (!options.embeddedItemOverride) {
-        options.embeddedItemOverride = inheritableItems(target)
-    }
+    // if (!options.embeddedItemOverride) {
+    //     options.embeddedItemOverride = inheritableItems(target)
+    // }
 
     let failureList = [];
-    let silentFail = [];
+    // let silentFail = [];
     let successList = [];
-    for (let prereq of prereqs) {
-        let response = meetsPrerequisite(prereq, target, options);
-        failureList.push(...response.failureList)
-        successList.push(...response.successList)
+    try {
+        for (let prereq of prereqs) {
+            let response = meetsPrerequisite(prereq, target, options);
+            failureList.push(...response.failureList)
+            successList.push(...response.successList)
+        }
+    } catch (e) {
+        console.error(e, prereqs, target, options)
     }
-
     let doesFail = false;
     for (let fail of failureList) {
         if (fail.fail === true) {
@@ -581,12 +588,12 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     //     }
     // }
 
-    return {doesFail, failureList, silentFail, successList};
+    return {doesFail, failureList, successList};
 }
 
 
 export function formatPrerequisites(failureList, type = "html") {
-    if(type === "plain"){
+    if (type === "plain") {
         let format = "[";
         for (let fail of failureList) {
             format = format + `"${fail.message}"`;

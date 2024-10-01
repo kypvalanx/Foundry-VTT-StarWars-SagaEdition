@@ -6,13 +6,17 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 /**
  *
  * @param actor {SWSEActor}
+ * @param options
+ * @param options.embeded
  */
-export function generateAttributes(actor) {
+export function generateAttributes(actor, options={}) {
     let system = actor.system;
 
     system.lockAttributes = actor.shouldLockAttributes
     let attributeGenType = actor.system.finalAttributeGenerationType;
     //let data = {};
+
+    let embeddedItemOverride = options?.embeddedItemOverride;
 
     for (let [key, attribute] of Object.entries(system.attributes)) {
         let longKey = getLongKey(key);
@@ -30,7 +34,8 @@ export function generateAttributes(actor) {
             let attributeBase = getInheritableAttribute({
                 entity: actor,
                 attributeKey: `base${longKey.titleCase()}`,
-                reduce: "MAX"
+                reduce: "MAX",
+                embeddedItemOverride
             });
             if (attributeBase > 0) {
                 attribute.base = attributeBase;
@@ -39,7 +44,8 @@ export function generateAttributes(actor) {
             let attributeMax = getInheritableAttribute({
                 entity: actor,
                 attributeKey: `${longKey}Max`,
-                reduce: "MIN"
+                reduce: "MIN",
+                embeddedItemOverride
             });
             if (!isNaN(attributeMax)) {
                 attribute.base = Math.min(attribute.base, attributeMax);
@@ -51,7 +57,8 @@ export function generateAttributes(actor) {
             let bonuses = getInheritableAttribute({
                 entity: actor,
                 attributeKey: `${longKey}Bonus`,
-                reduce: "VALUES"
+                reduce: "VALUES",
+                embeddedItemOverride
             })
             let attributeBonus = system.levelAttributeBonus;
             for (let levelAttributeBonus of Object.values(attributeBonus ? attributeBonus : []).filter(b => b != null)) {
@@ -63,7 +70,8 @@ export function generateAttributes(actor) {
             let attributeMaxBonus = getInheritableAttribute({
                 entity: actor,
                 attributeKey: `${longKey}MaxBonus`,
-                reduce: "MIN"
+                reduce: "MIN",
+                embeddedItemOverride
             });
 
             if (!isNaN(attributeMaxBonus)) {

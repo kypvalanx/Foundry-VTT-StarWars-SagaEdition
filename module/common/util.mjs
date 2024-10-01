@@ -78,7 +78,6 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
         const substring = expression.substring(0, deepestStart - fName.length);
         const substring1 = expression.substring(deepestEnd + 1);
         const newVar = substring + result + substring1;
-        console.log(substring, result, substring1)
         return newVar;
     }
 
@@ -1180,10 +1179,11 @@ export function inheritableItems(entity, options={}) {
             }
             shouldResolveSkills = false;
             for (let possible of possibleInheritableItems) {
-                if (!possible.system?.prerequisite || !meetsPrerequisites(entity, possible.system.prerequisite, {
+                const prerequisiteResponse = meetsPrerequisites(entity, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
                     existingTraitPrerequisite: possible.type === "trait"
-                }).doesFail) {
+                });
+                if (!prerequisiteResponse.doesFail) {
                     actualInheritable.push(possible);
                     if(possible.system.changes.find(c => c.key === "forceSensitivity" && c.value === "true")){
                         shouldResolveSkills = true;
