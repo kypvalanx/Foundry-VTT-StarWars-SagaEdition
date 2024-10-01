@@ -22,23 +22,27 @@ export function appendSourceMeta(attribute, source, sourceString, sourceDescript
     return attribute
 }
 
-
-function getChangesFromEmbeddedItems(entity, data) {
+/**
+ *  get changes from items on an actor
+ * @param entity {SWSEActor}
+ * @param embeddedItemOverride {[SWSEItem]}
+ * @param itemFilter {Function}
+ * @return {*[]}
+ */
+function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
     if (!(entity instanceof SWSEActor)) {
         return [];
     }
-    const predicate = data.itemFilter
-    const embeddedItemOverride = data.embeddedItemOverride
 
-    let attributes = [];
     let items = !!embeddedItemOverride ? embeddedItemOverride : inheritableItems(entity);
     items = items.filter(i => !!i)
-    if (predicate) {
-        items = items.filter(predicate)
+    if (itemFilter) {
+        items = items.filter(itemFilter)
     }
+
+    let attributes = [];
     for (let item of items) {
-        const changesFromDocuments = getChangesFromDocuments({
-            entity: item,
+        const changesFromDocuments = getChangesFromDocuments(item, {
             recursive: true,
             parent: entity
         });
@@ -89,9 +93,14 @@ function getLocalChangesOnDocument(document, flags) {
     return values.filter(v => !!v).map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
 
-//
-function getChangesFromActiveEffects(document, data) {
-    if (!document.effects || data.recursive) {
+/**
+ *
+ * @param document {SWSEItem|SWSEActor}
+ * @param recursive {boolean}
+ * @return {*[]}
+ */
+function getChangesFromActiveEffects(document, recursive) {
+    if (!document.effects || recursive) {
         return [];
     }
 
@@ -129,43 +138,39 @@ function isActiveEffect(effect, document) {
     return effect.flags.swse?.itemModifier || effect.disabled === false;
 }
 
-function getChangesFromDocument(data) {
-    let document = data.entity;
+function getChangesFromDocument(document, data) {
     let fn = () => {
         let allAttributes = [];
         if (!data.skipLocal) {
             allAttributes.push(...getLocalChangesOnDocument(document, data.flags))
-
         }
 
-        allAttributes.push(...getChangesFromEmbeddedItems(document, data));
-        allAttributes.push(...getChangesFromActiveEffects(document, data));
+        allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
+        allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
         return allAttributes;
     };
-
 
     return document.getCached ? document.getCached({
         fn: "getChangesFromDocument",
         predicate: data.itemFilter,
         embeddedItemOverride: data.embeddedItemOverride,
         skipLocal: data.skipLocal,
-        attributeKey: data.attributeKey
+        recursive: data.recursive
     }, fn) : fn();
 }
-function getChangesFromDocuments(data) {
-    if (Array.isArray(data.entity)) {
+function getChangesFromDocuments(entity, data) {
+    if (Array.isArray(entity)) {
         let values = [];
-        for (let entity of data.entity) {
-            values.push(...getChangesFromDocument({
-                entity: entity,
-                attributeKey: data.attributeKey,
+        for (let e of entity) {
+            values.push(...getChangesFromDocument(e, {
                 itemFilter: data.itemFilter,
-                recursive: data.recursive
+                recursive: data.recursive,
+                embeddedItemOverride: data.embeddedItemOverride
             }))
         }
         return values;
     }
-    return getChangesFromDocument(data);
+    return getChangesFromDocument(entity, data);
 }
 
 /**
@@ -183,7 +188,7 @@ export function getInheritableAttribute(data = {}) {
     if (!data.entity) {
         return [];
     }
-    let values = getChangesFromDocuments(data);
+    let values = getChangesFromDocuments(data.entity, data);
     // 1. get values
     // 2. ?
     // 3. profit
