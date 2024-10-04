@@ -1379,9 +1379,12 @@ export class SWSEActor extends Actor {
 
     applyHealing(options) {
         let update = {};
-        update[`system.health.value`] = this.system.health.value + toNumber(options.heal);
+        const proposedHealAmount = toNumber(options.heal);
+        const maxHealAmount = this.system.health.max - this.system.health.value;
+        const healAmount = Math.min(proposedHealAmount, maxHealAmount);
+        update[`system.health.value`] = this.system.health.value + healAmount;
 
-        const content = `${this.name} has has healed ${options.heal} damage.`
+        const content = `${this.name} has has healed ${healAmount} damage` + (maxHealAmount < proposedHealAmount ? " reaching max health." : ".")
         toChat(content, this)
         this.safeUpdate(update);
     }
