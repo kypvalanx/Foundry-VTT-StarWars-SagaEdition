@@ -48,26 +48,28 @@ export function resolveDefenses(actor) {
         if(!actor){
             return {};
         }
-        let conditionBonus = getInheritableAttribute({
+        let condition = getInheritableAttribute({
             entity: actor,
             attributeKey: "condition",
             reduce: "FIRST"
-        })
+        }) || "0"
 
-        if("OUT" === conditionBonus || !conditionBonus){
-            conditionBonus = "0";
-        }
+        // let condition;
+        // if("OUT" === condition){
+        //     condition = "0";
+        //     condition = "OUT"
+        // }
 
         //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 
         let defense = actor.system.defense || {};
 
-        defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, conditionBonus)};
+        defense.fortitude = {...defense.fortitude, ..._resolveFort(actor, condition)};
         if(actor.type !== "vehicle"){
-            defense.will = {...defense.will, ..._resolveWill(actor, conditionBonus)};
+            defense.will = {...defense.will, ..._resolveWill(actor, condition)};
         }
-        defense.reflex = {...defense.reflex, ..._resolveRef(actor, conditionBonus)};
-        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, conditionBonus, defense.fortitude.total)};
+        defense.reflex = {...defense.reflex, ..._resolveRef(actor, condition)};
+        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, condition, defense.fortitude.total)};
         defense.situationalBonuses = _getSituationalBonuses(actor);
 
         defense.damageReduction = getInheritableAttribute({
@@ -91,11 +93,13 @@ export function resolveDefenses(actor) {
 /**
  *
  * @param actor {SWSEActor}
- * @param conditionBonus {number}
+ * @param condition
  * @returns
  * @private
  */
-function _resolveFort(actor, conditionBonus) {
+function _resolveFort(actor, condition) {
+    const conditionBonus = condition === "OUT" ? "0" : condition
+
     let bonuses = [];
     bonuses.push(10);
     let heroicLevel = actor.heroicLevel;
@@ -147,11 +151,13 @@ function _resolveFort(actor, conditionBonus) {
 /**
  *
  * @param actor {SWSEActor}
- * @param conditionBonus
+ * @param condition
  * @returns {{classBonus, total: number, miscBonus: number, abilityBonus, armorBonus: number}}
  * @private
  */
-function _resolveWill(actor, conditionBonus) {
+function _resolveWill(actor, condition) {
+
+    const conditionBonus = condition === "OUT" ? "0" : condition
     let skip = ['vehicle', 'npc-vehicle'].includes(actor.type);
     let bonuses = [];
     bonuses.push(10);
@@ -226,17 +232,20 @@ function _resolveWill(actor, conditionBonus) {
 /**
  *
  * @param actor {SWSEActor}
- * @param conditionBonus
+ * @param condition
  * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
  * @private
  */
-function _resolveRef(actor, conditionBonus) {
+function _resolveRef(actor, condition) {
+
+    const conditionBonus = condition === "OUT" ? "0" : condition
     let bonuses = [];
     bonuses.push(10);
 
     let armorBonus = getArmorBonus(actor);
     bonuses.push(armorBonus);
-    let abilityBonus = Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
+
+    let abilityBonus = condition === "OUT" ? -5 : Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
     bonuses.push(abilityBonus);
 
 
@@ -395,12 +404,11 @@ function _getDamageThresholdSizeMod(actor) {
 /**
  *
  * @param actor {SWSEActor}
- * @param conditionBonus
  * @param fortitudeTotal
  * @returns {{total: number}}
  * @private
  */
-function _resolveDt(actor, conditionBonus, fortitudeTotal) {
+function _resolveDt(actor, fortitudeTotal) {
     let total = [];
     total.push(fortitudeTotal);
     total.push(_getDamageThresholdSizeMod(actor));
