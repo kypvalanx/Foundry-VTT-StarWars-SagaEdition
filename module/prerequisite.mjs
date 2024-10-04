@@ -557,12 +557,8 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
     }
 
     prereqs = ensureArray(prereqs)
-    // if (!options.embeddedItemOverride) {
-    //     options.embeddedItemOverride = inheritableItems(target)
-    // }
 
     let failureList = [];
-    // let silentFail = [];
     let successList = [];
     try {
         for (let prereq of prereqs) {
@@ -580,13 +576,6 @@ export function meetsPrerequisites(target, prereqs, options = {}) {
             break;
         }
     }
-    //
-    // for (let fail of silentFail) {
-    //     if (fail.fail === true) {
-    //         doesFail = true;
-    //         break;
-    //     }
-    // }
 
     return {doesFail, failureList, successList};
 }
