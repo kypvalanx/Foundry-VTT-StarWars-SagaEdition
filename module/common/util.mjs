@@ -1131,11 +1131,11 @@ export function fullJoin(...args) {
  * @returns {SWSEItem[]}
  */
 export function equippedItems(entity, type) {
-    let entities = [];
-    if (entity.items) {
-        entities.push(...entity.items?.filter(item => !!item.system.equipped && (!type || item.type === type)))
+    if (!entity.items) {
+        return [];
+    } else {
+        return entity.items.filter(item => !!item.system.equipped && (!type || item.type === type));
     }
-    return entities;
 }
 
 export function getItemParentId(id) {
@@ -1160,32 +1160,23 @@ const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower"
 export function inheritableItems(entity, options={}) {
     let fn = () => {
         let possibleInheritableItems = filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES);
-
         let actualInheritable = equippedItems(entity);
         actualInheritable.push(...filterItemsByType(entity.items || [], ALWAYS_INHERITABLE_TYPES));
         let shouldRetry = possibleInheritableItems.length > 0;
-        let shouldResolveSkills = false;
         while (shouldRetry) {
             shouldRetry = false;
-            if(shouldResolveSkills){
-                //generateSkills(entity);
-            }
-            shouldResolveSkills = false;
-            for (let possible of possibleInheritableItems) {
+            possibleInheritableItems = possibleInheritableItems.filter(possible => {
                 const prerequisiteResponse = meetsPrerequisites(entity, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
                     existingTraitPrerequisite: possible.type === "trait"
                 });
                 if (!prerequisiteResponse.doesFail) {
                     actualInheritable.push(possible);
-                    if(possible.system.changes.find(c => c.key === "forceSensitivity" && c.value === "true")){
-                        shouldResolveSkills = true;
-                    }
-
                     shouldRetry = true;
+                    return false
                 }
-            }
-            possibleInheritableItems = possibleInheritableItems.filter(possible => !actualInheritable.includes(possible));
+                return true;
+            });
         }
 
         return actualInheritable;
