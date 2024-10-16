@@ -200,6 +200,35 @@ export class SWSEActor extends Actor {
         if (this.skipPrepare) {
             return;
         }
+
+        if(this.system.externalEditorLink){
+
+            //this.scrapeExternal(this.system.externalEditorLink)
+
+
+            // let my_variable = new XMLHttpRequest(); // object
+            // my_variable.onload = function() {
+            //
+            //     console.log("data")
+            //     // Here, we can use the response Data
+            //
+            // }
+            // my_variable.open("GET", this.system.externalEditorLink);
+            //
+            // my_variable.send();
+
+            // fetch(this.system.externalEditorLink, {
+            //     headers: {
+            //     }
+            // })
+            //     //.then(r => r.json())
+            //     .then(data => {
+            //
+            //     console.log(data)
+            //
+            // });
+        }
+
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
@@ -989,16 +1018,9 @@ export class SWSEActor extends Actor {
                 {value: "Point Buy", display: "Point Buy", tooltip: "Point buy rules. droids should be expected to have a lower point buy value because they have one fewer stats"},
                 {value: "Standard Array", display: "Standard Array", tooltip: "Assign the Standard Array"}
             ]
-            //     {
-            //
-            //     Default: "Default",
-            //     Manual: "Manual",
-            //     "Semi-Manual": "Semi-Manual",
-            //     Roll: "Roll",
-            //     "Point Buy": "Point Buy",
-            //     "Standard Array": "Standard Array"
-            // }
         })
+
+        //this.system.settings.push({type: "text", path: "system.externalEditorLink", label: "External Editor Link (Saga Workshop)", value: this.system.externalEditorLink})
     }
 
     async removeItems(itemIds) {
@@ -3153,6 +3175,23 @@ export class SWSEActor extends Actor {
             existingLink.system.skills = skills;
         }
         return existingLink;
+    }
+
+    async scrapeExternal(externalLink) {
+        // const browser = await puppeteer.launch({
+        //     headless: false,
+        //     defaultViewport: null,
+        // });
+        //
+        //
+        // const page = await browser.newPage();
+        // await page.goto(externalLink, {
+        //     waitUntil: "domcontentloaded",
+        // });
+        //
+        // await page.evaluate(() =>{
+        //     console.log(document)
+        // })
     }
 }
 
