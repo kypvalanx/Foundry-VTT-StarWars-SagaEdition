@@ -69,6 +69,38 @@ function configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) 
     skill.situationalSkills = [];
 }
 
+function standardizedAttribute(rerollKey)
+{
+    if (!rerollKey) {
+        return rerollKey;
+    }
+    rerollKey = rerollKey.toLowerCase()
+    switch(rerollKey)
+    {
+        case "dex":
+            return "dexterity";
+        case "str":
+            return "strength";
+        case "con":
+            return "constitution";
+        case "int":
+            return "intelligence";
+        case "wis":
+            return "wisdom";
+        case "cha":
+            return "charisma";
+        default:
+            return rerollKey;
+    }
+}
+
+function isRerollApplicable(rerollKey, key, attribute) {
+    if(key.toLowerCase() === "knowledge" && key.toLowerCase().startsWith("knowledge")){
+        return true;
+    }
+    return rerollKey.toLowerCase() === key || rerollKey.toLowerCase() === "any" || standardizedAttribute(rerollKey) === standardizedAttribute(attribute);
+}
+
 /**
  *
  * @param actor
@@ -187,7 +219,7 @@ export function generateSkills(actor, options = {}) {
 
             skill.isClass = resSkill === 'Use the Force' ? actor.isForceSensitive : classSkills.has(key)
 
-            let applicableRerolls = reRollSkills.filter(reroll => reroll.value.toLowerCase() === key || reroll.value.toLowerCase() === "any")
+            let applicableRerolls = reRollSkills.filter(reroll => isRerollApplicable(reroll, key, reroll.value, skill.attribute))
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})
