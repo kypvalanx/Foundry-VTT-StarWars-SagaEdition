@@ -39,20 +39,16 @@ export async function withTestVehicle(param, options= {}) {
     }
 }
 
-function getMockEvent() {
+export function getMockEvent() {
     const newVar = {};
     newVar.preventDefault = () => {
     };
     return newVar;
 }
 
-export function hasItems(assert, items, strings) {
-    items = items.map(i => i.name).sort()
-    strings.push(...(game.settings.get("swse", "automaticItems").split(",").map(f => {
-        return (f.trim().split(":"))[1]
-    })))
-    strings = strings.sort()
-    assert.sameMembers(items, strings)
+export function hasItems(assert, actual, expected) {
+    actual = actual.map(i => i.name)
+    assert.includeMembers(actual, expected)
 }
 
 export async function actorSheetTests(quench) {

@@ -1,3 +1,5 @@
-2024/10/16-11:37:37.377 5a20 Recovering log #424
-2024/10/16-11:37:37.379 5a20 Delete type=0 #424
-2024/10/16-11:37:37.379 5a20 Delete type=3 #423
+2024/10/22-12:26:21.030 4bbc Recovering log #3
+2024/10/22-12:26:21.031 4bbc Level-0 table #5: started
+2024/10/22-12:26:21.033 4bbc Level-0 table #5: 94040 bytes OK
+2024/10/22-12:26:21.035 4bbc Delete type=0 #3
+2024/10/22-12:26:21.035 4bbc Delete type=3 #2

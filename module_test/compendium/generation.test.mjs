@@ -122,6 +122,8 @@ export async function generationTests(quench) {
                     assert.equal(actor.system.attributes.wis.total, 14)
                     assert.equal(actor.system.attributes.cha.total, 6)
 
+                    assert.includeMembers(actor.items.map(i => i.name), ['Quadanium Plating'])
+
                     actor.delete()
                 })
                 // it("Generate CL20 Luke Skywalker, Grand Master", async ()=>{
