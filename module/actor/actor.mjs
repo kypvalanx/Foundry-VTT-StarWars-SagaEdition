@@ -1799,8 +1799,9 @@ export class SWSEActor extends Actor {
      * @returns {boolean}
      */
     hasItem(item) {
-        return Array.from(this.items.values())
-            .map(i => `${i.finalName}:${i.type}`)
+        const strings = Array.from(this.items.values())
+            .map(i => `${i.finalName}:${i.type}`);
+        return strings
             .includes(`${item.finalName}:${item.type}`);
     }
 
@@ -2759,7 +2760,13 @@ export class SWSEActor extends Actor {
         const providedItems = [];
         if (criteria.items) {
             for (const item of criteria.items.filter(item => !!item)) {
-                providedItems.push(item)
+                if(item.quantity > 0){
+                    for (let i =0; i < item.quantity; i++) {
+                        providedItems.push(item)
+                    }
+                } else {
+                    providedItems.push(item)
+                }
             }
         }
 

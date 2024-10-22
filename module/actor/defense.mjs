@@ -69,7 +69,7 @@ export function resolveDefenses(actor) {
             defense.will = {...defense.will, ..._resolveWill(actor, condition)};
         }
         defense.reflex = {...defense.reflex, ..._resolveRef(actor, condition)};
-        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, condition, defense.fortitude.total)};
+        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, defense.fortitude.total)};
         defense.situationalBonuses = _getSituationalBonuses(actor);
 
         defense.damageReduction = getInheritableAttribute({
@@ -384,22 +384,7 @@ function _resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDe
     return ffReflexDefense
 }
 
-/**
- *
- * @param actor {SWSEActor}
- * @returns {number}
- * @private
- */
-function _getDamageThresholdSizeMod(actor) {
-    let attributes = actor.getTraitAttributesByKey('damageThresholdSizeModifier')
 
-    let total = [];
-    for (let attribute of attributes) {
-        total.push(attribute)
-    }
-
-    return resolveValueArray(total, actor)
-}
 
 /**
  *
@@ -411,7 +396,11 @@ function _getDamageThresholdSizeMod(actor) {
 function _resolveDt(actor, fortitudeTotal) {
     let total = [];
     total.push(fortitudeTotal);
-    total.push(_getDamageThresholdSizeMod(actor));
+    total.push(getInheritableAttribute({
+        entity: actor,
+        attributeKey: "damageThresholdSizeModifier",
+        reduce: "SUM"
+    }));
     total.push(getInheritableAttribute({
         entity: actor,
         attributeKey: "damageThresholdBonus",

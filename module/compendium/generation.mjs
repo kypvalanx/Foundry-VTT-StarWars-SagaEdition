@@ -18,15 +18,16 @@ export async function processActor(actorData) {
         skipPrerequisite: true,
         generalAnswers: choiceAnswers,
         isUpload: true,
-        suppressWarnings: true
-    }, providedItems, null);
+        suppressWarnings: true,
+        items: providedItems
+    });
 
     actor.skipPrepare = false;
     actor.prepareData();
 
 
 
-    if(actor.hasAnyOf([
+    if(!actor.hasAnyOf([
         {finalName: "Colossal (Cruiser)", type: "trait"},
         {finalName: "Colossal (Station)", type: "trait"},
         {finalName: "Colossal", type: "trait"},
@@ -37,7 +38,7 @@ export async function processActor(actorData) {
         {finalName: "Small", type: "trait"},
         {finalName: "Tiny", type: "trait"},
         {finalName: "Diminutive", type: "trait"},
-        {finalName: "Fine", type: "trait"}]) !== size){
+        {finalName: "Fine", type: "trait"}])){
 
         await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
     }

@@ -7,6 +7,7 @@ import {skillHandlerTest} from "./actor/skill-handler.test.mjs";
 import {vehicleSheetTests} from "./actor/actor-sheet.vehicle.test.mjs";
 import {utilTests} from "./common/util.test.js";
 import {attackTests} from "./actor/attack/attack.test.mjs";
+import {poltgotBasicTests} from "./module-integrations/polygot/basic-integration.test.mjs";
 
 const registeredTests = [
     generationTests,
@@ -17,7 +18,8 @@ const registeredTests = [
     choiceTests,
     utilTests,
     compendiumUtilTests,
-    attackTests];
+    attackTests,
+    poltgotBasicTests];
 
 export function registerTestSuites(quench) {
     for(const batchFunction of registeredTests){
