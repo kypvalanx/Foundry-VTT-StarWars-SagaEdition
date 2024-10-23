@@ -95,7 +95,11 @@ function standardizedAttribute(rerollKey)
 }
 
 function isRerollApplicable(rerollKey, key, attribute) {
-    if(key.toLowerCase() === "knowledge" && key.toLowerCase().startsWith("knowledge")){
+    if(!rerollKey){
+        return false;
+    }
+
+    if(rerollKey.toLowerCase() === "knowledge" && key.toLowerCase().startsWith("knowledge")){
         return true;
     }
     return rerollKey.toLowerCase() === key || rerollKey.toLowerCase() === "any" || standardizedAttribute(rerollKey) === standardizedAttribute(attribute);
@@ -219,7 +223,7 @@ export function generateSkills(actor, options = {}) {
 
             skill.isClass = resSkill === 'Use the Force' ? actor.isForceSensitive : classSkills.has(key)
 
-            let applicableRerolls = reRollSkills.filter(reroll => isRerollApplicable(reroll, key, reroll.value, skill.attribute))
+            let applicableRerolls = reRollSkills.filter(reroll => isRerollApplicable(reroll.value.split(":")[0], key, skill.attribute))
 
             bonuses.push({value: halfCharacterLevel, description: `Half character level: ${halfCharacterLevel}`})
             bonuses.push({value: skillAttributeMod, description: `Attribute Mod: ${skillAttributeMod}`})

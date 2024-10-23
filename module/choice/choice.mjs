@@ -2,7 +2,7 @@ import {COLORS, GM_BONUSES, lightsaberForms, skills} from "../common/constants.m
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {fullJoin, innerJoin} from "../common/util.mjs";
 import {initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
-import {getCompendium, getIndexEntriesByTypes} from "../compendium/compendium-util.mjs";
+import {getIndexEntriesByTypes} from "../compendium/compendium-util.mjs";
 
 function skipFirstLevelChoice(choice, context) {
     return choice.isFirstLevel && !context.isFirstLevel;

@@ -17,9 +17,27 @@ export async function poltgotBasicTests(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.sheet._onDropItem(getMockEvent(), {name: "Basic", type: "language"})
-                        hasItems(assert, actor.items, ["Basic"])
+
                         const [known_languages, literate_languages] = game.polyglot.LanguageProvider.getUserLanguages(actor)
                         assert.includeMembers(Array.from(known_languages), ["Basic"]);
+                    })
+                })
+                it("should limit spoken languages due to maySpeak Tag", async ()=>{
+                    await withTestActor(async actor => {
+                        actor.suppressDialog = true
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Basic", type: "language"})
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Shyriiwook", type: "language"})
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Wookiee", type: "species"})
+
+                        const [known_languages, literate_languages] = game.polyglot.LanguageProvider.getUserLanguages(actor)
+
+                        const actual_known_languages = Array.from(known_languages);
+                        assert.includeMembers(actual_known_languages, ["Shyriiwook"])
+                        assert.notIncludeMembers(actual_known_languages, ["Basic"])
+
+                        const actual_literate_languages = Array.from(literate_languages);
+                        assert.includeMembers(actual_literate_languages, ["Basic"])
+                        assert.notIncludeMembers(actual_literate_languages, ["Shyriiwook"])
                     })
                 })
             });

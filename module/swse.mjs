@@ -18,6 +18,7 @@ import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 import {SWSETokenDocument} from "./token/token-document.js";
 import {CompendiumWeb} from "./compendium/compendium-web.mjs";
 import {SWSECompendiumDirectory} from "./compendium/compendium-directory.mjs";
+import {getInheritableAttribute} from "./attribute-helper.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -167,27 +168,50 @@ Hooks.once('init', async function () {
 Hooks.once("polyglot.init", (LanguageProvider) => {
     console.log("POLYGLOT INIT")
     class SWSELanguageProvider extends LanguageProvider {
-        // async getLanguages() {
-        //     const langs = {};
-        //     if (this.replaceLanguages) {
-        //         CONFIG.FICTIONAL.spoken = {};
-        //     }
-        //     const languagesSetting = game.settings.get("polyglot", "Languages");
-        //     for (let lang in CONFIG.FICTIONAL.spoken) {
-        //         langs[lang] = {
-        //             label: CONFIG.FICTIONAL.spoken[lang],
-        //             font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
-        //             rng: languagesSetting[lang]?.rng ?? "default",
-        //         };
-        //     }
-        //     this.languages = langs;
-        // }
+        async getLanguages() {
+            const langs = {};
+
+            const packs = [];
+            packs.push(...game.packs.filter(p => true));
+
+            const languagesSetting = game.settings.get("polyglot", "Languages");
+            if (!this.replaceLanguages) {
+                //CONFIG.FICTIONAL.spoken = {};
+                const languages = packs.filter(pack => pack.collection.startsWith("swse.languages"))[0].index;
+
+                for (const language of languages) {
+                    langs[language.name] = {
+                                label: language.name,
+                                font: languagesSetting[language.name]?.font || this.languages[language.name]?.font || this.defaultFont,
+                                rng: languagesSetting[language.name]?.rng ?? "default",
+                            };
+                }
+
+                console.log(language)
+            }
+            // for (let lang in CONFIG.FICTIONAL.spoken) {
+            //     langs[lang] = {
+            //         label: CONFIG.FICTIONAL.spoken[lang],
+            //         font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
+            //         rng: languagesSetting[lang]?.rng ?? "default",
+            //     };
+            // }
+            this.languages = langs;
+        }
 
         getUserLanguages(actor) {
             let known_languages = new Set();
             let literate_languages = new Set();
+
+            const maySpeak = getInheritableAttribute({entity:actor, attributeKey: "maySpeak", reduce: "VALUES"})
+            const limitedSpeech = maySpeak.length > 0;
+
             for (let lang of filterItemsByType(actor.items.values(), "language")) {
-                known_languages.add(lang.name)
+                if(limitedSpeech && !maySpeak.includes(lang.name)) {
+                    literate_languages.add(lang.name)
+                } else {
+                    known_languages.add(lang.name)
+                }
             }
             return [known_languages, literate_languages];
         }
