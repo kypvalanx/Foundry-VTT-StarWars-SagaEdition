@@ -187,7 +187,7 @@ Hooks.once("polyglot.init", (LanguageProvider) => {
                             };
                 }
 
-                console.log(language)
+                console.log(languages)
             }
             // for (let lang in CONFIG.FICTIONAL.spoken) {
             //     langs[lang] = {
