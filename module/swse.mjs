@@ -10,7 +10,7 @@ import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
 import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
-import {toNumber} from "./common/util.mjs";
+import {filterItemsByType, toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
@@ -163,6 +163,42 @@ Hooks.once('init', async function () {
         'systems/swse/templates/common/rollable.hbs']);
 
 });
+
+Hooks.once("polyglot.init", (LanguageProvider) => {
+    console.log("POLYGLOT INIT")
+    class SWSELanguageProvider extends LanguageProvider {
+        // async getLanguages() {
+        //     const langs = {};
+        //     if (this.replaceLanguages) {
+        //         CONFIG.FICTIONAL.spoken = {};
+        //     }
+        //     const languagesSetting = game.settings.get("polyglot", "Languages");
+        //     for (let lang in CONFIG.FICTIONAL.spoken) {
+        //         langs[lang] = {
+        //             label: CONFIG.FICTIONAL.spoken[lang],
+        //             font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
+        //             rng: languagesSetting[lang]?.rng ?? "default",
+        //         };
+        //     }
+        //     this.languages = langs;
+        // }
+
+        getUserLanguages(actor) {
+            let known_languages = new Set();
+            let literate_languages = new Set();
+            for (let lang of filterItemsByType(actor.items.values(), "language")) {
+                known_languages.add(lang.name)
+            }
+            return [known_languages, literate_languages];
+        }
+    }
+
+
+    game.polyglot.api.registerSystem(SWSELanguageProvider);
+    console.log("POLYGLOT INIT")
+})
+
+
 
 function deleteActorsByName(name){
     game.actors.filter(actor => actor.name === name).forEach(actor => actor.delete())
