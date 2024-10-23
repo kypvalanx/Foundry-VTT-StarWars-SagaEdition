@@ -3024,7 +3024,9 @@ export class SWSEActor extends Actor {
                 "beastAttack",
                 "beastSense",
                 "beastType",
-                "beastQuality"].includes(type)
+                "beastQuality",
+                "language"
+            ].includes(type)
         } else if (vehicleActorTypes.includes(this.type)) {
             return ["weapon",
                 "armor",
