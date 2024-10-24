@@ -874,7 +874,10 @@ export class SWSEActorSheet extends ActorSheet {
             } else {
                 //TODO implement logic for dragging to another character sheet
                 let sourceActor = game.actors.find(actor => actor.id === data.actorId);
-                await sourceActor.removeItem(data.itemId)
+                const itemId = data.itemId;
+                data = sourceActor.items.contents.find(i => i.id === itemId)
+
+                await sourceActor.removeItem(itemId)
             }
         }
 

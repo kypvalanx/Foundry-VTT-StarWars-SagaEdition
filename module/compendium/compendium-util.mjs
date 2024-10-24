@@ -113,6 +113,10 @@ export async function getIndexAndPack(item) {
 }
 
 
+function isFullItem(item) {
+    return !!item.system || item instanceof SWSEItem;
+}
+
 /**
  *
  * @param item
@@ -127,7 +131,12 @@ export async function resolveEntity(item) {
     let entity = undefined
     let itemName = undefined
     let payload = undefined
-    if (item.duplicate) {
+
+    if(isFullItem(item)){
+        entity = item;
+        itemName = item.name;
+
+    } else if (item.duplicate) {
         entity = item.item.clone();
         itemName = entity.name;
     } else if (item.uuid) {
