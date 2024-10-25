@@ -13,16 +13,7 @@ import {vehicleActorTypes} from "../common/constants.mjs";
 import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
-import {
-    changeCheckbox,
-    changeRadio,
-    changeSelect,
-    changeText,
-    onChangeControl,
-    onEffectControl,
-    onSpanTextInput,
-    onToggle
-} from "../common/listeners.mjs";
+import {onChangeControl, onEffectControl, onSpanTextInput, onToggle} from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
 import {buildRollContent, SWSEActor} from "./actor.mjs";
@@ -284,7 +275,19 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
         html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
+        html.find('[data-action="open-actor"]').click(this._onOpenActor.bind(this));
         //html.find()
+    }
+
+    async _onOpenActor(event){
+        event.preventDefault();
+        event.stopPropagation();
+
+        const a = event.currentTarget;
+        const actorId = a.dataset.actorId;
+        const actor = game.actors.get(actorId)
+
+        actor.sheet.render(true)
     }
 
     async _onCreateFollower(event){
@@ -332,9 +335,15 @@ export class SWSEActorSheet extends ActorSheet {
             actor.addChange({key:"provided", value: provide})
         }
 
+        let followerTrait = (await actor.addItems({
+            returnAdded: true, items: [
+                {name: "Follower", type: "trait", system: {changes: [{key: "leader", value: true}]}}
+            ]
+        }))[0];
 
-        await this.object.addActorLink(actor, "follower", itemId);
-        await actor.addActorLink(this.object, "leader", itemId);
+
+        await this.object.addActorLink(actor, "follower", itemId, {skipReciprocal: true});
+        await actor.addActorLink(this.object, "leader", followerTrait.id, {skipReciprocal: true});
 
         actor.sheet.render(true)
     }

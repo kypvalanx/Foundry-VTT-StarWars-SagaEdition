@@ -133,9 +133,14 @@ export async function resolveEntity(item) {
     let payload = undefined
 
     if(isFullItem(item)){
-        entity = item;
-        itemName = item.name;
+        if(item instanceof SWSEItem){
+            entity = item;
+            itemName = item.name;
+        } else {
 
+            entity = await SWSEItem.create(item);
+            itemName = entity.name;
+        }
     } else if (item.duplicate) {
         entity = item.item.clone();
         itemName = entity.name;
