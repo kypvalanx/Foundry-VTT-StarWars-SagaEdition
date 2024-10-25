@@ -19,7 +19,7 @@ import {
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
-import {getAvailableTrainedSkillCount, SkillDelegate} from "./skill-handler.mjs";
+import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
     CLASSES_BY_STARTING_FEAT,
@@ -102,6 +102,14 @@ function getTooltipSections(roll) {
  * @extends {Actor}
  */
 export class SWSEActor extends Actor {
+
+    _onDelete(options, userId) {
+        for (const actorLink of this.actorLinks) {
+            const actor = game.actors.get(actorLink.id);
+            this.removeActorLink(actor)
+        }
+        return super._onDelete(options, userId);
+    }
 
     _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
         super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
@@ -705,7 +713,7 @@ export class SWSEActor extends Actor {
      * @param context {Object}
      */
     async removeActorLink(actor, context = {}) {
-        if (!context.skipReciprocal) {
+        if (!context.skipReciprocal && actor) {
             await actor.removeActorLink(this, {skipReciprocal: true});
         }
         let update = {};
