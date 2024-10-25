@@ -178,10 +178,10 @@ function getChangesFromDocuments(entity, data) {
  * @param data
  * @param data.entity {object}
  * @param data.attributeKey {string}
- * @param data.attributeFilter {function|string}
- * @param data.itemFilter {function} filters out child items based on a filter
- * @param data.reduce {string}
- * @param data.recursive {boolean}
+ * @param [data.attributeFilter] {function|string}
+ * @param [data.itemFilter] {function} filters out child items based on a filter
+ * @param [data.reduce] {string}
+ * @param [data.recursive] {boolean}
  * @returns {*|string|[]|*[]}
  */
 export function getInheritableAttribute(data = {}) {

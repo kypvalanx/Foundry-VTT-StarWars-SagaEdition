@@ -155,6 +155,36 @@ export class SWSEItem extends Item {
         }
     }
 
+    get itemActions(){
+        const actions = [];
+
+        if(this.parent){
+            const follower = getInheritableAttribute({entity: this, attributeKey: "follower", reduce: "OR"});
+
+            if(follower){
+                let actorFound = false;
+                for (const actorLink of this.parent.system.actorLinks) {
+                    if(actorLink.slot === this.id){
+                        const actor = game.actors.get(actorLink.id)
+                        if(actor){
+                            console.log(actor)
+                            actions.push({action:"open-actor", optionString:`data-actor-id="${actor.id}"`, buttonText:`Open ${actor.name}`})
+                            actorFound = true;
+                        }
+                    }
+                }
+                if(!actorFound){
+                    actions.push({action:"create-follower", optionString:`data-item-id="${this.id}"`, buttonText:"Create Follower"})
+                }
+            }
+
+
+        }
+
+
+        return actions;
+    }
+
     get inheritedChanges() {
         return this.getCached("inheritedChanges", () => {
             return getInheritableAttribute({

@@ -37,6 +37,10 @@
                     <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>
             {{/ifContains}}
 
+            {{#each item.itemActions as |action id|}}
+                <div><button type="button" data-action="{{action.action}}" {{{action.optionString}}}>{{action.buttonText}}</button></div>
+            {{/each}}
+
         </div>
         <div class="item-controls">
             {{#if quantity}}

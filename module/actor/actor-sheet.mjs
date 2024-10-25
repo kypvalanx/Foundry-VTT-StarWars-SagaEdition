@@ -25,7 +25,8 @@ import {
 } from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
-import {buildRollContent} from "./actor.mjs";
+import {buildRollContent, SWSEActor} from "./actor.mjs";
+import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -282,8 +283,61 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
+        html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
+        //html.find()
     }
 
+    async _onCreateFollower(event){
+        event.preventDefault();
+        event.stopPropagation();
+        console.log("Create Follower");
+
+        const a = event.currentTarget;
+        const itemId = a.dataset.itemId;
+
+        const sourceItem = this.object.items.find(item => item._id === itemId);
+
+
+
+
+
+
+        const actor = await SWSEActor.create({
+            name: this.object.name + "'s Follower",
+            type: "character",
+            img: "artwork/character-profile.jpg",
+            system: {
+                follower: true
+            }
+        })
+
+
+        const provided = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvided", reduce:"VALUES"})
+        const providedItems = provided.map(s => {
+            return {
+                name: s.split(":")[0],
+                type: s.split(":")[1]
+            }
+        })
+        actor.addItems({items: providedItems});
+
+
+        const trainedSkills = getInheritableAttribute({entity: sourceItem, attributeKey: "followerTrainedSkills", reduce:"VALUES"})
+        for (const trainedSkill of trainedSkills) {
+            actor.addChange({key:"automaticTrainedSkill", value: trainedSkill})
+        }
+
+        const provides = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvides", reduce:"VALUES"})
+        for (const provide of provides) {
+            actor.addChange({key:"provided", value: provide})
+        }
+
+
+        await this.object.addActorLink(actor, "follower", itemId);
+        await actor.addActorLink(this.object, "leader", itemId);
+
+        actor.sheet.render(true)
+    }
 
     _onReload(event) {
         event.preventDefault();
@@ -332,6 +386,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onToChat(event) {
         event.preventDefault();
+        event.stopPropagation();
         const a = event.currentTarget;
         const type = a.dataset.actionType;
 
@@ -726,6 +781,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _adjustActorPropertyBySpan(event) {
         event.preventDefault();
+        event.stopPropagation();
         const el = event.currentTarget;
 
         this._mouseWheelAdd(event.originalEvent, el);
@@ -758,6 +814,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _adjustItemAttributeBySpan(event) {
         event.preventDefault();
+        event.stopPropagation();
         const el = event.currentTarget;
 
         this._mouseWheelAdd(event.originalEvent, el);
@@ -811,6 +868,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onDropActor(event, data) {
         event.preventDefault();
+        event.stopPropagation();
         if (!this.actor.isOwner) return false;
 
         if (!vehicleActorTypes.includes(this.actor.type)) {
@@ -996,6 +1054,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     _onItemCreate(event) {
         event.preventDefault();
+        event.stopPropagation();
 
         const header = event.currentTarget;
         // Get the type of item to create.
@@ -1024,6 +1083,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     async _onRoll(event) {
         event.preventDefault();
+        event.stopPropagation();
         const element = event.currentTarget;
 
         const dataset = element.dataset;
@@ -1091,6 +1151,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onCrewControl(event) {
         event.preventDefault();
+        event.stopPropagation();
         const a = event.currentTarget;
 
         // Delete race
@@ -1103,6 +1164,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onOpenCompendium(event) {
         event.preventDefault();
+        event.stopPropagation();
         const a = event.currentTarget;
         const target = a.dataset.actionTarget;
         let newVar = game.packs.filter(pack => pack.collection.startsWith(target))[0];
@@ -1117,6 +1179,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     async _onItemDelete(event) {
         event.preventDefault();
+        event.stopPropagation();
         const button = event.currentTarget;
         if (button.disabled) return;
 
@@ -1146,6 +1209,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     async removeClassLevel(event, sheet) {
         event.preventDefault();
+        event.stopPropagation();
         const button = event.currentTarget;
         if (button.disabled) return;
 
@@ -1178,6 +1242,7 @@ export class SWSEActorSheet extends ActorSheet {
      */
     _onItemEdit(event) {
         event.preventDefault();
+        event.stopPropagation();
         let itemId = event.currentTarget.dataset.itemId
         if (!itemId) {
             const li = event.currentTarget.closest(".item");
@@ -1189,6 +1254,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onDecreaseItemQuantity(event) {
         event.preventDefault();
+        event.stopPropagation();
         let itemId = event.currentTarget.dataset.itemId
         if (!itemId) {
             const li = event.currentTarget.closest(".item");
@@ -1200,6 +1266,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onIncreaseItemQuantity(event) {
         event.preventDefault();
+        event.stopPropagation();
         let itemId = event.currentTarget.dataset.itemId
         if (!itemId) {
             const li = event.currentTarget.closest(".item");
@@ -1211,6 +1278,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onToggleUse(event) {
         event.preventDefault();
+        event.stopPropagation();
         let toggle = event.currentTarget.checked
         let key = event.currentTarget.dataset.name
         const li = event.currentTarget.closest(".item");
@@ -1220,6 +1288,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     _onToggleSecondWind(event) {
         event.preventDefault();
+        event.stopPropagation();
         let toggle = event.currentTarget.checked
         let key = event.currentTarget.dataset.name
         let data = {};
