@@ -216,7 +216,7 @@ export class Attack {
                 return new UnarmedAttack(this.actorId);
             }
 
-            return actor.items.get(this.weaponId);
+            return actor.items.find(i => i.uuid === this.weaponId);
         })
     }
 

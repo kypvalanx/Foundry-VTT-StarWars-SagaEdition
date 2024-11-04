@@ -45,24 +45,24 @@ export class AttackDelegate {
      * @returns {Promise<void>}
      */
     generateAttacks(actor) {
-        let weaponIds = actor.equippedWeapons
-            .map(item => item.id)
+        let weaponUuids = actor.equippedWeapons
+            .map(item => item.uuid)
 
         let beastAttackIds = actor.naturalWeapons
-            .map(item => item.id);
+            .map(item => item.uuid);
 
         if (beastAttackIds.length > 0) {
-            weaponIds.push(...beastAttackIds)
+            weaponUuids.push(...beastAttackIds)
         } else {
-            weaponIds.push("Unarmed Attack")
+            weaponUuids.push("Unarmed Attack")
         }
 
         const actorUUID = actor.uuid;
-        let attacks = weaponIds.map(id => Attack.create({actorId: actorUUID, operatorId: actorUUID, weaponId: id}));
+        let attacks = weaponUuids.map(uuid => Attack.create({actorId: actorUUID, operatorId: actorUUID, weaponId: uuid}));
 
         let items = actor.getItemsFromRelationships()
 
-        attacks.push(...items.map(item => Attack.create({actorId: actorUUID, weaponId: item.id, operatorId: actorUUID, parentId: item.parent?.id, options: {}})))
+        attacks.push(...items.map(item => Attack.create({actorId: actorUUID, weaponId: item.uuid, operatorId: actorUUID, parentId: item.parent?.uuid, options: {}})))
         return attacks;
     }
 
@@ -86,7 +86,7 @@ export class AttackDelegate {
     generateVehicleAttacks(vehicle) {
         return vehicle.getItemsFromRelationships()
             .map(weapon => {
-                return Attack.create({actorId: vehicle.id, weaponId: weapon.id, parentId:weapon.parent?.id, operatorId:vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).id})
+                return Attack.create({actorId: vehicle.uuid, weaponId: weapon.uuid, parentId:weapon.parent?.uuid, operatorId:vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).uuid})
             });
     }
 
