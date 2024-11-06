@@ -39,20 +39,22 @@ export async function withTestVehicle(param, options= {}) {
     }
 }
 
-export function getMockEvent() {
-    const newVar = {};
+export function getMockEvent(data = {}) {
+    const newVar = data;
     newVar.preventDefault = () => {
+    };
+    newVar.stopPropagation = () => {
     };
     return newVar;
 }
 
 export function hasItems(assert, actual, expected) {
-    actual = actual.map(i => i.name)
+    actual = actual.map(i => i.name || i.value)
     assert.includeMembers(actual, expected)
 }
 
 export async function actorSheetTests(quench) {
-    quench.registerBatch("actor.actor-sheet.character",
+    quench.registerBatch("actor.actor-sheet.character.drop-item",
         (context) => {
             const {describe, it, assert, expect, should} = context;
             describe("Actor", () => {
@@ -137,7 +139,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class",
                                     answers: ["Force Sensitivity"]})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class", answers: ["Armor Proficiency (Light)"]})
-                                 hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
+                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
                                     "Bonus Feat (Weapon Proficiency (Pistols))",
                                     "Bonus Feat (Weapon Proficiency (Simple Weapons))",
                                     "Jedi",
@@ -272,8 +274,6 @@ export async function actorSheetTests(quench) {
                             });
                         });
 
-
-
                         it('should resolve beast attacks correctly', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
@@ -352,5 +352,80 @@ export async function actorSheetTests(quench) {
                 })
             })
 
+        })
+
+    quench.registerBatch("actor.actor-sheet.character.follower-create",
+        (context) => {
+            const {describe, it, assert, expect, should} = context;
+            describe("Actor", () => {
+                describe("._sheet", () => {
+                    describe("._onFollowerCreate", () => {
+
+                        it('should add all creation Provided items when a follower is created', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                                let itemId = response[0].id;
+                                let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                                    currentTarget:{dataset: {itemId}},
+                                    skipRender:true
+                                }))
+
+                                hasItems(assert, follower.items, [
+                                    "Follower",
+                                    "Weapon Proficiency (Rifles)"])
+
+                                hasItems(assert, follower.changes, [
+                                    "Armor Proficiency Feat:1"])
+                            });
+                        });
+
+                        it('should add all current follower provides when a follower is created', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
+                                let itemId = response[0].id;
+                                let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                                    currentTarget:{dataset: {itemId}},
+                                    skipRender:true
+                                }))
+
+                                hasItems(assert, follower.items, [
+                                    "Coordinated Attack"])
+                            });
+                        });
+
+                        it('should add new follower provides when the change is added', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
+
+                                hasItems(assert, actor.items, [
+                                    "Bonus Feat (Point-Blank Shot)",
+                                    "Bonus Feat (Weapon Proficiency (Pistols))",
+                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Point-Blank Shot",
+                                    "Scoundrel",
+                                    "Sneak Attack",
+                                    "Sneak Attack",
+                                    "Weapon Proficiency (Pistols)",
+                                    "Weapon Proficiency (Simple Weapons)"])
+                            });
+                        });
+                    })
+
+                })
+            })
         })
 }

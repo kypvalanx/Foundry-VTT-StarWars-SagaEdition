@@ -1059,7 +1059,10 @@ export class SWSEItem extends Item {
     }
     /**
      *
-     * @param parent {SWSEItem}
+     * @param parent {Object}
+     * @param parent.name {String}
+     * @param parent.id {String}
+     * @param parent.type {String}
      */
     async setParent(parent, unlocked) {
         if (!parent) {
