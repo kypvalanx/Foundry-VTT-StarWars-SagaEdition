@@ -1,3 +1,5 @@
-2024/11/06-10:34:39.708 c18 Recovering log #6
-2024/11/06-10:34:39.710 c18 Delete type=0 #6
-2024/11/06-10:34:39.710 c18 Delete type=3 #4
+2024/11/06-11:38:53.408 af8 Recovering log #3
+2024/11/06-11:38:53.412 af8 Level-0 table #5: started
+2024/11/06-11:38:53.427 af8 Level-0 table #5: 1231739 bytes OK
+2024/11/06-11:38:53.429 af8 Delete type=0 #3
+2024/11/06-11:38:53.429 af8 Delete type=3 #2

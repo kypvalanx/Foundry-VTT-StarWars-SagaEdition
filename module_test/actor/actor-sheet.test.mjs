@@ -52,6 +52,10 @@ export function hasItems(assert, actual, expected) {
     actual = actual.map(i => i.name || i.value)
     assert.includeMembers(actual, expected)
 }
+export function notHaveItems(assert, actual, expected) {
+    actual = actual.map(i => i.name || i.value)
+    assert.notIncludeMembers(actual, expected)
+}
 
 export async function actorSheetTests(quench) {
     quench.registerBatch("actor.actor-sheet.character.drop-item",
@@ -375,10 +379,9 @@ export async function actorSheetTests(quench) {
 
                                 hasItems(assert, follower.items, [
                                     "Follower",
-                                    "Weapon Proficiency (Rifles)"])
-
-                                hasItems(assert, follower.changes, [
-                                    "Armor Proficiency Feat:1"])
+                                    "Weapon Proficiency (Rifles)",
+                                    "Provides (Armor Proficiency Feat:1)"
+                                ])
                             });
                         });
 
@@ -405,22 +408,44 @@ export async function actorSheetTests(quench) {
                         it('should add new follower provides when the change is added', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Sneak Attack", type: "talent"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                                let itemId = response[0].id;
+                                let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                                    currentTarget:{dataset: {itemId}},
+                                    skipRender:true
+                                }))
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
 
-                                hasItems(assert, actor.items, [
-                                    "Bonus Feat (Point-Blank Shot)",
-                                    "Bonus Feat (Weapon Proficiency (Pistols))",
-                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
-                                    "Point-Blank Shot",
-                                    "Scoundrel",
-                                    "Sneak Attack",
-                                    "Sneak Attack",
-                                    "Weapon Proficiency (Pistols)",
-                                    "Weapon Proficiency (Simple Weapons)"])
+                                hasItems(assert, follower.items, [
+                                    "Coordinated Attack"])
+                            });
+                        });
+
+
+                        it('should remove follower provides when the provider is removed', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                                let itemId = response[0].id;
+                                let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                                    currentTarget:{dataset: {itemId}},
+                                    skipRender:true
+                                }))
+                                let coordinatedTactic = await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
+                                let coordinatedTacticId = coordinatedTactic[0].id;
+
+                                await actor.removeItem(coordinatedTacticId)
+
+                                notHaveItems(assert, follower.items, [
+                                    "Coordinated Attack"])
                             });
                         });
                     })

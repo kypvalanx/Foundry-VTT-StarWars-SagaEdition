@@ -159,7 +159,7 @@ export class SWSEItem extends Item {
         const actions = [];
 
         if(this.parent){
-            const follower = getInheritableAttribute({entity: this, attributeKey: "follower", reduce: "OR"});
+            const follower = getInheritableAttribute({entity: this, attributeKey: "createFollower", reduce: "OR"});
 
             if(follower){
                 let actorFound = false;
