@@ -699,7 +699,7 @@ export class SWSEActor extends Actor {
      */
     get linkedActors(){
         return this.getCached("linkedActors", () => {
-            return this.actorLinks.map(actorLink => getDocumentByUuid(actorLink.uuid));
+            return this.actorLinks.map(actorLink => getDocumentByUuid(actorLink.uuid)).filter(actorLink => !!actorLink);
         })
     }
 
