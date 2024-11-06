@@ -10,7 +10,8 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveWeight, toChat,
+    resolveWeight,
+    toChat,
     toNumber,
     toShortAttribute,
     unique,
@@ -693,6 +694,15 @@ export class SWSEActor extends Actor {
         })
     }
 
+    /**
+     * @return [SWSEActor]
+     */
+    get linkedActors(){
+        return this.getCached("linkedActors", () => {
+            return this.actorLinks.map(actorLink => getDocumentByUuid(actorLink.uuid));
+        })
+    }
+
     get actorLinks() {
         return this.getCached("actorLinks", () => {
             return Array.isArray(this.system.actorLinks) ? this.system.actorLinks || [] : [];
@@ -1034,17 +1044,29 @@ export class SWSEActor extends Actor {
     async removeItems(itemIds) {
         let ids = [];
         ids.push(...itemIds)
+
         for (let itemId of itemIds) {
             await this.removeChildItems(itemId);
-            ids.push(...await this.removeSuppliedItems(itemId));
+            ids.push(...await this.getSuppliedItems(itemId));
+
+            for (const linkedActor of this.linkedActors) {
+                const removedIds = await linkedActor.getSuppliedItems(itemId);
+                linkedActor.deleteEmbeddedDocuments("Item", removedIds);
+            }
         }
         await this.deleteEmbeddedDocuments("Item", ids);
     }
 
     async removeItem(itemId) {
         await this.removeChildItems(itemId);
-        let ids = await this.removeSuppliedItems(itemId);
+        let ids = await this.getSuppliedItems(itemId);
         ids.push(itemId);
+
+        for (const linkedActor of this.linkedActors) {
+            const removedIds = await linkedActor.getSuppliedItems(itemId);
+            linkedActor.deleteEmbeddedDocuments("Item", removedIds);
+        }
+
         await this.deleteEmbeddedDocuments("Item", ids);
     }
 
@@ -1069,7 +1091,7 @@ export class SWSEActor extends Actor {
         }
     }
 
-    async removeSuppliedItems(id) {
+    async getSuppliedItems(id) {
         return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
@@ -2789,6 +2811,11 @@ export class SWSEActor extends Actor {
         const lazyAdd = [];
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
+
+            if(providedItem.parent){
+                parent = providedItem.parent;
+            }
+
             const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, parent, criteria);
             if (toBeAdded) {
                 lazyAdd.push(...toBeAdded);
@@ -2810,20 +2837,23 @@ export class SWSEActor extends Actor {
 
     /**
      *
-     * @param providedItem
-     * @param parentItem
+     * @param item
+     * @param parent
+     * @param parent.name {String}
+     * @param parent.id {String}
+     * @param parent.type {String}
      * @param options
      * @return {Promise<{addedItem, notificationMessage: (string|string), toBeAdded: *[]}|{}|{addedItem: undefined, notificationMessage: string}>}
      */
-    async addItem(providedItem, parentItem, options) {
-        //TODO FUTURE WORK let namedCrew = providedItem.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
-        let {payload, itemName, entity, createdItem} = await resolveEntity(providedItem);
+    async addItem(item, parent, options) {
+        //TODO FUTURE WORK let namedCrew = item.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
+        let {payload, itemName, entity, createdItem} = await resolveEntity(item);
 
         if (!entity) {
             if (options.suppressWarnings) {
-                console.debug(`attempted to add ${JSON.stringify(providedItem)}`)
+                console.debug(`attempted to add ${JSON.stringify(item)}`)
             } else {
-                console.warn(`attempted to add ${JSON.stringify(providedItem)}`)
+                console.warn(`attempted to add ${JSON.stringify(item)}`)
             }
             return {};
         }
@@ -2835,7 +2865,7 @@ export class SWSEActor extends Actor {
                 levels.push(...(clazz.levelsTaken || []))
             }
 
-            let nextLevel = providedItem.firstLevel ? 1 : Math.max(...levels) + 1
+            let nextLevel = item.firstLevel ? 1 : Math.max(...levels) + 1
 
             let existing = this.itemTypes.class.find(item => item.name === entity.name)
             if (existing) {
@@ -2872,8 +2902,8 @@ export class SWSEActor extends Actor {
             }
         }
 
-        entity.addItemAttributes(providedItem.changes);
-        const providedItems = providedItem.providedItems || [];
+        entity.addItemAttributes(item.changes);
+        const providedItems = item.providedItems || [];
         const automaticItemsWhenItemIsAdded = game.settings.get("swse", "automaticItemsWhenItemIsAdded");
         if (automaticItemsWhenItemIsAdded) {
             automaticItemsWhenItemIsAdded.split(",").forEach(entry => {
@@ -2889,21 +2919,21 @@ export class SWSEActor extends Actor {
             })
         }
         entity.addProvidedItems(providedItems);
-        if (parentItem) await entity.setParent(parentItem, providedItem.unlocked);
-        else if (providedItem.granted) entity.setGranted(providedItem.granted);
-        entity.setPrerequisite(providedItem.prerequisite); //TODO this only sets if it's defined... idk if i like how this works
+        if (parent) await entity.setParent(parent, item.unlocked);
+        else if (item.granted) entity.setGranted(item.granted);
+        entity.setPrerequisite(item.prerequisite); //TODO this only sets if it's defined... idk if i like how this works
 
         //TODO payload should be deprecated in favor of payloads
         if (!!payload) {
             entity.setChoice(payload)
             await entity.setPayload(payload);
         }
-        for (let payload of Object.entries(providedItem.payloads || {})) {
+        for (let payload of Object.entries(item.payloads || {})) {
             entity.setChoice(payload[1]);
             await entity.setPayload(payload[1], payload[0]);
         }
 
-        let equip = providedItem.equip;
+        let equip = item.equip;
         if (equip) {
             entity.system.equipped = equip
         }
@@ -2913,13 +2943,17 @@ export class SWSEActor extends Actor {
 
 
         let childOptions = JSON.parse(JSON.stringify(options))
-        childOptions.itemAnswers = providedItem.answers;
-        childOptions.modifications = providedItem.modifications;
+        childOptions.itemAnswers = item.answers;
+        childOptions.modifications = item.modifications;
         let {addedItem, toBeAdded} = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
         let notificationMessage = addedItem ? `<li>${addedItem.finalName}</li>` : "";
 
-        return {notificationMessage, addedItem, toBeAdded};
+        let addedToFollowers = []
+
+        getInheritableAttribute({entity: addedItem, attributeKey:""})
+
+        return {notificationMessage, addedItem, toBeAdded, addedToFollowers};
     }
 
     get warnings() {

@@ -305,7 +305,7 @@ export class SWSEActorSheet extends ActorSheet {
 
 
 
-        const actor = await SWSEActor.create({
+        const follower = await SWSEActor.create({
             name: this.object.name + "'s Follower",
             type: "character",
             img: "artwork/character-profile.jpg",
@@ -315,37 +315,49 @@ export class SWSEActorSheet extends ActorSheet {
         })
 
 
-        const provided = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvided", reduce:"VALUES"})
-        const providedItems = provided.map(s => {
-            return {
-                name: s.split(":")[0],
-                type: s.split(":")[1]
+        const provided = getInheritableAttribute({entity: this.object, attributeKey: "followerProvides"})
+
+        const provideTypes = ['FEAT', 'TALENT']
+
+
+        const providedItems = []
+        //const providedChanges = [];
+
+        provided.push(...getInheritableAttribute({entity: sourceItem, attributeKey: "followerCreationProvides"}))
+        provided.forEach(s => {
+            const toks = s.value.split(":");
+            if(provideTypes.includes(toks[0].toUpperCase())){
+                providedItems.push({name: toks[1], type: toks[0]})
+                return;
             }
+            follower.addChange({key:"provides", value: s.value})
         })
-        actor.addItems({items: providedItems});
+        follower.addItems({items: providedItems, provided: true});
 
 
-        const trainedSkills = getInheritableAttribute({entity: sourceItem, attributeKey: "followerTrainedSkills", reduce:"VALUES"})
-        for (const trainedSkill of trainedSkills) {
-            actor.addChange({key:"automaticTrainedSkill", value: trainedSkill})
-        }
+        // const trainedSkills = getInheritableAttribute({entity: sourceItem, attributeKey: "followerTrainedSkills", reduce:"VALUES"})
+        // for (const trainedSkill of trainedSkills) {
+        //     follower.addChange({key:"automaticTrainedSkill", value: trainedSkill})
+        // }
 
-        const provides = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvides", reduce:"VALUES"})
-        for (const provide of provides) {
-            actor.addChange({key:"provided", value: provide})
-        }
+        // const provides = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvides", reduce:"VALUES"})
+        // for (const provide of provides) {
+        //     follower.addChange({key:"provided", value: provide})
+        // }
 
-        let followerTrait = (await actor.addItems({
+        let followerTrait = (await follower.addItems({
             returnAdded: true, items: [
-                {name: "Follower", type: "trait", system: {changes: [{key: "leader", value: true}]}}
+                {name: "Follower", type: "trait", system: {changes: [{key: "follower", value: true}]}}
             ]
         }))[0];
 
 
-        await this.object.addActorLink(actor, "follower", itemId, {skipReciprocal: true});
-        await actor.addActorLink(this.object, "leader", followerTrait.id, {skipReciprocal: true});
+        await this.object.addActorLink(follower, "follower", itemId, {skipReciprocal: true});
+        await follower.addActorLink(this.object, "leader", followerTrait.id, {skipReciprocal: true});
 
-        actor.sheet.render(true)
+        follower.sheet.render(!event.skipRender)
+
+        return follower;
     }
 
     _onReload(event) {
@@ -948,10 +960,10 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
-        await this.object.addItems({
+        return await this.object.addItems({
             newFromCompendium: true,
             answers: data.answers,
-            items: [data]
+            items: [data], returnAdded: true
         });
     }
 
