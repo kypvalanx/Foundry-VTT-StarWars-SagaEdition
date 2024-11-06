@@ -1064,7 +1064,7 @@ export class SWSEActor extends Actor {
 
         for (const linkedActor of this.linkedActors) {
             const removedIds = await linkedActor.getSuppliedItems(itemId);
-            linkedActor.deleteEmbeddedDocuments("Item", removedIds);
+            await linkedActor.deleteEmbeddedDocuments("Item", removedIds);
         }
 
         await this.deleteEmbeddedDocuments("Item", ids);
@@ -2828,12 +2828,50 @@ export class SWSEActor extends Actor {
         if (lazyAdd.length > 0) {
             addedItems.push(...await this.createEmbeddedDocuments("Item", lazyAdd))
         }
+
+        let addedToFollowers = getInheritableAttribute({entity: addedItems, attributeKey: "followerProvides"})
+        if(addedToFollowers.length > 0) {
+            for (const linkedActor of this.linkedActors) {
+                if(linkedActor.isFollower){
+                    await linkedActor.addProvided(addedToFollowers)
+                }
+            }
+        }
+
+
         if (criteria.returnAdded) {
             return addedItems;
         }
         return notificationMessages;
     }
 
+    get isFollower(){
+        return getInheritableAttribute({entity: this, attributeKey:"follower", reduce: "OR"})
+    }
+
+
+    /**
+     *
+     * @param provided
+     * @return {Promise<void>}
+     */
+    async addProvided(provided){
+        const provideTypes = ['FEAT', 'TALENT']
+        const providedItems = []
+        for (const s of provided) {
+            const toks = s.value.split(":");
+            const parent = {name: s.sourceString, id: s.source ,type: "UNKNOWN"}
+
+            if(provideTypes.includes(toks[0].toUpperCase())){
+                providedItems.push({name: toks[1], type: toks[0], parent: parent})
+                continue;
+            }
+
+            providedItems.push({name: "Provides ("+s.value+")", type: "trait", system: {changes: [{key: "provides", value: s.value}]}, parent:parent})
+            //await this.addChange({key: "provides", value: s.value})
+        }
+        await this.addItems({items: providedItems, provided: true});
+    }
 
     /**
      *
@@ -2949,11 +2987,9 @@ export class SWSEActor extends Actor {
 
         let notificationMessage = addedItem ? `<li>${addedItem.finalName}</li>` : "";
 
-        let addedToFollowers = []
 
-        getInheritableAttribute({entity: addedItem, attributeKey:""})
 
-        return {notificationMessage, addedItem, toBeAdded, addedToFollowers};
+        return {notificationMessage, addedItem, toBeAdded};
     }
 
     get warnings() {

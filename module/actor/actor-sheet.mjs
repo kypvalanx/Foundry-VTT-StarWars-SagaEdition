@@ -317,22 +317,13 @@ export class SWSEActorSheet extends ActorSheet {
 
         const provided = getInheritableAttribute({entity: this.object, attributeKey: "followerProvides"})
 
-        const provideTypes = ['FEAT', 'TALENT']
 
-
-        const providedItems = []
         //const providedChanges = [];
 
         provided.push(...getInheritableAttribute({entity: sourceItem, attributeKey: "followerCreationProvides"}))
-        provided.forEach(s => {
-            const toks = s.value.split(":");
-            if(provideTypes.includes(toks[0].toUpperCase())){
-                providedItems.push({name: toks[1], type: toks[0]})
-                return;
-            }
-            follower.addChange({key:"provides", value: s.value})
-        })
-        follower.addItems({items: providedItems, provided: true});
+
+
+        await follower.addProvided(provided)
 
 
         // const trainedSkills = getInheritableAttribute({entity: sourceItem, attributeKey: "followerTrainedSkills", reduce:"VALUES"})
