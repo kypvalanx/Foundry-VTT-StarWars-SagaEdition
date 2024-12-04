@@ -49,7 +49,7 @@
                 </div>
             {{/ifEquals}}
             {{#unlessEquals actor.system.finalAttributeGenerationType "Manual"}}
-                {{#if actor.remainingLevelUpBonuses.[Ability Score Level Bonus]}}
+                {{#if actor.availableItems.[Ability Score Level Bonus]}}
                     <button type="button" class="flex-0 editor" style="flex-basis:180px" data-action="level-up-bonus" title="Select Level Up Attribute Bonus for Level">Level Up Bonus</button>
                 {{/if}}
             {{/unlessEquals}}
