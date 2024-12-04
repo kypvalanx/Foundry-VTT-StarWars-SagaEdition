@@ -1,75 +1,84 @@
 <div class="flexrow">
     <h2><label class="resource-label">Classes
-    </label></h2><button type="button" class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>
+    </label></h2>
+    <button type="button" class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>
 </div>
 <table class="fixed">
     <thead>
     <tr>
         <th></th>
         <th>Class</th>
-        <th>Class HP</th>
-        <th>Re-roll HP</th>
-        <th>Attribute Bonus HP</th>
-        <th>Total HP</th>
-        <!--                  <th>First Level Class</th> -->
+        {{#unless actor.isFollower}}
+            <th>Class HP</th>
+            <th>Re-roll HP</th>
+            <th>Attribute Bonus HP</th>
+            <th>Total HP</th>
+        {{/unless}}
         <th>
             <a data-action="compendium" data-type="Item" data-filter="-type:class"
                title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a></th>
     </tr>
     </thead>
     <tbody>
-    <!-- <ol class="items-list charclass-list"> -->
     {{#each actor.classes as |class id|}}
         <tr class="charclass item" data-item-id="{{class.id}}">
             <td class="item-image"><img src="{{class.img}}" title="{{class.name}}" width="24"
                                         height="24" alt="{{class.name}}"/></td>
             <td><h4 class="item-name">{{class.name}}</h4></td>
-            <td><span class="text-box {{#if class.canRerollHealth}}item-action short{{/if}} center"
-                      data-action="update-level-attribute"
-                      data-context="health"
-                      data-item="{{class.id}}" data-attribute="rolledHp" data-level="{{class.classLevel}}"
-                      data-dtype="Number">{{class.classLevelHealth}}</span>
-            </td>
-            <td>
-                {{#if class.canRerollHealth}}
-                    <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}" data-context="health"
-                       data-item="{{class.id}}" data-item-attribute="rolledHp" data-level="{{class.classLevel}}"
-                       data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
-                    </a>{{/if}}</td>
-            <td>{{../actor.system.attributes.con.mod}}</td>
-            <td>{{sum class.classLevelHealth ../actor.system.attributes.con.mod}}</td>
+            {{#unless ../actor.isFollower}}
+                <td><span class="text-box {{#if class.canRerollHealth}}item-action short{{/if}} center"
+                          data-action="update-level-attribute"
+                          data-context="health"
+                          data-item="{{class.id}}" data-attribute="rolledHp" data-level="{{class.classLevel}}"
+                          data-dtype="Number">{{class.classLevelHealth}}</span>
+                </td>
+                <td>
+                    {{#if class.canRerollHealth}}
+                        <a class="rollable" title="Re-roll {{class.levelUpHitPoints}}" data-context="health"
+                           data-item="{{class.id}}" data-item-attribute="rolledHp" data-level="{{class.classLevel}}"
+                           data-roll="{{class.levelUpHitPoints}}"><i class="fas fa-dice"></i>
+                        </a>{{/if}}</td>
+                <td>{{../actor.system.attributes.con.mod}}</td>
+                <td>{{sum class.classLevelHealth ../actor.system.attributes.con.mod}}</td>
+            {{/unless}}
             <td class="item-controls">
                 <a data-action="view" class="item-control" title="View Class Description"><i
                         class="fas fa-edit"></i></a>
-                <a class="item-control item-duplicate" title="Copy Class"><i
-                        class="fas fa-plus"></i></a>
+
+                {{#unless ../actor.isFollower}}
+                    <a class="item-control item-duplicate" title="Copy Class"><i
+                            class="fas fa-plus"></i></a>
+
+                {{/unless}}
                 {{#if class.isLatest}}
                     <a data-action="remove-class-level" title="Delete Class"><i
                             class="fas fa-trash"></i></a>{{/if}}
             </td>
         </tr>
     {{/each}}
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td title="these bonuses come from feats, traits, and equipped items.">Other
-            Bonuses:
-        </td>
-        <td> {{actor.health.other}}</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td>{{actor.health.max}}</td>
-        <td></td>
-    </tr>
-    <!-- </ol> -->
+
+    {{#unless actor.isFollower}}
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td title="these bonuses come from feats, traits, and equipped items.">Other
+                Bonuses:
+            </td>
+            <td> {{actor.health.other}}</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>{{actor.health.max}}</td>
+            <td></td>
+        </tr>
+    {{/unless}}
     </tbody>
 </table>
 

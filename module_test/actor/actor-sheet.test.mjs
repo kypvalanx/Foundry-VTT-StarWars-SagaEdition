@@ -448,6 +448,37 @@ export async function actorSheetTests(quench) {
                                     "Coordinated Attack"])
                             });
                         });
+
+                        it('should throw an exception if a non follower takes a follower template', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Aggressive Follower", type: "class"})
+                                assert.equal(response, false);
+                            });
+                        });
+
+                        it('should throw an exception if a follower takes a regular class', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                                let itemId = response[0].id;
+                                let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                                    currentTarget:{dataset: {itemId}},
+                                    skipRender:true
+                                }))
+                                let coordinatedTactic = await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
+                                let coordinatedTacticId = coordinatedTactic[0].id;
+
+                                await actor.removeItem(coordinatedTacticId)
+
+                                notHaveItems(assert, follower.items, [
+                                    "Coordinated Attack"])
+                            });
+                        });
                     })
 
                 })

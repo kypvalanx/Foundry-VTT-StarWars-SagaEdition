@@ -132,7 +132,7 @@ function isActiveEffect(effect, document) {
 
     if (effect.flags.swse && effect.flags.swse.isLevel){
         const classItem = getClassItemFromClassLevel(effect);
-        return effect.flags.swse.level <= (classItem.system.levelsTaken?.length || 0);
+        return effect.flags.swse.level <= (classItem?.system.levelsTaken?.length || 0);
     }
 
     return effect.flags.swse?.itemModifier || effect.disabled === false;

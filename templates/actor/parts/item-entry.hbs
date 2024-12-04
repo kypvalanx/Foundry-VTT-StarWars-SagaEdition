@@ -1,4 +1,5 @@
-<li class="item flexcol {{#if draggable}}draggable{{/if}}
+
+<li {{#if item.system.supplier}}title="Source: {{item.system.supplier.name}}"{{/if}} class="item flexcol {{#if draggable}}draggable{{/if}}
     {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}{{#if acceptsTemplates}} acceptsTemplates{{/if}}"
     data-item-id="{{item.id}}"
     data-item-name="{{item.name}}"

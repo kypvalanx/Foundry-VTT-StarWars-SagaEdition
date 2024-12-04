@@ -14,11 +14,10 @@ import {
     toChat,
     toNumber,
     toShortAttribute,
-    unique,
-    viewableEntityFromEntityType
+    unique
 } from "../common/util.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
-import {resolveDefenses} from "./defense.mjs";
+import {generateArmorBlock, resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
@@ -28,14 +27,11 @@ import {
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
-    EQUIPABLE_TYPES,
     GRAVITY_CARRY_CAPACITY_MODIFIER,
     KNOWN_WEIRD_UNITS,
-    LIMITED_TO_ONE_TYPES,
     SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
-    skills,
-    vehicleActorTypes
+    skills
 } from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
@@ -46,23 +42,9 @@ import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
+import {VALIDATORS} from "./actor-item-validation.js";
 
-function suppressibleDialog(entity, message, title, suppress) {
-    if (suppress) {
-        console.warn(message, entity)
-    } else {
-        new Dialog({
-            title: title,
-            content: message,
-            buttons: {
-                ok: {
-                    icon: '<i class="fas fa-check"></i>',
-                    label: 'Ok'
-                }
-            }
-        }).render(true);
-    }
-}
+
 
 export function buildRollContent(formula, roll, notes = [], itemFlavor) {
     const tooltip = getTooltipSections(roll)
@@ -104,11 +86,13 @@ function getTooltipSections(roll) {
  */
 export class SWSEActor extends Actor {
 
-    _onDelete(options, userId) {
+    async _onDelete(options, userId) {
+        const links = [];
         for (const actorLink of this.actorLinks) {
             const actor = game.actors.get(actorLink.id);
-            this.removeActorLink(actor)
+            links.push(this.removeActorLink(actor))
         }
+        await Promise.all(links)
         return super._onDelete(options, userId);
     }
 
@@ -545,9 +529,7 @@ export class SWSEActor extends Actor {
     }
 
     get health() {
-        //return this.getCached("health", () => {
         return resolveHealth(this);
-        //});
     }
 
 
@@ -579,12 +561,15 @@ export class SWSEActor extends Actor {
     }
 
     get defense(){
-        let {defense, armors} = resolveDefenses(this);
-        return defense;
+        return resolveDefenses(this);
     }
 
     get armors(){
-        let {defense, armors} = resolveDefenses(this);
+        let armors = []
+
+        for (const armor of this.getEquippedItems().filter(item => item.type === 'armor')) {
+            armors.push(generateArmorBlock(this, armor));
+        }
         return armors;
     }
 
@@ -699,7 +684,7 @@ export class SWSEActor extends Actor {
      */
     get linkedActors(){
         return this.getCached("linkedActors", () => {
-            return this.actorLinks.map(actorLink => getDocumentByUuid(actorLink.uuid)).filter(actorLink => !!actorLink);
+            return new Map(this.actorLinks.map(actorLink => [actorLink.position, getDocumentByUuid(actorLink.uuid)]).filter(actorLink => !!(actorLink[1])));
         })
     }
 
@@ -857,6 +842,7 @@ export class SWSEActor extends Actor {
                 leveledClass.isLatest = false;
                 leveledClass.classLevel = levelOfClass;
                 leveledClass.characterLevel = characterLevel;
+                leveledClass.isFollowerTemplate = co.isFollowerTemplate
 
                 classes.push(leveledClass);
             }
@@ -1049,7 +1035,7 @@ export class SWSEActor extends Actor {
             await this.removeChildItems(itemId);
             ids.push(...await this.getSuppliedItems(itemId));
 
-            for (const linkedActor of this.linkedActors) {
+            for (const linkedActor of this.linkedActors.values()) {
                 const removedIds = await linkedActor.getSuppliedItems(itemId);
                 linkedActor.deleteEmbeddedDocuments("Item", removedIds);
             }
@@ -1062,7 +1048,7 @@ export class SWSEActor extends Actor {
         let ids = await this.getSuppliedItems(itemId);
         ids.push(itemId);
 
-        for (const linkedActor of this.linkedActors) {
+        for (const linkedActor of this.linkedActors.values()) {
             const removedIds = await linkedActor.getSuppliedItems(itemId);
             await linkedActor.deleteEmbeddedDocuments("Item", removedIds);
         }
@@ -2249,306 +2235,22 @@ export class SWSEActor extends Actor {
      * @param context.isUpload {boolean} is this part of a bulk upload (TODO we should probably deprecate this and do a better job of generating the upload data)
      * @param context.isFirstLevel {boolean} does this item represent the first level for a character?
      * @param context.provided {boolean} is this a new item from the compendium
-     * @param context.isAdd {boolean} is this check part of an add?
      * TODO refactor this
      */
     async checkPrerequisitesAndResolveOptions(entity, context) {
-        context.actor = this;
+
         let choices = await activateChoices(entity, context);
         if (!choices.success) {
             return false;
         }
 
-        if(!game.settings.get("swse", "enableHomebrewContent")){
-            const isHomebrew = getInheritableAttribute({
-                entity:entity,
-                attributeKey: "isHomebrew",
-                reduce:"OR"
-            });
-
-            if(isHomebrew){
-                suppressibleDialog.call(this, entity,
-                    `Attempted to add ${entity.finalName} but could not because Homebrew Content is currently disabled`, `Inappropriate Item`,
-                    this.suppressDialog);
-
-                return false;
-            }
-        }
-
-
-
-        if (!context.isUpload && !context.provided) {
-            //Check that the item being added can be added to this actor type and that it hasn't been added too many times
-            if (context.isAdd) {
-                if (!context.skipPrerequisite) {
-                    if (!this.isPermittedForActorType(entity.type)) {
-                        suppressibleDialog.call(this, entity,
-                            `Attempted to add ${entity.finalName} but could not because a ${entity.type} can't be added to a ${this.type}`, `Inappropriate Item`,
-                            this.suppressDialog);
-
-                        return false;
-                    }
-                    if (LIMITED_TO_ONE_TYPES.includes(entity.type)) {
-                        const maximumQuantity = getInheritableAttribute({
-                            entity: entity,
-                            attributeKey: "takeMultipleTimesMax",
-                            reduce: "MAX"
-                        });
-                        const timesTaken = this.countItem(entity);
-                        const isAtMaximumQuantity = timesTaken === maximumQuantity;
-
-                        const takenOnceAndCannotBeTakenMultipleTimes = this.hasItem(entity) && !getInheritableAttribute({
-                            entity: entity,
-                            attributeKey: "takeMultipleTimes"
-                        }).map(a => a.value === "true" || a.value === true).reduce((a, b) => a || b, false);
-
-                        if (takenOnceAndCannotBeTakenMultipleTimes || isAtMaximumQuantity) {
-                            suppressibleDialog.call(this, entity,
-                                `Attempted to add ${entity.finalName} but could not because ${entity.finalName} can't be taken more than ${timesTaken} time${timesTaken > 1 ? 's' : ''}`, `Already Taken ${timesTaken} Time${timesTaken > 1 ? 's' : ''}`,
-                                this.suppressDialog);
-
-                            return false;
-                        }
-                    }
-
-                    //TODO upfront prereq checks should be on classes, feats, talents, and force stuff?  equipable stuff can always be added to a sheet, we check on equip.  verify this in the future
-                    if (!EQUIPABLE_TYPES.includes(entity.type)) {
-                        let meetsPrereqs = meetsPrerequisites(this, entity.system.prerequisite);
-                        if (meetsPrereqs.doesFail) {
-                            if (context.offerOverride) {
-                                let override = await Dialog.wait({
-                                    title: "You Don't Meet the Prerequisites!",
-                                    content: `You do not meet the prerequisites:<br/> ${formatPrerequisites(meetsPrereqs.failureList)}`,
-                                    buttons: {
-                                        ok: {
-                                            icon: '<i class="fas fa-check"></i>',
-                                            label: 'Ok',
-                                            callback: () => {
-                                                return false
-                                            }
-                                        },
-                                        override: {
-                                            icon: '<i class="fas fa-check"></i>',
-                                            label: 'Override',
-                                            callback: () => {
-                                                return true
-                                            }
-                                        }
-                                    }
-                                });
-                                if (!override) {
-                                    return false;
-                                }
-                            } else {
-                                suppressibleDialog.call(this, entity,
-                                    `You do not meet the prerequisites:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You Don't Meet the Prerequisites!`,
-                                    this.suppressDialog);
-                                return false;
-                            }
-
-                        } else if (meetsPrereqs.failureList.length > 0) {
-                            suppressibleDialog.call(this, entity,
-                                `You MAY meet the prerequisites. Check the remaining reqs:<br/>${formatPrerequisites(meetsPrereqs.failureList)}`, `You <b>MAY</b> Meet the Prerequisites!`,
-                                this.suppressDialog);
-                        }
-                    }
-                }
-
-                if (entity.type === 'talent') {
-                    let possibleTalentTrees = new Set();
-                    let possibleProviders = new Set();
-                    let optionString = "";
-
-                    let actorsBonusTrees = getInheritableAttribute({
-                        entity: this,
-                        attributeKey: 'bonusTalentTree',
-                        reduce: "VALUES"
-                    });
-                    if (actorsBonusTrees.includes(entity.system.bonusTalentTree)) {
-                        for (let [id, item] of Object.entries(this.availableItems)) {
-                            if (id.includes("Talent") && item > 0) {
-                                optionString += `<option value="${id}">${id}</option>`
-                                possibleTalentTrees.add(id);
-                            }
-                        }
-                    } else {
-                        for (let talentTree of entity.system.possibleProviders.filter(unique)) {
-                            possibleProviders.add(talentTree);
-                            let count = this.availableItems[talentTree];
-                            if (count && count > 0) {
-                                optionString += `<option value="${talentTree}">${talentTree}</option>`
-                                possibleTalentTrees.add(talentTree);
-                            }
-                        }
-                    }
-
-
-                    if (possibleTalentTrees.size === 0) {
-                        suppressibleDialog.call(this, entity,
-                            `Attempting to add ${entity.finalName}. You don't have more talents available of these types: <br/><ul><li>${Array.from(possibleProviders).join("</li><li>")}</li></ul>`, `Insufficient Talents`,
-                            this.suppressDialog);
-                        return [];
-                    } else if (possibleTalentTrees.size > 1) {
-                        let content = `<p>Select an unused talent source.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                        await Dialog.prompt({
-                            title: "Select an unused talent source.",
-                            content: content,
-                            callback: async (html) => {
-                                let key = html.find("#choice")[0].value;
-                                possibleTalentTrees = new Set();
-                                possibleTalentTrees.add(key);
-                            }
-                        });
-                    }
-                    entity.system.activeCategory = Array.from(possibleTalentTrees)[0];
-
-                }
-
-                if (entity.type === 'feat' && !context.provided) {
-                    let possibleFeatTypes = [];
-
-                    let optionString = "";
-                    let possibleProviders = entity.system.possibleProviders;
-                    if (this.availableItems) {
-                        for (let provider of possibleProviders) {
-                            if (this.availableItems[provider] > 0) {
-                                possibleFeatTypes.push(provider);
-                                optionString += `<option value="${JSON.stringify(provider).replace(/"/g, '&quot;')}">${provider}</option>`;
-                            }
-                        }
-                    }
-
-                    if (possibleFeatTypes.length === 0) {
-                        suppressibleDialog.call(this, entity,
-                            `Attempting to add ${entity.finalName}. You don't have more feats available of these types: <br/><ul><li>${Array.from(possibleProviders).join("</li><li>")}</li></ul>`, `Insufficient Feats`,
-                            this.suppressDialog);
-                        return [];
-                    } else if (possibleFeatTypes.length > 1) {
-                        let content = `<p>Select an unused feat type.</p>
-                        <div><select id='choice'>${optionString}</select> 
-                        </div>`;
-
-                        await Dialog.prompt({
-                            title: "Select an unused feat source.",
-                            content: content,
-                            callback: async (html) => {
-                                let key = html.find("#choice")[0].value;
-                                possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
-                            }
-                        });
-                    }
-
-                    entity.system.activeCategory = possibleFeatTypes;
-                }
-
-                if (entity.type === 'forcePower' || entity.type === 'forceTechnique' || entity.type === 'forceSecret') {
-                    let viewable = viewableEntityFromEntityType(entity.type);
-
-                    let foundCategory = false
-                    for (let category of entity.system.categories || []) {
-                        if (!!this.availableItems[category.value]) {
-                            foundCategory = true;
-                            entity.system.activeCategory = category.value;
-                            break;
-                        }
-                    }
-
-                    if (!foundCategory && !this.availableItems[viewable]) {
-                        await Dialog.prompt({
-                            title: `You can't take any more ${viewable.titleCase()}`,
-                            content: `You can't take any more ${viewable.titleCase()}`,
-                            callback: () => {
-                            }
-                        });
-                        return false;
-                    }
-                    entity.system.activeCategory = entity.system.activeCategory || viewable;
-                }
-
-                if (entity.type === "background" || entity.type === "destiny") {
-                    if (filterItemsByType(this.items.values(), ["background", "destiny"]).length > 0) {
-                        new Dialog({
-                            title: `${entity.type.titleCase()} Selection`,
-                            content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok'
-                                }
-                            }
-                        }).render(true);
-                        return false
-                    }
-                }
-
-                if (entity.type === "vehicleBaseType" || entity.type === "species") {
-                    let type = entity.type;
-                    let viewable = type.replace(/([A-Z])/g, " $1");
-                    if (filterItemsByType(this.items.values(), type).length > 0) {
-                        new Dialog({
-                            title: `${viewable.titleCase()} Selection`,
-                            content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
-                            buttons: {
-                                ok: {
-                                    icon: '<i class="fas fa-check"></i>',
-                                    label: 'Ok'
-                                }
-                            }
-                        }).render(true);
-                        return false
-                    }
-                }
-
-            }
-        }
-
-        if (entity.type === "class") {
-            context.isFirstLevel = this.classes.length === 0;
-            if (!context.skipPrerequisite && !context.isUpload) {
-
-                if (entity.name === "Beast" && !context.isFirstLevel && this.classes.filter(clazz => clazz.name === "Beast").length === 0) {
-                    new Dialog({
-                        title: "The Beast class is not allowed at this time",
-                        content: `The Beast class is only allowed to be taken at first level or if it has been taken in a previous level`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
+        if (!context.isUpload && !context.provided && !context.skipPrerequisite) {
+            context.actor = this;
+            context.entity = entity;
+            for (const validator of VALIDATORS) {
+                if (!(await validator(context))) {
                     return false;
                 }
-                if (entity.name !== "Beast" && this.classes.filter(clazz => clazz.name === "Beast").length > 0 && this.getAttribute("INT") < 3) {
-                    new Dialog({
-                        title: "The Beast class is not allowed to multiclass at this time",
-                        content: `Beasts can only multiclass when they have an Intelligence higher than 2.`,
-                        buttons: {
-                            ok: {
-                                icon: '<i class="fas fa-check"></i>',
-                                label: 'Ok'
-                            }
-                        }
-                    }).render(true);
-                    return false
-                }
-            }
-
-            SWSEActor.updateOrAddChange(entity, "isFirstLevel", context.isFirstLevel);
-
-            if (context.isFirstLevel) {
-                let firstLevelHP = getInheritableAttribute({
-                    entity,
-                    attributeKey: "firstLevelHitPoints",
-                    reduce: "VALUES"
-                })[0]
-                SWSEActor.updateOrAddChange(entity, "rolledHP", `${firstLevelHP}`.includes('d') ? 1 : firstLevelHP);
-
-            } else {
-                SWSEActor.updateOrAddChange(entity, "rolledHP", 1);
             }
         }
 
@@ -2686,7 +2388,7 @@ export class SWSEActor extends Actor {
                 if (!this.suppressDialog) {
                     new Dialog({
                         title: "Adding Class Starting Feats",
-                        content: `Adding class starting feats: <ul>${featString}</ul>`,
+                        content: `Adding class starting feats: <ul>${featString.map(item => item?.name).filter(name => !!name).join(", ")}</ul>`,
                         buttons: {
                             ok: {
                                 icon: '<i class="fas fa-check"></i>',
@@ -2786,7 +2488,6 @@ export class SWSEActor extends Actor {
      * @returns {string | [SWSEItem]}
      */
     async addItems(criteria = {}, items, parent) {
-        criteria.isAdd = true;
         const providedItems = [];
         if (criteria.items) {
             for (const item of criteria.items.filter(item => !!item)) {
@@ -2831,7 +2532,7 @@ export class SWSEActor extends Actor {
 
         let addedToFollowers = getInheritableAttribute({entity: addedItems, attributeKey: "followerProvides"})
         if(addedToFollowers.length > 0) {
-            for (const linkedActor of this.linkedActors) {
+            for (const linkedActor of this.linkedActors.values()) {
                 if(linkedActor.isFollower){
                     await linkedActor.addProvided(addedToFollowers)
                 }
@@ -2980,9 +2681,11 @@ export class SWSEActor extends Actor {
         entity.handleLegacyData()
 
 
+        delete options.actor;
         let childOptions = JSON.parse(JSON.stringify(options))
         childOptions.itemAnswers = item.answers;
         childOptions.modifications = item.modifications;
+        childOptions.actor = this;
         let {addedItem, toBeAdded} = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
 
         let notificationMessage = addedItem ? `<li>${addedItem.finalName}</li>` : "";
@@ -3078,45 +2781,7 @@ export class SWSEActor extends Actor {
     }
 
 
-    isPermittedForActorType(type) {
-        if (["character", "npc"].includes(this.type)) {
-            return ["weapon",
-                "armor",
-                "equipment",
-                "implant",
-                "feat",
-                "talent",
-                "species",
-                "droid system",
-                "class",
-                "upgrade",
-                "forcePower",
-                "affiliation",
-                "forceTechnique",
-                "forceSecret",
-                "forceRegimen",
-                "trait",
-                "template",
-                "background",
-                "destiny",
-                "beastAttack",
-                "beastSense",
-                "beastType",
-                "beastQuality",
-                "language"
-            ].includes(type)
-        } else if (vehicleActorTypes.includes(this.type)) {
-            return ["weapon",
-                "armor",
-                "equipment",
-                "upgrade",
-                "vehicleBaseType",
-                "vehicleSystem",
-                "template"].includes(type)
-        }
 
-        return false;
-    }
 
     get weight() {
         let fn = () => {

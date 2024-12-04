@@ -8,21 +8,19 @@ import {SWSEActor} from "./actor.mjs";
  * @returns {{temp, other: number, max: number, value: *, dr, sr}}
  */
 export function resolveHealth(actor) {
-    if (!actor || !actor) {
-        return;
-    }
-    let system = actor.system;
-    let ignoreCon = actor.ignoreCon();
     let healthBonuses = [];
-    for (let charClass of actor.classes || []) {
-        healthBonuses.push(charClass.classLevelHealth)
-        healthBonuses.push(resolveAttributeMod(actor, ignoreCon));
+
+    if(actor.isFollower){
+        healthBonuses.push(10)
+        healthBonuses.push(actor.heroicLevel)
+    } else {
+        for (let charClass of actor.classes || []) {
+            healthBonuses.push(charClass.classLevelHealth)
+            healthBonuses.push(resolveAttributeMod(actor, actor.ignoreCon()));
+        }
     }
+
     let others = [];
-    let traitAttributes = getInheritableAttribute({
-        entity: actor,
-        attributeKey: 'hitPointEq'
-    });
     let multipliers = [];
 
     healthBonuses.push(... getInheritableAttribute({
@@ -30,7 +28,10 @@ export function resolveHealth(actor) {
         attributeKey: 'healthHardenedMultiplier',
         reduce: "NUMERIC_VALUES"
     }).map(value => "*"+value))
-    for (let item of traitAttributes || []) {
+    for (let item of getInheritableAttribute({
+        entity: actor,
+        attributeKey: 'hitPointEq'
+    })) {
         if (item) {
             others.push(item.value);
             healthBonuses.push(item.value);
@@ -42,12 +43,12 @@ export function resolveHealth(actor) {
     let other = resolveValueArray(others, actor);
 
     //TODO add traits and stuff that boost HP
-    let health = system.health;
-    health.value = Array.isArray(system.health.value) ? system.health.value[0] : system.health.value;
+    let health = actor.system.health;
+    health.value = Array.isArray(actor.system.health.value) ? actor.system.health.value[0] : actor.system.health.value;
     health.other = other;
-    health.max = system.health.override ? system.health.override : resolveValueArray(healthBonuses, actor);
+    health.max = actor.system.health.override ? actor.system.health.override : resolveValueArray(healthBonuses, actor);
     health.multipliers = multipliers;
-    health.override = system.health.override;
+    health.override = actor.system.health.override;
     return health;
 }
 

@@ -9,7 +9,7 @@ import {
     toChat,
     unique
 } from "../common/util.mjs";
-import {vehicleActorTypes} from "../common/constants.mjs";
+import {characterActorTypes, vehicleActorTypes} from "../common/constants.mjs";
 import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
@@ -887,7 +887,7 @@ export class SWSEActorSheet extends ActorSheet {
             return;
         }
         let actor = getDocumentByUuid(data.uuid);
-        if (!["character", "npc"].includes(actor.type)) {
+        if (!characterActorTypes.includes(actor.type)) {
             return;
         }
         let targetItemContainer = getParentByHTMLClass(event, "vehicle-station");
@@ -925,11 +925,10 @@ export class SWSEActorSheet extends ActorSheet {
             //first check if the item being dropped is dropped on an item on the list.
             const itemOnSheet = getParentByHTMLClass(ev, "acceptsTemplates")
             if(itemOnSheet){
-                console.log(itemOnSheet, itemOnSheet.dataset)
                 const item = this.object.items.get(itemOnSheet.dataset.itemId);
                 const response = await item.handleDroppedItem(data, {silent: true});
                 if(response.success){
-                    return;
+                    return true; //make this return the modified items
                 }
             }
         }
@@ -940,7 +939,7 @@ export class SWSEActorSheet extends ActorSheet {
         if (data.actorId) {
             if (data.actorId === this.actor.id) {
                 await this.moveExistingItemWithinActor(data, ev);
-                return;
+                return true; //make this return the modified items
             } else {
                 //TODO implement logic for dragging to another character sheet
                 let sourceActor = game.actors.find(actor => actor.id === data.actorId);
