@@ -158,6 +158,18 @@ export class SWSEActiveEffect extends ActiveEffect {
         return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
+    get hideFromActor(){
+        return false;
+    }
+
+    /**
+     *  should this appear as an effect on an actors Mode page?  levels should be used for stats but hidden here.
+     * @return {boolean}
+     */
+    get isActorLevelEffect(){
+        return !this.flags.swse?.isLevel;
+    }
+
     static async _onCreateOperation(documents, context) {
         super._onCreateOperation(documents, context).then(
             game.items.directory.render())
