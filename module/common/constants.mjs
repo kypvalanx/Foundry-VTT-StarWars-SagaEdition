@@ -266,6 +266,7 @@ export const crewSlotResolution = {
     'Engineer': (crew) => (crew > 2) ? 1 : 0,
 };
 export const vehicleActorTypes = ["vehicle", "npc-vehicle"];
+export const characterActorTypes = ["character", "npc"];
 
 export const crewQuality = {
     "Untrained": {"Attack Bonus": -5, "Check Modifier": 0, "CL Modifier": -1},

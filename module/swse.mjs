@@ -166,7 +166,6 @@ Hooks.once('init', async function () {
 });
 
 Hooks.once("polyglot.init", (LanguageProvider) => {
-    console.log("POLYGLOT INIT")
     class SWSELanguageProvider extends LanguageProvider {
         async getLanguages() {
             const langs = {};
@@ -187,7 +186,7 @@ Hooks.once("polyglot.init", (LanguageProvider) => {
                             };
                 }
 
-                console.log(languages)
+                //console.log(languages)
             }
             // for (let lang in CONFIG.FICTIONAL.spoken) {
             //     langs[lang] = {
@@ -219,7 +218,6 @@ Hooks.once("polyglot.init", (LanguageProvider) => {
 
 
     game.polyglot.api.registerSystem(SWSELanguageProvider);
-    console.log("POLYGLOT INIT")
 })
 
 

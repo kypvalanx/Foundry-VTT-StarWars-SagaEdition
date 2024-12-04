@@ -87,6 +87,7 @@
         </div>
     </div>
 
+    {{#unless actor.isFollower}}
     <div class="flex-row">
         <div class="labeled-input">
             <label for="forcePoints">Force Points</label>
@@ -102,6 +103,7 @@
                    data-dtype="Number"/>
         </div>
     </div>
+    {{/unless}}
 
     <h1 class="top-label label resource-label">Shields</h1>
     <div class="flex-row">

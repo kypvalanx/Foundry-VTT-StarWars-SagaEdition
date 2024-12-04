@@ -73,6 +73,7 @@
 
 
 
+    {{#unless actor.isFollower}}
     <div class="large labeled-input item" data-item-id="{{#if actor.destiny}}{{actor.destiny.id}}{{else}}{{#if actor.background}}{{actor.background.id}}{{/if}}{{/if}}">
         <label for="destiny" class="text">{{#if actor.destiny}}Destiny{{else}}{{#if actor.background}}Background{{else}}Destiny or Background{{/if}}{{/if}}</label>
         <input class="input" id="destiny"  type="text" value="{{#if actor.destiny}}{{actor.destiny.name}}{{else}}{{#if actor.background}}{{actor.background.name}}{{/if}}{{/if}}" placeholder="" disabled/>
@@ -101,5 +102,5 @@
         <label for="experience" class="text">XP</label>
         <input class="input" id="experience" name="system.experience" type="text" value="{{actor.system.experience}}" placeholder=""/>
     </div>
-
+    {{/unless}}
 </div>

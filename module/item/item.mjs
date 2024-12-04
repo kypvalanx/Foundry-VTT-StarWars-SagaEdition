@@ -163,7 +163,7 @@ export class SWSEItem extends Item {
 
             if(follower){
                 let actorFound = false;
-                for (const actorLink of this.parent.system.actorLinks) {
+                for (const actorLink of this.parent.system.actorLinks || []) {
                     if(actorLink.slot === this.id){
                         const actor = game.actors.get(actorLink.id)
                         if(actor){
@@ -217,7 +217,27 @@ export class SWSEItem extends Item {
         })
     }
     get levelsTaken(){
+        if(this.type!=="class"){
+            return [];
+        }
+
+        if(this.isFollowerTemplate){
+            const leader = this.parent.linkedActors.get("leader")
+            if(leader){
+                const heroicLevel = leader.heroicLevel;
+                const levelsTaken = [];
+                for(let i = 1; i <= heroicLevel; i++){
+                    levelsTaken.push(i);
+                }
+                return levelsTaken;
+            }
+        }
+
         return this.system.levelsTaken || []
+    }
+
+    get isFollowerTemplate() {
+        return getInheritableAttribute({entity: this, attributeKey: "isFollowerTemplate", reduce: "OR"});
     }
 
     get strippable() {

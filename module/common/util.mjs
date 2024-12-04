@@ -1028,7 +1028,7 @@ function resolveValuesReduce(values, actor) {
 
 export function reduceArray(reduce, values, actor) {
     if (!reduce) {
-        return values;
+        return values || [];
     }
     if (!Array.isArray(values)) {
         values = [values];

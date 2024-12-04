@@ -1,5 +1,5 @@
 import {SWSEActor} from "./actor.mjs";
-import {equippedItems, filterItemsByType, resolveValueArray, toNumber} from "../common/util.mjs";
+import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 
 
@@ -16,7 +16,7 @@ function reduceSpeedForArmorType(speed, armorType) {
  * @param {SWSEItem} armor
  * @returns {{fortDefense: (*|number), notes: (*|string), refDefense: (*|number), name, type: string, maxDex: (*|number), speed}}
  */
-function generateArmorBlock(actor, armor) {
+export function generateArmorBlock(actor, armor) {
     let attributes = getInheritableAttribute({
         entity: armor,
         attributeKey: "special",
@@ -54,11 +54,6 @@ export function resolveDefenses(actor) {
             reduce: "FIRST"
         }) || "0"
 
-        // let condition;
-        // if("OUT" === condition){
-        //     condition = "0";
-        //     condition = "OUT"
-        // }
 
         //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 
@@ -78,12 +73,7 @@ export function resolveDefenses(actor) {
             reduce: "SUM"
         })
 
-        let armors = []
-
-        for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
-            armors.push(generateArmorBlock(actor, armor));
-        }
-        return {defense, armors};
+        return defense;
 
     }
 
@@ -324,13 +314,13 @@ function getArmorBonus(actor) {
     })
     if (["vehicle", "npc-vehicle"].includes(actor.type)) {
         if (actor.pilot) {
-            let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.system.attributes).find(a => a.key === "isHeroic").value).length;
+            let armorBonus = actor.pilot.items.filter(i => i.type === "class" && Object.values(i.system.changes).find(a => a.key === "isHeroic").value).length;
             return Math.max(armorBonus, armorReflexDefenseBonus);
         } else {
             return armorReflexDefenseBonus;
         }
     } else {
-        return _selectRefBonus(actor, actor.heroicLevel, armorReflexDefenseBonus);
+        return _selectRefBonus(actor, armorReflexDefenseBonus);
     }
 }
 
@@ -444,7 +434,7 @@ function _getSituationalBonuses(actor) {
     return situational;
 }
 
-function _selectRefBonus(actor, heroicLevel, armorBonus) {
+function _selectRefBonus(actor, armorBonus) {
     if (armorBonus) {
         let proficientWithEquipped = true;
         for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
@@ -459,21 +449,21 @@ function _selectRefBonus(actor, heroicLevel, armorBonus) {
                 reduce: "OR"
             })
             if (improvedArmoredDefense) {
-                return Math.max(armorBonus, heroicLevel + Math.floor(armorBonus / 2))
+                return Math.max(armorBonus, actor.heroicLevel + Math.floor(armorBonus / 2))
             }
             let armoredDefense = getInheritableAttribute({
                 entity: actor,
                 attributeKey: "armoredDefense",
                 reduce: "OR"
             })
-            if (armoredDefense) {
-                return Math.max(armorBonus, heroicLevel)
+            if (armoredDefense || actor.isFollower) {
+                return Math.max(armorBonus, actor.heroicLevel)
             }
         }
 
         return armorBonus;
     }
-    return heroicLevel;
+    return actor.heroicLevel;
 }
 
 function _getDexMod(actor) {
