@@ -1,7 +1,8 @@
 import {appendTerms} from "../../../module/common/util.mjs";
+import {getMockEvent, hasItems, withTestActor} from "../actor-sheet.test.mjs";
 
 export async function attackTests(quench) {
-    quench.registerBatch("attack",
+    quench.registerBatch("attack.appendTerm",
         (context) => {
             const {describe, it, assert, expect, should} = context;
             describe("appendTerm", () => {
@@ -30,6 +31,31 @@ export async function attackTests(quench) {
                         `,{"class":"NumericTerm","options":{"flavor":"bomb"},"evaluated":false,"number":1}` +
                         `,{"class":"OperatorTerm","options":{},"evaluated":false,"operator":"+"}` +
                         `,{"class":"Die","options":{"flavor":"bomb"},"evaluated":false,"number":3,"faces":6,"modifiers":[],"results":[]}]`, JSON.stringify(appendTerms("1+3d6", "bomb")))
+                })
+            })
+        })
+    quench.registerBatch("attack.attackRoll",
+        (context) => {
+            const {describe, it, assert, expect, should} = context;
+            describe("attackRoll", () => {
+                it("should not resolve", async () => {
+                    await withTestActor(async actor => {
+                        actor.suppressDialog = true
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                        let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
+                        let itemId = response[0].id;
+                        let follower = await actor.sheet._onCreateFollower(getMockEvent({
+                            currentTarget:{dataset: {itemId}},
+                            skipRender:true
+                        }))
+
+                        hasItems(assert, follower.items, [
+                            "Follower",
+                            "Weapon Proficiency (Rifles)",
+                            "Provides (Armor Proficiency Feat:1)"
+                        ])
+                    });
                 })
             })
         })
