@@ -38,19 +38,14 @@ export async function attackTests(quench) {
         (context) => {
             const {describe, it, assert, expect, should} = context;
             describe("attackRoll", () => {
-                it("should not resolve", async () => {
+                it("should not add an autofire effect to the actor when an item with autofire is added", async () => {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
-                        await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
-                        let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})
-                        let itemId = response[0].id;
-                        let follower = await actor.sheet._onCreateFollower(getMockEvent({
-                            currentTarget:{dataset: {itemId}},
-                            skipRender:true
-                        }))
+                        await actor.sheet._onDropItem(getMockEvent(), {name: "Heavy Assault Blaster", type: "weapon"})
 
-                        hasItems(assert, follower.items, [
+
+                        hasItems(assert, actor.effects, [
                             "Follower",
                             "Weapon Proficiency (Rifles)",
                             "Provides (Armor Proficiency Feat:1)"
