@@ -44,6 +44,13 @@ export class SWSEActiveEffect extends ActiveEffect {
         if ( CONFIG.ActiveEffect.legacyTransferral ) return this.transfer ? null : this.parent;
         return this.transfer ? (this.parent.parent ?? null) : this.parent;
     }
+    get transfer(){
+        return false;
+    }
+
+    set transfer(value) {
+        //console.warn("attempted to modify transfer");
+    }
 
 
     _onDelete(options, userId) {
