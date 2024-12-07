@@ -707,7 +707,7 @@ async function resolveAttack(attack, targetActors) {
     let critical = attack.isCritical(attackRollResult);
 
     let targets = targetActors.map(actor => {
-        let reflexDefense = actor.system.defense.reflex.total;
+        let reflexDefense = actor.defense.reflex.total;
         let isMiss = attack.isMiss(attackRollResult, reflexDefense)
         let targetResult = critical ? "Critical Hit!" : fail ? "Automatic Miss" : isMiss ? "Miss" : "Hit";
 
