@@ -48,7 +48,7 @@ export function getMockEvent(data = {}) {
     return newVar;
 }
 
-export function hasItems(assert, actual, expected) {
+export function hasItems(assert, actual = [], expected) {
     actual = actual.map(i => i.name || i.value)
     assert.includeMembers(actual, expected)
 }
@@ -64,15 +64,6 @@ export async function actorSheetTests(quench) {
             describe("Actor", () => {
                 describe("._sheet", () => {
                     describe("._onDropItem", () => {
-
-                        it('should accept a first level of a heroic class and should grant associated feats and traits', async function () {
-                            await withTestActor(async actor => {
-                                actor.suppressDialog = true
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                hasItems(assert, actor.items, ["Jedi", "Bonus Feat (Force Sensitivity)", "Bonus Feat (Weapon Proficiency (Lightsabers))", "Bonus Feat (Weapon Proficiency (Simple Weapons))",
-                                    "Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)"])
-                            });
-                        });
 
                         it('should accept a 2nd degree droid species and should grant associated feats and traits', async function () {
                             await withTestActor(async actor => {
@@ -135,27 +126,6 @@ export async function actorSheetTests(quench) {
                             });
                         });
 
-                        it('should only take trained skills from first level class', async function () {
-                            await withTestActor(async actor => {
-                                actor.suppressDialog = true
-                                await actor.setAttributes({int:18})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class",
-                                    answers: ["Force Sensitivity"]})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class", answers: ["Armor Proficiency (Light)"]})
-                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
-                                    "Bonus Feat (Weapon Proficiency (Pistols))",
-                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
-                                    "Jedi",
-                                    "Point-Blank Shot",
-                                    "Scoundrel",
-                                    "Soldier",
-                                    "Weapon Proficiency (Pistols)",
-                                    "Weapon Proficiency (Simple Weapons)"])
-                                const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
-                                assert.equal(availableTrainedSkills, 8);
-                            });
-                        });
 
                         it('carried weight should ignore non numeric terms that cannot be converted into numeric terms', async function () {
                             await withTestActor(async actor => {
@@ -195,27 +165,9 @@ export async function actorSheetTests(quench) {
                             });
                         });
 
-                        it('should be able to take the prestige class Imperial Knight', async function () {
-                            await withTestActor(async actor => {
-                                actor.suppressDialog = true
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
 
-                                const update = {};
-                                update[`system.skills.use the force.trained`] = true;
-                                await actor.safeUpdate(update);
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Light)", type: "feat"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
 
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Imperial Knight", type: "class"})
 
-                            });
-                        });
 
                         it('adding a lightsaber with a blue Ilum Crystal should reflect that in the ignite effect', async function () {
                             await withTestActor(async actor => {
@@ -295,6 +247,7 @@ export async function actorSheetTests(quench) {
                                 assert.equal(attack.damageRoll.roll._formula, "1d6")
                             });
                         });
+
                     })
                 })
             })
@@ -357,6 +310,156 @@ export async function actorSheetTests(quench) {
             })
 
         })
+
+    quench.registerBatch("actor.actor-sheet.character.drop-item.class",
+        (context) => {
+            const {describe, it, assert, expect, should} = context;
+            describe("Actor", () => {
+                describe("._sheet", () => {
+                    describe("._onDropItem", () => {
+
+                        it('should accept a first level of a heroic class and should grant associated feats and traits', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                hasItems(assert, actor.items, ["Jedi", "Bonus Feat (Force Sensitivity)", "Bonus Feat (Weapon Proficiency (Lightsabers))", "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Force Sensitivity", "Weapon Proficiency (Lightsabers)", "Weapon Proficiency (Simple Weapons)"])
+
+                                hasItems(assert, actor.inheritedChanges, ["Jedi Talent Trees"])
+                            });
+                        });
+
+
+                        it('should only take trained skills from first level class', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.setAttributes({int:18})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class",
+                                    answers: ["Force Sensitivity"]})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class", answers: ["Armor Proficiency (Light)"]})
+                                hasItems(assert, actor.items, [  "Bonus Feat (Point-Blank Shot)",
+                                    "Bonus Feat (Weapon Proficiency (Pistols))",
+                                    "Bonus Feat (Weapon Proficiency (Simple Weapons))",
+                                    "Jedi",
+                                    "Point-Blank Shot",
+                                    "Scoundrel",
+                                    "Soldier",
+                                    "Weapon Proficiency (Pistols)",
+                                    "Weapon Proficiency (Simple Weapons)"])
+                                const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
+                                assert.equal(availableTrainedSkills, 8);
+                            });
+                        });
+
+                        it('should be able to take the prestige class Imperial Knight', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+
+                                const update = {};
+                                update[`system.skills.use the force.trained`] = true;
+                                await actor.safeUpdate(update);
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Light)", type: "feat"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Imperial Knight", type: "class"})
+
+                            });
+                        });
+
+                        it('should allow for crime lord to be selected as a prestige class', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Fortune's Favor", type: "talent"})
+
+                                const update = {};
+                                update[`system.skills.deception.trained`] = true;
+                                update[`system.skills.persuasion.trained`] = true;
+
+                                await actor.safeUpdate(update);
+
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Crime Lord", type: "class"})
+                            });
+                        });
+                    })
+                })
+            })
+
+            describe("SWSERollWrapper", () => {
+                describe(".renderWeaponBlockFormulaHTML", () => {
+                    it("should correctly print single die rolls", () => {
+                        const terms = [];
+                        terms.push(new foundry.dice.terms.Die({number: 3, faces: 8}))
+                        terms.push(new foundry.dice.terms.OperatorTerm({operator: "+"}))
+                        terms.push(new foundry.dice.terms.NumericTerm({number: 9}))
+
+                        const roll = Roll.fromTerms(terms);
+
+                        assert.equal( new SWSERollWrapper(roll).renderWeaponBlockFormulaHTML, '<span>3d8</span><span> + </span><span>9</span>')
+                    })
+
+                    it("should correctly print single die rolls", () => {
+                        const terms = [];
+                        terms.push(new foundry.dice.terms.Die({number: 3, faces: 8}))
+                        terms.push(new foundry.dice.terms.OperatorTerm({operator: "+"}))
+                        terms.push(new foundry.dice.terms.NumericTerm({number: 9}))
+
+                        const roll = Roll.fromTerms(terms);
+
+                        const additionalTerms = [];
+                        additionalTerms.push(new foundry.dice.terms.Die({number: 2, faces: 8}))
+                        additionalTerms.push(new foundry.dice.terms.Die({number: 1, faces: 4}))
+
+
+                        assert.equal( new SWSERollWrapper(roll, additionalTerms).renderWeaponBlockFormulaHTML, '<span>3d8</span><span>/</span><span>2d8</span><span>/</span><span>1d4</span><span> + </span><span>9</span>')
+                    })
+                })
+            })
+
+            describe("attack", () => {
+                describe("getDiceTermsFromString", () => {
+                    it("should handle a simple single die", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString("1d20")
+                        assert.equal(dice[0].faces, 20)
+                        assert.equal(dice[0].number, 1)
+                    })
+
+                    it("should handle a double weapon die", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString("3d8/4d6")
+                        assert.equal(dice[0].faces, 8)
+                        assert.equal(dice[0].number, 3)
+
+                        assert.lengthOf(additionalTerms, 1);
+                        assert.equal(additionalTerms[0].faces, 6)
+                        assert.equal(additionalTerms[0].number, 4)
+                    })
+                    it("should handle zero gracefully", ()=>{
+                        const {dice, additionalTerms} = getDiceTermsFromString(0)
+
+                        assert.lengthOf(additionalTerms, 0);
+                        assert.lengthOf(dice, 0);
+                    })
+                })
+            })
+
+        })
+
 
     quench.registerBatch("actor.actor-sheet.character.follower-create",
         (context) => {
@@ -452,8 +555,11 @@ export async function actorSheetTests(quench) {
                         it('should throw an exception if a non follower takes a follower template', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
-                                let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Aggressive Follower", type: "class"})
-                                assert.equal(response, false);
+                                try {
+                                    await actor.sheet._onDropItem(getMockEvent(), {name: "Aggressive Follower", type: "class"})
+                                } catch (e) {
+                                    assert.equal(e.message, "Follower Templates can only be applied to followers");
+                                }
                             });
                         });
 

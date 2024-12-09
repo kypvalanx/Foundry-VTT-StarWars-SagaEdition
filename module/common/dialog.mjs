@@ -1,6 +1,7 @@
 export function suppressibleDialog(entity, message, title, suppress) {
     if (suppress) {
-        console.warn(message, entity)
+        console.error(message, entity)
+        throw Error(message);
     } else {
         new Dialog({
             title: title,
