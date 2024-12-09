@@ -1,5 +1,5 @@
 import {appendTerms} from "../../../module/common/util.mjs";
-import {getMockEvent, hasItems, withTestActor} from "../actor-sheet.test.mjs";
+import {getMockEvent, hasItems, notHaveItems, withTestActor} from "../actor-sheet.test.mjs";
 
 export async function attackTests(quench) {
     quench.registerBatch("attack.appendTerm",
@@ -45,10 +45,8 @@ export async function attackTests(quench) {
                         await actor.sheet._onDropItem(getMockEvent(), {name: "Heavy Assault Blaster", type: "weapon"})
 
 
-                        hasItems(assert, actor.effects, [
-                            "Follower",
-                            "Weapon Proficiency (Rifles)",
-                            "Provides (Armor Proficiency Feat:1)"
+                        notHaveItems(assert, actor.effects, [
+                            "Autofire"
                         ])
                     });
                 })

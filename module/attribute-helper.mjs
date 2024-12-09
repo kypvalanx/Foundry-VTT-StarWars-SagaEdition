@@ -100,7 +100,7 @@ function getLocalChangesOnDocument(document, flags) {
  * @return {*[]}
  */
 function getChangesFromActiveEffects(document, recursive) {
-    if (!document.effects || recursive) {
+    if (!document.effects ) {//|| recursive) {
         return [];
     }
 
