@@ -370,7 +370,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Imperial Knight", type: "class"})
-
+                                hasItems(assert, actor.items, [  "Imperial Knight"])
                             });
                         });
 
@@ -395,6 +395,9 @@ export async function actorSheetTests(quench) {
 
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Crime Lord", type: "class"})
+
+
+                                hasItems(assert, actor.items, [  "Crime Lord"])
                             });
                         });
                     })
