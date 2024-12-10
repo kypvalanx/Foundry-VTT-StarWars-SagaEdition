@@ -229,7 +229,7 @@
                     </div>
                     <ol class="items-list">
                         {{#each actor.effects as |mode id|}}
-                            {{#if mode.isActorLevelEffect}}
+<!--                            {{#if mode.isActorLevelEffect}}-->
                                 <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
                                     <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
                                     </div>
@@ -246,7 +246,7 @@
                                         <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
                                     </div>
                                 </li>
-                            {{/if}}
+<!--                            {{/if}}-->
                         {{/each}}
                     </ol>
                 </div>
