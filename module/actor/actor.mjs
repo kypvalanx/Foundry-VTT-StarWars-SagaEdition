@@ -163,13 +163,36 @@ export class SWSEActor extends Actor {
     }
 
     async safeUpdate(data = {}, context = {}) {
-        if (this.canUserModify(game.user, 'update') && !this.pack && !!game.actors.get(this.id)) {
+        let user = game.user;
+
+        if(context.owner && context.bypass){
+            user = game.users.get(context.owner);
+        }
+        if ((this.canUserModify(user, 'update') && !this.pack && !!game.actors.get(this.id))) {
             try {
                 await this.update(data, context);
             } catch (e) {
                 console.warn("failed update")
             }
         }
+    }
+
+    static async updateDocuments(updates=[], operation={}) {
+        if ( operation.parent?.pack ) operation.pack = operation.parent.pack;
+        operation.updates = updates;
+        let user;
+        if(operation.bypass){
+            user = game.users.get(operation.owner);
+        }
+        const updated = await this.database.update(this.implementation, operation, user);
+
+        /** @deprecated since v12 */
+        if ( getDefiningClass(this, "_onUpdateDocuments") !== Document ) {
+            foundry.utils.logCompatibilityWarning("The Document._onUpdateDocuments static method is deprecated in favor of "
+                + "Document._onUpdateOperation", {since: 12, until: 14});
+            await this._onUpdateDocuments(updated, operation);
+        }
+        return updated;
     }
 
     async setActorLinkOnActorAndTokens(documents, val) {
@@ -411,6 +434,7 @@ export class SWSEActor extends Actor {
 
     getRollData() {
         this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
+        let health = this.health
         return super.getRollData();
     }
 
@@ -1400,7 +1424,7 @@ export class SWSEActor extends Actor {
 
 
         if (options.affectDamageThreshold) {
-            if (totalDamage > this.system.defense.damageThreshold.total) {
+            if (totalDamage > this.defense.damageThreshold.total) {
                 this.reduceCondition(1)
             }
         }
@@ -1412,7 +1436,18 @@ export class SWSEActor extends Actor {
             const content = `${this.name} has has taken ${totalDamage} damage.`
             toChat(content, this)
         }
-        this.safeUpdate(update);
+
+        if(this.canUserModify(game.user, 'update')){
+            this.safeUpdate(update);
+        } else {
+            console.log(this)
+            let ownerIds = Object.entries(this.ownership).filter(e => e[1]  === 3).map(e => e[0])
+            for (let ownerId of ownerIds) {
+                this.safeUpdate(update, {bypass: true, owner: ownerId})
+                // let owner = game.users.get(ownerId)
+                // console.log((owner))
+            }
+        }
     }
 
     applyHealing(options) {
@@ -1424,7 +1459,7 @@ export class SWSEActor extends Actor {
 
         const content = `${this.name} has has healed ${healAmount} damage` + (maxHealAmount < proposedHealAmount ? " reaching max health." : ".")
         toChat(content, this)
-        this.safeUpdate(update);
+        this.safeUpdate(update, {bypass: true});
     }
 
     get recoveryActions(){

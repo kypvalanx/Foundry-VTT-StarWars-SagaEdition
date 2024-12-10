@@ -227,9 +227,9 @@ function deleteActorsByName(name){
 }
 
 function getHitOptionHTML(target, attack, tokenId) {
-    let hit = target.system.defense.reflex.total <= attack;
+    let hit = target.defense.reflex.total <= attack;
 
-    return `<h4>${target.name}</h4>
+    return `<h4>Target: ${target.name} (Reflex Defense: ${target.defense.reflex.total})</h4>
 <div class="flex flex-col" data-type="target" data-target="${tokenId}">
     <div>
         <label>Hit: <input data-attribute="target-hit" type="checkbox" ${hit ? "checked" : ""}></label>
@@ -285,7 +285,7 @@ const applyAttack = (event) => {
 </div>`;
     for(let targetToken of targetTokens.values()){
         //targetToken.update
-        let actor = targetToken.document.getActor()
+        let actor = targetToken.document.actor
         if(actor){
             targetActors.push(actor)
             actorMap[targetToken.id] = actor;

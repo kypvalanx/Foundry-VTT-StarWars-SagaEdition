@@ -15,9 +15,9 @@ import {SWSEActor} from "./actor/actor.mjs";
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
     if (attribute) {
-        attribute.source = source;
-        attribute.sourceString = sourceString;
-        attribute.sourceDescription = sourceDescription;
+        attribute.source = attribute.source || source;
+        attribute.sourceString = attribute.sourceString || sourceString;
+        attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
     }
     return attribute
 }
