@@ -184,15 +184,7 @@ export class SWSEActor extends Actor {
         if(operation.bypass){
             user = game.users.get(operation.owner);
         }
-        const updated = await this.database.update(this.implementation, operation, user);
-
-        /** @deprecated since v12 */
-        if ( getDefiningClass(this, "_onUpdateDocuments") !== Document ) {
-            foundry.utils.logCompatibilityWarning("The Document._onUpdateDocuments static method is deprecated in favor of "
-                + "Document._onUpdateOperation", {since: 12, until: 14});
-            await this._onUpdateDocuments(updated, operation);
-        }
-        return updated;
+        return await this.database.update(this.implementation, operation, user);
     }
 
     async setActorLinkOnActorAndTokens(documents, val) {
