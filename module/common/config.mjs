@@ -105,19 +105,33 @@ export function initializeStatusEffects(config){
             id: "gravityLow",
             label: "EFFECT.StatusGravityLow",
             icon: "systems/swse/icon/status/helpless.png",
-            changes: [{key: "gravity", value:"Low"}]
+            changes: [
+                {key: "gravity", value:"Low"},
+                {key: "speedMultiplier", value: "1.25:min 1"},
+                {key: "carryCapacityMultiplier", value: "2"},
+                {key: "skillBonus", value: "str:2"},
+            ]
         },
         {
             id: "gravityHigh",
             label: "EFFECT.StatusGravityHigh",
             icon: "systems/swse/icon/status/helpless.png",
-            changes: [{key: "gravity", value:"High"}]
+            changes: [
+                {key: "gravity", value:"High"},
+                {key: "speedMultiplier", value: "0.75:min 1"},
+                {key: "carryCapacityMultiplier", value: "0.5"},
+                {key: "skillBonus", value: "str:-2"},
+            ]
         },
         {
             id: "gravityZero",
             label: "EFFECT.StatusGravityZero",
             icon: "systems/swse/icon/status/helpless.png",
-            changes: [{key: "gravity", value:"Zero"}]
+            changes: [
+                {key: "gravity", value:"Zero"},
+                {key: "speed", value: "Base Speed -> Flying Speed"},
+                {key: "carryCapacityMultiplier", value: "10"}
+            ]
         },
         {
             id: "shield",

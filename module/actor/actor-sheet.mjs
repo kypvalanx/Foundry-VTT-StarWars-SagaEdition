@@ -275,8 +275,15 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
+
+        //item actions
         html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
         html.find('[data-action="open-actor"]').click(this._onOpenActor.bind(this));
+        html.find('[data-action="block"]').click(this._onBlockDeflect.bind(this));
+        html.find('[data-action="deflect"]').click(this._onBlockDeflect.bind(this));
+        html.find('[data-action="reset-deflection-count"]').click(this.resetDeflection.bind(this));
+
+
 
         //CLEANUP PROMPTS
         html.find('[data-action="remove-leaked-level-effects"]').click((e) => {
@@ -300,6 +307,39 @@ export class SWSEActorSheet extends ActorSheet {
             })
         });
         //html.find()
+    }
+
+    async resetDeflection(){
+        const update = {"system.deflectCount": 0}
+        this.object.safeUpdate(update);
+    }
+
+    async _onBlockDeflect(event){
+        event.preventDefault();
+        event.stopPropagation();
+        const dataset = event.currentTarget.dataset
+
+        const deflectCount = this.object.system.deflectCount || 0;
+
+        let formula = getRollFromDataSet.call(this,{key: "@UseTheForce"})
+
+        if(deflectCount > 0){
+            formula = `${formula} - ${deflectCount * 5}`;
+        }
+
+        let roll = new Roll(formula, this.actor.system);
+        const rollResult = await roll.roll();
+
+        const context = {rollResult};
+        let itemFlavor = "";
+        const notes = [];
+        const flavor = dataset.label
+
+        let content = buildRollContent(formula, roll, notes, itemFlavor);
+        await toChat(content, this.object, flavor, context);
+
+        const update = {"system.deflectCount": deflectCount + 1}
+        this.object.safeUpdate(update);
     }
 
     async _onOpenActor(event){

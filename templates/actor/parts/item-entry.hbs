@@ -17,6 +17,10 @@
                 {{#if rollable}}
                     {{> 'systems/swse/templates/common/rollable.hbs' rollable=rollable label=(concat 'Use the Force for ' item.finalName) itemId=item.id type='forcepower'}}
                 {{/if}}
+
+                {{#each item.itemRollables as |action id|}}
+                    {{> 'systems/swse/templates/common/rollable.hbs' action=action.action label=action.title itemId=../item.id}}
+                {{/each}}
                 {{#if quantity}}
                     {{#unless usable}}
                         {{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}
