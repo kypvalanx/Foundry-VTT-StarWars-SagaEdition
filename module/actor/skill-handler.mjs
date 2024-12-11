@@ -262,10 +262,11 @@ export function generateSkills(actor, options = {}) {
 
             let miscBonuses = skillBonusAttr.filter(bonus => {
                 const bonusKey = bonus.split(":")[0].toLowerCase();
-                return bonusKey === resSkill.toLowerCase() || standardizedAttribute(bonusKey) === standardizedAttribute(skill.attribute)
+                return bonusKey === resSkill.toLowerCase() || standardizedAttribute(bonusKey) === standardizedAttribute(skill.attribute) || bonusKey === "all"
             }).map(bonus => bonus.split(":")[1]);
 
-            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus => bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
+            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus =>
+                bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
 
             bonuses.push({value: miscBonus, description: `Miscellaneous Bonus: ${miscBonus}`})
