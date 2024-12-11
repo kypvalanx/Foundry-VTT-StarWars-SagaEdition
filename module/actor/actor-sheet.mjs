@@ -277,6 +277,28 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
         html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
         html.find('[data-action="open-actor"]').click(this._onOpenActor.bind(this));
+
+        //CLEANUP PROMPTS
+        html.find('[data-action="remove-leaked-level-effects"]').click((e) => {
+            Dialog.prompt({
+                title: 'Are you sure you want to perform this cleanup?',
+                content: 'A long lived bug was creating additional copies of level effects.  There should be no reason to keep these unless you are doing custom scripting around them.',
+                callback: () => {
+                    const effectIds = this.object.effects.filter(effect => effect.flags.swse.isLevel).map(effect => effect.id)
+                    this.object.deleteEmbeddedDocuments("ActiveEffect", effectIds);
+                }
+            })
+        });
+        html.find('[data-action="remove-fire-mode-effects"]').click((e) => {
+            Dialog.prompt({
+                title: 'Are you sure you want to perform this cleanup?',
+                content: 'A long lived bug was creating additional copies of Fire Mode effects.  There should be no reason to keep these unless you are doing custom scripting around them.',
+                callback: () => {
+                    const effectIds = this.object.effects.filter(effect => effect.flags.swse.group === "Fire Mode").map(effect => effect.id)
+                    this.object.deleteEmbeddedDocuments("ActiveEffect", effectIds);
+                }
+            })
+        });
         //html.find()
     }
 
