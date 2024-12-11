@@ -393,6 +393,14 @@
       "type": "Actor",
       "system": "swse",
       "entity": "Actor"
+    },
+    {
+      "name": "region-effects",
+      "label": "Region Effects",
+      "path": "packs/region-effects",
+      "type": "Macro",
+      "system": "swse",
+      "entity": "Macro"
     }
   ],
   "languages": [
