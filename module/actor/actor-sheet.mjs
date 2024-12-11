@@ -89,7 +89,7 @@ export class SWSEActorSheet extends ActorSheet {
             width: 1000,
             height: 900,
             tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}],
-            debug: true
+            debug: false
         });
     }
 

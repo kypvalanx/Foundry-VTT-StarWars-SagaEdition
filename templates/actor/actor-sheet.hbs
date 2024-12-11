@@ -229,24 +229,22 @@
                     </div>
                     <ol class="items-list">
                         {{#each actor.effects as |mode id|}}
-<!--                            {{#if mode.isActorLevelEffect}}-->
-                                <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
-                                    <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
-                                    </div>
-                                    <h4 class="item-name">{{mode.name}}
+                            <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
+                                <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
+                                </div>
+                                <h4 class="item-name">{{mode.name}}
 
-                                        {{#if @root.options.debug}}
-                                            {{mode.id}} - source: {{mode.system}}
-                                        {{/if}}
-                                    </h4>
-                                    <div>{{#if mode.hasLinks}}<i class="fas fa-link" title="Has Links"></i>{{/if}}</div>
-                                    <div class="item-controls">
-                                        <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
-                                        <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                        <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
-                                    </div>
-                                </li>
-<!--                            {{/if}}-->
+                                    {{#if @root.options.debug}}
+                                        {{mode.id}} - source: {{mode.system}}
+                                    {{/if}}
+                                </h4>
+                                <div>{{#if mode.hasLinks}}<i class="fas fa-link" title="Has Links"></i>{{/if}}</div>
+                                <div class="item-controls">
+                                    <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
+                                    <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                    <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
                         {{/each}}
                     </ol>
                 </div>

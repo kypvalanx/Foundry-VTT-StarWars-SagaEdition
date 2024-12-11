@@ -29,7 +29,7 @@ export class SWSEItemSheet extends ItemSheet {
             height: 480,
             tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"},
                 {navSelector: ".level-tabs", contentSelector: ".level-body", initial: "1"}],
-            debug: true
+            debug: false
         });
     }
 
