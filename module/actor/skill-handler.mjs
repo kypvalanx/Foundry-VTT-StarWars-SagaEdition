@@ -2,6 +2,7 @@ import {resolveValueArray, toNumber} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {generateArmorCheckPenalties} from "./armor-check-penalty.mjs";
 import {
+    defaultAttributes,
     getGroupedSkillMap,
     HEAVY_LOAD_SKILLS,
     NEW_LINE,
@@ -183,13 +184,15 @@ export function generateSkills(actor, options = {}) {
     const distinctSkillBonuses = skillBonusAttr.map(bonus => bonus.split(":")[0]).distinct()
     for (const distinctSkillBonus of distinctSkillBonuses) {
         let isSub = false;
+        let isAttribute = defaultAttributes.includes(standardizedAttribute(distinctSkillBonus));
+
         for (const resolvedSkill of resolvedSkills) {
             if (distinctSkillBonus.toLowerCase().startsWith(resolvedSkill.toLowerCase())) {
                 isSub = true
                 break;
             }
         }
-        if(!isSub){
+        if(!isSub && !isAttribute){
             nonSituationalSkills.push(distinctSkillBonus)
         }
     }
@@ -257,7 +260,10 @@ export function generateSkills(actor, options = {}) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
-            let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0].toLowerCase() === resSkill.toLowerCase()).map(bonus => bonus.split(":")[1]);
+            let miscBonuses = skillBonusAttr.filter(bonus => {
+                const bonusKey = bonus.split(":")[0].toLowerCase();
+                return bonusKey === resSkill.toLowerCase() || standardizedAttribute(bonusKey) === standardizedAttribute(skill.attribute)
+            }).map(bonus => bonus.split(":")[1]);
 
             situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus => bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
             let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);

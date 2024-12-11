@@ -162,6 +162,11 @@ export class SWSEActor extends Actor {
         this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
 
+    startOfTurn(updateData){
+        const update = {"system.deflectCount": 0}
+        this.safeUpdate(update).then(()=> this.sheet.render())
+    }
+
     async safeUpdate(data = {}, context = {}) {
         let user = game.user;
 

@@ -3,6 +3,7 @@ export const dieSize_vanilla = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "1d10", 
 export const dieType = ["1", "2", "3", "4", "6", "8", "10", "12"];
 export const sizeArray = ["Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)"];
 export const d20 = "1d20";
+export const defaultAttributes = ["strength", "dexterity", "constitution", "wisdom", "intelligence", "charisma"]
 export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
     "Knowledge (Bureaucracy)", "Knowledge (Galactic Lore)", "Knowledge (Life Sciences)", "Knowledge (Physical Sciences)",
     "Knowledge (Social Sciences)", "Knowledge (Tactics)", "Knowledge (Technology)", "Mechanics", "Perception",

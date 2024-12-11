@@ -155,10 +155,30 @@ export class SWSEItem extends Item {
         }
     }
 
+    get itemRollables(){
+        const rollables = []
+        const keys = getInheritableAttribute({entity: this, attributeKey: "rollable", reduce: "VALUES"});
+        for (const key of keys) {
+            if(key.toLowerCase() === "block" || key.toLowerCase() === "deflect"){
+                const deflectCount = this.parent?.system.deflectCount || 0;
+                const number = deflectCount * -5;
+
+                rollables.push({action: key.toLocaleString(), title: `${key.toLocaleString()} ${number !== 0 ? ` (${number})` : ""}`})
+            }
+        }
+        return rollables;
+    }
+
     get itemActions(){
         const actions = [];
 
         if(this.parent){
+
+            const keys = getInheritableAttribute({entity: this, attributeKey: "rollable", reduce: "VALUES"});
+            if(this.parent.system.deflectCount > 0 && (keys.includes("block")||keys.includes("deflect"))){
+                actions.push({action:"reset-deflection-count", buttonText:`Reset Deflection Bonus`})
+            }
+
             const follower = getInheritableAttribute({entity: this, attributeKey: "createFollower", reduce: "OR"});
 
             if(follower){
@@ -187,13 +207,9 @@ export class SWSEItem extends Item {
                         }
                     }
                 }
-                // if(!actorFound){
-                //     actions.push({action:"create-follower", optionString:`data-item-id="${this.id}"`, buttonText:"Create Follower"})
-                // }
+
             }
-
         }
-
 
         return actions;
     }

@@ -1,5 +1,5 @@
 <!--add lookups to some of these fields-->
 <a class="rollable" title="{{label}}"
-   data-key="{{rollable}}" data-label="{{label}}" data-item-id="{{itemId}}">
+    {{#if rollable }} data-key="{{rollable}}" {{/if}}{{#if action}} data-action="{{action}}" {{/if}} data-label="{{label}}" data-item-id="{{itemId}}">
     <i class="fas fa-dice-d20"></i>
 </a>
