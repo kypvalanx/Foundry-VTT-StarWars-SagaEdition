@@ -110,6 +110,7 @@ export function initializeStatusEffects(config){
                 {key: "speedMultiplier", value: "1.25:min 1"},
                 {key: "carryCapacityMultiplier", value: "2"},
                 {key: "skillBonus", value: "str:2"},
+                {key: "toHitModifier", value: "-2"}
             ]
         },
         {
@@ -121,6 +122,7 @@ export function initializeStatusEffects(config){
                 {key: "speedMultiplier", value: "0.75:min 1"},
                 {key: "carryCapacityMultiplier", value: "0.5"},
                 {key: "skillBonus", value: "str:-2"},
+                {key: "toHitModifier", value: "-2"}
             ]
         },
         {
@@ -130,7 +132,9 @@ export function initializeStatusEffects(config){
             changes: [
                 {key: "gravity", value:"Zero"},
                 {key: "speed", value: "Base Speed -> Flying Speed"},
-                {key: "carryCapacityMultiplier", value: "10"}
+                {key: "carryCapacityMultiplier", value: "10"},
+                {key: "skillBonus", value: "all:-5"},
+                {key: "toHitModifier", value: "-5"}
             ]
         },
         {

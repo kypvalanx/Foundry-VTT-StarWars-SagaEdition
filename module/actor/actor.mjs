@@ -1238,9 +1238,15 @@ export class SWSEActor extends Actor {
                         armorType = armor.armorType;
                     }
                 }
+
+                const conversions = attributes.filter(attribute=> attribute.includes("->"))
+
+                attributes = attributes.filter(attribute=> !attribute.includes("->"))
+
                 return attributes.map(name => this.applyArmorSpeedPenalty(name, armorType))
                     .map(name => this.applyConditionSpeedPenalty(name, armorType))
                     .map(name => this.applyWeightSpeedPenalty(name))
+                    .map(name => this.applyConversions(name, conversions))
                     .join("; ");
             }
 
@@ -2997,6 +3003,15 @@ export class SWSEActor extends Actor {
         // await page.evaluate(() =>{
         //     console.log(document)
         // })
+    }
+
+    applyConversions(name, conversions) {
+        for (const conversion of conversions) {
+            const toks = conversion.split("->");
+
+            name = name.replace(toks[0].trim(), toks[1].trim());
+        }
+        return name;
     }
 }
 
