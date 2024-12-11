@@ -102,6 +102,24 @@ export function initializeStatusEffects(config){
             changes: [{key: "condition", value:"OUT"}, {key: "dexterityMax", value: "0"}, {key: "dexterityMaxBonus", value: "0"}]
         },
         {
+            id: "gravityLow",
+            label: "EFFECT.StatusGravityLow",
+            icon: "systems/swse/icon/status/helpless.png",
+            changes: [{key: "gravity", value:"Low"}]
+        },
+        {
+            id: "gravityHigh",
+            label: "EFFECT.StatusGravityHigh",
+            icon: "systems/swse/icon/status/helpless.png",
+            changes: [{key: "gravity", value:"High"}]
+        },
+        {
+            id: "gravityZero",
+            label: "EFFECT.StatusGravityZero",
+            icon: "systems/swse/icon/status/helpless.png",
+            changes: [{key: "gravity", value:"Zero"}]
+        },
+        {
             id: "shield",
             label: "EFFECT.StatusShield",
             icon: "icons/svg/shield.svg"

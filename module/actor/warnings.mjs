@@ -77,12 +77,12 @@ export function warningsFromActor(actor) {
 export function errorsFromActor(actor) {
     let errors = [];
 
-    const levelEffects = actor.effects.filter(effect => effect.flags.swse.isLevel);
+    const levelEffects = actor.effects.filter(effect => effect.flags?.swse?.isLevel);
     if(levelEffects.length > 0){
         errors.push(`<span data-action="remove-leaked-level-effects">You have level Effects on your actor sheet.  You may notice strange behavior if you do not remove them from your "Modes" tab</span>`)
     }
 
-    const weaponFireEffects = actor.effects.filter(effect => effect.flags.swse.group === "Fire Mode");
+    const weaponFireEffects = actor.effects.filter(effect => effect.flags?.swse?.group === "Fire Mode");
     if(weaponFireEffects.length > 0){
         errors.push(`<span data-action="remove-fire-mode-effects">You have Fire Mode Effects on your actor sheet (Single-Shot, Autofire, etc...).  You may notice strange behavior if you do not remove them from your "Modes" tab</span>`)
     }

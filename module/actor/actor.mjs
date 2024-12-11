@@ -248,7 +248,12 @@ export class SWSEActor extends Actor {
         }
         const system = this.system;
         system.description = system.description || ""
-        system.gravity = system.gravity || "Normal"
+        system.gravity = "Normal"
+        let gravityEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("gravity")))
+
+        if (gravityEffect) {
+            system.gravity = gravityEffect.changes.find(change => change.key === "gravity").value
+        }
 
 
         system.condition = 0;
@@ -1334,10 +1339,31 @@ export class SWSEActor extends Actor {
     get conditionBonus() {
         return this.system.condition;
     }
+    /**
+     * @param {string} effectGrouper
+     * @param changeValue
+     */
+    async setGroupedEffect(effectGrouper, changeValue) {
+        await this.clearGroupedEffect(effectGrouper);
 
-    async clearCondition() {
+        let statusEffect = this.effects.find(e => {
+            return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
+        })
+
+        if(!statusEffect){
+            statusEffect = CONFIG.statusEffects.find(e => {
+                return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
+            })
+        }
+        await this.activateStatusEffect(statusEffect);
+    }
+
+    /**
+     * @param {string} effectGrouper
+     */
+    async clearGroupedEffect(effectGrouper) {
         const effects = this.effects
-            .filter(effect => effect.statuses.find(status => status.startsWith("condition")));
+            .filter(effect => effect.statuses.find(status => status.startsWith(effectGrouper)));
         let ids = effects.map(effect => effect.id)
 
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
@@ -1350,21 +1376,16 @@ export class SWSEActor extends Actor {
     reduceCondition(number = 1) {
         let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
         if(i+number === 0){
-            this.clearCondition()
+            (async function () {
+                await this.clearGroupedEffect("condition");
+            })()
         }else {
             let newCondition = SWSE.conditionTrack[i + number]
-            this.setCondition(newCondition);
+            (async function (conditionValue) {
+                await this.setGroupedEffect('condition', conditionValue)
+            })(newCondition);
         }
     }
-
-
-    async setCondition(conditionValue) {
-        let statusEffect = CONFIG.statusEffects.find(e => {
-            return e.changes && e.changes.find(c => c.key === 'condition' && c.value === conditionValue);
-        })
-        await this.activateStatusEffect(statusEffect);
-    }
-
     async activateStatusEffect(statusEffect) {
         if (!statusEffect) {
             return;

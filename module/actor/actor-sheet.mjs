@@ -492,13 +492,13 @@ export class SWSEActorSheet extends ActorSheet {
 
     async _onConditionChange(event) {
         event.stopPropagation();
-        await this.object.clearCondition();
-        await this.object.setCondition(event.currentTarget.value);
+        await this.object.setGroupedEffect('condition', event.currentTarget.value);
     }
 
     async _onGravityChange(event) {
         event.stopPropagation();
-        await this.object.safeUpdate({"system.gravity": event.currentTarget.value})
+        await this.object.setGroupedEffect('gravity', event.currentTarget.value);
+        //await this.object.safeUpdate({"system.gravity": event.currentTarget.value})
     }
 
     async _onShield(event) {
