@@ -1357,15 +1357,18 @@ export class SWSEActor extends Actor {
     async setGroupedEffect(effectGrouper, changeValue) {
         await this.clearGroupedEffect(effectGrouper);
 
-        let statusEffect = this.effects.find(e => {
+        let localEffect = this.effects.find(e => {
             return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
         })
 
-        if(!statusEffect){
-            statusEffect = CONFIG.statusEffects.find(e => {
-                return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
-            })
+        let statusEffect = CONFIG.statusEffects.find(e => {
+            return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
+        })
+
+        if(localEffect){
+            statusEffect.changes = localEffect.changes;
         }
+
         await this.activateStatusEffect(statusEffect);
     }
 
@@ -1373,9 +1376,18 @@ export class SWSEActor extends Actor {
      * @param {string} effectGrouper
      */
     async clearGroupedEffect(effectGrouper) {
-        const effects = this.effects
-            .filter(effect => effect.statuses.find(status => status.startsWith(effectGrouper)));
-        let ids = effects.map(effect => effect.id)
+        const ids = [];
+        for (const effect of this.effects) {
+            if(effect.statuses.find(status => status.startsWith(effectGrouper))){
+                if(effect.origin){
+                    if(!effect.isDisabled){
+                        effect.disable(true)
+                    }
+                } else {
+                    ids.push(effect.id);
+                }
+            }
+        }
 
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
     }
@@ -1401,6 +1413,12 @@ export class SWSEActor extends Actor {
         if (!statusEffect) {
             return;
         }
+
+        if(statusEffect.origin){
+            statusEffect.disable(false);
+            return;
+        }
+
         const createData = foundry.utils.deepClone(statusEffect);
         createData.label = game.i18n.localize(statusEffect.label);
         createData["statuses"] = [statusEffect.id]
