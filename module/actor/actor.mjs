@@ -27,7 +27,6 @@ import {
     crewQuality,
     crewSlotResolution,
     DROID_COST_FACTOR,
-    GRAVITY_CARRY_CAPACITY_MODIFIER,
     KNOWN_WEIRD_UNITS,
     SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
@@ -43,7 +42,6 @@ import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
-
 
 
 export function buildRollContent(formula, roll, notes = [], itemFlavor) {
@@ -2894,25 +2892,35 @@ export class SWSEActor extends Actor {
         // return this.getCached("weight", fn)
     }
 
+
+    applyStandardCarryCapacityModifiers(number) {
+        const multipliers = getInheritableAttribute({entity: this, attributeKey: "carryCapacityMultiplier", reduce: "VALUES"})
+
+        for (const multiplier of multipliers) {
+            const toks = multiplier.split(":")
+            for (let tok of toks) {
+                if(tok.startsWith("min")){
+                    let min = tok.split(" ")[1];
+                    number = Math.min(number, min)
+                } else {
+                    number = number * tok;
+                }
+            }
+        }
+
+        return number * SIZE_CARRY_CAPACITY_MODIFIER[sizeArray[getResolvedSize(this)]]
+    }
     get heavyLoad() {
-        const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.attributes.str.total * 0.5, 2)
-            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
-            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total * 0.5, 2))
+
     }
 
     get strainCapacity() {
-        const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.attributes.str.total, 2) * 0.5
-            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
-            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total, 2) * 0.5)
     }
 
     get maximumCapacity() {
-        const resolvedSize = sizeArray[getResolvedSize(this)];
-        return Math.pow(this.attributes.str.total, 2)
-            * SIZE_CARRY_CAPACITY_MODIFIER[resolvedSize]
-            * GRAVITY_CARRY_CAPACITY_MODIFIER[this.system.gravity]
+        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total, 2))
     }
 
     updateLegacyActor() {
