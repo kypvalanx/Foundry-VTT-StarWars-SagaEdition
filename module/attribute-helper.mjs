@@ -86,7 +86,7 @@ export function getResolvedSize(entity, options = {}) {
 
 
 function getLocalChangesOnDocument(document, flags) {
-    let values = !document.isDisabled || flags.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
+    let values = !document.isDisabled || flags?.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
     if (!Array.isArray(values)){
         values = Object.values(values)
     }

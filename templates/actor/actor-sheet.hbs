@@ -230,9 +230,9 @@
                     <ol class="items-list">
                         {{#each actor.effects as |mode id|}}
                             <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
-                                <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
+                                <div class="item-image"><img src="{{mode.img}}" title="{{localize mode.name}}" width="24" height="24"/>
                                 </div>
-                                <h4 class="item-name">{{mode.name}}
+                                <h4 class="item-name">{{localize mode.name}}
 
                                     {{#if @root.options.debug}}
                                         {{mode.id}} - source: {{mode.system}}

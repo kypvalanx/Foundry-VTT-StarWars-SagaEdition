@@ -45,7 +45,8 @@ export class SWSEActiveEffect extends ActiveEffect {
         return this.transfer ? (this.parent.parent ?? null) : this.parent;
     }
     get transfer(){
-        return false;
+        const inheritableAttribute = this.changes.find(change => change.key === "transfer")
+        return inheritableAttribute?.value === "true"
     }
 
     set transfer(value) {
@@ -114,7 +115,7 @@ export class SWSEActiveEffect extends ActiveEffect {
         await this.safeUpdate(data);
     }
 
-    disable(disabled, affected = []){
+    disable(disabled = true, affected = []){
         if(this.disabled === disabled || (affected.includes(this.id))){
             return;
         }
@@ -154,15 +155,15 @@ export class SWSEActiveEffect extends ActiveEffect {
     }
 
     get links(){
-        return this.flags.swse?.links || []
+        return this.flags?.swse?.links || []
     }
 
     get hasDuration(){
-        return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
+        return !this.flags?.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
     get hasDisable(){
-        return !this.flags.swse?.itemModifier && !this.flags.swse?.isLevel
+        return !this.flags?.swse?.itemModifier && !this.flags.swse?.isLevel
     }
 
     get hideFromActor(){
