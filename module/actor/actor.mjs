@@ -529,6 +529,10 @@ export class SWSEActor extends Actor {
                 entity: this,
                 attributeKey: "grappleSizeModifier",
                 reduce: "SUM"
+            }) + getInheritableAttribute({
+                entity: this,
+                attributeKey: "condition",
+                reduce: "SUM"
             });
         })
     }
