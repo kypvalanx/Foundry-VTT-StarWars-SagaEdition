@@ -65,6 +65,25 @@ export async function actorSheetTests(quench) {
                 describe("._sheet", () => {
                     describe("._onDropItem", () => {
 
+                        it('should allow feats to be taken multiple times if they have the correct change', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+
+                                const update = {};
+                                update[`system.skills.use the force.trained`] = true;
+                                await actor.safeUpdate(update);
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Force Training", type: "feat"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Force Training", type: "feat"})
+
+                                const forceTrainings = actor.items.filter(i => i.name === "Force Training")
+                                assert.equal(forceTrainings.length, 2);
+                            });
+                        });
+
                         it('should accept a 2nd degree droid species and should grant associated feats and traits', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
@@ -328,6 +347,7 @@ export async function actorSheetTests(quench) {
                                 hasItems(assert, actor.inheritedChanges, ["Jedi Talent Trees"])
                             });
                         });
+
 
 
                         it('should only take trained skills from first level class', async function () {
