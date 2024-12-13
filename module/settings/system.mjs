@@ -93,10 +93,11 @@ export const registerSystemSettings = function () {
         hint: "Similar to games like Pathfinder",
         scope: "world",
         config: true,
-        default: "555",
+        default: "101010",
         type: String,
         choices: {
-            555: "Equal distance diagonals",
+            101010: "Diagonals are double move (default)",
+            555: "Diagonals are single move",
             5105: "Alternating double distance diagonals"
         },
         onChange: (rule) => (canvas.grid.diagonalRule = rule)

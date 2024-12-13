@@ -97,19 +97,10 @@
 
 
     <div class="large flex-col">
-        <div class="top-label center label">Vehicle Speed</div>
-        <div class="size flex-row">
-            <div class="labeled-input">
-                <label for="characterScaleSpeed" class="text">Character Scale</label>
-                <input class="left-input" id="characterScaleSpeed" type="text" value="{{actor.speed.character}}"
-                       placeholder="" disabled/>
-            </div>
-            <div class="divider"></div>
-            <div class="labeled-input">
-                <label for="vehicleScaleSpeed" class="text">Vehicle Scale</label>
-                <input class="right-input" id="vehicleScaleSpeed" type="text" value="{{actor.speed.vehicle}}"
-                       placeholder="" disabled/>
-            </div>
+        <div class="labeled-input">
+            <label for="speed" class="text">Vehicle Speed</label>
+            <input class="input" id="speed" name="speed" type="text" value="{{actor.speed}}"
+                   placeholder="" disabled/>
         </div>
     </div>
 
