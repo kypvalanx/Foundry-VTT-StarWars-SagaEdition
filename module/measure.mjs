@@ -19,6 +19,9 @@ function unifiedMeasureDistance(p0,
         const nd10 = Math.floor(state.diagonals / 2) - Math.floor((state.diagonals - nDiagonal) / 2);
         cells = nd10 * 2 + (nDiagonal - nd10) + nStraight;
     }
+    else if (diagonalRule === "101010") {
+        cells = nStraight + nDiagonal * 2;
+    }
     // Equal distance diagonals
     else cells = nStraight + nDiagonal;
 
@@ -31,7 +34,7 @@ export function measureDistances(segments, options = {}) {
     if (!options.gridSpaces) return BaseGrid.prototype.measureDistances.call(this, segments, options);
 
     // Track the total number of diagonals
-    const diagonalRule = this.parent.diagonalRule;
+    const diagonalRule = this.diagonalRule;
     const state = {diagonals: 0};
 
     // Iterate over measured segments

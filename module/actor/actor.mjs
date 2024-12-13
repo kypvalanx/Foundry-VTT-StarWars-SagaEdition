@@ -1209,50 +1209,64 @@ export class SWSEActor extends Actor {
         return this.system.sex;
     }
 
-    get speed() {
-        return this.getCached("speed", () => {
+    get gridSpeeds() {
+        return this.getCached("gridSpeed", () => {
             if (this.type === 'vehicle') {
-                return {
-                    vehicle: getInheritableAttribute({
-                        entity: this,
-                        attributeKey: "speedStarshipScale",
-                        reduce: "SUM"
-                    }),
-                    character: getInheritableAttribute({
-                        entity: this,
-                        attributeKey: "speedCharacterScale",
-                        reduce: "SUM"
-                    })
-                }
+                const vehicleSpeed = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "speedStarshipScale",
+                    reduce: "SUM"
+                });
+                const characterSpeed = getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "speedCharacterScale",
+                    reduce: "SUM"
+                })
+                return [
+                    {type: "Vehicle Scale", value: vehicleSpeed},
+                    {type: "Character Scale", value: characterSpeed}
+                ]
             } else {
                 let attributes = getInheritableAttribute({
                     entity: this,
                     attributeKey: 'speed', reduce: "VALUES"
                 })
 
+                attributes = attributes.map(speed => {
+                    let result = /([\w\s->]*)\s(\d*)/.exec(speed)
+                    return {type: result[1], value: parseInt(result[2])}
+                })
+
                 if (attributes.length === 0) {
-                    attributes.push("Stationary 0");
+                    attributes.push({type: "Stationary", value: 0});
                 }
+                let armorType = this.heaviestArmorType;
 
-                let armorType = "";
-                for (let armor of this.getEquippedItems().filter(item => item.type === "armor")) {
-                    if (armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)) {
-                        armorType = armor.armorType;
-                    }
-                }
+                const conversions = attributes.filter(attribute=> attribute.type.includes("->")).map(attribute => attribute.type)
 
-                const conversions = attributes.filter(attribute=> attribute.includes("->"))
+                attributes = attributes.filter(attribute=> !attribute.type.includes("->"))
 
-                attributes = attributes.filter(attribute=> !attribute.includes("->"))
-
-                return attributes.map(name => this.applyArmorSpeedPenalty(name, armorType))
-                    .map(name => this.applyConditionSpeedPenalty(name, armorType))
-                    .map(name => this.applyWeightSpeedPenalty(name))
-                    .map(name => this.applyConversions(name, conversions))
-                    .join("; ");
+                return attributes.map(speed => this.applyArmorSpeedPenalty(speed, armorType))
+                    .map(speed => this.applyConditionSpeedPenalty(speed, armorType))
+                    .map(speed => this.applyWeightSpeedPenalty(speed))
+                    .map(speed => this.applyConversions(speed, conversions))
             }
 
         })
+    }
+
+    get heaviestArmorType() {
+        let armorType = "";
+        for (let armor of this.getEquippedItems().filter(item => item.type === "armor")) {
+            if (armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)) {
+                armorType = armor.armorType;
+            }
+        }
+        return armorType;
+    }
+
+    get speed() {
+        return this.gridSpeeds.map(speed => `${speed.type} ${speed.value}`).join(" / ");
     }
 
     // getter for further speed calculations
@@ -1260,16 +1274,29 @@ export class SWSEActor extends Actor {
         return parseInt(/([\w\s]*)\s(\d*)/.exec(this.speed)[2]);
     }
 
-    //TODO extract this, it's not dependent on this class
+    /**
+     * applies the speed penalty from wearing armor
+     * @param speed {object}
+     * @param speed.type {string}
+     * @param speed.value {number}
+     * @param armorType {string}
+     * @return
+     */
     applyArmorSpeedPenalty(speed, armorType) {
         if (!armorType || "Light" === armorType) {
             return speed;
         }
-        let result = /([\w\s]*)\s(\d*)/.exec(speed);
-
-        return `${result[1]} ${Math.floor(parseInt(result[2]) * 3 / 4)}`
+        speed.value = Math.floor(speed.value * 3 / 4)
+        return speed;
     }
 
+    /**
+     * applies the speed penalty from your condition
+     * @param speed {object}
+     * @param speed.type {string}
+     * @param speed.value {number}
+     * @return
+     */
     applyConditionSpeedPenalty(speed) {
         let multipliers = getInheritableAttribute({
             entity: this,
@@ -1277,30 +1304,33 @@ export class SWSEActor extends Actor {
             reduce: "VALUES"
         })
 
-        let result = /([\w\s]*)\s(\d*)/.exec(speed);
-
-        let number = parseInt(result[2]);
-
-        multipliers.forEach(m => number = parseFloat(m) * number)
-        return `${result[1]} ${Math.floor(number)}`
+        multipliers.forEach(m => speed.value = parseFloat(m) * speed.value)
+        return speed
     }
 
+    /**
+     * applies the speed penalty from your carry weight
+     * @param speed {object}
+     * @param speed.type {string}
+     * @param speed.value {number}
+     * @return
+     */
     applyWeightSpeedPenalty(speed) {
-        let result = /([\w\s]*)\s(\d*)/.exec(speed);
-
-        let number = parseInt(result[2]);
-        let speedType = result[1];
         if (game.settings.get("swse", "enableEncumbranceByWeight")) {
             if (this.carriedWeight >= this.maximumCapacity) {
-                number = 0;
+                speed.value = 0;
             } else if (this.carriedWeight >= this.strainCapacity) {
-                number = 1;
+                speed.value = 1;
             } else if (this.carriedWeight >= this.heavyLoad) {
-                number = number * 3 / 4
+                if("Fly Speed" === speed.type){
+                    speed.value = 0;
+                }else {
+                    speed.value = Math.floor(speed.value * 3 / 4)
+                }
             }
         }
 
-        return `${speedType} ${Math.floor(number)}`
+        return speed
     }
 
     getTraits() {
@@ -3035,13 +3065,14 @@ export class SWSEActor extends Actor {
         // })
     }
 
-    applyConversions(name, conversions) {
+    applyConversions(speed, conversions) {
         for (const conversion of conversions) {
             const toks = conversion.split("->");
-
-            name = name.replace(toks[0].trim(), toks[1].trim());
+            for (const splitElement of toks[0].split("/")) {
+                speed.type = speed.type.replace(splitElement.trim(), toks[1].trim());
+            }
         }
-        return name;
+        return speed;
     }
 }
 

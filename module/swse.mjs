@@ -27,6 +27,102 @@ Hooks.once('quenchReady',  (quench) => {
 })
 
 
+const RUN_MULTIPLIER = 4;
+
+const ENCUMBERED_RUN_MULTIPLIER = 3;
+
+function initializeDragRuler() {
+    Hooks.once("dragRuler.ready", (SpeedProvider) => {
+        class SWSESpeedProvider extends SpeedProvider {
+            get colors() {
+                return [
+                    {id: "move", default: 0x00FF00, name: "swse.speeds.move"},
+                    {id: "double", default: 0xFFFF00, name: "swse.speeds.double"},
+                    {id: "run", default: 0xFF8000, name: "swse.speeds.run"},
+                    {id: "fly", default: 0x0000FF, name: "swse.speeds.fly"},
+                ]
+            }
+
+            getRanges(token) {
+                const speeds = token.actor.gridSpeeds
+
+                const runSpeedMultiplier = token.actor.heaviestArmorType === "Heavy" || this.carriedWeight >= this.heavyLoad ? ENCUMBERED_RUN_MULTIPLIER : RUN_MULTIPLIER
+
+                const fastest = speeds.reduce((selected, current) => selected?.value < current.value ? current : selected)
+                // A character can always walk it's base speed and dash twice it's base speed
+                const ranges = [
+                    {range: fastest.value, color: "move"},
+                    {range: fastest.value * 2, color: "double"},
+                    {range: fastest.value * runSpeedMultiplier, color: "run"}
+                ]
+
+                return ranges
+            }
+        }
+
+        dragRuler.registerSystem("swse", SWSESpeedProvider)
+    })
+}
+
+function initializePolyglot() {
+
+    Hooks.once("polyglot.init", (LanguageProvider) => {
+        class SWSELanguageProvider extends LanguageProvider {
+            async getLanguages() {
+                const langs = {};
+
+                const packs = [];
+                packs.push(...game.packs.filter(p => true));
+
+                const languagesSetting = game.settings.get("polyglot", "Languages");
+                if (!this.replaceLanguages) {
+                    //CONFIG.FICTIONAL.spoken = {};
+                    const languages = packs.filter(pack => pack.collection.startsWith("swse.languages"))[0].index;
+
+                    for (const language of languages) {
+                        langs[language.name] = {
+                            label: language.name,
+                            font: languagesSetting[language.name]?.font || this.languages[language.name]?.font || this.defaultFont,
+                            rng: languagesSetting[language.name]?.rng ?? "default",
+                        };
+                    }
+
+                    //console.log(languages)
+                }
+                // for (let lang in CONFIG.FICTIONAL.spoken) {
+                //     langs[lang] = {
+                //         label: CONFIG.FICTIONAL.spoken[lang],
+                //         font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
+                //         rng: languagesSetting[lang]?.rng ?? "default",
+                //     };
+                // }
+                this.languages = langs;
+            }
+
+            getUserLanguages(actor) {
+                let known_languages = new Set();
+                let literate_languages = new Set();
+
+                const maySpeak = getInheritableAttribute({entity:actor, attributeKey: "maySpeak", reduce: "VALUES"})
+                const limitedSpeech = maySpeak.length > 0;
+
+                for (let lang of filterItemsByType(actor.items.values(), "language")) {
+                    if(limitedSpeech && !maySpeak.includes(lang.name)) {
+                        literate_languages.add(lang.name)
+                    } else {
+                        known_languages.add(lang.name)
+                    }
+                }
+                return [known_languages, literate_languages];
+            }
+        }
+
+
+        game.polyglot.api.registerSystem(SWSELanguageProvider);
+    })
+
+
+}
 
 Hooks.once('init', async function () {
 
@@ -66,6 +162,9 @@ Hooks.once('init', async function () {
     registerSystemSettings();
     registerHandlebarsHelpers();
     initializeStatusEffects(CONFIG)
+
+    initializeDragRuler();
+    initializePolyglot();
 
     // if(game.settings.get("swse", "enableAdvancedCompendium")){
     //     CONFIG.ui.compendium = SWSECompendiumDirectory;
@@ -172,62 +271,6 @@ Hooks.once('init', async function () {
         'systems/swse/templates/common/rollable.hbs']);
 
 });
-
-Hooks.once("polyglot.init", (LanguageProvider) => {
-    class SWSELanguageProvider extends LanguageProvider {
-        async getLanguages() {
-            const langs = {};
-
-            const packs = [];
-            packs.push(...game.packs.filter(p => true));
-
-            const languagesSetting = game.settings.get("polyglot", "Languages");
-            if (!this.replaceLanguages) {
-                //CONFIG.FICTIONAL.spoken = {};
-                const languages = packs.filter(pack => pack.collection.startsWith("swse.languages"))[0].index;
-
-                for (const language of languages) {
-                    langs[language.name] = {
-                                label: language.name,
-                                font: languagesSetting[language.name]?.font || this.languages[language.name]?.font || this.defaultFont,
-                                rng: languagesSetting[language.name]?.rng ?? "default",
-                            };
-                }
-
-                //console.log(languages)
-            }
-            // for (let lang in CONFIG.FICTIONAL.spoken) {
-            //     langs[lang] = {
-            //         label: CONFIG.FICTIONAL.spoken[lang],
-            //         font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
-            //         rng: languagesSetting[lang]?.rng ?? "default",
-            //     };
-            // }
-            this.languages = langs;
-        }
-
-        getUserLanguages(actor) {
-            let known_languages = new Set();
-            let literate_languages = new Set();
-
-            const maySpeak = getInheritableAttribute({entity:actor, attributeKey: "maySpeak", reduce: "VALUES"})
-            const limitedSpeech = maySpeak.length > 0;
-
-            for (let lang of filterItemsByType(actor.items.values(), "language")) {
-                if(limitedSpeech && !maySpeak.includes(lang.name)) {
-                    literate_languages.add(lang.name)
-                } else {
-                    known_languages.add(lang.name)
-                }
-            }
-            return [known_languages, literate_languages];
-        }
-    }
-
-
-    game.polyglot.api.registerSystem(SWSELanguageProvider);
-})
-
 
 
 function deleteActorsByName(name){

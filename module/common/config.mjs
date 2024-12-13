@@ -131,7 +131,7 @@ export function initializeStatusEffects(config){
             icon: "systems/swse/icon/status/helpless.png",
             changes: [
                 {key: "gravity", value:"Zero"},
-                {key: "speed", value: "Base Speed -> Flying Speed"},
+                {key: "speed", value: "Base Speed/Walking Speed/Wheeled Speed/Tracked Speed/Hovering Speed -> Flying Speed"},
                 {key: "carryCapacityMultiplier", value: "10"},
                 {key: "skillBonus", value: "all:-5"},
                 {key: "toHitModifier", value: "-5"}
