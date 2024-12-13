@@ -328,7 +328,7 @@ const applyAttack = (event) => {
     } else if(type === "double") {
         baseDamage *= 2
     }
-    let damageString = `${baseDamage}`
+    let damageString = `${Math.floor(baseDamage)}`
 
     let content = `<div class="subtle-panel">
 <div>Attack Roll: ${attack}</div>
