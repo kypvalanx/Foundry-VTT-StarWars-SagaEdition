@@ -1431,14 +1431,12 @@ export class SWSEActor extends Actor {
     reduceCondition(number = 1) {
         let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
         if(i+number === 0){
-            (async function () {
-                await this.clearGroupedEffect("condition");
-            })()
+            this.clearGroupedEffect("condition");
         }else {
-            let newCondition = SWSE.conditionTrack[i + number]
-            (async function (conditionValue) {
-                await this.setGroupedEffect('condition', conditionValue)
-            })(newCondition);
+            const number1 = i + number;
+            let newCondition = SWSE.conditionTrack[number1];
+
+            this.setGroupedEffect('condition', newCondition)
         }
     }
     async activateStatusEffect(statusEffect) {
