@@ -82,11 +82,21 @@ const isItemTypePermitted = async (context) => {
 
 const canTakeMoreThanOnce = async (context) => {
     if (LIMITED_TO_ONE_TYPES.includes(context.entity.type)) {
+        const canTakeMultipleTimes = getInheritableAttribute({
+            entity: context.entity,
+            attributeKey: "takeMultipleTimes",
+            reduce: "OR"
+        })
+
         const maximumQuantity = getInheritableAttribute({
             entity: context.entity,
             attributeKey: "takeMultipleTimesMax",
             reduce: "MAX"
-        }) || 1;
+        });
+
+        if(!maximumQuantity){
+            return true;
+        }
         const timesTaken = context.actor.countItem(context.entity);
         const isAtMaximumQuantity = timesTaken >= maximumQuantity;
 
