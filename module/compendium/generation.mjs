@@ -64,7 +64,7 @@ export async function processItem(itemData) {
             for (const e of groupedEffects) {
                 await e.addLinks(effect, link.type.toLowerCase());
             }
-            console.log(effect)
+            //console.log(effect)
         }
         //delete effect.flags.swse.linkData
     }

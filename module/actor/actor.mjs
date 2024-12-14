@@ -1682,6 +1682,9 @@ export class SWSEActor extends Actor {
         })
     }
 
+    /**
+     * @return boolean
+     */
     get isDroid() {
         if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
             return false;
@@ -1695,6 +1698,25 @@ export class SWSEActor extends Actor {
             }
             return false;
         }
+    }
+
+    /**
+     * @return boolean
+     */
+    get takesFullDamageFromIon(){
+        if(this.isDroid){
+            return true;
+        }
+
+        for(const implant of this.itemTypes["implant"]){
+            const isCybernetic = getInheritableAttribute({entity: implant, attributeKey: "cybernetic", reduce: "OR"});
+            const isShielded = getInheritableAttribute({entity: implant, attributeKey: "ionShielded", reduce: "OR"});
+
+            if(isCybernetic && !isShielded){
+                return true;
+            }
+        }
+        return false;
     }
 
     get trainedSkills() {

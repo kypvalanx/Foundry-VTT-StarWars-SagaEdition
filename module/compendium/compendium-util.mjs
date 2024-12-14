@@ -114,7 +114,7 @@ export async function getIndexAndPack(item) {
 
 
 function isFullItem(item) {
-    return !!item.system || item instanceof SWSEItem;
+    return !!item?.system || item instanceof SWSEItem;
 }
 
 /**
