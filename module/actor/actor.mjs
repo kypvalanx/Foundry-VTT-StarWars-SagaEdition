@@ -1430,10 +1430,18 @@ export class SWSEActor extends Actor {
 
     reduceCondition(number = 1) {
         let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
+
+        //if this is reducing condition then we should consider anything that increases that reduction
+        if(i > 0){
+            if(getInheritableAttribute({entity:this, attributeKey:"implantDisruption", reduce: "OR"})){
+                number++;
+            }
+        }
+
         if(i+number === 0){
             this.clearGroupedEffect("condition");
         }else {
-            const number1 = i + number;
+            const number1 = Math.max(i + number, 5);
             let newCondition = SWSE.conditionTrack[number1];
 
             this.setGroupedEffect('condition', newCondition)

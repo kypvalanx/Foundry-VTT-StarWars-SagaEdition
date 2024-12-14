@@ -138,6 +138,25 @@ function _resolveFort(actor, condition) {
     return fortitudeDefense
 }
 
+function implantInterference(actor) {
+    let disruption = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "implantDisruption",
+        reduce: "OR"
+    })
+    let training = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "implantTraining",
+        reduce: "OR"
+    })
+
+    if(disruption && !training){
+        return [-2]
+    }
+
+    return [];
+}
+
 /**
  *
  * @param actor {SWSEActor}
@@ -155,6 +174,10 @@ function _resolveWill(actor, condition) {
     bonuses.push(heroicLevel);
     let abilityBonus = _getWisMod(actor);
     bonuses.push(abilityBonus);
+
+    bonuses.push(...implantInterference(actor))
+
+
     let classBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "classWillDefenseBonus",
