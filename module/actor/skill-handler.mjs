@@ -200,6 +200,28 @@ export function generateSkills(actor, options = {}) {
     resolvedSkills.push(...nonSituationalSkills);
 
 
+    function resolveBonusesAndHandleModifiers(rawSkillBonuses) {
+        const skillBonuses = [];
+
+        let implant = 0;
+        for (const skillBonus of rawSkillBonuses) {
+            const toks = skillBonus.split(":");
+            if(toks.length > 2){
+                const modifier = toks[2].toLowerCase().trim();
+                switch (modifier) {
+                    case "implant":
+                        implant = implant + parseInt(toks[1]);
+                        break;
+                }
+                continue;
+            }
+            skillBonuses.push(toks[1]);
+        }
+        if(implant){
+            skillBonuses.push(Math.max(implant, -5));
+        }
+        return skillBonuses;
+    }
 
     for (let resSkill of resolvedSkills) {
         let key = resSkill.toLowerCase();
@@ -260,10 +282,12 @@ export function generateSkills(actor, options = {}) {
                 bonuses.push({value: shipModifier, description: `Ship Size Modifier: ${shipModifier}`})
             }
 
-            let miscBonuses = skillBonusAttr.filter(bonus => {
+            const rawSkillBonuses = skillBonusAttr.filter(bonus => {
                 const bonusKey = bonus.split(":")[0].toLowerCase();
                 return bonusKey === resSkill.toLowerCase() || standardizedAttribute(bonusKey) === standardizedAttribute(skill.attribute) || bonusKey === "all"
-            }).map(bonus => bonus.split(":")[1]);
+            })
+
+            let miscBonuses = resolveBonusesAndHandleModifiers(rawSkillBonuses);
 
             situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus =>
                 bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
