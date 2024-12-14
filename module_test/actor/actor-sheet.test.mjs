@@ -83,6 +83,41 @@ export async function actorSheetTests(quench) {
                                 assert.equal(forceTrainings.length, 2);
                             });
                         });
+
+
+                        it('should reduce Use the Force by the number of cybernetics up to 5', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, 0)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -1)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -2)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -3)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -4)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -5)
+
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
+
+                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -5)
+
+                            });
+                        });
+
                         it('should understand if a character is effected by ion damage if they are a droid', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
