@@ -1719,6 +1719,11 @@ export class SWSEActor extends Actor {
         return false;
     }
 
+    get isEffectedByStun(){
+        return !(this.isDroid || this.type === 'vehicle' || this.type === 'npc-vehicle');
+
+    }
+
     get trainedSkills() {
         return this.getCached("trainedSkills", () => {
             return this.skills.filter(skill => skill && skill.trained);
