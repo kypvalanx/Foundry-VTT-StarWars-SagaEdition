@@ -83,6 +83,43 @@ export async function actorSheetTests(quench) {
                                 assert.equal(forceTrainings.length, 2);
                             });
                         });
+                        it('should understand if a character is effected by ion damage if they are a droid', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "2nd-Degree Droid Model", type: "species", answers: ["Medium"]})
+
+                                assert.equal(actor.takesFullDamageFromIon, true);
+                            });
+                        });
+                        it('should understand if a character is effected by ion damage if they have a cybernetic', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item"})
+
+                                assert.equal(actor.takesFullDamageFromIon, true);
+                            });
+                        });
+                        it('should understand if a character is effected by ion damage if they do not have a cybernetic', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+
+                                assert.equal(actor.takesFullDamageFromIon, false);
+                            });
+                        });
+                        it('should understand if a character is effected by ion damage if they have an ion-shielded prosthetic', async function () {
+                            await withTestActor(async actor => {
+                                actor.suppressDialog = true
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item"})
+
+                                for (const i of actor.items) {
+                                    if(i.name === "Cybernetic Prosthesis") {
+                                        await i.handleDroppedItem({name: "Ion-Shielding", type: "upgrade"})
+                                    }
+                                }
+
+                                assert.equal(actor.takesFullDamageFromIon, false);
+                            });
+                        });
 
                         it('should accept a 2nd degree droid species and should grant associated feats and traits', async function () {
                             await withTestActor(async actor => {

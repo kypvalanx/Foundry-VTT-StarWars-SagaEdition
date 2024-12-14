@@ -308,7 +308,8 @@ export const SUBTYPES = {
     "background": ["event", "occupation", "planet of origin"],
     "class": ["Nonheroic", "Heroic", "Prestige"],
     "species": ["Organic", "Droid"],
-    "beastattack": ["Melee Natural Weapons", "Ranged Natural Weapons"]
+    "beastattack": ["Melee Natural Weapons", "Ranged Natural Weapons"],
+    "implant":["Bio-Implants", "Cybernetic Devices", "Implants", "Advanced Cybernetics"]
 }
 
 export const GM_BONUSES = [

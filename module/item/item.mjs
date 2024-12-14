@@ -7,6 +7,7 @@ import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} 
 import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
+import {resolveEntity} from "../compendium/compendium-util.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -952,6 +953,11 @@ export class SWSEItem extends Item {
         if(droppedItem.uuid){
             item = await Item.implementation.fromDropData(droppedItem);
         }
+        if(!item){
+            const response = await resolveEntity(droppedItem);
+            item = response.entity;
+        }
+
         if(!item){
             return {};
         }
