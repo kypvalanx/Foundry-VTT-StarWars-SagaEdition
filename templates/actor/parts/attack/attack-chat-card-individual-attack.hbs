@@ -14,7 +14,7 @@
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.damage damageType=attack.damageType}}
 <div class="dice-roll">
     {{#each attack.notes as |note i|}}
-        <div class="dice-formula">{{note.value}}</div>
+        <div class="dice-formula"><a href="{{note.href}}">{{note.value}}</a></div>
     {{/each}}
 </div>
 <br>

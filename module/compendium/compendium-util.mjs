@@ -147,7 +147,7 @@ export async function resolveEntity(item) {
     } else if (item.uuid) {
         entity = await Item.implementation.fromDropData(item);
         itemName = entity.name;
-    } else {
+    } else if(item.name) {
         let indices = await getIndexAndPack(item);
         let response = await getIndexEntryByName(item.name, indices);
 

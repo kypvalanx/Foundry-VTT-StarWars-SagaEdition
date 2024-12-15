@@ -639,7 +639,7 @@ export class SWSEActorSheet extends ActorSheet {
         let actions = this.object.recoveryActions + 1;
         if(actions === this.object.totalRecoveryActions){
             actions = 0;
-            this.object.reduceCondition(-1)
+            await this.object.reduceCondition(-1)
         }
         const update= {};
         update[`system.recoveryActions`] = actions;
