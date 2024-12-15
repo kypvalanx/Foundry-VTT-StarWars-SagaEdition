@@ -633,11 +633,11 @@ export class Attack {
             attributeKey: 'special'
         })
         let type = this.type;
-        if ('Stun' === type) {
+        if ('Stun' === type  || type.includes("Energy (Stun)")) {
             notes.push({href: "https://swse.fandom.com/wiki/Stun_Damage", value: "Stun Damage"})
 
         }
-        if ('Ion' === type) {
+        if ('Ion' === type || type.includes("Energy (Ion)")) {
             notes.push({href: "https://swse.fandom.com/wiki/Ion_Damage", value: "Ion Damage"})
         }
 

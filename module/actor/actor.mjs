@@ -1428,7 +1428,7 @@ export class SWSEActor extends Actor {
         this.shields = Math.max(this.shields - number, 0);
     }
 
-    reduceCondition(number = 1) {
+    async reduceCondition(number = 1) {
         let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
 
         //if this is reducing condition then we should consider anything that increases that reduction
@@ -1439,12 +1439,16 @@ export class SWSEActor extends Actor {
         }
 
         if(i+number === 0){
-            this.clearGroupedEffect("condition");
+            await this.clearGroupedEffect("condition");
+
+            return `condition track reset.`
         }else {
             const number1 = Math.max(i + number, 5);
             let newCondition = SWSE.conditionTrack[number1];
 
-            this.setGroupedEffect('condition', newCondition)
+            await this.setGroupedEffect('condition', newCondition)
+
+            return `condition set to ${newCondition}`;
         }
     }
     async activateStatusEffect(statusEffect) {
@@ -1465,9 +1469,14 @@ export class SWSEActor extends Actor {
         await cls.create(createData, {parent: this});
     }
 
-    applyDamage(options) {
+    async applyDamage(options) {
         let update = {};
         let totalDamage = toNumber(options.damage);
+
+        const damageTypes = options.damageType.split(COMMMA_LIST);
+
+
+
 
         if (!options.skipShields) {
             let shields = this.system.shields;
@@ -1487,7 +1496,6 @@ export class SWSEActor extends Actor {
                 attributeKey: "blocksLightsaber",
                 reduce: "OR"
             })
-            let damageTypes = options.damageType.split(COMMMA_LIST);
 
             if (!damageTypes.includes("Lightsabers") || lightsaberResistance) {
                 for (let damageReduction of damageReductions) {
@@ -1503,31 +1511,62 @@ export class SWSEActor extends Actor {
         }
 
 
+
+        let conditionReduction = 1;
+        const currentHealth = this.system.health.value;
+
+        let damageThreshhold = this.defense.damageThreshold.total;
+        if(damageTypes.includes("Energy (Ion)")){
+            if (this.takesFullDamageFromIon) {
+                if(totalDamage >= currentHealth){
+                    conditionReduction = 5;
+                } else if(totalDamage > damageThreshhold){
+                    conditionReduction = 2;
+                }
+            } else {
+                totalDamage = Math.floor(totalDamage / 2);
+            }
+        } else if(damageTypes.includes("Energy (Stun)")){
+            if(this.isEffectedByStun){
+                if(totalDamage >= currentHealth){
+                    conditionReduction = 5;
+                } else if(totalDamage > damageThreshhold){
+                    conditionReduction = 2;
+                }
+            } else {
+                totalDamage = 0;
+            }
+        }
+
+        let reducedCondition = "";
         if (options.affectDamageThreshold) {
-            if (totalDamage > this.defense.damageThreshold.total) {
-                this.reduceCondition(1)
+            if (totalDamage > damageThreshhold) {
+                reducedCondition = await this.reduceCondition(conditionReduction)
             }
         }
 
         //TODO Floating numbers tie in
-
-        if (totalDamage > 0) {
-            update[`system.health.value`] = this.system.health.value - totalDamage;
-            const content = `${this.name} has has taken ${totalDamage} damage.`
-            toChat(content, this)
+        if(totalDamage < 0){
+            totalDamage = 0;
         }
 
-        if(this.canUserModify(game.user, 'update')){
+
+        update[`system.health.value`] = currentHealth - totalDamage;
+        const content = `${this.name} has has taken ${totalDamage} damage.  ${reducedCondition}`
+        toChat(content, this)
+
+
+        // if(this.canUserModify(game.user, 'update')){
             this.safeUpdate(update);
-        } else {
-            console.log(this)
-            let ownerIds = Object.entries(this.ownership).filter(e => e[1]  === 3).map(e => e[0])
-            for (let ownerId of ownerIds) {
-                this.safeUpdate(update, {bypass: true, owner: ownerId})
-                // let owner = game.users.get(ownerId)
-                // console.log((owner))
-            }
-        }
+        // } else {
+        //     console.log(this)
+        //     let ownerIds = Object.entries(this.ownership).filter(e => e[1]  === 3).map(e => e[0])
+        //     for (let ownerId of ownerIds) {
+        //         this.safeUpdate(update, {bypass: true, owner: ownerId})
+        //         // let owner = game.users.get(ownerId)
+        //         // console.log((owner))
+        //     }
+        // }
     }
 
     applyHealing(options) {
