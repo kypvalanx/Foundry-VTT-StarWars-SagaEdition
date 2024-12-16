@@ -1046,6 +1046,12 @@ export class SWSEItem extends Item {
                 providedItem.name = providedItem.name.replace(regExp, payload);
             }
         });
+
+        this.system.possibleProviders = this.system.possibleProviders.filter(provider => {
+            const toks = provider.split(":");
+            return toks.length === 1 || toks[1] === payload;
+        }).map(provider => provider.split(":")[0]);
+
         this.system.choices = [];
 
         this.system.displayName = SWSEItem.buildItemName(this);
