@@ -365,26 +365,28 @@ const applyAttack = (event) => {
         buttons: {
             attack:{
                 label: "Attack",
-                callback: (html)=>{
+                callback: async (html) => {
                     let targets = html.find("[data-type=target]")
-                    for(let target of targets){
+                    for (let target of targets) {
 
                         let targetHit = $(target).find("[data-attribute=target-hit]")[0]?.checked
 
                         let additionalDR = $(target).find("[data-attribute=additional-damage-resistance]")[0].value
                         let bypassDR = $(target).find("[data-attribute=bypass-damage-resistance]")[0]?.checked
                         let additionalShields = $(target).find("[data-attribute=additional-shield-rating]")[0].value
-                        let bypassShields =  $(target).find("[data-attribute=bypass-shields]")[0]?.checked
-                        let affectDamageThreshold =  $(target).find("[data-attribute=bypass-damage-threshold]")[0]?.checked
+                        let bypassShields = $(target).find("[data-attribute=bypass-shields]")[0]?.checked
+                        let affectDamageThreshold = $(target).find("[data-attribute=bypass-damage-threshold]")[0]?.checked
 
 
-                        if(!targetHit){return;}
+                        if (!targetHit) {
+                            return;
+                        }
 
                         let targetActor = actorMap[target.dataset.target];
-                        if(type === "heal"){
+                        if (type === "heal") {
                             targetActor.applyHealing({heal: baseDamage})
                         } else {
-                            targetActor.applyDamage({
+                            await targetActor.applyDamage({
                                 damage: baseDamage,
                                 damageType: damageType,
                                 additionalDR,
