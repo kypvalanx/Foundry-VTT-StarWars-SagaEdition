@@ -420,7 +420,8 @@ export class SWSEActorSheet extends ActorSheet {
         const a = event.currentTarget;
         const ammoKey = a.dataset.ammoKey;
         const itemId = a.dataset.itemId;
-        const item = this.object.items.get(itemId);
+        let split = itemId.split(".");
+        const item = this.object.items.get(itemId) || this.object.items.get(split[split.length - 1]);
         item.ammunition.reload(ammoKey);
     }
 
