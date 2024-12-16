@@ -3,7 +3,7 @@ import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-import {getParentByHTMLClass, linkEffects, onCollapseToggle, toNumber} from "../common/util.mjs";
+import {getParentByHTMLClass, linkEffects, onCollapseToggle, toChat, toNumber} from "../common/util.mjs";
 import {
     _adjustPropertyBySpan,
     changeCheckbox,
@@ -187,27 +187,9 @@ export class SWSEItemSheet extends ItemSheet {
             item = game.items.get(itemId);
         }
 
-        let name = item.name || item.data.name;
-        let description = item.description || item.data?.description || item.data?.data?.description || item.data?._source?.data?.description;
+        let content = item.description || item.system?.description
 
-        let content = `${description}`
-
-        let speaker = ChatMessage.getSpeaker({actor: this.object.parent});
-        console.log(item)
-        let messageData = {
-            user: game.user.id,
-            speaker: speaker,
-            flavor: name,
-            type: CONST.CHAT_MESSAGE_TYPES.OOC,
-            content,
-            sound: CONFIG.sounds.dice
-        }
-
-        let cls = getDocumentClass("ChatMessage");
-
-        let msg = new cls(messageData);
-
-        return cls.create(msg.data, {});
+        toChat(content, this.object.parent, item.name)
     }
     _onReload(event) {
         event.preventDefault();
