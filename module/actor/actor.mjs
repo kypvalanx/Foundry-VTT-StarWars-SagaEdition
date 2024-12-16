@@ -521,6 +521,15 @@ export class SWSEActor extends Actor {
 
     get grapple() {
         return this.getCached("grapple", () => {
+            let condition = getInheritableAttribute({
+                entity: this,
+                attributeKey: "condition",
+                reduce: "SUM"
+            });
+
+            if(condition === "OUT"){
+                condition = 0;
+            }
             return this.baseAttackBonus + Math.max(this.attributes.str.mod, this.attributes.dex.mod) + getInheritableAttribute({
                 entity: this,
                 attributeKey: "grappleBonus",
@@ -529,11 +538,7 @@ export class SWSEActor extends Actor {
                 entity: this,
                 attributeKey: "grappleSizeModifier",
                 reduce: "SUM"
-            }) + getInheritableAttribute({
-                entity: this,
-                attributeKey: "condition",
-                reduce: "SUM"
-            });
+            }) + condition;
         })
     }
 
@@ -1429,11 +1434,13 @@ export class SWSEActor extends Actor {
     }
 
     async reduceCondition(number = 1) {
-        let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`)
+        let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`);
 
+        let resultFlavor = ""
         //if this is reducing condition then we should consider anything that increases that reduction
-        if(i > 0){
+        if(number > 0){
             if(getInheritableAttribute({entity:this, attributeKey:"implantDisruption", reduce: "OR"})){
+                resultFlavor = "An additional step down the condition track was taken due to Implant Disruption."
                 number++;
             }
         }
@@ -1441,14 +1448,14 @@ export class SWSEActor extends Actor {
         if(i+number === 0){
             await this.clearGroupedEffect("condition");
 
-            return `condition track reset.`
+            return `condition track reset. ${resultFlavor}`
         }else {
-            const number1 = Math.max(i + number, 5);
+            const number1 = Math.min(i + number, 5);
             let newCondition = SWSE.conditionTrack[number1];
 
             await this.setGroupedEffect('condition', newCondition)
 
-            return `condition set to ${newCondition}`;
+            return `condition set to ${newCondition}.  ${resultFlavor}`;
         }
     }
     async activateStatusEffect(statusEffect) {
@@ -1474,9 +1481,6 @@ export class SWSEActor extends Actor {
         let totalDamage = toNumber(options.damage);
 
         const damageTypes = options.damageType.split(COMMMA_LIST);
-
-
-
 
         if (!options.skipShields) {
             let shields = this.system.shields;
@@ -1515,13 +1519,19 @@ export class SWSEActor extends Actor {
         let conditionReduction = 1;
         const currentHealth = this.system.health.value;
 
+        let resultFlavor = "";
+
         let damageThreshhold = this.defense.damageThreshold.total;
+        let reducedToZero = false;
         if(damageTypes.includes("Energy (Ion)")){
             if (this.takesFullDamageFromIon) {
                 if(totalDamage >= currentHealth){
                     conditionReduction = 5;
+                    resultFlavor = "The Ion Damage reduced hitpoints to 0 and has caused them to become helpless."
+                    reducedToZero = true;
                 } else if(totalDamage > damageThreshhold){
                     conditionReduction = 2;
+                    resultFlavor = "An additional step was taken down the condition track due to Ion Damage."
                 }
             } else {
                 totalDamage = Math.floor(totalDamage / 2);
@@ -1530,8 +1540,11 @@ export class SWSEActor extends Actor {
             if(this.isEffectedByStun){
                 if(totalDamage >= currentHealth){
                     conditionReduction = 5;
+                    resultFlavor = "The Stun Damage reduced hitpoints to 0 and has caused them to become helpless."
+                    reducedToZero = true;
                 } else if(totalDamage > damageThreshhold){
                     conditionReduction = 2;
+                    resultFlavor = "An additional step was taken down the condition track due to Stun Damage."
                 }
             } else {
                 totalDamage = 0;
@@ -1540,7 +1553,7 @@ export class SWSEActor extends Actor {
 
         let reducedCondition = "";
         if (options.affectDamageThreshold) {
-            if (totalDamage > damageThreshhold) {
+            if (totalDamage > damageThreshhold || reducedToZero) {
                 reducedCondition = await this.reduceCondition(conditionReduction)
             }
         }
@@ -1552,7 +1565,7 @@ export class SWSEActor extends Actor {
 
 
         update[`system.health.value`] = currentHealth - totalDamage;
-        const content = `${this.name} has has taken ${totalDamage} damage.  ${reducedCondition}`
+        const content = `${this.name} has has taken ${totalDamage} damage.  ${resultFlavor}  ${reducedCondition}`
         toChat(content, this)
 
 
@@ -1755,7 +1768,7 @@ export class SWSEActor extends Actor {
             return true;
         }
 
-        for(const implant of this.itemTypes["implant"]){
+        for(const implant of this.itemTypes["implant"].filter(implant => implant.system?.equipped === "equipped")){
             const isCybernetic = getInheritableAttribute({entity: implant, attributeKey: "cybernetic", reduce: "OR"});
             const isShielded = getInheritableAttribute({entity: implant, attributeKey: "ionShielded", reduce: "OR"});
 
