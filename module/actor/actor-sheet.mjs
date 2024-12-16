@@ -1176,6 +1176,10 @@ export class SWSEActorSheet extends ActorSheet {
 
         let flavor = label ? `${this.object.name} rolls for ${label}!` : '';
 
+        let exceptionalSkills = getInheritableAttribute({entity: this.object, attributeKey: "exceptionalSkill", reduce:"VALUES_TO_LOWERCASE"})
+
+        const exceptionalSkill = exceptionalSkills.includes(label)
+
         for (let formula of rawFormula.split(",")) {
 
             if (!!variable && variable.startsWith('@initiative') && game.combat) {
@@ -1189,14 +1193,24 @@ export class SWSEActorSheet extends ActorSheet {
             }
 
             let roll = new Roll(formula, this.actor.system);
-            const rollResult = await roll.roll();
+            await roll.roll();
+            if(exceptionalSkill){
+                for (const die of roll.dice) {
+                    if(die.faces === 20 && die.total > 1 && die.total < 8){
+                        const difference = 8 - die.total
+                        roll._total = roll._total + difference;
+                        die.results = [{result:8, active: true}]
+                        notes.push("Exceptional Skill")
+                    }
+                }
+            }
 
             if (changeKey) {
                 if (item && level) {
-                    this.updateItemEffectAttribute(rollResult.total, item, parseInt(level), changeKey, context);
+                    this.updateItemEffectAttribute(roll.total, item, parseInt(level), changeKey, context);
                 } else if (item) {
                     let updateTarget = this.actor.items.get(item);
-                    updateTarget.setAttribute(changeKey, rollResult.total);
+                    updateTarget.setAttribute(changeKey, roll.total);
                 }
             } else if (name) {
                 let updateCandidate = this.actor;
@@ -1205,15 +1219,15 @@ export class SWSEActorSheet extends ActorSheet {
                 }
 
                 const newVar = {};
-                newVar[name] = rollResult.total;
+                newVar[name] = roll.total;
                 updateCandidate.safeUpdate(newVar);
             } else {
-                const context = {rollResult};
+                const context = {rollResult: roll};
                 let itemFlavor = "";
                 if (item) {
                     let activeItem = this.actor.items.get(item);
                     if(activeItem) {
-                        itemFlavor = activeItem.getRollFlavor(rollResult.total);
+                        itemFlavor = activeItem.getRollFlavor(roll.total);
                     }
                 }
 
