@@ -183,6 +183,9 @@ export async function activateChoices(item, context) {
             },
             callback: async (html) => {
                 let find = html.find(".choice");
+                if(find.length === 0){
+                    return false;
+                }
                 let items = [];
                 for (let foundElement of find) {
                     if (!foundElement) {
@@ -307,6 +310,23 @@ export async function explodeOptions(options, actor) {
             let skillFocuses = getInheritableAttribute({
                 entity: actor,
                 attributeKey: "skillFocus",
+                reduce: "VALUES_TO_LOWERCASE"
+            });
+            for (let skill of actor.trainedSkills) {
+                let attributeKey = skill.label;
+                if (!skillFocuses.includes(attributeKey.toLowerCase())) {
+                    resolvedOptions.push({
+                        name: attributeKey.titleCase(),
+                        abilities: [],
+                        items: [],
+                        payload: attributeKey.titleCase()
+                    });
+                }
+            }
+        } else if (key === 'AVAILABLE_EXCEPTIONAL_SKILL') {
+            let skillFocuses = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "exceptionalSkill",
                 reduce: "VALUES_TO_LOWERCASE"
             });
             for (let skill of actor.trainedSkills) {
