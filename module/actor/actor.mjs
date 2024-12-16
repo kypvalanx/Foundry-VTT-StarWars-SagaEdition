@@ -2044,6 +2044,17 @@ export class SWSEActor extends Actor {
 
             let dynamicGroups = {};
             let specificProvided = {};
+            if(getInheritableAttribute({
+                    entity: this,
+                    attributeKey: "telekineticProdigy",
+                    reduce: "OR"
+                })){
+
+                const forceTrainingCount = getInheritableAttribute({entity: this, attributeKey: "forceTraining", reduce: "COUNT"})
+                const moveObjectCount = this.itemTypes["forcePower"].filter(power => power.name === "Move Object").length
+
+                availableItems['Telekinetic Force Powers'] = Math.min(forceTrainingCount, moveObjectCount)
+            }
 
             const provides = getInheritableAttribute({
                 entity: this,
