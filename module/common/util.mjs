@@ -1169,6 +1169,15 @@ export function inheritableItems(entity, options={}) {
         let possibleInheritableItems = filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES);
         let actualInheritable = equippedItems(entity);
         actualInheritable.push(...filterItemsByType(entity.items || [], ALWAYS_INHERITABLE_TYPES));
+
+        possibleInheritableItems = possibleInheritableItems.filter(item => {
+            if(!item.system.prerequisite){
+                actualInheritable.push(item)
+                return false;
+            }
+            return true;
+        });
+
         let shouldRetry = possibleInheritableItems.length > 0;
         while (shouldRetry) {
             shouldRetry = false;
