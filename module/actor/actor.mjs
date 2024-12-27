@@ -175,7 +175,7 @@ export class SWSEActor extends Actor {
             try {
                 await this.update(data, context);
             } catch (e) {
-                console.warn("failed update")
+                console.warn("failed update", e)
             }
         }
     }

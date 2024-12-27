@@ -1206,7 +1206,19 @@ export class SWSEItem extends Item {
             return;
         }
         funct(prerequisite);
-        for (let child of prerequisite.children ? prerequisite.children : []) {
+
+
+        let children
+        if(!prerequisite.children){
+            children = [];
+        }else if (Array.isArray(prerequisite.children)) {
+            children = prerequisite.children
+        } else {
+            children = Object.values(prerequisite.children);
+        }
+
+
+        for (let child of children) {
             this.crawlPrerequisiteTree(child, funct);
         }
     }

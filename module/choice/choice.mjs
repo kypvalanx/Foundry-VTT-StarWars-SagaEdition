@@ -247,74 +247,128 @@ export async function explodeOptions(options, actor) {
     for (let value of options) {
         let key = value.name;
         let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
-        if (key === 'AVAILABLE_GM_BONUSES') {
-            for (let bonus of GM_BONUSES) {
-                let deepCopy = {key: bonus.key, value: bonus.value}
-                resolvedOptions.push({name: bonus.display, attributes: [deepCopy]});
-            }
+        switch (key) {
+            case 'AVAILABLE_REPLICA_SPECIES':
+                for (const pack of game.packs.filter(p => p.metadata.name.toLowerCase().includes("species"))) {
+                    let indices = await pack.getIndex()
+                    for (const index of indices.filter(i => i.type === "species")) {
+                        const entity = await pack.getDocument(index._id)
+                        if(entity.changes.filter(c => c.key === "isDroid" && (c.value === "true" || c.value === true)).length > 0) continue;
 
-        } else if (key === 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY') {
-            let weaponProficiencies = getInheritableAttribute({
-                entity: actor,
-                attributeKey: "weaponProficiency",
-                reduce: "VALUES"
-            })
-            for (let weapon of game.generated.exoticWeapons) {
-                if (!weaponProficiencies.includes(weapon)) {
-                    resolvedOptions.push({name: weapon, abilities: [], items: [], payload: weapon});
+                        let attributes = [];
+                        for (const change of entity.changes) {
+                            attributes.push({key: change.key, value: change.value});
+                        }
+                        resolvedOptions.push({name: entity.name, attributes: attributes});
+                    }
                 }
-            }
-        } else if (key === 'AVAILABLE_WEAPON_FOCUS') {
-            resolvedOptions.push(...(resolveOptions(actor, "weaponFocus", "weaponProficiency")));
-        } else if (key === 'AVAILABLE_WEAPON_SPECIALIZATION') {
-            resolvedOptions.push(...(resolveOptions(actor, "weaponSpecialization", "weaponFocus")));
-        } else if (key === 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION') {
-            resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponSpecialization", ["greaterWeaponFocus", "weaponSpecialization"])));
-        } else if (key === 'AVAILABLE_DISARMING_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "disarmingAttack", "weaponSpecialization")));
-        } else if (key === 'AVAILABLE_GREATER_WEAPON_FOCUS') {
-            resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponFocus", "weaponProficiency")));
-        } else if (key === 'AVAILABLE_WEAPON_PROFICIENCIES') {
-            let weaponProficiencies = getInheritableAttribute({
-                entity: actor,
-                attributeKey: "weaponProficiency",
-                reduce: "VALUES"
-            });
-            for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
-                if (!weaponProficiencies.includes(weapon)) {
-                    resolvedOptions.push({
-                        name: weapon.titleCase(),
-                        abilities: [],
-                        items: [],
-                        payload: weapon.titleCase()
-                    });
+                break;
+            case 'AVAILABLE_GM_BONUSES':
+                for (let bonus of GM_BONUSES) {
+                    let deepCopy = {key: bonus.key, value: bonus.value}
+                    resolvedOptions.push({name: bonus.display, attributes: [deepCopy]});
                 }
-            }
-        } else if (key === 'UNFOCUSED_SKILLS') {
-            let skillFocuses = getInheritableAttribute({
-                entity: actor,
-                attributeKey: "skillFocus",
-                reduce: "VALUES"
-            });
-            for (let skill of skills()) {
-                if (!skillFocuses.includes(skill)) {
-                    resolvedOptions.push({
-                        name: skill.titleCase(),
-                        abilities: [],
-                        items: [],
-                        payload: skill.titleCase()
-                    });
+                break;
+            case 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY':
+                let weaponProficiencies = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                })
+                for (let weapon of game.generated.exoticWeapons) {
+                    if (!weaponProficiencies.includes(weapon)) {
+                        resolvedOptions.push({name: weapon, abilities: [], items: [], payload: weapon});
+                    }
                 }
-            }
-        } else if (key === 'AVAILABLE_SKILL_FOCUS') {
-            let skillFocuses = getInheritableAttribute({
-                entity: actor,
-                attributeKey: "skillFocus",
-                reduce: "VALUES_TO_LOWERCASE"
-            });
-            for (let skill of actor.trainedSkills) {
-                let attributeKey = skill.label;
-                if (!skillFocuses.includes(attributeKey.toLowerCase())) {
+                break;
+            case 'AVAILABLE_WEAPON_FOCUS':
+                resolvedOptions.push(...(resolveOptions(actor, "weaponFocus", "weaponProficiency")));
+                break;
+            case 'AVAILABLE_WEAPON_SPECIALIZATION':
+                resolvedOptions.push(...(resolveOptions(actor, "weaponSpecialization", "weaponFocus")));
+                break;
+            case 'AVAILABLE_GREATER_WEAPON_SPECIALIZATION':
+                resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponSpecialization", ["greaterWeaponFocus", "weaponSpecialization"])));
+                break;
+            case 'AVAILABLE_DISARMING_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "disarmingAttack", "weaponSpecialization")));
+                break;
+            case 'AVAILABLE_GREATER_WEAPON_FOCUS':
+                resolvedOptions.push(...(resolveOptions(actor, "greaterWeaponFocus", "weaponProficiency")));
+                break;
+            case 'AVAILABLE_WEAPON_PROFICIENCIES':
+                let proficientWeapons = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "weaponProficiency",
+                    reduce: "VALUES"
+                });
+                for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
+                    if (!proficientWeapons.includes(weapon)) {
+                        resolvedOptions.push({
+                            name: weapon.titleCase(),
+                            abilities: [],
+                            items: [],
+                            payload: weapon.titleCase()
+                        });
+                    }
+                }
+                break;
+            case 'UNFOCUSED_SKILLS':
+                let focussedSkills = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "skillFocus",
+                    reduce: "VALUES"
+                });
+                for (let skill of skills()) {
+                    if (!focussedSkills.includes(skill)) {
+                        resolvedOptions.push({
+                            name: skill.titleCase(),
+                            abilities: [],
+                            items: [],
+                            payload: skill.titleCase()
+                        });
+                    }
+                }
+                break;
+            case 'AVAILABLE_SKILL_FOCUS':
+                let skillFocuses = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "skillFocus",
+                    reduce: "VALUES_TO_LOWERCASE"
+                });
+                for (let skill of actor.trainedSkills) {
+                    let attributeKey = skill.label;
+                    if (!skillFocuses.includes(attributeKey.toLowerCase())) {
+                        resolvedOptions.push({
+                            name: attributeKey.titleCase(),
+                            abilities: [],
+                            items: [],
+                            payload: attributeKey.titleCase()
+                        });
+                    }
+                }
+                break;
+            case 'AVAILABLE_EXCEPTIONAL_SKILL':
+                let exceptionalSkillFocuses = getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: "exceptionalSkill",
+                    reduce: "VALUES_TO_LOWERCASE"
+                });
+                for (let skill of actor.trainedSkills) {
+                    let attributeKey = skill.label;
+                    if (!exceptionalSkillFocuses.includes(attributeKey.toLowerCase())) {
+                        resolvedOptions.push({
+                            name: attributeKey.titleCase(),
+                            abilities: [],
+                            items: [],
+                            payload: attributeKey.titleCase()
+                        });
+                    }
+                }
+                break;
+            case 'AVAILABLE_UNTRAINED_SKILLS':
+                for (let skill of actor.untrainedSkills) {
+                    let attributeKey = skill.label;
                     resolvedOptions.push({
                         name: attributeKey.titleCase(),
                         abilities: [],
@@ -322,96 +376,105 @@ export async function explodeOptions(options, actor) {
                         payload: attributeKey.titleCase()
                     });
                 }
-            }
-        } else if (key === 'AVAILABLE_EXCEPTIONAL_SKILL') {
-            let skillFocuses = getInheritableAttribute({
-                entity: actor,
-                attributeKey: "exceptionalSkill",
-                reduce: "VALUES_TO_LOWERCASE"
-            });
-            for (let skill of actor.trainedSkills) {
-                let attributeKey = skill.label;
-                if (!skillFocuses.includes(attributeKey.toLowerCase())) {
+                break;
+            case 'AVAILABLE_SKILL_MASTERY':
+                resolvedOptions.push(...(resolveOptions(actor, "skillMastery", "skillFocus", {excluded: ["Use The Force"]})));
+                break;
+            case 'AVAILABLE_DOUBLE_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "doubleAttack", "weaponProficiency")));
+                break;
+            case 'AVAILABLE_DEVASTATING_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "devastatingAttack", "weaponProficiency")));
+                break;
+            case 'AVAILABLE_GREATER_DEVASTATING_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "greaterDevastatingAttack", ["devastatingAttack", "greaterWeaponFocus"])));
+                break;
+            case 'AVAILABLE_TRIPLE_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "tripleAttack", "doubleAttack")));
+                break;
+            case 'AVAILABLE_SAVAGE_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "savageAttack", "doubleAttack")));
+                break;
+            case 'AVAILABLE_RELENTLESS_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "relentlessAttack", "doubleAttack")));
+                break;
+            case 'AVAILABLE_AUTOFIRE_SWEEP':
+                resolvedOptions.push(...(resolveOptions(actor, "autofireSweep", "weaponFocus")));
+                break;
+            case 'AVAILABLE_AUTOFIRE_ASSAULT':
+                resolvedOptions.push(...(resolveOptions(actor, "autofireAssault", "weaponFocus")));
+                break;
+            case 'AVAILABLE_HALT':
+                resolvedOptions.push(...(resolveOptions(actor, "halt", "weaponFocus")));
+                break;
+            case 'AVAILABLE_PENETRATING_ATTACK':
+                resolvedOptions.push(...(resolveOptions(actor, "penetratingAttack", "weaponFocus")));
+                break;
+            case 'AVAILABLE_RETURN_FIRE':
+                resolvedOptions.push(...(resolveOptions(actor, "returnFire", "weaponFocus")));
+                break;
+            case 'AVAILABLE_CRITICAL_STRIKE':
+                resolvedOptions.push(...(resolveOptions(actor, "criticalStrike", "weaponFocus")));
+                break;
+            case 'AVAILABLE_LIGHTSABER_FORMS':
+                for (let form of lightsaberForms) {
+                    if (!actor.talents.map(t => t.name).includes(form)) {
+                        resolvedOptions.push({name: form, abilities: [], items: [], payload: form});
+                    }
+                }
+                break;
+            case 'AVAILABLE_LIGHTSABER_CRYSTALS':
+                let items = (await getIndexEntriesByTypes(['upgrade'], ['Lightsaber Crystals'])).values()
+                const added = [];
+                for (const item of items) {
+                    let suffix = "";
+                    if (added.includes(item.name)) {
+                        suffix = ` (${item.pack})`
+                    }
                     resolvedOptions.push({
-                        name: attributeKey.titleCase(),
+                        name: item.name + suffix,
                         abilities: [],
                         items: [],
-                        payload: attributeKey.titleCase()
+                        modifications: [{uuid: item.uuid, type: "upgrade"}],
+                        payload: undefined,
+                        isDefault: item.name === "Ilum Crystal"
                     });
+                    added.push(item.name)
                 }
-            }
-        } else if (key === 'AVAILABLE_UNTRAINED_SKILLS') {
-            for (let skill of actor.untrainedSkills) {
-                let attributeKey = skill.label;
+                break;
+            case 'AVAILABLE_LIGHTSABER_COLORS':
+                const colors = Object.keys(COLORS)
+
+                const existingColors = resolvedOptions.map(option => option.name);
+                for (const lightsaberColor of colors) {
+                    if (!existingColors.includes(lightsaberColor)) {
+                        resolvedOptions.push({
+                            name: lightsaberColor,
+                            display: lightsaberColor,
+                            abilities: [],
+                            items: [],
+                            modifications: [],
+                            payloads: {lightsaberColor}
+                        });
+                    }
+                }
+
                 resolvedOptions.push({
-                    name: attributeKey.titleCase(),
+                    name: 'Custom',
+                    display: 'Custom',
                     abilities: [],
                     items: [],
-                    payload: attributeKey.titleCase()
+                    modifications: [],
+                    customType: 'color',
+                    payloads: {lightsaberColor: '#color#'}
                 });
-            }
-        } else if (key === 'AVAILABLE_SKILL_MASTERY') {
-            resolvedOptions.push(...(resolveOptions(actor, "skillMastery", "skillFocus", {excluded:["Use The Force"]})));
-        } else if (key === 'AVAILABLE_DOUBLE_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "doubleAttack", "weaponProficiency")));
-        } else if (key === 'AVAILABLE_DEVASTATING_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "devastatingAttack", "weaponProficiency")));
-        } else if (key === 'AVAILABLE_GREATER_DEVASTATING_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "greaterDevastatingAttack", ["devastatingAttack", "greaterWeaponFocus"])));
-        } else if (key === 'AVAILABLE_TRIPLE_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "tripleAttack", "doubleAttack")));
-        } else if (key === 'AVAILABLE_SAVAGE_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "savageAttack", "doubleAttack")));
-        } else if (key === 'AVAILABLE_RELENTLESS_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "relentlessAttack", "doubleAttack")));
-        } else if (key === 'AVAILABLE_AUTOFIRE_SWEEP') {
-            resolvedOptions.push(...(resolveOptions(actor, "autofireSweep", "weaponFocus")));
-        } else if (key === 'AVAILABLE_AUTOFIRE_ASSAULT') {
-            resolvedOptions.push(...(resolveOptions(actor, "autofireAssault", "weaponFocus")));
-        } else if (key === 'AVAILABLE_HALT') {
-            resolvedOptions.push(...(resolveOptions(actor, "halt", "weaponFocus")));
-        } else if (key === 'AVAILABLE_PENETRATING_ATTACK') {
-            resolvedOptions.push(...(resolveOptions(actor, "penetratingAttack", "weaponFocus")));
-        } else if (key === 'AVAILABLE_RETURN_FIRE') {
-            resolvedOptions.push(...(resolveOptions(actor, "returnFire", "weaponFocus")));
-        } else if (key === 'AVAILABLE_CRITICAL_STRIKE') {
-            resolvedOptions.push(...(resolveOptions(actor, "criticalStrike", "weaponFocus")));
-        } else if (key === 'AVAILABLE_LIGHTSABER_FORMS') {
-            for (let form of lightsaberForms) {
-                if (!actor.talents.map(t => t.name).includes(form)) {
-                    resolvedOptions.push({name: form, abilities: [], items: [], payload: form});
+                break;
+            default:
+                if (resolvedOptions.length === 0 && !hasDefault) {
+                    value.isDefault = true;
                 }
-            }
-        } else if (key === 'AVAILABLE_LIGHTSABER_CRYSTALS') {
-            let items = (await getIndexEntriesByTypes( ['upgrade'], ['Lightsaber Crystals'])).values()
-            const added = [];
-            for(const item of items){
-                let suffix = "";
-                if(added.includes(item.name)){
-                    suffix = ` (${item.pack})`
-                }
-                resolvedOptions.push({name: item.name + suffix, abilities: [], items: [], modifications: [{uuid:item.uuid, type:"upgrade"}], payload: undefined, isDefault: item.name === "Ilum Crystal"});
-                added.push(item.name)
-            }
-
-
-        } else if (key === 'AVAILABLE_LIGHTSABER_COLORS') {
-            const colors = Object.keys(COLORS)
-
-            const existingColors = resolvedOptions.map(option => option.name);
-            for(const lightsaberColor of colors){
-                if(!existingColors.includes(lightsaberColor)){
-                    resolvedOptions.push({name: lightsaberColor, display: lightsaberColor, abilities: [], items: [], modifications: [], payloads: {lightsaberColor}});
-                }
-            }
-
-            resolvedOptions.push({name: 'Custom', display: 'Custom', abilities: [], items: [], modifications: [], customType: 'color', payloads: {lightsaberColor: '#color#'}});
-
-        } else {
-            if(resolvedOptions.length === 0 && !hasDefault){
-                value.isDefault = true;
-            }
-            resolvedOptions.push(value);
+                resolvedOptions.push(value);
+                break;
         }
     }
 
