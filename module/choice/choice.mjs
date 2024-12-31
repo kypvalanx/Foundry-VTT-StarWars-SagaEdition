@@ -242,26 +242,18 @@ export async function explodeOptions(options, actor) {
     })
     const hasDefault = !!options.find(o => o.isDefault)
 
-
+    const delay = ms => new Promise(res => setTimeout(res, ms));
     let resolvedOptions = [];
     for (let value of options) {
         let key = value.name;
         let destination = Object.keys(value).find(destination => destination.startsWith("payload"))
         switch (key) {
             case 'AVAILABLE_REPLICA_SPECIES':
-                for (const pack of game.packs.filter(p => p.metadata.name.toLowerCase().includes("species"))) {
-                    let indices = await pack.getIndex()
-                    for (const index of indices.filter(i => i.type === "species")) {
-                        const entity = await pack.getDocument(index._id)
-                        if(entity.changes.filter(c => c.key === "isDroid" && (c.value === "true" || c.value === true)).length > 0) continue;
-
-                        let attributes = [];
-                        for (const change of entity.changes) {
-                            attributes.push({key: change.key, value: change.value});
-                        }
-                        resolvedOptions.push({name: entity.name, attributes: attributes});
-                    }
+                while(!Array.isArray(game.generated.species.replicaDroidChoices)){
+                    console.info("loading replica droid choices...")
+                    await delay(200)
                 }
+                resolvedOptions = game.generated.species.replicaDroidChoices
                 break;
             case 'AVAILABLE_GM_BONUSES':
                 for (let bonus of GM_BONUSES) {

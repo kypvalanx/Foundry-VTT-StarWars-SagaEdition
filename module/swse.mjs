@@ -424,118 +424,64 @@ Hooks.on('renderChatMessage', async (message, html) => {
 
 
 
-Hooks.on("ready", function () {
+Hooks.on("ready", async function () {
     game.generated = {};
+    game.generated.species = {}
+    game.generated.species.replicaDroidChoices = []
+    game.generated.weapon = {}
+    game.generated.weapon.exoticWeapons = [];
+    game.generated.weapon.exoticMeleeWeapons = [];
+    game.generated.weapon.exoticRangedWeapons = [];
 
-    game.generated.exoticWeapons = ()=>{
-        const exoticWeapons = [];
+    game.generated.species.replicaDroidChoices = new Promise(async resolve => {
+        const replicaDroidChoices = [];
+        for (const pack of game.packs.filter(p => p.metadata.name.toLowerCase().includes("species"))) {
+            let indices = await pack.getIndex()
+            for (const index of indices.filter(i => i.type === "species")) {
+                const entity = await pack.getDocument(index._id)
+                if (entity.changes.filter(c => c.key === "isDroid" && (c.value === "true" || c.value === true)).length > 0) continue;
+
+                let attributes = [];
+                for (const change of entity.changes) {
+                    attributes.push({key: change.key, value: change.value});
+                }
+                replicaDroidChoices.push({name: entity.name, attributes: attributes});
+            }
+        }
+        resolve(replicaDroidChoices)
+    }).then(result => game.generated.species.replicaDroidChoices = result);
+
+    new Promise(async resolve => {
         game.packs.forEach(pack => {
             pack.getIndex().then(index => {
-                index.forEach(i => pack.getDocument(i._id)
+                index.filter(i => i.type === "weapon" || i.type === "template")
+                    .forEach(i => pack.getDocument(i._id)
                     .then(entity => {
                         ///list all exotic weapons
                         if (entity.type === 'weapon') {
-                            let subTypeKey = entity.system?.subtype.toLowerCase() || entity._source.system.subtype.toLowerCase();
+                            let subTypeKey = entity._source.system.subtype.toLowerCase();
                             if (subTypeKey.includes('exotic')) {
-                                exoticWeapons.push(entity.name);
+                                game.generated.weapon.exoticWeapons.push(entity.name);
+                                if(subTypeKey.includes('melee')){
+                                    game.generated.weapon.exoticMeleeWeapons.push(entity.name);
+                                } else {
+                                    game.generated.weapon.exoticRangedWeapons.push(entity.name);
+                                }
                             }
                         } else if (entity.type === 'template') {
-                            exoticWeapons.push(...(getInheritableAttribute({
+                            let exoticWeaponTypes = getInheritableAttribute({
                                 entity,
                                 attributeKey: "exoticWeapon",
                                 reduce: "VALUES"
-                            })));
+                            })
+                            game.generated.weapon.exoticWeapons.push(...exoticWeaponTypes);
                         }
                     }))
             });
         });
-        return exoticWeapons;
-    };
-    game.generated.exoticMeleeWeapons = ()=>{
+    })
 
-        // game.packs.forEach(pack => {
-        //     pack.getIndex().then(index => {
-        //         index.forEach(i => pack.getDocument(i._id)
-        //             .then(entity => {
-        //                 ///list all exotic weapons
-        //                 if (entity.type === 'weapon') {
-        //                     let subTypeKey = entity._source.system.subtype.toLowerCase();
-        //                     if (subTypeKey.includes('exotic')) {
-        //                         game.generated.exoticWeapons.push(entity.name);
-        //                         if(subTypeKey.includes('melee')){
-        //                             game.generated.exoticMeleeWeapons.push(entity.name);
-        //                         } else {
-        //                             game.generated.exoticRangedWeapons.push(entity.name);
-        //                         }
-        //                     }
-        //                 } else if (entity.type === 'template') {
-        //                     let exoticWeaponTypes = getInheritableAttribute({
-        //                         entity,
-        //                         attributeKey: "exoticWeapon",
-        //                         reduce: "VALUES"
-        //                     })
-        //                     game.generated.exoticWeapons.push(...exoticWeaponTypes);
-        //                 }
-        //             }))
-        //     });
-        // });
-    };
-    game.generated.exoticRangedWeapons = ()=>{
 
-        // game.packs.forEach(pack => {
-        //     pack.getIndex().then(index => {
-        //         index.forEach(i => pack.getDocument(i._id)
-        //             .then(entity => {
-        //                 ///list all exotic weapons
-        //                 if (entity.type === 'weapon') {
-        //                     let subTypeKey = entity._source.system.subtype.toLowerCase();
-        //                     if (subTypeKey.includes('exotic')) {
-        //                         game.generated.exoticWeapons.push(entity.name);
-        //                         if(subTypeKey.includes('melee')){
-        //                             game.generated.exoticMeleeWeapons.push(entity.name);
-        //                         } else {
-        //                             game.generated.exoticRangedWeapons.push(entity.name);
-        //                         }
-        //                     }
-        //                 } else if (entity.type === 'template') {
-        //                     let exoticWeaponTypes = getInheritableAttribute({
-        //                         entity,
-        //                         attributeKey: "exoticWeapon",
-        //                         reduce: "VALUES"
-        //                     })
-        //                     game.generated.exoticWeapons.push(...exoticWeaponTypes);
-        //                 }
-        //             }))
-        //     });
-        // });
-    };
-
-    // game.packs.forEach(pack => {
-    //     pack.getIndex().then(index => {
-    //         index.forEach(i => pack.getDocument(i._id)
-    //             .then(entity => {
-    //                 ///list all exotic weapons
-    //                 if (entity.type === 'weapon') {
-    //                     let subTypeKey = entity._source.system.subtype.toLowerCase();
-    //                     if (subTypeKey.includes('exotic')) {
-    //                         game.generated.exoticWeapons.push(entity.name);
-    //                         if(subTypeKey.includes('melee')){
-    //                             game.generated.exoticMeleeWeapons.push(entity.name);
-    //                         } else {
-    //                             game.generated.exoticRangedWeapons.push(entity.name);
-    //                         }
-    //                     }
-    //                 } else if (entity.type === 'template') {
-    //                     let exoticWeaponTypes = getInheritableAttribute({
-    //                         entity,
-    //                         attributeKey: "exoticWeapon",
-    //                         reduce: "VALUES"
-    //                     })
-    //                     game.generated.exoticWeapons.push(...exoticWeaponTypes);
-    //                 }
-    //             }))
-    //     });
-    // });
 });
 
 Hooks.on("canvasInit", function () {
