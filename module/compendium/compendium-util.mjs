@@ -37,7 +37,7 @@ export function getCompendium(item) {
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.items")
                 || pack.collection.startsWith("swse.armor") || pack.collection.startsWith("swse.weapons")
                 || pack.collection.startsWith("swse.equipment") || pack.collection.startsWith("swse.hazard")
-                || pack.collection.startsWith("swse.implant") || pack.collection.startsWith("swse.droid systems"));
+                || pack.collection.startsWith("swse.implant") || pack.collection.startsWith("swse.droid-systems"));
         case 'trait':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.traits"));
         case 'feat':
