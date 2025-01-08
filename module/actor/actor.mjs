@@ -42,6 +42,7 @@ import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
+import {toggleEffectDisabled} from "../common/listeners.mjs";
 
 
 export function buildRollContent(formula, roll, notes = [], itemFlavor) {
@@ -202,6 +203,46 @@ export class SWSEActor extends Actor {
             }
         }
         await this.safeUpdate({"token.actorLink": val})
+    }
+
+    get additionalStatusEffectChoices() {
+        const effects = this.applicableEffects();
+
+
+        let filter = effects
+            .filter(e => !!e.flags.swse?.tokenAccessible);
+        return filter
+            .map(effect => {
+                return {
+                    _id: effect.id,
+                    id: effect.id,
+                    title: effect.name,
+                    src: effect.img,
+                    isActive: !effect.disabled,
+                    isOverlay: false
+                }
+            });
+}
+
+    applicableEffects() {
+        const effects = []
+        effects.push(...this.effects);
+        this.items.forEach(item => {
+            effects.push(...item.effects);
+        })
+        return effects;
+    }
+
+    async toggleStatusEffect(statusId, {active, overlay = false} = {}) {
+        const effects = this.applicableEffects();
+        const found = effects.find(effect => effect.id === statusId)
+
+        if(found){
+            found.disable(!found.disabled)
+            return;
+        }
+
+        return super.toggleStatusEffect(statusId, {active, overlay});
     }
 
     applyActiveEffects() {

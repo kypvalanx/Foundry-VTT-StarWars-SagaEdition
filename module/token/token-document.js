@@ -1,5 +1,5 @@
-import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {COLORS} from "../common/constants.mjs";
+import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
+import {COLORS, sizeArray} from "../common/constants.mjs";
 
 function mergeColor(colors) {
     let reds = 0;
@@ -33,6 +33,26 @@ export class SWSETokenDocument extends TokenDocument {
 
     prepareBaseData(){
         super.prepareBaseData()
+
+        const size = sizeArray[getResolvedSize(this.actor)]
+        switch(size) {
+            case "Large":
+                this.width = 2;
+                this.height = 2;
+                break;
+            case "Huge":
+                this.width = 3;
+                this.height = 3;
+                break;
+            case "Gargantuan":
+                this.width = 4;
+                this.height = 4;
+                break;
+            case "Colossal":
+                this.width = 6;
+                this.height = 6;
+                break;
+        }
 
         let tokenWidth = getInheritableAttribute({attributeKey: "tokenWidth", entity: this.actor, reduce: "SUM"})
         if(tokenWidth > 0){
