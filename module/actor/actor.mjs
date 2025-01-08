@@ -107,6 +107,11 @@ export class SWSEActor extends Actor {
             }
         }
     }
+    _onEmbeddedDocumentChange() {
+        super._onEmbeddedDocumentChange();
+        //game.canvas.draw()
+        game.canvas.activeLayer.draw()
+    }
 
     _onUpdate(changed, options, userId) {
         this.depthMerge(changed, this._pendingUpdates)

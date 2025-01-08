@@ -34,6 +34,18 @@ export class SWSETokenDocument extends TokenDocument {
     prepareBaseData(){
         super.prepareBaseData()
 
+        let tokenWidth = getInheritableAttribute({attributeKey: "tokenWidth", entity: this.actor, reduce: "SUM"})
+        if(tokenWidth > 0){
+            this.width = tokenWidth;
+        }
+
+        let tokenHeight = getInheritableAttribute({attributeKey: "tokenHeight", entity: this.actor, reduce: "SUM"})
+        if(tokenHeight > 0){
+            this.height = tokenHeight;
+        }
+
+
+
         let auraColors = getInheritableAttribute({attributeKey: "auraColor", entity: this.actor, reduce: "VALUES"})
 
         auraColors = auraColors.filter(color => !!color).map(color => {
