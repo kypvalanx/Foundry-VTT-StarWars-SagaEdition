@@ -79,7 +79,7 @@ export function onEffectControl(event){
     }
 }
 
-function toggleEffectDisabled(effectId, disabled) {
+export function toggleEffectDisabled(effectId, disabled) {
     this.effects.get(effectId).disable(disabled)
 }
 

@@ -18,6 +18,7 @@ import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 import {SWSETokenDocument} from "./token/token-document.js";
 import {CompendiumWeb} from "./compendium/compendium-web.mjs";
 import {getInheritableAttribute} from "./attribute-helper.mjs";
+import {SWSETokenHud} from "./token/token-hud.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -153,6 +154,7 @@ Hooks.once('init', async function () {
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.documentClass = SWSETokenDocument;
+    CONFIG.Token.hudClass = SWSETokenHud;
 
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
 

@@ -104,7 +104,7 @@ export function initializeStatusEffects(config){
         {
             id: "gravityLow",
             label: "EFFECT.StatusGravityLow",
-            icon: "systems/swse/icon/status/helpless.png",
+            icon: "systems/swse/icon/status/low-gravity.png",
             changes: [
                 {key: "gravity", value:"Low"},
                 {key: "speedMultiplier", value: "1.25:min 1"},
@@ -116,7 +116,7 @@ export function initializeStatusEffects(config){
         {
             id: "gravityHigh",
             label: "EFFECT.StatusGravityHigh",
-            icon: "systems/swse/icon/status/helpless.png",
+            icon: "systems/swse/icon/status/high-gravity.png",
             changes: [
                 {key: "gravity", value:"High"},
                 {key: "speedMultiplier", value: "0.75:min 1"},
@@ -128,7 +128,7 @@ export function initializeStatusEffects(config){
         {
             id: "gravityZero",
             label: "EFFECT.StatusGravityZero",
-            icon: "systems/swse/icon/status/helpless.png",
+            icon: "systems/swse/icon/status/zero-gravity.png",
             changes: [
                 {key: "gravity", value:"Zero"},
                 {key: "speed", value: "Base Speed/Walking Speed/Wheeled Speed/Tracked Speed/Hovering Speed -> Flying Speed"},
@@ -145,19 +145,19 @@ export function initializeStatusEffects(config){
         {
             id: "cover",
             label: "EFFECT.StatusCover",
-            icon: "systems/swse/icon/status/helpless.png",
+            icon: "systems/swse/icon/status/cover.png",
             changes: [{key: "dexterityBonus", value:"5"}]
         },
         {
             id: "improvedCover",
             label: "EFFECT.StatusImprovedCover",
-            icon: "systems/swse/icon/status/helpless.png",
+            icon: "systems/swse/icon/status/improved-cover.png",
             changes: [{key: "dexterityBonus", value:"10"}]
         },
         {
             id: "totalCover",
             label: "EFFECT.StatusTotalCover",
-            icon: "systems/swse/icon/status/helpless.png"
+            icon: "systems/swse/icon/status/total-cover.png"
         }
     ])
 }
