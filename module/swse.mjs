@@ -714,7 +714,7 @@ export async function createEffectToggleMacro(data, slot) {
 
 
     const command = `game.swse.toggleActiveEffect("${data.actorId}", "${data.effectId}");`;
-    const name = `${actor.name}: ${effect.parent.name}: ${effect.name}`
+    const name =  effect.parent instanceof SWSEItem ? `${actor.name}: ${effect.parent.name}: ${effect.name}` : `${actor.name}: ${effect.name}`
     let macro = game.macros.find((m) => m.name === name && m.command === command);
     if (!macro) {
         macro = await Macro.create(
