@@ -304,7 +304,7 @@ function getSaveMacroButton(dualWeaponModifier, actor, multipleAttackModifiers) 
         label: "Save Macro",
         callback: (html) => {
             let attacks = [];
-            let attackBlocks = html.find(".attack-block");
+            let attackBlocks = html.find(".attack.panel");
             let selects = html.find("select.attack-id")
             let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
             let damageMods = [];

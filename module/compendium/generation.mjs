@@ -27,22 +27,26 @@ export async function processActor(actorData) {
 
 
 
-    if(!actor.hasAnyOf([
-        {finalName: "Colossal (Cruiser)", type: "trait"},
-        {finalName: "Colossal (Station)", type: "trait"},
-        {finalName: "Colossal", type: "trait"},
-        {finalName: "Gargantuan", type: "trait"},
-        {finalName: "Huge", type: "trait"},
-        {finalName: "Large", type: "trait"},
-        {finalName: "Medium", type: "trait"},
-        {finalName: "Small", type: "trait"},
-        {finalName: "Tiny", type: "trait"},
-        {finalName: "Diminutive", type: "trait"},
-        {finalName: "Fine", type: "trait"}])){
+    // if(!actor.hasAnyOf([
+    //     {finalName: "Colossal (Cruiser)", type: "trait"},
+    //     {finalName: "Colossal (Station)", type: "trait"},
+    //     {finalName: "Colossal", type: "trait"},
+    //     {finalName: "Gargantuan", type: "trait"},
+    //     {finalName: "Huge", type: "trait"},
+    //     {finalName: "Large", type: "trait"},
+    //     {finalName: "Medium", type: "trait"},
+    //     {finalName: "Small", type: "trait"},
+    //     {finalName: "Tiny", type: "trait"},
+    //     {finalName: "Diminutive", type: "trait"},
+    //     {finalName: "Fine", type: "trait"}])){
+    //
+    //     await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
+    // }
+
+    if(!actor.species){
 
         await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
     }
-
     if(actor.isBeast){
         const proposedArmor = actor.defense.reflex.expected - actor.defense.reflex.total
         if(proposedArmor){
