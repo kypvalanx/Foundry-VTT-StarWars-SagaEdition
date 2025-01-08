@@ -639,6 +639,12 @@ function getNumericArray(start, end) {
     return array;
 }
 
+function getAvailableMacroSlot() {
+    const user = game.users.get(game.userId)
+    const hotbar = Object.entries(user.hotbar).filter(i => !!game.macros.get(i[1])).map(i => toNumber(i[0]))
+    return getNumericArray(1, 50).find(i => !hotbar.includes(i))
+}
+
 export async function createAttackMacro(data, slot) {
     let actorId = data.actorId;
 
@@ -647,10 +653,7 @@ export async function createAttackMacro(data, slot) {
     if (!data.attacks || data.attacks.length === 0) return;
 
     if (!slot) {
-        let user = game.users.get(game.userId)
-        let hotbar = Object.entries(user.data.hotbar).filter(i => !!i[1]).map(i => i[0])
-        let availableKeys = getNumericArray(1, 50).filter(i => !hotbar.includes(`${i}`))
-        slot = Math.min(...availableKeys);
+        slot = getAvailableMacroSlot();
     }
 
     let img = "systems/swse/icon/skill/default.png";
@@ -661,7 +664,7 @@ export async function createAttackMacro(data, slot) {
 
     let context = {};
     context.attacks = data.attacks;
-    let attackName = data.attacks[0].name
+    let attackName = data.attacks[0].name || data.label
     if (data.attacks.length > 1) {
         context.type = "fullAttack";
         attackName = "Full Attack";
