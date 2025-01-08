@@ -133,6 +133,7 @@ Hooks.once('init', async function () {
         rollItem,
         makeAttack,
         generateCompendiums, deleteEmptyCompendiums, clearEmptyCompendiums, deleteActorsByName,
+        toggleActiveEffect,
         refreshActors,
         applications: {
             SWSECompendiumBrowser
@@ -545,26 +546,26 @@ Array.prototype.distinct = function () {
 // };
 
 
-Hooks.on("hotbarDrop", (bar, data, slot) => {
+Hooks.on("hotbarDrop", async (bar, data, slot) => {
 
     let type = data.type.toLowerCase();
     if (type === "skill" || type === "ability") {
-        createVariableMacro(data, slot).then(() => {
-        });
+        await createVariableMacro(data, slot);
         return false;
 
     }
     if (type === "item") {
-        createItemMacro(data, slot).then(() => {
-        });
+        await createItemMacro(data, slot);
         return false;
 
     }
     if (type === "attack") {
-        createAttackMacro(data, slot).then(() => {
-        });
+        await createAttackMacro(data, slot);
         return false;
 
+    } if(type === "activeeffect"){
+        await createEffectToggleMacro(data, slot);
+        return false;
     }
     return true;
 });
@@ -688,6 +689,51 @@ export async function createAttackMacro(data, slot) {
     }
 
     await game.user.assignHotbarMacro(macro, slot);
+}
+
+export async function createEffectToggleMacro(data, slot) {
+    let actorId = data.actorId;
+
+    const actor = getActorFromId(actorId);
+    if (!actor) return;
+
+    if (!slot) {
+        slot = getAvailableMacroSlot();
+    }
+
+    let img = "systems/swse/icon/skill/default.png";
+
+    const effect = actor.applicableEffects().find(e =>e.id === data.effectId)
+
+    if (effect.img) {
+        img = effect.img;
+    }
+    if (data.img) {
+        img = data.img;
+    }
+
+
+    const command = `game.swse.toggleActiveEffect("${data.actorId}", "${data.effectId}");`;
+    const name = `${actor.name}: ${effect.parent.name}: ${effect.name}`
+    let macro = game.macros.find((m) => m.name === name && m.command === command);
+    if (!macro) {
+        macro = await Macro.create(
+            {
+                name: name,
+                type: "script",
+                img: img,
+                command: command,
+                flags: {"swse.effectToggle": true},
+            },
+            {displaySheet: false}
+        );
+    }
+
+    await game.user.assignHotbarMacro(macro, slot);
+}
+
+function toggleActiveEffect(actorId, effectId){
+    game.actors.get(actorId)?.toggleStatusEffect(effectId)
 }
 
 

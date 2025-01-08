@@ -42,7 +42,6 @@ import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
-import {toggleEffectDisabled} from "../common/listeners.mjs";
 
 
 export function buildRollContent(formula, roll, notes = [], itemFlavor) {
