@@ -1047,10 +1047,10 @@ export class SWSEItem extends Item {
             }
         });
 
-        this.system.possibleProviders = this.system.possibleProviders.filter(provider => {
+        this.system.possibleProviders = this.system.possibleProviders?.filter(provider => {
             const toks = provider.split(":");
             return toks.length === 1 || toks[1] === payload;
-        }).map(provider => provider.split(":")[0]);
+        }).map(provider => provider.split(":")[0]) || [];
 
         this.system.choices = [];
 
