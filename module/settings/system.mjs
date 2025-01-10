@@ -1,6 +1,4 @@
-
-//TODO can this be removed?
-export function refreshActors(options = { renderOnly: false, renderForEveryone: false }) {
+function refreshActors(options = { renderOnly: false, renderForEveryone: false }) {
     game.actors.contents.forEach((o) => {
         if (!options.renderOnly) o.prepareData();
         if (o.sheet != null && o.sheet._state > 0) o.sheet.render();
@@ -115,7 +113,7 @@ export const registerSystemSettings = function () {
             charLevelUp: "half character level rounded up",
             charLevelDown: "half character level rounded down"
         },
-        onChange: () => game.swse.refreshActors({ renderForEveryone: true })
+        onChange: () => refreshActors({ renderForEveryone: true })
 
     });
 
