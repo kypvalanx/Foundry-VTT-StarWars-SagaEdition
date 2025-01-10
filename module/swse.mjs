@@ -5,7 +5,7 @@ import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
 import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {SWSEItemSheet} from "./item/item-sheet.mjs";
-import {refreshActors, registerSystemSettings} from "./settings/system.mjs";
+import {registerSystemSettings} from "./settings/system.mjs";
 import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
 import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {measureDistances} from "./measure.mjs";
@@ -40,7 +40,6 @@ Hooks.once('init', async function () {
         makeAttack,
         generateCompendiums, deleteEmptyCompendiums, clearEmptyCompendiums, deleteActorsByName,
         toggleActiveEffect,
-        refreshActors,
         applications: {
             SWSECompendiumBrowser
         }
