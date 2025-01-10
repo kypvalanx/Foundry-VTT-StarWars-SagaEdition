@@ -10,7 +10,7 @@ import {registerHandlebarsHelpers} from "./settings/helpers.mjs";
 import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
-import {filterItemsByType, toNumber} from "./common/util.mjs";
+import {toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
@@ -19,6 +19,8 @@ import {SWSETokenDocument} from "./token/token-document.js";
 import {CompendiumWeb} from "./compendium/compendium-web.mjs";
 import {getInheritableAttribute} from "./attribute-helper.mjs";
 import {SWSETokenHud} from "./token/token-hud.mjs";
+import {initializeDragRuler} from "./module-support/drag-ruler.mjs";
+import {initializePolyglot} from "./module-support/polyglot.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -27,101 +29,35 @@ Hooks.once('quenchReady',  (quench) => {
 })
 
 
-const RUN_MULTIPLIER = 4;
-
-const ENCUMBERED_RUN_MULTIPLIER = 3;
-
-function initializeDragRuler() {
-    Hooks.once("dragRuler.ready", (SpeedProvider) => {
-        class SWSESpeedProvider extends SpeedProvider {
-            get colors() {
-                return [
-                    {id: "move", default: 0x00FF00, name: "swse.speeds.move"},
-                    {id: "double", default: 0xFFFF00, name: "swse.speeds.double"},
-                    {id: "run", default: 0xFF8000, name: "swse.speeds.run"},
-                    {id: "fly", default: 0x0000FF, name: "swse.speeds.fly"},
-                ]
+function initializeCompendiumButtons() {
+    Hooks.on("renderCompendiumDirectory", (function (e, t) {
+        const featTalentButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
+        featTalentButton.on("click", (function () {
+            const options = {
+                types: ['feat', "talent"]
             }
+            new CompendiumWeb(options).render(!0)
+        }))
+        t.append(featTalentButton)
 
-            getRanges(token) {
-                const speeds = token.actor.gridSpeeds
-
-                const runSpeedMultiplier = token.actor.heaviestArmorType === "Heavy" || this.carriedWeight >= this.heavyLoad ? ENCUMBERED_RUN_MULTIPLIER : RUN_MULTIPLIER
-
-                const fastest = speeds.reduce((selected, current) => selected?.value < current.value ? current : selected)
-                // A character can always walk it's base speed and dash twice it's base speed
-                const ranges = [
-                    {range: fastest.value, color: "move"},
-                    {range: fastest.value * 2, color: "double"},
-                    {range: fastest.value * runSpeedMultiplier, color: "run"}
-                ]
-
-                return ranges
+        const featButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
+        featButton.on("click", (function () {
+            const options = {
+                types: ['feat']
             }
-        }
+            new CompendiumWeb(options).render(!0)
+        }))
+        t.append(featButton)
 
-        dragRuler.registerSystem("swse", SWSESpeedProvider)
-    })
-}
-
-function initializePolyglot() {
-
-    Hooks.once("polyglot.init", (LanguageProvider) => {
-        class SWSELanguageProvider extends LanguageProvider {
-            async getLanguages() {
-                const langs = {};
-
-                const packs = [];
-                packs.push(...game.packs.filter(p => true));
-
-                const languagesSetting = game.settings.get("polyglot", "Languages");
-                if (!this.replaceLanguages) {
-                    //CONFIG.FICTIONAL.spoken = {};
-                    const languages = packs.filter(pack => pack.collection.startsWith("swse.languages"))[0].index;
-
-                    for (const language of languages) {
-                        langs[language.name] = {
-                            label: language.name,
-                            font: languagesSetting[language.name]?.font || this.languages[language.name]?.font || this.defaultFont,
-                            rng: languagesSetting[language.name]?.rng ?? "default",
-                        };
-                    }
-
-                    //console.log(languages)
-                }
-                // for (let lang in CONFIG.FICTIONAL.spoken) {
-                //     langs[lang] = {
-                //         label: CONFIG.FICTIONAL.spoken[lang],
-                //         font: languagesSetting[lang]?.font || this.languages[lang]?.font || this.defaultFont,
-                //         rng: languagesSetting[lang]?.rng ?? "default",
-                //     };
-                // }
-                this.languages = langs;
+        const talentButton = $(`<button type="button" class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
+        talentButton.on("click", (function () {
+            const options = {
+                types: ['talent']
             }
-
-            getUserLanguages(actor) {
-                let known_languages = new Set();
-                let literate_languages = new Set();
-
-                const maySpeak = getInheritableAttribute({entity:actor, attributeKey: "maySpeak", reduce: "VALUES"})
-                const limitedSpeech = maySpeak.length > 0;
-
-                for (let lang of filterItemsByType(actor.items.values(), "language")) {
-                    if(limitedSpeech && !maySpeak.includes(lang.name)) {
-                        literate_languages.add(lang.name)
-                    } else {
-                        known_languages.add(lang.name)
-                    }
-                }
-                return [known_languages, literate_languages];
-            }
-        }
-
-
-        game.polyglot.api.registerSystem(SWSELanguageProvider);
-    })
-
-
+            new CompendiumWeb(options).render(!0)
+        }))
+        t.append(talentButton)
+    }))
 }
 
 Hooks.once('init', async function () {
@@ -156,7 +92,6 @@ Hooks.once('init', async function () {
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.documentClass = SWSETokenDocument;
     CONFIG.Token.hudClass = SWSETokenHud;
-
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
 
     DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
@@ -164,42 +99,9 @@ Hooks.once('init', async function () {
     registerSystemSettings();
     registerHandlebarsHelpers();
     initializeStatusEffects(CONFIG)
-
     initializeDragRuler();
     initializePolyglot();
-
-    // if(game.settings.get("swse", "enableAdvancedCompendium")){
-    //     CONFIG.ui.compendium = SWSECompendiumDirectory;
-    // }
-
-    Hooks.on("renderCompendiumDirectory", (function (e, t) {
-        const featTalentButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.TALENT_AND_FEAT_WEB"><b class="button-text">Talent and Feat Web</b></button>`);
-        featTalentButton.on("click", (function () {
-            const options = {
-                types: ['feat', "talent"]
-            }
-            new CompendiumWeb(options).render(!0)
-        }))
-        t.append(featTalentButton)
-
-        const featButton = $(`<button type="button" class="feat-web-button constant-button" data-tooltip="SWSE.FEAT_WEB"><b class="button-text">Feat Web</b></button>`);
-        featButton.on("click", (function () {
-            const options = {
-                types: ['feat']
-            }
-            new CompendiumWeb(options).render(!0)
-        }))
-        t.append(featButton)
-
-        const talentButton = $(`<button type="button" class="talent-web-button constant-button" data-tooltip="SWSE.TALENT_WEB"><b class="button-text">Talent Web</b></button>`);
-        talentButton.on("click", (function () {
-            const options = {
-                types: ['talent']
-            }
-            new CompendiumWeb(options).render(!0)
-        }))
-        t.append(talentButton)
-    }))
+    initializeCompendiumButtons();
 
     // Hooks.on("combatTurn", (combat, updateData, updateOptions)=>{
     //     //console.log(combat.combatant.actor.name)

@@ -1,5 +1,5 @@
 
-
+//TODO can this be removed?
 export function refreshActors(options = { renderOnly: false, renderForEveryone: false }) {
     game.actors.contents.forEach((o) => {
         if (!options.renderOnly) o.prepareData();
