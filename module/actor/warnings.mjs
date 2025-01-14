@@ -1,6 +1,21 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {getAvailableTrainedSkillCount} from "./skill-handler.mjs";
 
+function getAvailableTrainedSkills(actor) {
+    let trainedSkills = actor.trainedSkills;
+    let trainedKnowledgeCount = trainedSkills.filter(s => s.label.includes('Knowledge')).length;
+    const otherTrainedSkillCount = trainedSkills.length - trainedKnowledgeCount;
+
+    let {availableTrainedSkillCount, availableTrainedKnowledgeSkillCount} = getAvailableTrainedSkillCount(actor);
+    availableTrainedKnowledgeSkillCount = availableTrainedKnowledgeSkillCount - trainedKnowledgeCount;
+
+    availableTrainedSkillCount = availableTrainedSkillCount - otherTrainedSkillCount;
+    if (availableTrainedKnowledgeSkillCount < 0) {
+        availableTrainedSkillCount = availableTrainedSkillCount + availableTrainedKnowledgeSkillCount;
+    }
+    return {availableTrainedSkillCount, availableTrainedKnowledgeSkillCount};
+}
+
 export function warningsFromActor(actor) {
     let warnings = [];
 
@@ -25,14 +40,16 @@ export function warningsFromActor(actor) {
     if (!actor.classes || actor.classes.length === 0) {
         warnings.push(`<span data-action="compendium-web" data-type="class">Please Select a Class</span>`)
     }
+    let {availableTrainedSkillCount, availableTrainedKnowledgeSkillCount} = getAvailableTrainedSkills(actor);
 
-    const availableTrainedSkills = getAvailableTrainedSkillCount(actor) - actor.trainedSkills.length;
-
-    if (availableTrainedSkills > 0) {
-        warnings.push(`<span>Remaining Trained Skills: ${availableTrainedSkills}</span>`)
+    if (availableTrainedKnowledgeSkillCount > 0) {
+        warnings.push(`<span>Remaining Trained Knowledge Skills: ${availableTrainedKnowledgeSkillCount}</span>`)
     }
-    if (availableTrainedSkills < 0) {
-        warnings.push(`<span>Too Many Skills Selected: ${Math.abs(availableTrainedSkills)}</span>`)
+    if (availableTrainedSkillCount > 0) {
+        warnings.push(`<span>Remaining Trained Skills: ${availableTrainedSkillCount}</span>`)
+    }
+    if (availableTrainedSkillCount < 0) {
+        warnings.push(`<span>Too Many Skills Selected: ${Math.abs(availableTrainedSkillCount)}</span>`)
     }
     for (let item of Object.entries(actor.availableItems || {})) {
         if (item[1] !== 0) {
