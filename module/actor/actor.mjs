@@ -113,6 +113,7 @@ export class SWSEActor extends Actor {
         game.canvas.activeLayer.draw()
     }
 
+
     _onUpdate(changed, options, userId) {
         this.depthMerge(changed, this._pendingUpdates)
         return super._onUpdate(changed, options, userId);

@@ -1630,7 +1630,7 @@ export function toChat(content, actor = undefined, flavor="", context={}) {
     }
 
     let cls = getDocumentClass("ChatMessage");
-
+    ChatMessage.applyRollMode(messageData, "roll")
     let msg = new cls(messageData);
 
     return cls.create(msg, {});

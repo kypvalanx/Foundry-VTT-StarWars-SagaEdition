@@ -10,9 +10,9 @@
     {{#each actor.system.attributes as |attribute id|}}
         {{#unless attribute.skip}}
             <div class="flex-row">
-                <div class="rollable medium labeled-input draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability">
-                    <input class="input rollable" type="text" value="{{attribute.label}}"
-                           placeholder="" disabled title="Roll 1d20 + {{attribute.roll}}" data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"/>
+                <div class="medium labeled-input" >
+                    <div class="input rollable draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability"
+                         title="Roll 1d20 + {{attribute.roll}}"  data-roll="1d20 + {{attribute.roll}}">{{attribute.label}}</div>
                 </div>
             {{#ifEquals ../actor.system.finalAttributeGenerationType "Semi-Manual"}}
                 <div class="small labeled-input">
