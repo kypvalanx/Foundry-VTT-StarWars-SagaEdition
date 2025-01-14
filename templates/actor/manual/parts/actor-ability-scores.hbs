@@ -7,9 +7,9 @@
     </div>
     {{#each actor.system.attributes as |attribute id|}}
         {{#unless attribute.skip}}
-            <div class="ability-score draggable" data-label="{{attribute.label}}"
+            <div class="ability-score rollable draggable" data-label="{{attribute.label}}"
                  data-variable="@{{attribute.label}}ROLL" data-type="ability">
-                <div class="name rollable input" title="Roll 1d20 + {{attribute.roll}}"
+                <div class="name input" title="Roll 1d20 + {{attribute.roll}}"
                      data-label="{{attribute.label}}" data-roll="1d20 + {{attribute.roll}}"><h3>{{attribute.label}}</h3>
                 </div>
                 <div class="score input"><input class="plain tiny" name="system.attributes.{{id}}.manual" type="number"

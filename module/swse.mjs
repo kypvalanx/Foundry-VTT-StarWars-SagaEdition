@@ -72,13 +72,13 @@ Hooks.once('init', async function () {
     initializePolyglot();
     initializeCompendiumButtons();
 
-    // Hooks.on("combatTurn", (combat, updateData, updateOptions)=>{
-    //     //console.log(combat.combatant.actor.name)
-    //     if(updateOptions.direction > 0){
-    //         //combat.nextCombatant.actor.startOfTurn(updateData);
-    //     }
-    //
-    // })
+    Hooks.on("updateCombat", (combat, updateData, updateOptions)=>{
+        //console.log(combat.combatant.actor.name)
+        if(updateOptions.direction > 0){
+            //combat.nextCombatant.actor.startOfTurn(updateData);
+        }
+
+    })
 
     // Register sheet application classes
     Actors.unregisterSheet("core", ActorSheet);
