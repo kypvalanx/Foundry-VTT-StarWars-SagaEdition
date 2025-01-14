@@ -172,7 +172,7 @@ export function generateSkills(actor, options = {}) {
 
         halfCharacterLevel = actor.getHalfCharacterLevel();
         halfCharacterLevelRoundedUp = actor.getHalfCharacterLevel("up");
-        skillFocus = getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel);
+        skillFocus = getSkillFocus(actor.characterLevel);
     }
 
 
@@ -416,7 +416,6 @@ function getSkillAttributeMod(actor, key, skill) {
 /**
  *
  * @param actor {SWSEActor}
- * @returns {number}
  */
 export function getAvailableTrainedSkillCount(actor) {
     return actor.getCached("trained skills", () => {
@@ -442,18 +441,24 @@ export function getAvailableTrainedSkillCount(actor) {
             attributeKey: "trainedSkills",
             reduce: "SUM"
         });
-        return Math.max(resolveValueArray([classBonus, intBonus, otherSkills, automaticTrainedSkill]), 0);
+        let availableTrainedSkillCount = Math.max(resolveValueArray([classBonus, intBonus, otherSkills, automaticTrainedSkill]), 0);
+        const availableTrainedKnowledgeSkillCount = game.settings.get("swse", "lilLiteralistHomebrewBonusTrainedSkill");
+        return {availableTrainedSkillCount, availableTrainedKnowledgeSkillCount};
     })
 
 }
 
-function getSkillFocus(halfCharacterLevelRoundedUp, halfCharacterLevel) {
+function getSkillFocus(characterLevel) {
+    if(characterLevel < 7 && game.settings.get("swse", "skillFocusDelay")){
+        return 0;
+    }
+
     let skillFocus = 5;
     let skillFocusCalculationOption = game.settings.get("swse", "skillFocusCalculation");
     if (skillFocusCalculationOption === "charLevelUp") {
-        skillFocus = halfCharacterLevelRoundedUp;
+        skillFocus = Math.ceil( characterLevel/2);
     } else if (skillFocusCalculationOption === "charLevelDown") {
-        skillFocus = halfCharacterLevel;
+        skillFocus = Math.floor( characterLevel/2);
     }
     return skillFocus;
 }

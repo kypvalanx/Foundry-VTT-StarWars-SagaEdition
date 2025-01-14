@@ -1381,7 +1381,7 @@ export class SWSEItem extends Item {
 
     getRollFlavor(roll){
         if (this.type === "forcePower"){
-            let description = getInheritableAttribute({entity: this, attributeKey: "forcePowerShortDescription", reduce: "VALUES"}).join(" ");
+            let description = getInheritableAttribute({entity: this, attributeKey: ["forcePowerShortDescription", "shortDescription"], reduce: "VALUES"}).join(" ");
 
             if(description){
                 let response = `<div>${description}</div>`

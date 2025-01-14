@@ -1,4 +1,4 @@
-import {SUBTYPES} from "../common/constants.mjs";
+import {SUBTYPES} from "./constants.mjs";
 
 export const registerHandlebarsHelpers = function () {
 
