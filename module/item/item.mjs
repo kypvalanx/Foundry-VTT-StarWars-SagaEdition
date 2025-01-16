@@ -884,6 +884,10 @@ export class SWSEItem extends Item {
         return this.stripping[key];
     }
 
+    toChat(thingy){
+        console.log(thingy)
+    }
+
     get stripping(){
         return this.getCached("stripping", ()=> {
             const strippings = {}

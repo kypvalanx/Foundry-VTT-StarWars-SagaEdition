@@ -63,6 +63,8 @@ Hooks.once('init', async function () {
     CONFIG.Token.hudClass = SWSETokenHud;
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
 
+    //CONFIG.debug.hooks = true
+
     DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
 
     registerSystemSettings();
@@ -299,6 +301,8 @@ Hooks.on('renderChatMessage', async (message, html) => {
 
 
 Hooks.on("ready", async function () {
+
+
     game.generated = {};
     game.generated.species = {}
     game.generated.species.replicaDroidChoices = []
