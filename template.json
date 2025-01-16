@@ -272,6 +272,7 @@
       "class",
       "upgrade",
       "forcePower",
+      "starShipManeuver",
       "affiliation",
       "forceTechnique",
       "forceSecret",
@@ -470,6 +471,13 @@
       "traits": []
     },
     "forcePower": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
+    },
+    "starShipManeuver": {
       "templates": [
         "base",
         "categories",

@@ -1,4 +1,4 @@
-import {getItemParentId, inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
+import {inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
@@ -214,14 +214,16 @@ export function getInheritableAttribute(data = {}) {
     }
 
 
+    const entities = {};
+    for (let e of Array.isArray(data.entity) ? data.entity : [data.entity]) {
+        entities[e.id] = e;
+    }
+
+
     if (!data.recursive) {
         values = values.filter(attr => {
-            let parent = data.parent;
-
-            if (!parent) {
-                let parentId = getItemParentId(attr.source)
-                parent = game.actors?.get(parentId) || game.data.actors.find(actor => actor._id === parentId)
-            }
+            let parent = data.parent || entities[attr.source]?.parent;
+            
             if(!parent){
                 return true;
             }
