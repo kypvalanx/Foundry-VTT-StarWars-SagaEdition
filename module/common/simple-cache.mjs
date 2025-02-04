@@ -1,6 +1,6 @@
 export class SimpleCache {
 
-    lazyResolve = new Map()
+    lazyResolve = {}
 
     getCached(key, fn) {
         if(key instanceof Object){
@@ -10,11 +10,9 @@ export class SimpleCache {
             }
             key = strKey;
         }
-        if (this.lazyResolve.has(key)) {
-            return this.lazyResolve.get(key);
+        if (!this.lazyResolve[key]) {
+            this.lazyResolve[key] = fn();
         }
-        let resolved = fn();
-        this.lazyResolve.set(key, resolved);
-        return resolved
+        return this.lazyResolve[key];
     }
 }
