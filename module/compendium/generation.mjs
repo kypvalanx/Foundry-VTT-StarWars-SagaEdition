@@ -43,10 +43,10 @@ export async function processActor(actorData) {
     //     await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
     // }
 
-    if(!actor.species){
-
-        await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
-    }
+    // if(!actor.species){
+    //
+    //     await actor.sheet._onDropItem(null, {name: size, type: "trait", answers:[]})
+    // }
     if(actor.isBeast){
         const proposedArmor = actor.defense.reflex.expected - actor.defense.reflex.total
         if(proposedArmor){

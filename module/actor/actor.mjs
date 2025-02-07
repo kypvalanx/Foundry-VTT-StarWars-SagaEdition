@@ -4,7 +4,7 @@ import {
     COMMMA_LIST,
     convertOverrideToMode,
     excludeItemsByType,
-    filterItemsByType,
+    filterItemsByTypes,
     getDocumentByUuid,
     getVariableFromActorData,
     inheritableItems,
@@ -22,7 +22,7 @@ import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
-    CLASSES_BY_STARTING_FEAT,
+    CLASSES_BY_STARTING_FEAT, COLORS,
     crewPositions,
     crewQuality,
     crewSlotResolution,
@@ -42,7 +42,29 @@ import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
+import {generateAction} from "../action/generate-action.mjs";
 
+function mergeColor(colors) {
+    if(colors.length === 0){
+        return "#000000"
+    }
+
+    let reds = 0;
+    let blues = 0;
+    let greens = 0;
+    if(colors.length > 0){
+        for (const color of colors) {
+            reds += parseInt(color.substring(1,3), 16)
+            blues += parseInt(color.substring(3,5), 16)
+            greens += parseInt(color.substring(5), 16)
+        }
+        reds = Math.round(reds/colors.length);
+        blues = Math.round(blues/colors.length);
+        greens = Math.round(greens/colors.length);
+    }
+
+    return `#${reds.toString(16).padStart(2,'0')}${blues.toString(16).padStart(2,'0')}${greens.toString(16).padStart(2,'0')}`;
+}
 
 export function buildRollContent(formula, roll, notes = [], itemFlavor) {
     const tooltip = getTooltipSections(roll)
@@ -78,6 +100,26 @@ function getTooltipSections(roll) {
     return sections.join("");
 }
 
+function registerFormulaFunctions(actor) {
+    actor.formulaFunctions = new Map();
+    actor.formulaFunctions['@charLevel'] = (actor)=>actor.characterLevel;
+}
+
+function getGridSizeFromSize(size) {
+    switch(size) {
+        case "Medium":
+            return 1;
+        case "Large":
+            return 2;
+        case "Huge":
+            return 3;
+        case "Gargantuan":
+            return 4;
+        case "Colossal":
+            return 6;
+    }
+}
+
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -107,17 +149,13 @@ export class SWSEActor extends Actor {
             }
         }
     }
-    _onEmbeddedDocumentChange() {
-        super._onEmbeddedDocumentChange();
-        //game.canvas.draw()
-        game.canvas.activeLayer.draw()
-    }
+
+
 
 
     _onUpdate(changed, options, userId) {
         this.depthMerge(changed, this._pendingUpdates)
         return super._onUpdate(changed, options, userId);
-
     }
 
     depthMerge(changed, toBeAdded) {
@@ -137,11 +175,22 @@ export class SWSEActor extends Actor {
         }
     }
 
+    get actions(){
+        let actions = [];
+        actions.push(...generateAction(this, this.changes));
+        for(let item of this.items){
+            actions.push(...item.actions);
+        }
+
+        return actions;
+    }
+
 
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
         //if(!this.parent) this.reset()
         this.reset()
+
     }
 
     useAmmunition(type) {
@@ -165,6 +214,8 @@ export class SWSEActor extends Actor {
         this.resolvedLabels.set(key, label);
         this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
+
+    
 
     startOfTurn(updateData){
         const update = {"system.deflectCount": 0}
@@ -257,6 +308,7 @@ export class SWSEActor extends Actor {
         if (this.skipPrepare) {
             return;
         }
+        registerFormulaFunctions(this)
 
         if(this.system.externalEditorLink){
 
@@ -374,6 +426,61 @@ export class SWSEActor extends Actor {
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
         }
+
+
+        if(this.type === "character"){
+            const tokenUpdates = {};
+            
+            if(!!this.system.autoSizeToken){
+
+                //adjust tokens to size
+                const newSize = sizeArray[getResolvedSize(this)]
+                this.system.size = newSize;
+                this._pendingUpdates["system.size"] = newSize;
+                const gridSize = getGridSizeFromSize(newSize);
+                tokenUpdates["width"] = gridSize;
+                tokenUpdates["height"] = gridSize;
+            }
+
+            if(!!this.system.allowSheetLighting){
+                let auraColors = getInheritableAttribute({attributeKey: "auraColor", entity: this, reduce: "VALUES"})
+
+                auraColors = auraColors.filter(color => !!color).map(color => {
+                    if(color.startsWith("#")){
+                        return color;
+                    }
+                    return COLORS[color];
+                }).filter(color => !!color)
+
+                const auraLuminosity = getInheritableAttribute({attributeKey: "auraLuminosity", entity: this, reduce: "SUM"})
+                tokenUpdates['light.luminosity'] = auraLuminosity || 0.30 + auraColors.length * 0.10
+
+                const auraBright = getInheritableAttribute({attributeKey: "auraBright", entity: this, reduce: "SUM"})
+                tokenUpdates['light.bright'] = auraBright || 0.20 + auraColors.length * 0.10
+
+                const auraDim = getInheritableAttribute({attributeKey: "auraDim", entity: this, reduce: "SUM"})
+                tokenUpdates['light.dim'] = auraDim || 0.50 + auraColors.length * 0.20
+
+                tokenUpdates['light.color'] = mergeColor(auraColors);
+
+                const auraAnimationType = getInheritableAttribute({attributeKey: "auraAnimationType", entity: this, reduce: "FIRST"})
+                if(auraAnimationType){
+                    const auraAnimationSpeed = getInheritableAttribute({attributeKey: "auraAnimationSpeed", entity: this, reduce: "FIRST"})
+                    const auraAnimationIntensity = getInheritableAttribute({attributeKey: "auraAnimationIntensity", entity: this, reduce: "FIRST"})
+                    tokenUpdates['animation'] = {type: auraAnimationType, speed:auraAnimationSpeed, intensity:auraAnimationIntensity, reverse:false};
+                }
+            }
+
+
+            if(Object.keys(tokenUpdates).length > 0){
+                for (const tokenDocument of this.getDependentTokens()) {
+                    if(tokenDocument._id){
+                        tokenDocument.update(tokenUpdates);
+                    }
+                }
+            }
+        }
+
 
         // if(Object.values(this._pendingUpdates).length > 0){
         //     this.safeUpdate(this._pendingUpdates);
@@ -654,7 +761,7 @@ export class SWSEActor extends Actor {
 
     get armorItems() {
         return this.getCached("armors", () => {
-            return filterItemsByType(this.items.values(), "armor");
+            return filterItemsByTypes(this.items.values(), ["armor"]);
         })
     }
 
@@ -850,7 +957,7 @@ export class SWSEActor extends Actor {
 
     get vehicleTemplate() {
         return this.getCached("vehicleTemplate", () => {
-            let vehicleBaseTypes = filterItemsByType(this.items.values(), "vehicleBaseType");
+            let vehicleBaseTypes = filterItemsByTypes(this.items.values(), ["vehicleBaseType"]);
             return (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
         })
     }
@@ -863,19 +970,19 @@ export class SWSEActor extends Actor {
 
     get installed() {
         return this.getCached("installed", () => {
-            return filterItemsByType(this.items.values(), "vehicleSystem").filter(item => item.system.equipped === 'installed');
+            return filterItemsByTypes(this.items.values(), ["vehicleSystem"]).filter(item => item.system.equipped === 'installed');
         })
     }
 
     get pilotInstalled() {
         return this.getCached("pilotInstalled", () => {
-            return filterItemsByType(this.items.values(), "vehicleSystem").filter(item => item.system.equipped === 'pilotInstalled');
+            return filterItemsByTypes(this.items.values(), ["vehicleSystem"]).filter(item => item.system.equipped === 'pilotInstalled');
         })
     }
 
     get gunnerPositions() {
         return this.getCached("gunnerPositions", () => {
-            let items = filterItemsByType(this.items.values(), "vehicleSystem");
+            let items = filterItemsByTypes(this.items.values(), ["vehicleSystem"]);
             let positions = items.filter(item => !!item.system.equipped)
                 .map(item => item.system.equipped)
                 .filter(unique)
@@ -893,38 +1000,40 @@ export class SWSEActor extends Actor {
 
     get cargo() {
         return this.getCached("cargo", () => {
-            return filterItemsByType(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
+            return filterItemsByTypes(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
         })
     }
 
     get species() {
         return this.getCached("species", () => {
-            const speciesList = filterItemsByType(this.items.values(), "species");
+            const speciesList = filterItemsByTypes(this.items.values(), ["species"]);
             return (speciesList.length > 0 ? speciesList[0] : null);
         })
     }
 
+    /**
+     *
+     * @return {[]}
+     */
     get classes() {
         // return this.getCached("classes", () => {
-        const classObjects = filterItemsByType(this.items.values(), "class");
-        let classes = [];
-        for (let co of classObjects) {
-            for (let [i, characterLevel] of co.levelsTaken.entries()) {
-                const levelOfClass = i + 1;
-                let leveledClass = {}
-                leveledClass.id = co.id;
-                leveledClass.img = co.img;
-                leveledClass.name = co.name;
-                leveledClass.levelUpHitPoints = co.levelUpHitPoints;
-                leveledClass.canRerollHealth = co.canRerollHealth(characterLevel);
-                leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass, characterLevel);
-                leveledClass.isLatest = false;
-                leveledClass.classLevel = levelOfClass;
-                leveledClass.characterLevel = characterLevel;
-                leveledClass.isFollowerTemplate = co.isFollowerTemplate
 
-                classes.push(leveledClass);
-            }
+        let classes = [];
+        for (let co of this.itemTypes.class) for (let [i, characterLevel] of co.levelsTaken.entries()) {
+            const levelOfClass = i + 1;
+            let leveledClass = {}
+            leveledClass.id = co.id;
+            leveledClass.img = co.img;
+            leveledClass.name = co.name;
+            leveledClass.levelUpHitPoints = co.levelUpHitPoints;
+            leveledClass.canRerollHealth = co.canRerollHealth(characterLevel);
+            leveledClass.classLevelHealth = co.classLevelHealth(levelOfClass, characterLevel);
+            leveledClass.isLatest = false;
+            leveledClass.classLevel = levelOfClass;
+            leveledClass.characterLevel = characterLevel;
+            leveledClass.isFollowerTemplate = co.isFollowerTemplate
+
+            classes.push(leveledClass);
         }
 
         classes = classes.sort((a, b) => a.characterLevel > b.characterLevel ? 1 : -1);
@@ -937,18 +1046,18 @@ export class SWSEActor extends Actor {
 
 
     get poorlyFormattedClasses() {
-        return filterItemsByType(this.items.values(), "class").filter(c => c.levelsTaken.length === 0);
+        return filterItemsByTypes(this.items.values(), ["class"]).filter(c => c.levelsTaken.length === 0);
     }
 
     get weapons() {
         return this.getCached("weapons", () => {
-            return filterItemsByType(this.items.values(), "weapon");
+            return filterItemsByTypes(this.items.values(), ["weapon"]);
         })
     }
 
     get equipment() {
         return this.getCached("equipment", () => {
-            return filterItemsByType(this.items.values(), "equipment");
+            return filterItemsByTypes(this.items.values(), ["equipment"]);
         })
     }
 
@@ -960,81 +1069,81 @@ export class SWSEActor extends Actor {
 
     get talents() {
         return this.getCached("talents", () => {
-            return filterItemsByType(inheritableItems(this), "talent");
+            return filterItemsByTypes(inheritableItems(this), ["talent"]);
         })
     }
 
     get powers() {
         return this.getCached("powers", () => {
-            return filterItemsByType(this.items.values(), "forcePower");
+            return filterItemsByTypes(this.items.values(), ["forcePower"]);
         })
     }
 
     get languages() {
         return this.getCached("languages", () => {
-            return filterItemsByType(this.items.values(), "language");
+            return filterItemsByTypes(this.items.values(), ["language"]);
         })
     }
 
     get background() {
         return this.getCached("background", () => {
-            let backgrounds = filterItemsByType(this.items.values(), "background");
+            let backgrounds = filterItemsByTypes(this.items.values(), ["background"]);
             return (backgrounds.length > 0 ? backgrounds[0] : null);
         })
     }
 
     get destiny() {
         return this.getCached("destiny", () => {
-            let destinies = filterItemsByType(this.items.values(), "destiny");
+            let destinies = filterItemsByTypes(this.items.values(), ["destiny"]);
             return (destinies.length > 0 ? destinies[0] : null);
         })
     }
 
     get secrets() {
         return this.getCached("secrets", () => {
-            return filterItemsByType(this.items.values(), "forceSecret");
+            return filterItemsByTypes(this.items.values(), ["forceSecret"]);
         })
     }
 
     get techniques() {
         return this.getCached("techniques", () => {
-            return filterItemsByType(this.items.values(), "forceTechnique");
+            return filterItemsByTypes(this.items.values(), ["forceTechnique"]);
         })
     }
 
     get affiliations() {
         return this.getCached("affiliations", () => {
-            return filterItemsByType(this.items.values(), "affiliation");
+            return filterItemsByTypes(this.items.values(), ["affiliation"]);
         })
     }
 
     get regimens() {
         return this.getCached("regimens", () => {
-            return filterItemsByType(this.items.values(), "forceRegimen");
+            return filterItemsByTypes(this.items.values(), ["forceRegimen"]);
         })
     }
 
     get naturalWeapons() {
         return this.getCached("naturalWeapons", () => {
-            return filterItemsByType(this.items.values(), "beastAttack");
+            return filterItemsByTypes(this.items.values(), ["beastAttack"]);
         })
     }
 
     get specialSenses() {
         return this.getCached("specialSenses", () => {
-            return filterItemsByType(this.items.values(), "beastSense");
+            return filterItemsByTypes(this.items.values(), ["beastSense"]);
         })
     }
 
     get speciesTypes() {
         return this.getCached("speciesTypes", () => {
-            return filterItemsByType(this.items.values(), "beastType");
+            return filterItemsByTypes(this.items.values(), ["beastType"]);
         })
     }
 
     get specialQualities() {
         return this.getCached("specialQualities", () => {
-            return filterItemsByType(this.items.values(), "beastQuality");
+            return filterItemsByTypes(this.items.values(), ["beastQuality"]);
         })
     }
 
@@ -1082,6 +1191,8 @@ export class SWSEActor extends Actor {
     initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
         this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
+        this.system.settings.push({type: "boolean", path: "system.autoSizeToken", label: "Autosize Token based on actor size?", value: this.system.autoSizeToken})
+        this.system.settings.push({type: "boolean", path: "system.allowSheetLighting", label: "Allow Sheet to modify token lighting", value: this.system.allowSheetLighting})
         this.system.settings.push({
             type: "boolean",
             path: "system.ignorePrerequisites",
@@ -1385,7 +1496,7 @@ export class SWSEActor extends Actor {
     }
 
     getTraits() {
-        let activeTraits = filterItemsByType(inheritableItems(this), "trait");
+        let activeTraits = filterItemsByTypes(inheritableItems(this), ["trait"]);
         return activeTraits.sort(ALPHA_FINAL_NAME);
     }
 
@@ -1406,8 +1517,8 @@ export class SWSEActor extends Actor {
 
     resolveFeats() {
         return this.getCached("feats", () => {
-            let feats = filterItemsByType(this.items.values(), "feat");
-            let activeFeats = filterItemsByType(inheritableItems(this), "feat");
+            let feats = filterItemsByTypes(this.items.values(), ["feat"]);
+            let activeFeats = filterItemsByTypes(inheritableItems(this), ["feat"]);
             let removeFeats = [];
             let inactiveProvidedFeats = [];
             for (let feat of feats) {
@@ -1744,7 +1855,7 @@ export class SWSEActor extends Actor {
     get heroicLevel() {
         return this.getCached("heroicLevel", () => {
             if (this.classes) {
-                const classObjects = filterItemsByType(this.items.values(), "class");
+                const classObjects = filterItemsByTypes(this.items.values(), ["class"]);
                 let heroicLevel = 0;
                 let charLevel = 0;
                 for (let co of classObjects) {
@@ -1929,7 +2040,7 @@ export class SWSEActor extends Actor {
     }
 
     getUninstalledSystems() {
-        let items = filterItemsByType(this.items.values(), "vehicleSystem");
+        let items = filterItemsByTypes(this.items.values(), ["vehicleSystem"]);
 
         return items.filter(item => !item.system.equipped);
     }
@@ -1978,6 +2089,18 @@ export class SWSEActor extends Actor {
         }
 
         return classSkills;
+    }
+
+    itemsWithTypes(types){
+        const items = [];
+        for(let type of types){
+            try{
+                items.push(...this.itemTypes[type])
+            } catch (e) {
+                console.error("INVALID ITEM TYPE: " + type, e);
+            }
+        }
+        return items;
     }
 
     /**

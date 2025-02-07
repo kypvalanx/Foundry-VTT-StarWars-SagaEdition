@@ -13,6 +13,7 @@
             {{!-- Sheet Tab Navigation --}}
             <nav class="sheet-tabs tabs" data-group="primary">
                 <a class="item" data-tab="summary">Summary</a>
+                <a class="item" data-tab="actions">Actions</a>
                 <a class="item" data-tab="charClass">Class</a>
                 {{#if actor.isBeast}}<a class="item" data-tab="beast">Beast</a>{{/if}}
                 <a class="item" data-tab="equipment">Equipment</a>
@@ -199,6 +200,19 @@
                                 </div>
                             </li>
                         {{/each}}
+                    </ol>
+                </div>
+
+
+                <div class="tab affiliations" data-group="primary" data-tab="actions">
+
+                    <ol class="items-list">
+                    {{#each actor.actions as |action id|}}
+                        <li class="item flexrow" data-item-id="">
+                            <h4 class="item-name"><b>{{action.name}}</b></h4>
+                        </li>
+                    {{/each}}
+
                     </ol>
                 </div>
 

@@ -1,5 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {filterItemsByType} from "../common/util.mjs";
+import {filterItemsByTypes} from "../common/util.mjs";
 
 export function initializePolyglot() {
 
@@ -43,7 +43,7 @@ export function initializePolyglot() {
                 const maySpeak = getInheritableAttribute({entity: actor, attributeKey: "maySpeak", reduce: "VALUES"})
                 const limitedSpeech = maySpeak.length > 0;
 
-                for (let lang of filterItemsByType(actor.items.values(), "language")) {
+                for (let lang of filterItemsByTypes(actor.items.values(), ["language"])) {
                     if (limitedSpeech && !maySpeak.includes(lang.name)) {
                         literate_languages.add(lang.name)
                     } else {

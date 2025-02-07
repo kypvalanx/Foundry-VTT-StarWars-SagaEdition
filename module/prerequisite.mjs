@@ -1,6 +1,6 @@
 import {
     equippedItems,
-    filterItemsByType,
+    filterItemsByTypes,
     inheritableItems,
     resolveExpression,
     resolveValueArray,
@@ -257,7 +257,7 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: false, message: `${prereq.text}`});
                 break;
             case 'FORCE TECHNIQUE':
-                let ownedForceTechniques = filterItemsByType(resolvedItems, "forceTechnique");
+                let ownedForceTechniques = filterItemsByTypes(resolvedItems, ["forceTechnique"]);
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForceTechniques.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -275,7 +275,7 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             case 'FORCE POWER':
-                let ownedForcePowers = filterItemsByType(resolvedItems, "forcePower");
+                let ownedForcePowers = filterItemsByTypes(resolvedItems, ["forcePower"]);
                 if (!isNaN(prereq.requirement)) {
                     if (!(ownedForcePowers.length < parseInt(prereq.requirement))) {
                         successList.push({prereq, count: 1});
@@ -413,12 +413,12 @@ function meetsPrerequisite(prereq, target, options) {
                     failureList.push({fail: false, message: `${prereq.type}: ${prereq.text}`});
                     break;
                 } else if (prereq.requirement === 'is part of a military') {
-                    if (filterItemsByType(resolvedItems, "affiliation").length > 0) {
+                    if (filterItemsByTypes(resolvedItems, ["affiliation"]).length > 0) {
                         successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
                         break;
                     }
                 } else if (prereq.requirement === 'is part of a major interstellar corporation') {
-                    if (filterItemsByType(resolvedItems, "affiliation").length > 0) {
+                    if (filterItemsByTypes(resolvedItems, ["affiliation"]).length > 0) {
                         successList.push({prereq: prereq + " (missing an affiliation)", count: 1});
                         break;
                     }

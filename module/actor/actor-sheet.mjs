@@ -1,5 +1,5 @@
 import {
-    filterItemsByType,
+    filterItemsByTypes,
     getCleanListFromCSV,
     getDocumentByUuid,
     getParentByHTMLClass,
@@ -655,7 +655,7 @@ export class SWSEActorSheet extends ActorSheet {
 
     buildAgeDialog(sheet) {
         let age = sheet.actor.system.age ? parseInt(sheet.actor.system.age) : 0;
-        let ageEffects = filterItemsByType(sheet.actor.items.values(), "trait")
+        let ageEffects = filterItemsByTypes(sheet.actor.items.values(), ["trait"])
             .map(trait => {
                 //let prereqs = trait.system.prerequisite.filter(prereq => );
                 let prereq = this._prerequisiteHasTypeInStructure(trait.system.prerequisite, 'AGE')
@@ -705,7 +705,7 @@ export class SWSEActorSheet extends ActorSheet {
         let sex = sheet.actor.system.sex ? sheet.actor.system.sex : "";
         let gender = sheet.actor.system.gender ? sheet.actor.system.gender : "";
         let searchString = "GENDER";
-        let genderEffects = filterItemsByType(sheet.actor.items.values(), "trait")
+        let genderEffects = filterItemsByTypes(sheet.actor.items.values(), ["trait"])
             .filter(trait => this._prerequisiteHasTypeInStructure(trait.system.prerequisite, searchString)).map(trait => {
                 let prerequisite = this._prerequisiteHasTypeInStructure(trait.system.prerequisite, searchString)
 

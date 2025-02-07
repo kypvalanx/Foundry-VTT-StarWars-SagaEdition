@@ -1,7 +1,7 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {suppressibleDialog} from "../common/dialog.mjs";
 import {characterActorTypes, EQUIPABLE_TYPES, LIMITED_TO_ONE_TYPES, vehicleActorTypes} from "../common/constants.mjs";
-import {filterItemsByType, unique, viewableEntityFromEntityType} from "../common/util.mjs";
+import {filterItemsByTypes, unique, viewableEntityFromEntityType} from "../common/util.mjs";
 import {SWSEActor} from "./actor.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 
@@ -307,7 +307,7 @@ const handleSpeciesAndVehicleBase = async (context) => {
     }
     let type = context.entity.type;
     let viewable = type.replace(/([A-Z])/g, " $1");
-    if (filterItemsByType(context.actor.items.values(), type).length > 0) {
+    if (filterItemsByTypes(context.actor.items.values(), [type]).length > 0) {
         new Dialog({
             title: `${viewable.titleCase()} Selection`,
             content: `Only one ${viewable.titleCase()} allowed at a time.  Please remove the existing one before adding a new one.`,
@@ -327,7 +327,7 @@ const handleBackgroundAndDestiny = async (context) => {
     if (!(context.entity.type === "background" || context.entity.type === "destiny")) {
         return true;
     }
-    if (filterItemsByType(context.actor.items.values(), ["background", "destiny"]).length > 0) {
+    if (filterItemsByTypes(context.actor.items.values(), ["background", "destiny"]).length > 0) {
         new Dialog({
             title: `${context.entity.type.titleCase()} Selection`,
             content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
