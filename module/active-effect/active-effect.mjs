@@ -1,5 +1,6 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {getDocumentByUuid} from "../common/util.mjs";
+import {generateAction} from "../action/generate-action.mjs";
 
 //import * as fields from "../data/fields.mjs";
 
@@ -53,6 +54,11 @@ export class SWSEActiveEffect extends ActiveEffect {
         //console.warn("attempted to modify transfer");
     }
 
+    get actions(){
+        let actions = [];
+        actions.push(...generateAction(this, this.changes))
+        return actions;
+    }
 
     _onDelete(options, userId) {
         super._onDelete(options, userId);

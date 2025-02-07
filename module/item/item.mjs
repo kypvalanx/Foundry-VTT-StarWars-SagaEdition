@@ -8,6 +8,7 @@ import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveEntity} from "../compendium/compendium-util.mjs";
+import {generateAction} from "../action/generate-action.mjs";
 
 function createChangeFromAttribute(attr) {
     //console.warn(`i don't think this should run ${Object.entries(attr)}`)
@@ -830,6 +831,19 @@ export class SWSEItem extends Item {
         return SWSEItem.buildItemName(this);
     }
 
+    get actions(){
+
+        let actions = [];
+        actions.push(...generateAction(this, this.changes))
+        for (const effect of this.effects) {
+            actions.push(... effect.actions)
+        }
+        return actions;
+    }
+
+    get equipped(){
+        return this.system.equipped;
+    }
     get isEquipable() {
         return (this.type === "weapon" || this.type === "armor") && !this.isBioPart && !this.isDroidPart;
     }

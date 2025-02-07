@@ -306,6 +306,14 @@ export function getVariableFromActorData(swseActor, variableName) {
     //     generateAttributes(swseActor);
     //     value = swseActor.resolvedVariables?.get(variableName);
     // }
+
+    if(value === undefined){
+        let fnct = swseActor.formulaFunctions?.get(variableName);
+        if(fnct){
+
+            value = fnct(swseActor);
+        }
+    }
     if (value === undefined) {
         console.warn("could not find " + variableName, swseActor.resolvedVariables);
     }
@@ -314,25 +322,17 @@ export function getVariableFromActorData(swseActor, variableName) {
 
 /**
  *
- * @param type {string|[string]}
+ * @param types {[string]}
  * @param items {[SWSEItem]}
  * @returns {[SWSEItem]}
  */
-export function filterItemsByType(items, type) {
-    let types = [];
-    if (Array.isArray(type)) {
-        types = type;
-    } else {
-        if (arguments.length > 1) {
-            for (let i = 1; i < arguments.length; i++) {
-                types[i - 1] = arguments[i];
-            }
-        }
-    }
+export function filterItemsByTypes(items, types) {
     let filtered = [];
-    for (let item of items) {
-        if (types.includes(item.type)) {// || types.includes(item.data.type)) {
-            filtered.push(item);
+    for(let type of types){
+        for (let item of items) {
+            if (type === item.type) {
+                filtered.push(item);
+            }
         }
     }
     return filtered;
@@ -680,6 +680,9 @@ export function getAttackRange(range, isAccurate, isInaccurate, actor) {
 }
 
 export function getTokenDistanceInSquares(source, target) {
+    if(!target.transform){
+        target = target.document
+    }
     let xDiff = Math.abs(source.x - target.x);
     let yDiff = Math.abs(source.y - target.y);
     let squareSize = source.scene.dimensions.size;
@@ -1130,7 +1133,7 @@ export function fullJoin(...args) {
  * @param type
  * @returns {SWSEItem[]}
  */
-export function equippedItems(entity, type) {
+export function equippedItems(entity, type = null) {
     if (!entity.items) {
         return [];
     } else {
@@ -1152,16 +1155,16 @@ export function getItemParentId(id) {
  * @type {string[]}
  */
 const CONDITIONALLY_INHERITABLE_TYPES = [ "trait", "feat", "talent"];
-const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower", "secret", "forceTechnique", "affiliation", "regimen", "species", "vehicleBaseType", "beastAttack",
+const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower", "forceSecret", "forceTechnique", "affiliation", "forceRegimen", "species", "vehicleBaseType", "beastAttack",
     "beastSense",
     "beastType",
     "beastQuality"];
 
-export function inheritableItems(entity, options={}) {
+export function inheritableItems(actor, options={}) {
     let fn = () => {
-        let possibleInheritableItems = filterItemsByType(entity.items || [], CONDITIONALLY_INHERITABLE_TYPES);
-        let actualInheritable = equippedItems(entity);
-        actualInheritable.push(...filterItemsByType(entity.items || [], ALWAYS_INHERITABLE_TYPES));
+        let possibleInheritableItems = actor.itemsWithTypes(CONDITIONALLY_INHERITABLE_TYPES);
+        let actualInheritable = equippedItems(actor);
+        actualInheritable.push(...actor.itemsWithTypes(ALWAYS_INHERITABLE_TYPES));
 
         possibleInheritableItems = possibleInheritableItems.filter(item => {
             if(!item.system.prerequisite){
@@ -1175,7 +1178,7 @@ export function inheritableItems(entity, options={}) {
         while (shouldRetry) {
             shouldRetry = false;
             possibleInheritableItems = possibleInheritableItems.filter(possible => {
-                const prerequisiteResponse = meetsPrerequisites(entity, possible.system.prerequisite, {
+                const prerequisiteResponse = meetsPrerequisites(actor, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
                     existingTraitPrerequisite: possible.type === "trait"
                 });
@@ -1191,7 +1194,7 @@ export function inheritableItems(entity, options={}) {
         return actualInheritable;
     }
 
-    return entity.getCached && !options.skipCache ? entity.getCached(`inheritableItems`, fn) : fn();
+    return actor.getCached && !options.skipCache ? actor.getCached(`inheritableItems`, fn) : fn();
 }
 
 

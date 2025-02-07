@@ -1,5 +1,5 @@
 import {
-	filterItemsByType,
+	filterItemsByTypes,
 	inheritableItems,
 	ALPHA_FINAL_NAME,
 } from "../../../common/util.mjs";
@@ -35,9 +35,9 @@ export class TraitsFields {
 export class TraitsFunctions {
 	_prepareTraitsDerivedData() {
 		let system = this;
-		let activeTraits = filterItemsByType(
+		let activeTraits = filterItemsByTypes(
 			inheritableItems(system.parent),
-			"trait"
+			["trait"]
 		);
 		system.traits = activeTraits.sort(ALPHA_FINAL_NAME);
 	}
