@@ -15,7 +15,6 @@ import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/test-suites.test.mjs";
 import {makeAttack} from "./actor/attack/attackDelegate.mjs";
-import {SWSETokenDocument} from "./token/token-document.js";
 import {getInheritableAttribute} from "./attribute-helper.mjs";
 import {SWSETokenHud} from "./token/token-hud.mjs";
 import {initializeDragRuler} from "./module-support/drag-ruler.mjs";
@@ -59,7 +58,6 @@ Hooks.once('init', async function () {
     CONFIG.SWSE = SWSE;
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
-    CONFIG.Token.documentClass = SWSETokenDocument;
     CONFIG.Token.hudClass = SWSETokenHud;
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
 
