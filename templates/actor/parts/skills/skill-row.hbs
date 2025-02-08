@@ -22,6 +22,8 @@
     <td>
         <div class="background-text-container">{{toUpperCase skill.attribute}} ({{skill.abilityBonus}})</div>
     </td>
+
+{{#unless disableTrained}}
     <td>
         {{#if skill.isClass}}
             <label title="trained skills get an additional +5">
@@ -35,23 +37,15 @@
         {{/if}}
         <!--                        {{skill.trainedBonus}}-->
     </td>
-    <!--                    <td>-->
-    <!--                        {{skill.focusBonus}}-->
-    <!--                    </td>-->
-    <!--                    <td>-->
-    <!--                        {{skill.miscBonus}}-->
-    <!--                    </td>-->
-    <!--                    <td>-->
-        <!--                        {{#if skill.acp}}-->
-    <!--                            {{skill.armorPenalty}}-->
-        <!--                        {{/if}}-->
-    <!--                    </td>-->
+{{/unless}}
+{{#unless disableBonus}}
     <td>
         <div class="small labeled-input">
             <input class="input" name="system.skills.{{skill.key}}.manualBonus" type="number"
                    value="{{skill.manualBonus}}" placeholder="0"/>
         </div>
     </td>
+{{/unless}}
 </tr>
 {{#if skill.situationalSkills}}
     {{#if (lookup toggles (concat @root.actor._id "-" skill.key))}}
