@@ -11,20 +11,23 @@
         <div class="divider"></div>
         <div class="labeled-input medium">
             <label for="currentHealth" class="text">Current</label>
-            <input class="middle-input" id="currentHealth" type="number" name="system.health.value"
+            <input class="right-input" id="currentHealth" type="number" name="system.health.value"
                    value="{{actor.health.value}}" data-dtype="Number"/>
         </div>
-
+    {{#unless disableSecondWind}}
         <div class="labeled-input medium">
             <label for="secondWind" class="top" title="Regardless of second winds per day, only one can be used per encounter.">Second
                 Winds/Day</label>
-            <input class="middle-input" id="secondWind" type="text" placeholder="" disabled/>
+            <input class="left-input" id="secondWind" type="text" placeholder="" disabled/>
             {{#times actor.secondWind.perDay}}
                 <input class="left-control-{{this}}" data-action="toggle-second-wind" title="Spent" type="checkbox" data-name="system.secondWind.toggles.{{this}}"
                        {{#if (lookup ../actor.system.secondWind.toggles this)}}checked{{/if}}>
             {{/times}}
         </div>
 
+    {{/unless}}
+
+    {{#unless disableFirstAid}}
         <div class="labeled-input medium">
             <label for="firstAid" class="top" title="You can usually only accept first aid once per day">First Aid/Day</label>
             <input class="right-input" id="firstAid" type="text" placeholder="" disabled/>
@@ -33,6 +36,7 @@
                        {{#if (lookup ../actor.system.firstDay.toggles this)}}checked{{/if}}>
             {{/times}}
         </div>
+    {{/unless}}
     </div>
 
 
@@ -64,6 +68,8 @@
 
 
     <div class="flex-row">
+
+    {{#unless disableSimpleSpeedAndBaseAttackBonus}}
         <div class="labeled-input">
             <label for="baseAttack">Base Attack</label>
             <input class="left-input" id="baseAttack" type="text"
@@ -72,22 +78,25 @@
                 <a class="rollable" title="Roll 1d20 + {{actor.baseAttackBonus}}" data-label="Base Attack Bonus" data-roll="1d20 + {{actor.baseAttackBonus}}"><i class="fas fa-dice-d20"></i></a>
             </div>
         </div>
+    {{/unless}}
         <div class="labeled-input">
             <label for="grapple">Grapple Bonus</label>
-            <input class="middle-input" id="grapple" type="text"
+            <input class="{{#unless disableSimpleSpeedAndBaseAttackBonus}}middle-input{{/unless}}" id="grapple" type="text"
                    value="{{actor.grapple}}" placeholder="" disabled/>
             <div class="control-0">
                 <a class="rollable" title="Roll 1d20 + {{actor.grapple}}" data-label="Grapple" data-roll="1d20 + {{actor.grapple}}"><i class="fas fa-dice-d20"></i></a>
             </div>
         </div>
+    {{#unless disableSimpleSpeedAndBaseAttackBonus}}
         <div class="labeled-input">
             <label for="dtMisc">Speed</label>
             <input class="right-input" id="dtMisc" type="text" title="{{actor.speed}}"
                    value="{{actor.speed}}" placeholder="" disabled/>
         </div>
+    {{/unless}}
     </div>
 
-    {{#unless actor.isFollower}}
+    {{#unless (or actor.isFollower disableForcePointsAndDestinyPoints)}}
     <div class="flex-row">
         <div class="labeled-input">
             <label for="forcePoints">Force Points</label>
