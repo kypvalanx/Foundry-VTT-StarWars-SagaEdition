@@ -8,17 +8,16 @@
             <td></td>
             <th>Total</th>
             <th>Ability</th>
-            <th>Trained</th>
-<!--            <th>Focus</th>-->
-<!--            <th>Misc</th>-->
-<!--            <th>Armor</th>-->
-            <th>Bonus</th>
+            {{#unless disableTrained}}
+                <th>Trained</th>{{/unless}}
+            {{#unless disableBonus}}
+                <th>Bonus</th>{{/unless}}
         </tr>
         </thead>
         <tbody>
         {{#each actor.skill.skills as |skill id|}}
             {{#unless skill.hide}}
-                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill toggles=../actor.system.toggles}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus}}
             {{/unless}}
         {{/each}}
         </tbody>
