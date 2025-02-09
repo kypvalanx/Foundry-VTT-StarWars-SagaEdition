@@ -633,7 +633,7 @@ export class SWSEActor extends Actor {
 
     get maximumVelocity() {
         return this.getCached("maximumVelocity", () => {
-            this.system.maximumVelocity = getInheritableAttribute({
+             return getInheritableAttribute({
                 entity: this,
                 attributeKey: "maximumVelocity",
                 reduce: "FIRST"
