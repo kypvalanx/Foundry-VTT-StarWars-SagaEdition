@@ -21,6 +21,7 @@ export class SWSEItemSheet extends ItemSheet {
         this._pendingUpdates = {};
         //this.options.submitOnChange = false;
     }
+
     /** @override */
     static get defaultOptions() {
         return foundry.utils.mergeObject(super.defaultOptions, {
@@ -146,12 +147,12 @@ export class SWSEItemSheet extends ItemSheet {
         });
 
         // Add general text box (span) handler
-        html.find("span.text-box.direct").on("click", (event) => {
-            onSpanTextInput.call(this, event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
-        });
-        html.find("[data-action=direct-field]").on("click", (event) => {
-            onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
-        });
+        // html.find("span.text-box.direct").on("click", (event) => {
+        //     onSpanTextInput.call(this, event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
+        // });
+        // html.find("[data-action=direct-field]").on("click", (event) => {
+        //     onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+        // });
 
 
         // html.find("select").on("change", changeSelect.bind(this));
