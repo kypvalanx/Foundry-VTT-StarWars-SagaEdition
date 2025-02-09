@@ -138,7 +138,7 @@ export class SWSEItem extends Item {
     get changes() {
         const changes = []
         changes.push(...this.system.changes);
-        changes.push(...Object.values(this.system.attributes || {}).map(attr => createChangeFromAttribute(attr)))
+        //changes.push(...Object.values(this.system.attributes || {}).map(attr => createChangeFromAttribute(attr)))
         return changes;
     }
 
