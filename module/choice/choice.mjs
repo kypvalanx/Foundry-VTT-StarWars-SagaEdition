@@ -267,7 +267,7 @@ export async function explodeOptions(options, actor) {
                     attributeKey: "weaponProficiency",
                     reduce: "VALUES"
                 })
-                for (let weapon of game.generated.exoticWeapons) {
+                for (let weapon of game.generated.weapon.exoticWeapons) {
                     if (!weaponProficiencies.includes(weapon)) {
                         resolvedOptions.push({name: weapon, abilities: [], items: [], payload: weapon});
                     }
