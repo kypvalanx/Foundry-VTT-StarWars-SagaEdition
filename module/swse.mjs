@@ -341,6 +341,13 @@ Hooks.on("ready", async function () {
                                 } else {
                                     game.generated.weapon.exoticRangedWeapons.push(entity.name);
                                 }
+                            } else {
+                                let exoticWeaponTypes = getInheritableAttribute({
+                                    entity,
+                                    attributeKey: "exoticWeapon",
+                                    reduce: "VALUES"
+                                })
+                                game.generated.weapon.exoticWeapons.push(...exoticWeaponTypes);
                             }
                         } else if (entity.type === 'template') {
                             let exoticWeaponTypes = getInheritableAttribute({
