@@ -7,7 +7,7 @@
         <div class="small small-header">Temp</div>
         <div class="small small-header">Mod</div>
     </div>
-    {{#each actor.system.attributes as |attribute id|}}
+    {{#each actor.attributes as |attribute id|}}
         {{#unless attribute.skip}}
             <div class="flex-row">
                 <div class="medium labeled-input" >

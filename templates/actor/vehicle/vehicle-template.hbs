@@ -1,26 +1,4 @@
 <div class="flex-row panel">
-    <div class="large labeled-input item" {{#if actor.vehicleTemplate}}
-         data-item-id="{{actor.vehicleTemplate.id}}" {{else}}data-action="compendium" data-type="Item"
-         data-filter="-type:vehicleBaseType"{{/if}}>
-        <label for="vehicleTemplate" class="text">Vehicle Template</label>
-        <input class="input" id="vehicleTemplate" type="text"
-               value="{{#if actor.vehicleTemplate}}{{actor.vehicleTemplate.name}}{{else}}Add Vehicle Template{{/if}}" placeholder="" disabled/>
-        {{#if actor.vehicleTemplate}}
-            <div class="control-1">
-                <a class="" data-action="view" data-item-id="{{actor.vehicleTemplate.id}}"
-                   title="view item"><i
-                        class="fas fa-eye"></i></a>
-            </div>
-            <div class="control-0">
-                <a class="" data-action="delete" data-item-id="{{actor.vehicleTemplate.id}}"
-                   title="delete item"><i
-                        class="fas fa-trash"></i></a>
-            </div>
-        {{else}}
-            <div class="control-0">
-                <a data-action="compendium" data-type="Item" data-filter="-type:vehicleBaseType"
-                   title="{{localize "Open Compendium"}}"><i class="fas fa-folder-plus"></i></a>
-            </div>
-        {{/if}}
-    </div>
+    <a data-action="compendium" data-type="Item" data-filter="-type:vehicleBaseType"
+       title="{{localize "Open Vehicle Template Compendium"}}"><i class="fas fa-folder-plus"></i></a>
 </div>
