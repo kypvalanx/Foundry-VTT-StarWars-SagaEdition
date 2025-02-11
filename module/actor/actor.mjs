@@ -3400,7 +3400,8 @@ export class SWSEActor extends Actor {
         SWSEActor.removeChange(this, undefined, false, "vehicleBaseType")
 
         const data = {};
-            for (const change of item.system.changes) {
+        const changes = item.system.changes || item.system.attributes ? Object.values(item.system.attributes) : [];
+        for (const change of changes) {
                 change.source = "vehicleBaseType"
                 switch (change.key) {
                     case "vehicleSubType":
