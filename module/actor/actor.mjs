@@ -372,7 +372,7 @@ export class SWSEActor extends Actor {
             this.system.attributeGenerationType = this.system.attributeGenerationType[0];
         }
         this.system.sheetType = "Auto"
-        if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet") {
+        if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet" || this.type === "vehicle") {
             this.system.finalAttributeGenerationType = "Manual";
             this.system.sheetType = "Manual"
         } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
@@ -1226,20 +1226,22 @@ export class SWSEActor extends Actor {
             label: "Ignore Prerequisites",
             value: this.system.ignorePrerequisites
         })
-        this.system.settings.push({
-            type: "select",
-            path: "system.attributeGenerationType",
-            label: "Attribute Generation Type",
-            value: this.system.attributeGenerationType || "Default",
-            options: [
-                {value: "Default", display: "Default", tooltip: "Uses System Preference"},
-                {value: "Manual", display: "Manual", tooltip: "Your Attributes are exactly as you enter them"},
-                {value: "Semi-Manual", display: "Semi-Manual", tooltip: "Enter Base Stat and bonuses will be applied from species, class, etc"},
-                {value: "Roll", display: "Roll", tooltip: "Roll and assign stats"},
-                {value: "Point Buy", display: "Point Buy", tooltip: "Point buy rules. droids should be expected to have a lower point buy value because they have one fewer stats"},
-                {value: "Standard Array", display: "Standard Array", tooltip: "Assign the Standard Array"}
-            ]
-        })
+        if(this.type === "character"){
+            this.system.settings.push({
+                type: "select",
+                path: "system.attributeGenerationType",
+                label: "Attribute Generation Type",
+                value: this.system.attributeGenerationType || "Default",
+                options: [
+                    {value: "Default", display: "Default", tooltip: "Uses System Preference"},
+                    {value: "Manual", display: "Manual", tooltip: "Your Attributes are exactly as you enter them"},
+                    {value: "Semi-Manual", display: "Semi-Manual", tooltip: "Enter Base Stat and bonuses will be applied from species, class, etc"},
+                    {value: "Roll", display: "Roll", tooltip: "Roll and assign stats"},
+                    {value: "Point Buy", display: "Point Buy", tooltip: "Point buy rules. droids should be expected to have a lower point buy value because they have one fewer stats"},
+                    {value: "Standard Array", display: "Standard Array", tooltip: "Assign the Standard Array"}
+                ]
+            })
+        }
 
         //this.system.settings.push({type: "text", path: "system.externalEditorLink", label: "External Editor Link (Saga Workshop)", value: this.system.externalEditorLink})
     }
@@ -3405,13 +3407,13 @@ export class SWSEActor extends Actor {
                         data['system.subType'] = change.value;
                         break;
                     case "baseStrength":
-                        data['system.attributes.str.base'] = change.value;
+                        data['system.attributes.str.manual'] = change.value;
                         break;
                     case "baseDexterity":
-                        data['system.attributes.dex.base'] = change.value;
+                        data['system.attributes.dex.manual'] = change.value;
                         break;
                     case "baseIntelligence":
-                        data['system.attributes.int.base'] = change.value;
+                        data['system.attributes.int.manual'] = change.value;
                         break;
                     case "speedCharacterScale":
                         data['system.vehicle.speed.characterScale'] = change.value;

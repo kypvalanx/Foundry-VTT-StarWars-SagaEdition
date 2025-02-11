@@ -25,7 +25,6 @@ export function generateAttributes(actor, options={}) {
         }
 
         attribute.skip = (key === "con" && actor.isDroid) || (["con", "cha", "wis"].includes(key) && ["vehicle", "npc-vehicle"].includes(actor.type))
-
         if(attribute.skip){
             attribute.total = 10
         } else if(attributeGenType === 'Manual'){
