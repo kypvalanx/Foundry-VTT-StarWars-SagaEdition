@@ -306,6 +306,18 @@ export class SWSEActorSheet extends ActorSheet {
                 }
             })
         });
+        html.find('[data-action="remove-vehicleBaseType"]').click(async (e) => {
+            let items = this.object.itemTypes['vehicleBaseType'];
+
+            const ids = [];
+            for (let item of items) {
+                await this.object.applyVehicleAttributes(item);
+                ids.push(item.id);
+
+            }
+            this.object.deleteEmbeddedDocuments("Item", ids);
+        });
+
         //html.find()
     }
 
