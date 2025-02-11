@@ -22,7 +22,8 @@ import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {
-    CLASSES_BY_STARTING_FEAT, COLORS,
+    CLASSES_BY_STARTING_FEAT,
+    COLORS,
     crewPositions,
     crewQuality,
     crewSlotResolution,
@@ -303,14 +304,14 @@ export class SWSEActor extends Actor {
     /**
      * Augment the basic actor data with additional dynamic data.
      */
-    prepareData() {
+    async prepareData() {
         this._pendingUpdates = {};
         if (this.skipPrepare) {
             return;
         }
         registerFormulaFunctions(this)
 
-        if(this.system.externalEditorLink){
+        if (this.system.externalEditorLink) {
 
             //this.scrapeExternal(this.system.externalEditorLink)
 
@@ -397,7 +398,7 @@ export class SWSEActor extends Actor {
             if (!linkedActor) continue;
             let reciLink = linkedActor.actorLinks?.find(link => link.uuid === this.uuid)
 
-            if(!reciLink) continue;
+            if (!reciLink) continue;
             const oldLink = JSON.stringify(reciLink);
             let system = this.getCachedLinkData(this.type, link.position, this, reciLink)
 
@@ -428,10 +429,10 @@ export class SWSEActor extends Actor {
         }
 
 
-        if(this.type === "character"){
+        if (this.type === "character") {
             const tokenUpdates = {};
-            
-            if(!!this.system.autoSizeToken){
+
+            if (!!this.system.autoSizeToken) {
 
                 //adjust tokens to size
                 const newSize = sizeArray[getResolvedSize(this)]
@@ -442,17 +443,21 @@ export class SWSEActor extends Actor {
                 tokenUpdates["height"] = gridSize;
             }
 
-            if(!!this.system.allowSheetLighting){
+            if (!!this.system.allowSheetLighting) {
                 let auraColors = getInheritableAttribute({attributeKey: "auraColor", entity: this, reduce: "VALUES"})
 
                 auraColors = auraColors.filter(color => !!color).map(color => {
-                    if(color.startsWith("#")){
+                    if (color.startsWith("#")) {
                         return color;
                     }
                     return COLORS[color];
                 }).filter(color => !!color)
 
-                const auraLuminosity = getInheritableAttribute({attributeKey: "auraLuminosity", entity: this, reduce: "SUM"})
+                const auraLuminosity = getInheritableAttribute({
+                    attributeKey: "auraLuminosity",
+                    entity: this,
+                    reduce: "SUM"
+                })
                 tokenUpdates['light.luminosity'] = auraLuminosity || 0.30 + auraColors.length * 0.10
 
                 const auraBright = getInheritableAttribute({attributeKey: "auraBright", entity: this, reduce: "SUM"})
@@ -463,19 +468,41 @@ export class SWSEActor extends Actor {
 
                 tokenUpdates['light.color'] = mergeColor(auraColors);
 
-                const auraAnimationType = getInheritableAttribute({attributeKey: "auraAnimationType", entity: this, reduce: "FIRST"})
-                if(auraAnimationType){
-                    const auraAnimationSpeed = getInheritableAttribute({attributeKey: "auraAnimationSpeed", entity: this, reduce: "FIRST"})
-                    const auraAnimationIntensity = getInheritableAttribute({attributeKey: "auraAnimationIntensity", entity: this, reduce: "FIRST"})
-                    tokenUpdates['animation'] = {type: auraAnimationType, speed:auraAnimationSpeed, intensity:auraAnimationIntensity, reverse:false};
+                const auraAnimationType = getInheritableAttribute({
+                    attributeKey: "auraAnimationType",
+                    entity: this,
+                    reduce: "FIRST"
+                })
+                if (auraAnimationType) {
+                    const auraAnimationSpeed = getInheritableAttribute({
+                        attributeKey: "auraAnimationSpeed",
+                        entity: this,
+                        reduce: "FIRST"
+                    })
+                    const auraAnimationIntensity = getInheritableAttribute({
+                        attributeKey: "auraAnimationIntensity",
+                        entity: this,
+                        reduce: "FIRST"
+                    })
+                    tokenUpdates['animation'] = {
+                        type: auraAnimationType,
+                        speed: auraAnimationSpeed,
+                        intensity: auraAnimationIntensity,
+                        reverse: false
+                    };
                 }
             }
 
 
-            if(Object.keys(tokenUpdates).length > 0){
-                for (const tokenDocument of this.getDependentTokens()) {
-                    if(tokenDocument._id){
-                        tokenDocument.update(tokenUpdates);
+            if (Object.keys(tokenUpdates).length > 0) {
+                const dependentTokens = this.getDependentTokens({linked: true});
+                for (const tokenDocument of dependentTokens) {
+                    if (tokenDocument._id && game) {
+                        try {
+                            await tokenDocument.update(tokenUpdates);
+                        } catch (e) {
+                            console.log(e)
+                        }
                     }
                 }
             }
@@ -2632,6 +2659,35 @@ export class SWSEActor extends Actor {
         let providedItems = entity.getProvidedItems() || [];
         //on uploads add "provide" changes for classFeats
 
+        if(entity.type === "vehicleBaseType"){
+            Dialog.confirm({
+                title: `Overwrite Vehicle attributes?`,
+                content: `<p>Overwriting attributes will overwrite attributes from previous base types.  Would you like to continue?</p>`,
+                yes: async (html)=>{
+                    await this.applyVehicleAttributes(entity)
+                    console.log(this)
+            }
+            })
+            //
+            // return await Dialog.prompt({
+            //     title: `Overwrite Vehicle attributes?`,
+            //     content: `<p>Overwriting attributes will overwrite attributes from previous base types.  Would you like to continue?</p>`,
+            //     callback: async (html) => {
+            //         let feat = html.find("#feat")[0].value;
+            //         await this.addItems(context, [{
+            //             type: 'TRAIT',
+            //             name: `Bonus Feat (${feat})`
+            //         }, {
+            //             type: 'FEAT',
+            //             name: feat
+            //         }], parentItem);
+            //         return feat;
+            //     }
+            // });
+
+            return {addedItem: entity, toBeAdded:[]}
+        }
+
         if (context.isUpload) {
             if (entity.type === "class") {
                 let isFirstLevelOfClass = this._isFirstLevelOfClass(entity.name);
@@ -2715,10 +2771,8 @@ export class SWSEActor extends Actor {
         }
     }
 
-    static removeChange(entity, key, forceAdd = false) {
-        let find = (entity.system.changes || Object.values(entity.system.attributes)).filter(v => v.key !== key);
-
-        entity.system.changes = find;
+    static removeChange(entity, key, forceAdd = false, source = undefined) {
+        entity.system.changes = (entity.system.changes || Object.values(entity.system.attributes)).filter(v => v.key !== key && v.source !== source);
     }
 
     /**
@@ -3338,6 +3392,67 @@ export class SWSEActor extends Actor {
             }
         }
         return speed;
+    }
+
+    async applyVehicleAttributes(item) {
+        SWSEActor.removeChange(this, undefined, false, "vehicleBaseType")
+
+        const data = {};
+            for (const change of item.system.changes) {
+                change.source = "vehicleBaseType"
+                switch (change.key) {
+                    case "vehicleSubType":
+                        data['system.subType'] = change.value;
+                        break;
+                    case "baseStrength":
+                        data['system.attributes.str.base'] = change.value;
+                        break;
+                    case "baseDexterity":
+                        data['system.attributes.dex.base'] = change.value;
+                        break;
+                    case "baseIntelligence":
+                        data['system.attributes.int.base'] = change.value;
+                        break;
+                    case "speedCharacterScale":
+                        data['system.vehicle.speed.characterScale'] = change.value;
+                        break;
+                    case "speedStarshipScale":
+                        data['system.vehicle.speed.starshipScale'] = change.value;
+                        break;
+                    case "hitPointEq":
+                        data['system.health.override'] = change.value;
+                        break;
+                    case "damageThresholdBonus":
+                        await this.addChange(change)
+                        //data['system.vehicle.damageThresholdBonus'] = change.value;
+                        break;
+                    case "armorReflexDefenseBonus":
+                        await this.addChange(change)
+                        //data['system.vehicle.armorReflexDefenseBonus'] = change.value;
+                        break;
+                    case "cost":
+                        data['system.vehicle.cost'] = change.value;
+                        break;
+                    case "crew":
+                        data['system.vehicle.crew'] = change.value;
+                        break;
+                    case "passengers":
+                        data['system.vehicle.passengers'] = change.value;
+                        break;
+                    case "cargoCapacity":
+                        data['system.vehicle.cargoCapacity.value'] = change.value;
+                        break;
+                    case "consumables":
+                        data['system.vehicle.consumables'] = change.value;
+                        break;
+                    case "emplacementPoints":
+                        data['system.vehicle.emplacementPoints'] = change.value;
+                        break;
+                    default:
+                        console.log(change.key);
+                }
+        }
+        await this.safeUpdate(data);
     }
 }
 
