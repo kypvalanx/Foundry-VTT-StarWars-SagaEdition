@@ -883,13 +883,7 @@ export class SWSEActor extends Actor {
     }
 
     get crew() {
-        return this.getCached("crew", () => {
-            return getInheritableAttribute({
-                entity: this,
-                attributeKey: "crew",
-                reduce: "SUM"
-            })
-        })
+            return this.system.vehicle.crew
     }
 
     /**
