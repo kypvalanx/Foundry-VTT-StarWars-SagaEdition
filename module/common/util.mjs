@@ -325,7 +325,9 @@ export function getVariableFromActorData(swseActor, variableName) {
  * @param types {[string]}
  * @param items {[SWSEItem]}
  * @returns {[SWSEItem]}
+ * @deprecated
  */
+
 export function filterItemsByTypes(items, types) {
     let filtered = [];
     for(let type of types){
@@ -333,29 +335,6 @@ export function filterItemsByTypes(items, types) {
             if (type === item.type) {
                 filtered.push(item);
             }
-        }
-    }
-    return filtered;
-}
-
-/**
- *
- * @param type
- * @param items
- * @returns {[SWSEItem]}
- */
-export function excludeItemsByType(items, type) {
-    let types = [];
-    types[0] = type;
-    if (arguments.length > 2) {
-        for (let i = 2; i < arguments.length; i++) {
-            types[i - 1] = arguments[i];
-        }
-    }
-    let filtered = [];
-    for (let item of items) {
-        if (!types.includes(item.type)) {
-            filtered.push(item);
         }
     }
     return filtered;

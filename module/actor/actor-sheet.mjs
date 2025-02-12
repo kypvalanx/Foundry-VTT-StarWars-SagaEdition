@@ -559,10 +559,10 @@ export class SWSEActorSheet extends ActorSheet {
         const type = $(event.currentTarget).data("action-type");
         switch (type) {
             case 'plus':
-                this.object.shields = this.object.shields + 5
+                this.object.changeShields(5);
                 break;
             case 'minus':
-                this.object.shields = this.object.shields - 5
+                this.object.changeShields(-5);
                 break;
             case 'toggle':
                 let ids = this.object.effects

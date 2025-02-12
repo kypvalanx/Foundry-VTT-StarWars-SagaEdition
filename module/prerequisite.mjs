@@ -67,8 +67,7 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: true, message: `${prereq.text}`});
                 break;
             case 'ITEM':
-                let ownedItem = SWSEActor.getInventoryItems(resolvedItems);
-                let filteredItem = ownedItem.filter(feat => feat.finalName === prereq.requirement);
+                let filteredItem = resolvedItems.filter(feat => feat.finalName === prereq.requirement);
                 if (filteredItem.length > 0) {
                     successList.push({prereq, count: 1});
                     break;

@@ -24,7 +24,7 @@ function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
 }
 
 function assertEquippedItems(assert, actor, expectedItems) {
-    let items = actor.getEquippedItems().map(i => i.name)
+    let items = actor.equippedItems.map(i => i.name)
     assert.equal(items.length, expectedItems.length, `expected ${expectedItems.toString()}, actual ${items.toString()}`)
     for (let item of expectedItems) {
         assert.ok(items.includes(item), `couldn't find ${item}`)

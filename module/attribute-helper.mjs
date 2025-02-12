@@ -173,6 +173,21 @@ function getChangesFromDocuments(entity, data) {
     return getChangesFromDocument(entity, data);
 }
 
+function getValues(values, data, entities) {
+    return values.filter(attr => {
+        let parent = data.parent || entities[attr.source]?.parent;
+
+        if (!parent) {
+            return true;
+        }
+        if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail) {
+            return false;
+        }
+
+        return !meetsPrerequisites(data.entity, attr.prerequisite).doesFail
+    });
+}
+
 /**
  *
  * @param data
@@ -195,13 +210,11 @@ export function getInheritableAttribute(data = {}) {
     // really though we have to filter by attribute key, allow attribute filter,
     // run prerequisites (look at this, it looks like it's done twice?)that order can stay the same
     // i think that overrid needs to move to reduce, the reduce functions just need to acknowledge mode. TODO look at this after coffee
-    if (data.attributeKey) {
-        let attributeKeyFilter;
-        if (Array.isArray(data.attributeKey)) {
-            attributeKeyFilter = (attribute) => !!attribute && data.attributeKey.includes(attribute.key);
-        } else {
-            attributeKeyFilter = (attribute) => !!attribute && data.attributeKey === attribute.key
-        }
+    const changeKey = data.attributeKey;
+    if (changeKey) {
+        let attributeKeyFilter = Array.isArray(changeKey) ?
+            (change) => change && changeKey.includes(change.key) :
+            (change) => change && changeKey === change.key;
         values = values.filter(attributeKeyFilter)
     }
 
@@ -221,18 +234,7 @@ export function getInheritableAttribute(data = {}) {
 
 
     if (!data.recursive) {
-        values = values.filter(attr => {
-            let parent = data.parent || entities[attr.source]?.parent;
-            
-            if(!parent){
-                return true;
-            }
-            if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail) {
-                return false;
-            }
-
-            return !meetsPrerequisites(data.entity, attr.prerequisite).doesFail
-        });
+        values = getValues(values, data, entities);
     }
 
     if (data.entity.type === "character" || data.entity.type === "npc") {
