@@ -3,7 +3,6 @@ import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
     convertOverrideToMode,
-    excludeItemsByType,
     filterItemsByTypes,
     getDocumentByUuid,
     getVariableFromActorData,
@@ -780,7 +779,7 @@ export class SWSEActor extends Actor {
     get armors(){
         let armors = []
 
-        for (const armor of this.getEquippedItems().filter(item => item.type === 'armor')) {
+        for (const armor of this.equipped.filter(item => item.type === 'armor')) {
             armors.push(generateArmorBlock(this, armor));
         }
         return armors;
@@ -985,25 +984,25 @@ export class SWSEActor extends Actor {
 
     get uninstalled() {
         return this.getCached("uninstalled", () => {
-            return this.getUninstalledSystems();
+            return this.itemTypes['vehicleSystem'].filter(item => !item.system.equipped);
         })
     }
 
     get installed() {
         return this.getCached("installed", () => {
-            return filterItemsByTypes(this.items.values(), ["vehicleSystem"]).filter(item => item.system.equipped === 'installed');
+            return this.itemTypes['vehicleSystem'].filter(item => item.system.equipped === 'installed');
         })
     }
 
     get pilotInstalled() {
         return this.getCached("pilotInstalled", () => {
-            return filterItemsByTypes(this.items.values(), ["vehicleSystem"]).filter(item => item.system.equipped === 'pilotInstalled');
+            return this.itemTypes['vehicleSystem'].filter(item => item.system.equipped === 'pilotInstalled');
         })
     }
 
     get gunnerPositions() {
         return this.getCached("gunnerPositions", () => {
-            let items = filterItemsByTypes(this.items.values(), ["vehicleSystem"]);
+            let items = this.itemTypes['vehicleSystem'];
             let positions = items.filter(item => !!item.system.equipped)
                 .map(item => item.system.equipped)
                 .filter(unique)
@@ -1020,9 +1019,7 @@ export class SWSEActor extends Actor {
     }
 
     get cargo() {
-        return this.getCached("cargo", () => {
-            return filterItemsByTypes(this.items.values(), ["weapon", "armor", "equipment"]).filter(item => !item.system.hasItemOwner);
-        })
+        return this.inventoryItems
     }
 
     get species() {
@@ -1071,101 +1068,69 @@ export class SWSEActor extends Actor {
     }
 
     get weapons() {
-        return this.getCached("weapons", () => {
-            return filterItemsByTypes(this.items.values(), ["weapon"]);
-        })
+        return this.itemTypes["weapons"]
     }
 
     get equipment() {
-        return this.getCached("equipment", () => {
-            return filterItemsByTypes(this.items.values(), ["equipment"]);
-        })
+        return this.itemTypes["equipment"]
     }
 
     get traits() {
-        return this.getCached("traits", () => {
-            return this.getTraits();
-        })
+        return this.itemTypes["trait"].sort(ALPHA_FINAL_NAME);
     }
 
     get talents() {
-        return this.getCached("talents", () => {
-            return filterItemsByTypes(inheritableItems(this), ["talent"]);
-        })
+        return this.itemTypes["talent"]
     }
 
     get powers() {
-        return this.getCached("powers", () => {
-            return filterItemsByTypes(this.items.values(), ["forcePower"]);
-        })
+        return this.itemTypes["forcePower"]
     }
 
     get languages() {
-        return this.getCached("languages", () => {
-            return filterItemsByTypes(this.items.values(), ["language"]);
-        })
+        return this.itemTypes["language"]
     }
 
     get background() {
-        return this.getCached("background", () => {
-            let backgrounds = filterItemsByTypes(this.items.values(), ["background"]);
-            return (backgrounds.length > 0 ? backgrounds[0] : null);
-        })
+        let backgrounds = this.itemTypes["background"];
+        return (backgrounds.length > 0 ? backgrounds[0] : null);
     }
 
     get destiny() {
-        return this.getCached("destiny", () => {
-            let destinies = filterItemsByTypes(this.items.values(), ["destiny"]);
-            return (destinies.length > 0 ? destinies[0] : null);
-        })
+        let destinies = this.itemTypes["destiny"];
+        return (destinies.length > 0 ? destinies[0] : null);
     }
 
     get secrets() {
-        return this.getCached("secrets", () => {
-            return filterItemsByTypes(this.items.values(), ["forceSecret"]);
-        })
+        return this.itemTypes["forceSecret"]
     }
 
     get techniques() {
-        return this.getCached("techniques", () => {
-            return filterItemsByTypes(this.items.values(), ["forceTechnique"]);
-        })
+        return this.itemTypes["forceTechnique"]
     }
 
     get affiliations() {
-        return this.getCached("affiliations", () => {
-            return filterItemsByTypes(this.items.values(), ["affiliation"]);
-        })
+        return this.itemTypes["affiliation"]
     }
 
     get regimens() {
-        return this.getCached("regimens", () => {
-            return filterItemsByTypes(this.items.values(), ["forceRegimen"]);
-        })
+        return this.itemTypes["forceRegimen"]
     }
 
     get naturalWeapons() {
-        return this.getCached("naturalWeapons", () => {
-            return filterItemsByTypes(this.items.values(), ["beastAttack"]);
-        })
+        return this.itemTypes["beastAttack"]
     }
 
     get specialSenses() {
-        return this.getCached("specialSenses", () => {
-            return filterItemsByTypes(this.items.values(), ["beastSense"]);
-        })
+        return this.itemTypes["beastSense"]
     }
 
     get speciesTypes() {
-        return this.getCached("speciesTypes", () => {
-            return filterItemsByTypes(this.items.values(), ["beastType"]);
-        })
+        return this.itemTypes["beastType"]
     }
 
     get specialQualities() {
-        return this.getCached("specialQualities", () => {
-            return filterItemsByTypes(this.items.values(), ["beastQuality"]);
-        })
+        return this.itemTypes["beastQuality"]
     }
 
     get isBeast() {
@@ -1179,19 +1144,19 @@ export class SWSEActor extends Actor {
 
     get equipped() {
         return this.getCached("equipped", () => {
-            return this.getEquippedItems();
+            return SWSEActor._getEquippedItems(this.system, this.inventoryItems, "equipped").filter(item => this.isEquipable(item));
         })
     }
 
     get unequipped() {
         return this.getCached("unequipped", () => {
-            return this.getUnequippedItems();
+            return this.inventoryItems.filter(item => this.isEquipable(item) && !item.system.equipped);
         })
     }
 
     get inventory() {
         return this.getCached("inventory", () => {
-            return this.getNonequippableItems();
+            return this.inventoryItems.filter(item => !this.isEquipable(item));
         })
     }
 
@@ -1442,7 +1407,7 @@ export class SWSEActor extends Actor {
 
     get heaviestArmorType() {
         let armorType = "";
-        for (let armor of this.getEquippedItems().filter(item => item.type === "armor")) {
+        for (let armor of this.equipped.filter(item => item.type === "armor")) {
             if (armor.armorType === "Heavy" || (armor.armorType === "Medium" && armorType === "Light") || (armor.armorType === "Light" && !armorType)) {
                 armorType = armor.armorType;
             }
@@ -1518,24 +1483,14 @@ export class SWSEActor extends Actor {
         return speed
     }
 
-    getTraits() {
-        let activeTraits = filterItemsByTypes(inheritableItems(this), ["trait"]);
-        return activeTraits.sort(ALPHA_FINAL_NAME);
-    }
-
-    getEquippedItems() {
-        let items = this.items;
-        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()), "equipped").filter(item => this.isEquipable(item));
-    }
 
     get equippedWeapons() {
-        return this.getEquippedItems()
+        return this.equipped
             .filter(item => 'weapon' === item.type)
     }
 
     getInstalledWeapons() {
-        let items = this.items;
-        return SWSEActor._getEquippedItems(this.system, SWSEActor.getInventoryItems(items.values()))
+        return SWSEActor._getEquippedItems(this.system, this.inventoryItems)
     }
 
     resolveFeats() {
@@ -1609,9 +1564,9 @@ export class SWSEActor extends Actor {
         await this.deleteEmbeddedDocuments("ActiveEffect", ids);
     }
 
-    reduceShields(number) {
+    changeShields(number) {
         const data = {}
-        data["system.shields.value"] = Math.max(this.shields.value - number, 0);
+        data["system.shields.value"] = Math.max(this.shields.value + number, 0);
         this.safeUpdate(data)
     }
 
@@ -1670,7 +1625,7 @@ export class SWSEActor extends Actor {
             let shieldValue = shields.value;
             if (shields.active && shieldValue > 0) {
                 if (totalDamage > shieldValue) {
-                    this.reduceShields(5)
+                    this.changeShields(-5)
                     resultFlavor += "Shields overwhelmed. Shield value reduced by 5. "
                 }
                 totalDamage = Math.max(totalDamage - shieldValue, 0);
@@ -1901,20 +1856,6 @@ export class SWSEActor extends Actor {
             return 0;
         })
     }
-
-
-    _getEquipable(items) {
-        return this.getCached("getEquipableItems", () => {
-            return items.filter(item => this.isEquipable(item))
-        })
-    }
-
-    _getUnequipableItems(items) {
-        return this.getCached("getUnequipableItems", () => {
-            return items.filter(item => !this.isEquipable(item))
-        })
-    }
-
     get hideForce() {
         return this.getCached("hideForce", () => {
             return !getInheritableAttribute({
@@ -2058,26 +1999,14 @@ export class SWSEActor extends Actor {
 
         return items.filter(item => equipTypes.includes(item.system.equipped));
     }
-
-    getUnequippedItems() {
-        let items = this._getEquipable(SWSEActor.getInventoryItems(this.items.values()));
-
-        return items.filter(item => !item.system.equipped);
-    }
-
-    getUninstalledSystems() {
-        let items = filterItemsByTypes(this.items.values(), ["vehicleSystem"]);
-
-        return items.filter(item => !item.system.equipped);
-    }
-
-    getNonequippableItems() {
-        return this._getUnequipableItems(SWSEActor.getInventoryItems(this.items.values())).filter(i => !i.system.hasItemOwner);
-    }
-
-    static getInventoryItems(items) {
-        return excludeItemsByType(items, "language", "feat", "talent", "species", "class", "classFeature", "forcePower", "forceTechnique", "forceSecret", "ability", "trait", "affiliation", "beastAttack", "beastSense", "beastType", "beastQuality")
-            .filter(item => !item.system.hasItemOwner);
+    get inventoryItems() {
+        return this.getCached("inventoryItems", () => {
+            const inventoryItems = [];
+            for (const type of ['weapon', 'armor', 'equipment']) {
+                inventoryItems.push(...this.itemTypes[type])
+            }
+            return inventoryItems.filter(item => !item.system.hasItemOwner);
+        }) 
     }
 //TODO, this is a better title case. i should move this
     _uppercaseFirstLetters(s) {
@@ -3227,7 +3156,7 @@ export class SWSEActor extends Actor {
     }
 
     get carriedWeight() {
-        // let fn = () => {
+        let fn = () => {
         const resolvedSize = sizeArray[getResolvedSize(this)];
         let costFactor = DROID_COST_FACTOR[resolvedSize]
         let sum = 0;
@@ -3239,9 +3168,9 @@ export class SWSEActor extends Actor {
             sum += resolveWeight(weight, item.system.quantity, costFactor, this)
         }
         return sum;
-        // }
+        }
         //
-        // return this.getCached("weight", fn)
+        return this.getCached("carriedWeight", fn)
     }
 
 

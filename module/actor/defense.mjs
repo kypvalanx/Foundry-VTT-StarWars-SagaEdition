@@ -460,7 +460,7 @@ function _getSituationalBonuses(actor) {
 function _selectRefBonus(actor, armorBonus) {
     if (armorBonus) {
         let proficientWithEquipped = true;
-        for (const armor of actor.getEquippedItems().filter(item => item.type === 'armor')) {
+        for (const armor of actor.equippedItems.filter(item => item.type === 'armor')) {
             if(!armor._parentIsProficientWithArmor()){
                 proficientWithEquipped = false;
             }
@@ -516,7 +516,7 @@ function _getFortStatMod(actor) {
  * @private
  */
 function _getEquipmentFortBonus(actor) {
-    let equipped = actor.getEquippedItems();
+    let equipped = actor.equipped;
     let bonus = 0;
     for (let item of equipped) {
         if (item.fortitudeDefenseBonus) {
@@ -527,7 +527,7 @@ function _getEquipmentFortBonus(actor) {
 }
 
 function _getEquipmentMaxDexBonus(actor) {
-    let equipped = actor.getEquippedItems();
+    let equipped = actor.equipped;
     let bonus = 1000;
     for (let item of equipped) {
         if (item.type !== "armor") continue;
