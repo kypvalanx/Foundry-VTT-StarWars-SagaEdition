@@ -460,7 +460,7 @@ function _getSituationalBonuses(actor) {
 function _selectRefBonus(actor, armorBonus) {
     if (armorBonus) {
         let proficientWithEquipped = true;
-        for (const armor of actor.equippedItems.filter(item => item.type === 'armor')) {
+        for (const armor of actor.equipped.filter(item => item.type === 'armor')) {
             if(!armor._parentIsProficientWithArmor()){
                 proficientWithEquipped = false;
             }
