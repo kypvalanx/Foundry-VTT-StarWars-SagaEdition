@@ -1610,7 +1610,9 @@ export class SWSEActor extends Actor {
     }
 
     reduceShields(number) {
-        this.shields = Math.max(this.shields - number, 0);
+        const data = {}
+        data["system.shields.value"] = Math.max(this.shields.value - number, 0);
+        this.safeUpdate(data)
     }
 
     async reduceCondition(number = 1) {
@@ -1662,14 +1664,16 @@ export class SWSEActor extends Actor {
 
         const damageTypes = options.damageType.split(COMMMA_LIST);
 
+        let resultFlavor = "";
         if (!options.skipShields) {
             let shields = this.system.shields;
             let shieldValue = shields.value;
             if (shields.active && shieldValue > 0) {
                 if (totalDamage > shieldValue) {
                     this.reduceShields(5)
+                    resultFlavor += "Shields overwhelmed. Shield value reduced by 5. "
                 }
-                totalDamage -= shieldValue;
+                totalDamage = Math.max(totalDamage - shieldValue, 0);
             }
         }
 
@@ -1688,7 +1692,7 @@ export class SWSEActor extends Actor {
                     let modifiers = modifier.split(COMMMA_LIST);
                     let innerJoin1 = innerJoin(damageTypes, modifiers);
                     if (!modifier || innerJoin1.length === 0) {
-                        totalDamage -= toNumber(damageReduction.value)
+                        totalDamage = Math.max(totalDamage - toNumber(damageReduction.value), 0)
                     }
                 }
             }
@@ -1699,7 +1703,6 @@ export class SWSEActor extends Actor {
         let conditionReduction = 1;
         const currentHealth = this.system.health.value;
 
-        let resultFlavor = "";
 
         let damageThreshhold = this.defense.damageThreshold.total;
         let reducedToZero = false;
@@ -1707,11 +1710,11 @@ export class SWSEActor extends Actor {
             if (this.takesFullDamageFromIon) {
                 if(totalDamage >= currentHealth){
                     conditionReduction = 5;
-                    resultFlavor = "The Ion Damage reduced hitpoints to 0 and has caused them to become helpless."
+                    resultFlavor += "The Ion Damage reduced hitpoints to 0 and has caused them to become helpless. "
                     reducedToZero = true;
                 } else if(totalDamage > damageThreshhold){
                     conditionReduction = 2;
-                    resultFlavor = "An additional step was taken down the condition track due to Ion Damage."
+                    resultFlavor += "An additional step was taken down the condition track due to Ion Damage. "
                 }
             } else {
                 totalDamage = Math.floor(totalDamage / 2);
@@ -1720,11 +1723,11 @@ export class SWSEActor extends Actor {
             if(this.isEffectedByStun){
                 if(totalDamage >= currentHealth){
                     conditionReduction = 5;
-                    resultFlavor = "The Stun Damage reduced hitpoints to 0 and has caused them to become helpless."
+                    resultFlavor += "The Stun Damage reduced hitpoints to 0 and has caused them to become helpless. "
                     reducedToZero = true;
                 } else if(totalDamage > damageThreshhold){
                     conditionReduction = 2;
-                    resultFlavor = "An additional step was taken down the condition track due to Stun Damage."
+                    resultFlavor += "An additional step was taken down the condition track due to Stun Damage. "
                 }
             } else {
                 totalDamage = 0;
