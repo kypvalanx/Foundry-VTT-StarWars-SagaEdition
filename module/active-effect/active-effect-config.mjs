@@ -3,9 +3,7 @@ import {
     _adjustPropertyBySpan,
     onChangeControl, _onLinkControl,
     onSpanTextInput,
-    changeCheckbox,
-    changeText,
-    onToggle, changeSelect
+    onToggle
 } from "../common/listeners.mjs";
 
 /**

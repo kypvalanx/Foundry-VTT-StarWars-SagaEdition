@@ -1,17 +1,11 @@
-import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 /**
  * Extend the basic ItemSheet with some very simple modifications
  * @extends {ItemSheet}
  */
-import {getParentByHTMLClass, linkEffects, onCollapseToggle, toChat, toNumber} from "../common/util.mjs";
+import {getParentByHTMLClass, onCollapseToggle, toChat, toNumber} from "../common/util.mjs";
 import {
-    _adjustPropertyBySpan,
-    changeCheckbox,
-    changeSelect,
-    changeText,
     onChangeControl,
     onEffectControl,
-    onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
 
