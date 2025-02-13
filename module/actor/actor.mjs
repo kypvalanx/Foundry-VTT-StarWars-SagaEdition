@@ -120,6 +120,16 @@ function getGridSizeFromSize(size) {
     }
 }
 
+function bypassShields(damageTypes) {
+    // if(damageTypes.includes("Lightsabers")){
+    //     return false;
+    // }
+    if(!damageTypes.includes("Energy") && !damageTypes.includes("Energy (Ion)")){
+        return true;
+    }
+    return false;
+}
+
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -882,7 +892,7 @@ export class SWSEActor extends Actor {
     }
 
     get crew() {
-            return this.system.vehicle.crew
+            return this.system.vehicle?.crew || 0;
     }
 
     /**
@@ -1620,7 +1630,7 @@ export class SWSEActor extends Actor {
         const damageTypes = options.damageType.split(COMMMA_LIST);
 
         let resultFlavor = "";
-        if (!options.skipShields) {
+        if (!options.skipShields && !bypassShields(damageTypes)) {
             let shields = this.system.shields;
             let shieldValue = shields.value;
             if (shields.active && shieldValue > 0) {
@@ -3326,7 +3336,7 @@ export class SWSEActor extends Actor {
         SWSEActor.removeChange(this, undefined, false, "vehicleBaseType")
 
         const data = {};
-        const changes = item.system.changes || item.system.attributes ? Object.values(item.system.attributes) : [];
+        const changes = item.system.changes || Object.values(item.system.attributes || {});
         for (const change of changes) {
                 change.source = "vehicleBaseType"
                 switch (change.key) {
@@ -3369,7 +3379,7 @@ export class SWSEActor extends Actor {
                         data['system.vehicle.passengers'] = change.value;
                         break;
                     case "cargoCapacity":
-                        data['system.vehicle.cargoCapacity.value'] = change.value;
+                        data['system.vehicle.cargoCapacity.capacity'] = change.value;
                         break;
                     case "consumables":
                         data['system.vehicle.consumables'] = change.value;
