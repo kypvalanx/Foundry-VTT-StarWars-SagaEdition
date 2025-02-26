@@ -70,7 +70,7 @@ export class SWSEItem extends Item {
     }
 
     get hasAmmunition(){
-        return getInheritableAttribute({entity: this, attributeKey:"ammo", reduce:"COUNT"}) > 0;
+        return this.system.changes.filter(c => c.key === "ammo").length > 0;
     }
 
     updateLegacyItem() {
