@@ -149,7 +149,7 @@ function getChangesFromLoadedAmmunition(document) {
             if(Array.isArray(ammo.queue) && ammo.queue[0]){
                 let item = document.parent.items.get(ammo.queue[0])
                 if(item){
-                    changes.push(...item.changes)
+                    changes.push(...item.changes.filter(change => !['actsAs'].includes(change.key)))
                 }
             }
         }
