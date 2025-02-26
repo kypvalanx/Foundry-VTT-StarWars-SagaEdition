@@ -333,8 +333,7 @@ export class SWSEItem extends Item {
         let prefix = getInheritableAttribute({
             entity: item,
             attributeKey: "prefix",
-            reduce: "VALUES",
-            attributeFilter: attr => attr.source !== id
+            reduce: "VALUES"
         }).join(" ");
 
         if (prefix) {
@@ -344,8 +343,7 @@ export class SWSEItem extends Item {
         let suffix = getInheritableAttribute({
             entity: item,
             attributeKey: "suffix",
-            reduce: "VALUES",
-            attributeFilter: attr => attr.source !== id
+            reduce: "VALUES"
         }).join(" ");
 
         if (suffix) {
@@ -1308,18 +1306,21 @@ export class SWSEItem extends Item {
         return false;
     }
 
-    addChange(attribute) {
-        let data = {};
-        let changes = this.system.changes
-        let chanceIndex = 0;
-        while (changes[chanceIndex]) {
-            chanceIndex++;
-        }
+    async addChange(change) {
+        await this.addChanges([change])
+    }
 
-        data.system = {};
-        data.system.changes = changes;
-        data.system.changes[chanceIndex] = attribute;
-        this.safeUpdate(data);
+    async addChanges(newChanges){
+        let changes = this.system.changes
+        let emptyIndex = 0;
+
+        for (const newChange of newChanges) {
+            while (changes[emptyIndex]) {
+                emptyIndex++;
+            }
+            changes[emptyIndex] = newChange;
+        }
+        await this.safeUpdate({'system.changes': changes});
     }
 
     get canStripAutoFire() {
@@ -1351,12 +1352,11 @@ export class SWSEItem extends Item {
         this.safeUpdate({"system.quantity": quantity});
     }
 
-    decreaseQuantity() {
-
+    async decreaseQuantity(reduction = 1) {
         let current = this.system.quantity;
-
-        let quantity = Math.max(0, current - 1);
-        this.safeUpdate({"system.quantity": quantity});
+        let quantity = Math.max(0, current - reduction);
+        await this.safeUpdate({"system.quantity": quantity});
+        return {quantity};
     }
 
     toggleUse(key, value) {
@@ -1551,25 +1551,27 @@ export class SWSEItem extends Item {
         return item.effects?.filter(effect => !effect.flags.swse?.itemModifier) || []
     }
 
-    activateMode(mode, type, group, attributes) {
+    async activateMode(mode, type, group, attributes) {
         let modes = this.system.modes;
         let update = {};
 
         update.system = {};
         this._activateMode(modes, mode, update.system, type, group, attributes);
 
-        this.safeUpdate(update);
+        await this.safeUpdate(update);
     }
 
-
-
-    equip(type){
-
-        this.safeUpdate({'system.equipped': type});
+    async hide(hide = true) {
+        await this.safeUpdate({'system.hidden': hide})
     }
-    unequip(){
 
-        this.safeUpdate({'system.equipped': null});
+    async equip(type) {
+
+        await this.safeUpdate({'system.equipped': type});
+    }
+    async unequip() {
+
+        await this.safeUpdate({'system.equipped': null});
     }
 
     _activateMode(modes, mode, system, type, group, attributes) {

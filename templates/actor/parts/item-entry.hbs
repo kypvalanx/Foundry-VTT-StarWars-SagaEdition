@@ -9,7 +9,7 @@
             <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="48"
                                          height="48" alt=""/></div>
             <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">
-                {{item.finalName}}
+                {{item.finalName}}  {{#if item.system.hidden}} (Hidden){{/if}}
 
                 {{#if @root.options.debug}}
                     {{item.id}} - source: {{item.system.supplier.name}}

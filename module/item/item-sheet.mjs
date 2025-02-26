@@ -71,7 +71,7 @@ export class SWSEItemSheet extends ItemSheet {
         if (!this.isEditable) return;
 
         html.find(".toggle").on("click", onToggle.bind(this))
-        html.find('.tab').each((i, li) => {
+        html.find('.app.sheet.item').each((i, li) => {
             li.addEventListener("drop", (ev) => this._onDrop(ev));
         });
 
@@ -103,6 +103,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
         html.find('[data-action="reload"]').click(this._onReload.bind(this));
+        html.find('[data-action="eject"]').click(this._onEject.bind(this));
         html.find('[data-action="increase-ammo"]').click(this._onIncreaseAmmo.bind(this));
         html.find('[data-action="decrease-ammo"]').click(this._onDecreaseAmmo.bind(this));
 
@@ -186,23 +187,29 @@ export class SWSEItemSheet extends ItemSheet {
 
         toChat(content, this.object.parent, item.name)
     }
-    _onReload(event) {
+    async _onEject(event) {
         event.preventDefault();
         const a = event.currentTarget;
-        const ammoKey = a.dataset.ammoKey;
-        this.object.ammunition.reload(ammoKey);
+        const ammoType = a.dataset.ammoType;
+        await this.object.ammunition.eject(ammoType);
     }
-    _onIncreaseAmmo(event) {
+    async _onReload(event) {
         event.preventDefault();
         const a = event.currentTarget;
-        const ammoKey = a.dataset.ammoKey;
-        this.object.ammunition.increaseAmmunition(ammoKey);
+        const ammoType = a.dataset.ammoType;
+        await this.object.ammunition.reload(ammoType);
     }
-    _onDecreaseAmmo(event) {
+    async _onIncreaseAmmo(event) {
         event.preventDefault();
         const a = event.currentTarget;
-        const ammoKey = a.dataset.ammoKey;
-        this.object.ammunition.decreaseAmmunition(ammoKey);
+        const ammoType = a.dataset.ammoType;
+        await this.object.ammunition.increaseAmmunition(ammoType);
+    }
+    async _onDecreaseAmmo(event) {
+        event.preventDefault();
+        const a = event.currentTarget;
+        const ammoType = a.dataset.ammoType;
+        await this.object.ammunition.decreaseAmmunition(ammoType);
     }
 
 

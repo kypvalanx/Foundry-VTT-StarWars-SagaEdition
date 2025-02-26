@@ -43,6 +43,7 @@ import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
+import {isAppropriateAmmo} from "../item/ammunitionDelegate.mjs";
 
 function mergeColor(colors) {
     if(colors.length === 0){
@@ -130,6 +131,8 @@ function bypassShields(damageTypes) {
     return false;
 }
 
+
+
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -202,11 +205,17 @@ export class SWSEActor extends Actor {
         this.reset()
 
     }
+    getAvailableAmmunition(type) {
+        return this.items.filter(item => {
+            return isAppropriateAmmo(item, type) && !item.system?.hide ;
+        });
+    }
+    async loadAmmo(ammoItem, quantity = 1) {
 
-    useAmmunition(type) {
-        let item = this.items.find(i => i.name === type);
-        if (item && item.system.quantity > 0) {
-            item.decreaseQuantity();
+
+        //let item = this.items.find(i => i.name === type);
+        if (ammoItem && ammoItem.system.quantity > 0) {
+            await ammoItem.decreaseQuantity(quantity);
             return {fail: false}
         }
         return {fail: true};
@@ -989,6 +998,13 @@ export class SWSEActor extends Actor {
         return this.getCached("vehicleTemplate", () => {
             let vehicleBaseTypes = filterItemsByTypes(this.items.values(), ["vehicleBaseType"]);
             return (vehicleBaseTypes.length > 0 ? vehicleBaseTypes[0] : null);
+        })
+    }
+
+
+    get ammunition() {
+        return this.getCached("ammunition", () => {
+            return this.itemTypes['equipment'].filter(item => item.system.subtype === "Ammunition");
         })
     }
 

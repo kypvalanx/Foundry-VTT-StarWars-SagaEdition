@@ -161,6 +161,10 @@
   text-align: center;
 }
 
+.flex-gap-small {
+  gap: 3px;
+}
+
 .flex-between {
   -webkit-box-pack: justify;
   -ms-flex-pack: justify;
@@ -1289,6 +1293,16 @@
 
 .swse .highlighted-skill {
   background-color: darkcyan;
+}
+
+.swse .queued-ammo-empty, .swse .queued-ammo-full {
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--color-foreground);
+}
+
+.swse .queued-ammo-full {
+  background: var(--color-foreground);
 }
 
 .swse .attribute {
