@@ -138,6 +138,26 @@ function isActiveEffect(effect, document) {
     return effect.flags.swse?.itemModifier || effect.disabled === false;
 }
 
+function getChangesFromLoadedAmmunition(document) {
+    if (!document.hasAmmunition) {
+        return [];
+    }
+
+    let changes = [];
+    Object.values(document.system.ammunition).forEach(ammo => {
+        if(typeof ammo === 'object'){
+            if(Array.isArray(ammo.queue) && ammo.queue[0]){
+                let item = document.parent.items.get(ammo.queue[0])
+                if(item){
+                    changes.push(...item.changes)
+                }
+            }
+        }
+    })
+
+    return changes;
+}
+
 function getChangesFromDocument(document, data) {
     let fn = () => {
         let allAttributes = [];
@@ -147,6 +167,7 @@ function getChangesFromDocument(document, data) {
 
         allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
         allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
+        allAttributes.push(...getChangesFromLoadedAmmunition(document))
         return allAttributes;
     };
 
