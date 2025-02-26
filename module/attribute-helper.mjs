@@ -139,7 +139,7 @@ function isActiveEffect(effect, document) {
 }
 
 function getChangesFromLoadedAmmunition(document) {
-    if (!document.hasAmmunition) {
+    if (!document.hasAmmunition || !document.system.ammunition) {
         return [];
     }
 
