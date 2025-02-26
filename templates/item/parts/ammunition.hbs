@@ -4,10 +4,17 @@
             {{ammo.type}}
             {{ammo.current}}/{{ammo.capacity}}
             <div class="flex-row">
-                <button type="button" data-action="increase-ammo" data-ammo-key="{{ammo.key}}">+</button>
-                <button type="button" data-action="decrease-ammo" data-ammo-key="{{ammo.key}}">-</button>
+                <button type="button" data-action="increase-ammo" data-ammo-type="{{ammo.type}}">+</button>
+                <button type="button" data-action="decrease-ammo" data-ammo-type="{{ammo.type}}">-</button>
             </div>
-            <button type="button" data-action="reload" data-ammo-key="{{ammo.key}}">reload</button>
+            <button type="button" data-action="reload" data-ammo-type="{{ammo.type}}">Reload</button>
+            <button type="button" data-action="eject" data-ammo-type="{{ammo.type}}">Eject Ammunition</button>
+        </div>
+        {{log ammo}}
+        <div class="flex flex-row flex-gap-small">
+            {{#each ammo.queue as |item id|}}
+                <div class="queued-ammo-{{#if item.empty}}empty{{else}}full{{/if}}" data-item-id="{{item.id}}" title="{{item.name}}"></div>
+            {{/each}}
         </div>
     {{/each}}
 {{/if}}

@@ -106,8 +106,8 @@ export class Attack {
         let s = JSON.stringify(value);
         return escape(s);
     }
-
-    reduceAmmunition(count = 1) {
+//TODO this should reduce the current value of ammo, when it reaches 0, set the hidden item to "expended"  maybe just a suffix.
+    async reduceAmmunition(count = 1) {
         if (!(this.item && this.item.hasAmmunition)) {
             return;
         }
@@ -115,15 +115,21 @@ export class Attack {
         let ammoModifiers = getInheritableAttribute({entity: this.item, attributeKey: ["ammoUse", "ammoUseMultiplier"]})
 
         const baseCounts = [count];
-        baseCounts.push(...ammoModifiers.filter(m => m.key === "ammoUse").map(m=>parseInt(m.value)))
+        baseCounts.push(...ammoModifiers.filter(m => m.key === "ammoUse").map(m => parseInt(m.value)))
         count = Math.max(...baseCounts);
 
-        for(const mod of ammoModifiers.filter(m => m.type === "ammoUseMultiplier")){
+        for (const mod of ammoModifiers.filter(m => m.type === "ammoUseMultiplier")) {
             count *= parseInt(mod.value, 10)
         }
 
-        const ammo = this.item.ammunition.current[0];
-        this.item.ammunition.decreaseAmmunition(ammo.key, count);
+        for (const ammo of this.item.ammunition.current) {
+            let response = await this.item.ammunition.decreaseAmmunition(ammo.type, count);
+
+            if (response.remaining === 0) {
+
+                await this.item.ammunition.ejectSpentAmmunition(ammo.type)
+            }
+        }
     }
 
 

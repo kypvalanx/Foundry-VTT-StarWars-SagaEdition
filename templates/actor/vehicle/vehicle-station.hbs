@@ -14,8 +14,8 @@
     {{/if}}
 
     <div class="crewCover medium labeled-input">
-        <label for="crewCover">Crew Cover</label>
-        <select id="crewCover" name="system.crewCover.{{concat crew.type crew.slotNumber}}">
+        <label for="crewCover{{concat crew.type crew.slotNumber}}">Crew Cover</label>
+        <select id="crewCover{{concat crew.type crew.slotNumber}}" name="system.crewCover.{{concat crew.type crew.slotNumber}}">
             {{#select crew.cover}}
                 <option value="None">None</option>
                 <option value="+5 Cover Bonus">+5 Cover Bonus</option>

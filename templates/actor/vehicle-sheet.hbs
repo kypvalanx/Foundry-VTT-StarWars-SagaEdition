@@ -129,6 +129,7 @@
                 <div class="grid-2col">
                     <div>
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="ammunition" label="Ammunition" items=actor.ammunition draggable=true delete="always" quantity=true}}
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true delete="always"}}
                     </div>
                     <div>
