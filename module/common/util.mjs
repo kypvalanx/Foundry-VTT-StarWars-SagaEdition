@@ -1159,7 +1159,8 @@ export function inheritableItems(actor, options={}) {
             possibleInheritableItems = possibleInheritableItems.filter(possible => {
                 const prerequisiteResponse = meetsPrerequisites(actor, possible.system.prerequisite, {
                     embeddedItemOverride: actualInheritable,
-                    existingTraitPrerequisite: possible.type === "trait"
+                    existingTraitPrerequisite: possible.type === "trait",
+                    isLoad: true
                 });
                 if (!prerequisiteResponse.doesFail) {
                     actualInheritable.push(possible);
