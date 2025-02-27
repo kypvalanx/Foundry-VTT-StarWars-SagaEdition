@@ -1210,6 +1210,12 @@ export class SWSEActor extends Actor {
             path: "system.ignorePrerequisites",
             label: "Ignore Prerequisites",
             value: this.system.ignorePrerequisites
+        });
+        this.system.settings.push({
+            type: "boolean",
+            path: "system.ignorePrerequisitesOnDrop",
+            label: "Ignore Prerequisites when adding new Items",
+            value: this.system.ignorePrerequisites
         })
         if(this.type === "character"){
             this.system.settings.push({
@@ -3096,7 +3102,7 @@ export class SWSEActor extends Actor {
             equipType = newEquipType;
         }
         if (!!options.offerOverride) {
-            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
+            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite, {isAdd: true});
             if (meetsPrereqs.doesFail) {
                 await new Dialog({
                     title: "You Don't Meet the Prerequisites!",
@@ -3116,7 +3122,7 @@ export class SWSEActor extends Actor {
                 return;
             }
         } else if (!options.skipPrerequisite) {
-            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite);
+            let meetsPrereqs = meetsPrerequisites(this, item.system.prerequisite, {isAdd: true});
             if (meetsPrereqs.doesFail) {
                 new Dialog({
                     title: "You Don't Meet the Prerequisites!",

@@ -348,7 +348,7 @@ const handlePrerequisites = async (context) => {
     if (EQUIPABLE_TYPES.includes(context.entity.type)) {
         return true;
     }
-    let meetsPrereqs = meetsPrerequisites(context.actor, context.entity.system.prerequisite);
+    let meetsPrereqs = meetsPrerequisites(context.actor, context.entity.system.prerequisite, {isLoad: true});
     if (!meetsPrereqs.doesFail) {
         if (meetsPrereqs.failureList.length > 0) {
             suppressibleDialog.call(context.actor, context.entity,
