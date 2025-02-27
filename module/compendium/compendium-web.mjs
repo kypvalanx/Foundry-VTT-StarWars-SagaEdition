@@ -111,7 +111,7 @@ export class CompendiumWeb extends Application {
             mutation: (value) => {
                 return (index) => {
                     const actor = game.actors.get(value)
-                    index.hide ||= !(meetsPrerequisites(actor, index.prerequisite)).doesFail;
+                    index.hide ||= !(meetsPrerequisites(actor, index.prerequisite, {isAdd: true})).doesFail;
 
                     for (const item of actor.items) {
                         if(item.name === index.name){
