@@ -545,7 +545,7 @@ function meetsPrerequisite(prereq, target, options) {
 export function meetsPrerequisites(target, prereqs, options = {}) {
     //TODO add links to failures to open up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
-    if (!prereqs || (target.system.ignorePrerequisites && options.isAdd) || options.skipPrerequisite || options.isUpload) {
+    if (!prereqs || (target.system.ignorePrerequisites && options.isLoad)|| (target.system.ignorePrerequisitesOnDrop && options.isAdd) || options.skipPrerequisite || options.isUpload) {
         return {doesFail: false, failureList: [], successList: []};
     }
     if (!target) {

@@ -201,11 +201,11 @@ function getValues(values, data, entities) {
         if (!parent) {
             return true;
         }
-        if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey}).doesFail) {
+        if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey, isLoad: true}).doesFail) {
             return false;
         }
 
-        return !meetsPrerequisites(data.entity, attr.prerequisite).doesFail
+        return !meetsPrerequisites(data.entity, attr.prerequisite, {isLoad: true}).doesFail
     });
 }
 
@@ -260,7 +260,7 @@ export function getInheritableAttribute(data = {}) {
 
     if (data.entity.type === "character" || data.entity.type === "npc") {
         values = values
-            .filter(value => !!value && !meetsPrerequisites(data.entity, value.parentPrerequisite).doesFail)
+            .filter(value => !!value && !meetsPrerequisites(data.entity, value.parentPrerequisite, {isLoad: true}).doesFail)
     }
 
     // let overrides = values.filter(attr => attr && attr.override)
