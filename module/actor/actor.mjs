@@ -44,6 +44,7 @@ import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
 import {isAppropriateAmmo} from "../item/ammunitionDelegate.mjs";
+import {WeightDelegate} from "./weightDelegate.mjs";
 
 function mergeColor(colors) {
     if(colors.length === 0){
@@ -132,7 +133,6 @@ function bypassShields(damageTypes) {
 }
 
 
-
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -209,16 +209,6 @@ export class SWSEActor extends Actor {
         return this.items.filter(item => {
             return isAppropriateAmmo(item, type) && !item.system?.hide ;
         });
-    }
-    async loadAmmo(ammoItem, quantity = 1) {
-
-
-        //let item = this.items.find(i => i.name === type);
-        if (ammoItem && ammoItem.system.quantity > 0) {
-            await ammoItem.decreaseQuantity(quantity);
-            return {fail: false}
-        }
-        return {fail: true};
     }
 
     getCached(key, fn) {
@@ -400,8 +390,8 @@ export class SWSEActor extends Actor {
         //generateAttributes(this);//TODO, make this lazy
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
+        this.weight = new WeightDelegate(this);
 
-//        generateSkills(this, {groupedSkillMap: getGroupedSkillMap()})
 
         if (this.type === 'character') this._prepareCharacterData(system);
         //if (this.type === 'npc') this._prepareCharacterData(system);
@@ -1102,7 +1092,7 @@ export class SWSEActor extends Actor {
     }
 
     get traits() {
-        return this.itemTypes["trait"].sort(ALPHA_FINAL_NAME);
+        return filterItemsByTypes(inheritableItems(this), ["trait"]).sort(ALPHA_FINAL_NAME);
     }
 
     get talents() {
@@ -2034,7 +2024,7 @@ export class SWSEActor extends Actor {
     get inventoryItems() {
         return this.getCached("inventoryItems", () => {
             const inventoryItems = [];
-            for (const type of ['weapon', 'armor', 'equipment']) {
+            for (const type of ['weapon', 'armor', 'equipment', 'vehicleSystem', 'droid system']) {
                 inventoryItems.push(...this.itemTypes[type])
             }
             return inventoryItems.filter(item => !item.system.hasItemOwner);
@@ -2943,6 +2933,7 @@ export class SWSEActor extends Actor {
      *
      * @param provided
      * @return {Promise<void>}
+     * TODO is this being used?
      */
     async addProvided(provided){
         const provideTypes = ['FEAT', 'TALENT']
@@ -3171,70 +3162,7 @@ export class SWSEActor extends Actor {
 
 
 
-    get weight() {
-        let fn = () => {
-            const resolvedSize = sizeArray[getResolvedSize(this)];
-            let costFactor = DROID_COST_FACTOR[resolvedSize]
-            let sum = 0;
-            for (let item of this.items.values()) {
-                if (!!item.system.weight) {
-                    sum += resolveWeight(item.system.weight, item.system.quantity, costFactor, this)
-                }
-            }
-            return sum;
-        }
 
-        return this.getCached("weight", fn)
-    }
-
-    get carriedWeight() {
-        let fn = () => {
-        const resolvedSize = sizeArray[getResolvedSize(this)];
-        let costFactor = DROID_COST_FACTOR[resolvedSize]
-        let sum = 0;
-        for (let item of this.items.values()) {
-            let weight = getInheritableAttribute({entity: item, attributeKey: "weight", reduce: "SUM"})
-            if (isNaN(weight)) {
-                weight = 0;
-            }
-            sum += resolveWeight(weight, item.system.quantity, costFactor, this)
-        }
-        return sum;
-        }
-        //
-        return this.getCached("carriedWeight", fn)
-    }
-
-
-    applyStandardCarryCapacityModifiers(number) {
-        const multipliers = getInheritableAttribute({entity: this, attributeKey: "carryCapacityMultiplier", reduce: "VALUES"})
-
-        for (const multiplier of multipliers) {
-            const toks = multiplier.split(":")
-            for (let tok of toks) {
-                if(tok.startsWith("min")){
-                    let min = tok.split(" ")[1];
-                    number = Math.min(number, min)
-                } else {
-                    number = number * tok;
-                }
-            }
-        }
-
-        return number * SIZE_CARRY_CAPACITY_MODIFIER[sizeArray[getResolvedSize(this)]]
-    }
-    get heavyLoad() {
-        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total * 0.5, 2))
-
-    }
-
-    get strainCapacity() {
-        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total, 2) * 0.5)
-    }
-
-    get maximumCapacity() {
-        return this.applyStandardCarryCapacityModifiers(Math.pow(this.attributes.str.total, 2))
-    }
 
     updateLegacyActor() {
         let update = {};

@@ -189,9 +189,6 @@ export class AmmunitionDelegate {
 
             let result = await this.queueAmmunition(type, ammoItem);
 
-
-            //let result = await this.item.parent.loadAmmo(ammoItem);
-
             if (result.fail) {
                 //do something here with a popup
                 console.error("INSUFFICIENT AMMO")
