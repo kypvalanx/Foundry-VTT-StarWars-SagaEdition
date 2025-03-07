@@ -115,7 +115,7 @@
                                     class="fas fa-folder-plus"></i></a></label>
                         </h2>
                     </div>
-                    <div title="Strain Capacity: {{actor.strainCapacity}}; Maximum Capacity: {{actor.maximumCapacity}}">{{actor.carriedWeight}}/{{actor.heavyLoad}} kgs</div>
+                    <div title="Strain Capacity: {{actor.weight.strainCapacity}}; Maximum Capacity: {{actor.weight.maximumCapacity}}">{{actor.weight.carriedWeight}}/{{actor.weight.heavyLoad}} kgs</div>
                     <div class="grid-2col">
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="unequipped" label="Unequipped" items=actor.unequipped draggable=true quantity=true delete="always" acceptsTemplates=true}}
                         {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="equipped" label="Equipped" items=actor.equipped draggable=true quantity=true delete="always" acceptsTemplates=true}}

@@ -4,8 +4,9 @@
  */
 import {getParentByHTMLClass, onCollapseToggle, toChat, toNumber} from "../common/util.mjs";
 import {
+    _adjustPropertyBySpan,
     onChangeControl,
-    onEffectControl,
+    onEffectControl, onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
 
@@ -145,9 +146,9 @@ export class SWSEItemSheet extends ItemSheet {
         // html.find("span.text-box.direct").on("click", (event) => {
         //     onSpanTextInput.call(this, event, null, "text"); // this._adjustItemPropertyBySpan.bind(this)
         // });
-        // html.find("[data-action=direct-field]").on("click", (event) => {
-        //     onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
-        // });
+        html.find("[data-action=direct-field]").on("click", (event) => {
+            onSpanTextInput.call(this, event, _adjustPropertyBySpan.bind(this), "text"); // this._adjustItemPropertyBySpan.bind(this)
+        });
 
 
         // html.find("select").on("change", changeSelect.bind(this));

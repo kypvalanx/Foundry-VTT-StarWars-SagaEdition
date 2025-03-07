@@ -42,7 +42,6 @@ export async function poltgotBasicTests(quench) {
                 })
             });
         }
-        //, {displayName: "GENERATION: ACTOR SPOT CHECKS"}
     );
 
 }

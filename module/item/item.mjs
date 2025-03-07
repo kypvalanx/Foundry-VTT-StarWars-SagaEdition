@@ -25,7 +25,6 @@ export class SWSEItem extends Item {
     async _preUpdate(changed, options, user) {
         super._preUpdate(changed, options, user);
         changed.system = changed.system || {};
-        changed.system.displayName = SWSEItem.buildItemName(this);
         // if(changed.system?.dirty !== false){
         //     changed.system = changed.system || {};
         //     changed.system.dirty = true;
@@ -33,6 +32,9 @@ export class SWSEItem extends Item {
         //console.log(changed)
     }
 
+    get displayName(){
+        return SWSEItem.buildItemName(this)
+    }
 
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
@@ -51,14 +53,8 @@ export class SWSEItem extends Item {
         } else{
             this.system.changes = this.system.changes || []
         }
-        // if(this.updateLegacyItem()){
-        //     return;
-        // }
 
         this.cache = new SimpleCache();
-        if(this.system.displayName){
-            this.name = this.system.displayName;
-        }
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
@@ -73,54 +69,6 @@ export class SWSEItem extends Item {
         return this.system.changes.filter(c => c.key === "ammo").length > 0;
     }
 
-    updateLegacyItem() {
-        if(!this.canUserModify(game.user, 'update')){
-            return;
-        }
-        let update = {};
-        let activeEffects = [];
-        const changes = this.system.changes;
-
-        if (this.system.attributes) {
-            for (let change of Object.values(this.system.attributes)) {
-                if (change) {
-                    changes.push(change);
-                }
-            }
-            update['system.changes'] = changes;
-            update['system.attributes'] = null;
-        }
-        if (this.system.modes) {
-            let modes = Array.isArray(this.system.modes) ? this.system.modes : Object.values(this.system.modes || {})
-            if(modes){
-                update["system.modes"] = null;
-            }
-
-            if (modes.length > 0) {
-                activeEffects = modes.map(mode => this.createActiveEffectFromMode(mode))
-                //this.safeUpdate(data).then(() => this.createEmbeddedDocuments("ActiveEffect", activeEffects))
-            }
-        }
-        this.system.items?.forEach(id => {
-            let item = this.parent.items.get(id)
-            if (item) {
-                this.addItemModificationEffectFromItem(item)
-                this.item?.revokeOwnership(item)
-            }
-        })
-        convertOverrideToMode(changes, update);
-
-        let response = false;
-        if(Object.keys(update).length>0){
-             this.safeUpdate(update)
-            response = true
-        }
-        if(activeEffects && activeEffects.length>0){
-            this.createEmbeddedDocuments("ActiveEffect", activeEffects)
-            response = true
-        }
-        return response;
-    }
 
     canUserModify(user, action, data){
         let canModify = super.canUserModify(user, action, data);
@@ -136,10 +84,7 @@ export class SWSEItem extends Item {
     }
 
     get changes() {
-        const changes = []
-        changes.push(...this.system.changes);
-        //changes.push(...Object.values(this.system.attributes || {}).map(attr => createChangeFromAttribute(attr)))
-        return changes;
+        return this.system.changes;
     }
 
     updateOrAddChange(change){
@@ -406,14 +351,6 @@ export class SWSEItem extends Item {
 
         return sizeIndex + sizeBonus;
     }
-
-    // get baseName() {
-    //     return this.system.baseName ?? null;
-    // }
-
-    // get displayName(){
-    //     return SWSEItem.buildItemName(this);
-    // }
 
     get sizeMod() {
 
@@ -1021,9 +958,6 @@ export class SWSEItem extends Item {
         }
         this.system.selectedChoices = this.system.selectedChoices || [];
         this.system.selectedChoices.push(choice);
-
-
-        this.system.displayName = SWSEItem.buildItemName(this);
     }
 
     async setPayload(payload, payloadString) {
@@ -1068,9 +1002,7 @@ export class SWSEItem extends Item {
             return toks.length === 1 || toks[1] === payload;
         }).map(provider => provider.split(":")[0]) || [];
 
-        this.system.choices = [];
-
-        this.system.displayName = SWSEItem.buildItemName(this);
+        this.system.choices = []; //TODO ??
     }
 
 
