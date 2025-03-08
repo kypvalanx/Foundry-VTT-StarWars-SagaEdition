@@ -232,6 +232,7 @@ export class AmmunitionDelegate {
     }
 
     #buildQueue(queue, queueCapacity) {
+        if(!queue) return [];
         let generatedQueue = [];
         queueCapacity = Math.max(queueCapacity, 1)
         for (let i = 0; i < queueCapacity; i++) {
