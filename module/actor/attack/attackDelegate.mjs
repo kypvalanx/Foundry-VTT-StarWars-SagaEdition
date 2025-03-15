@@ -94,7 +94,7 @@ export class AttackDelegate {
      *
      * @param event
      * @param context
-     * @returns {Promise<void>}
+     * @returns {Promise<void>} TODO this should return an ACTIVEATTACK or create a macro for an ACTIVEATTACK
      */
      async createAttackDialog(event, context) {
         const attacksFromContext = getAttacksFromContext(context);
@@ -108,8 +108,36 @@ export class AttackDelegate {
             title: getAttackWindowTitle(context),
             content: await this.getAttackDialogueContent(attackCount, attacksFromContext, doubleAttack, tripleAttack),
             buttons: {
-                attack: getAttackButton(dualWeaponModifier, context.availableHands, multipleAttackModifiers),
-                saveMacro: getSaveMacroButton(dualWeaponModifier, this.actor, multipleAttackModifiers)
+                attack: {
+                    label: "Attack",
+                    callback: async (html) => {
+                        let attacks = getActiveAttacks(html, dualWeaponModifier, multipleAttackModifiers);
+                        let data = {
+                            attacks,
+                            actorId: this.actor.id,
+                            hands: getHandsFromAttackOptions(html),
+                            availableHands: context.availableHands,
+                            rollMode: undefined
+                        };
+                        await createAttackChatMessage(data)
+                    }
+                },
+                saveMacro: {
+                    label: "Save Macro",
+                    callback: async (html) => {
+                        let attacks = getActiveAttacks(html, dualWeaponModifier, multipleAttackModifiers);
+
+                        let data = {
+                            attacks,
+                            actorId: this.actor.id,
+                            hands: getHandsFromAttackOptions(html),
+                            availableHands: context.availableHands,
+                            rollMode: undefined
+                        };
+
+                        await createAttackMacro(data)
+                    }
+                }
             },
             default: "attack",
             render: (html) => {
@@ -273,55 +301,19 @@ function getAttackWindowTitle(context) {
     return "Single Attack";
 }
 
-function getAttackButton(dualWeaponModifier, availableHands, multipleAttackModifiers) {
-    return {
-        label: "Attack",
-        callback: (html) => {
-            let attacks = [];
-            let attackBlocks = html.find(".attack.panel");
-            let selects = html.find("select.attack-id");
-            let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
-            let damageMods = [];
-            for (let attackBlock of attackBlocks) {
-                let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
-                if (!!attackFromBlock) {
-                    attacks.push(attackFromBlock);
-                }
-            }
-
-            for (const attack of attacks) {
-                attack.reduceAmmunition()
-            }
-            const hands = getHandsFromAttackOptions(html);
-            createAttackChatMessage(attacks, undefined, hands, availableHands).then(() => {
-            });
+function getActiveAttacks(html, dualWeaponModifier, multipleAttackModifiers) {
+    let attacks = [];
+    let attackBlocks = html.find(".attack.panel");
+    let selects = html.find("select.attack-id");
+    let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
+    let damageMods = [];
+    for (let attackBlock of attackBlocks) {
+        let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
+        if (!!attackFromBlock) {
+            attacks.push(attackFromBlock);
         }
-    };
-}
-
-function getSaveMacroButton(dualWeaponModifier, actor, multipleAttackModifiers) {
-    return {
-        label: "Save Macro",
-        callback: (html) => {
-            let attacks = [];
-            let attackBlocks = html.find(".attack.panel");
-            let selects = html.find("select.attack-id")
-            let attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
-            let damageMods = [];
-            for (let attackBlock of attackBlocks) {
-                let attackFromBlock = createAttackFromAttackBlock(attackBlock, attackMods, damageMods);
-                if (!!attackFromBlock) {
-                    attacks.push(attackFromBlock);
-                }
-            }
-            let data = {};
-            data.attacks = attacks;
-            data.actorId = actor._id;
-
-            createAttackMacro(data).then(() => {
-            });
-        }
-    };
+    }
+    return attacks;
 }
 
 function modifyForFullAttack(doubleAttack, actor, tripleAttack, availableAttacks, dualWeaponModifier) {
@@ -403,9 +395,12 @@ function attackDialogue(context) {
  * @returns {Promise<void>}
  */
 export async function makeAttack(context) {
-    const actorId = context.attacks[0].actorId;
-    const actor = getActorFromId(actorId)
-    actor.attack.createAttackDialog(null, context);
+    //const actorId = context.actorId || context.attacks[0].actorId;
+    //const actor = getActorFromId(actorId)
+    context.attacks = context.attacks.map(a => Attack.fromJSON(a))
+
+    await createAttackChatMessage(context)
+    //actor.attack.createAttackDialog(null, context);
 }
 
 function getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers) {
@@ -706,6 +701,8 @@ async function resolveAttack(attack, targetActors) {
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
 
+    await attack.reduceAmmunition()
+
     let targets = targetActors.map(actor => {
         let reflexDefense = actor.defense.reflex.total;
         let isMiss = attack.isMiss(attackRollResult, reflexDefense)
@@ -761,16 +758,21 @@ async function resolveAttack(attack, targetActors) {
     };
 }
 
-export async function createAttackChatMessage(attacks, rollMode, hands, availableHands) {
+function getTargetedActors() {
     let targetTokens = game.user.targets
     let targetActors = [];
     for (let targetToken of targetTokens.values()) {
-        let actorId = targetToken.document.actorId
-        let actor = game.actors.get(actorId)
+        let actor = targetToken.actor
         if (actor) {
             targetActors.push(actor)
+        } else {
+            console.warn(`Could not find actor for ${targetToken.name}`)
         }
     }
+    return targetActors;
+}
+
+async function resolveAttacks(attacks, targetActors) {
     let attackRows = [];
     let rolls = [];
     let rollOrder = 1;
@@ -784,7 +786,48 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
         attackRows.push(await generateAttackCard([resolvedAttack], attack))
     }
 
-    let content = `${attackRows.join("<br>")}`;
+    return {rolls, content: `${attackRows.join("<br>")}`};
+}
+
+function modes(sounds) {
+    let largest = 0;
+    let soundMap = new Map();
+    for (let sound of sounds){
+        soundMap.set(sound, sound.has(sound) ? soundMap.get(sound) + 1 : 1) ;
+        largest = Math.max(largest, soundMap[sound]);
+    }
+
+    let response = [];
+
+    for (let entry of soundMap.entries()) {
+        if(entry.value === largest){
+            response.push(entry.value)
+        }
+    }
+
+    return response;
+}
+
+function getSound(attacks) {
+    let sounds = attacks.map(attack => attack.sound).filter(sound => !!sound)
+    if(sounds.length > 0){
+        let mostCommon = modes(sounds)
+        if(mostCommon.length > 0){
+            return mostCommon[0];
+        }
+    }
+
+    return CONFIG.sounds.dice;
+}
+
+export async function createAttackChatMessage(data) {
+    const attacks = data.attacks;
+    const rollMode = data.rollMode;
+    const hands = data.hands;
+    const availableHands = data.availableHands;
+
+    let targetActors = getTargetedActors();
+    let {rolls, content} = await resolveAttacks(attacks, targetActors);
 
     if(hands > availableHands){
         content = `<div class="warning">${hands} hands used out of a possible ${availableHands}</div><br>` + content;
@@ -810,7 +853,7 @@ export async function createAttackChatMessage(attacks, rollMode, hands, availabl
         speaker: speaker,
         flavor: flavor,
         content,
-        sound: CONFIG.sounds.dice,
+        sound: getSound(attacks),
         roll,
         rolls
     }
