@@ -40,7 +40,8 @@ const isPermittedForActorType = (actor, type) => {
             "upgrade",
             "vehicleBaseType",
             "vehicleSystem",
-            "template"].includes(type)
+            "template",
+        "trait"].includes(type)
     }
 
     return false;
