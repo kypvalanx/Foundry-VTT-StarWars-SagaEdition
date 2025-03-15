@@ -126,7 +126,6 @@ export class Attack {
             let response = await this.item.ammunition.decreaseAmmunition(ammo.type, count);
 
             if (response.remaining === 0) {
-
                 await this.item.ammunition.ejectSpentAmmunition(ammo.type)
             }
         }
