@@ -106,25 +106,21 @@ export class AmmunitionDelegate {
         return Math.max(1, ammoCapacity);
     }
 
-    unQueueAmmunition(key, item) {
-
-        //if so, attempt to add to the queue and show on parent sheet.
-    }
-
     async ejectSpentAmmunition(type, force = true) {
         const ammunition = this.getAmmunition(type);
 
-        if (force || ammunition.value === 0) {
-            let queue = ammunition.queue
-            if (queue.length > 0 && queue[0]) {
-                let spentAmmo = this.item.parent.items.get(queue[0])
-                spentAmmo.hide(false)
-                await spentAmmo.addChanges([{key: "suffix", value: "(Spent)"},
-                    {key: "spent", value: true}])
-
-                await this.setAmmunition(type, {queue: queue.filter(id => id !== queue[0]), value:0});
-            }
+        let queue = ammunition.queue || []
+        if (!((force || ammunition.value === 0) && queue.length > 0 && queue[0])) {
+            return;
         }
+        let spentAmmo = this.item.parent.items.get(queue[0])
+        spentAmmo.hide(false)
+        await spentAmmo.addChanges([
+            {key: "suffix", value: "(Spent)"},
+            {key: "spent", value: true}
+        ])
+        const capacity = queue.length > 1 ? this.getCapacity(type) : 0;
+        await this.setAmmunition(type, {queue: queue.filter(id => id !== queue[0]), value: capacity});
     }
 
     async decreaseAmmunition(type, count = 1) {
