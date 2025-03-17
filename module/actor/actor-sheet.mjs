@@ -19,7 +19,7 @@ import {CompendiumWeb} from "../compendium/compendium-web.mjs";
 import {buildRollContent, SWSEActor} from "./actor.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {SWSEItemSheet} from "../item/item-sheet.mjs";
-import {onAmmunition} from "../item/ammunitionDelegate.mjs";
+import {onAmmunition} from "../item/ammunition/ammunitionDelegate.mjs";
 
 // noinspection JSClosureCompilerSyntax
 

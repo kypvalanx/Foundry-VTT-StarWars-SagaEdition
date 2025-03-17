@@ -43,7 +43,7 @@ import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
-import {isAppropriateAmmo} from "../item/ammunitionDelegate.mjs";
+import {isAppropriateAmmo} from "../item/ammunition/ammunitionDelegate.mjs";
 import {WeightDelegate} from "./weightDelegate.mjs";
 
 function mergeColor(colors) {

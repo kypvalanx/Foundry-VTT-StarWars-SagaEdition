@@ -9,7 +9,7 @@ import {
     onEffectControl, onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
-import {onAmmunition} from "./ammunitionDelegate.mjs";
+import {onAmmunition} from "./ammunition/ammunitionDelegate.mjs";
 
 
 

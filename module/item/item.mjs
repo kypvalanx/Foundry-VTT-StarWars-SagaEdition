@@ -4,7 +4,7 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
-import {AmmunitionDelegate} from "./ammunitionDelegate.mjs";
+import {AmmunitionDelegate} from "./ammunition/ammunitionDelegate.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveEntity} from "../compendium/compendium-util.mjs";
