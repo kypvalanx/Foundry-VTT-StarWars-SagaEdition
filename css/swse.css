@@ -55,10 +55,6 @@
   min-height: 25px;
 }
 
-.attack-block {
-  min-height: 225px;
-}
-
 .border-light {
   border: 1px solid var(--color-foreground);
 }
@@ -196,9 +192,9 @@
   flex-direction: row;
   -ms-flex-wrap: nowrap;
   flex-wrap: nowrap;
-  -webkit-box-pack: start;
-  -ms-flex-pack: start;
-  justify-content: flex-start;
+  -webkit-box-pack: justify;
+  -ms-flex-pack: justify;
+  justify-content: space-between;
 }
 
 .flex-row-reverse {
@@ -544,7 +540,7 @@
 
 .swse input[type=text], .swse input[type=number], .swse select, .swse div.input {
   padding-left: 6px;
-  height: 32px;
+  min-height: 32px;
   font-size: 1.25rem;
   border: 2px var(--color-foreground) solid;
   border-radius: 10px;
@@ -1118,7 +1114,7 @@
 .swse .attack-block {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 0fr);
   grid-column-gap: 9px;
   grid-row-gap: 1px;
 }
@@ -1131,14 +1127,6 @@
   grid-area: 1 / 4 / 2 / 7;
 }
 
-.swse .attack-block .attack-notes {
-  grid-area: 3 / 1 / 4 / 7;
-  white-space: nowrap;
-  overflow: hidden;
-  -o-text-overflow: ellipsis;
-  text-overflow: ellipsis;
-}
-
 .swse .attack-block .range {
   grid-area: 2 / 4 / 3 / 6;
 }
@@ -1149,36 +1137,6 @@
 
 .swse .attack-block .type {
   grid-area: 2 / 1 / 3 / 4;
-}
-
-.swse .attack-block .modes {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  grid-area: 4 / 1 / 5 / 7;
-}
-
-.swse .attack-block .modes .mode-group {
-  display: -webkit-box;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -ms-flex-direction: row;
-  flex-direction: row;
-  -ms-flex-wrap: wrap;
-  flex-wrap: wrap;
-  border: 1px solid #7a7971;
-}
-
-.swse .attack-block .modes .mode-group .mode-selector {
-  border: 1px solid #7a7971;
 }
 
 .swse .float-right-toggle-button {
@@ -1303,6 +1261,10 @@
 
 .swse .queued-ammo-full {
   background: var(--color-foreground);
+}
+
+.swse .ammunition-block {
+  width: 100px;
 }
 
 .swse .attribute {
