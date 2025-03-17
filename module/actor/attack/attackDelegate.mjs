@@ -701,8 +701,6 @@ async function resolveAttack(attack, targetActors) {
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
 
-    await attack.reduceAmmunition()
-
     let targets = targetActors.map(actor => {
         let reflexDefense = actor.defense.reflex.total;
         let isMiss = attack.isMiss(attackRollResult, reflexDefense)
@@ -744,7 +742,8 @@ async function resolveAttack(attack, targetActors) {
 
     let damage = await damageRoll.roll();
     let targetIds = targetActors.map(target => target.id);
-    return {
+
+    const response = {
         attack: attackRollResult,
         itemId: attack.itemId,
         attackRollFunction: attackRoll.formula,
@@ -756,6 +755,8 @@ async function resolveAttack(attack, targetActors) {
         fail,
         targets, targetIds
     };
+    await attack.reduceAmmunition()
+    return response;
 }
 
 function getTargetedActors() {

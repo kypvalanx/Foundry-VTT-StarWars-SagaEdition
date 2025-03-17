@@ -9,7 +9,7 @@
 
 
                 <div class="huge labeled-input">
-                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
+                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.next}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
                            placeholder="" disabled/>
                     <div class="toggle control" data-toggle-id="{{concat "attack-" id}}">
                         <a>
