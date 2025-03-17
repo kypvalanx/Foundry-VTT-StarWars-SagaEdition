@@ -18,6 +18,8 @@ import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
 import {buildRollContent, SWSEActor} from "./actor.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
+import {SWSEItemSheet} from "../item/item-sheet.mjs";
+import {onAmmunition} from "../item/ammunitionDelegate.mjs";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -67,6 +69,8 @@ function getNotesFromDataSet(dataset) {
     }
     return [];
 }
+
+
 
 /**
  * Extend the basic ActorSheet with some very simple modifications
@@ -280,7 +284,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
-        html.find('[data-action|="ammunition"]').click(this._onAmmunition.bind(this));
+        html.find('[data-action|="ammunition"]').click(onAmmunition.bind(this));
 
         //item actions
         html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
@@ -410,29 +414,7 @@ export class SWSEActorSheet extends ActorSheet {
         return follower;
     }
 
-    async _onAmmunition(event){
-        event.preventDefault();
-        const a = event.currentTarget;
-        const ammoType = a.dataset.ammoType;
-        const action = a.dataset.action;
-        const itemId = a.dataset.itemId;
-        let split = itemId.split(".");
-        const item = this.object.items.get(itemId) || this.object.items.get(split[split.length - 1]);
-        switch (action) {
-            case "ammunition-reload":
-                await item.ammunition.reload(ammoType);
-                break;
-            case "ammunition-eject":
-                await item.ammunition.eject(ammoType);
-                break;
-            case "ammunition-increase":
-                await item.ammunition.increaseAmmunition(ammoType);
-                break;
-            case "ammunition-decrease":
-                await item.ammunition.decreaseAmmunition(ammoType);
-                break;
-        }
-    }
+
 
 
     _performItemAction(event) {
