@@ -1,20 +1,20 @@
 {{#if ammunition}}
     {{#each ammunition.current as |ammo id|}}
-        <div>
+        {{log ammo}}
+        <div class="ammunition-block">
             {{ammo.type}}
             {{ammo.current}}/{{ammo.capacity}}
             <div class="flex-row">
-                <button type="button" data-action="increase-ammo" data-ammo-type="{{ammo.type}}">+</button>
-                <button type="button" data-action="decrease-ammo" data-ammo-type="{{ammo.type}}">-</button>
+                <button type="button" data-action="ammunition-increase" data-ammo-type="{{ammo.type}}" data-item-id="{{ammo.itemId}}">+</button>
+                <button type="button" data-action="ammunition-decrease" data-ammo-type="{{ammo.type}}" data-item-id="{{ammo.itemId}}">-</button>
             </div>
-            <button type="button" data-action="reload" data-ammo-type="{{ammo.type}}">Reload</button>
-            <button type="button" data-action="eject" data-ammo-type="{{ammo.type}}">Eject Ammunition</button>
-        </div>
-        {{log ammo}}
-        <div class="flex flex-row flex-gap-small">
-            {{#each ammo.queue as |item id|}}
-                <div class="queued-ammo-{{#if item.empty}}empty{{else}}full{{/if}}" data-item-id="{{item.id}}" title="{{item.name}}"></div>
-            {{/each}}
+            <button type="button" data-action="ammunition-reload" data-ammo-type="{{ammo.type}}" data-item-id="{{ammo.itemId}}">Reload</button>
+            <button type="button" data-action="ammunition-eject" data-ammo-type="{{ammo.type}}" data-item-id="{{ammo.itemId}}">Eject Ammunition</button>
+            <div class="flex flex-row flex-gap-small flex-wrap">
+                {{#each ammo.queue as |item id|}}
+                    <div class="queued-ammo-{{#if item.empty}}empty{{else}}full{{/if}}" data-item-id="{{item.id}}" title="{{item.name}}"></div>
+                {{/each}}
+            </div>
         </div>
     {{/each}}
 {{/if}}

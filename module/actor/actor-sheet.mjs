@@ -208,6 +208,12 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("div.attack").each((i, div) => {
             div.setAttribute("draggable", true);
             div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
+            //div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
+        });
+
+        html.find("button.attack").each((i, div) => {
+            //div.setAttribute("draggable", true);
+            //div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
             div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
         html.find("#fullAttack").on("click", () => this.object.attack.createAttackDialog(event, {type: "fullAttack"}));
@@ -274,7 +280,7 @@ export class SWSEActorSheet extends ActorSheet {
         html.find('[data-action="gender"]').on("click", event => this._selectGender(event, this));
         html.find('[data-action="recover"]').on("click", event => this.recover(event, this));
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
-        html.find('[data-action="reload"]').click(this._onReload.bind(this));
+        html.find('[data-action|="ammunition"]').click(this._onAmmunition.bind(this));
 
         //item actions
         html.find('[data-action="create-follower"]').click(this._onCreateFollower.bind(this));
@@ -375,11 +381,6 @@ export class SWSEActorSheet extends ActorSheet {
 
         const sourceItem = this.object.items.find(item => item._id === itemId);
 
-
-
-
-
-
         const follower = await SWSEActor.create({
             name: this.object.name + "'s Follower",
             type: "character",
@@ -389,34 +390,17 @@ export class SWSEActorSheet extends ActorSheet {
             }
         })
 
-
         const provided = getInheritableAttribute({entity: this.object, attributeKey: "followerProvides"})
-
-
-        //const providedChanges = [];
 
         provided.push(...getInheritableAttribute({entity: sourceItem, attributeKey: "followerCreationProvides"}))
 
-
         await follower.addProvided(provided)
-
-
-        // const trainedSkills = getInheritableAttribute({entity: sourceItem, attributeKey: "followerTrainedSkills", reduce:"VALUES"})
-        // for (const trainedSkill of trainedSkills) {
-        //     follower.addChange({key:"automaticTrainedSkill", value: trainedSkill})
-        // }
-
-        // const provides = getInheritableAttribute({entity: sourceItem, attributeKey: "followerProvides", reduce:"VALUES"})
-        // for (const provide of provides) {
-        //     follower.addChange({key:"provided", value: provide})
-        // }
 
         let followerTrait = (await follower.addItems({
             returnAdded: true, items: [
                 {name: "Follower", type: "trait", system: {changes: [{key: "follower", value: true}]}}
             ]
         }))[0];
-
 
         await this.object.addActorLink(follower, "follower", itemId, {skipReciprocal: true});
         await follower.addActorLink(this.object, "leader", followerTrait.id, {skipReciprocal: true});
@@ -426,16 +410,30 @@ export class SWSEActorSheet extends ActorSheet {
         return follower;
     }
 
-    _onReload(event) {
+    async _onAmmunition(event){
         event.preventDefault();
-        event.stopPropagation();
         const a = event.currentTarget;
-        const ammoKey = a.dataset.ammoKey;
+        const ammoType = a.dataset.ammoType;
+        const action = a.dataset.action;
         const itemId = a.dataset.itemId;
         let split = itemId.split(".");
         const item = this.object.items.get(itemId) || this.object.items.get(split[split.length - 1]);
-        item.ammunition.reload(ammoKey);
+        switch (action) {
+            case "ammunition-reload":
+                await item.ammunition.reload(ammoType);
+                break;
+            case "ammunition-eject":
+                await item.ammunition.eject(ammoType);
+                break;
+            case "ammunition-increase":
+                await item.ammunition.increaseAmmunition(ammoType);
+                break;
+            case "ammunition-decrease":
+                await item.ammunition.decreaseAmmunition(ammoType);
+                break;
+        }
     }
+
 
     _performItemAction(event) {
         const target = $(event.currentTarget)

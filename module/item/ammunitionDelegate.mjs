@@ -48,6 +48,7 @@ export class AmmunitionDelegate {
             ammunition.current = current.value || 0;
             ammunition.queueCapacity = this.getQueueCapacity(ammunition.type);
             ammunition.queue = this.#buildQueue(current.queue, ammunition.queueCapacity);
+            ammunition.itemId = this.item.id;
             ammoResponse.push(ammunition);
         }
 

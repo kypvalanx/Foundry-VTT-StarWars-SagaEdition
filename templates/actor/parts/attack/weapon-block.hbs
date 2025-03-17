@@ -9,46 +9,46 @@
 
 
                 <div class="huge labeled-input">
-                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} {{log ammo}}({{ammo.type}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
+                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
                            placeholder="" disabled/>
-                        <div class="toggle control" data-toggle-id="{{concat "attack-" id}}">
-                            <a>
-                                <i class="fas {{#if
-                                        (lookup toggles (concat "attack-" id))}}fa-minus{{else}}fa-plus{{/if}}"></i>
-                            </a>
-                        </div>
+                    <div class="toggle control" data-toggle-id="{{concat "attack-" id}}">
+                        <a>
+                            <i class="fas {{#if
+                                    (lookup toggles (concat "attack-" id))}}fa-minus{{else}}fa-plus{{/if}}"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="attack-block collapsible" style="display: {{#if
+            <button class="attack" type="button" data-attacks="[{{attack.toJSONString}}]">Attack</button>
+            <div class="collapsible" style="display: {{#if
                     (lookup toggles (concat "attack-" id))}}grid{{else}}none{{/if}}">
 
-                <div class="to-hit labeled-input"><label for="attack">Attack</label>
-                    <div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div>
+                <div class="attack-block">
+                    <div class="to-hit labeled-input"><label for="attack">Attack</label>
+                        <div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div>
+                    </div>
+                    <div class="damage labeled-input"><label for="damage">Damage</label>
+                        <div class="plain input">{{{attack.damageRoll.renderWeaponBlockFormulaHTML}}}</div>
+                    </div>
+                    <div class="range labeled-input"><label for="range">Range</label>
+                        <div class="plain input">{{attack.rangeDisplay}}</div>
+                    </div>
+                    <div class="critical-multiplier labeled-input"><label for="critical">Crit.</label>
+                        <div class="plain input">{{attack.critical}}</div>
+                    </div>
+                    <div class="type labeled-input"><label for="type">Type</label>
+                        <div class="plain input">{{attack.type}}</div>
+                    </div>
                 </div>
-                <div class="damage labeled-input"><label for="damage">Damage</label>
-                    <div class="plain input">{{{attack.damageRoll.renderWeaponBlockFormulaHTML}}}</div>
-                </div>
+
                 <div class="attack-notes labeled-input" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
                     <div class="plain input">{{{attack.notesHTML}}}</div>
                 </div>
-                <div class="range labeled-input"><label for="range">Range</label>
-                    <div class="plain input">{{attack.rangeDisplay}}</div>
-                </div>
-                <div class="critical-multiplier labeled-input"><label for="critical">Crit.</label>
-                    <div class="plain input">{{attack.critical}}</div>
-                </div>
-                <div class="type labeled-input"><label for="type">Type</label>
-                    <div class="plain input">{{attack.type}}</div>
-                </div>
-                <div class="modes">
-                    <div class="flex flex-col">
-                        <button type="button">Attack</button>
+
+                <div class="flex flex-row flex-wrap">
                         {{#if attack.hasAmmunition}}
-                            {{#each attack.ammunition.current as |ammo id|}}
-                        <button type="button" data-item-id="{{../attack.weaponId}}" data-action="reload" data-ammo-key="{{ammo.key}}">Reload {{type}}</button>
-                            {{/each}}
+                            {{> 'systems/swse/templates/item/parts/ammunition.hbs' ammunition=attack.ammunition}}
                         {{/if}}
-                    </div>
                     {{#each attack.modes as |mode id|}}
                         <div class="mode-selector mode-group editor" data-type="{{mode.type}}"
                              data-mode-path="{{mode.modePath}}"

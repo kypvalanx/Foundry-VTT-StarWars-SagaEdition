@@ -103,10 +103,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
-        html.find('[data-action="reload"]').click(this._onReload.bind(this));
-        html.find('[data-action="eject"]').click(this._onEject.bind(this));
-        html.find('[data-action="increase-ammo"]').click(this._onIncreaseAmmo.bind(this));
-        html.find('[data-action="decrease-ammo"]').click(this._onDecreaseAmmo.bind(this));
+        html.find('[data-action|="ammunition"]').click(this._onAmmunition.bind(this));
 
 
         //TODO switch to data action
@@ -188,29 +185,27 @@ export class SWSEItemSheet extends ItemSheet {
 
         toChat(content, this.object.parent, item.name)
     }
-    async _onEject(event) {
+
+
+    async _onAmmunition(event){
         event.preventDefault();
         const a = event.currentTarget;
         const ammoType = a.dataset.ammoType;
-        await this.object.ammunition.eject(ammoType);
-    }
-    async _onReload(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const ammoType = a.dataset.ammoType;
-        await this.object.ammunition.reload(ammoType);
-    }
-    async _onIncreaseAmmo(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const ammoType = a.dataset.ammoType;
-        await this.object.ammunition.increaseAmmunition(ammoType);
-    }
-    async _onDecreaseAmmo(event) {
-        event.preventDefault();
-        const a = event.currentTarget;
-        const ammoType = a.dataset.ammoType;
-        await this.object.ammunition.decreaseAmmunition(ammoType);
+        const action = a.dataset.action;
+        switch (action) {
+            case "reload":
+                await this.object.ammunition.reload(ammoType);
+                break;
+            case "eject":
+                await this.object.ammunition.eject(ammoType);
+                break;
+            case "increase-ammunition":
+                await this.object.ammunition.increaseAmmunition(ammoType);
+                break;
+            case "decrease-ammunition":
+                await this.object.ammunition.decreaseAmmunition(ammoType);
+                break;
+        }
     }
 
 
