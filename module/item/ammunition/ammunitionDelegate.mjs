@@ -1,5 +1,5 @@
-import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {SWSEItemSheet} from "./item-sheet.mjs";
+import {getInheritableAttribute} from "../../attribute-helper.mjs";
+import {SWSEItemSheet} from "../item-sheet.mjs";
 
 async function selectItemFromArray(items, dialog, options) {
     const select = "SELECT_ID";
