@@ -9,6 +9,9 @@ import {
     onEffectControl, onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
+import {onAmmunition} from "./ammunitionDelegate.mjs";
+
+
 
 export class SWSEItemSheet extends ItemSheet {
     constructor(...args) {
@@ -103,7 +106,7 @@ export class SWSEItemSheet extends ItemSheet {
         html.find('[data-action="prerequisite-control"]').click(this._onPrerequisiteControl.bind(this));
         html.find('[data-action="modifier-control"]').click(this._onModifierControl.bind(this));
         html.find('[data-action="effect-control"]').click(onEffectControl.bind(this));
-        html.find('[data-action|="ammunition"]').click(this._onAmmunition.bind(this));
+        html.find('[data-action|="ammunition"]').click(onAmmunition.bind(this));
 
 
         //TODO switch to data action
@@ -187,26 +190,7 @@ export class SWSEItemSheet extends ItemSheet {
     }
 
 
-    async _onAmmunition(event){
-        event.preventDefault();
-        const a = event.currentTarget;
-        const ammoType = a.dataset.ammoType;
-        const action = a.dataset.action;
-        switch (action) {
-            case "reload":
-                await this.object.ammunition.reload(ammoType);
-                break;
-            case "eject":
-                await this.object.ammunition.eject(ammoType);
-                break;
-            case "increase-ammunition":
-                await this.object.ammunition.increaseAmmunition(ammoType);
-                break;
-            case "decrease-ammunition":
-                await this.object.ammunition.decreaseAmmunition(ammoType);
-                break;
-        }
-    }
+
 
 
     /** @override */

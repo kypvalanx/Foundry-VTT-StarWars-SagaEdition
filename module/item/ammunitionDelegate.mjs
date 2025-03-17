@@ -1,4 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
+import {SWSEItemSheet} from "./item-sheet.mjs";
 
 async function selectItemFromArray(items, dialog, options) {
     const select = "SELECT_ID";
@@ -27,6 +28,37 @@ async function selectItemFromArray(items, dialog, options) {
     });
     dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
     return await Dialog.prompt(dialogConfig)
+}
+
+export async function onAmmunition(event){
+    event.preventDefault();
+    const a = event.currentTarget;
+    const ammoType = a.dataset.ammoType;
+    const action = a.dataset.action;
+    const itemId = a.dataset.itemId;
+    const item = ammunitionItem.call(this, itemId);
+    switch (action) {
+        case "ammunition-reload":
+            await item.ammunition.reload(ammoType);
+            break;
+        case "ammunition-eject":
+            await item.ammunition.eject(ammoType);
+            break;
+        case "ammunition-increase":
+            await item.ammunition.increaseAmmunition(ammoType);
+            break;
+        case "ammunition-decrease":
+            await item.ammunition.decreaseAmmunition(ammoType);
+            break;
+    }
+}
+
+function ammunitionItem(itemId) {
+    if(this instanceof SWSEItemSheet){
+        return this.object
+    }
+    let split = itemId.split(".");
+    return this.object.items.get(itemId) || this.object.items.get(split[split.length - 1]);
 }
 
 export class AmmunitionDelegate {
