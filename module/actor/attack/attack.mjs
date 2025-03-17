@@ -732,6 +732,10 @@ export class Attack {
             attributes.push("Energy");
         }
 
+        if(attributes.length > 1 && attributes.includes("Varies")){
+            attributes = attributes.filter(x => x !== "Varies");
+        }
+
         return attributes.join(', ');
     }
 

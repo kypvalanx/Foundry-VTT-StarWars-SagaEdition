@@ -81,6 +81,7 @@ export class AmmunitionDelegate {
             ammunition.queueCapacity = this.getQueueCapacity(ammunition.type);
             ammunition.queue = this.#buildQueue(current.queue, ammunition.queueCapacity);
             ammunition.itemId = this.item.id;
+            ammunition.next = this.#nextRound(ammunition.queue, ammunition.type)
             ammoResponse.push(ammunition);
         }
 
@@ -278,6 +279,13 @@ export class AmmunitionDelegate {
             }
         }
         return {empty: true};
+    }
+
+    #nextRound(queue, type) {
+        if(queue && queue.length > 0 && queue[0]){
+            return queue[0].name
+        }
+        return type;
     }
 }
 
