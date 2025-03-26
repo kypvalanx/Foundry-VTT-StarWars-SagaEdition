@@ -234,8 +234,11 @@ export class SWSEActor extends Actor {
     async safeUpdate(data = {}, context = {}) {
         let user = game.user;
 
-        if(context.owner && context.bypass){
-            user = game.users.get(context.owner);
+        if(context.bypass){
+
+            let userId = this.permission < 3 ? Object.entries(this.ownership).find(o => o[1] >= 3)[0] : ""
+            user = game.users.get(userId);
+            context.owner = userId;
         }
         if ((this.canUserModify(user, 'update') && !this.pack && !!game.actors.get(this.id))) {
             try {
@@ -1636,7 +1639,6 @@ export class SWSEActor extends Actor {
     }
 
     async applyDamage(options) {
-        let update = {};
         let totalDamage = toNumber(options.damage);
 
         const damageTypes = options.damageType.split(COMMMA_LIST);
@@ -1674,8 +1676,6 @@ export class SWSEActor extends Actor {
                 }
             }
         }
-
-
 
         let conditionReduction = 1;
         const currentHealth = this.system.health.value;
@@ -1723,23 +1723,26 @@ export class SWSEActor extends Actor {
             totalDamage = 0;
         }
 
-
-        update[`system.health.value`] = currentHealth - totalDamage;
         const content = `${this.name} has has taken ${totalDamage} damage.  ${resultFlavor}  ${reducedCondition}`
-        toChat(content, this)
 
+        let flags = {};
+        flags.swse = {};
+        flags.swse.context = {};
+        flags.swse.context.type = "damage-result";
+        flags.swse.context.damageTarget = this.id;
+        flags.swse.context.damage = totalDamage;
 
-        // if(this.canUserModify(game.user, 'update')){
-            this.safeUpdate(update);
-        // } else {
-        //     console.log(this)
-        //     let ownerIds = Object.entries(this.ownership).filter(e => e[1]  === 3).map(e => e[0])
-        //     for (let ownerId of ownerIds) {
-        //         this.safeUpdate(update, {bypass: true, owner: ownerId})
-        //         // let owner = game.users.get(ownerId)
-        //         // console.log((owner))
-        //     }
-        // }
+        await toChat(content, this, "Damage", {flags})
+    }
+
+    async resolveDamage(damage, timestamp) {
+        if ((this.system.lastResolvedMessageTS >= timestamp) || !damage) {
+            return;
+        }
+        let update = {};
+        update[`system.health.value`] = this.system.health.value - damage;
+        update[`system.lastResolvedMessageTS`] = timestamp;
+        await this.safeUpdate(update);
     }
 
     applyHealing(options) {

@@ -1616,7 +1616,8 @@ export function toChat(content, actor = undefined, flavor="", context={}) {
         flavor: flavor,
         style: getChatType(context),
         content,
-        sound: CONFIG.sounds.dice
+        sound: CONFIG.sounds.dice,
+        flags: context.flags
     }
 
     let cls = getDocumentClass("ChatMessage");

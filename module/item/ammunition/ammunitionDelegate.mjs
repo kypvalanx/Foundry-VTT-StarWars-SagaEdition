@@ -1,7 +1,7 @@
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {SWSEItemSheet} from "../item-sheet.mjs";
 
-async function selectItemFromArray(items, dialog, options) {
+export async function selectItemFromArray(items, dialog, options) {
     const select = "SELECT_ID";
     const default1 = {
         callback: (html) => {
@@ -27,6 +27,39 @@ async function selectItemFromArray(items, dialog, options) {
         return `<option value="${item.id}">${item.name}${fields}</option>`
     });
     dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
+    return await Dialog.prompt(dialogConfig)
+}
+
+export async function selectOptionFromArray(items, dialog, options) {
+    if(items.length === 1){
+        return items[0].value;
+    }
+    const select = "SELECT_ID";
+    const default1 = {
+        callback: (html) => {
+            const find = html.find(`#${select}`);
+            return find[0].value;
+
+        },
+    };
+    let dialogConfig = {...default1, ...dialog}
+    let itemOptions = items.map(item => {
+        let fields = ""
+        // if (options.fields) {
+        //     for (const field of options.fields) {
+        //         let cursor = item;
+        //         const val = field.split(".").forEach(tok => {
+        //             cursor = cursor[tok]
+        //         })
+        //         if (val) {
+        //             fields += ` (${val})`;
+        //         }
+        //     }
+        // }
+        let color = item.color ? `style="background-color: ${item.color}"` : ""
+        return `<option value="${item.value}" ${color}>${item.name}${fields}</option>`
+    });
+    dialogConfig.content += `<br><select id="${select}">${itemOptions}</select>`
     return await Dialog.prompt(dialogConfig)
 }
 

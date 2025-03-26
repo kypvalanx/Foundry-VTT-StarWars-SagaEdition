@@ -181,6 +181,8 @@ function getHitOptionHTML(target, attack, tokenId) {
 </div>`;
 }
 
+
+
 const applyAttack = (event) => {
     let element = $(event.currentTarget);
     let damageType = element.data("damage-type")
@@ -282,19 +284,22 @@ const applyAttack = (event) => {
 
 Hooks.on('renderChatMessage', async (message, html) => {
     if (typeof message.flags?.swse?.context === 'undefined') {
-        return;
+        return true;
     }
 
     if(message.flags.swse.context.type === "attack-roll"){
-       // console.log("bam")
-
         html.find('[data-action="apply-attack"]').click(applyAttack.bind(this));
     }
+    if(message.flags.swse.context.type === "damage-result"){
+        let activeGM = game.users.activeGM
+        if(game.user.id === activeGM.id){
+            let targetActor = game.actors.get(message.flags.swse.context.damageTarget)
+            targetActor.resolveDamage(message.flags.swse.context.damage, message.timestamp)
+        }
+    }
 
+    return true;
 })
-
-
-
 
 Hooks.on("ready", async function () {
 

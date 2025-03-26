@@ -1,6 +1,6 @@
 import {SimpleCache} from "../../common/simple-cache.mjs";
 import {Attack} from "./attack.mjs";
-import {createAttackMacro, getActorFromId} from "../../swse.mjs";
+import {createAttackMacro} from "../../swse.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
@@ -10,6 +10,7 @@ import {
     handleAttackSelect,
     resolveValueArray
 } from "../../common/util.mjs";
+import {selectOptionFromArray} from "../../item/ammunition/ammunitionDelegate.mjs";
 
 
 export class AttackDelegate {
@@ -695,11 +696,87 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     return damageRoll;
 }
 
+/**
+ *
+ * @param area {PlaceableObject}
+ * @param token {PlaceableObject}
+ * @return {boolean}
+ */
+function collides(area, token) {
+    let areaShape = area.document.t;
+    switch (areaShape) {
+        case "rect":
+        case "circle":
+        case "cone":
+        case "ray":
+    }
+    return false;
+}
+
+function findContained(templateDoc) {
+    const {size} = templateDoc.parent.grid;
+    const {x: tempx, y: tempy, object} = templateDoc;
+    const tokenDocs = templateDoc.parent.tokens;
+    const contained = new Set();
+    for (const tokenDoc of tokenDocs) {
+        const {width, height, x: tokx, y: toky} = tokenDoc;
+        const startX = width >= 1 ? 0.5 : width / 2;
+        const startY = height >= 1 ? 0.5 : height / 2;
+        for (let x = startX; x < width; x++) {
+            for (let y = startY; y < width; y++) {
+                const curr = {
+                    x: tokx + x * size - tempx,
+                    y: toky + y * size - tempy
+                };
+                const contains = object.shape.contains(curr.x, curr.y);
+                if (contains) {
+                    contained.add(tokenDoc);
+                    continue;
+                }
+            }
+        }
+    }
+    return [...contained];
+}
+
+async function selectAreaActors() {
+    let templateLayer = game.canvas.layers.find(layer => layer instanceof TemplateLayer)
+
+    let templates = [];
+    for (const value of templateLayer.placeables) {
+        if (value.isAuthor) {
+            templates.push({
+                color: value.document.fillColor.css,
+                name: `${value.document._id} (shape: ${value.document.t})`,
+                value: value.document._id
+            });
+        }
+    }
+
+    let id = await selectOptionFromArray(templates, {
+        title: "Select Template to Use For Attack",
+        content: "Select Template to Use For Attack.  templates do not have names but you can change the color to make this selection easier"
+    }, {});
+
+    let selected = templateLayer.placeables.find(i => i.document._id === id);
+
+    let found = findContained(selected.document)
+
+    return found.map(token => token.actor);
+}
+
 async function resolveAttack(attack, targetActors) {
     let attackRoll = attack.attackRoll.roll;
     let attackRollResult = await attackRoll.roll();
     let fail = attack.isFailure(attackRollResult);
     let critical = attack.isCritical(attackRollResult);
+    let attackType = "areaAttack#NOT";
+
+    if(attackType === "areaAttack" && (!targetActors || targetActors.length === 0)) {
+        targetActors = await selectAreaActors();
+    }
+
+
 
     let targets = targetActors.map(actor => {
         let reflexDefense = actor.defense.reflex.total;
