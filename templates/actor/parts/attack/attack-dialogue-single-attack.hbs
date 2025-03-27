@@ -1,4 +1,5 @@
 <div class="attack panel flex flex-col">
+    {{log availableAttacks}}
     <div class="attack-name">{{> 'systems/swse/templates/common/select.hbs' selected=selectedAttack options=availableAttacks includeDefault=true classes='attack-id'}}</div>
     <div class="attack-options"></div>
     <div class="attack-total"></div>

@@ -529,48 +529,26 @@ function getAvailableMacroSlot() {
     return getNumericArray(1, 50).find(i => !hotbar.includes(i))
 }
 
-export async function createAttackMacro(data, slot) {
-    let actorId = data.actorId;
-
-    const actor = getActorFromId(actorId);
-    if (!actor) return;
-    if (!data.attacks || data.attacks.length === 0) return;
-
-    if (!slot) {
-        slot = getAvailableMacroSlot();
-    }
-
-    let img = "systems/swse/icon/skill/default.png";
-
-    if (data.img) {
-        img = data.img;
-    }
-
-    let context = {};
-    context.attacks = data.attacks;
-    let attackName = data.attacks[0].name || data.label
-    if (data.attacks.length > 1) {
-        context.type = "fullAttack";
-        attackName = "Full Attack";
-    }
-
-
+export async function createAttackMacro(data, slot = getAvailableMacroSlot()) {
+    let context = {
+        attackKeys: data.attackKeys,
+        attacks: data.attacks
+    };
     const command = `game.swse.makeAttack(${JSON.stringify(context)});`;
-    const name = `${actor.name}: ${attackName}`
-    let macro = game.macros.find((m) => m.name === name && m.command === command);
-    if (!macro) {
-        macro = await Macro.create(
-            {
-                name: name,
-                type: "script",
-                img: img,
-                command: command,
-                flags: {"swse.itemMacro": true},
-            },
-            {displaySheet: false}
-        );
+    const name = `${data.actorName}: ${(data.label)}`
+    if (game.macros.find((m) => m.name === name && m.command === command)) {
+        return;
     }
-
+    let macro = await Macro.create(
+        {
+            name: name,
+            type: "script",
+            img: data.img || "systems/swse/icon/skill/default.png", //should refer constant
+            command: command,
+            flags: {"swse.itemMacro": true},
+        },
+        {displaySheet: false}
+    );
     await game.user.assignHotbarMacro(macro, slot);
 }
 

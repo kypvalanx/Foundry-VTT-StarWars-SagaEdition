@@ -1,13 +1,8 @@
  {{#if attack}}
     {{#unless attack.hide}}
-        <div class="flex flex-col {{#if
-                attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container"
-             data-attacks="[{{attack.toJSONString}}]" data-weapon-id="{{attack.weaponId}}"
-             data-operator-id="{{attack.operatorId}}" data-actor-id="{{attack.actorId}}"
+        <div class="flex flex-col {{#if attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container" data-attack-key="{{attack.attackKey}}" data-type="attack"
              data-label="{{attack.name}}" data-img="{{attack.img}}">
             <div class="flex flex-row">
-
-
                 <div class="huge labeled-input">
                     <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.next}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
                            placeholder="" disabled/>
@@ -19,7 +14,7 @@
                     </div>
                 </div>
             </div>
-            <button class="attack" type="button" data-attacks="[{{attack.toJSONString}}]">Attack</button>
+            <button class="attack" type="button" data-attack-key="{{attack.attackKey}}">Attack</button>
             <div class="collapsible" style="display: {{#if
                     (lookup toggles (concat "attack-" id))}}grid{{else}}none{{/if}}">
 
@@ -43,6 +38,10 @@
 
                 <div class="attack-notes labeled-input" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
                     <div class="plain input">{{{attack.notesHTML}}}</div>
+                </div>
+
+                <div class="flex flex-col">
+                    
                 </div>
 
                 <div class="flex flex-row flex-wrap">

@@ -2390,12 +2390,7 @@ export class SWSEActor extends Actor {
 
         //let items = itemIds.map(itemId => this.items.get(itemId)).filter(item => !!item && item.type !== "weapon");
 
-        if (items.length === 0) {
-            this.attack.createAttackDialog(null, {
-                type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"),
-                items: itemIds
-            })
-        } else {
+        if (items.length > 0) {
             for (let item of items) {
                 item.rollItem(this).render(true);
             }

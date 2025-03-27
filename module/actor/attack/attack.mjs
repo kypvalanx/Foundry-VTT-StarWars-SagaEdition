@@ -45,6 +45,13 @@ export class Attack {
         SINGLE_ATTACK: "SINGLE_ATTACK"
     };
 
+    get attackKey(){
+        if ('Unarmed Attack' === this.weaponId) {
+            return `${this.actorId}.Unarmed Attack`
+        }
+        return this.weaponId;
+    }
+
     /**
      *
      * @param actorId {String} the actor that this attack belongs to.
@@ -437,6 +444,9 @@ export class Attack {
         terms.push(...getSpecializationDamageBonuses(actor, weaponTypes));
         //actorData.
 
+        if(terms[0] instanceof OperatorTerm){
+            terms[0] = null;
+        }
 
         terms = terms
             .filter(term => !!term);
@@ -915,7 +925,7 @@ export class Attack {
     }
 
 get summary(){
-        return {attributes:[{key:"value", value:this.toJSONString}, {key:"data-item-id", value: this.weaponId}], value:this.toJSONString, item:this.weaponId, name:this.name}
+        return {attributes:[{key:"data-attack-key", value:this.attackKey}], value:this.attackKey, name:this.name}
 }
     attackOption(attack, id) {
         let attackString = attack.toJSONString
@@ -977,7 +987,7 @@ get summary(){
 }
 
 
-function getActor(actorId) {
+export function getActor(actorId) {
     if (!actorId) {
         return;
     }
