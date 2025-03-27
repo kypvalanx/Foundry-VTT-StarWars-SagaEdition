@@ -10,7 +10,6 @@ import {
     unique
 } from "../common/util.mjs";
 import {characterActorTypes, vehicleActorTypes} from "../common/constants.mjs";
-import {Attack} from "./attack/attack.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
 import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {onChangeControl, onEffectControl, onSpanTextInput, onToggle} from "../common/listeners.mjs";
@@ -18,8 +17,9 @@ import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
 import {buildRollContent, SWSEActor} from "./actor.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {SWSEItemSheet} from "../item/item-sheet.mjs";
 import {onAmmunition} from "../item/ammunition/ammunitionDelegate.mjs";
+import {makeAttack} from "./attack/attackDelegate.mjs";
+import {Attack} from "./attack/attack.mjs";
 
 // noinspection JSClosureCompilerSyntax
 
@@ -218,9 +218,9 @@ export class SWSEActorSheet extends ActorSheet {
         html.find("button.attack").each((i, div) => {
             //div.setAttribute("draggable", true);
             //div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
-            div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
+            div.addEventListener("click", (ev) => this._onMakeAttack(ev), false);
         });
-        html.find("#fullAttack").on("click", () => this.object.attack.createAttackDialog(event, {type: "fullAttack"}));
+        html.find("#fullAttack").on("click", (ev) => this._onMakeAttack(ev, Attack.TYPES.FULL_ATTACK));
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
@@ -582,10 +582,16 @@ export class SWSEActorSheet extends ActorSheet {
             dragData.type = elem.dataset.type
         }
 
+        if(elem.dataset.attackKey){
+            dragData.attackKeys = [elem.dataset.attackKey]
+        } else if(elem.dataset.attackKeys){
+            dragData.attackKeys = elem.dataset.attackKeys
+        }
         dragData.img = elem.dataset.img;
         dragData.itemId = elem.dataset.itemId;
         dragData.providerId = elem.dataset.providerId;
         dragData.actorId = this.actor.id;
+        dragData.actorName = this.actor.name;
         dragData.attacks = elem.dataset.attacks ? JSON.parse(unescape(elem.dataset.attacks)) : [];
         if (this.actor.isToken) {
             dragData.sceneId = canvas.scene.id;
@@ -1675,11 +1681,12 @@ export class SWSEActorSheet extends ActorSheet {
         return false;
     }
 
-    _onActivateItem(ev) {
-        let elem = ev.currentTarget;
-        let attacks = Attack.fromJSON(elem.dataset.attacks);
+    async _onMakeAttack(ev, type = Attack.TYPES.SINGLE_ATTACK){
+        await makeAttack({actorId: this.object.id,type: type, attackKeys:[ev.currentTarget.dataset.attackKey]});
+    }
 
-        this.object.attack.createAttackDialog(ev, {type: "singleAttack", attacks});
+    _onActivateItem(ev) {
+
     }
 
     onlyAllowsWeaponsDialog(weaponOnly = true) {

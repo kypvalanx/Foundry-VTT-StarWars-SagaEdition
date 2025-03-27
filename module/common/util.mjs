@@ -552,6 +552,15 @@ export function handleExclusiveSelect(e, selects) {
 }
 
 
+function explodeAttackKey(attackKey) {
+    const toks = attackKey.split(":")
+
+    let doubleAttack = toks.includes("DOUBLE_ATTACK");
+    let tripleAttack = toks.includes("TRIPLE_ATTACK");
+    let standardAttack = !toks.includes("BEAST_ATTACK");
+    return {doubleAttack, tripleAttack, standardAttack}
+}
+
 export function handleAttackSelect(selects) {
     let selectedValues = [];
 
@@ -569,37 +578,37 @@ export function handleAttackSelect(selects) {
         }
         selectedValues.push( select.value);
 
-        let selected = JSON.parse(unescape(select.value))
-        if (selected.options.standardAttack) {
+        let selected = explodeAttackKey(select.value)
+        if (selected.standardAttack) {
             hasStandard = true;
         }
-        if (selected.options.doubleAttack) {
+        if (selected.doubleAttack) {
             hasDoubleAttack = true;
         }
-        if (selected.options.tripleAttack) {
+        if (selected.tripleAttack) {
             hasTripleAttack = true;
         }
     }
 
     function shouldDisableDoubleAttack(attackFromOption, selectedAttack) {
-        return attackFromOption.options.doubleAttack &&
-            (!hasStandard || (hasDoubleAttack && !selectedAttack.options.doubleAttack));
+        return explodeAttackKey(attackFromOption).doubleAttack &&
+            (!hasStandard || (hasDoubleAttack && !explodeAttackKey(selectedAttack).doubleAttack));
     }
 
     function shouldDisableTripleAttack(attackFromOption, selectedAttack) {
-        return attackFromOption.options.tripleAttack &&
-            (!hasDoubleAttack || (hasTripleAttack && !selectedAttack.options.tripleAttack) || selectedAttack.options.doubleAttack);
+        return explodeAttackKey(attackFromOption).tripleAttack &&
+            (!hasDoubleAttack || (hasTripleAttack && !explodeAttackKey(selectedAttack).tripleAttack) || explodeAttackKey(selectedAttack).doubleAttack);
     }
 
 //disable options in other selects that match a selected select
     for (let select of selects) {
-        let selectedAttack = select.value !== "--" ? Attack.fromJSON(select.value) : {options: {}};
+        let selectedAttack = select.value;
         for (let o of select.options) {
-            if (o.value === "--" || o.selected) {
+            let attackFromOption = o.value
+            if (attackFromOption === "--" || o.selected) {
                 continue;
             }
-            let attackFromOption = Attack.fromJSON(o.value)//JSON.parse(unescape(o.value));
-            if (selectedValues.includes( o.value)
+            if (selectedValues.includes( attackFromOption)
                 || shouldDisableDoubleAttack(attackFromOption, selectedAttack)
                 || shouldDisableTripleAttack(attackFromOption, selectedAttack)
             ) {
@@ -1339,6 +1348,9 @@ export function getDocumentByUuid(uuid, from) {
         return;
     }
     let toks = uuid.split(".")
+    if(toks.length < 2){
+        return;
+    }
     let source = from || game;
     if(from){
         const newToks = [];

@@ -1,6 +1,5 @@
 import {SimpleCache} from "../../common/simple-cache.mjs";
-import {Attack} from "./attack.mjs";
-import {createAttackMacro} from "../../swse.mjs";
+import {Attack, getActor} from "./attack.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
@@ -11,6 +10,7 @@ import {
     resolveValueArray
 } from "../../common/util.mjs";
 import {selectOptionFromArray} from "../../item/ammunition/ammunitionDelegate.mjs";
+import {createAttackMacro} from "../../swse.mjs";
 
 
 export class AttackDelegate {
@@ -91,86 +91,7 @@ export class AttackDelegate {
             });
     }
 
-    /**
-     *
-     * @param event
-     * @param context
-     * @returns {Promise<void>} TODO this should return an ACTIVEATTACK or create a macro for an ACTIVEATTACK
-     */
-     async createAttackDialog(event, context) {
-        const attacksFromContext = getAttacksFromContext(context);
-        const attackType = context.type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK;
-        const dualWeaponModifier = this.dualWeaponModifier;
-        const multipleAttackModifiers = this.multipleAttackModifiers;
-        const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails(attackType);
-        context.availableHands = 2;
-
-        const data = {
-            title: getAttackWindowTitle(context),
-            content: await this.getAttackDialogueContent(attackCount, attacksFromContext, doubleAttack, tripleAttack),
-            buttons: {
-                attack: {
-                    label: "Attack",
-                    callback: async (html) => {
-                        let attacks = getActiveAttacks(html, dualWeaponModifier, multipleAttackModifiers);
-                        let data = {
-                            attacks,
-                            actorId: this.actor.id,
-                            hands: getHandsFromAttackOptions(html),
-                            availableHands: context.availableHands,
-                            rollMode: undefined
-                        };
-                        await createAttackChatMessage(data)
-                    }
-                },
-                saveMacro: {
-                    label: "Save Macro",
-                    callback: async (html) => {
-                        let attacks = getActiveAttacks(html, dualWeaponModifier, multipleAttackModifiers);
-
-                        let data = {
-                            attacks,
-                            actorId: this.actor.id,
-                            hands: getHandsFromAttackOptions(html),
-                            availableHands: context.availableHands,
-                            rollMode: undefined
-                        };
-
-                        await createAttackMacro(data)
-                    }
-                }
-            },
-            default: "attack",
-            render: (html) => {
-                let selects = html.find("select.attack-id");
-                context.dialog = html;
-                this.updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers);
-                selects.on("change", () => {
-                    this.updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers);
-                })
-            }
-        };
-
-        const options = {
-            height: attackCount * 272 + 130,
-            classes: ["swse", "dialog"],
-            resizable: true,
-            popOut: true
-        };
-
-        if(data){
-            new Dialog(data, options).render(true);
-        }
-    }
-
-    updateAttackDialog(selects, context, dualWeaponModifier, html, multipleAttackModifiers) {
-        handleAttackSelect(selects)
-        context.attackMods = getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers);
-        context.damageMods = [];
-        selects.each((i, div) => populateItemStats(div, context));
-    }
-
-    getAttackDetails(attackType) {
+    getAttackDetails() {
         let doubleAttack = [];
         let tripleAttack = [];
         let hands = getHands(this.actor);
@@ -179,7 +100,6 @@ export class AttackDelegate {
         let attacksFromDualWielding = 1;
         let beastAttacks = 0;
 
-        if (attackType === Attack.TYPES.FULL_ATTACK) {
             doubleAttack = getInheritableAttribute({
                 entity: this.actor,
                 attributeKey: "doubleAttack",
@@ -204,7 +124,7 @@ export class AttackDelegate {
 
             attacksFromDoubleAttack = doubleAttack.filter(x => subtypes.includes(x)).length > 0 ? 1 : 0;
             attacksFromTripleAttack = tripleAttack.filter(x => subtypes.includes(x)).length > 0 ? 1 : 0;
-        }
+
 
         const attackCount = this.getAttackCount(attacksFromDualWielding, attacksFromDoubleAttack, attacksFromTripleAttack, beastAttacks);
         return {doubleAttack, tripleAttack, attackCount};
@@ -244,24 +164,96 @@ export class AttackDelegate {
     }
 
 
-    async getAttackDialogueContent(availableAttacks, suppliedAttacks, doubleAttack, tripleAttack) {
-
-        const attacks = [];
-
-        for (let i = 0; i < availableAttacks; i++) {
-            attacks.push(suppliedAttacks.length > i ? suppliedAttacks[i].name : "--")
-        }
+    async getAttackDialogueContent(attackCount, doubleAttack, tripleAttack) {
 
         let template = await getTemplate("systems/swse/templates/actor/parts/attack/attack-dialogue.hbs")
 
         const resolvedAttacks = this.attackOptions(doubleAttack, tripleAttack)
 
-        return template({selectedAttacks:attacks, availableAttacks: resolvedAttacks.map(attack => attack.summary)});
+        let selectedAttacks = [];
+        for(let i =0; i < attackCount; i++){
+            selectedAttacks.push(null)
+        }
+
+        return template({selectedAttacks, availableAttacks: resolvedAttacks.map(attack => attack.summary)});
+    }
+
+
+
+    /**
+     *
+     * @param event
+     * @param context
+     * @returns {Promise<void>} TODO this should return an ACTIVEATTACK or create a macro for an ACTIVEATTACK
+     */
+    async createAttackDialog(event, context) {
+        await makeAttack(context)
+    }
+    async getAttacksFromUserSelection() {
+        const {doubleAttack, tripleAttack, attackCount} = this.getAttackDetails()
+
+        return await Dialog.wait({        //     title: getAttackWindowTitle(context),
+                content: await this.getAttackDialogueContent(attackCount, doubleAttack, tripleAttack),
+                buttons: {
+                    attack: {
+                        label: "Attack",
+                        callback: async (html) => {
+
+                            let selects = html.find("select.attack-id");
+
+                            let attackKeys = [];
+                            for (const select of selects) {
+                                attackKeys.push(select.value)
+                            }
+                          //  const map = selects.map(select => select.value);
+                            return attackKeys
+                        }
+                    },
+                    saveMacro: {
+                        label: "Save Macro",
+                        callback: async (html) => {
+                            let selects = html.find("select.attack-id");
+
+                            let attackKeys = [];
+                            for (const select of selects) {
+                                attackKeys.push(select.value)
+                            }
+
+                            let data = {
+                                attackKeys,
+                                actorId: this.actor.id,
+                            };
+
+                            await createAttackMacro(data)
+                        }
+                    }
+                },
+                default: "attack",
+                render: (html) => {
+                    let selects = html.find("select.attack-id");
+                    handleAttackSelect(selects)
+                    selects.on("change", () => {
+                        handleAttackSelect(selects)
+                    })
+                }
+        })
     }
 
 }
 
+function getAttacksFromContext(context) {
+    if(context.attackKeys){
+        let actor = getActor(`Actor.${context.actorId}`)
+        return actor.attack.attacks.filter(a => context.attackKeys.includes(a.attackKey))
+    }
 
+    return context.attacks?.map(i => {
+        if (i instanceof Attack) {
+            return i;
+        }
+        return Attack.fromJSON(i);
+    }) || [];
+}
 
 function multiplyNumericTerms(roll, multiplier) {
     let previous;
@@ -367,42 +359,6 @@ function modifyForFullAttack(doubleAttack, actor, tripleAttack, availableAttacks
     return {doubleAttack, tripleAttack, availableAttacks, dualWeaponModifier};
 }
 
-function getAttacksFromContext(context) {
-    return context.attacks?.map(i => {
-        if (i instanceof Attack) {
-            return i;
-        }
-        return Attack.fromJSON(i);
-    }) || [];
-}
-
-/**
- *
- * @param context {object}
- * @param context.type {string}
- * @param context.attacks {Array.<Attack>}
- * @param context.actor {ActorData}
- * @returns {{buttons: {attack: {callback: buttons.attack.callback, label: string}}, options: {height: number}, title: string, render: ((function(*): Promise<void>)|*), content: string}}
- */
-function attackDialogue(context) {
-
-}
-
-/**
- *
- * @param context
- * @param.items
- * @param.actor
- * @returns {Promise<void>}
- */
-export async function makeAttack(context) {
-    //const actorId = context.actorId || context.attacks[0].actorId;
-    //const actor = getActorFromId(actorId)
-    context.attacks = context.attacks.map(a => Attack.fromJSON(a))
-
-    await createAttackChatMessage(context)
-    //actor.attack.createAttackDialog(null, context);
-}
 
 function getAttackMods(selects, dualWeaponModifier, multipleAttackModifiers) {
     let isDoubleAttack = false;
@@ -898,18 +854,28 @@ function getSound(attacks) {
     return CONFIG.sounds.dice;
 }
 
-export async function createAttackChatMessage(data) {
-    const attacks = data.attacks;
+
+
+export async function makeAttack(data) {
+    let attacks = getAttacksFromContext(data);
     const rollMode = data.rollMode;
-    const hands = data.hands;
-    const availableHands = data.availableHands;
+    //const hands = data.hands;
+    //const availableHands = data.availableHands;
+
+    if(attacks.length === 0){
+
+        let actor = getActor(`Actor.${data.actorId}`)
+        let attackKeys = await actor.attack.getAttacksFromUserSelection(data);
+
+        attacks = actor.attack.attacks.filter(a => attackKeys.includes(a.attackKey))
+    }
 
     let targetActors = getTargetedActors();
     let {rolls, content} = await resolveAttacks(attacks, targetActors);
 
-    if(hands > availableHands){
-        content = `<div class="warning">${hands} hands used out of a possible ${availableHands}</div><br>` + content;
-    }
+    // if(hands > availableHands){
+    //     content = `<div class="warning">${hands} hands used out of a possible ${availableHands}</div><br>` + content;
+    // }
 
     let speaker = ChatMessage.getSpeaker({actor: attacks[0].actor});
 
