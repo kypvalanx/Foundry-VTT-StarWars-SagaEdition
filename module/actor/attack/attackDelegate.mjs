@@ -215,13 +215,17 @@ export class AttackDelegate {
                             let selects = html.find("select.attack-id");
 
                             let attackKeys = [];
+                            let attackNames = [];
                             for (const select of selects) {
                                 attackKeys.push(select.value)
+                                attackNames.push(select.selectedOptions[0].label)
                             }
 
                             let data = {
                                 attackKeys,
                                 actorId: this.actor.id,
+                                actorName: this.actor.name,
+                                label: `Full Attack: ${attackNames.join(", ")}`
                             };
 
                             await createAttackMacro(data)
@@ -866,7 +870,9 @@ export async function makeAttack(data) {
 
         let actor = getActor(`Actor.${data.actorId}`)
         let attackKeys = await actor.attack.getAttacksFromUserSelection(data);
-
+        if(!attackKeys){
+            return;
+        }
         attacks = actor.attack.attacks.filter(a => attackKeys.includes(a.attackKey))
     }
 
