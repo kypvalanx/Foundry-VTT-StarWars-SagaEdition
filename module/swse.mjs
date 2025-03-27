@@ -531,6 +531,7 @@ function getAvailableMacroSlot() {
 
 export async function createAttackMacro(data, slot = getAvailableMacroSlot()) {
     let context = {
+        actorId: data.actorId,
         attackKeys: data.attackKeys,
         attacks: data.attacks
     };
