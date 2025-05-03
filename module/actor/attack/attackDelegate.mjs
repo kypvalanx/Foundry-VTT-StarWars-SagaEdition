@@ -3,7 +3,7 @@ import {Attack, getActor} from "./attack.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
-    appendNumericTerm,
+    appendNumericTerm, d20Result,
     equippedItems,
     getBonusString,
     handleAttackSelect,
@@ -766,7 +766,7 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
     let targetActors = await getTargetedActors(attack);
     let attackRoll = attack.attackRoll.roll;
     let attackRollResult = await attackRoll.roll();
-    let d20Value = this.d20Result(attackRollResult);
+    let d20Value = d20Result(attackRollResult);
     let autoMiss = attack.isAutomaticMiss(d20Value);
     let critical = criticalHitEnabled && attack.isCritical(d20Value);
     let autoHit = attack.isCritical(d20Value, true)
