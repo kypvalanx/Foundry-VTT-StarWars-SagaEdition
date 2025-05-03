@@ -656,22 +656,6 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     return damageRoll;
 }
 
-/**
- *
- * @param area {PlaceableObject}
- * @param token {PlaceableObject}
- * @return {boolean}
- */
-function collides(area, token) {
-    let areaShape = area.document.t;
-    switch (areaShape) {
-        case "rect":
-        case "circle":
-        case "cone":
-        case "ray":
-    }
-    return false;
-}
 
 function findContained(templateDoc) {
     const {size} = templateDoc.parent.grid;
@@ -688,7 +672,7 @@ function findContained(templateDoc) {
                     x: tokx + x * size - tempx,
                     y: toky + y * size - tempy
                 };
-                const contains = object.shape.contains(curr.x, curr.y);
+                const contains = object._computeShape().contains(curr.x, curr.y);
                 if (contains) {
                     contained.add(tokenDoc);
                     continue;
@@ -699,7 +683,25 @@ function findContained(templateDoc) {
     return [...contained];
 }
 
-async function selectAreaActors() {
+/**
+ *
+ * @param templates
+ * @return {Promise<[{location:{x,y}, actors:[]}]>}
+ */
+async function selectAreaActors(templates) {
+    let actors = [];
+    for (const template of templates) {
+        let gridSize = canvas.scene.grid
+        let x = template.x / gridSize.sizeX
+        let y = template.y / gridSize.sizeY
+        let found = findContained(template)
+        actors.push({location: {x,y}, actors:found.map(token => token.actor)})
+    }
+
+    return actors;
+}
+
+async function createAreaAndSelectActors() {
     let templateLayer = game.canvas.layers.find(layer => layer instanceof TemplateLayer)
 
     let templates = [];
@@ -725,41 +727,99 @@ async function selectAreaActors() {
     return found.map(token => token.actor);
 }
 
-async function resolveAttack(attack, targetActors) {
+function getDistance(a, b) {
+    let xDiff = Math.floor(Math.abs(a.x - b.x));
+    let yDiff = Math.floor(Math.abs(a.y - b.y));
+    let diagonal = Math.min(xDiff, yDiff);
+    let adjustedDiagonal = Math.floor(diagonal/2) * 3 + diagonal % 2
+
+    return xDiff + yDiff - diagonal * 2 + adjustedDiagonal;
+}
+
+function getDistanceModifier(actor, location, attack) {
+    let token;
+    if(actor.isToken){
+        token = actor.token;
+    } else {
+        let tokens = canvas.tokens.placeables.filter(token => token.actor.id === actor.id);
+        //TODO this defaults to the first token instance.  idk if this is an issue.  would a PC have multiple?
+
+        token = tokens[0];
+    }
+    console.log(token)
+    let x = token.center.x / canvas.grid.sizeX
+    let y = token.center.y / canvas.grid.sizeY
+    let distance = getDistance(location, {x,y})
+
+    return attack.rangePenalty(distance);
+}
+
+function isAreaAttack(targetType) {
+    return targetType !== Attack.TARGET_TYPES.SINGLE_TARGET;
+}
+
+function hitsTargetedArea(attackRoll) {
+    return attackRoll >= 10;
+}
+
+async function resolveAttack(attack, criticalHitEnabled, targetType) {
+    let targetActors = await getTargetedActors(attack);
     let attackRoll = attack.attackRoll.roll;
     let attackRollResult = await attackRoll.roll();
-    let fail = attack.isFailure(attackRollResult);
-    let critical = attack.isCritical(attackRollResult);
-    let attackType = "areaAttack#NOT";
+    let d20Value = this.d20Result(attackRollResult);
+    let autoMiss = attack.isAutomaticMiss(d20Value);
+    let critical = criticalHitEnabled && attack.isCritical(d20Value);
+    let autoHit = attack.isCritical(d20Value, true)
 
-    if(attackType === "areaAttack" && (!targetActors || targetActors.length === 0)) {
-        targetActors = await selectAreaActors();
-    }
+    let targets = [];
 
+    targetActors.map((actorAndLocation) => {
+        let {actors, location} = actorAndLocation;
+        let distanceModifier = getDistanceModifier(attack.actor, location, attack);
+        targets.push(...actors.map(actor => {
+            let reflexDefense = actor.defense.reflex.total;
+            const attackRoll = attackRollResult.total + distanceModifier;
+            let isMiss = attack.isMiss(attackRoll , reflexDefense, autoHit, autoMiss)
+            let isHalfDamage = isAreaAttack(targetType) && hitsTargetedArea(attackRoll) && isMiss;
+            //yes, a triple embeded ternary, sorry
+            let targetResult;
+            if (critical) {
+                targetResult = "Critical Hit!";
+            } else if (autoHit) {
+                targetResult = "Hit";
+            }else if (isHalfDamage) {
+                targetResult = "Half Damage";
+            } else if (autoMiss) {
+                targetResult = "Automatic Miss";
+            }  else if (isMiss) {
+                targetResult = "Miss";
+            } else {
+                targetResult = "Hit";
+            }
 
+            let conditionalDefenses =
+                getInheritableAttribute({
+                    entity: actor,
+                    attributeKey: ["reflexDefenseBonus"],
+                    attributeFilter: attr => !!attr.modifier,
+                    reduce: "VALUES"
+                });
 
-    let targets = targetActors.map(actor => {
-        let reflexDefense = actor.defense.reflex.total;
-        let isMiss = attack.isMiss(attackRollResult, reflexDefense)
-        let targetResult = critical ? "Critical Hit!" : fail ? "Automatic Miss" : isMiss ? "Miss" : "Hit";
-
-        let conditionalDefenses =
-            getInheritableAttribute({
-                entity: actor,
-                attributeKey: ["reflexDefenseBonus"],
-                attributeFilter: attr => !!attr.modifier,
-                reduce: "VALUES"
-            });
-
-        return {
-            name: actor.name,
-            defense: reflexDefense,
-            defenseType: 'Ref',
-            highlight: targetResult.includes("Miss") ? "miss" : "hit",
-            result: targetResult,
-            conditionalDefenses: conditionalDefenses
-        }
+            return {
+                name: actor.name,
+                defense: reflexDefense,
+                defenseType: 'Ref',
+                adjustedAttackRoll: attackRoll,
+                highlight: targetResult.includes("Miss") ? "miss" : "hit",
+                result: targetResult,
+                conditionalDefenses: conditionalDefenses,
+                id: actor.id,
+                notes: attack.notes
+            }
+        }))
     })
+
+
     let damageRoll = attack.damageRoll.roll;
 
     if (critical) {
@@ -778,7 +838,7 @@ async function resolveAttack(attack, targetActors) {
     }
 
     let damage = await damageRoll.roll();
-    let targetIds = targetActors.map(target => target.id);
+    let targetIds = targetActors.map(target => target.id).join(", ");
 
     const response = {
         attack: attackRollResult,
@@ -789,16 +849,21 @@ async function resolveAttack(attack, targetActors) {
         damageType: attack.type,
         notes: attack.notes,
         critical,
-        fail,
+        fail: autoMiss,
         targets, targetIds
     };
     await attack.reduceAmmunition()
     return response;
 }
 
-function getTargetedActors() {
-    let targetTokens = game.user.targets
+/**
+ *
+ * @param attack
+ * @return {Promise<{location: {x, y}, actors: []}[]|*[]>}
+ */
+async function getTargetedActors(attack) {
     let targetActors = [];
+    let targetTokens = game.user.targets
     for (let targetToken of targetTokens.values()) {
         let actor = targetToken.actor
         if (actor) {
@@ -807,24 +872,12 @@ function getTargetedActors() {
             console.warn(`Could not find actor for ${targetToken.name}`)
         }
     }
-    return targetActors;
-}
+    if(targetActors.length > 0) return targetActors;
 
-async function resolveAttacks(attacks, targetActors) {
-    let attackRows = [];
-    let rolls = [];
-    let rollOrder = 1;
-    for (let attack of attacks) {
-        let resolvedAttack = await resolveAttack(attack, targetActors);
-        resolvedAttack.attack.dice.forEach(die => die.options.rollOrder = rollOrder);
-        rolls.push(resolvedAttack.attack)
-        resolvedAttack.damage.dice.forEach(die => die.options.rollOrder = rollOrder);
-        rolls.push(resolvedAttack.damage)
-        rollOrder++
-        attackRows.push(await generateAttackCard([resolvedAttack], attack))
-    }
-
-    return {rolls, content: `${attackRows.join("<br>")}`};
+    let templates = await attack.placeTemplate()
+    const actors = await selectAreaActors(templates);
+    await cleanupTemplates(templates)
+    return actors;
 }
 
 function modes(sounds) {
@@ -859,6 +912,13 @@ function getSound(attacks) {
 }
 
 
+async function cleanupTemplates(templates = []) {
+    for(let template of templates){
+        if(template.flags.cleanUp){
+            template.delete()
+        }
+    }
+}
 
 export async function makeAttack(data) {
     let attacks = getAttacksFromContext(data);
@@ -874,10 +934,31 @@ export async function makeAttack(data) {
             return;
         }
         attacks = actor.attack.attacks.filter(a => attackKeys.includes(a.attackKey))
+
+        if(attacks.length === 0){
+            return;
+        }
     }
 
-    let targetActors = getTargetedActors();
-    let {rolls, content} = await resolveAttacks(attacks, targetActors);
+    let attackRows = [];
+    let rolls = [];
+    let rollOrder = 1;
+    let resolvedAttackData = [];
+    for (let attack of attacks) {
+        const targetType = attack.targetType;
+
+
+        let resolvedAttack = await resolveAttack(attack, targetType.criticalHitEnabled, targetType.type);
+        resolvedAttack.attack.dice.forEach(die => die.options.rollOrder = rollOrder);
+        rolls.push(resolvedAttack.attack)
+        resolvedAttack.damage.dice.forEach(die => die.options.rollOrder = rollOrder);
+        rolls.push(resolvedAttack.damage)
+        rollOrder++
+        attackRows.push(await generateAttackCard([resolvedAttack], attack))
+        resolvedAttackData.push(resolvedAttack)
+    }
+
+    const content = `${attackRows.join("<br>")}`;
 
     // if(hands > availableHands){
     //     content = `<div class="warning">${hands} hands used out of a possible ${availableHands}</div><br>` + content;
@@ -896,6 +977,8 @@ export async function makeAttack(data) {
     flags.swse = {};
     flags.swse.context = {};
     flags.swse.context.type = "attack-roll";
+    flags.swse.context.attacks = resolvedAttackData;
+    //flags.swse.context.targets = targetActors.map(actor => actor.id);
 
     let messageData = {
         flags,

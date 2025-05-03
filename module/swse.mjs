@@ -182,16 +182,56 @@ function getHitOptionHTML(target, attack, tokenId) {
 }
 
 
+async function selectTargetList(originallyTargeted, currentlyTargeted) {
+    if (!(originallyTargeted.length > 0 && currentlyTargeted.length > 0)) {
+        return originallyTargeted.length > 0 ? originallyTargeted : currentlyTargeted;
+    }
+    const sortedOriginal = originallyTargeted.map(a=> a.name).sort();
+    const sortedCurrent = currentlyTargeted.map(a=> a.name).sort();
+    if(sortedOriginal.every((val, index) => val === sortedCurrent[index])){
+        return originallyTargeted;
+    }
+    let response = await openTargetListResolutionDialog(sortedOriginal, sortedCurrent)
 
-const applyAttack = (event) => {
+    return response === "Original" ? originallyTargeted : currentlyTargeted;
+}
+
+async function openTargetListResolutionDialog(sortedOriginal,sortedCurrent) {
+    return new Promise((resolve) => {
+        new Dialog({
+            title: "Target Selection",
+            content: `<p>Do you want to attack the originally selected targets or the current targets?</p>
+<div class="flex flex-row">
+<div><ul><li>`+ sortedOriginal.join("</li><li>")+`</li></ul></div>
+<div><ul><li>`+ sortedCurrent.join("</li><li>")+`</li></ul></div>
+</div>`,
+            buttons: {
+                original: {
+                    label: "Original",
+                    callback: () => resolve("Original")
+                },
+                current: {
+                    label: "Current",
+                    callback: () => resolve("Current")
+                }
+            },
+            default: "original",
+            close: () => resolve("Original") // Optional: handle dialog close without button press
+        }).render(true);
+    });
+}
+
+const applyAttack = async (event) => {
     let element = $(event.currentTarget);
     let damageType = element.data("damage-type")
     let type = element.data("type")
     let attack = element.data("attack")
     let damage = element.data("damage")
 
-    let targetTokens = game.user.targets
-    let targetActors = [];
+    let actorIds = element.data("targetIds").split(", ")
+    let originallyTargeted = game.actors.filter(actor => actorIds.includes(actor.id))
+    let currentlyTargeted = [...game.user.targets.map(token => token.actor)]
+    let targetActors = await selectTargetList(originallyTargeted, currentlyTargeted);
     let actorMap = {};
 
     let damageTypeString = !!damageType ? ` (${damageType})` : ""
@@ -202,20 +242,6 @@ const applyAttack = (event) => {
         baseDamage *= 2
     }
     let damageString = `${Math.floor(baseDamage)}`
-
-    let content = `<div class="subtle-panel">
-<div>Attack Roll: ${attack}</div>
-<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
-</div>`;
-    for(let targetToken of targetTokens.values()){
-        //targetToken.update
-        let actor = targetToken.document.actor
-        if(actor){
-            targetActors.push(actor)
-            actorMap[targetToken.id] = actor;
-            content += getHitOptionHTML(actor, attack, targetToken.id)
-        }
-    }
 
     if(targetActors.length === 0){
         new Dialog({
@@ -234,7 +260,10 @@ const applyAttack = (event) => {
 
     new Dialog({
         title: "Resolve Attacks",
-        content,
+        content: `<div class="subtle-panel">
+<div>Attack Roll: ${attack}</div>
+<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
+</div>`,
         buttons: {
             attack:{
                 label: "Attack",
@@ -289,6 +318,33 @@ Hooks.on('renderChatMessage', async (message, html) => {
 
     if(message.flags.swse.context.type === "attack-roll"){
         html.find('[data-action="apply-attack"]').click(applyAttack.bind(this));
+        // html.find('[data-action="apply-attack"]').addEventListener('contextmenu', event => {
+        //     event.preventDefault();
+        //
+        //     // Optional: Position the menu at the mouse pointer
+        //     const menu = new ContextMenu(
+        //         { event }, // Required event for positioning
+        //         [ // Menu options
+        //             {
+        //                 name: "Inspect",
+        //                 icon: '<i class="fas fa-search"></i>',
+        //                 callback: () => ui.notifications.info("Inspecting...")
+        //             },
+        //             {
+        //                 name: "Attack",
+        //                 icon: '<i class="fas fa-crosshairs"></i>',
+        //                 callback: () => ui.notifications.info("Preparing attack...")
+        //             },
+        //             {
+        //                 name: "Cancel",
+        //                 icon: '<i class="fas fa-times"></i>',
+        //                 callback: () => console.log("Canceled.")
+        //             }
+        //         ]
+        //     );
+        //     menu.render(true);
+        // });
+
     }
     if(message.flags.swse.context.type === "damage-result"){
         let activeGM = game.users.activeGM
