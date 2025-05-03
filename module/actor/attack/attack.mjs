@@ -863,10 +863,7 @@ export class Attack {
         }).includes(num);
     }
 
-    d20Result(roll) {
-        let term = roll.terms.find(term => term.faces === 20);
-        return term.results[0].result;
-    }
+
 
     isMiss(attackRoll, defense, autohit, autoMiss) {
         if(autoMiss) return true;

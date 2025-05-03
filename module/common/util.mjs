@@ -645,6 +645,11 @@ export function getOrdinal(i) {
     return `${i}`
 }
 
+export function d20Result(roll) {
+    let term = roll.terms.find(term => term.faces === 20);
+    return term.results[0].result;
+}
+
 export function getAttackRange(range, isAccurate, isInaccurate, actor) {
     let targets = Array.from(game.user.targets); //get targeted tokens
 
