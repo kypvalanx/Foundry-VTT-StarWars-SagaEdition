@@ -34,9 +34,7 @@ import {SimpleCache} from "../../common/simple-cache.mjs";
 import {weaponGroup} from "../../common/constants.mjs";
 import {SWSE} from "../../common/config.mjs";
 import {RollModifier, RollModifierChoice} from "../../common/roll-modifier.mjs";
-
-//Broken out because i have no idea if i'm doing this in a way that the roller understands
-
+import SWSETemplate from "../../template/SWSETemplate.mjs";
 
 
 export class Attack {
@@ -45,7 +43,14 @@ export class Attack {
         SINGLE_ATTACK: "SINGLE_ATTACK"
     };
 
-    get attackKey(){
+    #mapToStandardRanges(range) {
+        if(range === "Grenades"){
+            return "Thrown Weapons"
+        }
+        return range;
+    }
+
+    get attackKey() {
         if ('Unarmed Attack' === this.weaponId) {
             return `${this.actorId}.Unarmed Attack`
         }
@@ -60,7 +65,7 @@ export class Attack {
      * @param parentId {String} the parent actor of the weapon
      * @param options {object}
      */
-    constructor(actorId, weaponId, operatorId, parentId, options= {}) {
+    constructor(actorId, weaponId, operatorId, parentId, options = {}) {
         this.actorId = actorId;
         this.weaponId = weaponId;
         this.operatorId = operatorId;
@@ -113,6 +118,7 @@ export class Attack {
         let s = JSON.stringify(value);
         return escape(s);
     }
+
 //TODO this should reduce the current value of ammo, when it reaches 0, set the hidden item to "expended"  maybe just a suffix.
     async reduceAmmunition(count = 1) {
         if (!(this.item && this.item.hasAmmunition)) {
@@ -157,7 +163,7 @@ export class Attack {
                 let tokens = canvas.tokens.children || [];
                 let token = tokens.flatMap(token => token.children).find(token => token.id === this.parentId);
                 const actor = token?.document?.actor
-                if(actor){
+                if (actor) {
                     return actor;
                 }
             }
@@ -284,7 +290,7 @@ export class Attack {
         terms.push(...appendNumericTerm(operator.baseAttackBonus, "Base Attack Bonus"));
         terms.push(...appendNumericTerm(this.getConditionModifier(operator), "Condition Modifier"));
 
-        if(parent !== operator){
+        if (parent !== operator) {
             terms.push(...appendNumericTerm(this.getConditionModifier(parent), "Vehicle Condition Modifier"));
         }
 
@@ -322,13 +328,13 @@ export class Attack {
         const primaryTerms = [];
         let cache;
         for (const term of terms) {
-            if(term.operator){
+            if (term.operator) {
                 cache = term;
                 continue;
             }
 
             if (!term.options.requirements) {
-                if(cache){
+                if (cache) {
                     primaryTerms.push(cache)
                     cache = undefined;
                 }
@@ -408,10 +414,10 @@ export class Attack {
             })
             //let damageDie = damageDice[damageDice.length - 1];
             const {dice, additionalTerms} = getDiceTermsFromString(damageDice);
-            if(additionalTerms){
+            if (additionalTerms) {
                 doubleWeaponDamage.push(...additionalTerms)
             }
-            if(dice){
+            if (dice) {
                 terms.push(...dice)
             }
         }
@@ -444,7 +450,7 @@ export class Attack {
         terms.push(...getSpecializationDamageBonuses(actor, weaponTypes));
         //actorData.
 
-        if(terms[0] instanceof OperatorTerm){
+        if (terms[0] instanceof foundry.dice.terms.OperatorTerm) {
             terms[0] = null;
         }
 
@@ -510,14 +516,14 @@ export class Attack {
 
         let rollModifier = RollModifier.createRadio("hands", "Handedness", this.item.id);
 
-        if(!isTwoHanded){
+        if (!isTwoHanded) {
             const rollModifierChoice = new RollModifierChoice(`1 Hand`, 1, !isTwoHanded && !isMySize);
             rollModifierChoice.icon = "fa-hand";
             rollModifier.addChoice(rollModifierChoice);
 
         }
 
-        if(isTwoHanded || isMySize){
+        if (isTwoHanded || isMySize) {
             const rollModifierChoice1 = new RollModifierChoice(`2 Hand`, 2, isTwoHanded || isMySize);
             rollModifierChoice1.icon = "fa-hands";
             rollModifier.addChoice(rollModifierChoice1);
@@ -526,7 +532,7 @@ export class Attack {
         return rollModifier.hasChoices() ? [rollModifier] : [];
     }
 
-    get rangeDamageModifiers(){
+    get rangeDamageModifiers() {
         const modifiers = getInheritableAttribute({
             entity: [this.item, this.operator],
             attributeKey: "bonusDamage",
@@ -536,7 +542,7 @@ export class Attack {
         return this.filterBonusesByType(modifiers, "range");
     }
 
-    get rangeAttackModifiers(){
+    get rangeAttackModifiers() {
         const modifiers = getInheritableAttribute({
             entity: [this.item, this.operator],
             attributeKey: "toHitModifier",
@@ -561,7 +567,7 @@ export class Attack {
 
     getRangeModifierBlock() {
         let range = this.effectiveRange;
-        const accurate =this.isAccurate;
+        const accurate = this.isAccurate;
         const inaccurate = this.isInaccurate
         const defaultRange = this.defaultRange
         const damageModifiers = this.rangeDamageModifiers
@@ -577,8 +583,8 @@ export class Attack {
             if (inaccurate && rangeName === 'long') {
                 continue;
             }
-            const damageBonus = damageModifiers.filter(modifier=>modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a,b) => a + b, 0);
-            const attackBonus = attackModifiers.filter(modifier=>modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a,b) => a + b, 0) + rangePenalty;
+            const damageBonus = damageModifiers.filter(modifier => modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a, b) => a + b, 0);
+            const attackBonus = attackModifiers.filter(modifier => modifier.type === rangeName).map(modifier => modifier.bonus).reduce((a, b) => a + b, 0) + rangePenalty;
 
             const display = `${rangeName.titleCase()}, ${rangeIncrement.string.titleCase()}, ${rangePenalty}`;
             const value = {attack: attackBonus === 0 ? "+0" : attackBonus, damage: damageBonus};
@@ -648,11 +654,11 @@ export class Attack {
             attributeKey: 'special'
         })
         let type = this.type;
-        if ('Stun' === type  || type.includes("Energy (Stun)")) {
+        if ('Stun' === type || type.includes("Energy (Stun)") || type.includes("Stun")) {
             notes.push({href: "https://swse.fandom.com/wiki/Stun_Damage", value: "Stun Damage"})
 
         }
-        if ('Ion' === type || type.includes("Energy (Ion)")) {
+        if ('Ion' === type || type.includes("Energy (Ion)") || type.includes("Ion")) {
             notes.push({href: "https://swse.fandom.com/wiki/Ion_Damage", value: "Ion Damage"})
         }
 
@@ -697,7 +703,27 @@ export class Attack {
             resolvedSubtype = reduceWeaponRange(resolvedSubtype);
         }
 
-        return resolvedSubtype;
+        return this.#mapToStandardRanges(resolvedSubtype);
+    }
+
+    /**
+     *
+     * @param distance
+     * @return {integer|null}
+     */
+    rangePenalty(distance) {
+        let range = this.range
+        let rangeGrid = CONST.SWSE.Combat.range[range];
+
+        let rangeDescription = "out of range";
+        for (const [range, details] of Object.entries(rangeGrid)) {
+            if(distance >= details.low && distance <= details.high ){
+                rangeDescription = range;
+                break;
+            }
+        }
+
+        return SWSE.Combat.rangePenalty[rangeDescription] || rangeDescription;
     }
 
     get rangeDisplay() {
@@ -742,7 +768,7 @@ export class Attack {
             attributes.push("Energy");
         }
 
-        if(attributes.length > 1 && attributes.includes("Varies")){
+        if (attributes.length > 1 && attributes.includes("Varies")) {
             attributes = attributes.filter(x => x !== "Varies");
         }
 
@@ -761,8 +787,7 @@ export class Attack {
         return modes;
     }
 
-
-
+//TODO REMOVE
     get defaultRange() {
         return getAttackRange(this.range, this.isAccurate, this.isInaccurate, this.actor)
     }
@@ -828,12 +853,9 @@ export class Attack {
     }
 
 
-    isCritical(roll) {
-        let term = roll.terms.find(term => term.faces === 20);
-        let num = term.results[0].result;
-        if (num === 20) {
-            return true;
-        }
+    isCritical(num, excludeExtendedCritRange = false) {
+        if (num === 20) return true;
+        if (!excludeExtendedCritRange) return false;
         return getInheritableAttribute({
             entity: this.item,
             attributeKey: 'extendedCriticalHit',
@@ -841,9 +863,15 @@ export class Attack {
         }).includes(num);
     }
 
-    isMiss(roll, defense) {
-        let num = roll.total
-        return num < defense;
+    d20Result(roll) {
+        let term = roll.terms.find(term => term.faces === 20);
+        return term.results[0].result;
+    }
+
+    isMiss(attackRoll, defense, autohit, autoMiss) {
+        if(autoMiss) return true;
+        if(autohit) return false;
+        return attackRoll < defense;
     }
 
     get ammunition() {
@@ -854,9 +882,7 @@ export class Attack {
         return this.item.hasAmmunition;
     }
 
-    isFailure(roll) {
-        let term = roll.terms.find(term => term.faces === 20);
-        let num = term.results[0].result;
+    isAutomaticMiss(num) {
         if (num === 1) {
             return true;
         }
@@ -924,13 +950,62 @@ export class Attack {
         return dynamics;
     }
 
-get summary(){
-        return {attributes:[{key:"data-attack-key", value:this.attackKey}], value:this.attackKey, name:this.name}
-}
+//https://swse.fandom.com/wiki/Area_Attacks
+    static TARGET_TYPES = {
+        SINGLE_TARGET: "SINGLE_TARGET",
+        BURST: "BURST",
+        AUTOFIRE_WEAPON: "AUTOFIRE_WEAPON",
+        SPLASH_WEAPON: "SPLASH_WEAPON"
+    };
+
+
+    //TODO add an expected shape filter for area attacks
+    get targetType() {
+        const item = this.item;
+
+        const autofire = item.effects?.find(effect => effect.name === "Autofire");
+        if (autofire && autofire.disabled === false) {
+            return {type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON, criticalHitEnabled: false}
+        }
+
+        if (item.system.subtype === "Grenades") {
+            return {type: Attack.TARGET_TYPES.BURST, criticalHitEnabled: false}
+        }
+        return {type: Attack.TARGET_TYPES.SINGLE_TARGET, criticalHitEnabled: true}
+    }
+
+    get template(){
+        const item = this.item;
+
+        const autofire = item.effects?.find(effect => effect.name === "Autofire");
+        if (autofire && autofire.disabled === false) {
+            return {shape: "circle", size: 1, disableRotation: true, type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON, criticalHitEnabled: false, snapPoint:"vertex"}
+        }
+
+        if (item.system.subtype === "Grenades") {
+            return {shape: "circle", size: 2, disableRotation: true, type: Attack.TARGET_TYPES.BURST, criticalHitEnabled: false, snapPoint:"vertex"}
+        }
+        return {shape: "circle", size: 0.5, disableRotation: true, type: Attack.TARGET_TYPES.SINGLE_TARGET, criticalHitEnabled: false, snapPoint:"center", cleanUp:true}
+    }
+
+    async placeTemplate() {
+        const templates = [];
+        for (const template of SWSETemplate.fromAttack(this)) {
+            const result = await template.drawPreview();
+            if (result) templates.push(...result);
+        }
+        return templates;
+    }
+
+    get summary() {
+        return {attributes: [{key: "data-attack-key", value: this.attackKey}], value: this.attackKey, name: this.name}
+    }
+
     attackOption(attack, id) {
         let attackString = attack.toJSONString
         return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
     }
+
     // attackOption(attack, id) {
     //     let attackString = attack.toJSONString
     //     return `<option id="${id}" data-item-id="${attack.itemId}" value="${attackString}" data-attack="${attackString}">${attack.name}</option>`;
@@ -983,7 +1058,6 @@ get summary(){
     }
 
 
-
 }
 
 
@@ -1022,7 +1096,10 @@ export function getDiceTermsFromString(dieString) {
             dice.push(new foundry.dice.terms.NumericTerm({number: 0}));
         } else if (!isNaN(dieTerm)) {
             if (lastOperator === "x") {
-                dice.push(new foundry.dice.terms.NumericTerm({number: toNumber(dieTerm), options: {flavor: "multiplier"}}));
+                dice.push(new foundry.dice.terms.NumericTerm({
+                    number: toNumber(dieTerm),
+                    options: {flavor: "multiplier"}
+                }));
             } else {
                 dice.push(new foundry.dice.terms.NumericTerm({number: toNumber(dieTerm)}));
             }
@@ -1041,7 +1118,7 @@ export function getDiceTermsFromString(dieString) {
             diceTokens.forEach((token, i) => {
                 let toks = token.split("d")
                 const die = new foundry.dice.terms.Die({number: parseInt(toks[0]), faces: parseInt(toks[1])});
-                if(i === 0){
+                if (i === 0) {
                     dice.push(die);
                 } else {
                     additionalTerms.push(die);

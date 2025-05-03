@@ -204,6 +204,12 @@
   flex-direction: row-reverse;
 }
 
+.flex-tight {
+  -webkit-box-pack: space-evenly;
+  -ms-flex-pack: space-evenly;
+  justify-content: space-evenly;
+}
+
 .flex-grow,
 .flex-grow1 {
   -webkit-box-flex: 1;
