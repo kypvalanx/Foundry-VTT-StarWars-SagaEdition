@@ -838,7 +838,7 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
     }
 
     let damage = await damageRoll.roll();
-    let targetIds = targetActors.map(target => target.id).join(", ");
+    let targetIds = targets.map(target => target.id).join(", ");
 
     const response = {
         attack: attackRollResult,

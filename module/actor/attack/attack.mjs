@@ -713,7 +713,7 @@ export class Attack {
      */
     rangePenalty(distance) {
         let range = this.range
-        let rangeGrid = CONST.SWSE.Combat.range[range];
+        let rangeGrid = CONFIG.SWSE.Combat.range[range];
 
         let rangeDescription = "out of range";
         for (const [range, details] of Object.entries(rangeGrid)) {
