@@ -18,7 +18,7 @@ import {reduceWeaponRange, SWSEItem} from "../../item/item.mjs";
 import {
     appendNumericTerm,
     appendTerms,
-    getAttackRange,
+    getAttackRange, getDistance,
     getDocumentByUuid,
     getEntityFromCompendiums,
     getOrdinal,
@@ -700,7 +700,6 @@ export class Attack {
 
         let resolvedSubtype = treatedAsForRange ? treatedAsForRange : item.system.subtype;
 
-
         if (item.stripping["reduceRange"]?.value) {
             resolvedSubtype = reduceWeaponRange(resolvedSubtype);
         }
@@ -1056,7 +1055,30 @@ export class Attack {
         return resolvedAttacks;
     }
 
+    /**
+     *
+     * @param actor
+     * @param location
+     * @return {{distanceModifier: (*|string), rangeDistance: (string|*)}}
+     */
+    getDistanceModifier(actor, location) {
+        let token;
+        if (actor.isToken) {
+            token = actor.token;
+        } else {
+            let tokens = canvas.tokens.placeables.filter(token => token.actor.id === actor.id);
+            //TODO this defaults to the first token instance.  idk if this is an issue.  would a PC have multiple?
 
+            token = tokens[0];
+        }
+        let x = token.center.x / canvas.grid.sizeX
+        let y = token.center.y / canvas.grid.sizeY
+        let distance = getDistance(location, {x, y})
+
+        let {rangePenalty, rangeDescription} = this.rangePenalty(distance)
+
+        return {distanceModifier: rangePenalty, rangeDistance: rangeDescription.titleCase()};
+    }
 }
 
 
@@ -1155,3 +1177,4 @@ function resolveUnarmedDamageDie(actor) {
     damageDie = increaseDieSize(damageDie, bonus);
     return getDiceTermsFromString(damageDie).dice;
 }
+

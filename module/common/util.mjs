@@ -6,7 +6,6 @@ import {SWSEActor} from "../actor/actor.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
-import {Attack} from "../actor/attack/attack.mjs";
 import {getCompendium} from "../compendium/compendium-util.mjs";
 
 export function unique(value, index, self) {
@@ -1703,4 +1702,24 @@ export function numericOverrideOptions(actor) {
     })
 
     return options;
+}
+
+/**
+ * Returns the distance between 2 points using 1212 counting for diagonals
+ *
+ * @param a a point
+ * @param a.x {number}
+ * @param a.y {number}
+ * @param b a point
+ * @param b.x {number}
+ * @param b.y {number}
+ * @return {number}
+ */
+export function getDistance(a, b) {
+    let xDiff = Math.floor(Math.abs(a.x - b.x));
+    let yDiff = Math.floor(Math.abs(a.y - b.y));
+    let diagonal = Math.min(xDiff, yDiff);
+    let adjustedDiagonal = Math.floor(diagonal / 2) * 3 + diagonal % 2
+
+    return xDiff + yDiff - diagonal * 2 + adjustedDiagonal;
 }

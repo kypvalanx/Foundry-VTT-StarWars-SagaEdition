@@ -3,7 +3,8 @@ import {Attack, getActor, outOfRange} from "./attack.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
-    appendNumericTerm, d20Result,
+    appendNumericTerm,
+    d20Result,
     equippedItems,
     getBonusString,
     handleAttackSelect,
@@ -727,41 +728,6 @@ async function createAreaAndSelectActors() {
     return found.map(token => token.actor);
 }
 
-function getDistance(a, b) {
-    let xDiff = Math.floor(Math.abs(a.x - b.x));
-    let yDiff = Math.floor(Math.abs(a.y - b.y));
-    let diagonal = Math.min(xDiff, yDiff);
-    let adjustedDiagonal = Math.floor(diagonal/2) * 3 + diagonal % 2
-
-    return xDiff + yDiff - diagonal * 2 + adjustedDiagonal;
-}
-
-/**
- *
- * @param actor
- * @param location
- * @param attack
- * @return {{distanceModifier: (*|string), rangeDistance: (string|*)}}
- */
-function getDistanceModifier(actor, location, attack) {
-    let token;
-    if(actor.isToken){
-        token = actor.token;
-    } else {
-        let tokens = canvas.tokens.placeables.filter(token => token.actor.id === actor.id);
-        //TODO this defaults to the first token instance.  idk if this is an issue.  would a PC have multiple?
-
-        token = tokens[0];
-    }
-    let x = token.center.x / canvas.grid.sizeX
-    let y = token.center.y / canvas.grid.sizeY
-    let distance = getDistance(location, {x,y})
-
-    let {rangePenalty, rangeDescription} = attack.rangePenalty(distance)
-
-    return {distanceModifier: rangePenalty, rangeDistance: rangeDescription.titleCase};
-}
-
 function isAreaAttack(targetType) {
     return targetType !== Attack.TARGET_TYPES.SINGLE_TARGET;
 }
@@ -791,7 +757,7 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
 
     targetActors.map((actorAndLocation) => {
         let {actors, location} = actorAndLocation;
-        let {distanceModifier, rangeDistance} = getDistanceModifier(attack.actor, location, attack);
+        let {distanceModifier, rangeDistance} = attack.getDistanceModifier(attack.actor, location);
         targets.push(...actors.map(actor => {
             let reflexDefense = actor.defense.reflex.total;
             const attackRoll = attackRollResult.total + (isNaN(distanceModifier) ? 0 : distanceModifier);
@@ -835,7 +801,9 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
                 result: targetResult,
                 conditionalDefenses: conditionalDefenses,
                 id: actor.id,
-                notes: attack.notes
+                notes: attack.notes,
+                damage,
+                damageType: attack.type,
             }
         }))
     })
