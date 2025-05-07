@@ -1,5 +1,5 @@
 import {SimpleCache} from "../../common/simple-cache.mjs";
-import {Attack, getActor} from "./attack.mjs";
+import {Attack, getActor, outOfRange} from "./attack.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {
     adjustDieSize,
@@ -736,6 +736,13 @@ function getDistance(a, b) {
     return xDiff + yDiff - diagonal * 2 + adjustedDiagonal;
 }
 
+/**
+ *
+ * @param actor
+ * @param location
+ * @param attack
+ * @return {{distanceModifier: (*|string), rangeDistance: (string|*)}}
+ */
 function getDistanceModifier(actor, location, attack) {
     let token;
     if(actor.isToken){
@@ -746,12 +753,13 @@ function getDistanceModifier(actor, location, attack) {
 
         token = tokens[0];
     }
-    console.log(token)
     let x = token.center.x / canvas.grid.sizeX
     let y = token.center.y / canvas.grid.sizeY
     let distance = getDistance(location, {x,y})
 
-    return attack.rangePenalty(distance);
+    let {rangePenalty, rangeDescription} = attack.rangePenalty(distance)
+
+    return {distanceModifier: rangePenalty, rangeDistance: rangeDescription.titleCase};
 }
 
 function isAreaAttack(targetType) {
@@ -762,6 +770,13 @@ function hitsTargetedArea(attackRoll) {
     return attackRoll >= 10;
 }
 
+/**
+ *
+ * @param attack
+ * @param criticalHitEnabled
+ * @param targetType
+ * @return {Promise<{itemId: *, damage: *, fail: boolean, notes, attackSummary: string, critical: boolean, attackRollFunction, targetIds: string, attack: *, damageType, targets: *[], damageRollFunction}>}
+ */
 async function resolveAttack(attack, criticalHitEnabled, targetType) {
     let targetActors = await getTargetedActors(attack);
     let attackRoll = attack.attackRoll.roll;
@@ -772,13 +787,14 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
     let autoHit = attack.isCritical(d20Value, true)
 
     let targets = [];
+    const attackSummary = [];
 
     targetActors.map((actorAndLocation) => {
         let {actors, location} = actorAndLocation;
-        let distanceModifier = getDistanceModifier(attack.actor, location, attack);
+        let {distanceModifier, rangeDistance} = getDistanceModifier(attack.actor, location, attack);
         targets.push(...actors.map(actor => {
             let reflexDefense = actor.defense.reflex.total;
-            const attackRoll = attackRollResult.total + distanceModifier;
+            const attackRoll = attackRollResult.total + (isNaN(distanceModifier) ? 0 : distanceModifier);
             let isMiss = attack.isMiss(attackRoll , reflexDefense, autoHit, autoMiss)
             let isHalfDamage = isAreaAttack(targetType) && hitsTargetedArea(attackRoll) && isMiss;
             //yes, a triple embeded ternary, sorry
@@ -797,6 +813,10 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
                 targetResult = "Hit";
             }
 
+            if(outOfRange === distanceModifier){
+                targetResult += " (Out of Range)";
+            }
+
             let conditionalDefenses =
                 getInheritableAttribute({
                     entity: actor,
@@ -804,11 +824,12 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
                     attributeFilter: attr => !!attr.modifier,
                     reduce: "VALUES"
                 });
-
             return {
                 name: actor.name,
                 defense: reflexDefense,
                 defenseType: 'Ref',
+                rangeDistance: rangeDistance,
+                rangeModifier: distanceModifier,
                 adjustedAttackRoll: attackRoll,
                 highlight: targetResult.includes("Miss") ? "miss" : "hit",
                 result: targetResult,
@@ -850,7 +871,8 @@ async function resolveAttack(attack, criticalHitEnabled, targetType) {
         notes: attack.notes,
         critical,
         fail: autoMiss,
-        targets, targetIds
+        targets, targetIds,
+        attackSummary: JSON.stringify(targets)
     };
     await attack.reduceAmmunition()
     return response;

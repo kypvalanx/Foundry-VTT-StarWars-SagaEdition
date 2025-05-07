@@ -37,6 +37,8 @@ import {RollModifier, RollModifierChoice} from "../../common/roll-modifier.mjs";
 import SWSETemplate from "../../template/SWSETemplate.mjs";
 
 
+export const outOfRange = "out of range";
+
 export class Attack {
     static TYPES = {
         FULL_ATTACK: "FULL_ATTACK",
@@ -709,13 +711,13 @@ export class Attack {
     /**
      *
      * @param distance
-     * @return {integer|null}
+     * @return {{rangePenalty: (*|string), rangeDescription: string}}
      */
     rangePenalty(distance) {
         let range = this.range
         let rangeGrid = CONFIG.SWSE.Combat.range[range];
 
-        let rangeDescription = "out of range";
+        let rangeDescription = outOfRange;
         for (const [range, details] of Object.entries(rangeGrid)) {
             if(distance >= details.low && distance <= details.high ){
                 rangeDescription = range;
@@ -723,7 +725,7 @@ export class Attack {
             }
         }
 
-        return SWSE.Combat.rangePenalty[rangeDescription] || rangeDescription;
+        return {rangePenalty: SWSE.Combat.rangePenalty[rangeDescription] || rangeDescription, rangeDescription: rangeDescription};
     }
 
     get rangeDisplay() {
