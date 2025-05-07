@@ -223,110 +223,27 @@ async function openTargetListResolutionDialog(sortedOriginal,sortedCurrent) {
 
 const applyAttack = async (event) => {
     let element = $(event.currentTarget);
-    let damageType = element.data("damage-type")
     let type = element.data("type")
-    let attack = element.data("attack")
-    let damage = element.data("damage")
 
     const attackSummaries = element.data("attackSummary");
-    let actorIds = element.data("targetIds").split(", ")
-    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id)).reduce((actorMap, actor) => actorMap[actor.id] = actor, {})
+    let actorIds = attackSummaries.map(a=>a.id);
+    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id)).reduce((actorMap, actor) => {actorMap[actor.id] = actor; return actorMap}, {})
     for (const attackSummary of attackSummaries) {
         const targetActor = targetActors[attackSummary.id]
 
         if (type === "heal") {
-            targetActor.applyHealing({heal: attackSummary.adjustedAttackRoll})
+            targetActor.applyHealing({heal: attackSummary.damage})
         } else {
             await targetActor.applyDamage({
-                damage: attackSummary.adjustedAttackRoll,
-                affectDamageThreshold: true
+                damage: attackSummary.damage,
+                affectDamageThreshold: true,
+                damageType: attackSummary.damageType,
+                skipShields: false,
+                skipDamageReduction: false,
+                halfDamage: attackSummary.result === "Half Damage"
             })
         }
     }
-
-
-    //let currentlyTargeted = [...game.user.targets.map(token => token.actor)]
-    //let targetActors = await selectTargetList(originallyTargeted, currentlyTargeted);
-    let actorMap = {};
-
-    let damageTypeString = !!damageType ? ` (${damageType})` : ""
-    let baseDamage = toNumber(damage);
-    if(type === "half"){
-        baseDamage /= 2
-    } else if(type === "double") {
-        baseDamage *= 2
-    }
-    let damageString = `${Math.floor(baseDamage)}`
-
-    if(targetActors.length === 0){
-        new Dialog({
-            title: "No Targets Selected",
-            content: "No tokens were targeted",
-            buttons: {
-                ok:{
-                    label: "OK",
-                    icon:  `<i class="fas fa-check"></i>`
-                }
-            },
-            default: "ok"
-        }).render(true);
-    return;
-    }
-let dataset = $(element).dataset
-
-
-
-    new Dialog({
-        title: "Resolve Attacks",
-        content: `<div class="subtle-panel">
-<div>Attack Roll: ${attack}</div>
-<div>${type.titleCase()}: ${damageString}${damageTypeString}</div>
-</div>`,
-        buttons: {
-            attack:{
-                label: "Attack",
-                callback: async (html) => {
-                    let targets = html.find("[data-type=target]")
-                    for (let target of targets) {
-
-                        let targetHit = $(target).find("[data-attribute=target-hit]")[0]?.checked
-
-                        let additionalDR = $(target).find("[data-attribute=additional-damage-resistance]")[0].value
-                        let bypassDR = $(target).find("[data-attribute=bypass-damage-resistance]")[0]?.checked
-                        let additionalShields = $(target).find("[data-attribute=additional-shield-rating]")[0].value
-                        let bypassShields = $(target).find("[data-attribute=bypass-shields]")[0]?.checked
-                        let affectDamageThreshold = $(target).find("[data-attribute=bypass-damage-threshold]")[0]?.checked
-
-
-                        if (!targetHit) {
-                            return;
-                        }
-
-                        let targetActor = actorMap[target.dataset.target];
-                        if (type === "heal") {
-                            targetActor.applyHealing({heal: baseDamage})
-                        } else {
-                            await targetActor.applyDamage({
-                                damage: baseDamage,
-                                damageType: damageType,
-                                additionalDR,
-                                skipDamageReduction: bypassDR,
-                                additionalShields,
-                                skipShields: bypassShields,
-                                affectDamageThreshold
-                            })
-                        }
-                    }
-                },
-                icon:  `<i class="fas fa-check"></i>`
-            },
-            cancel:{
-                label: "Cancel",
-                icon:  `<i class="fas fa-x"></i>`
-            }
-        },
-        default: "attack"
-    }).render(true);
 }
 
 Hooks.on('renderChatMessage', async (message, html) => {
@@ -336,39 +253,16 @@ Hooks.on('renderChatMessage', async (message, html) => {
 
     if(message.flags.swse.context.type === "attack-roll"){
         html.find('[data-action="apply-attack"]').click(applyAttack.bind(this));
-        // html.find('[data-action="apply-attack"]').addEventListener('contextmenu', event => {
-        //     event.preventDefault();
-        //
-        //     // Optional: Position the menu at the mouse pointer
-        //     const menu = new ContextMenu(
-        //         { event }, // Required event for positioning
-        //         [ // Menu options
-        //             {
-        //                 name: "Inspect",
-        //                 icon: '<i class="fas fa-search"></i>',
-        //                 callback: () => ui.notifications.info("Inspecting...")
-        //             },
-        //             {
-        //                 name: "Attack",
-        //                 icon: '<i class="fas fa-crosshairs"></i>',
-        //                 callback: () => ui.notifications.info("Preparing attack...")
-        //             },
-        //             {
-        //                 name: "Cancel",
-        //                 icon: '<i class="fas fa-times"></i>',
-        //                 callback: () => console.log("Canceled.")
-        //             }
-        //         ]
-        //     );
-        //     menu.render(true);
-        // });
-
     }
     if(message.flags.swse.context.type === "damage-result"){
         let activeGM = game.users.activeGM
         if(game.user.id === activeGM.id){
+            /**
+             * SWSEActor
+             */
             let targetActor = game.actors.get(message.flags.swse.context.damageTarget)
             targetActor.resolveDamage(message.flags.swse.context.damage, message.timestamp)
+            message.delete();
         }
     }
 

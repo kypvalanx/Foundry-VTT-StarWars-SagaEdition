@@ -1,12 +1,11 @@
-<!--index attack-->
+<div>
+    <div>{{attack.range}} Range</div>
 {{#if targetsEnabled}}
     <div class="targets">
         {{#each attack.targets as |target i|}}
             {{> 'systems/swse/templates/roll/roll-target.hbs' target=target}}
         {{/each}}
     </div>
-    {{#if attack.targetIds}}
-    {{/if}}
 {{/if}}
 <div>Attack:</div>
 {{> 'systems/swse/templates/roll/roll.hbs' roll=attack.attack critical=attack.critical fail=attack.fail}}
@@ -17,10 +16,11 @@
         <div class="dice-formula"><a href="{{note.href}}">{{note.value}}</a></div>
     {{/each}}
 </div>
-<br>
-<div class="buttons flex flex-row">
-    <button type="button" data-action="apply-attack" data-type="damage" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Damage</span></button>
-    <button type="button" data-action="apply-attack" data-type="half" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Half</span></button>
-    <button type="button" data-action="apply-attack" data-type="double" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Double</span></button>
-    <button type="button" data-action="apply-attack" data-type="heal" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-hand-holding-heart"></i><br><span class="button-text">Heal</span></button>
+<!--<br>-->
+<!--<div class="buttons flex flex-row">-->
+<!--    <button type="button" data-action="apply-attack" data-type="damage" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Damage</span></button>-->
+<!--    <button type="button" data-action="apply-attack" data-type="half" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Half</span></button>-->
+<!--    <button type="button" data-action="apply-attack" data-type="double" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-explosion"></i><br><span class="button-text">Double</span></button>-->
+<!--    <button type="button" data-action="apply-attack" data-type="heal" data-attack-summary="{{attack.attackSummary}}" data-item-id="{{attack.itemId}}" data-damage-type="{{attack.damageType}}" data-attack="{{attack.attack._total}}" data-damage="{{attack.damage._total}}" data-target-ids="{{attack.targetIds}}"><i class="fas fa-hand-holding-heart"></i><br><span class="button-text">Heal</span></button>-->
+<!--</div>-->
 </div>

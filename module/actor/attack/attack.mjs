@@ -16,9 +16,13 @@ import {generateArmorCheckPenalties} from "../armor-check-penalty.mjs";
 import {SWSEActor} from "../actor.mjs";
 import {reduceWeaponRange, SWSEItem} from "../../item/item.mjs";
 import {
+    adjustDieSize,
     appendNumericTerm,
+    appendTerm,
     appendTerms,
-    getAttackRange, getDistance,
+    d20Result,
+    getAttackRange,
+    getDistance,
     getDocumentByUuid,
     getEntityFromCompendiums,
     getOrdinal,
@@ -26,6 +30,7 @@ import {
     minus,
     mult,
     plus,
+    resolveValueArray,
     toNumber,
     toShortAttribute
 } from "../../common/util.mjs";
@@ -38,6 +43,72 @@ import SWSETemplate from "../../template/SWSETemplate.mjs";
 
 
 export const outOfRange = "out of range";
+
+/**
+ *
+ * @param templateDoc
+ * @return {TokenDocument[]}
+ */
+function findContained(templateDoc) {
+    const {size} = templateDoc.parent.grid;
+    const {x: tempx, y: tempy, object} = templateDoc;
+    const tokenDocs = templateDoc.parent.tokens;
+    const contained = new Set();
+    for (const tokenDoc of tokenDocs) {
+        const {width, height, x: tokx, y: toky} = tokenDoc;
+        const startX = width >= 1 ? 0.5 : width / 2;
+        const startY = height >= 1 ? 0.5 : height / 2;
+        for (let x = startX; x < width; x++) {
+            for (let y = startY; y < width; y++) {
+                const curr = {
+                    x: tokx + x * size - tempx,
+                    y: toky + y * size - tempy
+                };
+                const contains = object._computeShape().contains(curr.x, curr.y);
+                if (contains) {
+                    contained.add(tokenDoc);
+                    continue;
+                }
+            }
+        }
+    }
+    return [...contained];
+}
+
+/**
+ *
+ * @param templates
+ * @return {[{location:{x,y}, actors:[]}]}
+ */
+export function selectActorsByTemplates(templates = []) {
+    let actors = [];
+    let gridSize = canvas.scene.grid
+    for (const template of templates) {
+        let x = template.x / gridSize.sizeX
+        let y = template.y / gridSize.sizeY
+        let found = findContained(template)
+        actors.push({location: {x, y}, actors: found.map(token => token.actor)})
+    }
+    return actors;
+}
+
+
+export function cleanupTemplates(templates = []) {
+    for (let template of templates) {
+        if (template.flags.cleanUp) {
+            template.delete()
+        }
+    }
+}
+
+function simplify(attackSummaries) {
+    for (const attackSummary of attackSummaries) {
+        //console.log(attackSummary)
+        attackSummary.damage = attackSummary.damage.total;
+    }
+
+    return attackSummaries;
+}
 
 export class Attack {
     static TYPES = {
@@ -708,13 +779,13 @@ export class Attack {
     }
 
     /**
+     * Returns the range penalty and description for a given distance in squares
      *
      * @param distance
-     * @return {{rangePenalty: (*|string), rangeDescription: string}}
+     * @return {{penalty: number, description: string}}
      */
     rangePenalty(distance) {
-        let range = this.range
-        let rangeGrid = CONFIG.SWSE.Combat.range[range];
+        let rangeGrid = CONFIG.SWSE.Combat.range[this.range];
 
         let rangeDescription = outOfRange;
         for (const [range, details] of Object.entries(rangeGrid)) {
@@ -724,7 +795,10 @@ export class Attack {
             }
         }
 
-        return {rangePenalty: SWSE.Combat.rangePenalty[rangeDescription] || rangeDescription, rangeDescription: rangeDescription};
+        return {
+            penalty: SWSE.Combat.rangePenalty[rangeDescription] || 0,
+            description: rangeDescription.titleCase()
+        };
     }
 
     get rangeDisplay() {
@@ -866,7 +940,7 @@ export class Attack {
 
 
 
-    isMiss(attackRoll, defense, autohit, autoMiss) {
+    static isMiss(attackRoll, defense, autohit, autoMiss) {
         if(autoMiss) return true;
         if(autohit) return false;
         return attackRoll < defense;
@@ -1059,7 +1133,7 @@ export class Attack {
      *
      * @param actor
      * @param location
-     * @return {{distanceModifier: (*|string), rangeDistance: (string|*)}}
+     * @return {{penalty: (number), description: (string)}}
      */
     getDistanceModifier(actor, location) {
         let token;
@@ -1075,9 +1149,98 @@ export class Attack {
         let y = token.center.y / canvas.grid.sizeY
         let distance = getDistance(location, {x, y})
 
-        let {rangePenalty, rangeDescription} = this.rangePenalty(distance)
+        return this.rangePenalty(distance)
+    }
 
-        return {distanceModifier: rangePenalty, rangeDistance: rangeDescription.titleCase()};
+    /**
+     * gets the actors targeted already or creates the appropriate template to select them
+     * @return {Promise<{location: {x, y}, actors: []}[]>}
+     */
+    async targetedActors() {
+        let targetActors = [];
+        let targetTokens = game.user.targets
+        let gridSize = canvas.scene.grid
+        for (let targetToken of targetTokens.values()) {
+            let actor = targetToken.actor
+            if (actor) {
+                let x = targetToken.x / gridSize.sizeX
+                let y = targetToken.y / gridSize.sizeY
+                targetActors.push({location:{x,y}, actors:[actor]})
+            } else {
+                console.warn(`Could not find actor for ${targetToken.name}`)
+            }
+        }
+        if(targetActors.length > 0) return targetActors;
+
+        let templates = await this.placeTemplate()
+        const actors = selectActorsByTemplates(templates);
+        cleanupTemplates(templates)
+        return actors;
+    }
+
+    async resolve(){
+        let targetActors = await this.targetedActors();
+        let attackRoll = this.attackRoll.roll;
+        await attackRoll.roll();
+        let d20Value = d20Result(attackRoll);
+        let autoMiss = this.isAutomaticMiss(d20Value);
+        let critical =  this.targetType.criticalHitEnabled && this.isCritical(d20Value);
+        let autoHit = this.isCritical(d20Value, true)
+
+        let damageRoll = this.damageRoll.roll;
+
+        if (critical) {
+            damageRoll = modifyRollForCriticalEvenOnAreaAttack(this, damageRoll);
+        }
+        const areaAttack = this.targetType.type !== Attack.TARGET_TYPES.SINGLE_TARGET;
+
+        let ignoreCritical = getInheritableAttribute({
+            entity: this.item,
+            attributeKey: "skipCriticalMultiply",
+            reduce: "OR"
+        }) || areaAttack
+
+        if (critical && !ignoreCritical) {
+            damageRoll = modifyRollForCriticalHit(this, damageRoll);
+        }
+
+        await damageRoll.roll();
+
+        const response = {
+            attack: attackRoll,
+            damage: damageRoll
+        };
+        response.rangeBreakdown = []
+        let attackSummaries = []
+
+        for (const targetActor of targetActors) {
+            let {actors, location} = targetActor;
+            let {penalty, description} = this.getDistanceModifier(this.actor, location);
+
+            let found = response.rangeBreakdown.find(rb => rb.range === description)
+            let modifiedRoll = found ? found.attack : makeVariantRoll(attackRoll, penalty, description);
+            const targets = toTargets(actors, modifiedRoll, autoMiss, autoHit, critical, areaAttack, damageRoll, this)
+            attackSummaries.push(...targets);
+            if (found) {
+                found.targets.push(...targets)
+                continue;
+            }
+
+            response.rangeBreakdown.push({
+                range: description,
+                attack: modifiedRoll,
+                damage: damageRoll,
+                damageType: this.type,
+                notes: this.notes,
+                critical,
+                fail: autoMiss,
+                targets
+            });
+        }
+
+        await this.reduceAmmunition()
+        response.attackSummaries = JSON.stringify(simplify(attackSummaries))
+        return response;
     }
 }
 
@@ -1176,5 +1339,203 @@ function resolveUnarmedDamageDie(actor) {
     })
     damageDie = increaseDieSize(damageDie, bonus);
     return getDiceTermsFromString(damageDie).dice;
+}
+
+function multiplyNumericTerms(roll, multiplier) {
+    let previous;
+    for (let term of roll.terms) {
+        if (term instanceof foundry.dice.terms.NumericTerm) {
+            if (previous && previous.operator !== "*" && previous.operator !== "/") {
+                term.number = term.number * multiplier;
+            }
+        }
+        previous = term;
+    }
+    return Roll.fromTerms(roll.terms);
+}
+
+function addMultiplierToDice(roll, multiplier) {
+    let terms = [];
+
+    for (let term of roll.terms) {
+        terms.push(term);
+        if (term instanceof foundry.dice.terms.DiceTerm) {
+            terms.push(new foundry.dice.terms.OperatorTerm({operator: '*'}));
+            terms.push(new foundry.dice.terms.NumericTerm({number: `${multiplier}`}))
+        }
+    }
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+function modifyRollForPreMultiplierBonuses(attack, damageRoll) {
+    let criticalHitPreMultiplierBonuses = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "criticalHitPreMultiplierBonus"
+    })
+
+
+    for (let criticalHitPreMultiplierBonus of criticalHitPreMultiplierBonuses) {
+
+        let value = resolveValueArray(criticalHitPreMultiplierBonus, attack.actor)
+
+        damageRoll.terms.push(...appendNumericTerm(value, criticalHitPreMultiplierBonus.sourceString))
+    }
+    return damageRoll;
+}
+
+function modifyRollForPostMultiplierBonus(attack, damageRoll) {
+    let postMultBonusDie = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "criticalHitPostMultiplierBonusDie",
+        reduce: "SUM"
+    })
+    damageRoll.alter(1, postMultBonusDie)
+    return damageRoll;
+}
+
+export function crunchyCrit(roll) {
+    const terms = [];
+    let max = 0;
+
+    for (let term of roll.terms) {
+        terms.push(term);
+        if (term instanceof foundry.dice.terms.DiceTerm) {
+            max += term.faces * term.number
+        } else if (term instanceof foundry.dice.terms.NumericTerm) {
+            max += term.number
+        }
+    }
+    terms.push(new foundry.dice.terms.OperatorTerm({operator: "+"}))
+    terms.push(new foundry.dice.terms.NumericTerm({number: max}))
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+export function maxRollCrit(roll) {
+    const terms = [];
+
+    for (const term of roll.terms) {
+        if (term instanceof foundry.dice.terms.DiceTerm) {
+            terms.push(new foundry.dice.terms.NumericTerm({
+                number: term.number * term.faces,
+                options: {flavor: term.expression}
+            }))
+        } else {
+            terms.push(term)
+        }
+    }
+
+    return Roll.fromTerms(terms
+        .filter(term => !!term))
+}
+
+export function doubleDiceCrit(damageRoll, criticalMultiplier) {
+    damageRoll.alter(criticalMultiplier, 0, true)
+    return multiplyNumericTerms(damageRoll, criticalMultiplier)
+}
+
+export function doubleValueCrit(damageRoll, criticalMultiplier) {
+    damageRoll = addMultiplierToDice(damageRoll, criticalMultiplier)
+    return multiplyNumericTerms(damageRoll, criticalMultiplier)
+}
+
+function modifyRollForCriticalHit(attack, damageRoll) {
+    damageRoll = modifyRollForPreMultiplierBonuses(attack, damageRoll);
+
+    const criticalMultiplier = attack.critical;
+    switch (game.settings.get("swse", "criticalHitType")) {
+        case "Double Dice":
+            damageRoll = doubleDiceCrit(damageRoll, criticalMultiplier);
+            break;
+        case "Crunchy Crit":
+            damageRoll = crunchyCrit(damageRoll)
+            break;
+        case "Max Damage":
+            damageRoll = maxRollCrit(damageRoll)
+            break;
+        default:
+            damageRoll = doubleValueCrit(damageRoll, criticalMultiplier);
+    }
+
+    damageRoll = modifyRollForPostMultiplierBonus(attack, damageRoll);
+    return damageRoll;
+}
+
+function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
+    let bonusCriticalDamageDieType = getInheritableAttribute({
+        entity: attack.item,
+        attributeKey: "bonusCriticalDamageDieType",
+        reduce: "SUM"
+    })
+
+    if (bonusCriticalDamageDieType) {
+        damageRoll = adjustDieSize(damageRoll, bonusCriticalDamageDieType)
+    }
+    return damageRoll;
+}
+
+function makeVariantRoll(attackRollResult, penalty, description) {
+    const terms = [...attackRollResult.terms]
+    terms.push(...appendTerm(penalty, description, true))
+
+    return Roll.fromTerms(terms);
+    // let modifiedAttackRoll = Roll.fromTerms(terms)
+    // modifiedAttackRoll.terms[0].results[0].result = attackRollResult.dice[0].results[0].result
+    // modifiedAttackRoll.terms[0].results[0].active = true;
+    // modifiedAttackRoll._total = attackRollResult._total + penalty; // override total
+    // modifiedAttackRoll._evaluated = true;
+    // return modifiedAttackRoll;
+}
+
+function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack) {
+    let reflexDefense = actor.defense.reflex.total;
+    const attackRollTotal = parseInt(attackRoll.total);
+    let isMiss = Attack.isMiss(attackRollTotal, reflexDefense, autoHit, autoMiss)
+    const hitsTargetedArea = attackRollTotal >= 10;
+    isMiss = areaAttack ? isMiss || !hitsTargetedArea : isMiss
+    let isHalfDamage = areaAttack && hitsTargetedArea && isMiss;
+
+    let targetResult;
+    if (critical) {
+        targetResult = "Critical Hit!";
+    } else if (autoHit) {
+        targetResult = "Hit";
+    } else if (isHalfDamage) {
+        targetResult = "Half Damage";
+    } else if (autoMiss) {
+        targetResult = "Automatic Miss";
+    } else if (isMiss) {
+        targetResult = "Miss";
+    } else {
+        targetResult = "Hit";
+    }
+
+    let conditionalDefenses =
+        getInheritableAttribute({
+            entity: actor,
+            attributeKey: ["reflexDefenseBonus"],
+            attributeFilter: attr => !!attr.modifier,
+            reduce: "VALUES"
+        });
+    return {
+        name: actor.name,
+        defense: reflexDefense,
+        defenseType: 'Ref',
+        adjustedAttackRoll: attackRollTotal,
+        highlight: targetResult.includes("Miss") ? "miss" : "hit",
+        result: targetResult,
+        conditionalDefenses: conditionalDefenses,
+        id: actor.id,
+        notes: attack.notes,
+        damage: damage,
+        damageType: attack.type,
+    }
+}
+
+function toTargets(actors, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack) {
+    return actors.map((a) => toTarget(a, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack));
 }
 

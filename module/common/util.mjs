@@ -1516,16 +1516,27 @@ export function addBlankMode() {
     }
 }
 
-export function plus() {
-    return new foundry.dice.terms.OperatorTerm({operator: "+"});
+export function plus(evaluated = false) {
+    const operatorTerm = new foundry.dice.terms.OperatorTerm({operator: "+"});
+    operatorTerm._evaluated = evaluated;
+    return operatorTerm;
 }
 
-export function mult() {
-    return new foundry.dice.terms.OperatorTerm({operator: "*"});
+export function mult(evaluated = false) {
+    const operatorTerm = new foundry.dice.terms.OperatorTerm({operator: "*"});
+    operatorTerm._evaluated = evaluated;
+    return operatorTerm;
 }
 
-export function minus() {
-    return new foundry.dice.terms.OperatorTerm({operator: "-"});
+export function minus(evaluated = false) {
+    const operatorTerm = new foundry.dice.terms.OperatorTerm({operator: "-"});
+    operatorTerm._evaluated = evaluated;
+    return operatorTerm;
+}
+function numeric(num, flavor, evaluated = false) {
+    const numericTerm = new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: {flavor: flavor}});
+    numericTerm._evaluated = evaluated;
+    return numericTerm;
 }
 
 export function appendTerms(value, flavor) {
@@ -1546,9 +1557,9 @@ export function appendTerms(value, flavor) {
     return terms;
 }
 
-export function appendTerm(value, flavor) {
-    if (`${parseInt(value)}` === value) {
-        return appendNumericTerm(value, flavor);
+export function appendTerm(value, flavor, evaluated = false) {
+    if (`${parseInt(value)}` === `${value}`) {
+        return appendNumericTerm(value, flavor, evaluated);
     }
     return appendDieTerm(value, flavor)
 }
@@ -1568,7 +1579,8 @@ export function appendDieTerm(value, flavor) {
         new foundry.dice.terms.Die({number: Math.abs(number), faces, options: {flavor}})];
 }
 
-export function appendNumericTerm(value, flavor) {
+
+export function appendNumericTerm(value, flavor, evaluated) {
     if (!value) {
         return [];
     }
@@ -1584,8 +1596,8 @@ export function appendNumericTerm(value, flavor) {
         return [];
     }
 
-    return [num > -1 ? plus() : minus(),
-        new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: {flavor: flavor}})];
+    return [num > -1 ? plus(evaluated) : minus(evaluated),
+        numeric(num, flavor, evaluated)];
 }
 
 function generateUUID(actorId, itemId, effectId) {
