@@ -1647,10 +1647,15 @@ export class SWSEActor extends Actor {
      * @param options.skipShields
      * @param options.skipDamageReduction
      * @param options.affectDamageThreshold
+     * @param options.halfDamage
      * @return {Promise<void>}
      */
     async applyDamage(options) {
         let totalDamage = toNumber(options.damage);
+
+        if(options.halfDamage){
+            totalDamage = Math.floor(totalDamage/2);
+        }
 
         const damageTypes = options.damageType.split(COMMMA_LIST);
 

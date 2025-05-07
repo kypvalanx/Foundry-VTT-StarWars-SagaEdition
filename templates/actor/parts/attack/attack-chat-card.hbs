@@ -1,5 +1,14 @@
 {{#each attacks as |attack i|}}
-    {{> 'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs' index = i attack = attack targetsEnabled = ../targetsEnabled}}
+    {{#each attack.rangeBreakdown as |range i|}}
+        {{> 'systems/swse/templates/actor/parts/attack/attack-chat-card-individual-attack.hbs' index = i attack = range targetsEnabled = ../../targetsEnabled}}
+    {{/each}}
+    {{log this}}
+    <div class="buttons flex flex-row">
+        <button type="button" data-action="apply-attack" data-type="damage" data-attack-summary="{{attack.attackSummaries}}"><i class="fas fa-explosion"></i><br><span class="button-text">Damage</span></button>
+        <button type="button" data-action="apply-attack" data-type="half" data-attack-summary="{{attack.attackSummaries}}"><i class="fas fa-explosion"></i><br><span class="button-text">Half</span></button>
+        <button type="button" data-action="apply-attack" data-type="double" data-attack-summary="{{attack.attackSummaries}}"><i class="fas fa-explosion"></i><br><span class="button-text">Double</span></button>
+        <button type="button" data-action="apply-attack" data-type="heal" data-attack-summary="{{attack.attackSummaries}}"><i class="fas fa-hand-holding-heart"></i><br><span class="button-text">Heal</span></button>
+    </div>
 {{/each}}
 
 <br/>
