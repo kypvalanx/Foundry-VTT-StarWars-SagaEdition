@@ -1638,6 +1638,17 @@ export class SWSEActor extends Actor {
         await cls.create(createData, {parent: this});
     }
 
+    /**
+     * this should be where damage is actually applied.  since most users cannot apply damage, this instead queues it up for a user with privs to do it.  probably should find a better way of doing it than a chat message
+     *
+     * @param options
+     * @param options.damage
+     * @param options.damageType
+     * @param options.skipShields
+     * @param options.skipDamageReduction
+     * @param options.affectDamageThreshold
+     * @return {Promise<void>}
+     */
     async applyDamage(options) {
         let totalDamage = toNumber(options.damage);
 

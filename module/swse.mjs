@@ -227,18 +227,24 @@ const applyAttack = async (event) => {
     let type = element.data("type")
     let attack = element.data("attack")
     let damage = element.data("damage")
-    try{
-        const attackSummary = element.data("attackSummary");
-        //let attackSummary = JSON.parse(text)
 
-        console.log(attackSummary)
-    } catch (e) {
-        ui.notifications.error("Something went wrong with this button.  Please check the logs and either post it in the discord, open a Github Issue, or shout into the void.")
-        console.error("this is probably the log you're looking for.  JSON Parsing issues? shame.", text, e)
+    const attackSummaries = element.data("attackSummary");
+    let actorIds = element.data("targetIds").split(", ")
+    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id)).reduce((actorMap, actor) => actorMap[actor.id] = actor, {})
+    for (const attackSummary of attackSummaries) {
+        const targetActor = targetActors[attackSummary.id]
+
+        if (type === "heal") {
+            targetActor.applyHealing({heal: attackSummary.adjustedAttackRoll})
+        } else {
+            await targetActor.applyDamage({
+                damage: attackSummary.adjustedAttackRoll,
+                affectDamageThreshold: true
+            })
+        }
     }
 
-    let actorIds = element.data("targetIds").split(", ")
-    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id))
+
     //let currentlyTargeted = [...game.user.targets.map(token => token.actor)]
     //let targetActors = await selectTargetList(originallyTargeted, currentlyTargeted);
     let actorMap = {};
