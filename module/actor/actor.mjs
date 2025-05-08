@@ -2043,7 +2043,7 @@ export class SWSEActor extends Actor {
     get inventoryItems() {
         return this.getCached("inventoryItems", () => {
             const inventoryItems = [];
-            for (const type of ['weapon', 'armor', 'equipment', 'vehicleSystem', 'droid system']) {
+            for (const type of ['weapon', 'armor', 'equipment', 'vehicleSystem', 'droid system', 'implant']) {
                 inventoryItems.push(...this.itemTypes[type])
             }
             return inventoryItems.filter(item => !item.system.hasItemOwner);
