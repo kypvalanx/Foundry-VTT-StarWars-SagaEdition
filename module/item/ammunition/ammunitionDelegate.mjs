@@ -258,7 +258,7 @@ export class AmmunitionDelegate {
 
                 new Dialog({
                     title: "Insufficient Ammunition",
-                    content: `This character does not have any ammunition of type ${type} in they're inventory.`,
+                    content: `This character does not have any ammunition of type ${type} in their inventory.`,
                     buttons: {
                         ok: {
                             label: "Ok", callback: () => {
