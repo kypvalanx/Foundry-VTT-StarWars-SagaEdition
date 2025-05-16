@@ -124,8 +124,12 @@ function resolveParensAndFunctions(expression, actor) {
     if (!!result) {
         return resolveExpression(result, actor);
     }
-    const subExpression = expression.substring(0, deepestStart) + resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor) + expression.substring(deepestEnd + 1);
+    let payload = expression.substring(deepestStart + 1, deepestEnd);
+
+    const subExpression = expression.substring(0, deepestStart) + payload.split(", ").map(t => resolveExpression(t.trim(), actor)).join(", ") + expression.substring(deepestEnd + 1);
     //subExpression.split(", ").map(t => resolveExpression(t, actor))
+    //resolveExpression(expression.substring(deepestStart + 1, deepestEnd), actor)
+    //payload.split(", ").map(t => resolveExpression(t.trim(), actor)).join(", ")
     return resolveExpression(subExpression, actor);
 
 }
