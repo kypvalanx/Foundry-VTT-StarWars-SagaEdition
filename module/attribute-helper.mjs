@@ -268,7 +268,7 @@ export function getInheritableAttribute(data = {}) {
     //     let overriddenKeys = overrides.map(o => o.key);
     //     values = values.filter(value => !overriddenKeys.includes(value.key) || value.override);
     // }
-    return reduceArray(data.reduce, values, data.entity);
+    return reduceArray(data.reduce, JSON.parse(JSON.stringify(values)), data.entity);
 }
 
 export function extractEffectChange(changes, entity) {
