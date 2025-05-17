@@ -120,31 +120,33 @@ const handleTalent = async (context) => {
 
     let possibleTalentTrees = new Set();
     let possibleProviders = new Set();
-    let optionString = "";
 
     let actorsBonusTrees = getInheritableAttribute({
         entity: context.actor,
         attributeKey: 'bonusTalentTree',
         reduce: "VALUES"
     });
-    //TODO move bonus Talent Tree to possible providers
-    if (actorsBonusTrees.includes(context.entity.system.bonusTalentTree)) {
+
+    let possible = context.entity.possibleProviders
+
+    if (actorsBonusTrees.filter(t => possible.includes(t)).length > 0) {
         for (let [id, item] of Object.entries(context.actor.availableItems)) {
+            possibleProviders.add(id);
             if (id.includes("Talent") && item > 0) {
-                optionString += `<option value="${id}">${id}</option>`
                 possibleTalentTrees.add(id);
             }
         }
     } else {
-        for (let talentTree of context.entity.system.possibleProviders.filter(unique)) {
+        for (let talentTree of possible) {
             possibleProviders.add(talentTree);
             let count = context.actor.availableItems[talentTree];
             if (count && count > 0) {
-                optionString += `<option value="${talentTree}">${talentTree}</option>`
                 possibleTalentTrees.add(talentTree);
             }
         }
     }
+
+    const optionString = possibleTalentTrees.map(talentTree => `<option value="${talentTree}">${talentTree}</option>`).join();
 
 
     if (possibleTalentTrees.size === 0) {
