@@ -1,4 +1,11 @@
-import {convertOverrideToMode, increaseDieSize, increaseDieType, linkEffects, toNumber} from "../common/util.mjs";
+import {
+    convertOverrideToMode,
+    increaseDieSize,
+    increaseDieType,
+    linkEffects,
+    toNumber,
+    unique
+} from "../common/util.mjs";
 import {sizeArray, uniqueKey} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
@@ -38,6 +45,15 @@ export class SWSEItem extends Item {
 
     _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+    }
+
+    get possibleProviders(){
+        const providers = [];
+        providers.push(...this.system.possibleProviders)
+        providers.push(this.system.bonusTalentTree);
+        providers.push(...getInheritableAttribute({entity: this, reduce:"VALUES", attributeKey:"possibleProvider"}));
+
+        return providers.filter(p => !!p).filter(unique);
     }
 
 
