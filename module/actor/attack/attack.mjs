@@ -1481,6 +1481,7 @@ function makeVariantRoll(attackRollResult, penalty, description) {
     const terms = [...attackRollResult.terms]
     terms.push(...appendTerm(penalty, description, true))
 
+    terms.forEach(t => t._evaluated = true)
     return Roll.fromTerms(terms);
     // let modifiedAttackRoll = Roll.fromTerms(terms)
     // modifiedAttackRoll.terms[0].results[0].result = attackRollResult.dice[0].results[0].result
