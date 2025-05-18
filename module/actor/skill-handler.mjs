@@ -302,11 +302,6 @@ export function generateSkills(actor, options = {}) {
                 bonuses.push({value: -10, description: `Heavy Load Penalty: -10`})
             }
 
-            skill.trainedBonus = trainedSkillBonus + untrainedSkillBonus;
-            skill.focusBonus = skillFocusBonus;
-            skill.miscBonus = miscBonus;
-            skill.armorPenalty = acPenalty;
-
             skill.notes = []
             for (let reroll of applicableRerolls) {
                 skill.notes.push(`[[/roll 1d20 + ${skill.value}]] ${reroll.sourceDescription}`)
@@ -329,7 +324,7 @@ export function generateSkills(actor, options = {}) {
             bonuses.push({value: skill.manualFocusBonus, description: `Focus Bonus: ${skill.manualFocusBonus}`});
             bonuses.push({value: skill.manualArmorBonus, description: `Armor Penalty: ${skill.manualArmorBonus}`});
         }
-        let nonZeroBonuses = bonuses.filter(bonus => bonus.value !== 0);
+        let nonZeroBonuses = bonuses.filter(bonus => !!bonus.value && bonus.value !== 0);
         configureSkill(skill, nonZeroBonuses, actor, resSkill, skillAttributeMod);
 
         for (const situationalSkillName of situationalSkillNames) {
