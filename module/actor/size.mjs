@@ -77,3 +77,18 @@ export function getSize(actor) {
     }
     return actor.system.size
 }
+
+export function getGridSizeFromSize(size) {
+    switch (size) {
+        case "Medium":
+            return 1;
+        case "Large":
+            return 2;
+        case "Huge":
+            return 3;
+        case "Gargantuan":
+            return 4;
+        case "Colossal":
+            return 6;
+    }
+}

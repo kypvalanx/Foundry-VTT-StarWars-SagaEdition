@@ -42,6 +42,7 @@ import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
 import {isAppropriateAmmo} from "../item/ammunition/ammunitionDelegate.mjs";
 import {WeightDelegate} from "./weightDelegate.mjs";
+import {getGridSizeFromSize} from "./size.mjs";
 
 function mergeColor(colors) {
     if(colors.length === 0){
@@ -102,21 +103,6 @@ function getTooltipSections(roll) {
 function registerFormulaFunctions(actor) {
     actor.formulaFunctions = new Map();
     actor.formulaFunctions['@charLevel'] = (actor)=>actor.characterLevel;
-}
-
-function getGridSizeFromSize(size) {
-    switch(size) {
-        case "Medium":
-            return 1;
-        case "Large":
-            return 2;
-        case "Huge":
-            return 3;
-        case "Gargantuan":
-            return 4;
-        case "Colossal":
-            return 6;
-    }
 }
 
 function bypassShields(damageTypes) {
