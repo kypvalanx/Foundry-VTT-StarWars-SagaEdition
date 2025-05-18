@@ -9,7 +9,6 @@ import {
     inheritableItems,
     innerJoin,
     resolveExpression,
-    resolveWeight,
     toChat,
     toNumber,
     toShortAttribute,
@@ -26,9 +25,7 @@ import {
     crewPositions,
     crewQuality,
     crewSlotResolution,
-    DROID_COST_FACTOR,
     KNOWN_WEIRD_UNITS,
-    SIZE_CARRY_CAPACITY_MODIFIER,
     sizeArray,
     skills
 } from "../common/constants.mjs";
