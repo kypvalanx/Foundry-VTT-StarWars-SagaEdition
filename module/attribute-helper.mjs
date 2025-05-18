@@ -1,7 +1,7 @@
 import {inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
-import {ITEM_ONLY_ATTRIBUTES} from "./common/constants.mjs";
+import {ITEM_ONLY_ATTRIBUTES, SIZE_CHANGES, sizeArray} from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 
 /**
@@ -40,19 +40,19 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
         items = items.filter(itemFilter)
     }
 
-    let attributes = [];
+    let changes = [];
     for (let item of items) {
         const changesFromDocuments = getChangesFromDocuments(item, {
             recursive: true,
             parent: entity
         });
-        attributes.push(...changesFromDocuments);
+        changes.push(...changesFromDocuments);
     }
-    return attributes;
+    return changes;
 }
 
 export function getResolvedSize(entity, options = {}) {
-    if (entity.document && entity.document instanceof SWSEItem) {
+    if (entity && entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
     }
 
@@ -60,12 +60,14 @@ export function getResolvedSize(entity, options = {}) {
 
         let sizeIndex = toNumber(getInheritableAttribute({
             entity,
+            changes: options.changes,
             attributeKey: "sizeIndex",
             reduce: "MAX",
             recursive: true
         }))
         let sizeBonus = toNumber(getInheritableAttribute({
             entity,
+            changes: options.changes,
             attributeKey: "sizeBonus",
             reduce: "SUM",
             recursive: true
@@ -74,10 +76,11 @@ export function getResolvedSize(entity, options = {}) {
 
         let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
             entity,
+            changes: options.changes,
             attributeKey: "damageThresholdEffectiveSize",
             reduce: "SUM", recursive: true
         }))
-        let miscBonus = (["damageThresholdSizeModifier"].includes(options.attributeKey) ? damageThresholdEffectiveSize : 0);
+        let miscBonus = "damageThresholdSizeModifier" === options.attributeKey ? damageThresholdEffectiveSize : 0;
         return sizeIndex + sizeBonus + miscBonus;
     }
     return entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey, fn) : fn()
@@ -158,6 +161,20 @@ function getChangesFromLoadedAmmunition(document) {
     return changes;
 }
 
+function getSizeChangesFromSize(size) {
+    if(!isNaN(size)){
+        size = sizeArray[size];
+    }
+    return SIZE_CHANGES[size]
+}
+
+function getChangesFromSize(changes) {
+    const options = {changes: changes};
+    let size = getResolvedSize(null, options)
+
+    return getSizeChangesFromSize(size);
+}
+
 function getChangesFromDocument(document, data) {
     let fn = () => {
         let allAttributes = [];
@@ -168,6 +185,8 @@ function getChangesFromDocument(document, data) {
         allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
         allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
         allAttributes.push(...getChangesFromLoadedAmmunition(document))
+
+        allAttributes.push(...getChangesFromSize(allAttributes))
         return allAttributes;
     };
 
@@ -221,10 +240,17 @@ function getValues(values, data, entities) {
  * @returns {*|string|[]|*[]}
  */
 export function getInheritableAttribute(data = {}) {
-    if (!data.entity) {
+    if (!data.entity && !data.changes) {
         return [];
     }
-    let values = getChangesFromDocuments(data.entity, data);
+    const values = []
+
+    if(data.changes){
+        values.push(...data.changes);
+    }
+    if(data.entity){
+        values.push(...getChangesFromDocuments(data.entity, data));
+    }
     // 1. get values
     // 2. ?
     // 3. profit
