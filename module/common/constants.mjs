@@ -2,6 +2,118 @@ export const dieSize = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "2d6", "2d8", "3
 export const dieSize_vanilla = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "1d10", "1d12"];
 export const dieType = ["1", "2", "3", "4", "6", "8", "10", "12"];
 export const sizeArray = ["Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)"];
+export const SIZE_CHANGES = {
+    "Diminutive" : [
+        {"key" : "reflexDefenseBonus","value" : "5","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "5","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:15","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Small" : [
+        {"key" : "reflexDefenseBonus","value" : "1","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "1","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d3","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:5","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Gargantuan" : [
+        {"key" : "reflexDefenseBonus","value" : "-5","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "16 squares","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "-5","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d6","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-15","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "20","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "15","mode" : 2},
+    ],
+    "Medium" : [
+        {"key" : "reflexDefenseBonus","value" : "0","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "0","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d4","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:0","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Tiny" : [
+        {"key" : "reflexDefenseBonus","value" : "2","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "2","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d2","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:10","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Large" : [
+        {"key" : "reflexDefenseBonus","value" : "-1","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "4 squares","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "-1","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d6","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-5","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "5","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "5","mode" : 2},
+    ],
+    "Huge" : [
+        {"key" : "reflexDefenseBonus","value" : "-2","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "9 squares","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "-2","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d8","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-10","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "10","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "10","mode" : 2},
+    ],
+    "Colossal" : [
+        {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
+        {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d8","mode" : 2},
+        {"key" : "vehicleFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "50","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "20","mode" : 2},
+    ],
+    "Fine" : [
+        {"key" : "reflexDefenseBonus","value" : "10","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "10","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Colossal (Frigate)" : [
+        {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
+        {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d8","mode" : 2},
+        {"key" : "vehicleFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "100","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "25","mode" : 2},
+    ],
+    "Colossal (Cruiser)" : [
+        {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
+        {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d8","mode" : 2},
+        {"key" : "vehicleFightingSpace","value" : "4 squares","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "200","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "30","mode" : 2},
+    ],
+    "Colossal (Station)" : [
+        {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
+        {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d8","mode" : 2},
+        {"key" : "vehicleFightingSpace","value" : "4 squares","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "500","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "35","mode" : 2},
+    ],
+}
+
+
+
+
+
+
+
 export const d20 = "1d20";
 export const defaultAttributes = ["strength", "dexterity", "constitution", "wisdom", "intelligence", "charisma"]
 export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "Gather Information", "Initiative", "Jump",
