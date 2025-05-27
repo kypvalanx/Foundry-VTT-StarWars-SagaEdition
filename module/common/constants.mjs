@@ -594,3 +594,4 @@ export const HOMEBREW_LILLITERALIST_SKILLS = new Map([["Athletics", {
     attribute: "str",
     uut: true
 }]]);
+export const UNINHERITABLE_AMMO_CHANGES = ['actsAs'];

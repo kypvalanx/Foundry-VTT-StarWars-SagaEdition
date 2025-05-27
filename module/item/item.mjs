@@ -64,6 +64,10 @@ export class SWSEItem extends Item {
         super.prepareData();
         this.hasItemOwner = this.hasItemOwner || false;
 
+        // if(game.system.version !== this._stats.systemVersion){
+        //
+        // }
+        //console.log(this._stats.systemVersion)
         if(!Array.isArray(this.system.changes)){
             this.system.changes = Object.values(this.system.changes || {})
         } else{
@@ -415,7 +419,7 @@ export class SWSEItem extends Item {
             attributeKey: "levelUpHitPoints",
             reduce: "FIRST"
         });
-        let max = inheritableAttribute.split("d")[1]
+        let max = inheritableAttribute?.split("d")[1]
         return rolledHp > max ? max : rolledHp;
 
     }

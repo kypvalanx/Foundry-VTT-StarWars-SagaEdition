@@ -1,7 +1,7 @@
 import {inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
-import {ITEM_ONLY_ATTRIBUTES, SIZE_CHANGES, sizeArray} from "./common/constants.mjs";
+import {ITEM_ONLY_ATTRIBUTES, SIZE_CHANGES, sizeArray, UNINHERITABLE_AMMO_CHANGES} from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 
 /**
@@ -15,6 +15,7 @@ import {SWSEActor} from "./actor/actor.mjs";
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
     if (attribute) {
+        attribute = JSON.parse(JSON.stringify(attribute));
         attribute.source = attribute.source || source;
         attribute.sourceString = attribute.sourceString || sourceString;
         attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
@@ -83,18 +84,47 @@ export function getResolvedSize(entity, options = {}) {
         let miscBonus = "damageThresholdSizeModifier" === options.attributeKey ? damageThresholdEffectiveSize : 0;
         return sizeIndex + sizeBonus + miscBonus;
     }
-    return entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey, fn) : fn()
+    return entity && entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey, fn) : fn()
 
 }
 
 
 function getLocalChangesOnDocument(document, flags) {
-    let values = !document.isDisabled || flags?.includes("IGNORE_DISABLE") ? document.changes || document.system?.changes || document._source?.system?.changes || [] : [];
-    if (!Array.isArray(values)){
+    let values;
+    if (!isActiveDocument(document, flags)) {
+        return [];
+    }
+
+    values = document.changes || document.system?.changes || document._source?.system?.changes || [];
+
+    if (!Array.isArray(values)) {
         values = Object.values(values)
     }
-    return values.filter(v => !!v).map(value => appendSourceMeta(value, document._id, document.name, document.name));
+    values = values.filter(v => !!v);
+
+
+    //Ignore all changes on old size traits except the actual size
+    // if(sizeArray.includes(document.name)){
+    //     let sizeValues = values.filter(v => v.key === "size")
+    //
+    //     if(sizeValues.length > 0){
+    //         values = sizeValues;
+    //     }
+    // }
+
+
+    return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
 }
+
+function isActiveDocument(effect, flags = []) {
+    if (effect.flags?.swse && effect.flags?.swse.isLevel) {
+        const classItem = getClassItemFromClassLevel(effect);
+        return effect.flags.swse.level <= (classItem?.system.levelsTaken?.length || 0);
+    }
+
+    return effect.flags?.swse?.itemModifier || effect.disabled === false || flags?.includes("IGNORE_DISABLE");
+}
+
 
 /**
  *
@@ -103,43 +133,26 @@ function getLocalChangesOnDocument(document, flags) {
  * @return {*[]}
  */
 function getChangesFromActiveEffects(document, recursive) {
-    if (!document.effects ) {//|| recursive) {
+    if (!document.effects) {//|| recursive) {
         return [];
     }
 
     let attributes = []
     for (let effect of document.effects || []) {
-        if (isActiveEffect(effect, document)) {
-            attributes.push(...extractEffectChange(effect.changes || [], effect))
-        }
+        attributes.push(...(getLocalChangesOnDocument(effect)))
     }
     return attributes;
 }
 
-function isEffectOnEmbeddedItem(document, effect) {
-    return document instanceof SWSEActor && effect.origin?.includes("Item");
-}
 
 function getClassItemFromClassLevel(effect) {
-    if(effect.parent instanceof SWSEItem){
+    if (effect.parent instanceof SWSEItem) {
         return effect.parent
     }
     const split = effect.origin.split(".");
     return effect.parent.items.get(split[split.length - 1]);
 }
 
-function isActiveEffect(effect, document) {
-    // if (isEffectOnEmbeddedItem(document, effect)){
-    //     return false
-    // }
-
-    if (effect.flags.swse && effect.flags.swse.isLevel){
-        const classItem = getClassItemFromClassLevel(effect);
-        return effect.flags.swse.level <= (classItem?.system.levelsTaken?.length || 0);
-    }
-
-    return effect.flags.swse?.itemModifier || effect.disabled === false;
-}
 
 function getChangesFromLoadedAmmunition(document) {
     if (!document.hasAmmunition || !document.system.ammunition) {
@@ -147,22 +160,23 @@ function getChangesFromLoadedAmmunition(document) {
     }
 
     let changes = [];
-    Object.values(document.system.ammunition).forEach(ammo => {
-        if(typeof ammo === 'object'){
-            if(Array.isArray(ammo.queue) && ammo.queue[0]){
-                let item = document.parent.items.get(ammo.queue[0])
-                if(item){
-                    changes.push(...item.changes.filter(change => !['actsAs'].includes(change.key)))
-                }
+    Object.values(document.system.ammunition)
+        .forEach(ammo => {
+            if (!(typeof ammo === 'object' && Array.isArray(ammo.queue) && ammo.queue[0])) {
+                return;
             }
-        }
-    })
+            let item = document.parent.items.get(ammo.queue[0])
+            if (item) {
+                changes.push(...item.changes
+                    .filter(change => !UNINHERITABLE_AMMO_CHANGES.includes(change.key)))
+            }
+        })
 
     return changes;
 }
 
 function getSizeChangesFromSize(size) {
-    if(!isNaN(size)){
+    if (!isNaN(size)) {
         size = sizeArray[size];
     }
     return SIZE_CHANGES[size]
@@ -186,7 +200,7 @@ function getChangesFromDocument(document, data) {
         allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
         allAttributes.push(...getChangesFromLoadedAmmunition(document))
 
-        allAttributes.push(...getChangesFromSize(allAttributes))
+        //allAttributes.push(...getChangesFromSize(allAttributes))
         return allAttributes;
     };
 
@@ -198,6 +212,7 @@ function getChangesFromDocument(document, data) {
         recursive: data.recursive
     }, fn) : fn();
 }
+
 function getChangesFromDocuments(entity, data) {
     if (Array.isArray(entity)) {
         let values = [];
@@ -220,7 +235,10 @@ function getValues(values, data, entities) {
         if (!parent) {
             return true;
         }
-        if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {attributeKey: data.attributeKey, isLoad: true}).doesFail) {
+        if (attr.parentPrerequisite && meetsPrerequisites(parent, attr.parentPrerequisite, {
+            attributeKey: data.attributeKey,
+            isLoad: true
+        }).doesFail) {
             return false;
         }
 
@@ -243,12 +261,12 @@ export function getInheritableAttribute(data = {}) {
     if (!data.entity && !data.changes) {
         return [];
     }
-    const values = []
+    let values = []
 
-    if(data.changes){
+    if (data.changes) {
         values.push(...data.changes);
     }
-    if(data.entity){
+    if (data.entity) {
         values.push(...getChangesFromDocuments(data.entity, data));
     }
     // 1. get values
@@ -274,33 +292,22 @@ export function getInheritableAttribute(data = {}) {
     }
 
 
-    const entities = {};
-    for (let e of Array.isArray(data.entity) ? data.entity : [data.entity]) {
-        entities[e.id] = e;
+    if (data.entity) {
+        const entities = {};
+        for (let e of Array.isArray(data.entity) ? data.entity : [data.entity]) {
+            entities[e.id] = e;
+        }
+
+        if (!data.recursive) {
+            values = getValues(values, data, entities);
+        }
     }
 
 
-    if (!data.recursive) {
-        values = getValues(values, data, entities);
-    }
-
-    if (data.entity.type === "character" || data.entity.type === "npc") {
+    if (data.entity && (data.entity.type === "character" || data.entity.type === "npc")) {
         values = values
             .filter(value => !!value && !meetsPrerequisites(data.entity, value.parentPrerequisite, {isLoad: true}).doesFail)
     }
 
-    // let overrides = values.filter(attr => attr && attr.override)
-    // if (overrides.length > 0) {
-    //     let overriddenKeys = overrides.map(o => o.key);
-    //     values = values.filter(value => !overriddenKeys.includes(value.key) || value.override);
-    // }
     return reduceArray(data.reduce, JSON.parse(JSON.stringify(values)), data.entity);
-}
-
-export function extractEffectChange(changes, entity) {
-    let values = [];
-    for (let attribute of Object.values(changes || {})) {
-        values.push(appendSourceMeta(attribute, entity._id, entity.name, entity.name));
-    }
-    return values;
 }
