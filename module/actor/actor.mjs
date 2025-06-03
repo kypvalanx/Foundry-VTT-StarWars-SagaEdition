@@ -2428,7 +2428,7 @@ export class SWSEActor extends Actor {
         const featTokens = automaticFeats.split(",").map(f => {
             f = f.trim();
             const toks = f.split(":");
-            return {name: toks[1], type: toks[0], granted: "Automatic from system configuration"}
+            if (toks[1].length > 0 && toks[0].length > 0) return {name: toks[1], type: toks[0], granted: "Automatic from system configuration"}
         });
         this.addItems({items: featTokens, provided: true})
     }
@@ -2507,12 +2507,10 @@ export class SWSEActor extends Actor {
      * @returns {undefined|SWSEItem}
      */
     get size() {
-        for (let trait of this.traits || []) {
-            if (sizeArray.includes(trait.name)) {
-                return trait;
-            }
-        }
-        return undefined;
+        return this.getCached("size", () => {
+            const sizeIndex = getResolvedSize(this);
+            return {name: sizeArray[sizeIndex], sizeIndex: sizeIndex};
+        })
     }
 
     getItemContainingInheritableAttribute(key, value) {
@@ -2585,7 +2583,7 @@ export class SWSEActor extends Actor {
      * @param context.provided {boolean} is this a new item from the compendium
      * TODO refactor this
      */
-    async checkPrerequisitesAndResolveOptions(entity, context) {
+    async checkPrerequisitesAndResolveOptions(entity, item, context) {
 
         let choices = await activateChoices(entity, context);
         if (!choices.success) {
@@ -2601,38 +2599,74 @@ export class SWSEActor extends Actor {
                 }
             }
         }
+        if (entity.type === "class") {
+            let levels = [0];
+            for (let clazz of this.itemTypes.class) {
+                levels.push(...(clazz.levelsTaken || []))
+            }
 
+            let nextLevel = item.firstLevel ? 1 : Math.max(...levels) + 1
+
+            let existing = this.itemTypes.class.find(item => item.name === entity.name)
+            if (existing) {
+                let levels = existing.levelsTaken || [];
+                levels.push(nextLevel);
+                await existing.safeUpdate({"system.levelsTaken": levels});
+                let notificationMessage = `<li>Took level of ${existing.name}</li>`
+                return {notificationMessage, addedItem: undefined}
+            }
+
+            entity.system.levelsTaken = [nextLevel];
+        }
+
+        if(context.isUpload){
+
+            if (entity.type === "feat") {
+                const classes = CLASSES_BY_STARTING_FEAT[entity.name];
+                if (classes) {
+                    for (let charClass of classes) {
+                        entity.system.possibleProviders.push(`${charClass} Starting Feats`)
+                    }
+                }
+                if (entity.name === 'Skill Training') {
+                    SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
+                    SWSEActor.removeChange(entity, "automaticTrainedSkill");
+                }
+            }
+
+            if (entity.type === "trait") {
+                if (entity.name === 'Bonus Trained Skill') {
+                    SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
+                    SWSEActor.removeChange(entity, "automaticTrainedSkill");
+                }
+                if (entity.name === 'Bonus Feat' && !payload) {
+                    SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
+                }
+            }
+        }
 
         let providedItems = entity.getProvidedItems() || [];
         //on uploads add "provide" changes for classFeats
 
         if(entity.type === "vehicleBaseType"){
-            Dialog.confirm({
-                title: `Overwrite Vehicle attributes?`,
-                content: `<p>Overwriting attributes will overwrite attributes from previous base types.  Would you like to continue?</p>`,
-                yes: async (html)=>{
-                    await this.applyVehicleAttributes(entity)
-                    console.log(this)
-            }
-            })
-            //
-            // return await Dialog.prompt({
-            //     title: `Overwrite Vehicle attributes?`,
-            //     content: `<p>Overwriting attributes will overwrite attributes from previous base types.  Would you like to continue?</p>`,
-            //     callback: async (html) => {
-            //         let feat = html.find("#feat")[0].value;
-            //         await this.addItems(context, [{
-            //             type: 'TRAIT',
-            //             name: `Bonus Feat (${feat})`
-            //         }, {
-            //             type: 'FEAT',
-            //             name: feat
-            //         }], parentItem);
-            //         return feat;
-            //     }
-            // });
 
-            return {addedItem: entity, toBeAdded:[]}
+            const toBeAdded = [];
+            if (!this.suppressDialog) {
+                await Dialog.confirm({
+                    title: `Overwrite Vehicle attributes?`,
+                    content: `<p>Overwriting attributes will overwrite attributes from previous base types.  Would you like to continue?</p>`,
+                    yes: async (html) => {
+                        await this.applyVehicleAttributes(entity)
+                        toBeAdded.push(...entity.getProvidedItems())
+                    }
+                })
+            } else {
+                await this.applyVehicleAttributes(entity)
+                toBeAdded.push(...entity.getProvidedItems())
+            }
+
+
+            return {addedItem: entity, toBeAdded: toBeAdded}
         }
 
         if (context.isUpload) {
@@ -2676,35 +2710,34 @@ export class SWSEActor extends Actor {
             }
         }
 
-        let shouldLazyLoad = entity.type !== "class" && modifications.length === 0 && nonMods.length === 0;
+        //let shouldLazyLoad = entity.type !== "class" && modifications.length === 0 && nonMods.length === 0;
         let addedItem;
         const toBeAdded = [];
 
-        if (shouldLazyLoad) {
-            toBeAdded.push(entity.toObject(false))
-        } else {
+        //if (shouldLazyLoad) {
+       //     toBeAdded.push(entity.toObject(false))
+        //} else {
             let providedItemContext = Object.assign({}, context);
             providedItemContext.newFromCompendium = false;
             providedItemContext.provided = true;
             providedItemContext.skipPrerequisite = true;
-            addedItem = (await this.createEmbeddedDocuments("Item", [entity.toObject(false)]))[0];
-            await this.addItems(providedItemContext, nonMods, addedItem);
+
+            addedItem = (await this.createEmbeddedDocuments("Item", [entity.toObject(false)], {render: false, noHook: true, noRenderTemplate: true}))[0];
+            nonMods.forEach(item => item.parent = addedItem)
+            toBeAdded.push(...nonMods);
 
             if (entity.type === "class") {
-                await this.addClassFeats(addedItem, providedItemContext);
+                toBeAdded.push(...await this.addClassFeats(addedItem, providedItemContext));
             }
 
-            for (let modification of modifications) {
-                let {payload, itemName, entity} = await resolveEntity(modification)
-                if (entity) {
-                    await addedItem.addItemModificationEffectFromItem(entity, providedItemContext)
-                }
-            }
-        }
+            const resolvedMods = (await Promise.all(modifications.map(m => resolveEntity(m)))).map(m=>m.entity);
+            await addedItem.addItemModificationEffectsFromItems(resolvedMods, providedItemContext);
+       // }
 
 
         return {addedItem: addedItem, toBeAdded: toBeAdded};
     }
+
 
 
     static updateOrAddChange(entity, key, value, forceAdd = false) {
@@ -2726,12 +2759,14 @@ export class SWSEActor extends Actor {
      * Adds Feats provided by a class and provides choices to the player when one is available
      * @param item {SWSEItem}
      * @param context
+     * @return [SWSEItem] to be added
      */
     async addClassFeats(item, context) {
         if (context.isUpload) {
-            return;
+            return [];
         }
 
+        const toBeAdded = [];
         let feats = getInheritableAttribute({
             entity: item,
             attributeKey: "classFeat",
@@ -2752,18 +2787,19 @@ export class SWSEActor extends Actor {
         const currentFeats = this.feats || [];
         if (context.isFirstLevel) {
             if (!(availableClassFeats > 0 && availableClassFeats < feats.length)) {
-                await this.addItems(context, feats.map(feat => {
-                    return {type: 'TRAIT', name: `Bonus Feat (${feat})`}
-                }), item);
-                let featString = await this.addItems(context, feats.map(feat => {
-                    return {type: 'FEAT', name: feat}
-                }), item);
+                const items = feats.flatMap(feat => {
+                    return [{type: 'TRAIT', name: `Bonus Feat (${feat})`, parent: item}, {type: 'FEAT', name: feat, parent: item}]
+                });
+                // let addItemsCriteria = {
+                //     items: items}
+                //await this.addItems(addItemsCriteria);
+                toBeAdded.push(... items)
 
 
                 if (!this.suppressDialog) {
                     new Dialog({
                         title: "Adding Class Starting Feats",
-                        content: `Adding class starting feats: <ul>${featString.map(item => item?.name).filter(name => !!name).join(", ")}</ul>`,
+                        content: `Adding class starting feats: <ul>${feats.filter(name => !!name).join(", ")}</ul>`,
                         buttons: {
                             ok: {
                                 icon: '<i class="fas fa-check"></i>',
@@ -2776,7 +2812,9 @@ export class SWSEActor extends Actor {
                 let ownedFeats = currentFeats.map(f => f.finalName);
                 for (let i = 0; i < availableClassFeats; i++) {
                     const availableFeats = this._explodeFeatNames(feats);
-                    ownedFeats.push(await this.selectFeat(availableFeats, ownedFeats, item, context))
+                    const selectFeatResponse = await this.selectFeat(availableFeats, ownedFeats, item, context);
+                    toBeAdded.push(...selectFeatResponse.items)
+                    ownedFeats.push(selectFeatResponse.feat)
                 }
             }
         } else if (isFirstLevelOfClass) {
@@ -2788,8 +2826,11 @@ export class SWSEActor extends Actor {
             }).map(feat => cleanItemName(feat))))
 
             let ownedFeats = currentFeats.map(f => f.finalName);
-            await this.selectFeat(availableFeats, ownedFeats, item, context);
+            const selectFeatResponse = await this.selectFeat(availableFeats, ownedFeats, item, context);
+            toBeAdded.push(...selectFeatResponse.items)
         }
+
+        return toBeAdded;
     }
 
     async selectFeat(availableFeats, ownedFeats, parentItem, context) {
@@ -2818,14 +2859,19 @@ export class SWSEActor extends Actor {
                         </div>`,
             callback: async (html) => {
                 let feat = html.find("#feat")[0].value;
-                await this.addItems(context, [{
+                let addItemsCriteria = JSON.parse(JSON.stringify(context));
+                const items = [{
                     type: 'TRAIT',
-                    name: `Bonus Feat (${feat})`
+                    name: `Bonus Feat (${feat})`,
+                    parent: parentItem
                 }, {
                     type: 'FEAT',
-                    name: feat
-                }], parentItem);
-                return feat;
+                    name: feat,
+                    parent: parentItem
+                }];
+                addItemsCriteria.items = items;
+                //await this.addItems(addItemsCriteria);
+                return {feat, items};
             }
         });
     }
@@ -2856,31 +2902,27 @@ export class SWSEActor extends Actor {
     /**
      *
      * @param criteria
-     * @param criteria.items {[{name: string,type: string}]}
-     * @param items {[{name: string,type: string}] | {name: string, type: string}}
-     * @param parent {SWSEItem}
+     * @param criteria.items {[{name: string,type: string, parent: undefined | {name: string, id: string, type: string}}]}
      * @param criteria.returnAdded this flag makes the method return added items
      * @returns {string | [SWSEItem]}
      */
-    async addItems(criteria = {}, items, parent) {
+    async addItems(criteria = {}) {
         const providedItems = [];
-        if (criteria.items) {
-            for (const item of criteria.items.filter(item => !!item)) {
-                if(item.quantity > 0){
-                    for (let i =0; i < item.quantity; i++) {
-                        providedItems.push(item)
-                    }
-                } else {
-                    providedItems.push(item)
-                }
-            }
+        if (!criteria.items) {
+            return [];
         }
 
-        if (items) {
-            for (const item of items.filter(item => !!item)) {
+        for (const item of criteria.items.filter(item => !!item)) {
+            if (item.quantity > 0) {
+                for (let i = 0; i < item.quantity; i++) {
+                    providedItems.push(item)
+                }
+            } else {
                 providedItems.push(item)
             }
         }
+
+
 
         let notificationMessages = "";
         let addedItems = [];
@@ -2888,11 +2930,7 @@ export class SWSEActor extends Actor {
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
 
-            if(providedItem.parent){
-                parent = providedItem.parent;
-            }
-
-            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, parent, criteria);
+            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, criteria);
             if (toBeAdded) {
                 lazyAdd.push(...toBeAdded);
             }
@@ -2902,7 +2940,7 @@ export class SWSEActor extends Actor {
             }
         }
         if (lazyAdd.length > 0) {
-            addedItems.push(...await this.createEmbeddedDocuments("Item", lazyAdd))
+                addedItems.push(...await this.addItems( {items: lazyAdd}))
         }
 
         let addedToFollowers = getInheritableAttribute({entity: addedItems, attributeKey: "followerProvides"})
@@ -2915,9 +2953,11 @@ export class SWSEActor extends Actor {
         }
 
 
+        this.sheet.render(false)
         if (criteria.returnAdded) {
             return addedItems;
         }
+
         return notificationMessages;
     }
 
@@ -2953,14 +2993,10 @@ export class SWSEActor extends Actor {
     /**
      *
      * @param item
-     * @param parent
-     * @param parent.name {String}
-     * @param parent.id {String}
-     * @param parent.type {String}
      * @param options
      * @return {Promise<{addedItem, notificationMessage: (string|string), toBeAdded: *[]}|{}|{addedItem: undefined, notificationMessage: string}>}
      */
-    async addItem(item, parent, options) {
+    async addItem(item, options) {
         //TODO FUTURE WORK let namedCrew = item.namedCrew; //TODO Provides a list of named crew.  in the future this should check actor compendiums for an actor to add.
         let {payload, itemName, entity, createdItem} = await resolveEntity(item);
 
@@ -2974,67 +3010,12 @@ export class SWSEActor extends Actor {
         }
         entity.prepareData();
 
-        if (entity.type === "class") {
-            let levels = [0];
-            for (let clazz of this.itemTypes.class) {
-                levels.push(...(clazz.levelsTaken || []))
-            }
-
-            let nextLevel = item.firstLevel ? 1 : Math.max(...levels) + 1
-
-            let existing = this.itemTypes.class.find(item => item.name === entity.name)
-            if (existing) {
-                let levels = existing.levelsTaken || [];
-                levels.push(nextLevel);
-                await existing.safeUpdate({"system.levelsTaken": levels});
-                let notificationMessage = `<li>Took level of ${existing.name}</li>`
-                return {notificationMessage, addedItem: undefined}
-            }
-
-            entity.system.levelsTaken = [nextLevel];
-        }
-
-        if (entity.type === "feat") {
-            const classes = CLASSES_BY_STARTING_FEAT[itemName];
-            if (classes) {
-                for (let charClass of classes) {
-                    entity.system.possibleProviders.push(`${charClass} Starting Feats`)
-                }
-            }
-            if (entity.name === 'Skill Training') {
-                SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
-                SWSEActor.removeChange(entity, "automaticTrainedSkill");
-            }
-        }
-
-        if (entity.type === "trait") {
-            if (entity.name === 'Bonus Trained Skill') {
-                SWSEActor.updateOrAddChange(entity, "trainedSkills", "1");
-                SWSEActor.removeChange(entity, "automaticTrainedSkill");
-            }
-            if (entity.name === 'Bonus Feat' && !payload) {
-                SWSEActor.updateOrAddChange(entity, "provides", "General Feats");
-            }
-        }
-
         entity.addItemAttributes(item.changes);
         const providedItems = item.providedItems || [];
-        const automaticItemsWhenItemIsAdded = game.settings.get("swse", "automaticItemsWhenItemIsAdded");
-        if (automaticItemsWhenItemIsAdded) {
-            automaticItemsWhenItemIsAdded.split(",").forEach(entry => {
-                const toks = entry.split(">").map(e => e.trim())
-
-                const triggerItem = toks[0].split(":")
-                const bonusItem = toks[1].split(":")
-                if (entity.name.toLowerCase() === triggerItem[1].toLowerCase() && entity.type.toLowerCase() === triggerItem[0].toLowerCase()) {
-                    providedItems.push({name: bonusItem[1], type: bonusItem[0]})
-                }
-
-                providedItems.push()
-            })
-        }
+        providedItems.push(...(game.generated.autoItemMapping.get({name:item.name, type:item.type})) || [])
         entity.addProvidedItems(providedItems);
-        if (parent) await entity.setParent(parent, item.unlocked);
+
+        if (item.parent) await entity.setParent(item.parent, item.unlocked);
         else if (item.granted) entity.setGranted(item.granted);
         entity.setPrerequisite(item.prerequisite); //TODO this only sets if it's defined... idk if i like how this works
 
@@ -3048,25 +3029,17 @@ export class SWSEActor extends Actor {
             await entity.setPayload(payload[1], payload[0]);
         }
 
-        let equip = item.equip;
-        if (equip) {
-            entity.system.equipped = equip
-        }
-
-        entity.setTextDescription();
+        entity.system.equipped = item.equip || undefined
         entity.handleLegacyData()
-
 
         delete options.actor;
         let childOptions = JSON.parse(JSON.stringify(options))
         childOptions.itemAnswers = item.answers;
         childOptions.modifications = item.modifications;
         childOptions.actor = this;
-        let {addedItem, toBeAdded} = await this.checkPrerequisitesAndResolveOptions(entity, childOptions);
+        let {addedItem, toBeAdded} = await this.checkPrerequisitesAndResolveOptions(entity, item, childOptions);
 
         let notificationMessage = addedItem ? `<li>${addedItem.finalName}</li>` : "";
-
-
 
         return {notificationMessage, addedItem, toBeAdded};
     }
