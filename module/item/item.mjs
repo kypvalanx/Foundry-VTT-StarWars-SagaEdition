@@ -1,5 +1,4 @@
 import {
-    convertOverrideToMode,
     increaseDieSize,
     increaseDieType,
     linkEffects,
@@ -907,10 +906,6 @@ export class SWSEItem extends Item {
         });
     }
 
-    setTextDescription() {
-        this.system.textDescription = this.stripHTML(this.system.description);
-    }
-
     handleLegacyData(){
         if((!this.system.changes || this.system.changes.length === 0) && this.system.attributes && this.system.attributes.length > 0){
              this.system.changes = this.system.attributes;
@@ -1624,15 +1619,65 @@ export class SWSEItem extends Item {
         this.safeUpdate(update);
     }
 
-    getClassLevel() {
-        if (this.data.type !== 'class' || !this.parent) {
-            return undefined;
+
+    async addItemModificationEffectsFromItems(items, context={}) {
+        if (!this.canUserModify(game.user, 'update')) {
+            return;
         }
-        let classLevels = this.parent.classes.filter(clazz => clazz.data.name === this.data.name)
 
-        return classLevels.length;
+        let effectsFromItems = []
+        for (const item of items) {
+            if(!item.name){
+                continue;
+            }
+            item.prepareData();
+            let choices = await activateChoices(item, context);
+
+            if (!choices.success) {
+                return false;
+            }
+            let changes = [];
+            changes.push(...Object.values(item.system.attributes || {}))
+            changes.push(...item.system.changes)
+            let activeEffect = DEFAULT_MODIFICATION_EFFECT;
+            activeEffect.name = item.name;
+            activeEffect.changes = changes;
+            activeEffect.img = item.img;
+            activeEffect.origin = item.uuid;
+            activeEffect.flags.swse.description = item.system.description;
+            effectsFromItems.push(activeEffect)
+        }
+
+        let itemMap = items.reduce(function(map, obj) {
+            map[obj.uuid] = obj;
+            return map;
+        }, {});
+
+
+        const createdEffects = await this.createEmbeddedDocuments("ActiveEffect", effectsFromItems);
+
+        const effects = []
+        for (const createdEffect of createdEffects) {
+            let item = itemMap[createdEffect.origin]
+            if (item.effects && item.effects.filter(i => i).length > 0) {
+                item.effects.forEach(effect => {
+                    let activeEffect = {...DEFAULT_MODE_EFFECT};
+                    activeEffect.name = effect.name;
+                    activeEffect.disabled = effect.disabled;
+                    activeEffect.changes = effect.changes;
+                    activeEffect.img = effect.img;
+                    activeEffect.origin = createdEffect.id
+                    activeEffect.flags.swse.providedBy = createdEffect.id
+                    activeEffect.flags.swse.description =
+                        effect.flags.swse.description || "";
+                    effects.push(activeEffect);
+                })
+            }
+        }
+
+        await this.createEmbeddedDocuments("ActiveEffect", effects);
+
     }
-
 
 
     async addItemModificationEffectFromItem(item, context={}) {

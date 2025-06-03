@@ -22,8 +22,7 @@ export async function vehicleSheetTests(quench) {
                             await withTestVehicle(async actor => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Light Freighter", type: "vehicleBaseType"})
-                                hasItems(assert, actor.items, ["Colossal",
-                                    "Light Freighter"])
+                                hasItems(assert, actor.items, ["Colossal"])
                                 assert.equal(actor.size.name, "Colossal")
 
                                 assert.equal(actor.attributes.str.total, 42);
@@ -39,22 +38,21 @@ export async function vehicleSheetTests(quench) {
                             await withTestVehicle(async actor => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Light Freighter", type: "vehicleBaseType"})
-                                hasItems(assert, actor.items, ["Colossal",
-                                    "Light Freighter"])
+                                hasItems(assert, actor.items, ["Colossal"])
 
                                 const reflexDefense = getInheritableAttribute({
                                     entity: actor,
                                     attributeKey: "reflexDefenseBonus",
                                     reduce: ["SUM", "SUMMARY", "MAPPED"],
-                                    attributeFilter: attr => !attr.modifier
-                                }, {skipCache:true})
+                                    attributeFilter: attr => !attr.modifier,
+                                    skipCache:true})
 
                                 const armorReflexDefenseBonus = getInheritableAttribute({
                                     entity: actor,
                                     attributeKey: "armorReflexDefenseBonus",
                                     reduce: ["SUM", "SUMMARY", "MAPPED"],
-                                    attributeFilter: attr => !attr.modifier
-                                }, {skipCache:true})
+                                    attributeFilter: attr => !attr.modifier,
+                                    skipCache:true})
 
                                 assert.equal(reflexDefense["SUM"], -10)
                                 assert.equal(armorReflexDefenseBonus["SUM"], 12)

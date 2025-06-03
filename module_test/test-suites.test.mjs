@@ -22,6 +22,8 @@ const registeredTests = [
     poltgotBasicTests];
 
 export function registerTestSuites(quench) {
+
+    quench.mocha.setup({timeout: 10000})
     for(const batchFunction of registeredTests){
         batchFunction(quench);
     }

@@ -272,6 +272,7 @@ Hooks.on('renderChatMessage', async (message, html) => {
 Hooks.on("ready", async function () {
 
 
+    let startTime = new Date();
     game.generated = {};
     game.generated.species = {}
     game.generated.species.replicaDroidChoices = []
@@ -335,7 +336,25 @@ Hooks.on("ready", async function () {
         });
     })
 
+    game.generated.autoItemMapping = new Map();
+    const automaticItemsWhenItemIsAdded = game.settings.get("swse", "automaticItemsWhenItemIsAdded");
+    if (automaticItemsWhenItemIsAdded) {
+        automaticItemsWhenItemIsAdded.split(",").forEach(entry => {
+            const toks = entry.split(">").map(e => e.trim())
 
+            let triggerItemSplit = toks[0].split(":")
+            const triggerItem = {name: triggerItemSplit[1], type: triggerItemSplit[0]};
+            let bonusItemSplit = toks[0].split(":")
+            const bonusItem = {name: bonusItemSplit[1], type: bonusItemSplit[0]};
+
+            let bonusItems = game.generated.autoItemMapping.computeIfAbsent(triggerItem, () => [])
+
+            bonusItems.push(bonusItem);
+        })
+    }
+
+
+    console.log("TOTAL TIME FOR GENERATED FIELDS " + (new Date().getMilliseconds() - startTime.getMilliseconds()) + "ms");
 });
 
 Hooks.on("canvasInit", function () {

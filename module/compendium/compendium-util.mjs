@@ -138,7 +138,7 @@ export async function resolveEntity(item) {
             itemName = item.name;
         } else {
 
-            entity = await SWSEItem.create(item);
+            entity = await SWSEItem.create(item, {render: false});
             itemName = entity.name;
         }
     } else if (item.duplicate) {

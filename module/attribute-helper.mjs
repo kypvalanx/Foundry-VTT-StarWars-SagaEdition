@@ -58,22 +58,26 @@ export function getResolvedSize(entity, options = {}) {
     }
 
     const fn = () => {
-
-        let sizeIndex = toNumber(getInheritableAttribute({
+        let size_values = getInheritableAttribute({
             entity,
             changes: options.changes,
-            attributeKey: "sizeIndex",
-            reduce: "MAX",
+            attributeKey: ["sizeIndex", "sizeBonus", "size"],
             recursive: true
-        }))
-        let sizeBonus = toNumber(getInheritableAttribute({
-            entity,
-            changes: options.changes,
-            attributeKey: "sizeBonus",
-            reduce: "SUM",
-            recursive: true
-        }))
+        })
 
+        let sizeIndex = 0;
+        let sizeBonus = 0;
+        for (const sizeValue of size_values) {
+            if(sizeValue.key === "sizeBonus" || (sizeValue.key === "size" && (sizeValue.value.startsWith("+") || sizeValue.value.startsWith("-")))) {
+                sizeBonus += parseInt(sizeValue.value, 10);
+            } else {
+                if(sizeArray.indexOf(sizeValue.value)> -1) {
+                    sizeIndex = Math.max( sizeIndex, sizeArray.indexOf(sizeValue.value));
+                } else if (!isNaN(sizeValue)){
+                    sizeIndex = Math.max( sizeIndex, parseInt(sizeValue.value));
+                }
+            }
+        }
 
         let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
             entity,
@@ -84,7 +88,7 @@ export function getResolvedSize(entity, options = {}) {
         let miscBonus = "damageThresholdSizeModifier" === options.attributeKey ? damageThresholdEffectiveSize : 0;
         return sizeIndex + sizeBonus + miscBonus;
     }
-    return entity && entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey, fn) : fn()
+    return entity && entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey + (entity?entity.name:options.changes), fn) : fn()
 
 }
 
@@ -104,13 +108,13 @@ function getLocalChangesOnDocument(document, flags) {
 
 
     //Ignore all changes on old size traits except the actual size
-    // if(sizeArray.includes(document.name)){
-    //     let sizeValues = values.filter(v => v.key === "size")
-    //
-    //     if(sizeValues.length > 0){
-    //         values = sizeValues;
-    //     }
-    // }
+    if(sizeArray.includes(document.name)){
+        let sizeValues = values.filter(v => v.key === "size")
+
+        if(sizeValues.length > 0){
+            values = sizeValues;
+        }
+    }
 
 
     return values.map(value => appendSourceMeta(value, document._id, document.name, document.name));
@@ -175,18 +179,15 @@ function getChangesFromLoadedAmmunition(document) {
     return changes;
 }
 
-function getSizeChangesFromSize(size) {
-    if (!isNaN(size)) {
-        size = sizeArray[size];
-    }
-    return SIZE_CHANGES[size]
-}
 
 function getChangesFromSize(changes) {
     const options = {changes: changes};
     let size = getResolvedSize(null, options)
 
-    return getSizeChangesFromSize(size);
+    if (!isNaN(size)) {
+        size = sizeArray[size];
+    }
+    return SIZE_CHANGES[size]
 }
 
 function getChangesFromDocument(document, data) {
@@ -200,7 +201,6 @@ function getChangesFromDocument(document, data) {
         allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
         allAttributes.push(...getChangesFromLoadedAmmunition(document))
 
-        //allAttributes.push(...getChangesFromSize(allAttributes))
         return allAttributes;
     };
 
@@ -258,7 +258,7 @@ function getValues(values, data, entities) {
  * @returns {*|string|[]|*[]}
  */
 export function getInheritableAttribute(data = {}) {
-    if (!data.entity && !data.changes) {
+    if ((!data.entity || data.entity.length === 0) && !data.changes) {
         return [];
     }
     let values = []
@@ -268,6 +268,9 @@ export function getInheritableAttribute(data = {}) {
     }
     if (data.entity) {
         values.push(...getChangesFromDocuments(data.entity, data));
+        if(values.length > 0) {
+            values.push(...getChangesFromSize(values));
+        }
     }
     // 1. get values
     // 2. ?
