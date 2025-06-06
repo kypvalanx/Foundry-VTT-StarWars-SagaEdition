@@ -242,6 +242,16 @@ function _resolveWill(actor, condition) {
     return willDefense
 }
 
+function applyBonuses(defense, total, bonuses) {
+    defense.total = defense.override ? defense.override : total;
+    defense.abilityBonus = bonuses.find(b => b.type === "Ability")?.value || 0;
+    defense.armorBonus = bonuses.find(b => b.type === "Armor")?.value || 0;
+    defense.classBonus = bonuses.find(b => b.type === "Class")?.value || 0;
+    const miscBonus = bonuses.filter(b => !(b.type === "Ability" || b.type === "Armor" || b.type === "Class"));
+    defense.miscBonus = miscBonus.reduce((acc, obj) => acc + obj.value, 0);
+    defense.miscBonusTip = miscBonus.map(b => `${b.type} ${b.value > -1 ? "Bonus" : "Modifier"}: ${b.value}`).join("\n");
+}
+
 /**
  *
  * @param actor {SWSEActor}
@@ -250,26 +260,25 @@ function _resolveWill(actor, condition) {
  * @private
  */
 function _resolveRef(actor, condition) {
+    let bonuses = [{value: 10, type: "Base"}];
 
-    const conditionBonus = condition === "OUT" ? "0" : condition
-    let bonuses = [];
-    bonuses.push(10);
+    const conditionBonus = condition === "OUT" ? 0 : parseInt(condition)
+    bonuses.push({value: conditionBonus, type: "Condition"});
 
     let armorBonus = getArmorBonus(actor);
-    bonuses.push(armorBonus);
+    bonuses.push({value: armorBonus, type: "Armor"});
 
     let abilityBonus = condition === "OUT" ? -5 : Math.min(_getDexMod(actor), _getEquipmentMaxDexBonus(actor));
-    bonuses.push(abilityBonus);
+    bonuses.push({value: abilityBonus, type: "Ability"});
 
 
     let reflexDefenseBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "reflexDefenseBonus",
-        reduce: ["SUM", "SUMMARY", "MAPPED"],
+        reduce: "SUM",
         attributeFilter: attr => !attr.modifier
     })
-    let otherBonus = reflexDefenseBonus["SUM"];
-    let miscBonusTip = reflexDefenseBonus["SUMMARY"];
+    bonuses.push({value: reflexDefenseBonus, type: "Miscellaneous"});
 
     let naturalArmorBonus = getInheritableAttribute({
         entity: actor,
@@ -278,52 +287,39 @@ function _resolveRef(actor, condition) {
         attributeFilter: attr => !attr.modifier
     })
 
-    bonuses.push(otherBonus);
+    bonuses.push({value: naturalArmorBonus, type: "Natural"});
+
     let classBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "classReflexDefenseBonus",
         reduce: "MAX"
     }) || 0;
-    bonuses.push(classBonus);
+
+    bonuses.push({value: classBonus, type: "Class"});
 
 
-    let bonusDodgeReflexDefense = getInheritableAttribute({
+    let dodgeBonus = getInheritableAttribute({
         entity: actor,
         attributeKey: "bonusDodgeReflexDefense",
-        reduce: ["SUM", "SUMMARY", "MAPPED"],
+        reduce: "SUM",
         attributeFilter: attr => !attr.modifier
     })
 
-    let dodgeBonus = bonusDodgeReflexDefense["SUM"]
-    miscBonusTip += bonusDodgeReflexDefense["SUMMARY"]
-    miscBonusTip += `Condition: ${conditionBonus};  `
-    const miscBonuses = [otherBonus, conditionBonus, dodgeBonus, naturalArmorBonus];
+    bonuses.push({value: dodgeBonus, type: "Dodge"});
     if(game.settings.get("swse", "enableEncumbranceByWeight") && actor.weight >= actor.strainCapacity){
         const negativeAbilityBonus = abilityBonus*-1;
-        miscBonuses.push(negativeAbilityBonus)
-        bonuses.push(negativeAbilityBonus);
-        miscBonusTip += `Strained Capacity: ${negativeAbilityBonus};  `
+        bonuses.push({value: negativeAbilityBonus, type: "Encumbrance"});
     }
-    bonuses.push(dodgeBonus);
-    bonuses.push(conditionBonus);
-    bonuses.push(naturalArmorBonus);
-    let miscBonus = resolveValueArray(miscBonuses)
-    let defenseModifiers = [_resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus)]
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex';
     actor.setResolvedVariable("@RefDef", total, name, name);
 
     let reflexDefense = actor.system.defense?.reflex || {};
-    reflexDefense.total = reflexDefense.override ? reflexDefense.override : total;
-    reflexDefense.abilityBonus = abilityBonus;
-    reflexDefense.armorBonus = armorBonus;
-    reflexDefense.classBonus = classBonus;
-    reflexDefense.miscBonus = miscBonus;
-    reflexDefense.miscBonusTip = miscBonusTip;
+    applyBonuses(reflexDefense, total, bonuses);
     reflexDefense.name = name;
     reflexDefense.skip = false;
     reflexDefense.defenseBlock = true;
-    reflexDefense.defenseModifiers = defenseModifiers;
+    reflexDefense.defenseModifiers = [_resolveFFRef(actor, bonuses,  reflexDefense.defenseModifiers)];
     return reflexDefense
 }
 
@@ -350,47 +346,27 @@ function getArmorBonus(actor) {
 /**
  *
  * @param actor {SWSEActor}
- * @param conditionBonus
- * @param abilityBonus
- * @param armorBonus
- * @param reflexDefenseBonus
- * @param classBonus
+ * @param bonuses
+ * @param defenseModifiers
  * @returns {{classBonus, total: number, miscBonus: number, abilityBonus: number, armorBonus: (*)}}
  * @private
  */
-function _resolveFFRef(actor, conditionBonus, abilityBonus, armorBonus, reflexDefenseBonus, classBonus) {
-    let bonuses = [];
-    bonuses.push(10);
+function _resolveFFRef(actor, bonuses, defenseModifiers) {
+    bonuses = JSON.parse(JSON.stringify(bonuses));
 
-    if(abilityBonus < 0) {
-        bonuses.push(abilityBonus);
-    }
-    bonuses.push(armorBonus);
+    bonuses = bonuses.filter(b => !((b.type === "Ability" && b.value > -1) || b.type === "Encumbrance"));
 
-    let otherBonus = reflexDefenseBonus["SUM"];
-    let miscBonusTip = reflexDefenseBonus["SUMMARY"];
-
-    bonuses.push(otherBonus);
-    bonuses.push(classBonus);
-    miscBonusTip += `Condition: ${conditionBonus};  `
-    bonuses.push(conditionBonus);
-    let miscBonus = resolveValueArray([otherBonus, conditionBonus])
     let total = resolveValueArray(bonuses, actor);
     let name = 'Reflex (Flat-Footed)';
 
     actor.setResolvedVariable("@RefFFDef", total, name, name);
 
     let ffReflexDefense =  {};
-    let defenseModifiers = actor.system.defense?.reflex?.defenseModifiers
     if(defenseModifiers){
         ffReflexDefense = defenseModifiers['reflex (flat-footed)'] || {};
     }
-    ffReflexDefense.total = total;
-    ffReflexDefense.abilityBonus = 0;
-    ffReflexDefense.armorBonus = armorBonus;
-    ffReflexDefense.classBonus = classBonus;
-    ffReflexDefense.miscBonus = miscBonus;
-    ffReflexDefense.miscBonusTip = miscBonusTip;
+
+    applyBonuses(ffReflexDefense, total, bonuses)
     ffReflexDefense.name = name;
     ffReflexDefense.skip = false;
     ffReflexDefense.defenseBlock = true;

@@ -9,14 +9,14 @@
                     "type": "affiliation"
                 },
                 {
-                    "name": "Huge",
-                    "type": "trait"
-                },
-                {
                     "quantity": "12",
                     "name": "Beast",
                     "type": "class",
                     "firstLevel": true
+                },
+                {
+                    "name": "Huge",
+                    "type": "trait"
                 },
                 {
                     "name": "Cleave",
@@ -72,5 +72,5 @@
     }],
     "name": "Units-CL-11",
     "type": "Actor",
-    "version": 1729559213869
+    "version": 1749038258011
 }
