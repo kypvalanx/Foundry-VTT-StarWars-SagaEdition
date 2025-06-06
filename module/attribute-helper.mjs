@@ -3,6 +3,7 @@ import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {ITEM_ONLY_ATTRIBUTES, SIZE_CHANGES, sizeArray, UNINHERITABLE_AMMO_CHANGES} from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
+import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 
 /**
  * appends source meta to a given attribute
@@ -73,7 +74,7 @@ export function getResolvedSize(entity, options = {}) {
             } else {
                 if(sizeArray.indexOf(sizeValue.value)> -1) {
                     sizeIndex = Math.max( sizeIndex, sizeArray.indexOf(sizeValue.value));
-                } else if (!isNaN(sizeValue)){
+                } else if (!isNaN(sizeValue.value)){
                     sizeIndex = Math.max( sizeIndex, parseInt(sizeValue.value));
                 }
             }
@@ -109,7 +110,7 @@ function getLocalChangesOnDocument(document, flags) {
 
     //Ignore all changes on old size traits except the actual size
     if(sizeArray.includes(document.name)){
-        let sizeValues = values.filter(v => v.key === "size")
+        let sizeValues = values.filter(v => v.key === "size" || v.key === "sizeIndex" || v.key === "sizeBonus")
 
         if(sizeValues.length > 0){
             values = sizeValues;
@@ -124,6 +125,10 @@ function isActiveDocument(effect, flags = []) {
     if (effect.flags?.swse && effect.flags?.swse.isLevel) {
         const classItem = getClassItemFromClassLevel(effect);
         return effect.flags.swse.level <= (classItem?.system.levelsTaken?.length || 0);
+    }
+
+    if(!(effect instanceof SWSEActiveEffect)) {
+        return true;
     }
 
     return effect.flags?.swse?.itemModifier || effect.disabled === false || flags?.includes("IGNORE_DISABLE");

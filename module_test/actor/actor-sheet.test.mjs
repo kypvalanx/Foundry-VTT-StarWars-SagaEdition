@@ -2,14 +2,25 @@ import {SWSEActor} from "../../module/actor/actor.mjs";
 import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
 import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
+import {processActor} from "../../module/compendium/generation.mjs";
+import {getEntityRawData} from "../compendium/generation.test.mjs";
 
 export async function withTestActor(param, options= {}) {
     const name = "New Test Actor DELETE ME";
-    const actor = await SWSEActor.create({
-        name: name,
-        type: "character",
-        img: "artwork/character-profile.jpg"
-    })
+    let actor;
+    if(options.entity){
+        let actorData = await getEntityRawData(options.entity.path, options.entity.name)
+
+        actorData.name = name;
+        actor = await processActor(actorData);
+    } else {
+        actor = await SWSEActor.create({
+            name: name,
+            type: "character",
+            img: "artwork/character-profile.jpg"
+        })
+    }
+
     try {
         await param(actor);
     } finally {
