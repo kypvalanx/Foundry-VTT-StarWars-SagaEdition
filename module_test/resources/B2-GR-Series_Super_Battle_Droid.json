@@ -12,43 +12,13 @@
                     "type": "affiliation"
                 },
                 {
+                    "quantity": "9",
                     "name": "Nonheroic",
                     "type": "class",
                     "firstLevel": true
                 },
                 {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
-                    "name": "Nonheroic",
-                    "type": "class"
-                },
-                {
+                    "quantity": "1",
                     "name": "Soldier",
                     "type": "class"
                 },
@@ -184,5 +154,5 @@
     }],
     "name": "Units-CL-4",
     "type": "Actor",
-    "version": 1722388135304
+    "version": 1749220239282
 }
