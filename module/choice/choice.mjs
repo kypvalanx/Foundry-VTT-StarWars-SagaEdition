@@ -17,7 +17,7 @@ async function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
     if (choice.type === 'INTEGER') {
         await item.setPayload(choiceAnswer, choice.payload);
     } else {
-        let selectedChoice = options.find(option => option.name.toLowerCase() === choiceAnswer.toLowerCase());
+        let selectedChoice = options.find(option => option.value.toLowerCase() === choiceAnswer.toLowerCase());
         if (!selectedChoice) {
             return items;
         }
@@ -67,12 +67,12 @@ async function resolveActionsFromChoice(choice, item, choiceAnswer, options) {
  */
 export async function activateChoices(item, context) {
     let actor = context.actor;
-    let choices = item.system.choices;
-    if (choices?.length === 0) {
+    let choices = item.system.choices || [];
+    if (choices.length === 0) {
         return {success: true, items: []};
     }
     let items = [];
-    for (let choice of choices ? choices : []) {
+    for (let choice of choices ) {
         if (skipFirstLevelChoice(choice, context)) {
             continue;
         }
@@ -92,24 +92,14 @@ export async function activateChoices(item, context) {
         } else {
             options = await explodeOptions(choice.options, actor);
 
-            //let preprogrammedAnswer;
-
-            //console.log("itemAnswers: " + context.itemAnswers);
-            let preprogrammedAnswer = !!context.itemAnswers && context.itemAnswers.length === 1 ? context.itemAnswers[0]: undefined;
-
-
-            if(!preprogrammedAnswer) {
-                const answeredOption = options.find(o => context.itemAnswers && (context.itemAnswers.includes(o.name) || context.itemAnswers.includes(o.value)));
-                if (answeredOption) {
-                    preprogrammedAnswer = answeredOption.name
-                }
+            let preprogrammedAnswer = null
+            if(context.itemAnswers?.length > 0){
+                preprogrammedAnswer = choice.options.find(o=> context.itemAnswers.includes( o.value) )?.value
             }
-            if(!preprogrammedAnswer) {
-                const answeredOption = options.find(o => context.generalAnswers && (context.generalAnswers.includes(o.name) || context.generalAnswers.includes(o.value)));
-                if(answeredOption){
-                    preprogrammedAnswer = answeredOption.name
-                }
+            if (!preprogrammedAnswer && context.generalAnswers?.length > 0) {
+                preprogrammedAnswer = choice.options.find(o => context.generalAnswers.includes(o.value))?.value
             }
+
             if(preprogrammedAnswer){
                 items.push(...await resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
                 continue;

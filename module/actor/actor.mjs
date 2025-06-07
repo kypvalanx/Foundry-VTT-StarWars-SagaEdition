@@ -2425,7 +2425,7 @@ export class SWSEActor extends Actor {
         super._onCreate(item, options, userId);
 
         const automaticFeats = game.settings.get("swse", "automaticItems")
-        const featTokens = automaticFeats.split(",").map(f => {
+        const featTokens = automaticFeats.split(",").filter(f => !!f).map(f => {
             f = f.trim();
             const toks = f.split(":");
             if (toks[1].length > 0 && toks[0].length > 0) return {name: toks[1], type: toks[0], granted: "Automatic from system configuration"}
