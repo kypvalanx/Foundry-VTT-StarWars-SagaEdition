@@ -145,6 +145,7 @@ export class Attack {
         this.parentId = parentId;
         this.options = options;
         this.cache = new SimpleCache()
+        this.cacheDisabled = false;
     }
 
     /**
@@ -219,7 +220,7 @@ export class Attack {
 
 
     getCached(key, fn) {
-        if (!this.cache) {
+        if (!this.cache || this.cacheDisabled) {
             return fn();
         }
         return this.cache.getCached(key, fn)

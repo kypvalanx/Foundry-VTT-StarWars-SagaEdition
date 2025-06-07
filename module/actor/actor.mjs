@@ -2774,7 +2774,7 @@ export class SWSEActor extends Actor {
         }).map(feat => cleanItemName(feat));
 
         if (feats.length === 0) {
-            return;
+            return [];
         }
 
         let isFirstLevelOfClass = this._isFirstLevelOfClass(item.name);
@@ -3004,6 +3004,7 @@ export class SWSEActor extends Actor {
             if (options.suppressWarnings) {
                 console.debug(`attempted to add ${JSON.stringify(item)}`)
             } else {
+                item.parent = null
                 console.warn(`attempted to add ${JSON.stringify(item)}`)
             }
             return {};

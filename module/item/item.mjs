@@ -318,7 +318,7 @@ export class SWSEItem extends Item {
     }
 
     getCached(key, fn) {
-        if(!this.cache){
+        if(!this.cache || this.cacheDisabled || this.parent?.cacheDisabled){
             return fn();
         }
         return this.cache.getCached(key, fn)
