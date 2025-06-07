@@ -60,7 +60,7 @@ export function getMockEvent(data = {}) {
 }
 
 export function hasItems(assert, actual = [], expected) {
-    actual = actual.map(i => i.name || i.value)
+    actual = actual.map(i => i.displayName || i.name || i.value)
     assert.includeMembers(actual, expected)
 }
 export function notHaveItems(assert, actual, expected) {
@@ -140,7 +140,7 @@ export async function actorSheetTests(quench) {
                         it('should understand if a character is effected by ion damage if they have a cybernetic', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
                                 assert.equal(actor.takesFullDamageFromIon, true);
                             });
@@ -214,8 +214,9 @@ export async function actorSheetTests(quench) {
                         it('should correctly format damage die rolls on beast actors', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
+                                actor.cacheDisabled = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Beast", type: "class"})
-                                await actor.sheet._onDropItem(getMockEvent(), {name: "Claw", type: "beastAttack"})
+                                await actor.sheet._onDropItem(getMockEvent(), {name: "Claw", type: "beastAttack", equip: "equipped"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Medium", type: "trait"})
                                 hasItems(assert, actor.items, ["Beast", "Claw", "Medium"])
 
