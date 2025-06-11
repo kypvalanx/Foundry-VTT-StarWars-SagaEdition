@@ -108,9 +108,74 @@ export const SIZE_CHANGES = {
     ],
 }
 
+//This is a 3d lookup table to be used like this [scalablekey][mediumValue][size]
+// first give it the scalable change key.  it will end with "Scalable",
+// then give it the value that it should have for a medium-sized character, then give it the actual size
+export const SCALABLE_CHANGES = {
+    "damageScalable" : {
+        "1d4":{
+            "Fine": [
+                {"key" : "damage","value" : "1","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "damage","value" : "1","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "damage","value" : "1d2","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "damage","value" : "1d3","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "damage","value" : "1d4","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "damage","value" : "1d6","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "damage","value" : "1d8","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "damage","value" : "2d6","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "damage","value" : "3d6","mode" : 2}
+            ]
+        },
+        "1d6":{
+            "Fine": [
+                {"key" : "damage","value" : "1","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "damage","value" : "1d2","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "damage","value" : "1d3","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "damage","value" : "1d4","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "damage","value" : "1d6","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "damage","value" : "1d8","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "damage","value" : "2d6","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "damage","value" : "3d6","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "damage","value" : "4d6","mode" : 2}
+            ]
+        }
+    }
+}
 
-
-
+///INCLUSION LISTS
+export const WEAPON_INCLUSION_LIST = []
 
 
 

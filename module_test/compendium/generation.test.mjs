@@ -74,6 +74,7 @@ export async function generationTests(quench) {
                     let actorData = await getEntityRawData("systems/swse/module_test/resources/rancor.json", "Rancor")
 
                     let actor = await processActor(actorData);
+                    actor.cacheDisabled = true
 
                     assert.equal(actor.name, "Rancor")
 

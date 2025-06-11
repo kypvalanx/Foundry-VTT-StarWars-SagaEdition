@@ -195,7 +195,7 @@ export class SWSEActor extends Actor {
     }
 
     getCached(key, fn) {
-        if (!this.cache) {
+        if (!this.cache || this.cacheDisabled) {
             return fn();
         }
         return this.cache.getCached(key, fn)

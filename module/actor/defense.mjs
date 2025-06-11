@@ -316,6 +316,7 @@ function _resolveRef(actor, condition) {
 
     let reflexDefense = actor.system.defense?.reflex || {};
     applyBonuses(reflexDefense, total, bonuses);
+    reflexDefense.bonuses = bonuses
     reflexDefense.name = name;
     reflexDefense.skip = false;
     reflexDefense.defenseBlock = true;
