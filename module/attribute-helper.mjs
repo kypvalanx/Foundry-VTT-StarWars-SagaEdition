@@ -1,7 +1,13 @@
 import {inheritableItems, reduceArray, toNumber} from "./common/util.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
-import {ITEM_ONLY_ATTRIBUTES, SIZE_CHANGES, sizeArray, UNINHERITABLE_AMMO_CHANGES} from "./common/constants.mjs";
+import {
+    ITEM_ONLY_ATTRIBUTES,
+    SCALABLE_CHANGES,
+    SIZE_CHANGES,
+    sizeArray,
+    UNINHERITABLE_AMMO_CHANGES, WEAPON_INCLUSION_LIST
+} from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 
@@ -44,7 +50,8 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
 
     let changes = [];
     for (let item of items) {
-        const changesFromDocuments = getChangesFromDocuments(item, {
+        const changesFromDocuments = getChangesFromDocument(item, {
+            flags: ["REQUESTED_BY_ACTOR"],
             recursive: true,
             parent: entity
         });
@@ -56,6 +63,8 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
 export function getResolvedSize(entity, options = {}) {
     if (entity && entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
+    } else if(entity instanceof SWSEItem) {
+        entity = entity.parent;
     }
 
     const fn = () => {
@@ -93,6 +102,18 @@ export function getResolvedSize(entity, options = {}) {
 
 }
 
+/**
+ * This provides filters based on doc type, flags, etc
+ */
+function getLocalChangesFilter(document, flags = []) {
+    if(flags.includes("REQUESTED_BY_ACTOR")) {
+        if(document.type === "weapon"){
+            return (c => WEAPON_INCLUSION_LIST.includes(c.key))
+        }
+    }
+
+    return (v => !!v);
+}
 
 function getLocalChangesOnDocument(document, flags) {
     let values;
@@ -107,8 +128,11 @@ function getLocalChangesOnDocument(document, flags) {
     }
     values = values.filter(v => !!v);
 
+    values = values.filter(getLocalChangesFilter(document, flags));
+
 
     //Ignore all changes on old size traits except the actual size
+    //TODO build cleanup script and remove
     if(sizeArray.includes(document.name)){
         let sizeValues = values.filter(v => v.key === "size" || v.key === "sizeIndex" || v.key === "sizeBonus")
 
@@ -185,28 +209,38 @@ function getChangesFromLoadedAmmunition(document) {
 }
 
 
-function getChangesFromSize(changes) {
+function getChangesFromSize(entity, changes) {
     const options = {changes: changes};
-    let size = getResolvedSize(null, options)
+    let size = getResolvedSize(entity, options)
 
     if (!isNaN(size)) {
         size = sizeArray[size];
     }
-    return SIZE_CHANGES[size]
+
+    const resolvedChanges = [];
+    resolvedChanges.push(...SIZE_CHANGES[size])
+
+    resolvedChanges.push(...changes.filter(change => !change.key.toLowerCase().endsWith("scalable")))
+
+    for (const scalableChange of changes.filter(change => change.key.toLowerCase().endsWith("scalable"))) {
+        resolvedChanges.push(...SCALABLE_CHANGES[scalableChange.key][scalableChange.value][size]);
+    }
+
+    return resolvedChanges;
 }
 
 function getChangesFromDocument(document, data) {
     let fn = () => {
-        let allAttributes = [];
+        let changes = [];
         if (!data.skipLocal) {
-            allAttributes.push(...getLocalChangesOnDocument(document, data.flags))
+            changes.push(...getLocalChangesOnDocument(document, data.flags))
         }
 
-        allAttributes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
-        allAttributes.push(...getChangesFromActiveEffects(document, data.recursive));
-        allAttributes.push(...getChangesFromLoadedAmmunition(document))
+        changes.push(...getChangesFromEmbeddedItems(document, data.itemFilter, data.embeddedItemOverride));
+        changes.push(...getChangesFromActiveEffects(document, data.recursive));
+        changes.push(...getChangesFromLoadedAmmunition(document))
 
-        return allAttributes;
+        return changes;
     };
 
     return document.getCached ? document.getCached({
@@ -270,11 +304,10 @@ export function getInheritableAttribute(data = {}) {
 
     if (data.changes) {
         values.push(...data.changes);
-    }
-    if (data.entity) {
+    } else if (data.entity) {
         values.push(...getChangesFromDocuments(data.entity, data));
         if(values.length > 0) {
-            values.push(...getChangesFromSize(values));
+            values = getChangesFromSize(data.entity, values);
         }
     }
     // 1. get values
