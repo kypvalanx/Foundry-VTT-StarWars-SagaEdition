@@ -343,7 +343,7 @@ export function getInheritableAttribute(data = {}) {
     if (data.entity) {
         values.push(...getChangesFromDocuments(data));
         if(values.length > 0 && containsScalableAttributes(changeKey) && (!data.flags || !data.flags.includes("SKIP_SIZE")) && ((data.entity instanceof SWSEItem && data.entity.parent) || (data.entity instanceof SWSEActor))) {
-            values.push(...getChangesFromSize(data.entity, values));
+            values = getChangesFromSize(data.entity, values);
         }
     }
     // 1. get values

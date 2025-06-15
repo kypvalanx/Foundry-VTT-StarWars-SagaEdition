@@ -99,6 +99,7 @@ export async function actorSheetTests(quench) {
                         it('should reduce Use the Force by the number of cybernetics up to 5', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
+                                actor.cacheDisabled = true
 
                                 assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, 0)
 

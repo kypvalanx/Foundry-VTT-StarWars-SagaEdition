@@ -106,6 +106,29 @@ function isRerollApplicable(rerollKey, key, attribute) {
     return rerollKey.toLowerCase() === key || rerollKey.toLowerCase() === "any" || standardizedAttribute(rerollKey) === standardizedAttribute(attribute);
 }
 
+function resolveBonusesAndHandleModifiers(rawSkillBonuses) {
+    const skillBonuses = [];
+
+    let implant = 0;
+    for (const skillBonus of rawSkillBonuses) {
+        const toks = skillBonus.split(":");
+        if (toks.length > 2) {
+            const modifier = toks[2].toLowerCase().trim();
+            switch (modifier) {
+                case "implant":
+                    implant = implant + parseInt(toks[1]);
+                    break;
+            }
+            continue;
+        }
+        skillBonuses.push(toks[1]);
+    }
+    if (implant) {
+        skillBonuses.push(Math.max(implant, -5));
+    }
+    return skillBonuses;
+}
+
 /**
  *
  * @param actor
@@ -199,29 +222,6 @@ export function generateSkills(actor, options = {}) {
 
     resolvedSkills.push(...nonSituationalSkills);
 
-
-    function resolveBonusesAndHandleModifiers(rawSkillBonuses) {
-        const skillBonuses = [];
-
-        let implant = 0;
-        for (const skillBonus of rawSkillBonuses) {
-            const toks = skillBonus.split(":");
-            if(toks.length > 2){
-                const modifier = toks[2].toLowerCase().trim();
-                switch (modifier) {
-                    case "implant":
-                        implant = implant + parseInt(toks[1]);
-                        break;
-                }
-                continue;
-            }
-            skillBonuses.push(toks[1]);
-        }
-        if(implant){
-            skillBonuses.push(Math.max(implant, -5));
-        }
-        return skillBonuses;
-    }
 
     for (let resSkill of resolvedSkills) {
         let key = resSkill.toLowerCase();
