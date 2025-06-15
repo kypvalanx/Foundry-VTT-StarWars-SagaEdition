@@ -152,7 +152,7 @@ function getLocalChangesOnDocument(document, flags) {
     //Ignore all changes on old size traits except the actual size
     //TODO build cleanup script and remove
     if(sizeArray.includes(document.name)){
-        let sizeValues = values.filter(v => v.key === "size" || v.key === "sizeIndex" || v.key === "sizeBonus")
+        let sizeValues = values.filter(v => v.key === "size" || v.key === "sizeIndex" || v.key === "sizeBonus"|| v.key.endsWith("Scalable"))
 
         if(sizeValues.length > 0){
             values = sizeValues;
@@ -236,7 +236,6 @@ function getChangesFromSize(entity, changes) {
     }
 
     const resolvedChanges = [];
-    resolvedChanges.push(...SIZE_CHANGES[size])
 
     resolvedChanges.push(...changes.filter(change => !change.key.toLowerCase().endsWith("scalable")))
 
@@ -311,7 +310,7 @@ function containsScalableAttributes(changeKey) {
         changeKey = [changeKey];
     }
 
-    for (const changeKeyElement of changeKey) {
+    for (const changeKeyElement of changeKey.filter(c => !!c)) {
         if(changeKeyElement.endsWith("Scalable"))return true;
 
         if(Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8)).includes(changeKeyElement)) return true;
