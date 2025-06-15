@@ -3,12 +3,28 @@ export const dieSize_vanilla = ["1", "1d2", "1d3", "1d4", "1d6", "1d8", "1d10", 
 export const dieType = ["1", "2", "3", "4", "6", "8", "10", "12"];
 export const sizeArray = ["Fine", "Diminutive", "Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan", "Colossal", "Colossal (Frigate)", "Colossal (Cruiser)", "Colossal (Station)"];
 export const SIZE_CHANGES = {
+    "Fine" : [
+        {"key" : "reflexDefenseBonus","value" : "10","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "10","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:20","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
     "Diminutive" : [
         {"key" : "reflexDefenseBonus","value" : "5","mode" : 2},
         {"key" : "shipSkillModifier","value" : "5","mode" : 2},
         {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
         {"key" : "unarmedDamage","value" : "1","mode" : 2},
         {"key" : "skillBonus","value" : "stealth:15","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
+    ],
+    "Tiny" : [
+        {"key" : "reflexDefenseBonus","value" : "2","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "2","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
+        {"key" : "unarmedDamage","value" : "1d2","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:10","mode" : 2},
         {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
     ],
     "Small" : [
@@ -19,29 +35,12 @@ export const SIZE_CHANGES = {
         {"key" : "skillBonus","value" : "stealth:5","mode" : 2},
         {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
     ],
-    "Gargantuan" : [
-        {"key" : "reflexDefenseBonus","value" : "-5","mode" : 2},
-        {"key" : "characterFightingSpace","value" : "16 squares","mode" : 2},
-        {"key" : "shipSkillModifier","value" : "-5","mode" : 2},
-        {"key" : "unarmedDamage","value" : "2d6","mode" : 2},
-        {"key" : "skillBonus","value" : "stealth:-15","mode" : 2},
-        {"key" : "damageThresholdSizeModifier","value" : "20","mode" : 2},
-        {"key" : "grappleSizeModifier","value" : "15","mode" : 2},
-    ],
     "Medium" : [
         {"key" : "reflexDefenseBonus","value" : "0","mode" : 2},
         {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
         {"key" : "shipSkillModifier","value" : "0","mode" : 2},
         {"key" : "unarmedDamage","value" : "1d4","mode" : 2},
         {"key" : "skillBonus","value" : "stealth:0","mode" : 2},
-        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
-    ],
-    "Tiny" : [
-        {"key" : "reflexDefenseBonus","value" : "2","mode" : 2},
-        {"key" : "shipSkillModifier","value" : "2","mode" : 2},
-        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
-        {"key" : "unarmedDamage","value" : "1d2","mode" : 2},
-        {"key" : "skillBonus","value" : "stealth:10","mode" : 2},
         {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
     ],
     "Large" : [
@@ -62,6 +61,15 @@ export const SIZE_CHANGES = {
         {"key" : "damageThresholdSizeModifier","value" : "10","mode" : 2},
         {"key" : "grappleSizeModifier","value" : "10","mode" : 2},
     ],
+    "Gargantuan" : [
+        {"key" : "reflexDefenseBonus","value" : "-5","mode" : 2},
+        {"key" : "characterFightingSpace","value" : "16 squares","mode" : 2},
+        {"key" : "shipSkillModifier","value" : "-5","mode" : 2},
+        {"key" : "unarmedDamage","value" : "2d6","mode" : 2},
+        {"key" : "skillBonus","value" : "stealth:-15","mode" : 2},
+        {"key" : "damageThresholdSizeModifier","value" : "20","mode" : 2},
+        {"key" : "grappleSizeModifier","value" : "15","mode" : 2},
+    ],
     "Colossal" : [
         {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
         {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2},
@@ -70,14 +78,6 @@ export const SIZE_CHANGES = {
         {"key" : "skillBonus","value" : "stealth:-20","mode" : 2},
         {"key" : "damageThresholdSizeModifier","value" : "50","mode" : 2},
         {"key" : "grappleSizeModifier","value" : "20","mode" : 2},
-    ],
-    "Fine" : [
-        {"key" : "reflexDefenseBonus","value" : "10","mode" : 2},
-        {"key" : "shipSkillModifier","value" : "10","mode" : 2},
-        {"key" : "characterFightingSpace","value" : "1 square","mode" : 2},
-        {"key" : "unarmedDamage","value" : "1","mode" : 2},
-        {"key" : "skillBonus","value" : "stealth:20","mode" : 2},
-        {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2},
     ],
     "Colossal (Frigate)" : [
         {"key" : "shipSkillModifier","value" : "-10","mode" : 2},
@@ -171,8 +171,296 @@ export const SCALABLE_CHANGES = {
                 {"key" : "damage","value" : "4d6","mode" : 2}
             ]
         }
-    }
+    },
+    "shipSkillModifierScalable": {
+        "0": {
+            "Fine" : [
+                {"key" : "shipSkillModifier","value" : "10","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "shipSkillModifier","value" : "5","mode" : 2}
+            ],
+            "Tiny" : [
+                {"key" : "shipSkillModifier","value" : "2","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "shipSkillModifier","value" : "1","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "shipSkillModifier","value" : "0","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "shipSkillModifier","value" : "-1","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "shipSkillModifier","value" : "-2","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "shipSkillModifier","value" : "-5","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "shipSkillModifier","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "shipSkillModifier","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "shipSkillModifier","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "shipSkillModifier","value" : "-10","mode" : 2}
+            ],
+        }
+    },
+    "reflexDefenseBonusScalable": {
+        "0": {
+            "Fine" : [
+                {"key" : "reflexDefenseBonus","value" : "10","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "reflexDefenseBonus","value" : "5","mode" : 2}
+            ],
+            "Tiny" : [
+                {"key" : "reflexDefenseBonus","value" : "2","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "reflexDefenseBonus","value" : "1","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "reflexDefenseBonus","value" : "0","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "reflexDefenseBonus","value" : "-1","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "reflexDefenseBonus","value" : "-2","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "reflexDefenseBonus","value" : "-5","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "reflexDefenseBonus","value" : "-10","mode" : 2}
+            ],
+        }
+    },
+    "characterFightingSpaceScalable": {
+        "1 square": {
+            "Fine" : [
+                {"key" : "characterFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "characterFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Tiny" : [
+                {"key" : "characterFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "characterFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "characterFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "characterFightingSpace","value" : "4 squares","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "characterFightingSpace","value" : "9 squares","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "characterFightingSpace","value" : "16 squares","mode" : 2}
+            ],
+            "Colossal" : [],
+            "Colossal (Frigate)" : [],
+            "Colossal (Cruiser)" : [],
+            "Colossal (Station)" : [],
+        }
+    },
+    "unarmedDamageScalable": {
+        "1d4": {
+            "Fine" : [
+                {"key" : "unarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "unarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Tiny" : [
+                {"key" : "unarmedDamage","value" : "1d2","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "unarmedDamage","value" : "1d3","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "unarmedDamage","value" : "1d4","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "unarmedDamage","value" : "1d6","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "unarmedDamage","value" : "1d8","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "unarmedDamage","value" : "2d6","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "unarmedDamage","value" : "2d8","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "unarmedDamage","value" : "2d8","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "unarmedDamage","value" : "2d8","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "unarmedDamage","value" : "2d8","mode" : 2}
+            ],
+        }
+    },
+    "vehicleFightingSpaceScalable": {
+        "0 squares": {
+            "Fine" : [],
+            "Diminutive" : [],
+            "Tiny" : [],
+            "Small" : [],
+            "Medium" : [],
+            "Large" : [],
+            "Huge" : [],
+            "Gargantuan" : [],
+            "Colossal" : [
+                {"key" : "vehicleFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "vehicleFightingSpace","value" : "1 square","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "vehicleFightingSpace","value" : "4 squares","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "vehicleFightingSpace","value" : "4 squares","mode" : 2}
+            ],
+        }
+    },
+    "skillBonusScalable": {
+        "stealth:0": {
+            "Fine" : [
+                {"key" : "skillBonus","value" : "stealth:20","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "skillBonus","value" : "stealth:15","mode" : 2},
+            ],
+            "Tiny" : [
+                {"key" : "skillBonus","value" : "stealth:10","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "skillBonus","value" : "stealth:5","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "skillBonus","value" : "stealth:0","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "skillBonus","value" : "stealth:-5","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "skillBonus","value" : "stealth:-10","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "skillBonus","value" : "stealth:-15","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "skillBonus","value" : "stealth:-20","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "skillBonus","value" : "stealth:-20","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "skillBonus","value" : "stealth:-20","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "skillBonus","value" : "stealth:-20","mode" : 2}
+            ],
+        }
+    },
+    "damageThresholdSizeModifierScalable": {
+        "0":{
+            "Fine" : [
+                {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2}
+            ],
+            "Diminutive" : [
+                {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2}
+            ],
+            "Tiny" : [
+                {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2}
+            ],
+            "Small" : [
+                {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2}
+            ],
+            "Medium" : [
+                {"key" : "damageThresholdSizeModifier","value" : "0","mode" : 2}
+            ],
+            "Large" : [
+                {"key" : "damageThresholdSizeModifier","value" : "5","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "damageThresholdSizeModifier","value" : "10","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "damageThresholdSizeModifier","value" : "20","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "damageThresholdSizeModifier","value" : "50","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "damageThresholdSizeModifier","value" : "100","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "damageThresholdSizeModifier","value" : "200","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "damageThresholdSizeModifier","value" : "500","mode" : 2}
+            ],
+        }
+    },
+    "grappleSizeModifierScalable": {
+        "0":{
+            "Fine" : [],
+            "Diminutive" : [],
+            "Tiny" : [],
+            "Small" : [],
+            "Medium" : [],
+            "Large" : [
+                {"key" : "grappleSizeModifier","value" : "5","mode" : 2}
+            ],
+            "Huge" : [
+                {"key" : "grappleSizeModifier","value" : "10","mode" : 2}
+            ],
+            "Gargantuan" : [
+                {"key" : "grappleSizeModifier","value" : "15","mode" : 2}
+            ],
+            "Colossal" : [
+                {"key" : "grappleSizeModifier","value" : "20","mode" : 2}
+            ],
+            "Colossal (Frigate)" : [
+                {"key" : "grappleSizeModifier","value" : "25","mode" : 2}
+            ],
+            "Colossal (Cruiser)" : [
+                {"key" : "grappleSizeModifier","value" : "30","mode" : 2}
+            ],
+            "Colossal (Station)" : [
+                {"key" : "grappleSizeModifier","value" : "35","mode" : 2}
+            ],
+        }
+    },
 }
+
+
 
 ///INCLUSION LISTS
 export const WEAPON_INCLUSION_LIST = []

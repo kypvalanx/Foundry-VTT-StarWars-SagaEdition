@@ -219,7 +219,7 @@ export class SWSEItem extends Item {
     }
 
     get isFollowerTemplate() {
-        return getInheritableAttribute({entity: this, attributeKey: "isFollowerTemplate", reduce: "OR"});
+        return getInheritableAttribute({entity: this , attributeKey: "isFollowerTemplate", reduce: "OR", flags:['SKIP_SIZE']});
     }
 
     get strippable() {
@@ -297,7 +297,8 @@ export class SWSEItem extends Item {
         let prefix = getInheritableAttribute({
             entity: item,
             attributeKey: "prefix",
-            reduce: "VALUES"
+            reduce: "VALUES",
+            flags: ["SKIP_SIZE"]
         }).join(" ");
 
         if (prefix) {
@@ -307,7 +308,8 @@ export class SWSEItem extends Item {
         let suffix = getInheritableAttribute({
             entity: item,
             attributeKey: "suffix",
-            reduce: "VALUES"
+            reduce: "VALUES",
+            flags: ["SKIP_SIZE"]
         }).join(" ");
 
         if (suffix) {

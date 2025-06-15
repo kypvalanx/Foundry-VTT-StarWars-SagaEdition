@@ -6,7 +6,8 @@ import {
     SCALABLE_CHANGES,
     SIZE_CHANGES,
     sizeArray,
-    UNINHERITABLE_AMMO_CHANGES, WEAPON_INCLUSION_LIST
+    UNINHERITABLE_AMMO_CHANGES,
+    WEAPON_INCLUSION_LIST
 } from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
@@ -50,7 +51,8 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
 
     let changes = [];
     for (let item of items) {
-        const changesFromDocuments = getChangesFromDocument(item, {
+        const changesFromDocuments = getChangesFromDocument({
+            entity: item,
             flags: ["REQUESTED_BY_ACTOR"],
             recursive: true,
             parent: entity
@@ -63,16 +65,25 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
 export function getResolvedSize(entity, options = {}) {
     if (entity && entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
-    } else if(entity instanceof SWSEItem) {
-        entity = entity.parent;
+    } else if(entity instanceof SWSEItem && entity.parent) {
+        return getResolvedSize(entity.parent, {flags: ["REQUESTED_BY_ACTOR"]});
     }
 
     const fn = () => {
+        let flags = !options.flags ? [] : [...options.flags];
+        if(!flags.includes("RECURSIVE")) {
+            flags.push("RECURSIVE");
+        }
+        if(!flags.includes("SKIP_SIZE")) {
+            flags.push("SKIP_SIZE");
+        }
         let size_values = getInheritableAttribute({
             entity,
             changes: options.changes,
             attributeKey: ["sizeIndex", "sizeBonus", "size"],
-            recursive: true
+            recursive: true,
+            skipSize: true,
+            flags: flags
         })
 
         let sizeIndex = 0;
@@ -88,17 +99,24 @@ export function getResolvedSize(entity, options = {}) {
                 }
             }
         }
+        let miscBonus = 0;
+        if("damageThresholdSizeModifier" === options.attributeKey){
+            miscBonus = toNumber(getInheritableAttribute({
+                entity,
+                changes: options.changes,
+                attributeKey: "damageThresholdEffectiveSize",
+                reduce: "SUM", recursive: true,
+                skipSize: true,
+                flags: flags
+            })) ;
+        }
 
-        let damageThresholdEffectiveSize = toNumber(getInheritableAttribute({
-            entity,
-            changes: options.changes,
-            attributeKey: "damageThresholdEffectiveSize",
-            reduce: "SUM", recursive: true
-        }))
-        let miscBonus = "damageThresholdSizeModifier" === options.attributeKey ? damageThresholdEffectiveSize : 0;
         return sizeIndex + sizeBonus + miscBonus;
     }
-    return entity && entity.getCache ? entity.getCache("resolvedSize" + options.attributeKey + (entity?entity.name:options.changes), fn) : fn()
+
+    let variation = "damageThresholdSizeModifier" === options.attributeKey ? "damageThresholdSizeModifier" : "";
+
+    return entity && entity.getCache ? entity.getCache("resolvedSize" + variation, fn) : fn()
 
 }
 
@@ -229,7 +247,8 @@ function getChangesFromSize(entity, changes) {
     return resolvedChanges;
 }
 
-function getChangesFromDocument(document, data) {
+function getChangesFromDocument( data) {
+   let document = data.entity;
     let fn = () => {
         let changes = [];
         if (!data.skipLocal) {
@@ -252,19 +271,20 @@ function getChangesFromDocument(document, data) {
     }, fn) : fn();
 }
 
-function getChangesFromDocuments(entity, data) {
-    if (Array.isArray(entity)) {
+function getChangesFromDocuments(data) {
+    if (Array.isArray(data.entity)) {
         let values = [];
-        for (let e of entity) {
-            values.push(...getChangesFromDocument(e, {
+        for (let e of data.entity) {
+            values.push(...getChangesFromDocument( {
                 itemFilter: data.itemFilter,
                 recursive: data.recursive,
-                embeddedItemOverride: data.embeddedItemOverride
+                embeddedItemOverride: data.embeddedItemOverride,
+                entity: e
             }))
         }
         return values;
     }
-    return getChangesFromDocument(entity, data);
+    return getChangesFromDocument( data);
 }
 
 function getValues(values, data, entities) {
@@ -285,6 +305,22 @@ function getValues(values, data, entities) {
     });
 }
 
+function containsScalableAttributes(changeKey) {
+    if(!Array.isArray(changeKey))
+    {
+        changeKey = [changeKey];
+    }
+
+    for (const changeKeyElement of changeKey) {
+        if(changeKeyElement.endsWith("Scalable"))return true;
+
+        if(Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8)).includes(changeKeyElement)) return true;
+
+    }
+
+    return false;
+}
+
 /**
  *
  * @param data
@@ -301,13 +337,14 @@ export function getInheritableAttribute(data = {}) {
         return [];
     }
     let values = []
-
+    const changeKey = data.attributeKey;
     if (data.changes) {
         values.push(...data.changes);
-    } else if (data.entity) {
-        values.push(...getChangesFromDocuments(data.entity, data));
-        if(values.length > 0) {
-            values = getChangesFromSize(data.entity, values);
+    }
+    if (data.entity) {
+        values.push(...getChangesFromDocuments(data));
+        if(values.length > 0 && containsScalableAttributes(changeKey) && (!data.flags || !data.flags.includes("SKIP_SIZE")) && ((data.entity instanceof SWSEItem && data.entity.parent) || (data.entity instanceof SWSEActor))) {
+            values.push(...getChangesFromSize(data.entity, values));
         }
     }
     // 1. get values
@@ -316,7 +353,7 @@ export function getInheritableAttribute(data = {}) {
     // really though we have to filter by attribute key, allow attribute filter,
     // run prerequisites (look at this, it looks like it's done twice?)that order can stay the same
     // i think that overrid needs to move to reduce, the reduce functions just need to acknowledge mode. TODO look at this after coffee
-    const changeKey = data.attributeKey;
+
     if (changeKey) {
         let attributeKeyFilter = Array.isArray(changeKey) ?
             (change) => change && changeKey.includes(change.key) :
