@@ -458,6 +458,124 @@ export const SCALABLE_CHANGES = {
             ],
         }
     },
+    "droidUnarmedDamageScalable":{
+        "1":{
+            "Fine": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "droidUnarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "droidUnarmedDamage","value" : "1d2","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "droidUnarmedDamage","value" : "1d3","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "droidUnarmedDamage","value" : "1d4","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "droidUnarmedDamage","value" : "1d6","mode" : 2}
+            ]
+        },
+        "1d2":{
+            "Fine": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "droidUnarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "droidUnarmedDamage","value" : "1d2","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "droidUnarmedDamage","value" : "1d3","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "droidUnarmedDamage","value" : "1d4","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "droidUnarmedDamage","value" : "1d6","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "droidUnarmedDamage","value" : "1d8","mode" : 2}
+            ]
+        },
+        "1d3":{
+            "Fine": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "droidUnarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "droidUnarmedDamage","value" : "1d2","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "droidUnarmedDamage","value" : "1d3","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "droidUnarmedDamage","value" : "1d4","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "droidUnarmedDamage","value" : "1d6","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "droidUnarmedDamage","value" : "1d8","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "droidUnarmedDamage","value" : "2d6","mode" : 2}
+            ]
+        },
+        "1d4":{
+            "Fine": [
+                {"key" : "droidUnarmedDamage","value" : "0","mode" : 2}
+            ],
+            "Diminutive": [
+                {"key" : "droidUnarmedDamage","value" : "1","mode" : 2}
+            ],
+            "Tiny": [
+                {"key" : "droidUnarmedDamage","value" : "1d2","mode" : 2}
+            ],
+            "Small": [
+                {"key" : "droidUnarmedDamage","value" : "1d3","mode" : 2}
+            ],
+            "Medium": [
+                {"key" : "droidUnarmedDamage","value" : "1d4","mode" : 2}
+            ],
+            "Large": [
+                {"key" : "droidUnarmedDamage","value" : "1d6","mode" : 2}
+            ],
+            "Huge": [
+                {"key" : "droidUnarmedDamage","value" : "1d8","mode" : 2}
+            ],
+            "Gargantuan": [
+                {"key" : "droidUnarmedDamage","value" : "2d6","mode" : 2}
+            ],
+            "Colossal": [
+                {"key" : "droidUnarmedDamage","value" : "2d8","mode" : 2}
+            ]
+        },
+    }
 }
 
 
