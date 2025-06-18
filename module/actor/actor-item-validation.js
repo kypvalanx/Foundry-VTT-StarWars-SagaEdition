@@ -146,7 +146,9 @@ const handleTalent = async (context) => {
         }
     }
 
-    const optionString = possibleTalentTrees.map(talentTree => `<option value="${talentTree}">${talentTree}</option>`).join();
+    const optionString = [...possibleTalentTrees]
+        .map(talentTree => `<option value="${talentTree}">${talentTree}</option>`)
+        .join("");
 
 
     if (possibleTalentTrees.size === 0) {
