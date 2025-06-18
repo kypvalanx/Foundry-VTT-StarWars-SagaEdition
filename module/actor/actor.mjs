@@ -2839,9 +2839,19 @@ export class SWSEActor extends Actor {
 
     async selectFeat(availableFeats, ownedFeats, parentItem, context) {
         if (context.itemAnswers) {
-            for (const answer of context.itemAnswers) {
-                if (availableFeats.includes(answer)) {
-                    return answer;
+            for (const feat of context.itemAnswers) {
+                if (availableFeats.includes(feat)) {
+
+                    const items = [{
+                        type: 'TRAIT',
+                        name: `Bonus Feat (${feat})`,
+                        parent: parentItem
+                    }, {
+                        type: 'FEAT',
+                        name: feat,
+                        parent: parentItem
+                    }];
+                    return {feat, items};
                 }
             }
         }
