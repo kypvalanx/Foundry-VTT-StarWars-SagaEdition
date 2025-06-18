@@ -1194,7 +1194,9 @@ export function inheritableItems(actor, options={}) {
     return actor.getCached && !options.skipCache ? actor.getCached(`inheritableItems`, fn) : fn();
 }
 
-
+export function titleCase(str) {
+    return str.replace(/\b\w/g, letter => letter.toUpperCase());
+}
 
 export function resolveWeight(weight, quantity = 1, costFactor = 1, actor) {
     weight = `${weight}`.toLowerCase();
