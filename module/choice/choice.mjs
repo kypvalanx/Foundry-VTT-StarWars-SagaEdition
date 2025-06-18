@@ -94,10 +94,10 @@ export async function activateChoices(item, context) {
 
             let preprogrammedAnswer = null
             if(context.itemAnswers?.length > 0){
-                preprogrammedAnswer = choice.options.find(o=> context.itemAnswers.includes( o.value) )?.value
+                preprogrammedAnswer = options.find(o=> context.itemAnswers.map(ia => ia.toLowerCase).includes( o.value.toLowerCase) )?.value
             }
             if (!preprogrammedAnswer && context.generalAnswers?.length > 0) {
-                preprogrammedAnswer = choice.options.find(o => context.generalAnswers.includes(o.value))?.value
+                preprogrammedAnswer = options.find(o => context.generalAnswers.map(ia => ia.toLowerCase).includes(o.value.toLowerCase))?.value
             }
 
             if(preprogrammedAnswer){

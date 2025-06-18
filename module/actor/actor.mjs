@@ -1491,6 +1491,10 @@ export class SWSEActor extends Actor {
         return speed
     }
 
+    get carriedWeight(){
+        return this.weight.carriedWeight;
+    }
+
 
     get equippedWeapons() {
         return this.equipped

@@ -234,6 +234,7 @@ export async function actorSheetTests(quench) {
                         it('carried weight should ignore non numeric terms that cannot be converted into numeric terms', async function () {
                             await withTestActor(async actor => {
                                 actor.suppressDialog = true
+                                actor.cacheDisabled = true
                                 await actor.setAttributes({int:18})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Blaster Pistol", type: "weapon"})
                                 hasItems(assert, actor.items, [  "Blaster Pistol"])
