@@ -11,7 +11,7 @@ export async function poltgotBasicTests(quench) {
             const { describe, it, assert, expect, should } = context;
             describe("Polygot Module", ()=>{
 
-
+                if(!game.polyglot) return;
 
                 it("should treat a language as known when it is on an actor sheet", async ()=>{
                     await withTestActor(async actor => {
