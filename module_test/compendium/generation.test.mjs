@@ -100,6 +100,7 @@ export async function generationTests(quench) {
 
                 it("Generate B2-GR-Series Super Battle Droid Correctly", async function() {
                     this.timeout(10000)
+                    this.cacheDisabled = true
                     let actorData = await getEntityRawData("systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json", "B2-GR-Series Super Battle Droid")
 
                     let actor = await processActor(actorData);

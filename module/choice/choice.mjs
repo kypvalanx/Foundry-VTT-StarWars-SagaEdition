@@ -1,6 +1,6 @@
 import {COLORS, GM_BONUSES, lightsaberForms, skills} from "../common/constants.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {fullJoin, innerJoin} from "../common/util.mjs";
+import {fullJoin, innerJoin, titleCase} from "../common/util.mjs";
 import {initializeUniqueSelection, uniqueSelection} from "../common/listeners.mjs";
 import {getIndexEntriesByTypes} from "../compendium/compendium-util.mjs";
 
@@ -94,10 +94,14 @@ export async function activateChoices(item, context) {
 
             let preprogrammedAnswer = null
             if(context.itemAnswers?.length > 0){
-                preprogrammedAnswer = options.find(o=> context.itemAnswers.map(ia => ia.toLowerCase).includes( o.value.toLowerCase) )?.value
+                const lowercaseAnswers = context.itemAnswers.map(ia => ia.toLowerCase());
+                const found = options.find(o=> lowercaseAnswers.includes( (o.value).toLowerCase()));
+                preprogrammedAnswer = found?.value;
             }
             if (!preprogrammedAnswer && context.generalAnswers?.length > 0) {
-                preprogrammedAnswer = options.find(o => context.generalAnswers.map(ia => ia.toLowerCase).includes(o.value.toLowerCase))?.value
+                const contextualAnswers = context.generalAnswers.map(ia => ia.toLowerCase());
+                const found = options.find(o => contextualAnswers.includes((o.value).toLowerCase()));
+                preprogrammedAnswer = found?.value;
             }
 
             if(preprogrammedAnswer){
@@ -221,6 +225,9 @@ export async function explodeOptions(options, actor) {
         let resolvedOptions = [];
         for (let [key, value] of Object.entries(options)) {
             value.name = value.name || key;
+            if(!value.value){
+                value.value = value.name || value.display;
+            }
             resolvedOptions.push(value);
         }
         options = resolvedOptions;
@@ -248,7 +255,7 @@ export async function explodeOptions(options, actor) {
             case 'AVAILABLE_GM_BONUSES':
                 for (let bonus of GM_BONUSES) {
                     let deepCopy = {key: bonus.key, value: bonus.value}
-                    resolvedOptions.push({name: bonus.display, attributes: [deepCopy]});
+                    resolvedOptions.push({name: bonus.display, value: bonus.display, attributes: [deepCopy]});
                 }
                 break;
             case 'AVAILABLE_EXOTIC_WEAPON_PROFICIENCY':
@@ -259,7 +266,7 @@ export async function explodeOptions(options, actor) {
                 })
                 for (let weapon of game.generated.weapon.exoticWeapons) {
                     if (!weaponProficiencies.includes(weapon)) {
-                        resolvedOptions.push({name: weapon, abilities: [], items: [], payload: weapon});
+                        resolvedOptions.push({name: weapon, value: weapon, abilities: [], items: [], payload: weapon});
                     }
                 }
                 break;
@@ -287,10 +294,11 @@ export async function explodeOptions(options, actor) {
                 for (let weapon of ["Simple Weapons", "Pistols", "Rifles", "Lightsabers", "Heavy Weapons", "Advanced Melee Weapons"]) {
                     if (!proficientWeapons.includes(weapon)) {
                         resolvedOptions.push({
-                            name: weapon.titleCase(),
+                            name: titleCase(weapon),
+                            value: titleCase(weapon),
                             abilities: [],
                             items: [],
-                            payload: weapon.titleCase()
+                            payload: titleCase(weapon)
                         });
                     }
                 }
@@ -304,10 +312,11 @@ export async function explodeOptions(options, actor) {
                 for (let skill of skills()) {
                     if (!focussedSkills.includes(skill)) {
                         resolvedOptions.push({
-                            name: skill.titleCase(),
+                            name: titleCase(skill),
+                            value: titleCase(skill),
                             abilities: [],
                             items: [],
-                            payload: skill.titleCase()
+                            payload: titleCase(skill)
                         });
                     }
                 }
@@ -322,10 +331,11 @@ export async function explodeOptions(options, actor) {
                     let attributeKey = skill.label;
                     if (!skillFocuses.includes(attributeKey.toLowerCase())) {
                         resolvedOptions.push({
-                            name: attributeKey.titleCase(),
+                            name: titleCase(attributeKey),
+                            value: titleCase(attributeKey),
                             abilities: [],
                             items: [],
-                            payload: attributeKey.titleCase()
+                            payload: titleCase(attributeKey)
                         });
                     }
                 }
@@ -340,10 +350,10 @@ export async function explodeOptions(options, actor) {
                     let attributeKey = skill.label;
                     if (!exceptionalSkillFocuses.includes(attributeKey.toLowerCase())) {
                         resolvedOptions.push({
-                            name: attributeKey.titleCase(),
+                            name: titleCase(attributeKey),
                             abilities: [],
                             items: [],
-                            payload: attributeKey.titleCase()
+                            payload: titleCase(attributeKey)
                         });
                     }
                 }
@@ -352,10 +362,10 @@ export async function explodeOptions(options, actor) {
                 for (let skill of actor.untrainedSkills) {
                     let attributeKey = skill.label;
                     resolvedOptions.push({
-                        name: attributeKey.titleCase(),
+                        name: titleCase(attributeKey),
                         abilities: [],
                         items: [],
-                        payload: attributeKey.titleCase()
+                        payload: titleCase(attributeKey)
                     });
                 }
                 break;
@@ -473,6 +483,8 @@ export async function explodeOptions(options, actor) {
             }
             return 0;
         })
+
+        resolvedOptions.forEach(o => o.value = o.value || o.name)
     }
 
     return resolvedOptions;
@@ -510,7 +522,7 @@ function resolveOptions(actor, excludingKey, includeKey, options = {}) {
     included.push(...(options?.included || []))
     for (let option of included) {
         if (!excluded.includes(option)) {
-            resolvable.push({name: option.titleCase(), abilities: [], items: [], payloads: {payload:option.titleCase()}});
+            resolvable.push({name: titleCase(option), abilities: [], items: [], payloads: {payload:titleCase(option)}});
         }
     }
     return resolvable;
