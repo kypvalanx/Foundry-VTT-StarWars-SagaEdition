@@ -454,7 +454,7 @@ export async function actorSheetTests(quench) {
                                     "Weapon Proficiency (Pistols)",
                                     "Weapon Proficiency (Simple Weapons)"])
                                 const availableTrainedSkills = await getAvailableTrainedSkillCount(actor)
-                                assert.equal(availableTrainedSkills.skills, 8);
+                                assert.equal(availableTrainedSkills.availableTrainedSkillCount, 8);
                             });
                         });
 
