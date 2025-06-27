@@ -25,7 +25,7 @@
                 <a class="item" data-tab="affiliations">Affiliations & Languages</a>
                 <a class="item" data-tab="traits">Traits</a>
                 <a class="item" data-tab="modes">Modes</a>
-<!--                <a class="item" data-tab="changes">Changes</a>-->
+                <a class="item" data-tab="changes">Changes</a>
                 <a class="item" data-tab="description">Notes</a>
                 <a class="item" data-tab="settings">Settings</a>
 
@@ -223,7 +223,7 @@
                 </div>
 
                 <div class="tab changes" data-group="primary" data-tab="changes">
-<!--                    { {> 'systems/swse/templates/change/change-list.hbs' changes=actor.changes inheritedChanges=actor.inheritedChanges modes=modes changepath='system.changes'}}-->
+                    {{> 'systems/swse/templates/change/change-list.hbs' changes=actor.changes modes=modes changepath='system.changes'}}
                 </div>
 
                 <div class="tab settings" data-group="primary" data-tab="settings">
