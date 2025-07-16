@@ -1,0 +1,154 @@
+{
+    "entries": [{
+        "effects": [],
+        "system": {
+            "providedItems": [{
+                "providedItems": [
+                    {
+                        "name": "Gargantuan",
+                        "type": "trait"
+                    },
+                    {
+                        "equip": "installed",
+                        "name": "Droid Socket",
+                        "type": "vehicleSystem"
+                    },
+                    {
+                        "equip": "installed",
+                        "name": "Hyperdrive, Class 1",
+                        "type": "vehicleSystem"
+                    },
+                    {
+                        "equip": "pilotInstalled",
+                        "name": "Medium Laser Cannon",
+                        "changes": [{
+                            "mode": 2,
+                            "value": "6d10x2",
+                            "key": "damage"
+                        }],
+                        "type": "vehicleSystem"
+                    },
+                    {
+                        "equip": "pilotInstalled",
+                        "name": "Proton Torpedoes",
+                        "changes": [{
+                            "mode": 2,
+                            "value": "9d10x2",
+                            "key": "damage"
+                        }],
+                        "type": "vehicleSystem"
+                    }
+                ],
+                "name": "Custom",
+                "changes": [
+                    {
+                        "mode": 2,
+                        "value": "Starfighter",
+                        "key": "vehicleSubType"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "7",
+                        "key": "armorReflexDefenseBonus"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "10",
+                        "key": "damageReduction"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "120",
+                        "key": "hitPointEq"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "15",
+                        "key": "shieldRating"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "16",
+                        "key": "speedCharacterScale"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "16",
+                        "key": "speedStarshipScale"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1,050",
+                        "key": "maximumVelocity"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Total Cover:Pilot",
+                        "key": "cover"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "+5 Cover Bonus:Astromech Droid",
+                        "key": "cover"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "42",
+                        "key": "baseStrength"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "22",
+                        "key": "baseDexterity"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "16",
+                        "key": "baseIntelligence"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1",
+                        "key": "crew"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "Skilled",
+                        "key": "crewQuality"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "None",
+                        "key": "passengers"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "0.11",
+                        "key": "cargoCapacity"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "1 Week",
+                        "key": "consumables"
+                    },
+                    {
+                        "mode": 2,
+                        "value": "6 Proton Torpedoes",
+                        "key": "payload"
+                    }
+                ],
+                "type": "vehicleBaseType"
+            }],
+            "changes": [],
+            "description": ""
+        },
+        "name": "T-65B X-Wing Starfighter",
+        "flags": {},
+        "permission": {"default": 0},
+        "sort": 0,
+        "type": "vehicle"
+    }],
+    "name": "Vehicles",
+    "type": "Item",
+    "version": 1751054489083
+}

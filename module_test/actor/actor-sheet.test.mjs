@@ -11,7 +11,7 @@ export async function withTestActor(param, options= {}) {
     if(options.entity){
         let actorData = await getEntityRawData(options.entity.path, options.entity.name)
 
-        actorData.name = name;
+        actorData.system.test = true;
         actor = await processActor(actorData);
     } else {
         actor = await SWSEActor.create({
@@ -21,11 +21,16 @@ export async function withTestActor(param, options= {}) {
         })
     }
 
+    let context = {otherActors:[]}
+
     try {
-        await param(actor);
+        await param(actor, context);
     } finally {
+        for(let a of context.otherActors){
+            a.delete()
+        }
         await actor.delete();
-        game.actors.forEach(a => {if(a.name === name){
+        game.actors.forEach(a => {if(a.system.test === true){
             a.delete()
         }})
     }
@@ -578,7 +583,7 @@ export async function actorSheetTests(quench) {
                     describe("._onFollowerCreate", () => {
 
                         it('should add all creation Provided items when a follower is created', async function () {
-                            await withTestActor(async actor => {
+                            await withTestActor(async (actor, context) => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
@@ -588,6 +593,7 @@ export async function actorSheetTests(quench) {
                                     currentTarget:{dataset: {itemId}},
                                     skipRender:true
                                 }))
+                                context.otherActors.push(follower)
 
                                 hasItems(assert, follower.items, [
                                     "Follower",
@@ -598,7 +604,7 @@ export async function actorSheetTests(quench) {
                         });
 
                         it('should add all current follower provides when a follower is created', async function () {
-                            await withTestActor(async actor => {
+                            await withTestActor(async (actor, context) => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
@@ -611,6 +617,7 @@ export async function actorSheetTests(quench) {
                                     currentTarget:{dataset: {itemId}},
                                     skipRender:true
                                 }))
+                                context.otherActors.push(follower)
 
                                 hasItems(assert, follower.items, [
                                     "Coordinated Attack"])
@@ -618,7 +625,7 @@ export async function actorSheetTests(quench) {
                         });
 
                         it('should add new follower provides when the change is added', async function () {
-                            await withTestActor(async actor => {
+                            await withTestActor(async (actor, context) => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
@@ -630,6 +637,7 @@ export async function actorSheetTests(quench) {
                                     currentTarget:{dataset: {itemId}},
                                     skipRender:true
                                 }))
+                                context.otherActors.push(follower)
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
 
                                 hasItems(assert, follower.items, [
@@ -639,7 +647,7 @@ export async function actorSheetTests(quench) {
 
 
                         it('should remove follower provides when the provider is removed', async function () {
-                            await withTestActor(async actor => {
+                            await withTestActor(async (actor, context) => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
@@ -651,6 +659,7 @@ export async function actorSheetTests(quench) {
                                     currentTarget:{dataset: {itemId}},
                                     skipRender:true
                                 }))
+                                context.otherActors.push(follower)
                                 let coordinatedTactic = await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
                                 let coordinatedTacticId = coordinatedTactic[0].id;
 
@@ -673,7 +682,7 @@ export async function actorSheetTests(quench) {
                         });
 
                         it('should throw an exception if a follower takes a regular class', async function () {
-                            await withTestActor(async actor => {
+                            await withTestActor(async (actor, context) => {
                                 actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
@@ -685,6 +694,7 @@ export async function actorSheetTests(quench) {
                                     currentTarget:{dataset: {itemId}},
                                     skipRender:true
                                 }))
+                                context.otherActors.push(follower)
                                 let coordinatedTactic = await actor.sheet._onDropItem(getMockEvent(), {name: "Coordinated Tactics", type: "talent"})
                                 let coordinatedTacticId = coordinatedTactic[0].id;
 

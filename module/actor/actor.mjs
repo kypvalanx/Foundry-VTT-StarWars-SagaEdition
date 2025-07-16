@@ -3295,6 +3295,8 @@ export class SWSEActor extends Actor {
                         break;
                     case "hitPointEq":
                         data['system.health.override'] = change.value;
+                        data['system.health.max'] = change.value;
+                        data['system.health.value'] = change.value;
                         break;
                     case "damageThresholdBonus":
                         await this.addChange(change)

@@ -11,25 +11,8 @@
 import {getFile, processActor, processItem} from "../../module/compendium/generation.mjs";
 import {getResolvedSize} from "../../module/attribute-helper.mjs";
 import {sizeArray} from "../../module/common/constants.mjs";
+import {withTestActor} from "../actor/actor-sheet.test.mjs";
 
-function assertAbilityScores(assert, actor, str, dex, con, int, wis, cha) {
-    assert.equal(actor.system.attributeGenerationType, "Manual")
-    const attributes = actor.attributes;
-    assert.equal(attributes.str.total, str)
-    assert.equal(attributes.dex.total, dex)
-    assert.equal(attributes.con.total, con)
-    assert.equal(attributes.int.total, int)
-    assert.equal(attributes.wis.total, wis)
-    assert.equal(attributes.cha.total, cha)
-}
-
-function assertEquippedItems(assert, actor, expectedItems) {
-    let items = actor.equipped.map(i => i.name)
-    assert.equal(items.length, expectedItems.length, `expected ${expectedItems.toString()}, actual ${items.toString()}`)
-    for (let item of expectedItems) {
-        assert.ok(items.includes(item), `couldn't find ${item}`)
-    }
-}
 
 export async function generationTests(quench) {
 
@@ -70,9 +53,7 @@ export async function generationTests(quench) {
 
 
                 it("Generate Rancor Correctly", async function() {
-                    this.timeout(10000)
                     let actorData = await getEntityRawData("systems/swse/module_test/resources/rancor.json", "Rancor")
-
                     let actor = await processActor(actorData);
                     actor.cacheDisabled = true
 
@@ -99,37 +80,84 @@ export async function generationTests(quench) {
                 })
 
                 it("Generate B2-GR-Series Super Battle Droid Correctly", async function() {
-                    this.timeout(10000)
-                    this.cacheDisabled = true
-                    let actorData = await getEntityRawData("systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json", "B2-GR-Series Super Battle Droid")
+                    await withTestActor(async (actor) => {
+                        assert.equal(actor.name, "B2-GR-Series Super Battle Droid")
 
-                    let actor = await processActor(actorData);
+                        assert.equal(sizeArray[getResolvedSize(actor)], "Large")
 
-                    assert.equal(actor.name, "B2-GR-Series Super Battle Droid")
+                        assert.equal(actor.system.health.value, 42, "health")
+                        assert.equal(actor.system.health.max, 42)
+                        assert.equal(actor.system.health.override, 42)
 
-                    assert.equal(sizeArray[getResolvedSize(actor)], "Large")
+                        assert.equal(actor.defense.fortitude.total, 18)
+                        assert.equal(actor.defense.reflex.total, 19, "reflex")
+                        assert.equal(actor.defense.will.total, 13)
+                        assert.equal(actor.defense.damageThreshold.total, 23, "damage threshold")
 
-                    assert.equal(actor.system.health.value, 42, "health")
-                    assert.equal(actor.system.health.max, 42)
-                    assert.equal(actor.system.health.override, 42)
+                        assert.equal(actor.system.attributeGenerationType, "Manual")
+                        assert.equal(actor.system.attributes.str.total, 20)
+                        assert.equal(actor.system.attributes.dex.total, 14)
+                        assert.equal(actor.system.attributes.con.total, 10)
+                        assert.equal(actor.system.attributes.int.total, 10)
+                        assert.equal(actor.system.attributes.wis.total, 14)
+                        assert.equal(actor.system.attributes.cha.total, 6)
 
-                    assert.equal(actor.defense.fortitude.total, 18)
-                    assert.equal(actor.defense.reflex.total, 19, "reflex")
-                    assert.equal(actor.defense.will.total, 13)
-                    assert.equal(actor.defense.damageThreshold.total, 23, "damage threshold")
-
-                    assert.equal(actor.system.attributeGenerationType, "Manual")
-                    assert.equal(actor.system.attributes.str.total, 20)
-                    assert.equal(actor.system.attributes.dex.total, 14)
-                    assert.equal(actor.system.attributes.con.total, 10)
-                    assert.equal(actor.system.attributes.int.total, 10)
-                    assert.equal(actor.system.attributes.wis.total, 14)
-                    assert.equal(actor.system.attributes.cha.total, 6)
-
-                    assert.includeMembers(actor.items.map(i => i.name), ['Quadanium Plating'])
-
-                    actor.delete()
+                        assert.includeMembers(actor.items.map(i => i.name), ['Quadanium Plating'])
+                    }, {
+                        entity: {
+                            path: "systems/swse/module_test/resources/B2-GR-Series_Super_Battle_Droid.json",
+                            name: "B2-GR-Series Super Battle Droid"
+                        }
+                    })
                 })
+
+                it("Generate T-65B X-Wing Starfighter Correctly", async function() {
+                    await withTestActor(async (actor) => {
+                        // Basic Information
+                        assert.equal(actor.name, "T-65B X-Wing Starfighter");
+                        assert.equal(sizeArray[getResolvedSize(actor)], "Gargantuan");
+
+                        // Health and Defenses
+                        assert.equal(actor.system.health.value, 120, "health");
+                        assert.equal(actor.system.health.max, 120);
+                        assert.equal(actor.defense.reflex.total, 18, "reflex");
+                        assert.equal(actor.defense.reflex.defenseModifiers[0].total, 12, "Flat-Footed Reflex");
+                        assert.equal(actor.defense.fortitude.total, 26, "fortitude");
+                        assert.equal(actor.defense.damageThreshold.total, 46, "damage threshold");
+
+                        // Vehicle Stats
+                        assert.equal(actor.system.attributes.str.total, 42, "strength");
+                        assert.equal(actor.system.attributes.dex.total, 22, "dexterity");
+                        assert.equal(actor.system.attributes.int.total, 16, "intelligence");
+
+                        // Speed and Movement
+                        //assert.equal(actor.system.speed.fly, 16, "fly speed");
+                        //assert.equal(actor.system.speed.flyMax, 40, "maximum fly speed");
+
+                        // Equipment and Features
+                        assert.includeMembers(actor.items.map(i => i.name), [
+                            "Gargantuan",
+                            "Droid Socket",
+                            "Hyperdrive, Class 1",
+                        ]);
+
+                        // Crew Requirements
+                        assert.equal(actor.system.crew.pilot, 1, "pilot requirement");
+                        assert.equal(actor.system.crew.passengers, 0, "passenger capacity");
+
+                        // Cargo and Payload
+                        assert.equal(actor.system.cargo, 110, "cargo capacity");
+
+                        // Consumables
+                        assert.equal(actor.system.consumables, "1 week", "consumables duration");
+                    }, {
+                        entity: {
+                            path: "systems/swse/module_test/resources/T-65B_X-Wing_Starfighter.json",
+                            name: "T-65B X-Wing Starfighter"
+                        }
+                    })
+                });
+
             });
         },
         {displayName: "GENERATION: ACTOR SPOT CHECKS"});
