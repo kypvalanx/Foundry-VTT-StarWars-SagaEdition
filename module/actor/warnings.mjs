@@ -1,5 +1,6 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {getAvailableTrainedSkillCount} from "./skill-handler.mjs";
+import {XP_REQUIREMENT} from "../common/constants.mjs";
 
 function getAvailableTrainedSkills(actor) {
     let trainedSkills = actor.trainedSkills;
@@ -37,10 +38,14 @@ export function warningsFromActor(actor) {
         }
 
         if (!actor.species && !actor.classes.find(c => c.name === 'Beast')) {
-            warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:species">Please Select a Species</span>`)
+            warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:species" title="Open Species Compendium">Please Select a Species</span>`)
         }
+
+
         if (!actor.classes || actor.classes.length === 0) {
-            warnings.push(`<span data-action="compendium-web" data-type="class">Please Select a Class</span>`)
+            warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:class" title="Open Class Compendium">Please Select a Class</span>`)
+        } else if(actor.characterLevel < 20 && XP_REQUIREMENT[actor.characterLevel + 1] <= actor.system.experience){
+            warnings.push(`<span data-action="compendium" data-type="Item" data-filter="-type:class" title="Open Class Compendium">You have enough XP for a new level!</span>`)
         }
         let {availableTrainedSkillCount, availableTrainedKnowledgeSkillCount} = getAvailableTrainedSkills(actor);
 

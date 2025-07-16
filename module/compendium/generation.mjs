@@ -14,6 +14,7 @@ export async function processActor(actorData) {
     delete actor.system.providedItems;
     actor.prepareData();
     actor.skipPrepare = true;
+    actor.suppressDialog = true;
     await actor.addItems({
         skipPrerequisite: true,
         generalAnswers: choiceAnswers,
@@ -22,6 +23,7 @@ export async function processActor(actorData) {
         items: providedItems
     });
 
+    actor.suppressDialog = false;
     actor.skipPrepare = false;
     actor.prepareData();
 
