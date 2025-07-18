@@ -248,7 +248,7 @@ export class SWSEActor extends Actor {
                 await document.update({'actorLink': val});
             }
         }
-        await this.safeUpdate({"token.actorLink": val})
+        await this.safeUpdate({"prototypeToken.actorLink": val})
     }
 
     get additionalStatusEffectChoices() {
