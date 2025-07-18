@@ -27,9 +27,10 @@ export class SWSECompendiumDirectory extends CompendiumDirectory{
         let filterString = element.data("filter")
         let type = element.data("type")
         let pack = element.data("pack")
+        let actionModifier = element.data("action-modifier")
 
         if(game.settings.get("swse", "enableAdvancedCompendium")) {
-            new SWSECompendiumBrowser({filterString, type, pack})._render(true);
+            new SWSECompendiumBrowser({filterString, type, pack, actionModifier})._render(true);
         } else {
             let found = game.packs.get(pack);
 

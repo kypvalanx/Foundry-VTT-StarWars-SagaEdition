@@ -544,7 +544,7 @@
   cursor: pointer;
 }
 
-.swse input[type=text], .swse input[type=number], .swse select, .swse div.input {
+.swse input[type=text], .swse input[type=number], .swse select, .swse .input, .swse .left-input, .swse .right-input, .swse .middle-input {
   padding-left: 6px;
   min-height: 32px;
   font-size: 1.25rem;
@@ -571,15 +571,15 @@
   transition: all 0.3s ease-in-out;
 }
 
-.swse input[type=text].left-input, .swse input[type=number].left-input {
+.swse .left-input {
   border-radius: 10px 0 0 10px;
 }
 
-.swse input[type=text].right-input, .swse input[type=number].right-input {
+.swse .right-input {
   border-radius: 0 10px 10px 0;
 }
 
-.swse input[type=text].middle-input, .swse input[type=number].middle-input {
+.swse .middle-input {
   border-radius: 0 0 0 0;
 }
 

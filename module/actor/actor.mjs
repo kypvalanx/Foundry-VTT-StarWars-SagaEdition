@@ -841,27 +841,40 @@ export class SWSEActor extends Actor {
 
     get hyperdrive() {
         return this.getCached("hyperdrive", () => {
+            let hyperdrives = this.itemTypes["vehicleSystem"]
+                .filter(item => item.changes.find(change => change.key === "hyperdrive") && item.equipped)
+                .map(item => {
+                    return {
+                        hClass: parseInt(item.changes.find(change => change.key === "hyperdrive").value),
+                        item: item
+                    }
+                });
 
-            let primary = `Class ${(getInheritableAttribute({
-                entity: this,
-                attributeKey: "hyperdrive",
-                reduce: "MIN"
-            }))}`;
-            let backup = `Class ${(getInheritableAttribute({
-                entity: this,
-                attributeKey: "hyperdrive",
-                reduce: "MAX"
-            }))}`;
-            if (primary === backup) {
-                backup = undefined;
+            let primaryValue = Infinity
+            let primary;
+
+            if(hyperdrives.length > 0){
+                for(let hyperdrive of hyperdrives){
+                    if(hyperdrive.hClass < primaryValue){
+                        primaryValue = hyperdrive.hClass;
+                        primary = hyperdrive;
+                    }
+                }
             }
-            if (primary === `Class undefined`) {
-                primary = undefined;
+
+            hyperdrives = hyperdrives.filter( h => h !== primary);
+            let backupValue = Infinity
+            let backup;
+            if(hyperdrives.length > 0){
+                for(let hyperdrive of hyperdrives){
+                    if(hyperdrive.hClass < backupValue){
+                        backupValue = hyperdrive.hClass;
+                        backup = hyperdrive;
+                    }
+                }
             }
-            return {
-                primary: primary,
-                backup: backup
-            }
+
+            return { primary: primary?.item, backup: backup?.item }
         })
     }
 

@@ -1012,6 +1012,11 @@ export class SWSEActorSheet extends ActorSheet {
             }
         }
 
+        if(data.modifier){
+            let toks = data.modifier.split(":");
+            data[toks[0]] = toks[1];
+        }
+
         return await this.object.addItems({
             newFromCompendium: true,
             answers: data.answers,

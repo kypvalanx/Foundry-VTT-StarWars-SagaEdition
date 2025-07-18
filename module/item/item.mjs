@@ -1621,6 +1621,13 @@ export class SWSEItem extends Item {
         this.safeUpdate(update);
     }
 
+    get hyperdrive(){
+        let value = this.changes.find(change => change.key.toLowerCase() === "hyperdrive")?.value;
+        if(value)
+            return `Class ${value}`
+        return "";
+    }
+
 
     async addItemModificationEffectsFromItems(items, context={}) {
         if (!this.canUserModify(game.user, 'update')) {
