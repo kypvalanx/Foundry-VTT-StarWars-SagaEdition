@@ -64,14 +64,26 @@
     <div class="size large flex-row">
         <div class="labeled-input">
             <label for="hyperdrive" class="text">Hyperdrive</label>
-            <input class="left-input" id="hyperdrive" type="text" value="{{actor.hyperdrive.primary}}"
-                   placeholder="" disabled/>
+            <div class="left-input" id="hyperdrive"{{#if actor.hyperdrive.primary}} data-action="view" data-item-id="{{actor.hyperdrive.primary.id}}" {{else}} data-action="compendium" data-action-modifier="equip:installed" data-type="Item" data-filter="-type:vehicleSystem hyperdrive" {{/if}}>{{#if actor.hyperdrive.primary}}{{actor.hyperdrive.primary.hyperdrive}}{{else}}Add Drive{{/if}}</div>
+            {{#if actor.hyperdrive.primary}}
+                <div class="control-0">
+                    <a class="" data-action="delete" data-item-id="{{actor.hyperdrive.primary.id}}"
+                       title="delete item"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            {{/if}}
         </div>
         <div class="divider"></div>
         <div class="labeled-input">
             <label for="backupHyperdrive" class="text">Backup Hyperdrive</label>
-            <input class="right-input" id="backupHyperdrive" type="text" value="{{actor.hyperdrive.backup}}"
-                   placeholder="" disabled/>
+            <div class="right-input" id="backupHyperdrive"{{#if actor.hyperdrive.backup}} data-action="view" data-item-id="{{actor.hyperdrive.backup.id}}" {{else}} data-action="compendium" data-action-modifier="equip:installed" data-type="Item" data-filter="-type:vehicleSystem hyperdrive" {{/if}}>{{#if actor.hyperdrive.backup}}{{actor.hyperdrive.backup.hyperdrive}}{{else}}Add Drive{{/if}}</div>
+            {{#if actor.hyperdrive.backup}}
+                <div class="control-0">
+                    <a class="" data-action="delete" data-item-id="{{actor.hyperdrive.backup.id}}"
+                       title="delete item"><i
+                            class="fas fa-trash"></i></a>
+                </div>
+            {{/if}}
         </div>
     </div>
 

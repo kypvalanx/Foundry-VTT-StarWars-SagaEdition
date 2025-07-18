@@ -234,7 +234,7 @@
   cursor: pointer;
 }
 
-input[type=text], input[type=number], select, div.input {
+input[type=text], input[type=number], select, .input, .left-input, .right-input, .middle-input {
   padding-left: 6px;
   min-height: 32px;
   font-size: 1.25rem;
@@ -261,16 +261,16 @@ button {
 }
 
 
-input[type=text].left-input, input[type=number].left-input {
+.left-input {
   border-radius: 10px 0 0 10px;
 }
 
 
-input[type=text].right-input, input[type=number].right-input {
+.right-input {
   border-radius: 0 10px 10px 0;
 }
 
-input[type=text].middle-input, input[type=number].middle-input {
+.middle-input {
   border-radius: 0 0 0 0;
 }
 

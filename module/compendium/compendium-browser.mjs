@@ -139,6 +139,7 @@ export class SWSECompendiumBrowser extends Application {
         for (let a = 0; items.length < this.lazyLoadTreshold && a < this.items.length; a++) {
             const item = this.items[a];
             if (this._passesFilters(item.item)) {
+                item.item.compendiumModifier = this.options.actionModifier
                 items.push(item);
             }
             this.lazyIndex = a + 1;
@@ -522,7 +523,8 @@ export class SWSECompendiumBrowser extends Application {
                 type: pack.documentClass.documentName,
                 pack: pack.collection,
                 id: li.getAttribute("data-document-id"),
-                uuid: li.getAttribute("data-uuid")
+                uuid: li.getAttribute("data-uuid"),
+                modifier: li.getAttribute("data-action-modifier")
             })
         );
     }
