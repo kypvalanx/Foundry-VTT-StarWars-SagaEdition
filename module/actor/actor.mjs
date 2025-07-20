@@ -41,7 +41,7 @@ import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
 import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
-import {isAppropriateAmmo} from "../item/ammunition/ammunitionDelegate.mjs";
+import {ActorAmmunitionDelegate} from "../item/ammunition/ammunitionDelegate.mjs";
 import {WeightDelegate} from "./weightDelegate.mjs";
 import {getGridSizeFromSize} from "./size.mjs";
 import {bypassShields} from "../common/conditionalHelpers.mjs";
@@ -109,13 +109,12 @@ export class SWSEActor extends Actor {
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
         this.weight = new WeightDelegate(this);
+        this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
 
 
         if (this.type === 'character') this._prepareCharacterData();
-        //if (this.type === 'npc') this._prepareCharacterData(system);
         if (this.type === 'computer') this._prepareComputerData(system);
         if (this.type === 'vehicle') this._prepareVehicleData(system);
-        //if (this.type === 'npc-vehicle') this._prepareVehicleData(system);
 
         this.initializeCharacterSettings();
 
@@ -281,19 +280,6 @@ export class SWSEActor extends Actor {
         super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
         this.reset()
     }
-
-    getAvailableAmmunition(type) {
-        return this.items.filter(item => {
-            return isAppropriateAmmo(item, type) && !item.system?.hide ;
-        });
-    }
-
-    get ammunition() {
-        return this.getCached("ammunition", () => {
-            return this.itemTypes['equipment'].filter(item => item.system.subtype === "Ammunition");
-        })
-    }
-
 
     getCached(key, fn) {
         if (!this.cache || this.cacheDisabled) {

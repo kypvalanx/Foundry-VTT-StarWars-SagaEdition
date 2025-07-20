@@ -95,10 +95,37 @@ function ammunitionItem(itemId) {
 }
 
 export class AmmunitionDelegate {
+    /**
+     * Constructs an instance of the class with a specified item.
+     *
+     * @param {SWSEItem} item - The item to be initialized or assigned to this instance.
+     * @return {Object} A new instance of the class containing the specified item.
+     */
     constructor(item) {
+        /**
+         * Represents an item or a property within the current context.
+         * It is used for accessing or manipulating values associated with this specific reference.
+         */
         this.item = item;
     }
 
+    isAppropriateAmmunition(type){
+        if (!this.item) return false;
+
+        if(this.item.system.hidden){
+            return false;
+        }
+
+        if (getInheritableAttribute({entity: item, attributeKey: "spent", reduce: "OR"})) {
+            return false;
+        }
+        const inheritableAttribute = getInheritableAttribute({
+            entity: item,
+            attributeKey: "actsAs",
+            reduce: "VALUES"
+        });
+        return item.name === type || inheritableAttribute.includes(type);
+    }
 //as user i want to load ammo into a queueable weapon
     //as a user i want to be able to fire a queueable weapon and have it automatically reload
     //as a user i want to be able to unload ammunition from the queue and from the active spot
@@ -133,7 +160,7 @@ export class AmmunitionDelegate {
 
 
     async queueAmmunition(type, item) {
-        if (!isAppropriateAmmo(item, type)) return {fail: true}
+        if (!this.isAppropriateAmmunition(type)) return {fail: true}
         let queue = this.getAmmunition(type).queue || [];
         if (this.ammoCapacity(type) <= queue.length) {
             return {fail: true, message: "NO ROOM IN QUEUE"}
@@ -238,7 +265,7 @@ export class AmmunitionDelegate {
     async reload(type) {
 //THIS SHOULD LOAD FROM THE QUEUE FIRST
         if (this.item.parent) {
-            const availableAmmunition = this.item.parent.getAvailableAmmunition(type);
+            const availableAmmunition = this.item.parent.ammunitionDelegate.getAvailableAmmunition(type);
 
             let ammoItem;
             if (availableAmmunition.length === 1) {
@@ -322,20 +349,22 @@ export class AmmunitionDelegate {
     }
 }
 
-export function isAppropriateAmmo(item, type) {
-    if (!item) return false;
 
-    if(item.system.hidden){
-        return false;
+export class ActorAmmunitionDelegate {
+
+    constructor(actor) {
+        this.actor = actor;
     }
 
-    if (getInheritableAttribute({entity: item, attributeKey: "spent", reduce: "OR"})) {
-        return false;
+    get ammunition(){
+        return this.actor.getCached("ammunition", () => {
+            return this.actor.itemTypes['equipment'].filter(item => item.system.subtype === "Ammunition");
+        })
     }
-    const inheritableAttribute = getInheritableAttribute({
-        entity: item,
-        attributeKey: "actsAs",
-        reduce: "VALUES"
-    });
-    return item.name === type || inheritableAttribute.includes(type);
+
+    getAvailableAmmunition(type) {
+        return this.actor.items.filter(item => {
+            return item.ammunition.isAppropriateAmmunition(type) && !item.system?.hide ;
+        });
+    }
 }
