@@ -65,34 +65,6 @@ export class SWSEActor extends Actor {
         this.formulaFunctions = new Map();
         this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
 
-        if (this.system.externalEditorLink) {
-
-            //this.scrapeExternal(this.system.externalEditorLink)
-
-
-            // let my_variable = new XMLHttpRequest(); // object
-            // my_variable.onload = function() {
-            //
-            //     console.log("data")
-            //     // Here, we can use the response Data
-            //
-            // }
-            // my_variable.open("GET", this.system.externalEditorLink);
-            //
-            // my_variable.send();
-
-            // fetch(this.system.externalEditorLink, {
-            //     headers: {
-            //     }
-            // })
-            //     //.then(r => r.json())
-            //     .then(data => {
-            //
-            //     console.log(data)
-            //
-            // });
-        }
-
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
