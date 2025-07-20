@@ -139,7 +139,7 @@ export class SWSEActor extends Actor {
         this.weight = new WeightDelegate(this);
 
 
-        if (this.type === 'character') this._prepareCharacterData(system);
+        if (this.type === 'character') this._prepareCharacterData();
         //if (this.type === 'npc') this._prepareCharacterData(system);
         if (this.type === 'computer') this._prepareComputerData(system);
         if (this.type === 'vehicle') this._prepareVehicleData(system);
@@ -336,13 +336,6 @@ export class SWSEActor extends Actor {
         this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
     }
 
-    
-
-    startOfTurn(updateData){
-        const update = {"system.deflectCount": 0}
-        this.safeUpdate(update).then(()=> this.sheet.render())
-    }
-
     async safeUpdate(data = {}, context = {}) {
         let user = game.user;
 
@@ -534,7 +527,6 @@ export class SWSEActor extends Actor {
 
     getRollData() {
         this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
-        let health = this.health
         return super.getRollData();
     }
 
@@ -678,7 +670,7 @@ export class SWSEActor extends Actor {
     /**
      * Prepare Character type specific data
      */
-    _prepareCharacterData(system) {
+    _prepareCharacterData() {
         this.darkside = new DarksideDelegate(this);
 
     }
@@ -1761,6 +1753,7 @@ export class SWSEActor extends Actor {
      *
      * @param actor {SWSEActor}
      * @param attributeName
+     * @param options
      * @return {*}
      */
     static getActorAttribute(actor, attributeName, options) {
@@ -2385,11 +2378,11 @@ export class SWSEActor extends Actor {
 
 
     setAge(age) {
-        this.safeUpdate({'system.age': age}).then(r => {})
+        this.safeUpdate({'system.age': age}).then(() => {})
     }
 
     setGender(sex, gender) {
-        this.safeUpdate({'system.sex': sex, 'system.gender': gender}).then(r=> {})
+        this.safeUpdate({'system.sex': sex, 'system.gender': gender}).then(()=> {})
     }
 
 
@@ -2418,8 +2411,7 @@ export class SWSEActor extends Actor {
     }
 
     get baseAttackBonus() {
-        const baseAttackBonus = this._baseAttackBonus();
-        return baseAttackBonus;
+        return this._baseAttackBonus();
     }
 
     _baseAttackBonus(override) {
