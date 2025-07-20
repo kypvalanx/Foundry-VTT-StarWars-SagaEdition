@@ -15,13 +15,6 @@ import {activateChoices} from "../choice/choice.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveEntity} from "../compendium/compendium-util.mjs";
 import {generateAction} from "../action/generate-action.mjs";
-
-function createChangeFromAttribute(attr) {
-    //console.warn(`i don't think this should run ${Object.entries(attr)}`)
-    attr.mode = 2;
-    return attr;
-}
-
 /**
  * Extend the basic Item with some very simple modifications.
  * @extends {Item}
@@ -31,11 +24,6 @@ export class SWSEItem extends Item {
     async _preUpdate(changed, options, user) {
         super._preUpdate(changed, options, user);
         changed.system = changed.system || {};
-        // if(changed.system?.dirty !== false){
-        //     changed.system = changed.system || {};
-        //     changed.system.dirty = true;
-        // }
-        //console.log(changed)
     }
 
     get displayName(){
