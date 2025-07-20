@@ -83,12 +83,6 @@ export class SWSEItem extends Item {
         if (this.type === "feat") this.prepareFeatData(this.system);
 
     }
-
-    get hasAmmunition(){
-        return this.system.changes.filter(c => c.key === "ammo").length > 0;
-    }
-
-
     canUserModify(user, action, data){
         let canModify = super.canUserModify(user, action, data);
         if(canModify){

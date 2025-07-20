@@ -4,7 +4,6 @@ import {meetsPrerequisites} from "./prerequisite.mjs";
 import {
     ITEM_ONLY_ATTRIBUTES,
     SCALABLE_CHANGES,
-    SIZE_CHANGES,
     sizeArray,
     UNINHERITABLE_AMMO_CHANGES,
     WEAPON_INCLUSION_LIST
@@ -206,7 +205,7 @@ function getClassItemFromClassLevel(effect) {
 
 
 function getChangesFromLoadedAmmunition(document) {
-    if (!document.hasAmmunition || !document.system.ammunition) {
+    if (!this.ammunition.hasAmmunition || !document.system.ammunition) {
         return [];
     }
 
