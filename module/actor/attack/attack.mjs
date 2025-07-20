@@ -195,7 +195,7 @@ export class Attack {
 
 //TODO this should reduce the current value of ammo, when it reaches 0, set the hidden item to "expended"  maybe just a suffix.
     async reduceAmmunition(count = 1) {
-        if (!(this.item && this.item.hasAmmunition)) {
+        if (!(this.item && this.item.ammunition.hasAmmunition)) {
             return;
         }
 
@@ -952,7 +952,7 @@ export class Attack {
     }
 
     get hasAmmunition() {
-        return this.item.hasAmmunition;
+        return this.item.ammunition.hasAmmunition;
     }
 
     isAutomaticMiss(num) {

@@ -312,6 +312,10 @@ export class AmmunitionDelegate {
         }
         return type;
     }
+
+    get hasAmmunition() {
+        return this.item.changes.filter(c => c.key === "ammo").length > 0;
+    }
 }
 
 
