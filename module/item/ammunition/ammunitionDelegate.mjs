@@ -29,40 +29,6 @@ export async function selectItemFromArray(items, dialog, options) {
     dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
     return await Dialog.prompt(dialogConfig)
 }
-
-export async function selectOptionFromArray(items, dialog, options) {
-    if(items.length === 1){
-        return items[0].value;
-    }
-    const select = "SELECT_ID";
-    const default1 = {
-        callback: (html) => {
-            const find = html.find(`#${select}`);
-            return find[0].value;
-
-        },
-    };
-    let dialogConfig = {...default1, ...dialog}
-    let itemOptions = items.map(item => {
-        let fields = ""
-        // if (options.fields) {
-        //     for (const field of options.fields) {
-        //         let cursor = item;
-        //         const val = field.split(".").forEach(tok => {
-        //             cursor = cursor[tok]
-        //         })
-        //         if (val) {
-        //             fields += ` (${val})`;
-        //         }
-        //     }
-        // }
-        let color = item.color ? `style="background-color: ${item.color}"` : ""
-        return `<option value="${item.value}" ${color}>${item.name}${fields}</option>`
-    });
-    dialogConfig.content += `<br><select id="${select}">${itemOptions}</select>`
-    return await Dialog.prompt(dialogConfig)
-}
-
 export async function onAmmunition(event){
     event.preventDefault();
     const a = event.currentTarget;
@@ -130,7 +96,6 @@ export class AmmunitionDelegate {
     //as a user i want to be able to fire a queueable weapon and have it automatically reload
     //as a user i want to be able to unload ammunition from the queue and from the active spot
     get current() {
-        let ammoQueueCapacity = 0;
         let ammoDeclarations = getInheritableAttribute({entity: this.item, attributeKey: "ammo", reduce: "VALUES"})
         let ammoResponse = [];
 
