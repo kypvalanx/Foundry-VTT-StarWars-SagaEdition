@@ -15,11 +15,12 @@ import {SWSECompendiumDirectory} from "../compendium/compendium-directory.mjs";
 import {onChangeControl, onEffectControl, onSpanTextInput, onToggle} from "../common/listeners.mjs";
 import {getDefaultDataByType} from "../common/classDefaults.mjs";
 import {CompendiumWeb} from "../compendium/compendium-web.mjs";
-import {buildRollContent, SWSEActor} from "./actor.mjs";
+import {SWSEActor} from "./actor.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {onAmmunition} from "../item/ammunition/ammunitionDelegate.mjs";
 import {makeAttack} from "./attack/attackDelegate.mjs";
 import {Attack} from "./attack/attack.mjs";
+import {buildRollContent} from "../common/chatMessageHelpers.mjs";
 
 // noinspection JSClosureCompilerSyntax
 

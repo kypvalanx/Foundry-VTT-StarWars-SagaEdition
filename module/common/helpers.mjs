@@ -203,3 +203,19 @@ export const registerHandlebarsHelpers = function () {
     //Handlebars.registerHelper('getLabel', function(value, options) {})
     //.registerHelper('getNotes', function(value, options) {})
 }
+
+export function depthMerge(toBeAdded, changed) {
+    for (const entry of Object.entries(toBeAdded)) {
+        let cursor = changed;
+        let lastCursor = cursor;
+        const paths = entry[0].split("\. ")
+        for (const path of paths) {
+            if (!cursor[path]) {
+                cursor[path] = {};
+            }
+            lastCursor = cursor;
+            cursor = cursor[path];
+        }
+        lastCursor = entry[1];
+    }
+}

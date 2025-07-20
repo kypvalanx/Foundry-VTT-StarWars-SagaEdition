@@ -1734,3 +1734,25 @@ export function getDistance(a, b) {
 
     return xDiff + yDiff - diagonal * 2 + adjustedDiagonal;
 }
+
+export function mergeColor(colors) {
+    if (colors.length === 0) {
+        return "#000000"
+    }
+
+    let reds = 0;
+    let blues = 0;
+    let greens = 0;
+    if (colors.length > 0) {
+        for (const color of colors) {
+            reds += parseInt(color.substring(1, 3), 16)
+            blues += parseInt(color.substring(3, 5), 16)
+            greens += parseInt(color.substring(5), 16)
+        }
+        reds = Math.round(reds / colors.length);
+        blues = Math.round(blues / colors.length);
+        greens = Math.round(greens / colors.length);
+    }
+
+    return `#${reds.toString(16).padStart(2, '0')}${blues.toString(16).padStart(2, '0')}${greens.toString(16).padStart(2, '0')}`;
+}

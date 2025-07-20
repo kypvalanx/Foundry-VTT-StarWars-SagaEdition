@@ -8,6 +8,7 @@ import {
     getVariableFromActorData,
     inheritableItems,
     innerJoin,
+    mergeColor,
     resolveExpression,
     toChat,
     toNumber,
@@ -43,77 +44,8 @@ import {generateAction} from "../action/generate-action.mjs";
 import {isAppropriateAmmo} from "../item/ammunition/ammunitionDelegate.mjs";
 import {WeightDelegate} from "./weightDelegate.mjs";
 import {getGridSizeFromSize} from "./size.mjs";
-
-function mergeColor(colors) {
-    if(colors.length === 0){
-        return "#000000"
-    }
-
-    let reds = 0;
-    let blues = 0;
-    let greens = 0;
-    if(colors.length > 0){
-        for (const color of colors) {
-            reds += parseInt(color.substring(1,3), 16)
-            blues += parseInt(color.substring(3,5), 16)
-            greens += parseInt(color.substring(5), 16)
-        }
-        reds = Math.round(reds/colors.length);
-        blues = Math.round(blues/colors.length);
-        greens = Math.round(greens/colors.length);
-    }
-
-    return `#${reds.toString(16).padStart(2,'0')}${blues.toString(16).padStart(2,'0')}${greens.toString(16).padStart(2,'0')}`;
-}
-
-export function buildRollContent(formula, roll, notes = [], itemFlavor) {
-    const tooltip = getTooltipSections(roll)
-    return `<div class="message-content">
-${itemFlavor}
-        <div class="dice-roll">
-            <div class="dice-result">
-                <div class="dice-formula">${formula}</div>
-                <div class="dice-tooltip">${tooltip}</div>
-                <h4 class="dice-total">${roll.total}</h4>
-            </div>
-        </div>
-        <div>${notes.map(note => `<div>${note}</div>`).join("")}</div>
-    </div>`
-}
-function getTooltipSections(roll) {
-    let sections = [];
-
-    for (let term of roll.terms) {
-        if (term instanceof foundry.dice.terms.Die) {
-            let partFormula = `<span class="part-formula">${term.number}d${term.faces}</span>`
-            let partTotal = `<span class="part-total">${term.total}</span>`
-            let partHeader = `<header class="part-header flexrow">${partFormula}${partTotal}</header>`
-            let diceRolls = [];
-            for (let result of term.results) {
-                diceRolls.push(`<li class="roll die d20">${result.result}</li>`)
-            }
-
-            sections.push(`<section class="tooltip-part"><div class="dice">${partHeader}<ol class="dice-rolls">${diceRolls.join("")}</ol></div></section>`)
-        }
-    }
-
-    return sections.join("");
-}
-
-function registerFormulaFunctions(actor) {
-    actor.formulaFunctions = new Map();
-    actor.formulaFunctions['@charLevel'] = (actor)=>actor.characterLevel;
-}
-
-function bypassShields(damageTypes) {
-    // if(damageTypes.includes("Lightsabers")){
-    //     return false;
-    // }
-    if(!damageTypes.includes("Energy") && !damageTypes.includes("Energy (Ion)")){
-        return true;
-    }
-    return false;
-}
+import {bypassShields} from "../common/conditionalHelpers.mjs";
+import {depthMerge} from "../common/helpers.mjs";
 
 
 /**
@@ -121,179 +53,6 @@ function bypassShields(damageTypes) {
  * @extends {Actor}
  */
 export class SWSEActor extends Actor {
-
-    async _onDelete(options, userId) {
-        const links = [];
-        for (const actorLink of this.actorLinks) {
-            const actor = game.actors.get(actorLink.id);
-            links.push(this.removeActorLink(actor))
-        }
-        await Promise.all(links)
-        return super._onDelete(options, userId);
-    }
-
-    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
-        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
-
-        //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
-        if ("effects" === collection) {
-            let activeEffect = documents[0];
-            if (activeEffect.statuses.filter(status => status.startsWith('condition')).size > 0) {
-                this.effects
-                    .filter(effect => effect !== activeEffect && effect.statuses.filter(status => status.startsWith('condition')).size > 0)
-                    .map(effect => effect.delete())
-            }
-        }
-    }
-
-
-
-
-    _onUpdate(changed, options, userId) {
-        this.depthMerge(changed, this._pendingUpdates)
-        return super._onUpdate(changed, options, userId);
-    }
-
-    depthMerge(changed, toBeAdded) {
-        for (const entry of Object.entries(toBeAdded)) {
-            let cursor = changed;
-            let lastCursor = cursor;
-            const paths = entry[0].split("\. ")
-            for (const path of paths) {
-                if (!cursor[path]) {
-                    cursor[path] = {};
-                }
-                lastCursor = cursor;
-                cursor = cursor[path];
-            }
-            lastCursor = entry[1];
-
-        }
-    }
-
-    get actions(){
-        let actions = [];
-        actions.push(...generateAction(this, this.changes));
-        for(let item of this.items){
-            actions.push(...item.actions);
-        }
-
-        return actions;
-    }
-
-
-    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
-        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
-        //if(!this.parent) this.reset()
-        this.reset()
-
-    }
-    getAvailableAmmunition(type) {
-        return this.items.filter(item => {
-            return isAppropriateAmmo(item, type) && !item.system?.hide ;
-        });
-    }
-
-    getCached(key, fn) {
-        if (!this.cache || this.cacheDisabled) {
-            return fn();
-        }
-        return this.cache.getCached(key, fn)
-    }
-
-    setResolvedVariable(key, variable, label, notes) {
-        this.resolvedVariables.set(key, variable);
-        this.resolvedLabels.set(key, label);
-        this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
-    }
-
-    
-
-    startOfTurn(updateData){
-        const update = {"system.deflectCount": 0}
-        this.safeUpdate(update).then(()=> this.sheet.render())
-    }
-
-    async safeUpdate(data = {}, context = {}) {
-        let user = game.user;
-
-        if(context.bypass){
-
-            let userId = this.permission < 3 ? Object.entries(this.ownership).find(o => o[1] >= 3)[0] : ""
-            user = game.users.get(userId);
-            context.owner = userId;
-        }
-        if ((this.canUserModify(user, 'update') && !this.pack && !!game.actors.get(this.id))) {
-            try {
-                await this.update(data, context);
-            } catch (e) {
-                console.warn("failed update", e)
-            }
-        }
-    }
-
-    static async updateDocuments(updates=[], operation={}) {
-        if ( operation.parent?.pack ) operation.pack = operation.parent.pack;
-        operation.updates = updates;
-        let user;
-        if(operation.bypass){
-            user = game.users.get(operation.owner);
-        }
-        return await this.database.update(this.implementation, operation, user);
-    }
-
-    async setActorLinkOnActorAndTokens(documents, val) {
-        if (this.canUserModify(game.user, 'update')) {
-            for (let document of documents) {
-                await document.update({'actorLink': val});
-            }
-        }
-        await this.safeUpdate({"prototypeToken.actorLink": val})
-    }
-
-    get additionalStatusEffectChoices() {
-        const effects = this.applicableEffects();
-
-
-        let filter = effects
-            .filter(e => !!e.flags.swse?.tokenAccessible);
-        return filter
-            .map(effect => {
-                return {
-                    _id: effect.id,
-                    id: effect.id,
-                    title: effect.name,
-                    src: effect.img,
-                    isActive: !effect.disabled,
-                    isOverlay: false
-                }
-            });
-}
-
-    applicableEffects() {
-        const effects = []
-        effects.push(...this.effects);
-        this.items.forEach(item => {
-            effects.push(...item.effects);
-        })
-        return effects;
-    }
-
-    async toggleStatusEffect(statusId, {active, overlay = false} = {}) {
-        const effects = this.applicableEffects();
-        const found = effects.find(effect => effect.id === statusId)
-
-        if(found){
-            found.disable(!found.disabled)
-            return;
-        }
-
-        return super.toggleStatusEffect(statusId, {active, overlay});
-    }
-
-    applyActiveEffects() {
-        //disable default effect resolution
-    }
 
     /**
      * Augment the basic actor data with additional dynamic data.
@@ -303,7 +62,8 @@ export class SWSEActor extends Actor {
         if (this.skipPrepare) {
             return;
         }
-        registerFormulaFunctions(this)
+        this.formulaFunctions = new Map();
+        this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
 
         if (this.system.externalEditorLink) {
 
@@ -506,6 +266,172 @@ export class SWSEActor extends Actor {
         // if(Object.values(this._pendingUpdates).length > 0){
         //     this.safeUpdate(this._pendingUpdates);
         // }
+    }
+
+
+    /**
+     * Handles the deletion process for the object, including removing associated actor links, and delegates further deletion to the parent class method.
+     *
+     * @param {object} options - Configuration options for the delete operation.
+     * @param {string} userId - The ID of the user initiating the deletion.
+     * @return {Promise} A promise that resolves once all deletion operations are completed.
+     */
+    async _onDelete(options, userId) {
+        const links = [];
+        for (const actorLink of this.actorLinks) {
+            const actor = game.actors.get(actorLink.id);
+            links.push(this.removeActorLink(actor))
+        }
+        await Promise.all(links)
+        return super._onDelete(options, userId);
+    }
+
+    _onCreateDescendantDocuments(parent, collection, documents, data, options, userId) {
+        super._onCreateDescendantDocuments(parent, collection, documents, data, options, userId);
+
+        //remove other condition ActiveEffects.  should identifying a condition ActiveEffect be done differently?
+        if ("effects" === collection) {
+            let activeEffect = documents[0];
+            if (activeEffect.statuses.filter(status => status.startsWith('condition')).size > 0) {
+                this.effects
+                    .filter(effect => effect !== activeEffect && effect.statuses.filter(status => status.startsWith('condition')).size > 0)
+                    .map(effect => effect.delete())
+            }
+        }
+    }
+
+    _onUpdate(changed, options, userId) {
+        depthMerge(this._pendingUpdates, changed);
+        return super._onUpdate(changed, options, userId);
+    }
+
+    _onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId) {
+        super._onUpdateDescendantDocuments(parent, collection, documents, changes, options, userId);
+        this.reset()
+    }
+
+    getAvailableAmmunition(type) {
+        return this.items.filter(item => {
+            return isAppropriateAmmo(item, type) && !item.system?.hide ;
+        });
+    }
+
+    get ammunition() {
+        return this.getCached("ammunition", () => {
+            return this.itemTypes['equipment'].filter(item => item.system.subtype === "Ammunition");
+        })
+    }
+
+
+    getCached(key, fn) {
+        if (!this.cache || this.cacheDisabled) {
+            return fn();
+        }
+        return this.cache.getCached(key, fn)
+    }
+
+    setResolvedVariable(key, variable, label, notes) {
+        this.resolvedVariables.set(key, variable);
+        this.resolvedLabels.set(key, label);
+        this.resolvedNotes.set(key, Array.isArray(notes) ? notes : [notes]);
+    }
+
+    
+
+    startOfTurn(updateData){
+        const update = {"system.deflectCount": 0}
+        this.safeUpdate(update).then(()=> this.sheet.render())
+    }
+
+    async safeUpdate(data = {}, context = {}) {
+        let user = game.user;
+
+        if(context.bypass){
+
+            let userId = this.permission < 3 ? Object.entries(this.ownership).find(o => o[1] >= 3)[0] : ""
+            user = game.users.get(userId);
+            context.owner = userId;
+        }
+        if ((this.canUserModify(user, 'update') && !this.pack && !!game.actors.get(this.id))) {
+            try {
+                await this.update(data, context);
+            } catch (e) {
+                console.warn("failed update", e)
+            }
+        }
+    }
+
+    static async updateDocuments(updates=[], operation={}) {
+        if ( operation.parent?.pack ) operation.pack = operation.parent.pack;
+        operation.updates = updates;
+        let user;
+        if(operation.bypass){
+            user = game.users.get(operation.owner);
+        }
+        return await this.database.update(this.implementation, operation, user);
+    }
+
+    async setActorLinkOnActorAndTokens(documents, val) {
+        if (this.canUserModify(game.user, 'update')) {
+            for (let document of documents) {
+                await document.update({'actorLink': val});
+            }
+        }
+        await this.safeUpdate({"prototypeToken.actorLink": val})
+    }
+
+    get additionalStatusEffectChoices() {
+        const effects = this.applicableEffects();
+
+
+        let filter = effects
+            .filter(e => !!e.flags.swse?.tokenAccessible);
+        return filter
+            .map(effect => {
+                return {
+                    _id: effect.id,
+                    id: effect.id,
+                    title: effect.name,
+                    src: effect.img,
+                    isActive: !effect.disabled,
+                    isOverlay: false
+                }
+            });
+}
+
+    get actions(){
+        let actions = [];
+        actions.push(...generateAction(this, this.changes));
+        for(let item of this.items){
+            actions.push(...item.actions);
+        }
+
+        return actions;
+    }
+
+    applicableEffects() {
+        const effects = []
+        effects.push(...this.effects);
+        this.items.forEach(item => {
+            effects.push(...item.effects);
+        })
+        return effects;
+    }
+
+    async toggleStatusEffect(statusId, {active, overlay = false} = {}) {
+        const effects = this.applicableEffects();
+        const found = effects.find(effect => effect.id === statusId)
+
+        if(found){
+            found.disable(!found.disabled)
+            return;
+        }
+
+        return super.toggleStatusEffect(statusId, {active, overlay});
+    }
+
+    applyActiveEffects() {
+        //disable default effect resolution
     }
 
     get condition() {
@@ -991,11 +917,6 @@ export class SWSEActor extends Actor {
     }
 
 
-    get ammunition() {
-        return this.getCached("ammunition", () => {
-            return this.itemTypes['equipment'].filter(item => item.system.subtype === "Ammunition");
-        })
-    }
 
     get uninstalled() {
         return this.getCached("uninstalled", () => {
