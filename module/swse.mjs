@@ -1,6 +1,6 @@
 // Import Modules
 import {initializeStatusEffects, SWSE} from "./common/config.mjs";
-import {buildRollContent, SWSEActor} from "./actor/actor.mjs";
+import {SWSEActor} from "./actor/actor.mjs";
 import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
 import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
@@ -21,6 +21,7 @@ import {initializeDragRuler} from "./module-support/drag-ruler.mjs";
 import {initializePolyglot} from "./module-support/polyglot.mjs";
 
 import {initializeCompendiumButtons} from "./compendium/compendium-web.mjs";
+import {buildRollContent} from "./common/chatMessageHelpers.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
