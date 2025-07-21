@@ -120,6 +120,11 @@ export class Attack {
         if(range === "Grenades"){
             return "Thrown Weapons"
         }
+
+        if(range.contains("Melee")){
+            return "Melee Weapons"
+        }
+
         return range;
     }
 
@@ -800,6 +805,10 @@ export class Attack {
             penalty: SWSE.Combat.rangePenalty[rangeDescription] || 0,
             description: rangeDescription.titleCase()
         };
+    }
+
+    get meleeRange() {
+        return {}
     }
 
     get rangeDisplay() {
