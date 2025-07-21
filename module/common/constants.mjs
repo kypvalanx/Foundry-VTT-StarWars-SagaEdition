@@ -861,25 +861,8 @@ export const COLORS = {
 
 }
 
-export const crewPositions = ['Pilot', 'Copilot', 'Gunner', 'Commander', 'System Operator', 'Engineer'];
-
-export const crewSlotResolution = {
-    'Pilot': (crew) => (crew > 0) ? 1 : 0,
-    'Copilot': (crew) => (crew > 1) ? 1 : 0,
-    'Commander': (crew) => (crew > 2) ? 1 : 0,
-    'System Operator': (crew) => (crew > 2) ? 1 : 0,
-    'Engineer': (crew) => (crew > 2) ? 1 : 0,
-};
 export const vehicleActorTypes = ["vehicle", "npc-vehicle"];
 export const characterActorTypes = ["character", "npc"];
-
-export const crewQuality = {
-    "Untrained": {"Attack Bonus": -5, "Check Modifier": 0, "CL Modifier": -1},
-    "Normal": {"Attack Bonus": 0, "Check Modifier": 5, "CL Modifier": 0},
-    "Skilled": {"Attack Bonus": 2, "Check Modifier": 6, "CL Modifier": 1},
-    "Expert": {"Attack Bonus": 5, "Check Modifier": 8, "CL Modifier": 2},
-    "Ace": {"Attack Bonus": 10, "Check Modifier": 12, "CL Modifier": 4}
-};
 
 export const uniqueKey = ["damage", "stunDamage"];
 

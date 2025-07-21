@@ -3,6 +3,7 @@ import {SWSE} from "../../../common/config.mjs";
 import {NEW_LINE, PHYSICAL_SKILLS} from "../../../common/constants.mjs";
 import {resolveValueArray, toNumber} from "../../../common/util.mjs";
 import {generateArmorCheckPenalties} from "../../armor-check-penalty.mjs";
+import {titleCase} from "../../../common/helpers.mjs";
 
 const fields = foundry.data.fields;
 
