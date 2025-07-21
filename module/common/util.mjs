@@ -7,6 +7,7 @@ import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
 import {getCompendium} from "../compendium/compendium-util.mjs";
+import {titleCase} from "./helpers.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -1192,10 +1193,6 @@ export function inheritableItems(actor, options={}) {
     }
 
     return actor.getCached && !options.skipCache ? actor.getCached(`inheritableItems`, fn) : fn();
-}
-
-export function titleCase(str) {
-    return str.replace(/\b\w/g, letter => letter.toUpperCase());
 }
 
 export function resolveWeight(weight, quantity = 1, costFactor = 1, actor) {

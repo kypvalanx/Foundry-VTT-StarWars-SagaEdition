@@ -261,8 +261,8 @@ export class Attack {
             }
             if (this.operatorId) {
                 let provider = this.provider;
-                let quality = provider?.system?.crewQuality?.quality;
-                return SWSEActor.getCrewByQuality(quality);
+                let quality = this.crew.quality()?.quality;
+                return getCrewByQuality(quality);
             }
         })
     }
@@ -280,7 +280,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get operator() {
-        return getActor(this.operatorId) || SWSEActor.getCrewByQuality(getActor(this.parentId).system?.crewQuality?.quality);
+        return getActor(this.operatorId) || getCrewByQuality(this.crew.quality()?.quality);
     }
 
     /**

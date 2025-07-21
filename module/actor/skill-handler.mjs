@@ -482,7 +482,7 @@ function getVehicleSkillBonuses(key, actor, shipModifier, applicableReRolls) {
     } else {
         return [];
     }
-    crew = actor.crewman(position);
+    crew = actor.crew.crewman(position, undefined);
 
     if (!crew) {
         return [];

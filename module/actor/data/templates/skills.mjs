@@ -3,6 +3,7 @@ import {SWSE} from "../../../common/config.mjs";
 import {NEW_LINE, PHYSICAL_SKILLS} from "../../../common/constants.mjs";
 import {resolveValueArray, toNumber} from "../../../common/util.mjs";
 import {generateArmorCheckPenalties} from "../../armor-check-penalty.mjs";
+import {titleCase} from "../../../common/helpers.mjs";
 
 const fields = foundry.data.fields;
 
@@ -379,27 +380,11 @@ export class SkillFunctions {
 	}
 
 	cleanSkillName(key) {
-		return this.uppercaseFirstLetters(key)
+		return titleCase(key)
 			.replace("Knowledge ", "K")
 			.replace("(", "")
 			.replace(")", "")
 			.replace(" ", "")
 			.replace(" ", "");
-	}
-
-	uppercaseFirstLetters(s) {
-		const words = s.split(" ");
-
-		for (let i = 0; i < words.length; i++) {
-			if (words[i][0] === "(") {
-				words[i] =
-					words[i][0] +
-					words[i][1].toUpperCase() +
-					words[i].substr(2);
-			} else {
-				words[i] = words[i][0].toUpperCase() + words[i].substr(1);
-			}
-		}
-		return words.join(" ");
 	}
 }

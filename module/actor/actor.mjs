@@ -20,16 +20,7 @@ import {generateArmorBlock, resolveDefenses} from "./defense.mjs";
 import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
-import {
-    CLASSES_BY_STARTING_FEAT,
-    COLORS,
-    crewPositions,
-    crewQuality,
-    crewSlotResolution,
-    KNOWN_WEIRD_UNITS,
-    sizeArray,
-    skills
-} from "../common/constants.mjs";
+import {CLASSES_BY_STARTING_FEAT, COLORS, KNOWN_WEIRD_UNITS, sizeArray, skills} from "../common/constants.mjs";
 import {getActorFromId} from "../swse.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
 import {activateChoices} from "../choice/choice.mjs";
@@ -45,8 +36,8 @@ import {ActorAmmunitionDelegate} from "../item/ammunition/ammunitionDelegate.mjs
 import {WeightDelegate} from "./weightDelegate.mjs";
 import {getGridSizeFromSize} from "./size.mjs";
 import {bypassShields} from "../common/conditionalHelpers.mjs";
-import {depthMerge} from "../common/helpers.mjs";
-
+import {depthMerge, titleCase} from "../common/helpers.mjs";
+import {CrewDelegate} from "./crewDelegate.mjs";
 
 /**
  * Extend the base Actor entity
@@ -110,6 +101,7 @@ export class SWSEActor extends Actor {
         this.skill = new SkillDelegate(this);
         this.weight = new WeightDelegate(this);
         this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
+        this.crew = new CrewDelegate(this);
 
 
         if (this.type === 'character') this._prepareCharacterData();
@@ -281,6 +273,11 @@ export class SWSEActor extends Actor {
         this.reset()
     }
 
+    getRollData() {
+        this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
+        return super.getRollData();
+    }
+
     getCached(key, fn) {
         if (!this.cache || this.cacheDisabled) {
             return fn();
@@ -333,8 +330,6 @@ export class SWSEActor extends Actor {
 
     get additionalStatusEffectChoices() {
         const effects = this.applicableEffects();
-
-
         let filter = effects
             .filter(e => !!e.flags.swse?.tokenAccessible);
         return filter
@@ -348,7 +343,7 @@ export class SWSEActor extends Actor {
                     isOverlay: false
                 }
             });
-}
+    }
 
     get actions(){
         let actions = [];
@@ -389,121 +384,36 @@ export class SWSEActor extends Actor {
         return this.system.condition;
     }
 
-    get crewSlots() {
-        return this.getCached("crewSlots", () => {
-            let crewSlots = []
+    //>>>>>>> actorlinks
 
-            let coverValues = getInheritableAttribute({
-                entity: this,
-                attributeKey: "cover",
-                reduce: "VALUES"
-            })
+    //>>>>>>>
+    getItemsFromRelationships() {
+        if (['vehicle', 'npc-vehicle'].includes(this.type)) {
+            return this.items.filter(item => item.type === "vehicleSystem" && item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && !!item.system.equipped)
+        }
+        if (['character', 'npc'].includes(this.type)) {
+            let availableItems = []
+            for (let crew of this.crew.members) {
+                let vehicle = game.data.actors.find(actor => actor._id === crew.id);
+                if (vehicle) {
+                    let itemIds = vehicle.system.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
 
-            let coverMap = {};
-            for (let coverValue of coverValues) {
-                if (coverValue.includes(":")) {
-                    let toks = coverValue.split(":");
-                    coverMap[toks[1] || "default"] = toks[0];
+                    let items = itemIds.map(id => vehicle.items.find(item => item._id === id))
+                    items.forEach(item => item.parentId = vehicle._id)
+                    items.forEach(item => item.position = crew.position)
+                    availableItems.push(...items)
                 } else {
-                    coverMap["default"] = coverValue;
+                    //Remove?
                 }
             }
-
-            let slots = getInheritableAttribute({
-                entity: this,
-                attributeKey: "providesSlot",
-                reduce: "VALUES"
-            });
-
-            crewPositions.forEach(position => {
-
-                let count = "Gunner" === position ? this.gunnerPositions.length : crewSlotResolution[position](this.crew);
-                for (let i = 0; i < count; i++) {
-                    slots.push(position)
-                }
-            });
-
-            let slotCount = {};
-
-            slots.forEach(position => {
-                const numericSlot = slotCount[position] || 0;
-                slotCount[position] = numericSlot + 1;
-                let slotId = `${position}${numericSlot}`
-
-
-                let crewMember = this.actorLinks.find(crewMember => crewMember.position === position && crewMember.slot === numericSlot);
-
-
-                this.system.crewCover = this.system.crewCover || {}
-
-                let positionCover = this.system.crewCover[slotId] || this.system.crewCover[position] || coverMap[position] || coverMap["default"];
-
-                crewSlots.push(this.resolveSlot(crewMember, position, positionCover, numericSlot));
-            })
-
-
-            // crewPositions.forEach(position => {
-            //     let crewMember = this.system.crew.filter(crewMember => crewMember.position === position);
-            //     let positionCover;
-            //
-            //     if (this.system.crewCover) {
-            //         positionCover = this.system.crewCover[position]
-            //     }
-            //     positionCover = positionCover || coverMap[position] || coverMap["default"];
-            //
-            //     if (position === 'Gunner') {
-            //         crewSlots.push(...this.resolveSlots(crewMember, position, positionCover, this.gunnerPositions.map(gp => gp.numericId)));
-            //     } else {
-            //         let crewSlot = crewSlotResolution[position];
-            //         if (crewSlot) {
-            //             crewSlots.push(...this.resolveSlots( crewMember, position, positionCover, range(0, crewSlot(this.crew) - 1)));
-            //         }
-            //     }
-            // });
-            //
-            // for (let position of providedSlots.filter(notEmpty).filter(unique)) {
-            //     let count = providedSlots.filter(s => s === position).length
-            //     let positionCover;
-            //
-            //     if (this.system.crewCover) {
-            //         positionCover = this.system.crewCover[position]
-            //     }
-            //
-            //     if (!positionCover) {
-            //         positionCover = coverMap[position];
-            //     }
-            //     if (!positionCover) {
-            //         positionCover = coverMap["default"];
-            //     }
-            //     //this.system.crewCount += ` plus ${count} ${position} slot${count > 1 ? "s" : ""}`
-            //     crewSlots.push(...this.resolveSlots(this.system.crew.filter(crewMember => crewMember.position === position), position, positionCover, count -1));
-            // }
-            return crewSlots;
-        })
-
+            return availableItems;
+        }
     }
 
-    getRollData() {
-        this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
-        return super.getRollData();
-    }
 
-    get crewQuality() {
-        return this.getCached("crewQuality", () => {
-            let crewQuality;
-            if (!this.system.crewQuality || this.system.crewQuality.quality === undefined) {
-                let quality = getInheritableAttribute({
-                    entity: this,
-                    attributeKey: "crewQuality",
-                    reduce: "FIRST"
-                });
-                if (quality) {
-                    crewQuality = {quality: quality.titleCase()}
-                }
-            }
-            return crewQuality;
-        })
-    }
+
+
+
 
 
     get passengers() {
@@ -756,7 +666,7 @@ export class SWSEActor extends Actor {
 
 
     get isHeroic() {
-        return this.getCached("crew", () => {
+        return this.getCached("isHeroic", () => {
             return getInheritableAttribute({
                 entity: this,
                 attributeKey: "isHeroic",
@@ -765,9 +675,7 @@ export class SWSEActor extends Actor {
         })
     }
 
-    get crew() {
-            return this.system.vehicle?.crew || 0;
-    }
+
 
     /**
      * @return [SWSEActor]
@@ -1046,20 +954,6 @@ export class SWSEActor extends Actor {
         })
     }
 
-    get hasAstromechSlot() {
-        let providedSlots = getInheritableAttribute({
-            entity: this,
-            attributeKey: "providesSlot",
-            reduce: "VALUES"
-        });
-        return providedSlots.includes("Astromech Droid");
-    }
-
-    get hasCrewQuality() {
-        return true;
-    }
-
-
     initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
         this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
@@ -1151,85 +1045,7 @@ export class SWSEActor extends Actor {
         return this.items.filter(item => item.system.supplier?.id === id).map(item => item.id) || []
     }
 
-    get hasCrew() {
-        if (!["vehicle", "npc-vehicle"].includes(this.type)) {
-            return false;
-        }
-        return 0 < this.system.crew.length
-    }
 
-
-    static getCrewByQuality(quality) {
-        let attackBonus = 0;
-        let checkModifier = 0;
-        //let cLModifier = 0;
-        if (quality && quality !== "-") {
-            attackBonus = crewQuality[quality.titleCase()]["Attack Bonus"];
-            checkModifier = crewQuality[quality.titleCase()]["Check Modifier"];
-            //cLModifier = crewQuality[quality.titleCase()]["CL Modifier"];
-        }
-        let resolvedSkills = {}
-        skills().forEach(s => resolvedSkills[s.toLowerCase()] = {value: checkModifier})
-        return {
-            baseAttackBonus: attackBonus,
-            system: {
-                skills: resolvedSkills
-            },
-            items: [],
-            name: quality
-        }
-    }
-
-    crewman(position, slot) {
-
-        if (position.startsWith("Gunner") && position !== "Gunner") {
-            slot = toNumber(position.slice(6, position.length))
-            position = "Gunner"
-        }
-        switch (position.titleCase()) {
-            case "Pilot":
-                return this._crewman("Pilot", "Astromech Droid");
-            case "Copilot":
-                return this._crewman("Copilot", "Astromech Droid");
-            case "Commander":
-                return this._crewman("Commander", "Copilot", "Astromech Droid");
-            case "Engineer":
-                return this._crewman("Engineer", "Astromech Droid");
-            case "Astromech Droid":
-                return this._crewman("Astromech Droid");
-            case "Systems Operator":
-            case "SystemsOperator":
-                return this._crewman("Systems Operator", "Astromech Droid");
-            case "Gunner":
-                return this.gunner(slot)
-        }
-        return SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-    }
-
-    _crewman(position, backup, third) {
-        let crewman = this.actorLinks.find(l => l.position === position)
-        if (!crewman && (!!backup || !!third)) {
-            crewman = this._crewman(backup, third);
-        }
-        if (!crewman) {
-            crewman = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-            if (position === "Astromech Droid" && this.system.hasAstromech && this.hasAstromechSlot) {
-                crewman.system.skills['mechanics'].value = 13;
-                crewman.system.skills['use computer'].value = 13;
-            }
-        }
-        return crewman;
-    }
-
-    gunner(index) {
-        let actor = this.actorLinks.find(c => c.position === 'Gunner' && c.slot === (index || 0))
-
-        if (!actor) {
-            actor = SWSEActor.getCrewByQuality(this.system.crewQuality.quality);
-        }
-
-        return actor;
-    }
 
     get age() {
         return this.system.age;
@@ -1919,22 +1735,9 @@ export class SWSEActor extends Actor {
                 inventoryItems.push(...this.itemTypes[type])
             }
             return inventoryItems.filter(item => !item.system.hasItemOwner);
-        }) 
-    }
-//TODO, this is a better title case. i should move this
-    _uppercaseFirstLetters(s) {
-        const words = s.split(" ");
+        })
 
-        for (let i = 0; i < words.length; i++) {
-            if (words[i][0] === "(") {
-                words[i] = words[i][0] + words[i][1].toUpperCase() + words[i].substr(2);
-            } else {
-                words[i] = words[i][0].toUpperCase() + words[i].substr(1);
-            }
-        }
-        return words.join(" ");
     }
-
     _getClassSkills() {
         let classSkills = new Set()
         let skills = getInheritableAttribute({
@@ -1959,17 +1762,6 @@ export class SWSEActor extends Actor {
         return classSkills;
     }
 
-    itemsWithTypes(types){
-        const items = [];
-        for(let type of types){
-            try{
-                items.push(...this.itemTypes[type])
-            } catch (e) {
-                console.error("INVALID ITEM TYPE: " + type, e);
-            }
-        }
-        return items;
-    }
 
     /**
      *
@@ -1980,24 +1772,6 @@ export class SWSEActor extends Actor {
         if (!ability) return;
         return this.attributes[ability.toLowerCase()]?.mod;
     }
-
-    /**
-     *
-     * @returns {SWSEItem|*}
-     */
-    getFirstClass() {
-        let firstClasses = this.getItemContainingInheritableAttribute("isFirstLevel", true);
-
-        if (firstClasses.length > 1) {
-            console.warn("more than one class item has been marked as first class on actor the first one found will be used as the first class and all others will be ignored " + this.id)
-        }
-        if (firstClasses.length > 0) {
-            return firstClasses[0];
-        }
-        return undefined;
-    }
-
-
     getTraitAttributesByKey(attributeKey) {
         // let values = [];
         // for (let trait of this.traits) {
@@ -2010,16 +1784,6 @@ export class SWSEActor extends Actor {
             itemFilter: (item => item.type === "trait")
         });
     }
-
-    get fullAttackCount() {
-        return 2
-    }
-
-    getActiveModes(itemId) {
-        let item = this.items.get(itemId);
-        return SWSEItem.getActiveModesFromItemData(item);
-    }
-
     getAbilitySkillBonus(skill) {
         //TODO camelcase and simplify unless this could be more complex?
         if (skill.toLowerCase() === 'stealth') {
@@ -2040,6 +1804,19 @@ export class SWSEActor extends Actor {
     }
 
 
+
+
+    itemsWithTypes(types){
+        const items = [];
+        for(let type of types){
+            try{
+                items.push(...this.itemTypes[type])
+            } catch (e) {
+                console.error("INVALID ITEM TYPE: " + type, e);
+            }
+        }
+        return items;
+    }
     /**
      *
      * @param item {SWSEItem}
@@ -2061,7 +1838,6 @@ export class SWSEActor extends Actor {
         return false;
     }
 
-
     /**
      *
      * @param item {SWSEItem}
@@ -2073,6 +1849,8 @@ export class SWSEActor extends Actor {
             .map(i => `${i.finalName}:${i.type}`)
             .filter(i => i === searchString).length;
     }
+
+
 
     get availableItems(){
         return this.getCached("availableItems", () => {
@@ -2258,7 +2036,7 @@ export class SWSEActor extends Actor {
     }
 
     cleanSkillName(key) {
-        return this._uppercaseFirstLetters(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
+        return titleCase(key).replace("Knowledge ", "K").replace("(", "").replace(")", "").replace(" ", "").replace(" ", "")
     }
     /**
      *
@@ -2414,46 +2192,10 @@ export class SWSEActor extends Actor {
     }
 
 
-    resolveSlot(crew, type, cover, numericSlot) {
-        let slot = {
-            slotNumber: numericSlot,
-            type: type,
-            cover: cover,
-            slotName: type === "Gunner" ? `Gunner ${numericSlot} Slot` : `${type} Slot`
-        };
-        if (crew) {
-            let actor = game.data.actors.find(actor => actor._id === crew.id);
-            slot.id = crew.id;
-            slot.uuid = crew.uuid;
-            slot.img = actor?.img;
-            slot.name = actor?.name;
-        }
-        return slot
-    }
 
 
-    getItemsFromRelationships() {
-        if (['vehicle', 'npc-vehicle'].includes(this.type)) {
-            return this.items.filter(item => item.type === "vehicleSystem" && item.system.subtype && item.system.subtype.toLowerCase() === 'weapon systems' && !!item.system.equipped)
-        }
-        if (['character', 'npc'].includes(this.type)) {
-            let availableItems = []
-            for (let crew of this.system.crew) {
-                let vehicle = game.data.actors.find(actor => actor._id === crew.id);
-                if (vehicle) {
-                    let itemIds = vehicle.system.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
 
-                    let items = itemIds.map(id => vehicle.items.find(item => item._id === id))
-                    items.forEach(item => item.parentId = vehicle._id)
-                    items.forEach(item => item.position = crew.position)
-                    availableItems.push(...items)
-                } else {
-                    //Remove?
-                }
-            }
-            return availableItems;
-        }
-    }
+
 
 
     //ADDING ITEMS

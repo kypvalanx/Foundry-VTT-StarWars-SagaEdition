@@ -79,7 +79,7 @@ export class AttackDelegate {
     generateVehicleAttacks(vehicle) {
         return vehicle.getItemsFromRelationships()
             .map(weapon => {
-                return Attack.create({actorId: vehicle.uuid, weaponId: weapon.uuid, parentId:weapon.parent?.uuid, operatorId:vehicle.crewman(this.getCrewPosition(weapon.system.equipped)).uuid})
+                return Attack.create({actorId: vehicle.uuid, weaponId: weapon.uuid, parentId:weapon.parent?.uuid, operatorId:vehicle.crew.crewman(this.getCrewPosition(weapon.system.equipped), undefined).uuid})
             });
     }
 
@@ -103,7 +103,6 @@ export class AttackDelegate {
                 reduce: "VALUES"
             });
 
-            //attackCount = this.fullAttackCount;
             let equippedWeapons = equippedItems(this.actor, "weapon")
 
             if (this.shouldHaveSecondAttackFromWeaponChoice(equippedWeapons)) {
@@ -289,7 +288,6 @@ function modifyForFullAttack(doubleAttack, actor, tripleAttack, availableAttacks
         reduce: "VALUES"
     });
 
-    //availableAttacks = this.fullAttackCount;
     let items = equippedItems(actor)
     let doubleAttackBonus = 0;
     let tripleAttackBonus = 0;
