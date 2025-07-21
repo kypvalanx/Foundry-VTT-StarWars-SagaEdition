@@ -1,5 +1,5 @@
 <div class="panel flex-row">
-    {{#if actor.hasCrewQuality}}
+    {{#if actor.crew.hasCrewQuality}}
         <div class="crew-quality medium labeled-input">
             <label class="resource-label" for="crew-quality">Crew Quality</label>
             <select id="crew-quality" name="system.crewQuality.quality">
@@ -15,7 +15,7 @@
         </div>
     {{/if}}
 
-    {{#if actor.hasAstromechSlot}}
+    {{#if actor.crew.hasAstromechSlot}}
         <div>
             <label class="resource-label" for="hasAstromech">Includes Astromech
             </label>
