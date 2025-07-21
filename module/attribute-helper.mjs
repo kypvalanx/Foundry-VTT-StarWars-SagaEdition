@@ -205,7 +205,7 @@ function getClassItemFromClassLevel(effect) {
 
 
 function getChangesFromLoadedAmmunition(document) {
-    if (!this.ammunition.hasAmmunition || !document.system.ammunition) {
+    if (!document.ammunition.hasAmmunition) {
         return [];
     }
 
