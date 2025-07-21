@@ -952,7 +952,7 @@ export class Attack {
     }
 
     get hasAmmunition() {
-        return this.item.ammunition.hasAmmunition;
+        return this.item.ammunition?.hasAmmunition;
     }
 
     isAutomaticMiss(num) {

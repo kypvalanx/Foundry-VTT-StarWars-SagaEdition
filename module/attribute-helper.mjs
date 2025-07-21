@@ -14,20 +14,31 @@ import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 /**
  * appends source meta to a given attribute
  * @param attribute {Object}
- * @param attribute.value {*}
  * @param source {String}
- * @param sourceString {String}
+ * @param sourceString {String} 
  * @param sourceDescription {String}
- * @returns {value, source, sourceString, sourceDescription}
+ * @returns {Object}
  */
 export function appendSourceMeta(attribute, source, sourceString, sourceDescription) {
-    if (attribute) {
-        attribute = JSON.parse(JSON.stringify(attribute));
-        attribute.source = attribute.source || source;
-        attribute.sourceString = attribute.sourceString || sourceString;
-        attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
+    // Return null if attribute is null/undefined
+    if (!attribute) {
+        return null;
     }
-    return attribute
+    
+    // Ensure attribute is an object
+    if (typeof attribute !== 'object') {
+        attribute = { value: attribute };
+    }
+    
+    // Create a deep copy
+    attribute = JSON.parse(JSON.stringify(attribute));
+    
+    // Add metadata properties if they don't exist
+    attribute.source = attribute.source || source;
+    attribute.sourceString = attribute.sourceString || sourceString;
+    attribute.sourceDescription = attribute.sourceDescription || sourceDescription;
+    
+    return attribute;
 }
 
 /**
@@ -205,12 +216,12 @@ function getClassItemFromClassLevel(effect) {
 
 
 function getChangesFromLoadedAmmunition(document) {
-    if (!document.ammunition.hasAmmunition) {
+    if (!document.ammunition?.hasAmmunition) {
         return [];
     }
 
     let changes = [];
-    Object.values(document.system.ammunition)
+    Object.values(document.ammunition.ammunition)
         .forEach(ammo => {
             if (!(typeof ammo === 'object' && Array.isArray(ammo.queue) && ammo.queue[0])) {
                 return;

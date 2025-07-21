@@ -10,7 +10,7 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {changeSize} from "../actor/size.mjs";
 import {SimpleCache} from "../common/simple-cache.mjs";
 import {DEFAULT_LEVEL_EFFECT, DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "../common/classDefaults.mjs";
-import {AmmunitionDelegate} from "./ammunition/ammunitionDelegate.mjs";
+import {ItemAmmunitionDelegate} from "./ammunition/ammunitionDelegate.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {resolveEntity} from "../compendium/compendium-util.mjs";
@@ -65,7 +65,7 @@ export class SWSEItem extends Item {
 
         this.system.quantity = Number.isInteger(this.system.quantity) ? this.system.quantity : 1;
 
-        this.ammunition = new AmmunitionDelegate(this);
+        this.ammunition = new ItemAmmunitionDelegate(this);
 
         if (this.type === "vehicleTemplate") this.type = "vehicleBaseType"; //TODO remove vehicle template type after next major release
         if (this.type === "feat") this.prepareFeatData(this.system);

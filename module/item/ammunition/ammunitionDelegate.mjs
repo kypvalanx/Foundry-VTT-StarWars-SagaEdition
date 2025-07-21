@@ -60,7 +60,7 @@ function ammunitionItem(itemId) {
     return this.object.items.get(itemId) || this.object.items.get(split[split.length - 1]);
 }
 
-export class AmmunitionDelegate {
+export class ItemAmmunitionDelegate {
     /**
      * Constructs an instance of the class with a specified item.
      *
@@ -100,7 +100,7 @@ export class AmmunitionDelegate {
         let ammoResponse = [];
 
         for (const ammoDeclaration of ammoDeclarations) {
-            let ammunition = AmmunitionDelegate.parseAmmunitionString(ammoDeclaration);
+            let ammunition = ItemAmmunitionDelegate.parseAmmunitionString(ammoDeclaration);
             let current = this.getAmmunition(ammunition.type);
             ammunition.current = current.value || 0;
             ammunition.queueCapacity = this.getQueueCapacity(ammunition.type);
@@ -201,8 +201,12 @@ export class AmmunitionDelegate {
     }
 
     getAmmunition(type) {
-        const ammunition = this.item.system.ammunition || {};
+        const ammunition = this.ammunition;
         return ammunition[type] || {};
+    }
+
+    get ammunition(){
+        return this.item.system.ammunition || {};
     }
 
     async increaseAmmunition(type, count = 1) {
@@ -314,8 +318,9 @@ export class AmmunitionDelegate {
     }
 
     get hasAmmunition() {
-        return this.item.changes.filter(c => c.key === "ammo").length > 0;
+        return (this.item?.changes || []).filter(c => c.key === "ammo").length > 0;
     }
+
 }
 
 
