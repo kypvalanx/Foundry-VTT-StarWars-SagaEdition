@@ -125,7 +125,8 @@ export class ItemAmmunitionDelegate {
 
 
     async queueAmmunition(type, item) {
-        if (!this.isAppropriateAmmunition(type)) return {fail: true}
+        if (!item || !item.ammunition.isAppropriateAmmunition(type)) return {fail: true}
+
         let queue = this.getAmmunition(type).queue || [];
         if (this.ammoCapacity(type) <= queue.length) {
             return {fail: true, message: "NO ROOM IN QUEUE"}
@@ -232,8 +233,14 @@ export class ItemAmmunitionDelegate {
     }
 
     async reload(type) {
+        let queue = this.getAmmunition(type).queue || [];
+        if (this.ammoCapacity(type) <= queue.length) {
+            return;
+        }
+
 //THIS SHOULD LOAD FROM THE QUEUE FIRST
         if (this.item.parent) {
+
             const availableAmmunition = this.item.parent.ammunitionDelegate.getAvailableAmmunition(type);
 
             let ammoItem;
@@ -249,30 +256,44 @@ export class ItemAmmunitionDelegate {
             let result = await this.queueAmmunition(type, ammoItem);
 
             if (result.fail) {
-                //do something here with a popup
-                console.error("INSUFFICIENT AMMO")
-
-                new Dialog({
-                    title: "Insufficient Ammunition",
-                    content: `This character does not have any ammunition of type ${type} in their inventory.`,
-                    buttons: {
-                        ok: {
-                            label: "Ok", callback: () => {
-                                return false;
+                if (result.message === "NO ROOM IN QUEUE") {
+                    new Dialog({
+                        title: "Weapon is Full",
+                        content: `There is no additional space in the ${this.item.name} for ${ammoItem.name}.`,
+                        buttons: {
+                            ok: {
+                                label: "Ok", callback: () => {
+                                    return false;
+                                }
                             }
                         },
-                        ignore: {
-                            label: "Ignore", callback: async () => {
+                        default: "ok"
+                    }).render(true)
+                } else {
+                    //do something here with a popup
+                    console.error("INSUFFICIENT AMMO")
 
-                                await this.setAmmunition(type, {value: this.getCapacity(type)});
-                                return true;
+                    new Dialog({
+                        title: "Insufficient Ammunition",
+                        content: `This character does not have any ammunition of type ${type} in their inventory.`,
+                        buttons: {
+                            ok: {
+                                label: "Ok", callback: () => {
+                                    return false;
+                                }
+                            },
+                            ignore: {
+                                label: "Ignore", callback: async () => {
+
+                                    await this.setAmmunition(type, {value: this.getCapacity(type)});
+                                    return true;
+                                }
                             }
-                        }
-                    },
-                    default: "ok"
-                }).render(true)
+                        },
+                        default: "ok"
+                    }).render(true)
+                }
             } else {
-
                 await this.setAmmunition(type, {value: this.getCapacity(type)});
             }
         }
