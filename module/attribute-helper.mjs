@@ -10,6 +10,7 @@ import {
 } from "./common/constants.mjs";
 import {SWSEActor} from "./actor/actor.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
+import {UnarmedAttack} from "./actor/unarmed-attack.mjs";
 
 /**
  * appends source meta to a given attribute
@@ -75,7 +76,7 @@ function getChangesFromEmbeddedItems(entity, itemFilter, embeddedItemOverride) {
 export function getResolvedSize(entity, options = {}) {
     if (entity && entity.document && entity.document instanceof SWSEItem) {
         entity = entity.document.parent;
-    } else if(entity instanceof SWSEItem && entity.parent) {
+    } else if((entity instanceof SWSEItem || entity instanceof UnarmedAttack) && entity.parent) {
         return getResolvedSize(entity.parent, {flags: ["REQUESTED_BY_ACTOR"]});
     }
 
@@ -154,10 +155,12 @@ function getLocalChangesOnDocument(document, flags) {
     if (!Array.isArray(values)) {
         values = Object.values(values)
     }
+
+    values.push(...(document.defaultChanges || []))
+
     values = values.filter(v => !!v);
 
     values = values.filter(getLocalChangesFilter(document, flags));
-
 
     //Ignore all changes on old size traits except the actual size
     //TODO build cleanup script and remove
@@ -276,7 +279,8 @@ function getChangesFromDocument( data) {
         predicate: data.itemFilter,
         embeddedItemOverride: data.embeddedItemOverride,
         skipLocal: data.skipLocal,
-        recursive: data.recursive
+        recursive: data.recursive,
+        flags: data.flags,
     }, fn) : fn();
 }
 
@@ -320,14 +324,22 @@ function containsScalableAttributes(changeKey) {
         changeKey = [changeKey];
     }
 
+    const scalableChangeKeys = Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8));
     for (const changeKeyElement of changeKey.filter(c => !!c)) {
         if(changeKeyElement.endsWith("Scalable"))return true;
 
-        if(Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8)).includes(changeKeyElement)) return true;
+        if(scalableChangeKeys.includes(changeKeyElement)) return true;
 
     }
 
     return false;
+}
+
+function shouldAddressScalable(values, changeKey, data) {
+    if (values.length === 0) return false;
+    if (!containsScalableAttributes(changeKey)) return false;
+    if (data.flags && data.flags.includes("SKIP_SIZE")) return false;
+    return (data.entity instanceof SWSEItem || data.entity instanceof UnarmedAttack) && data.entity.parent || data.entity instanceof SWSEActor;
 }
 
 /**
@@ -352,7 +364,7 @@ export function getInheritableAttribute(data = {}) {
     }
     if (data.entity) {
         values.push(...getChangesFromDocuments(data));
-        if(values.length > 0 && containsScalableAttributes(changeKey) && (!data.flags || !data.flags.includes("SKIP_SIZE")) && ((data.entity instanceof SWSEItem && data.entity.parent) || (data.entity instanceof SWSEActor))) {
+        if(shouldAddressScalable(values, changeKey, data)) {
             values = getChangesFromSize(data.entity, values);
         }
     }
