@@ -232,3 +232,67 @@ export function titleCase(s) {
     }
     return words.join(" ");
 }
+
+/**
+ *
+ * @param items
+ * @param dialog
+ * @param options
+ * @return {Promise<*>}
+ */
+export async function selectOption(items, dialog, options) {
+    const select = "SELECT_ID";
+    const default1 = {
+        callback: (html) => {
+            const find = html.find(`#${select}`);
+            return find[0].value;
+        },
+    };
+    let dialogConfig = {...default1, ...dialog}
+    let itemOptions = items.map(item => {
+        let fields = ""
+        if (options.fields) {
+            for (const field of options.fields) {
+                let cursor = item;
+                const val = field.split(".").forEach(tok => {
+                    cursor = cursor[tok]
+                })
+                if (val) {
+                    fields += ` (${val})`;
+                }
+            }
+        }
+        return `<option value="${item.value}">${item.display}${fields}</option>`
+    });
+    dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
+    return await Dialog.prompt(dialogConfig)
+}
+
+export async function selectItemFromArray(items, dialog, options) {
+    const select = "SELECT_ID";
+    const default1 = {
+        callback: (html) => {
+            const find = html.find(`#${select}`);
+            const selectedId = find[0].value;
+            return items.find(i => i.id === selectedId);
+        },
+    };
+    let dialogConfig = {...default1, ...dialog}
+    let itemOptions = items.map(item => {
+        let fields = ""
+        if (options.fields) {
+            for (const field of options.fields) {
+                let cursor = item;
+                const val = field.split(".").forEach(tok => {
+                    cursor = cursor[tok]
+                })
+                if (val) {
+                    fields += ` (${val})`;
+                }
+            }
+        }
+        return `<option value="${item.id}">${item.name}${fields}</option>`
+    });
+    dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
+    return await Dialog.prompt(dialogConfig)
+}

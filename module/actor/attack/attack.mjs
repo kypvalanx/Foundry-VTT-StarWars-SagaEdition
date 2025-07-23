@@ -41,6 +41,8 @@ import {SWSE} from "../../common/config.mjs";
 import {RollModifier, RollModifierChoice} from "../../common/roll-modifier.mjs";
 import SWSETemplate from "../../template/SWSETemplate.mjs";
 
+import {selectItemFromArray, selectOption} from "../../common/helpers.mjs";
+
 
 export const outOfRange = "out of range";
 
@@ -1145,7 +1147,7 @@ export class Attack {
      * @param location
      * @return {{penalty: (number), description: (string)}}
      */
-    getDistanceModifier(actor, location) {
+    async getDistanceModifier(actor, location) {
         let token;
         if (actor.isToken) {
             token = actor.token.object;
@@ -1156,11 +1158,29 @@ export class Attack {
             token = tokens[0];
         }
 
-        if (!token) return {penalty: 0, description: "No Token"};
+        let distance;
+        if (!token) {
+            let options = [];
+            let range = CONFIG.SWSE.Combat.range[this.range]
+            let rangePenalty = CONFIG.SWSE.Combat.rangePenalty
+            for (const entry of Object.entries(range)) {
+                options.push({value: rangePenalty[entry[0]], display: `${entry[0].titleCase()}: ${entry[1].string.titleCase()}`})
+            }
 
-        let x = token.center.x / canvas.grid.sizeX
-        let y = token.center.y / canvas.grid.sizeY
-        let distance = getDistance(location, {x, y})
+            if(options.length === 1){
+                distance = options[0].value;
+            } else {
+                distance = await selectOption(options, {
+                    title: "Select Range Penalty",
+                    content: "Select Range Penalty"
+                }, {});
+            }
+        } else {
+            let x = token.center.x / canvas.grid.sizeX
+            let y = token.center.y / canvas.grid.sizeY
+            distance = getDistance(location, {x, y})
+        }
+
 
         return this.rangePenalty(distance)
     }
@@ -1228,7 +1248,7 @@ export class Attack {
 
         for (const targetActor of targetActors) {
             let {actors, location} = targetActor;
-            let {penalty, description} = this.getDistanceModifier(this.actor, location);
+            let {penalty, description} = await this.getDistanceModifier(this.actor, location);
 
             let found = response.rangeBreakdown.find(rb => rb.range === description)
             let modifiedRoll = found ? found.attack : makeVariantRoll(attackRoll, penalty, description);
