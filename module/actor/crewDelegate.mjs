@@ -150,7 +150,7 @@ export class CrewDelegate {
     get quality(){
         return this.actor.getCached("crew_Quality", () => {
             let crewQuality;
-            if (!this.actor.system.crew.quality() || this.actor.system.crew.quality().quality === undefined) {
+            if (!this.actor.system.crew.quality || this.actor.system.crew.quality.quality === undefined) {
                 let quality = getInheritableAttribute({
                     entity: this.actor,
                     attributeKey: "crewQuality",

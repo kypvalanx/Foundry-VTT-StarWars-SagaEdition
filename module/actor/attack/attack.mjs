@@ -121,7 +121,7 @@ export class Attack {
             return "Thrown Weapons"
         }
 
-        if(range.contains("Melee")){
+        if(range.includes("Melee") || range.includes("Lightsabers")){
             return "Melee Weapons"
         }
 
@@ -200,7 +200,7 @@ export class Attack {
 
 //TODO this should reduce the current value of ammo, when it reaches 0, set the hidden item to "expended"  maybe just a suffix.
     async reduceAmmunition(count = 1) {
-        if (!(this.item && this.item.ammunition.hasAmmunition)) {
+        if (!this.item || !this.item.ammunition?.hasAmmunition) {
             return;
         }
 
