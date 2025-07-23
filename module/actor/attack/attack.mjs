@@ -1148,7 +1148,7 @@ export class Attack {
     getDistanceModifier(actor, location) {
         let token;
         if (actor.isToken) {
-            token = actor.token;
+            token = actor.token.object;
         } else {
             let tokens = canvas.tokens.placeables.filter(token => token.actor.id === actor.id);
             //TODO this defaults to the first token instance.  idk if this is an issue.  would a PC have multiple?
