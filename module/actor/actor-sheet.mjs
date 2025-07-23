@@ -1688,7 +1688,7 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _onMakeAttack(ev, type = Attack.TYPES.SINGLE_ATTACK){
-        await makeAttack({actorId: this.object.id,type: type, attackKeys:[ev.currentTarget.dataset.attackKey]});
+        await makeAttack({actorUUID: this.object.uuid, type: type, attackKeys:[ev.currentTarget.dataset.attackKey]});
     }
 
     _onActivateItem(ev) {

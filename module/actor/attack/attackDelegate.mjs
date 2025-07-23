@@ -240,9 +240,11 @@ export class AttackDelegate {
 
 }
 
-function getAttacksFromContext(context) {
+function getAttacksFromContext(actor, context) {
     if(context.attackKeys){
-        let actor = getActor(`Actor.${context.actorId}`)
+        if(!actor) {
+            actor = getActor(context.actorUUID)
+        }
         return actor.attack.attacks.filter(a => context.attackKeys.includes(a.attackKey))
     }
 
@@ -551,14 +553,15 @@ function getSound(attacks) {
 
 
 export async function makeAttack(data) {
-    let attacks = getAttacksFromContext(data);
+    let actor = getActor(data.actorUUID)
+
+    let attacks = getAttacksFromContext(actor, data);
     const rollMode = data.rollMode;
     //const hands = data.hands;
     //const availableHands = data.availableHands;
 
     if(attacks.length === 0){
 
-        let actor = getActor(`Actor.${data.actorId}`)
         let attackKeys = await actor.attack.getAttacksFromUserSelection(data);
         if(!attackKeys){
             return;
