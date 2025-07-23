@@ -247,7 +247,7 @@ function applyBonuses(defense, total, bonuses) {
     defense.abilityBonus = bonuses.find(b => b.type === "Ability")?.value || 0;
     defense.armorBonus = bonuses.find(b => b.type === "Armor")?.value || 0;
     defense.classBonus = bonuses.find(b => b.type === "Class")?.value || 0;
-    const miscBonus = bonuses.filter(b => !(b.type === "Ability" || b.type === "Armor" || b.type === "Class"));
+    const miscBonus = bonuses.filter(b => !(b.type === "Ability" || b.type === "Armor" || b.type === "Class" || b.type === "Base"));
     defense.miscBonus = miscBonus.reduce((acc, obj) => acc + obj.value, 0);
     defense.miscBonusTip = miscBonus.map(b => `${b.type} ${b.value > -1 ? "Bonus" : "Modifier"}: ${b.value}`).join("\n");
 }
