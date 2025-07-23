@@ -1,34 +1,7 @@
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {SWSEItemSheet} from "../item-sheet.mjs";
+import {selectItemFromArray} from "../../common/helpers.mjs";
 
-export async function selectItemFromArray(items, dialog, options) {
-    const select = "SELECT_ID";
-    const default1 = {
-        callback: (html) => {
-            const find = html.find(`#${select}`);
-            const selectedId = find[0].value;
-            return items.find(i => i.id === selectedId);
-        },
-    };
-    let dialogConfig = {...default1, ...dialog}
-    let itemOptions = items.map(item => {
-        let fields = ""
-        if (options.fields) {
-            for (const field of options.fields) {
-                let cursor = item;
-                const val = field.split(".").forEach(tok => {
-                    cursor = cursor[tok]
-                })
-                if (val) {
-                    fields += ` (${val})`;
-                }
-            }
-        }
-        return `<option value="${item.id}">${item.name}${fields}</option>`
-    });
-    dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
-    return await Dialog.prompt(dialogConfig)
-}
 export async function onAmmunition(event){
     event.preventDefault();
     const a = event.currentTarget;
