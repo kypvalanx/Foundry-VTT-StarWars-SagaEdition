@@ -239,63 +239,61 @@ export class ItemAmmunitionDelegate {
         }
 
 //THIS SHOULD LOAD FROM THE QUEUE FIRST
-        if (this.item.parent) {
+        if (!this.item.parent) {
+            return;
+        }
 
-            const availableAmmunition = this.item.parent.ammunitionDelegate.getAvailableAmmunition(type);
-
-            let ammoItem;
-            if (availableAmmunition.length === 1) {
-                ammoItem = availableAmmunition[0];
-            } else if (availableAmmunition.length > 1) {
-                ammoItem = await selectItemFromArray(availableAmmunition, {
-                    title: "Select Ammo to Load",
-                    content: "Select Ammo to Load"
-                }, {fields: ["system.quantity"]});
-            }
-
-            let result = await this.queueAmmunition(type, ammoItem);
-
-            if (result.fail) {
-                if (result.message === "NO ROOM IN QUEUE") {
-                    new Dialog({
-                        title: "Weapon is Full",
-                        content: `There is no additional space in the ${this.item.name} for ${ammoItem.name}.`,
-                        buttons: {
-                            ok: {
-                                label: "Ok", callback: () => {
-                                    return false;
-                                }
+        const availableAmmunition = this.item.parent.ammunitionDelegate.getAvailableAmmunition(type);
+        let ammoItem;
+        if (availableAmmunition.length === 1) {
+            ammoItem = availableAmmunition[0];
+        } else if (availableAmmunition.length > 1) {
+            ammoItem = await selectItemFromArray(availableAmmunition, {
+                title: "Select Ammo to Load",
+                content: "Select Ammo to Load"
+            }, {fields: ["system.quantity"]});
+        }
+        let result = await this.queueAmmunition(type, ammoItem);
+        if (result.fail) {
+            if (result.message === "NO ROOM IN QUEUE") {
+                new Dialog({
+                    title: "Weapon is Full",
+                    content: `There is no additional space in the ${this.item.name} for ${ammoItem.name}.`,
+                    buttons: {
+                        ok: {
+                            label: "Ok", callback: () => {
+                                return false;
                             }
-                        },
-                        default: "ok"
-                    }).render(true)
-                } else {
-                    //do something here with a popup
-                    console.error("INSUFFICIENT AMMO")
-
-                    new Dialog({
-                        title: "Insufficient Ammunition",
-                        content: `This character does not have any ammunition of type ${type} in their inventory.`,
-                        buttons: {
-                            ok: {
-                                label: "Ok", callback: () => {
-                                    return false;
-                                }
-                            },
-                            ignore: {
-                                label: "Ignore", callback: async () => {
-
-                                    await this.setAmmunition(type, {value: this.getCapacity(type)});
-                                    return true;
-                                }
-                            }
-                        },
-                        default: "ok"
-                    }).render(true)
-                }
+                        }
+                    },
+                    default: "ok"
+                }).render(true)
             } else {
-                await this.setAmmunition(type, {value: this.getCapacity(type)});
+                //do something here with a popup
+                console.error("INSUFFICIENT AMMO")
+
+                new Dialog({
+                    title: "Insufficient Ammunition",
+                    content: `This character does not have any ammunition of type ${type} in their inventory.`,
+                    buttons: {
+                        ok: {
+                            label: "Ok", callback: () => {
+                                return false;
+                            }
+                        },
+                        ignore: {
+                            label: "Ignore", callback: async () => {
+
+                                await this.setAmmunition(type, {value: this.getCapacity(type)});
+                                return true;
+                            }
+                        }
+                    },
+                    default: "ok"
+                }).render(true)
             }
+        } else {
+            await this.setAmmunition(type, {value: this.getCapacity(type)});
         }
     }
 
