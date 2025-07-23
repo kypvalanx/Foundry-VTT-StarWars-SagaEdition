@@ -274,7 +274,7 @@ export class ItemAmmunitionDelegate {
 
                 new Dialog({
                     title: "Insufficient Ammunition",
-                    content: `You does not have any ${type} ammunition in your.  Clicking Ignore will reload your weapon, but weapons with special ammunition might not work as expected.`,
+                    content: `You does not have any ${type} ammunition in your.  Clicking "Ignore" will reload your weapon, but weapons with special ammunition might not work as expected.`,
                     buttons: {
                         ok: {
                             label: "Ok", callback: () => {
