@@ -32,6 +32,10 @@ export class AttackDelegate {
         })
     }
 
+    get unarmed(){
+        return this.attacks.find(a => a.weaponId === "Unarmed Attack")
+    }
+
     /**
      *
      * @param {SWSEActor} actor

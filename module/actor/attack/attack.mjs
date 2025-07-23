@@ -310,7 +310,7 @@ export class Attack {
             }
 
             if ('Unarmed Attack' === this.weaponId) {
-                return new UnarmedAttack(this.actorId);
+                return new UnarmedAttack(actor);
             }
 
             return actor.items.find(i => i.uuid === this.weaponId);
@@ -321,7 +321,7 @@ export class Attack {
         return 0 < getInheritableAttribute({
             entity: this.item,
             attributeKey: ['unarmedModifier', 'unarmedBonusDamage']
-        }).length || this.item?.isUnarmed
+        }).length || this.item?.isUnarmed || false;
     }
 
     modifiers(type) {
@@ -1337,13 +1337,16 @@ function resolveUnarmedDamageDie(actor) {
         attributeKey: "isDroid",
         reduce: "OR"
     });
+    const unarmedSudoItem = actor.unarmedAttack.item;
     let damageDie = getInheritableAttribute({
-        entity: actor,
+        entity: unarmedSudoItem,
+        parent: actor,
         attributeKey: isDroid ? "droidUnarmedDamage" : ["unarmedDamage", "unarmedDamageDie"],
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({
-        entity: actor,
+        entity: unarmedSudoItem,
+        parent: actor,
         attributeKey: "bonusUnarmedDamageDieSize",
         reduce: "SUM"
     })

@@ -384,6 +384,23 @@ export class SWSEActor extends Actor {
         return this.system.condition;
     }
 
+
+    get unarmedAttack(){
+        return this.attack.unarmed
+    }
+    /**
+     * these are emergent changes that all actors should have without adding them
+     */
+    // get defaultChanges(){
+    //     let changes = [];
+    //
+    //     if(this.type === "character" && !this.isDroid){
+    //         changes.push({"key": "unarmedDamageScalable", "value": "1d4"})
+    //     }
+    //
+    //     return changes;
+    // }
+
     //>>>>>>> actorlinks
 
     //>>>>>>>
