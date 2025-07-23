@@ -1155,6 +1155,9 @@ export class Attack {
 
             token = tokens[0];
         }
+
+        if (!token) return {penalty: 0, description: "No Token"};
+
         let x = token.center.x / canvas.grid.sizeX
         let y = token.center.y / canvas.grid.sizeY
         let distance = getDistance(location, {x, y})

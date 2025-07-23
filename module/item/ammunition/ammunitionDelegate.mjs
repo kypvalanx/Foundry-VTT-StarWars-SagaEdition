@@ -82,15 +82,15 @@ export class ItemAmmunitionDelegate {
             return false;
         }
 
-        if (getInheritableAttribute({entity: item, attributeKey: "spent", reduce: "OR"})) {
+        if (getInheritableAttribute({entity: this.item, attributeKey: "spent", reduce: "OR"})) {
             return false;
         }
         const inheritableAttribute = getInheritableAttribute({
-            entity: item,
+            entity: this.item,
             attributeKey: "actsAs",
             reduce: "VALUES"
         });
-        return item.name === type || inheritableAttribute.includes(type);
+        return this.item.name === type || inheritableAttribute.includes(type);
     }
 //as user i want to load ammo into a queueable weapon
     //as a user i want to be able to fire a queueable weapon and have it automatically reload
