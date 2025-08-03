@@ -1061,12 +1061,22 @@ export class Attack {
     get template(){
         const item = this.item;
 
+        const ammoTypes = []
+        if( item.ammunition?.hasAmmunition && this.parent){
+            const parent = this.parent;
+            Object.entries(item.ammunition.ammunition).forEach(([key, value]) => {
+                if(value.queue.length > 0){
+                    ammoTypes.push(parent.items.get(value.queue[0])?.subType)
+                }
+            })
+        }
+
         const autofire = item.effects?.find(effect => effect.name === "Autofire");
         if (autofire && autofire.disabled === false) {
             return {shape: "circle", size: 1, disableRotation: true, type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON, criticalHitEnabled: false, snapPoint:"vertex"}
         }
 
-        if (item.system.subtype === "Grenades") {
+        if (item.system.subtype === "Grenades" || ammoTypes.includes("Grenades")) {
             return {shape: "circle", size: 2, disableRotation: true, type: Attack.TARGET_TYPES.BURST, criticalHitEnabled: false, snapPoint:"vertex"}
         }
         return {shape: "circle", size: 0.5, disableRotation: true, type: Attack.TARGET_TYPES.SINGLE_TARGET, criticalHitEnabled: false, snapPoint:"center", cleanUp:true}
@@ -1152,7 +1162,7 @@ export class Attack {
         if (actor.isToken) {
             token = actor.token.object;
         } else {
-            let tokens = canvas.tokens.placeables.filter(token => token.actor.id === actor.id);
+            let tokens = canvas.tokens.placeables.filter(token => token.actor?.id === actor.id);
             //TODO this defaults to the first token instance.  idk if this is an issue.  would a PC have multiple?
 
             token = tokens[0];
