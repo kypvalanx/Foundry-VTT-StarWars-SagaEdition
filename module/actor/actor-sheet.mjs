@@ -386,13 +386,19 @@ export class SWSEActorSheet extends ActorSheet {
 
         const sourceItem = this.object.items.find(item => item._id === itemId);
 
+        const system = {
+            follower: true
+        };
+        if(this.system.test) {
+            system.test = true;
+        }
+
+
         const follower = await SWSEActor.create({
             name: this.object.name + "'s Follower",
             type: "character",
             img: "artwork/character-profile.jpg",
-            system: {
-                follower: true
-            }
+            system: system
         })
 
         const provided = getInheritableAttribute({entity: this.object, attributeKey: "followerProvides"})

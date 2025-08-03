@@ -11,7 +11,8 @@
 import {getFile, processActor, processItem} from "../../module/compendium/generation.mjs";
 import {getResolvedSize} from "../../module/attribute-helper.mjs";
 import {sizeArray} from "../../module/common/constants.mjs";
-import {withTestActor} from "../actor/actor-sheet.test.mjs";
+
+import {withTestActor} from "../actor/actor-utils.mjs";
 
 
 export async function generationTests(quench) {

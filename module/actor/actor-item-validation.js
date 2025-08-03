@@ -177,6 +177,15 @@ const handleTalent = async (context) => {
     return true;
 }
 
+function getAnswer(answers, choices) {
+    for (let answer of answers) {
+        if (choices.includes(answer)) {
+            return answer;
+        }
+    }
+    return undefined;
+}
+
 const handleFeat = async (context) => {
     if (context.entity.type !== 'feat') {
         return true;
@@ -198,18 +207,25 @@ const handleFeat = async (context) => {
             context.actor.suppressDialog);
         return false;
     } else if (possibleFeatTypes.length > 1) {
-        let content = `<p>Select an unused feat type.</p>
+        let preselected = getAnswer([...(context.itemAnswers||[]), ...(context.answers||[])], possibleFeatTypes)
+
+        if(!preselected){
+            let content = `<p>Select an unused feat type.</p>
                     <div><select id='choice'>${optionString}</select> 
                     </div>`;
 
-        await Dialog.prompt({
-            title: "Select an unused feat source.",
-            content: content,
-            callback: async (html) => {
-                let key = html.find("#choice")[0].value;
-                possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
-            }
-        });
+            await Dialog.prompt({
+                title: "Select an unused feat source.",
+                content: content,
+                callback: async (html) => {
+                    let key = html.find("#choice")[0].value;
+                    possibleFeatTypes = JSON.parse(key.replace(/&quot;/g, '"'));
+                }
+            });
+        } else {
+            possibleFeatTypes = preselected;
+        }
+
     }
     context.entity.system.activeCategory = possibleFeatTypes;
     return true;

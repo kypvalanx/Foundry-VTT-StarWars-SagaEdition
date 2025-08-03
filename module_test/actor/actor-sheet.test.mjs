@@ -2,76 +2,8 @@ import {SWSEActor} from "../../module/actor/actor.mjs";
 import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
 import {SWSERollWrapper} from "../../module/common/roll.mjs";
 import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
-import {processActor} from "../../module/compendium/generation.mjs";
-import {getEntityRawData} from "../compendium/generation.test.mjs";
+import {getMockEvent, hasItems, notHaveItems, withTestActor} from "./actor-utils.mjs";
 
-export async function withTestActor(param, options= {}) {
-    const name = "New Test Actor DELETE ME";
-    let actor;
-    if(options.entity){
-        let actorData = await getEntityRawData(options.entity.path, options.entity.name)
-
-        actorData.system.test = true;
-        actor = await processActor(actorData);
-    } else {
-        actor = await SWSEActor.create({
-            name: name,
-            type: "character",
-            img: "artwork/character-profile.jpg"
-        })
-    }
-
-    let context = {otherActors:[]}
-
-    try {
-        await param(actor, context);
-    } finally {
-        for(let a of context.otherActors){
-            a.delete()
-        }
-        await actor.delete();
-        game.actors.forEach(a => {if(a.system.test === true){
-            a.delete()
-        }})
-    }
-}
-
-
-
-export async function withTestVehicle(param, options= {}) {
-    const name = "New Test Actor DELETE ME";
-    const actor = await SWSEActor.create({
-        name: name,
-        type: "vehicle",
-        img: "artwork/character-profile.jpg"
-    })
-    try {
-        await param(actor);
-    } finally {
-        await actor.delete();
-        game.actors.forEach(a => {if(a.name === name){
-            a.delete()
-        }})
-    }
-}
-
-export function getMockEvent(data = {}) {
-    const newVar = data;
-    newVar.preventDefault = () => {
-    };
-    newVar.stopPropagation = () => {
-    };
-    return newVar;
-}
-
-export function hasItems(assert, actual = [], expected) {
-    actual = actual.map(i => i.displayName || i.name || i.value)
-    assert.includeMembers(actual, expected)
-}
-export function notHaveItems(assert, actual, expected) {
-    actual = actual.map(i => i.name || i.value)
-    assert.notIncludeMembers(actual, expected)
-}
 
 export async function actorSheetTests(quench) {
     quench.registerBatch("actor.actor-sheet.character.drop-item",
@@ -594,6 +526,7 @@ export async function actorSheetTests(quench) {
                                     skipRender:true
                                 }))
                                 context.otherActors.push(follower)
+
 
                                 hasItems(assert, follower.items, [
                                     "Follower",

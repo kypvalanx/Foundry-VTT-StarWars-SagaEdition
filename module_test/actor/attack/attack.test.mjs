@@ -1,5 +1,5 @@
 import {appendTerms} from "../../../module/common/util.mjs";
-import {getMockEvent, hasItems, notHaveItems, withTestActor} from "../actor-sheet.test.mjs";
+import {getMockEvent, hasItems, notHaveItems, withTestActor} from "../actor-utils.mjs";
 
 export async function attackTests(quench) {
     quench.registerBatch("attack.appendTerm",

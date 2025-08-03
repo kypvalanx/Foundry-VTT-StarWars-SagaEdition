@@ -1378,8 +1378,7 @@ function resolveUnarmedDamageDie(actor) {
         reduce: "MAX"
     });
     let bonus = getInheritableAttribute({
-        entity: unarmedSudoItem,
-        parent: actor,
+        entity: actor,
         attributeKey: "bonusUnarmedDamageDieSize",
         reduce: "SUM"
     })
