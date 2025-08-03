@@ -9,6 +9,7 @@ import {utilTests} from "./common/util.test.js";
 import {attackTests} from "./actor/attack/attack.test.mjs";
 import {poltgotBasicTests} from "./module-integrations/polygot/basic-integration.test.mjs";
 import {defenseTests} from "./actor/actor-sheet.defense.test.mjs";
+import {featTests} from "./actor/actor-sheet.feats-martial-artist.mjs";
 
 const registeredTests = [
     generationTests,
@@ -21,7 +22,8 @@ const registeredTests = [
     compendiumUtilTests,
     attackTests,
     poltgotBasicTests,
-    defenseTests];
+    defenseTests,
+    featTests];
 
 export function registerTestSuites(quench) {
 

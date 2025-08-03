@@ -1,5 +1,5 @@
-import {hasItems, withTestActor, withTestVehicle} from "./actor-sheet.test.mjs";
 import {getInheritableAttribute} from "../../module/attribute-helper.mjs";
+import {hasItems, withTestActor, withTestVehicle} from "./actor-utils.mjs";
 
 
 function getMockEvent() {

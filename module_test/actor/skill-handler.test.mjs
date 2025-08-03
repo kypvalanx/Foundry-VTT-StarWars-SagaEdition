@@ -1,6 +1,6 @@
-import {withTestActor} from "./actor-sheet.test.mjs";
 import {generateSkills} from "../../module/actor/skill-handler.mjs";
 import {defaultSkills} from "../../module/common/constants.mjs";
+import {withTestActor} from "./actor-utils.mjs";
 
 export async function skillHandlerTest(quench) {
     quench.registerBatch("actor.skill-handler",

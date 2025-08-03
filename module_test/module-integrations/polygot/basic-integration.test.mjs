@@ -1,4 +1,4 @@
-import {getMockEvent, hasItems, withTestActor} from "../../actor/actor-sheet.test.mjs";
+import {getMockEvent, hasItems, withTestActor} from "../../actor/actor-utils.mjs";
 
 
 export async function poltgotBasicTests(quench) {
