@@ -9,6 +9,16 @@ export async function onAmmunition(event){
     const action = a.dataset.action;
     const itemId = a.dataset.itemId;
     const item = ammunitionItem.call(this, itemId);
+
+    let adjustAmount = 1
+
+    if(event.shiftKey){
+        adjustAmount *= 5;
+    }
+    if(event.ctrlKey){
+        adjustAmount *= 10;
+    }
+
     switch (action) {
         case "ammunition-reload":
             await item.ammunition.reload(ammoType);
@@ -17,10 +27,10 @@ export async function onAmmunition(event){
             await item.ammunition.eject(ammoType);
             break;
         case "ammunition-increase":
-            await item.ammunition.increaseAmmunition(ammoType);
+            await item.ammunition.increaseAmmunition(ammoType, adjustAmount);
             break;
         case "ammunition-decrease":
-            await item.ammunition.decreaseAmmunition(ammoType);
+            await item.ammunition.decreaseAmmunition(ammoType, adjustAmount);
             break;
     }
 }
@@ -186,10 +196,7 @@ export class ItemAmmunitionDelegate {
     async increaseAmmunition(type, count = 1) {
         let currentAmmo = this.getAmmunition(type).value || 0;
 
-        const remaining = count + currentAmmo;
-        if (remaining > this.getCapacity(type)) {
-            return {status: "MORE THAN CAPACITY", remaining};
-        }
+        const remaining = Math.min(Math.max(count + currentAmmo, 0), this.getCapacity(type));
 
         await this.setAmmunition(type, {value: remaining});
 
