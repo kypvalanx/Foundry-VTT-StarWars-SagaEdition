@@ -109,5 +109,5 @@ function resolveAttributeMod(actor, ignoreCon) {
     if (ignoreCon) {
         return 0;
     }
-    return actor.attributes.con.mod;
+    return Math.max(actor.attributes.con.mod, 0);
 }
