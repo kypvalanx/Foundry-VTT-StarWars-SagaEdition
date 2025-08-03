@@ -1065,7 +1065,7 @@ export class Attack {
         if( item.ammunition?.hasAmmunition && this.parent){
             const parent = this.parent;
             Object.entries(item.ammunition.ammunition).forEach(([key, value]) => {
-                if(value.queue.length > 0){
+                if(value.queue?.length > 0){
                     ammoTypes.push(parent.items.get(value.queue[0])?.subType)
                 }
             })
