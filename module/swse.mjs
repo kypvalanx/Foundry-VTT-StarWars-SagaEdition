@@ -520,8 +520,10 @@ function getAvailableMacroSlot() {
 export async function createAttackMacro(data, slot = getAvailableMacroSlot()) {
     let context = {
         actorId: data.actorId,
+        actorUUID: data.actorUUID,
         attackKeys: data.attackKeys,
-        attacks: data.attacks
+        attacks: data.attacks,
+        changes: data.changes,
     };
     const command = `game.swse.makeAttack(${JSON.stringify(context)});`;
     const name = `${data.actorName}: ${(data.label)}`

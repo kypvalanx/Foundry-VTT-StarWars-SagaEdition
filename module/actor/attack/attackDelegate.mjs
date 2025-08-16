@@ -240,6 +240,15 @@ export class AttackDelegate {
 
 }
 
+/**
+ *
+ * @param actor
+ * @param context
+ * @param context.attackKeys
+ * @param context.attacks
+ * @param context.actorUUID
+ * @return {*|*[]}
+ */
 function getAttacksFromContext(actor, context) {
     if(context.attackKeys){
         if(!actor) {
@@ -552,17 +561,25 @@ function getSound(attacks) {
 }
 
 
+/**
+ *
+ * @param data
+ * @param data.actorUUID the UUID of the actor that should make the attack
+ * @param data.rollMode
+ * @param data.attackKeys {[string]}
+ * @param data.changes {[(string, string)]}
+ * @return {Promise<abstract.Document|abstract.Document[]|undefined>}
+ */
 export async function makeAttack(data) {
-    let actor = getActor(data.actorUUID)
+    const actor = getActor(data.actorUUID)
 
     let attacks = getAttacksFromContext(actor, data);
-    const rollMode = data.rollMode;
     //const hands = data.hands;
     //const availableHands = data.availableHands;
 
     if(attacks.length === 0){
 
-        let attackKeys = await actor.attack.getAttacksFromUserSelection(data);
+        let attackKeys = await actor.attack.getAttacksFromUserSelection();
         if(!attackKeys){
             return;
         }
@@ -578,7 +595,7 @@ export async function makeAttack(data) {
     let rollOrder = 1;
     let resolvedAttackData = [];
     for (let attack of attacks) {
-        let resolvedAttack = await attack.resolve()
+        let resolvedAttack = await attack.resolve(data.changes)
 
         rolls.push(resolvedAttack.attack)
         rolls.push(resolvedAttack.damage)
@@ -628,6 +645,7 @@ export async function makeAttack(data) {
     let cls = getDocumentClass("ChatMessage");
     let msg = new cls(messageData);
 
+    const rollMode = data.rollMode;
     if (rollMode) msg.applyRollMode(rollMode);
 
     return cls.create(msg, {rollMode: rollMode});

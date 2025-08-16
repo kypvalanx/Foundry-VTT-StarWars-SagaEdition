@@ -14,7 +14,10 @@
                     </div>
                 </div>
             </div>
-            <button class="attack" type="button" data-attack-key="{{attack.attackKey}}">Attack</button>
+            <div class="flex flex-row">
+                <button class="attack" type="button" data-action="singleAttack" data-attack-key="{{attack.attackKey}}">Attack</button>
+<!--                <button class="tiny fas fa-ellipsis" data-attack-key="{{attack.attackKey}}" data-action="attack-more"></button>-->
+            </div>
             <div class="collapsible" style="display: {{#if
                     (lookup toggles (concat "attack-" id))}}grid{{else}}none{{/if}}">
 

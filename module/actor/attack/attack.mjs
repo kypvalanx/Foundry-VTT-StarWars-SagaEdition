@@ -397,11 +397,14 @@ export class Attack {
 
         //toHitModifiers only apply to the weapon they are on.  a toHitModifier change that is not on a weapon always applies
         const inheritableAttribute = getInheritableAttribute({
-            entity: [weapon, operator],
+            entity: [weapon, operator, this],
             attributeKey: "toHitModifier",
             parent: !!parent ? parent : operator,
             itemFilter: ((item) => item.type !== 'weapon')
         });
+
+        inheritableAttribute.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier") || []);
+
         inheritableAttribute.forEach(val => {
             terms.push(...appendNumericTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
         })
@@ -515,7 +518,10 @@ export class Attack {
             entity: item,
             attributeKey: "bonusDamage",
             reduce: "VALUES"
-        }).map(value => appendNumericTerm(value)).flat());
+        }).flat());
+
+
+        terms.push(...this.temporaryChanges?.filter(c => c.key === "damage").map(c => appendTerm(c.value, "Custom")).flat() || []);
 
 
         for (let mod of this.modifiers("damage")) {
@@ -1221,7 +1227,17 @@ export class Attack {
         return actors;
     }
 
-    async resolve(){
+
+    clearTemporaryChanges(){
+        this.temporaryChanges = [];
+    }
+    /**
+     *
+     * @return {Promise<{attack, damage}>}
+     */
+    async resolve(changes){
+        this.temporaryChanges = changes || [];
+
         let targetActors = await this.targetedActors();
         let attackRoll = this.attackRoll.roll;
         await attackRoll.roll();
