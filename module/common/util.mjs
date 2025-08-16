@@ -8,6 +8,9 @@ import {meetsPrerequisites} from "../prerequisite.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
 import {getCompendium} from "../compendium/compendium-util.mjs";
 import {titleCase} from "./helpers.mjs";
+import {makeAttack} from "../actor/attack/attackDelegate.mjs";
+import {Attack} from "../actor/attack/attack.mjs";
+import {createAttackMacro} from "../swse.mjs";
 
 export function unique(value, index, self) {
     return self.indexOf(value) === index;
@@ -1583,7 +1586,7 @@ export function appendDieTerm(value, flavor) {
 }
 
 
-export function appendNumericTerm(value, flavor, evaluated) {
+export function appendNumericTerm(value, flavor, evaluated = false) {
     if (!value) {
         return [];
     }
@@ -1650,6 +1653,80 @@ export function toChat(content, actor = undefined, flavor="", context={}) {
 
     return cls.create(msg, {});
 }
+
+function performAttack(actor, type, attackKey, macro) {
+    return async html => {
+        let attackRoll = html.find("#attack-roll")[0];
+        let damageRoll = html.find("#damage-roll")[0];
+        let changes = [
+            {key: "toHitModifier", value: attackRoll.value},
+            {key: "damage", value: damageRoll.value}
+        ]
+
+        if(macro){
+            await createAttackMacro({
+                actorUUID: actor.uuid,
+                type: type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK,
+                attackKeys: [attackKey],
+                changes: changes
+            })
+            return
+        }
+
+        await makeAttack({
+            actorUUID: actor.uuid,
+            type: type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK,
+            attackKeys: [attackKey],
+            changes: changes
+        });
+    };
+}
+
+export function attackOptions(actor) {
+    const options = [];
+
+    
+    let attackWithOptions = `<div>
+    <div class="medium labeled-input">
+        <label for="attack-roll" class="text">Attack Roll</label>
+        <input class="input" id="attack-roll" type="text" value="0" placeholder=""/>
+    </div>
+       <div class="medium labeled-input">
+        <label for="damage-roll" class="text">Damage Roll</label>
+        <input class="input" id="damage-roll" type="text" value="0" placeholder=""/>
+    </div>
+</div>`
+    
+    
+    options.push({
+        name: "Attack or Add Macro with options",
+        icon: '<i class="fas fa-edit">',
+        callback: async (html) => {
+            const type = html.data('action')
+            const attackKey = html.data('attackKey')
+
+            await Dialog.wait({
+                title: `Attack or Add Macro with options`,
+                content: attackWithOptions,
+                buttons: {
+                    attack:{
+                        label: "Attack",
+                        callback: performAttack(actor, type, attackKey)
+                    },
+                    saveMacro:{
+                        label: "Save Macro",
+                        callback: performAttack(actor, type, attackKey, true)
+                    }
+                },
+                callback: performAttack(actor, type, attackKey)
+
+            })
+        }
+    })
+
+    return options;
+}
+
 export function numericOverrideOptions(actor) {
     let options = [];
     options.push({

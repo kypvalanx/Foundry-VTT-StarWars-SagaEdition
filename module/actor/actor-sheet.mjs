@@ -1,4 +1,5 @@
 import {
+    attackOptions,
     filterItemsByTypes,
     getCleanListFromCSV,
     getDocumentByUuid,
@@ -156,19 +157,10 @@ export class SWSEActorSheet extends ActorSheet {
 
         html.find(".toggle").on("click", onToggle.bind(this))
         new ContextMenu(html, ".numeric-override", numericOverrideOptions(this.actor))
+        //new ContextMenu(html, `[data-action="attack-more"]`, numericOverrideOptions(this.actor))
 
+        new ContextMenu(html, `#fullAttack,button.attack`, attackOptions(this.actor))
 
-        //html.find("select").on("change", changeSelect.bind(this));
-        //const numberInputs = html.find("input[type=number],input[type=text]")
-        // numberInputs.on("change", changeText.bind(this));
-        // numberInputs.on("keydown", (event) => {
-        //     const key = event.which;
-        //     if (key === 13) {
-        //         changeText.call(this, event);
-        //     }
-        // })
-        // html.find("input[type=checkbox]").on("click", changeCheckbox.bind(this));
-        // html.find("input[type=radio]").on("click", changeRadio.bind(this));
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
             onSpanTextInput.call(this, event, this._adjustItemAttributeBySpan.bind(this), "text");
@@ -216,12 +208,16 @@ export class SWSEActorSheet extends ActorSheet {
             //div.addEventListener("click", (ev) => this._onActivateItem(ev), false);
         });
 
+        /// combine
         html.find("button.attack").each((i, div) => {
             //div.setAttribute("draggable", true);
             //div.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
             div.addEventListener("click", (ev) => this._onMakeAttack(ev), false);
         });
         html.find("#fullAttack").on("click", (ev) => this._onMakeAttack(ev, Attack.TYPES.FULL_ATTACK));
+        ///
+
+
 
         html.find('.condition-radio').on("click", this._onConditionChange.bind(this))
         html.find('.gravity-radio').on("click", this._onGravityChange.bind(this))
@@ -1694,7 +1690,13 @@ export class SWSEActorSheet extends ActorSheet {
     }
 
     async _onMakeAttack(ev, type = Attack.TYPES.SINGLE_ATTACK){
-        await makeAttack({actorUUID: this.object.uuid, type: type, attackKeys:[ev.currentTarget.dataset.attackKey]});
+        if(ev.currentTarget.dataset.attackKeys){
+            let keys = ev.currentTarget.dataset.attackKeys.split(",").map(k => k.trim())
+            await makeAttack({actorUUID: this.object.uuid, type: Attack.TYPES.FULL_ATTACK, attackKeys:[keys]});
+        } else {
+            await makeAttack({actorUUID: this.object.uuid, type: type, attackKeys:[ev.currentTarget.dataset.attackKey]});
+        }
+
     }
 
     _onActivateItem(ev) {
