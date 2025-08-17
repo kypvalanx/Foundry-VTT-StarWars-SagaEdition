@@ -229,10 +229,16 @@ const applyAttack = async (event) => {
     let type = element.data("type")
 
     const attackSummaries = element.data("attackSummary");
-    let actorIds = attackSummaries.map(a=>a.id);
-    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id)).reduce((actorMap, actor) => {actorMap[actor.id] = actor; return actorMap}, {})
+    let actorUUIDs = attackSummaries.map(a=>a.uuid);
+    let targetActors = game.actors.filter(actor => actorUUIDs.includes(actor.uuid)).reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, {})
+
+    canvas.tokens.placeables
+        .filter(token => actorUUIDs.includes(token.actor.uuid))
+        .map(token => token.actor)
+        .reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, targetActors)
+
     for (const attackSummary of attackSummaries) {
-        const targetActor = targetActors[attackSummary.id]
+        const targetActor = targetActors[attackSummary.uuid]
 
         if (type === "heal") {
             targetActor.applyHealing({heal: attackSummary.damage})
@@ -263,8 +269,17 @@ Hooks.on('renderChatMessage', async (message, html) => {
             /**
              * SWSEActor
              */
-            let targetActor = game.actors.get(message.flags.swse.context.damageTarget)
-            targetActor.resolveDamage(message.flags.swse.context.damage, message.timestamp)
+            let targetActor = game.actors.find(a => a.uuid === message.flags.swse.context.damageTarget)
+            if(!targetActor){
+                targetActor = game.actors.get(message.flags.swse.context.damageTarget)
+            }
+
+            if(!targetActor){
+                targetActor = canvas.tokens.placeables
+                    .find(token => message.flags.swse.context.damageTarget === token.actor.uuid)?.actor
+            }
+
+            await targetActor.resolveDamage(message.flags.swse.context.damage, message.timestamp)
             message.delete();
         }
     }
