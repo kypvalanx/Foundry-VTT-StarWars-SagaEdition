@@ -1590,7 +1590,7 @@ function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, da
         highlight: targetResult.includes("Miss") ? "miss" : "hit",
         result: targetResult,
         conditionalDefenses: conditionalDefenses,
-        id: actor.id,
+        uuid: actor.uuid,
         notes: attack.notes,
         damage: damage,
         damageType: attack.type,

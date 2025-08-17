@@ -1449,7 +1449,7 @@ export class SWSEActor extends Actor {
         flags.swse = {};
         flags.swse.context = {};
         flags.swse.context.type = "damage-result";
-        flags.swse.context.damageTarget = this.id;
+        flags.swse.context.damageTarget = this.uuid;
         flags.swse.context.damage = totalDamage;
 
         await toChat(content, this, "Damage", {flags})
