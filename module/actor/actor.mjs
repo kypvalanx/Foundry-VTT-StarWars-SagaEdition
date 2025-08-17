@@ -1465,7 +1465,7 @@ export class SWSEActor extends Actor {
         await this.safeUpdate(update);
     }
 
-    applyHealing(options) {
+    async applyHealing(options) {
         let update = {};
         const proposedHealAmount = toNumber(options.heal);
         const maxHealAmount = this.system.health.max - this.system.health.value;
@@ -1473,8 +1473,15 @@ export class SWSEActor extends Actor {
         update[`system.health.value`] = this.system.health.value + healAmount;
 
         const content = `${this.name} has has healed ${healAmount} damage` + (maxHealAmount < proposedHealAmount ? " reaching max health." : ".")
-        toChat(content, this)
-        this.safeUpdate(update, {bypass: true});
+
+        let flags = {};
+        flags.swse = {};
+        flags.swse.context = {};
+        flags.swse.context.type = "damage-result";
+        flags.swse.context.damageTarget = this.id;
+        flags.swse.context.damage = -healAmount;
+
+        await toChat(content, this, "Damage", {flags})
     }
 
     get recoveryActions(){
