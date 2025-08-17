@@ -403,10 +403,10 @@ export class Attack {
             itemFilter: ((item) => item.type !== 'weapon')
         });
 
-        inheritableAttribute.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier") || []);
+        terms.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier").map(c => appendTerm(c.value, "Custom")).flat() || []);
 
         inheritableAttribute.forEach(val => {
-            terms.push(...appendNumericTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
+            terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
         })
 
         const primaryTerms = [];

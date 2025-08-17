@@ -526,7 +526,7 @@ export async function createAttackMacro(data, slot = getAvailableMacroSlot()) {
         changes: data.changes,
     };
     const command = `game.swse.makeAttack(${JSON.stringify(context)});`;
-    const name = `${data.actorName}: ${(data.label)}`
+    const name = data.macroName ? data.macroName : `${data.actorName}: ${(data.label)}`
     if (game.macros.find((m) => m.name === name && m.command === command)) {
         return;
     }
