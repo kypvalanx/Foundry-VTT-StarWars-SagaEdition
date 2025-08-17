@@ -22,6 +22,7 @@ import {initializePolyglot} from "./module-support/polyglot.mjs";
 
 import {initializeCompendiumButtons} from "./compendium/compendium-web.mjs";
 import {buildRollContent} from "./common/chatMessageHelpers.mjs";
+import {SWSETokenDocument} from "./token/token-document.mjs";
 
 
 Hooks.once('quenchReady',  (quench) => {
@@ -60,6 +61,7 @@ Hooks.once('init', async function () {
     CONFIG.Actor.documentClass = SWSEActor;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.hudClass = SWSETokenHud;
+    CONFIG.Token.documentClass = SWSETokenDocument;
     CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
 
     //CONFIG.debug.hooks = true
