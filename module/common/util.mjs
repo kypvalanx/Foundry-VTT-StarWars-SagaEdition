@@ -1663,6 +1663,7 @@ export function toChat(content, actor = undefined, flavor="", context={}) {
 
 function performAttack(actor, type, attackKey, macro) {
     return async html => {
+        let macroName = html.find("#macro-name")[0];
         let attackRoll = html.find("#attack-roll")[0];
         let damageRoll = html.find("#damage-roll")[0];
         let changes = [
@@ -1672,6 +1673,7 @@ function performAttack(actor, type, attackKey, macro) {
 
         if(macro){
             await createAttackMacro({
+                macroName: macroName.value,
                 actorUUID: actor.uuid,
                 type: type === "fullAttack" ? Attack.TYPES.FULL_ATTACK : Attack.TYPES.SINGLE_ATTACK,
                 attackKeys: [attackKey],
@@ -1692,17 +1694,7 @@ function performAttack(actor, type, attackKey, macro) {
 export function attackOptions(actor) {
     const options = [];
 
-    
-    let attackWithOptions = `<div>
-    <div class="medium labeled-input">
-        <label for="attack-roll" class="text">Attack Roll</label>
-        <input class="input" id="attack-roll" type="text" value="0" placeholder=""/>
-    </div>
-       <div class="medium labeled-input">
-        <label for="damage-roll" class="text">Damage Roll</label>
-        <input class="input" id="damage-roll" type="text" value="0" placeholder=""/>
-    </div>
-</div>`
+
     
     
     options.push({
@@ -1711,6 +1703,24 @@ export function attackOptions(actor) {
         callback: async (html) => {
             const type = html.data('action')
             const attackKey = html.data('attackKey')
+
+            const attackName = actor.attack.attacks.find(a => a.attackKey === attackKey)?.name;
+
+
+            let attackWithOptions = `<div>
+    <div class="medium labeled-input">
+        <label for="macro-name" class="text">Macro Name</label>
+        <input class="input" id="macro-name" type="text" value="${actor.name + " : " + attackName}" placeholder=""/>
+    </div>
+    <div class="medium labeled-input">
+        <label for="attack-roll" class="text">Attack Roll</label>
+        <input class="input" id="attack-roll" type="text" value="0" placeholder=""/>
+    </div>
+    <div class="medium labeled-input">
+        <label for="damage-roll" class="text">Damage Roll</label>
+        <input class="input" id="damage-roll" type="text" value="0" placeholder=""/>
+    </div>
+</div>`
 
             await Dialog.wait({
                 title: `Attack or Add Macro with options`,
