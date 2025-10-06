@@ -361,13 +361,10 @@ Hooks.on("ready", async function () {
             const toks = entry.split(">").map(e => e.trim())
 
             let triggerItemSplit = toks[0].split(":")
-            const triggerItem = {name: triggerItemSplit[1], type: triggerItemSplit[0]};
+            const triggerItem = {name: triggerItemSplit[1], type: triggerItemSplit[0].toLowerCase()};
             let bonusItemSplit = toks[0].split(":")
-            const bonusItem = {name: bonusItemSplit[1], type: bonusItemSplit[0]};
-
-            let bonusItems = game.generated.autoItemMapping.computeIfAbsent(triggerItem, () => [])
-
-            bonusItems.push(bonusItem);
+            const bonusItem = {name: bonusItemSplit[1], type: bonusItemSplit[0].toLowerCase()};
+            game.generated.autoItemMapping.computeIfAbsent(triggerItem, () => [bonusItem])
         })
     }
 

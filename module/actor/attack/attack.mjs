@@ -405,8 +405,16 @@ export class Attack {
 
         terms.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier").map(c => appendTerm(c.value, "Custom")).flat() || []);
 
+        const conditionalTerms = [];
+
+
         inheritableAttribute.forEach(val => {
-            terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
+            const terms = val.value.split(":")
+            if (terms.length === 1) {
+                terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
+            }
+            //adding optional terms here.  these have a prerequisite
+            conditionalTerms.push(val)
         })
 
         const primaryTerms = [];
@@ -427,7 +435,7 @@ export class Attack {
         }
 
         return new SWSERollWrapper(Roll.fromTerms(primaryTerms
-            .filter(term => !!term)), []);
+            .filter(term => !!term)), [], conditionalTerms);
     }
 
     getConditionModifier(operator) {
@@ -1274,10 +1282,10 @@ export class Attack {
 
         for (const targetActor of targetActors) {
             let {actors, location} = targetActor;
-            let {penalty, description} = await this.getDistanceModifier(this.actor, location);
+            let {penalty, description: range} = await this.getDistanceModifier(this.actor, location);
 
-            let found = response.rangeBreakdown.find(rb => rb.range === description)
-            let modifiedRoll = found ? found.attack : makeVariantRoll(attackRoll, penalty, description);
+            let found = response.rangeBreakdown.find(rb => rb.range === range)
+            let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, penalty, range, this.attackRoll.conditionalTerms, {range: range});
             const targets = toTargets(actors, modifiedRoll, autoMiss, autoHit, critical, areaAttack, damageRoll, this)
             attackSummaries.push(...targets);
             if (found) {
@@ -1286,7 +1294,7 @@ export class Attack {
             }
 
             response.rangeBreakdown.push({
-                range: description,
+                range: range,
                 attack: modifiedRoll,
                 damage: damageRoll,
                 damageType: this.type,
@@ -1300,6 +1308,20 @@ export class Attack {
         await this.reduceAmmunition()
         response.attackSummaries = JSON.stringify(simplify(attackSummaries))
         return response;
+    }
+
+    makeVariantRoll(rollResult, penalty, description, conditionalTerms, context) {
+        const terms = [...rollResult.terms]
+        terms.push(...appendTerm(penalty, description, true))
+        for (const term of conditionalTerms) {
+            const toks = term.value.split(":");
+            if(!!context[toks[1].toLowerCase()] && context[toks[1].toLowerCase()] === toks[2]){
+                terms.push(appendTerm(toks[0], term.description, true));
+            }
+        }
+
+        terms.forEach(t => t._evaluated = true)
+        return Roll.fromTerms(terms);
     }
 }
 
@@ -1538,19 +1560,7 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     return damageRoll;
 }
 
-function makeVariantRoll(attackRollResult, penalty, description) {
-    const terms = [...attackRollResult.terms]
-    terms.push(...appendTerm(penalty, description, true))
 
-    terms.forEach(t => t._evaluated = true)
-    return Roll.fromTerms(terms);
-    // let modifiedAttackRoll = Roll.fromTerms(terms)
-    // modifiedAttackRoll.terms[0].results[0].result = attackRollResult.dice[0].results[0].result
-    // modifiedAttackRoll.terms[0].results[0].active = true;
-    // modifiedAttackRoll._total = attackRollResult._total + penalty; // override total
-    // modifiedAttackRoll._evaluated = true;
-    // return modifiedAttackRoll;
-}
 
 function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack) {
     let reflexDefense = actor.defense.reflex.total;

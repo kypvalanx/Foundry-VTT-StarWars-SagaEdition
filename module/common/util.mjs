@@ -1567,7 +1567,10 @@ export function appendTerm(value, flavor, evaluated = false) {
     if (`${parseInt(value)}` === `${value}`) {
         return appendNumericTerm(value, flavor, evaluated);
     }
-    return appendDieTerm(value, flavor)
+    if(value.split("d").length > 1){
+        return appendDieTerm(value, flavor)
+    }
+    console.warn(`unknown term ${value}`)
 }
 
 export function appendDieTerm(value, flavor) {
