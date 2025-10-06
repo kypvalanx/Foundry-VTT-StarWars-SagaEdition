@@ -2677,7 +2677,7 @@ export class SWSEActor extends Actor {
 
         entity.addItemAttributes(item.changes);
         const providedItems = item.providedItems || [];
-        providedItems.push(...(game.generated.autoItemMapping.get({name:item.name, type:item.type})) || [])
+        providedItems.push(...(game.generated.autoItemMapping.get({name:entity.name, type:entity.type})) || [])
         entity.addProvidedItems(providedItems);
 
         if (item.parent) await entity.setParent(item.parent, item.unlocked);

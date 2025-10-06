@@ -1,9 +1,10 @@
 
 export class SWSERollWrapper {
 
-    constructor(roll, additionalTerms = []){
+    constructor(roll, additionalTerms = [], conditionalTerms = []){
         this.roll = roll;
         this.additionalTerms = additionalTerms;
+        this.conditionalTerms = conditionalTerms;
     }
 
     get renderFormulaHTML(){
