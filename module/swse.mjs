@@ -531,6 +531,22 @@ function getAvailableMacroSlot() {
     return getNumericArray(1, 50).find(i => !hotbar.includes(i))
 }
 
+/**
+ * Creates an attack macro for the given data and assigns it to a specified hotbar slot.
+ *
+ * @param {Object} data - The data required to create the attack macro.
+ * @param {string} data.actorId - The ID of the actor associated with the macro. deprecated -> use actorUUID
+ * @param {string} data.actorUUID - The UUID of the actor associated with the macro.
+ * @param {Array} data.attackKeys - A list of keys representing the available attacks.
+ * @param {Array} data.attacks - A list of attacks associated with the actor.
+ * @param {Object} data.changes - Any changes or modifications relevant to the macro creation.
+ * @param {string} [data.macroName] - Optional custom name for the macro. Defaults to a combination of the actor's name and the label.
+ * @param {string} data.actorName - The name of the actor to be displayed in the macro name.
+ * @param {string} data.label - A label or descriptor for the macro name.
+ * @param {string} [data.img] - Optional image to use for the macro. Defaults to the system's default image.
+ * @param {number} [slot=getAvailableMacroSlot()] - The hotbar slot where the macro will be assigned. Defaults to the first available slot.
+ * @return {Promise<void>} Resolves when the macro is created and assigned successfully, or if the macro already exists.
+ */
 export async function createAttackMacro(data, slot = getAvailableMacroSlot()) {
     let context = {
         actorId: data.actorId,

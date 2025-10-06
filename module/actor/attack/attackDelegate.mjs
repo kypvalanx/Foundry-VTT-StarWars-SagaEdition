@@ -240,31 +240,6 @@ export class AttackDelegate {
 
 }
 
-/**
- *
- * @param actor
- * @param context
- * @param context.attackKeys
- * @param context.attacks
- * @param context.actorUUID
- * @return {*|*[]}
- */
-function getAttacksFromContext(actor, context) {
-    if(context.attackKeys){
-        if(!actor) {
-            actor = getActor(context.actorUUID)
-        }
-        return actor.attack.attacks.filter(a => context.attackKeys.includes(a.attackKey))
-    }
-
-    return context.attacks?.map(i => {
-        if (i instanceof Attack) {
-            return i;
-        }
-        return Attack.fromJSON(i);
-    }) || [];
-}
-
 function getHands(actor) {
     return 2;
 }
@@ -562,6 +537,33 @@ function getSound(attacks) {
 
 
 /**
+ * Retrieves a list of attacks based on the provided attack object and data.
+ *
+ * @param {Object} attack - The attack object containing attack-related properties and methods.
+ * @param {Object} data - The data object that may include an array of attacks or attack keys.
+ * @return {Promise<Object[]>} A promise that resolves to an array of attack objects.
+ */
+async function getAttacks(attack, data) {
+    let attacks;
+    if (data.attacks) {
+        attacks = data.attacks?.map(i => i instanceof Attack ? i : Attack.fromJSON(i)) || [];
+    }
+    if (attacks.length === 0) {
+        attacks = attack.attacks.filter(a => data.attackKeys.includes(a.attackKey));
+    }
+
+    if (attacks.length === 0) {
+        let attackKeys = await attack.getAttacksFromUserSelection();
+        if (!attackKeys) {
+            return [];
+        }
+        attacks = attack.attacks.filter(a => attackKeys.includes(a.attackKey))
+
+    }
+    return attacks;
+}
+
+/**
  *
  * @param data
  * @param data.actorUUID the UUID of the actor that should make the attack
@@ -572,23 +574,7 @@ function getSound(attacks) {
  */
 export async function makeAttack(data) {
     const actor = getActor(data.actorUUID)
-
-    let attacks = getAttacksFromContext(actor, data);
-    //const hands = data.hands;
-    //const availableHands = data.availableHands;
-
-    if(attacks.length === 0){
-
-        let attackKeys = await actor.attack.getAttacksFromUserSelection();
-        if(!attackKeys){
-            return;
-        }
-        attacks = actor.attack.attacks.filter(a => attackKeys.includes(a.attackKey))
-
-        if(attacks.length === 0){
-            return;
-        }
-    }
+    let attacks = await getAttacks(actor.attack, data);
 
     let attackRows = [];
     let rolls = [];
