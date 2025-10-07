@@ -516,7 +516,6 @@ export async function actorSheetTests(quench) {
 
                         it('should add all creation Provided items when a follower is created', async function () {
                             await withTestActor(async (actor, context) => {
-                                actor.suppressDialog = true
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
                                 let response = await actor.sheet._onDropItem(getMockEvent(), {name: "Commanding Officer", type: "talent"})

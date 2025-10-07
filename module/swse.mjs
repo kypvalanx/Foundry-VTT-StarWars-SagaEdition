@@ -278,7 +278,7 @@ Hooks.on('renderChatMessage', async (message, html) => {
                 targetActor = canvas.tokens?.placeables?.find(token => message.flags.swse.context.damageTarget === token.actor.uuid)?.actor
             }
 
-            await targetActor.resolveDamage(message.flags.swse.context.damage, message.timestamp)
+            await targetActor?.resolveDamage(message.flags.swse.context.damage, message.timestamp)
             message.delete();
         }
     }
