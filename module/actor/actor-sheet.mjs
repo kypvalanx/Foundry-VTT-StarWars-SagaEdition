@@ -385,7 +385,7 @@ export class SWSEActorSheet extends ActorSheet {
         const system = {
             follower: true
         };
-        if(this.system.test) {
+        if(this.object.system.test) {
             system.test = true;
         }
 
