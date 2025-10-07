@@ -96,7 +96,7 @@ export class CrewDelegate {
 
                 let positionCover = this.actor.system.crewCover[slotId] || this.actor.system.crewCover[position] || coverMap[position] || coverMap["default"];
 
-                crewSlots.push(this.actor.getSlot(crewMember, position, positionCover, numericSlot));
+                crewSlots.push(this.getSlot(crewMember, position, positionCover, numericSlot));
             })
 
 

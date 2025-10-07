@@ -71,14 +71,18 @@ const isHomebrewPermitted = async (context) => {
 }
 
 const isItemTypePermitted = async (context) => {
-    if (!isPermittedForActorType(context.actor, context.entity.type)) {
+    if (isPermittedForActorType(context.actor, context.entity.type)) {
+        return true;
+    } else if(context.actor.type === "vehicle" && context.entity.name === "Droid Socket"){
+        return true; //Droid sockets can go on vehicles
+    }
+    else {
         suppressibleDialog.call(context.actor, context.entity,
             `Attempted to add ${context.entity.finalName} but could not because a ${context.entity.type} can't be added to a ${context.actor.type}`, `Inappropriate Item`,
             context.actor.suppressDialog);
 
         return false;
     }
-    return true;
 }
 
 const canTakeMoreThanOnce = async (context) => {
