@@ -51,7 +51,7 @@ export function getCompendium(item) {
         case 'vehiclebasetype':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-base-types"));
         case 'vehiclesystem':
-            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-systems"));
+            return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.vehicle-systems") || pack.collection.startsWith("swse.droid-systems"));
         case 'template':
             return packs.filter(pack => pack.collection.startsWith("world.") || pack.collection.startsWith("swse.templates"));
         case 'affiliation':
