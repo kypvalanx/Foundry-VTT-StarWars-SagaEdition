@@ -187,7 +187,7 @@ function getAnswer(answers, choices) {
 }
 
 const handleFeat = async (context) => {
-    if (context.entity.type !== 'feat') {
+    if (context.entity.type !== 'feat' || context.ignoreAvailability) {
         return true;
     }
     let possibleFeatTypes = [];

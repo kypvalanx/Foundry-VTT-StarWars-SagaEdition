@@ -2247,6 +2247,7 @@ export class SWSEActor extends Actor {
         if (!context.isUpload && !context.provided && !context.skipPrerequisite) {
             context.actor = this;
             context.entity = entity;
+            context.ignoreAvailability = item.ignoreAvailability;
             for (const validator of VALIDATORS) {
                 if (!(await validator(context))) {
                     return false;
@@ -2483,6 +2484,8 @@ export class SWSEActor extends Actor {
             const selectFeatResponse = await this.selectFeat(availableFeats, ownedFeats, item, context);
             toBeAdded.push(...selectFeatResponse.items)
         }
+
+        toBeAdded.forEach(item => item.ignoreAvailability = true)
 
         return toBeAdded;
     }

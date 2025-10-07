@@ -18,6 +18,7 @@ export async function withTestActor(fn, options= {}) {
         })
     }
 
+    actor.suppressDialog = true
     let context = {otherActors:[]}
 
     try {
