@@ -39,6 +39,10 @@ import {bypassShields} from "../common/conditionalHelpers.mjs";
 import {depthMerge, titleCase} from "../common/helpers.mjs";
 import {CrewDelegate} from "./crewDelegate.mjs";
 
+export function getEntityKey(entity) {
+    return `${entity.type}:${entity.name}`;
+}
+
 /**
  * Extend the base Actor entity
  * @extends {Actor}
@@ -2244,7 +2248,7 @@ export class SWSEActor extends Actor {
             return false;
         }
 
-        if (!context.isUpload && !context.provided && !context.skipPrerequisite) {
+        if (!context.isUpload && !context.provided && !context.skipPrerequisite && !item.provided) {
             context.actor = this;
             context.entity = entity;
             context.ignoreAvailability = item.ignoreAvailability;
@@ -2680,7 +2684,11 @@ export class SWSEActor extends Actor {
 
         entity.addItemAttributes(item.changes);
         const providedItems = item.providedItems || [];
-        providedItems.push(...(game.generated.autoItemMapping.get({name:entity.name, type:entity.type})) || [])
+        const automaticItems = game.generated.autoItemMapping.has(getEntityKey(entity)) ? game.generated.autoItemMapping.get(getEntityKey(entity)) : [];
+
+        automaticItems.forEach(i => i.provided = true)
+
+        providedItems.push(...automaticItems)
         entity.addProvidedItems(providedItems);
 
         if (item.parent) await entity.setParent(item.parent, item.unlocked);

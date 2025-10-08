@@ -1,6 +1,6 @@
 // Import Modules
 import {initializeStatusEffects, SWSE} from "./common/config.mjs";
-import {SWSEActor} from "./actor/actor.mjs";
+import {getEntityKey, SWSEActor} from "./actor/actor.mjs";
 import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
 import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
@@ -361,9 +361,9 @@ Hooks.on("ready", async function () {
 
             let triggerItemSplit = toks[0].split(":")
             const triggerItem = {name: triggerItemSplit[1], type: triggerItemSplit[0].toLowerCase()};
-            let bonusItemSplit = toks[0].split(":")
+            let bonusItemSplit = toks[1].split(":")
             const bonusItem = {name: bonusItemSplit[1], type: bonusItemSplit[0].toLowerCase()};
-            game.generated.autoItemMapping.computeIfAbsent(triggerItem, () => [bonusItem])
+            game.generated.autoItemMapping.computeIfAbsent(getEntityKey(triggerItem), () => [bonusItem])
         })
     }
 
