@@ -23,7 +23,7 @@ export class SWSEItem extends Item {
 
     async _preUpdate(changed, options, user) {
         super._preUpdate(changed, options, user);
-        changed.system = changed.system || {};
+        //changed.system = changed.system || {};
     }
 
     get displayName(){
