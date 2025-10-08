@@ -548,11 +548,11 @@ async function getAttacks(attack, data) {
     if (data.attacks) {
         attacks = data.attacks?.map(i => i instanceof Attack ? i : Attack.fromJSON(i)) || [];
     }
-    if (attacks.length === 0) {
+    if (!attacks || attacks.length === 0) {
         attacks = attack.attacks.filter(a => data.attackKeys.includes(a.attackKey));
     }
 
-    if (attacks.length === 0) {
+    if (!attacks || attacks.length === 0) {
         let attackKeys = await attack.getAttacksFromUserSelection();
         if (!attackKeys) {
             return [];

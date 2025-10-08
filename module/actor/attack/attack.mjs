@@ -489,6 +489,7 @@ export class Attack {
         }
 
         let terms = [];
+        const conditionalTerms = [];
         const doubleWeaponDamage = [];
         if (this.isUnarmed) {
             terms.push(...resolveUnarmedDamageDie(actor));
@@ -522,11 +523,21 @@ export class Attack {
         if (item.type === 'beastAttack') {
             terms.push(...appendNumericTerm(halfBeastLevel, "Half Beast Level"));
         }
-        terms.push(...getInheritableAttribute({
-            entity: item,
+        const inheritableAttribute = getInheritableAttribute({
+            entity: [this.item, this.operator],
             attributeKey: "bonusDamage",
-            reduce: "VALUES"
-        }).flat());
+            parent: !!this.parent ? this.parent : this.operator,
+            itemFilter: ((item) => item.type !== 'weapon')
+        });
+
+        inheritableAttribute.forEach(val => {
+            const terms = val.value.split(":")
+            if (terms.length === 1) {
+                terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
+            }
+            //adding optional terms here.  these have a prerequisite
+            conditionalTerms.push(val)
+        })
 
 
         terms.push(...this.temporaryChanges?.filter(c => c.key === "damage").map(c => appendTerm(c.value, "Custom")).flat() || []);
@@ -562,7 +573,7 @@ export class Attack {
         })
         roll.alter(1, toNumber(bonusDamageDice));
 
-        return new SWSERollWrapper(roll, doubleWeaponDamage);
+        return new SWSERollWrapper(roll, doubleWeaponDamage, conditionalTerms);
     }
 
     getMeleeDamageAbilityModifier(actor, item) {
@@ -1286,7 +1297,8 @@ export class Attack {
 
             let found = response.rangeBreakdown.find(rb => rb.range === range)
             let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, penalty, range, this.attackRoll.conditionalTerms, {range: range});
-            const targets = toTargets(actors, modifiedRoll, autoMiss, autoHit, critical, areaAttack, damageRoll, this)
+            let modifiedDamageRoll = found ? found.attack : this.makeVariantRoll(damageRoll, 0, range, this.damageRoll.conditionalTerms, {range: range});
+            const targets = toTargets(actors, modifiedRoll, autoMiss, autoHit, critical, areaAttack, modifiedDamageRoll, this)
             attackSummaries.push(...targets);
             if (found) {
                 found.targets.push(...targets)
@@ -1296,7 +1308,7 @@ export class Attack {
             response.rangeBreakdown.push({
                 range: range,
                 attack: modifiedRoll,
-                damage: damageRoll,
+                damage: modifiedDamageRoll,
                 damageType: this.type,
                 notes: this.notes,
                 critical,
@@ -1315,8 +1327,9 @@ export class Attack {
         terms.push(...appendTerm(penalty, description, true))
         for (const term of conditionalTerms) {
             const toks = term.value.split(":");
-            if(!!context[toks[1].toLowerCase()] && context[toks[1].toLowerCase()] === toks[2]){
-                terms.push(appendTerm(toks[0], term.description, true));
+            const contextElement = context[toks[1].toLowerCase()];
+            if(!!contextElement && contextElement.toLowerCase() === toks[2].toLowerCase()){
+                terms.push(...appendTerm(toks[0], term.sourceDescription, true));
             }
         }
 

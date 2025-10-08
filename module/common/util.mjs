@@ -1570,6 +1570,13 @@ export function appendTerms(value, flavor) {
     return terms;
 }
 
+/**
+ *
+ * @param value
+ * @param flavor
+ * @param evaluated
+ * @return {[RollTerm]}
+ */
 export function appendTerm(value, flavor, evaluated = false) {
     if (`${parseInt(value)}` === `${value}`) {
         return appendNumericTerm(value, flavor, evaluated);
@@ -1578,6 +1585,7 @@ export function appendTerm(value, flavor, evaluated = false) {
         return appendDieTerm(value, flavor)
     }
     console.warn(`unknown term ${value}`)
+    return [];
 }
 
 export function appendDieTerm(value, flavor) {
