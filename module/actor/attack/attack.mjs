@@ -1293,7 +1293,7 @@ export class Attack {
 
         for (const targetActor of targetActors) {
             let {actors, location} = targetActor;
-            let {penalty, description: range} = await this.getDistanceModifier(this.actor, location);
+            let {penalty, description: range} = this.getDistanceModifier(this.actor, location);
 
             let found = response.rangeBreakdown.find(rb => rb.range === range)
             let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, penalty, range, this.attackRoll.conditionalTerms, {range: range});
