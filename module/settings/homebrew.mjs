@@ -51,6 +51,20 @@ export function lilLiteralistHomebrewOptions() {
         default: false,
         type: Boolean
     });
+
+    //5
+    game.settings.register("swse", "homebrewRanges", {
+        name: "Homebrew: Ranges",
+        hint: "Want to avoid all combat happening at point-blank range?",
+        scope: "world",
+        config: true,
+        default: "default",
+        type: String,
+        choices: {
+            default: "Vanilla Ranges",
+            halfRange: "Lil'Literalist: Cut the weapon ranges in half (except for thrown)",
+        }
+    });
 }
 
 export function darthauthorHomebrewOptions() {
