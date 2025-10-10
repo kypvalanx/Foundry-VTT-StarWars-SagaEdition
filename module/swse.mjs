@@ -10,7 +10,7 @@ import {registerHandlebarsHelpers} from "./common/helpers.mjs";
 import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
 import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
-import {toNumber} from "./common/util.mjs";
+import {getActorFromId, toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
 import {registerTestSuites} from "../module_test/quench/test-suites.test.mjs";
@@ -637,21 +637,6 @@ function rollAttack(actorId, itemIds) {
     }
     return actor.attack.makeAttack({type: (itemIds.length === 1 ? "singleAttack" : "fullAttack"), items: itemIds});
 }
-
-export const getActorFromId = function (id) {
-    let actor = null;
-    if (id) {
-        actor = game.actors?.tokens[id]
-        if (!actor) actor = game.actors?.get(id);
-        if (!actor) actor = game.data.actors.find(a => a._id === id);
-    }
-    if (!actor) {
-        const speaker = ChatMessage.getSpeaker();
-        if (speaker.token && !actor) actor = game.actors.tokens[speaker.token];
-        if (!actor) actor = game.actors.get(speaker.actor);
-    }
-    return actor;
-};
 
 async function rollVariable(actorId, variable) {
     const actor = getActorFromId(actorId);

@@ -7,7 +7,6 @@ import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";
 import {getCompendium} from "../compendium/compendium-util.mjs";
-import {titleCase} from "./helpers.mjs";
 import {makeAttack} from "../actor/attack/attackDelegate.mjs";
 import {Attack} from "../actor/attack/attack.mjs";
 import {createAttackMacro} from "../swse.mjs";
@@ -1858,3 +1857,18 @@ export function mergeColor(colors) {
 
     return `#${reds.toString(16).padStart(2, '0')}${blues.toString(16).padStart(2, '0')}${greens.toString(16).padStart(2, '0')}`;
 }
+
+export const getActorFromId = function (id) {
+    let actor = null;
+    if (id) {
+        actor = game.actors?.tokens[id]
+        if (!actor) actor = game.actors?.get(id);
+        if (!actor) actor = game.data.actors.find(a => a._id === id);
+    }
+    if (!actor) {
+        const speaker = ChatMessage.getSpeaker();
+        if (speaker.token && !actor) actor = game.actors.tokens[speaker.token];
+        if (!actor) actor = game.actors.get(speaker.actor);
+    }
+    return actor;
+};

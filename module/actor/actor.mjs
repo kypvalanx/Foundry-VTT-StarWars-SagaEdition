@@ -3,7 +3,7 @@ import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
     convertOverrideToMode,
-    filterItemsByTypes,
+    filterItemsByTypes, getActorFromId,
     getDocumentByUuid,
     getVariableFromActorData,
     inheritableItems,
@@ -21,7 +21,6 @@ import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {CLASSES_BY_STARTING_FEAT, COLORS, KNOWN_WEIRD_UNITS, sizeArray, skills} from "../common/constants.mjs";
-import {getActorFromId} from "../swse.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
 import {activateChoices} from "../choice/choice.mjs";
 import {errorsFromActor, warningsFromActor} from "./warnings.mjs";
