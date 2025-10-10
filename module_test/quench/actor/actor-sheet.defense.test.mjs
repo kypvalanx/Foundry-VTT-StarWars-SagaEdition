@@ -1,7 +1,7 @@
-import {SWSEActor} from "../../module/actor/actor.mjs";
-import {getAvailableTrainedSkillCount} from "../../module/actor/skill-handler.mjs";
-import {SWSERollWrapper} from "../../module/common/roll.mjs";
-import {getDiceTermsFromString} from "../../module/actor/attack/attack.mjs";
+import {SWSEActor} from "../../../module/actor/actor.mjs";
+import {getAvailableTrainedSkillCount} from "../../../module/actor/skill-handler.mjs";
+import {SWSERollWrapper} from "../../../module/common/roll.mjs";
+import {getDiceTermsFromString} from "../../../module/actor/attack/attack.mjs";
 
 import {withTestActor} from "./actor-utils.mjs";
 

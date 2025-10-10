@@ -1,6 +1,6 @@
 import {getEntityRawData} from "../compendium/generation.test.mjs";
-import {processActor} from "../../module/compendium/generation.mjs";
-import {SWSEActor} from "../../module/actor/actor.mjs";
+import {processActor} from "../../../module/compendium/generation.mjs";
+import {SWSEActor} from "../../../module/actor/actor.mjs";
 
 export async function withTestActor(fn, options= {}) {
     const name = "New Test Actor DELETE ME";

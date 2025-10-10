@@ -8,9 +8,9 @@
 
 //test()
 
-import {getFile, processActor, processItem} from "../../module/compendium/generation.mjs";
-import {getResolvedSize} from "../../module/attribute-helper.mjs";
-import {sizeArray} from "../../module/common/constants.mjs";
+import {getFile, processActor, processItem} from "../../../module/compendium/generation.mjs";
+import {getResolvedSize} from "../../../module/attribute-helper.mjs";
+import {sizeArray} from "../../../module/common/constants.mjs";
 
 import {withTestActor} from "../actor/actor-utils.mjs";
 

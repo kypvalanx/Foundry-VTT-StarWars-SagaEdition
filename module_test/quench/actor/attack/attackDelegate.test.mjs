@@ -1,4 +1,4 @@
-import {crunchyCrit, doubleDiceCrit, doubleValueCrit, maxRollCrit} from "../../../module/actor/attack/attack.mjs";
+import {crunchyCrit, doubleDiceCrit, doubleValueCrit, maxRollCrit} from "../../../../module/actor/attack/attack.mjs";
 
 export async function attackDelegateTests(quench) {
     quench.registerBatch("attackDelegate",

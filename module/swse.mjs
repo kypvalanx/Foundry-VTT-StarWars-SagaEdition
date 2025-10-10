@@ -13,7 +13,7 @@ import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
 import {toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {SWSEActiveEffectConfig} from "./active-effect/active-effect-config.mjs";
-import {registerTestSuites} from "../module_test/test-suites.test.mjs";
+import {registerTestSuites} from "../module_test/quench/test-suites.test.mjs";
 import {makeAttack} from "./actor/attack/attackDelegate.mjs";
 import {getInheritableAttribute} from "./attribute-helper.mjs";
 import {SWSETokenHud} from "./token/token-hud.mjs";
