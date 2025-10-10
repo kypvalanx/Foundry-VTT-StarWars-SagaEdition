@@ -811,11 +811,14 @@ export class Attack {
         return this.#mapToStandardRanges(resolvedSubtype);
     }
 
+
     /**
-     * Returns the range penalty and description for a given distance in squares
+     * Calculates the penalty and range description based on the given distance and configured range grid.
      *
-     * @param distance
-     * @return {{penalty: number, description: string}}
+     * @param {number} distance - The distance to evaluate against the range grid.
+     * @return {penalty:number|range:string} An object containing the penalty and the range description, where:
+     *                  - `penalty` is the numeric penalty associated with the range.
+     *                  - `range` is the string description of the range.
      */
     rangePenalty(distance) {
         let rangeGrid = CONFIG.SWSE.Combat.range[this.range];
@@ -830,7 +833,7 @@ export class Attack {
 
         return {
             penalty: SWSE.Combat.rangePenalty[rangeDescription] || 0,
-            description: rangeDescription.titleCase()
+            range: rangeDescription.titleCase()
         };
     }
 
@@ -1176,11 +1179,13 @@ export class Attack {
         return resolvedAttacks;
     }
 
+
     /**
+     * Calculates the distance modifier based on the actor's position and the specified location.
      *
-     * @param actor
-     * @param location
-     * @return {{penalty: (number), description: (string)}}
+     * @param {object} actor - The actor object which represents the character or token to evaluate.
+     * @param {object} location - The target location object containing coordinates.
+     * @return {Promise<penalty:number|range:string>}
      */
     async getDistanceModifier(actor, location) {
         let token;
@@ -1293,7 +1298,7 @@ export class Attack {
 
         for (const targetActor of targetActors) {
             let {actors, location} = targetActor;
-            let {penalty, description: range} = this.getDistanceModifier(this.actor, location);
+            let {penalty, range} = await this.getDistanceModifier(this.actor, location);
 
             let found = response.rangeBreakdown.find(rb => rb.range === range)
             let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, penalty, range, this.attackRoll.conditionalTerms, {range: range});

@@ -1570,6 +1570,9 @@ export function appendTerms(value, flavor) {
  * @return {[RollTerm]}
  */
 export function appendTerm(value, flavor, evaluated = false) {
+    if(!value)
+        return [];
+
     if (`${parseInt(value)}` === `${value}`) {
         return appendNumericTerm(value, flavor, evaluated);
     }
