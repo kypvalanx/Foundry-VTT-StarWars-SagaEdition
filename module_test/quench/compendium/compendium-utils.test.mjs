@@ -1,4 +1,4 @@
-import {getCompendium} from "../../module/compendium/compendium-util.mjs";
+import {getCompendium} from "../../../module/compendium/compendium-util.mjs";
 
 export async function compendiumUtilTests(quench) {
     quench.registerBatch("compendium-utils",

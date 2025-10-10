@@ -1,10 +1,10 @@
-import {explodeOptions} from "../../module/choice/choice.mjs";
+import {explodeOptions} from "../../../module/choice/choice.mjs";
 import {
     resolveExpression,
     resolveExpressionReduce,
     resolveValueArray,
     resolveWeight
-} from "../../module/common/util.mjs";
+} from "../../../module/common/util.mjs";
 
 const ADD = CONST.ACTIVE_EFFECT_MODES.ADD
 const MULTIPLY = CONST.ACTIVE_EFFECT_MODES.MULTIPLY

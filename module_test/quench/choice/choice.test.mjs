@@ -1,4 +1,4 @@
-import {explodeOptions} from "../../module/choice/choice.mjs";
+import {explodeOptions} from "../../../module/choice/choice.mjs";
 
 export async function choiceTests(quench) {
     quench.registerBatch("choice.choice",

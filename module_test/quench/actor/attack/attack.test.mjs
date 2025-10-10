@@ -1,4 +1,4 @@
-import {appendTerms} from "../../../module/common/util.mjs";
+import {appendTerms} from "../../../../module/common/util.mjs";
 import {getMockEvent, hasItems, notHaveItems, withTestActor} from "../actor-utils.mjs";
 
 export async function attackTests(quench) {
