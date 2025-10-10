@@ -1,14 +1,57 @@
 export const SWSE = {}
 
 SWSE.Combat = {};
-SWSE.Combat.range = {
-    "Heavy Weapons":	        {"point-blank": {"string": "0-50 squares", "low":0,"high":50},	"short": {"string": "51-100 squares", "low":51,"high":100},  "medium": {"string": "101-250 squares", "low":101,"high":250},	"long": {"string": "251-500 squares", "low":251,"high":500}},
-    "Pistols":	                {"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
-    "Rifles":	                {"point-blank": {"string": "0-30 squares", "low":0,"high":30},	"short": {"string": "31-60 squares", "low":31,"high":60},	"medium": {"string": "61-150 squares", "low":61,"high":150},	    "long": {"string": "151-300 squares", "low":151,"high":300}},
-    "Simple Ranged Weapons":	{"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
-    "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}},
-    "Melee Weapons":	        {"point-blank": {"string": "0-1 squares", "low":0,"high":1}}
-};
+
+Object.defineProperty(SWSE.Combat, "range", {
+    get: () => {
+        const rangeType = game.settings.get("swse", "homebrewRanges")
+
+        if(rangeType === "halfRange"){
+            return {
+                "Heavy Weapons": {
+                    "point-blank": { "string": "0-25 squares", "low": 0, "high": 25 },
+                    "short":       { "string": "26-50 squares", "low": 26, "high": 50 },
+                    "medium":      { "string": "51-125 squares", "low": 51, "high": 125 },
+                    "long":        { "string": "126-250 squares", "low": 126, "high": 250 }
+                },
+
+                "Pistols": {
+                    "point-blank": { "string": "0-10 squares", "low": 0, "high": 10 },
+                    "short":       { "string": "11-20 squares", "low": 11, "high": 20 },
+                    "medium":      { "string": "21-30 squares", "low": 21, "high": 30 },
+                    "long":        { "string": "31-40 squares", "low": 31, "high": 40 }
+                },
+
+                "Rifles": {
+                    "point-blank": { "string": "0-15 squares", "low": 0, "high": 15 },
+                    "short":       { "string": "16-30 squares", "low": 16, "high": 30 },
+                    "medium":      { "string": "31-75 squares", "low": 31, "high": 75 },
+                    "long":        { "string": "76-150 squares", "low": 76, "high": 150 }
+                },
+
+                "Simple Ranged Weapons": {
+                    "point-blank": { "string": "0-10 squares", "low": 0, "high": 10 },
+                    "short":       { "string": "11-20 squares", "low": 11, "high": 20 },
+                    "medium":      { "string": "21-30 squares", "low": 21, "high": 30 },
+                    "long":        { "string": "31-40 squares", "low": 31, "high": 40 }
+                },
+                "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}},
+                "Melee Weapons":	        {"point-blank": {"string": "0-1 squares", "low":0,"high":1}}
+            }
+        }
+
+
+        return {
+            "Heavy Weapons":	        {"point-blank": {"string": "0-50 squares", "low":0,"high":50},	"short": {"string": "51-100 squares", "low":51,"high":100},  "medium": {"string": "101-250 squares", "low":101,"high":250},	"long": {"string": "251-500 squares", "low":251,"high":500}},
+            "Pistols":	                {"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
+            "Rifles":	                {"point-blank": {"string": "0-30 squares", "low":0,"high":30},	"short": {"string": "31-60 squares", "low":31,"high":60},	"medium": {"string": "61-150 squares", "low":61,"high":150},	    "long": {"string": "151-300 squares", "low":151,"high":300}},
+            "Simple Ranged Weapons":	{"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
+            "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}},
+            "Melee Weapons":	        {"point-blank": {"string": "0-1 squares", "low":0,"high":1}}
+        }
+    }
+});
+
 
 SWSE.Combat.rangePenalty = {"point-blank": 0,	"short": -2,  "medium": -5,	"long": -10}
 
