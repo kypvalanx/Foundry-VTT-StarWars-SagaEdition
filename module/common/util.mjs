@@ -1025,26 +1025,28 @@ export function reduceArray(reduce, values, actor) {
     if (!reduce) {
         return values || [];
     }
+    
+    if(Array.isArray(reduce)){
+        if ( !reduce.includes("MAPPED")) {
+            for (let r of reduce) {
+                values = reduceArray(r, values, actor);
+            }
+            return values;
+        } else {
+            let reduction = {};
+            for (let r of reduce) {
+                reduction[r] = reduceArray(r, values, actor);
+            }
+            return reduction;
+        }
+    }
+
     if (!Array.isArray(values)) {
         values = [values];
-    }
-    if (Array.isArray(reduce) && !reduce.includes("MAPPED")) {
-        for (let r of reduce) {
-            values = reduceArray(r, values, actor);
-        }
-        return values;
     }
 
     if (typeof reduce === "string") {
         reduce = reduce.toUpperCase();
-    }
-
-    if (Array.isArray(reduce) && reduce.includes("MAPPED")) {
-        let reduction = {};
-        for (let r of reduce) {
-            reduction[r] = reduceArray(r, values, actor);
-        }
-        return reduction;
     }
 
     switch (reduce) {
@@ -1069,6 +1071,11 @@ export function reduceArray(reduce, values, actor) {
             return resolveValuesReduce(values, actor);
         case "VALUES_TO_LOWERCASE":
             return values.map(attr => attr.value.toLowerCase());
+        case "VALUES_WITH_MODIFIERS":
+            return values.map(attr => {
+                const toks = attr.value.split("|")
+                return {value: toks[0], modifiers: parseModifiers(toks.length > 1 ? toks.slice(1) : [])};
+            });
         case "UNIQUE":
             return values.filter(unique);
         case "NUMERIC_VALUES":
@@ -1084,6 +1091,34 @@ export function reduceArray(reduce, values, actor) {
         default:
             return values.map(attr => attr.value).reduce(reduce, "");
     }
+}
+
+/**
+ * Parses a list of tokens to extract and return an array of modifiers.
+ *
+ * @param {Array} tokens - An array of tokens to parse for modifiers. This may be an empty array or null.
+ * @return {Array} An array containing the extracted modifiers. Returns an empty array if no modifiers are found or the input is invalid.
+ */
+export function parseModifiers(tokens) {
+    if(!tokens || tokens.length === 0) return [];
+
+    const modifiers = [];
+
+    for (const token of tokens) {
+        let toks = token.split(":")
+        switch (toks[0].toLowerCase()) {
+            case "prerequisite":
+            case "prereq":
+            case "p":
+                modifiers.push({modType: "prerequisite", type: toks[1], requirement: toks[2]});
+            case "ammunition":
+            case "ammo":
+            case "a":
+                //where the standardized ammo parsing will go
+        }
+    }
+
+    return modifiers;
 }
 
 

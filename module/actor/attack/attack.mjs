@@ -409,8 +409,8 @@ export class Attack {
 
 
         inheritableAttribute.forEach(val => {
-            const terms = val.value.split(":")
-            if (terms.length === 1) {
+            const toks = val.value.split(":")
+            if (toks.length === 1) {
                 terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
             }
             //adding optional terms here.  these have a prerequisite
@@ -1332,7 +1332,7 @@ export class Attack {
         terms.push(...appendTerm(penalty, description, true))
         for (const term of conditionalTerms) {
             const toks = term.value.split(":");
-            const contextElement = context[toks[1].toLowerCase()];
+            const contextElement = context[toks[1]?.toLowerCase()];
             if(!!contextElement && contextElement.toLowerCase() === toks[2].toLowerCase()){
                 terms.push(...appendTerm(toks[0], term.sourceDescription, true));
             }
