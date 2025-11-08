@@ -1111,10 +1111,16 @@ export function parseModifiers(tokens) {
             case "prereq":
             case "p":
                 modifiers.push({modType: "prerequisite", type: toks[1], requirement: toks[2]});
+                break;
             case "ammunition":
             case "ammo":
             case "a":
                 //where the standardized ammo parsing will go
+                break;
+            case "type":
+            case "t":
+                modifiers.push({modType: "type", type: toks[1]});
+                break;
         }
     }
 
