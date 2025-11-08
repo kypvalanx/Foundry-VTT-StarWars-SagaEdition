@@ -42,6 +42,7 @@ import {RollModifier, RollModifierChoice} from "../../common/roll-modifier.mjs";
 import SWSETemplate from "../../template/SWSETemplate.mjs";
 
 import {selectItemFromArray, selectOption} from "../../common/helpers.mjs";
+import {getCrewByQuality} from "../crewDelegate.mjs";
 
 
 export const outOfRange = "out of range";
@@ -287,7 +288,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get operator() {
-        return getActor(this.operatorId) || getCrewByQuality(this.crew.quality()?.quality);
+        return getActor(this.operatorId) || getCrewByQuality(getActor(this.actorId).crew.quality?.quality);
     }
 
     /**

@@ -83,7 +83,8 @@ export class CrewDelegate {
 
             let slotCount = {};
 
-            slots.forEach(position => {
+            for (let position of slots) {
+
                 const numericSlot = slotCount[position] || 0;
                 slotCount[position] = numericSlot + 1;
                 let slotId = `${position}${numericSlot}`
@@ -97,7 +98,22 @@ export class CrewDelegate {
                 let positionCover = this.actor.system.crewCover[slotId] || this.actor.system.crewCover[position] || coverMap[position] || coverMap["default"];
 
                 crewSlots.push(this.getSlot(crewMember, position, positionCover, numericSlot));
-            })
+            }
+            // slots.forEach(position => {
+            //     const numericSlot = slotCount[position] || 0;
+            //     slotCount[position] = numericSlot + 1;
+            //     let slotId = `${position}${numericSlot}`
+            //
+            //
+            //     let crewMember = this.actor.actorLinks.find(crewMember => crewMember.position === position && crewMember.slot === numericSlot);
+            //
+            //
+            //     this.actor.system.crewCover = this.actor.system.crewCover || {}
+            //
+            //     let positionCover = this.actor.system.crewCover[slotId] || this.actor.system.crewCover[position] || coverMap[position] || coverMap["default"];
+            //
+            //     crewSlots.push(this.getSlot(crewMember, position, positionCover, numericSlot));
+            // })
 
 
             // crewPositions.forEach(position => {
@@ -141,27 +157,15 @@ export class CrewDelegate {
     }
 
     get hasCrewQuality() {
-        return this.actor.getCached("hasCrewQuality", () => {
-            const quality = this.quality;
-            return quality !== undefined && quality !== null;
-        });
+        // return this.actor.getCached("hasCrewQuality", () => {
+        //     const quality = this.quality;
+        //     return quality !== undefined && quality !== null;
+        // });
+        return true;
     }
 
     get quality(){
-        return this.actor.getCached("crew_Quality", () => {
-            let crewQuality;
-            if (!this.actor.system.crew.quality || this.actor.system.crew.quality.quality === undefined) {
-                let quality = getInheritableAttribute({
-                    entity: this.actor,
-                    attributeKey: "crewQuality",
-                    reduce: "FIRST"
-                });
-                if (quality) {
-                    crewQuality = {quality: quality.titleCase()}
-                }
-            }
-            return crewQuality;
-        })
+        return this.actor.system.crewQuality
     }
 
     crewman(position, slot) {
