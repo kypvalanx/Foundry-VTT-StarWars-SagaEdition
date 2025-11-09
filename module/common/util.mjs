@@ -55,12 +55,11 @@ export function resolveValueArray(values, actor, options) {
 
 
 function resolveFunction(expression, deepestStart, deepestEnd, func, actor) {
-    let preceeding = expression.substring(0, deepestStart);
-    if (preceeding.endsWith(func.name)) {
+    let preceeding = expression.substring(0, deepestStart).trim();
+    if (preceeding === func.name) {
         let payload = expression.substring(deepestStart + 1, deepestEnd);
         let toks = payload.split(",").map(a => resolveExpression(a.trim(), actor));
         return func.function(toks);
-
     }
 }
 
@@ -72,11 +71,11 @@ function resolveFunctions(expression, deepestStart, deepestEnd, actor) {
     for (let func of functions) {
         result = resolveFunction(expression, deepestStart, deepestEnd, func, actor);
         fName = func.name;
-        if (!!result) {
+        if (!isNaN(result)) {
             break;
         }
     }
-    if(result){
+    if(!isNaN(result)){
         const substring = expression.substring(0, deepestStart - fName.length);
         const substring1 = expression.substring(deepestEnd + 1);
         const newVar = substring + result + substring1;
