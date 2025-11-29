@@ -27,7 +27,7 @@ export class WeightDelegate {
     #applyStandardCarryCapacityModifiers(number) {
         const multipliers = getInheritableAttribute({entity: this.actor, attributeKey: "carryCapacityMultiplier", reduce: "VALUES"})
 
-        for (const multiplier of multipliers) {
+        for (const multiplier of multipliers.filter(m => m !== undefined && m !== null && m !== "" && m !== "0")) {
             const toks = multiplier.split(":")
             for (let tok of toks) {
                 if(tok.startsWith("min")){

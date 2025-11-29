@@ -1,3 +1,5 @@
-2025/11/29-12:28:20.104 6fcc Recovering log #213
-2025/11/29-12:28:20.108 6fcc Delete type=0 #213
-2025/11/29-12:28:20.108 6fcc Delete type=3 #212
+2025/11/29-14:44:50.901 4ca4 Recovering log #3
+2025/11/29-14:44:50.901 4ca4 Level-0 table #5: started
+2025/11/29-14:44:50.904 4ca4 Level-0 table #5: 90678 bytes OK
+2025/11/29-14:44:50.907 4ca4 Delete type=0 #3
+2025/11/29-14:44:50.907 4ca4 Delete type=3 #2
