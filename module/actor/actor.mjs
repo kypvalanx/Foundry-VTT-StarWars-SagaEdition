@@ -3,7 +3,8 @@ import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
     convertOverrideToMode,
-    filterItemsByTypes, getActorFromId,
+    filterItemsByTypes,
+    getActorFromId,
     getDocumentByUuid,
     getVariableFromActorData,
     inheritableItems,
@@ -1573,8 +1574,7 @@ export class SWSEActor extends Actor {
     }
 
     get halfHeroicLevel() {
-        let heroicLevel = this.heroicLevel;
-        return Math.floor(heroicLevel / 2);
+        return Math.floor(this.heroicLevel / 2);
     }
 
     get characterLevel() {

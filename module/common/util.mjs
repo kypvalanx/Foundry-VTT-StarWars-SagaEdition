@@ -650,6 +650,12 @@ export function getOrdinal(i) {
     return `${i}`
 }
 
+/**
+ * Extracts and returns the result of a d20 roll from a given roll object.
+ *
+ * @param {Object} roll - The roll object containing roll terms and results.
+ * @return {number} The result of the first d20 roll found within the roll object.
+ */
 export function d20Result(roll) {
     let term = roll.terms.find(term => term.faces === 20);
     return term.results[0].result;
@@ -1080,7 +1086,7 @@ export function reduceArray(reduce, values, actor) {
         case "VALUES_WITH_MODIFIERS":
             return values.map(attr => {
                 const toks = attr.value.split("|")
-                return {value: toks[0], modifiers: parseModifiers(toks.length > 1 ? toks.slice(1) : [])};
+                return {value: toks[0], modifiers: parseModifiers(toks.length > 1 ? toks.slice(1) : []), source: attr.sourceString};
             });
         case "UNIQUE":
             return values.filter(unique);
@@ -1585,13 +1591,21 @@ export function minus(evaluated = false) {
     operatorTerm._evaluated = evaluated;
     return operatorTerm;
 }
-function numeric(num, flavor, evaluated = false) {
-    const numericTerm = new foundry.dice.terms.NumericTerm({number: Math.abs(num), options: {flavor: flavor}});
+function numeric(num, flavor, modifiers, evaluated = false) {
+    const numericTerm = new foundry.dice.terms.NumericTerm(
+        {
+            number: Math.abs(num),
+            options: {
+                flavor: flavor,
+                modifiers: modifiers.filter(m => m.modType !== "prerequisite"),
+                prerequisites: modifiers.filter(m => m.modType === "prerequisite")
+            }
+        });
     numericTerm._evaluated = evaluated;
     return numericTerm;
 }
 
-export function appendTerms(value, flavor) {
+export function appendTerms(value, flavor, modifiers) {
     let toks = `${value}`.replace(/\+/g, " + ").replace(/-/g, " - ").replace(/\*/g, " * ").replace(/\//g, " / ").split(" ")
 
     let terms = [];
@@ -1603,7 +1617,7 @@ export function appendTerms(value, flavor) {
         } else if (tok === "+" || tok === "") {
             continue;
         }
-        terms.push(...appendTerm(`${buffer}${tok}`, flavor))
+        terms.push(...appendTerm(`${buffer}${tok}`, flavor, modifiers))
         buffer = ""
     }
     return terms;
@@ -1613,18 +1627,19 @@ export function appendTerms(value, flavor) {
  *
  * @param value
  * @param flavor
+ * @param modifiers
  * @param evaluated
  * @return {[RollTerm]}
  */
-export function appendTerm(value, flavor, evaluated = false) {
+export function appendTerm(value, flavor, modifiers = [], evaluated = false) {
     if(!value)
         return [];
 
     if (`${parseInt(value)}` === `${value}`) {
-        return appendNumericTerm(value, flavor, evaluated);
+        return appendNumericTerm(value, flavor, modifiers, evaluated);
     }
     if(value.split("d").length > 1){
-        return appendDieTerm(value, flavor)
+        return appendDieTerm(value, flavor, modifiers, evaluated)
     }
     console.warn(`unknown term ${value}`)
     return [];
@@ -1646,7 +1661,7 @@ export function appendDieTerm(value, flavor) {
 }
 
 
-export function appendNumericTerm(value, flavor, evaluated = false) {
+export function appendNumericTerm(value, flavor, modifiers = [], evaluated = false) {
     if (!value) {
         return [];
     }
@@ -1662,8 +1677,10 @@ export function appendNumericTerm(value, flavor, evaluated = false) {
         return [];
     }
 
-    return [num > -1 ? plus(evaluated) : minus(evaluated),
-        numeric(num, flavor, evaluated)];
+    return [
+        num > -1 ? plus(evaluated) : minus(evaluated),
+        numeric(num, flavor, modifiers, evaluated)
+    ];
 }
 
 function generateUUID(actorId, itemId, effectId) {
