@@ -233,7 +233,7 @@ const applyAttack = async (event) => {
     let targetActors = game.actors.filter(actor => actorUUIDs.includes(actor.uuid)).reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, {})
 
     canvas.tokens.placeables
-        .filter(token => actorUUIDs.includes(token.actor.uuid))
+        .filter(token => actorUUIDs.includes(token.actor?.uuid))
         .map(token => token.actor)
         .reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, targetActors)
 
@@ -408,6 +408,79 @@ Array.prototype.distinct = function () {
         }
     })
 }
+
+function getHumanReadable(prerequisite) {
+    if (prerequisite.type.toLowerCase() === "range") {
+        return "Requires " + prerequisite.requirement + " range.";
+    }
+
+    return prerequisite.type + " " + prerequisite.requirement;
+}
+
+function getTitle(term) {
+    if(!term.options.prerequisites || term.options.prerequisites.length === 0){
+        return "";
+    }
+
+    let titles = []
+    for (const prerequisite of term.options.prerequisites) {
+        titles.push(getHumanReadable(prerequisite));
+    }
+
+    return ` title="${titles.join(", ")}" `;
+}
+
+if(Roll.prototype.formattedFormula === undefined){
+    Object.defineProperty(Roll.prototype, 'formattedFormula', {
+        get: function () {
+            const renderedExpressions = [];
+            for (const term of this.terms) {
+                const classes = [];
+                const title = getTitle(term);
+                const flavor = term.options.flavor ? ` [${term.options.flavor}]` : "";
+                if(term.options.prerequisites && term.options.prerequisites.length > 0){
+                    classes.push("conditional-term");
+                }
+
+                const asterix = term.options.prerequisites && term.options.prerequisites.length > 0 ? "*" : "";
+                renderedExpressions.push(`<span class="${classes.join(" ")}"${title}>${term.expression}${flavor}${asterix}</span>`);
+            }
+
+            return renderedExpressions.join("");
+        }
+    })
+}
+
+//TODO reference for formatting of formulas, delete when done
+//    get renderFormulaHTML(){
+//         let response = "";
+//         for(let term of this.roll.terms){
+//             let expression1 = term.expression;
+//             let expression = `<span>${expression1}</span>`;
+//             if(term.options.flavor){
+//                 expression = `<span title="${term.options.flavor}">${expression1}</span>`
+//             }
+//             response += expression;
+//         }
+//         return response
+//     }
+//     get renderWeaponBlockFormulaHTML(){
+//         let response = "";
+//         for(let term of this.roll.terms){
+//             let expression1 = term.expression;
+//             let expression = `<span>${expression1}</span>`;
+//             if(term.options.flavor){
+//                 expression = `<span title="${term.options.flavor}">${expression1}</span>`
+//             }
+//             if(term instanceof foundry.dice.terms.Die){
+//                 for(const additionalTerm of this.additionalTerms){
+//                     expression += `<span>/</span><span>${additionalTerm.expression}</span>`
+//                 }
+//             }
+//             response += expression;
+//         }
+//         return response
+//     }
 
 /**
  * Convert a string to Title Case where the first letter of each word is capitalized

@@ -9,9 +9,9 @@ import {utilTests} from "./common/util.test.js";
 import {attackTests} from "./actor/attack/attack.test.mjs";
 import {poltgotBasicTests} from "./module-integrations/polygot/basic-integration.test.mjs";
 import {defenseTests} from "./actor/actor-sheet.defense.test.mjs";
-import {featTests} from "./actor/actor-sheet.feats-martial-artist.mjs";
+import {featTests} from "./actor/actor-sheet.feats-martial-artist.test.mjs";
 import {healthTests} from "./actor/actor-sheet.health.test.mjs";
-import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting-feats.mjs";
+import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting-feats.test.mjs";
 
 const registeredTests = [
     generationTests,

@@ -34,23 +34,28 @@ import {
     toNumber,
     toShortAttribute
 } from "../../common/util.mjs";
-import {SWSERollWrapper} from "../../common/roll.mjs";
 import {SimpleCache} from "../../common/simple-cache.mjs";
 import {weaponGroup} from "../../common/constants.mjs";
 import {SWSE} from "../../common/config.mjs";
 import {RollModifier, RollModifierChoice} from "../../common/roll-modifier.mjs";
 import SWSETemplate from "../../template/SWSETemplate.mjs";
 
-import {selectItemFromArray, selectOption} from "../../common/helpers.mjs";
+import {selectOption} from "../../common/helpers.mjs";
 import {getCrewByQuality} from "../crewDelegate.mjs";
 
 
 export const outOfRange = "out of range";
 
+
 /**
+ * Finds and returns a list of token documents that are contained within the shape
+ * computed by the provided template document.
  *
- * @param templateDoc
- * @return {TokenDocument[]}
+ * @param {object} templateDoc - The template document containing the object and grid information.
+ *   It must include a `parent` property with a `grid` object (providing `size`) and a `tokens` array,
+ *   and an `object` property capable of computing and checking shape containment.
+ * @return {Array<object>} An array of token documents that are determined to be contained within
+ *   the shape of the `templateDoc`.
  */
 function findContained(templateDoc) {
     const {size} = templateDoc.parent.grid;
@@ -84,15 +89,21 @@ function findContained(templateDoc) {
  * @return {[{location:{x,y}, actors:[]}]}
  */
 export function selectActorsByTemplates(templates = []) {
-    let actors = [];
+    let actorsByLocation = [];
     let gridSize = canvas.scene.grid
     for (const template of templates) {
-        let x = template.x / gridSize.sizeX
-        let y = template.y / gridSize.sizeY
+        let x = Math.floor(template.x / gridSize.sizeX)
+        let y = Math.floor(template.y / gridSize.sizeY)
         let found = findContained(template)
-        actors.push({location: {x, y}, actors: found.map(token => token.actor)})
+        const tokenActors = found.map(token => token.actor);
+        const actors = tokenActors.filter(actor => !!actor);
+        if(tokenActors.length !== actors.length) {
+            console.warn("user targeted a token with no actor")
+            ui.notifications.warn("A Targeted Token has no Actor")
+        }
+        actorsByLocation.push({location: {x, y}, actors: actors});
     }
-    return actors;
+    return actorsByLocation;
 }
 
 
@@ -120,11 +131,11 @@ export class Attack {
     };
 
     #mapToStandardRanges(range) {
-        if(range === "Grenades"){
+        if (range === "Grenades") {
             return "Thrown Weapons"
         }
 
-        if(range.includes("Melee") || range.includes("Lightsabers")){
+        if (range.includes("Melee") || range.includes("Lightsabers")) {
             return "Melee Weapons"
         }
 
@@ -301,8 +312,14 @@ export class Attack {
 
 
     /**
+     * Retrieves the item associated with the current weapon ID, or an unarmed attack
+     * if the weapon ID corresponds to an unarmed attack.
      *
-     * @returns {SWSEItem}
+     * This method uses caching to optimize repeated access.
+     *
+     * @return {Object|undefined} The item object corresponding to the weapon ID,
+     * an unarmed attack object if the weapon ID indicates an unarmed attack,
+     * or undefined if no actor or item is found.
      */
     get item() {
         return this.getCached("item", () => {
@@ -320,6 +337,11 @@ export class Attack {
         })
     }
 
+    /**
+     * Determines if the item is considered unarmed by checking its attributes and properties.
+     *
+     * @return {boolean} Returns true if the item is unarmed, otherwise false.
+     */
     get isUnarmed() {
         return 0 < getInheritableAttribute({
             entity: this.item,
@@ -335,6 +357,11 @@ export class Attack {
         return modifiers;
     }
 
+    /**
+     * Retrieves the name of the item, accounting for specific conditions such as being unarmed and applying a name modifier.
+     *
+     * @return {string} The modified name of the item or the original name, based on the conditions.
+     */
     get name() {
         let name = this.item.name;
         return ((this.isUnarmed && 'Unarmed Attack' !== name) ? `Unarmed Attack (${name})` : name) + this.nameModifier;
@@ -357,8 +384,17 @@ export class Attack {
         return modifiers.join(" ");
     }
 
+    /**
+     * Calculates and returns the attack roll for the given weapon and operator, including all applicable modifiers
+     * such as base attack bonus, condition modifiers, proficiency bonuses, and other relevant effects.
+     *
+     * This roll incorporates rules for determining the contributions of attributes, proficiencies, focus bonuses,
+     * vehicle-related bonuses, armor check penalties, as well as custom, temporary, or inheritable effects.
+     * The function accounts for both operator and vehicle-based contexts when determining applicable terms.
+     *
+     * @return {Roll} A Roll object representing the calculated attack roll with all modifiers applied, or undefined if the operator or weapon is not defined.
+     */
     get attackRoll() {
-        //let actor = this.actor;
         const weapon = this.item;
         const parent = this.parent;
         const operator = this.operator;
@@ -367,18 +403,19 @@ export class Attack {
             return;
         }
 
-        const terms = getDiceTermsFromString("1d20").dice;
+        //we start with a D20
+        const terms = [D20()];
 
         terms.push(...appendNumericTerm(operator.baseAttackBonus, "Base Attack Bonus"));
-        terms.push(...appendNumericTerm(this.getConditionModifier(operator), "Condition Modifier"));
+        terms.push(...appendNumericTerm(this.#getConditionModifier(operator), "Condition Modifier"));
 
         if (parent !== operator) {
-            terms.push(...appendNumericTerm(this.getConditionModifier(parent), "Vehicle Condition Modifier"));
+            terms.push(...appendNumericTerm(this.#getConditionModifier(parent), "Vehicle Condition Modifier"));
         }
 
         if (!parent || parent === operator) {
             let weaponTypes = getPossibleProficiencies(operator, weapon);
-            terms.push(...appendNumericTerm(this._resolveAttributeModifier(weapon, operator, weaponTypes), "Attribute Modifier"));
+            terms.push(...appendNumericTerm(this.#resolveAttributeModifier(weapon, operator, weaponTypes), "Attribute Modifier"));
             terms.push(...getProficiencyBonus(operator, weaponTypes));
             terms.push(...getFocusAttackBonuses(operator, weaponTypes));
         } else {
@@ -393,53 +430,31 @@ export class Attack {
             terms.push(...appendTerms(mod.value, mod.source))
         }
 
-
         terms.push(...appendNumericTerm(generateArmorCheckPenalties(operator), "Armor Check Penalty"));
+        terms.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier").map(c => appendTerm(c.value, "Custom")).flat() || []);
 
         //toHitModifiers only apply to the weapon they are on.  a toHitModifier change that is not on a weapon always applies
-        const inheritableAttribute = getInheritableAttribute({
+        getInheritableAttribute({
             entity: [weapon, operator, this],
             attributeKey: "toHitModifier",
             parent: !!parent ? parent : operator,
-            itemFilter: ((item) => item.type !== 'weapon')
-        });
-
-        terms.push(...this.temporaryChanges?.filter(c => c.key === "toHitModifier").map(c => appendTerm(c.value, "Custom")).flat() || []);
-
-        const conditionalTerms = [];
-
-
-        inheritableAttribute.forEach(val => {
-            const toks = val.value.split(":")
-            if (toks.length === 1) {
-                terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
-            }
-            //adding optional terms here.  these have a prerequisite
-            conditionalTerms.push(val)
+            itemFilter: ((item) => item.type !== 'weapon'),
+            reduce: "VALUES_WITH_MODIFIERS"
+        }).forEach(val => {
+            terms.push(...appendTerms(val.value, val.source, val.modifiers))
         })
 
-        const primaryTerms = [];
-        let cache;
-        for (const term of terms) {
-            if (term.operator) {
-                cache = term;
-                continue;
-            }
-
-            if (!term.options.requirements) {
-                if (cache) {
-                    primaryTerms.push(cache)
-                    cache = undefined;
-                }
-                primaryTerms.push(term)
-            }
-        }
-
-        return new SWSERollWrapper(Roll.fromTerms(primaryTerms
-            .filter(term => !!term)), [], conditionalTerms);
+        return Roll.fromTerms(terms
+            .filter(term => !!term));
     }
 
-    getConditionModifier(operator) {
+    /**
+     * Calculates and retrieves the condition modifier for the specified operator.
+     *
+     * @param {Object} operator - The operator entity whose condition modifier is to be retrieved.
+     * @return {number} The numeric condition modifier for the given operator. Defaults to 0 if no valid condition is found.
+     */
+    #getConditionModifier(operator) {
         let conditionBonus = getInheritableAttribute({
             entity: operator,
             attributeKey: "condition",
@@ -447,12 +462,12 @@ export class Attack {
         })
 
         if ("OUT" === conditionBonus || !conditionBonus) {
-            conditionBonus = "0";
+            return 0;
         }
         return toNumber(conditionBonus);
     }
 
-    _resolveAttributeModifier(item, actor, weaponTypes) {
+    #resolveAttributeModifier(item, actor, weaponTypes) {
         let attributeStats = []
         if (isRanged(item)) {
             attributeStats.push("DEX")
@@ -466,21 +481,27 @@ export class Attack {
             }
         }
 
-        return Math.max(...(attributeStats.map(stat => this._getCharacterAttributeModifier(actor, stat))));
+        return Math.max(...(attributeStats.map(stat => this.#getCharacterAttributeModifier(actor, stat))));
     }
 
-
     /**
+     * Retrieves the modifier value of a specific character attribute.
      *
-     * @param {SWSEActor} actor
-     * @param {string} attributeName
+     * @param {Object} actor - The actor object containing character information and attributes.
+     * @param {string} attributeName - The name of the attribute for which the modifier is being retrieved.
+     * @return {number} The modifier value of the specified attribute, or 0 if the attribute is not found.
      */
-    _getCharacterAttributeModifier(actor, attributeName) {
+    #getCharacterAttributeModifier(actor, attributeName) {
         let attributes = actor.attributes;
         return !attributes ? 0 : attributes[toShortAttribute(attributeName).toLowerCase()].mod;
     }
 
 
+    /**
+     * Calculates and constructs a Roll object representing the damage roll of a character's item, including applicable bonuses, modifiers, and terms.
+     * The calculation considers the item's properties, the actor's attributes, temporary changes, and inheritance rules for bonuses and dice terms.
+     * @return {Roll} A Roll object that can be rolled to compute the total damage for the given item, or `undefined` if the actor or item is not present.
+     */
     get damageRoll() {
         let actor = this.actor
         let item = this.item
@@ -490,7 +511,6 @@ export class Attack {
         }
 
         let terms = [];
-        const conditionalTerms = [];
         const doubleWeaponDamage = [];
         if (this.isUnarmed) {
             terms.push(...resolveUnarmedDamageDie(actor));
@@ -506,7 +526,7 @@ export class Attack {
                 attributeKey: ["damage", "damageDie"],
                 reduce: "SUM"
             })
-            //let damageDie = damageDice[damageDice.length - 1];
+
             const {dice, additionalTerms} = getDiceTermsFromString(damageDice);
             if (additionalTerms) {
                 doubleWeaponDamage.push(...additionalTerms)
@@ -516,46 +536,36 @@ export class Attack {
             }
         }
 
-        let halfHeroicLevel = actor?.halfHeroicLevel || 0;
-        let beastClassLevels = (actor?.items || []).filter(item => item.type === 'class' && item.name === "Beast")
-        let halfBeastLevel = Math.floor(beastClassLevels.length / 2)
+        terms.push(...appendNumericTerm(actor.halfHeroicLevel, "Half Heroic Level"));
 
-        terms.push(...appendNumericTerm(halfHeroicLevel, "Half Heroic Level"));
         if (item.type === 'beastAttack') {
+            let beastClassLevels = (actor?.items || []).filter(item => item.type === 'class' && item.name === "Beast")
+            let halfBeastLevel = Math.floor(beastClassLevels.length / 2)
             terms.push(...appendNumericTerm(halfBeastLevel, "Half Beast Level"));
         }
-        const inheritableAttribute = getInheritableAttribute({
+        terms.push(...this.temporaryChanges?.filter(c => c.key === "damage").map(c => appendTerm(c.value, "Custom", c.modifiers || [])).flat() || []);
+
+        getInheritableAttribute({
             entity: [this.item, this.operator],
             attributeKey: "bonusDamage",
             parent: !!this.parent ? this.parent : this.operator,
-            itemFilter: ((item) => item.type !== 'weapon')
-        });
-
-        inheritableAttribute.forEach(val => {
-            const terms = val.value.split(":")
-            if (terms.length === 1) {
-                terms.push(...appendTerm(val.value, this.actor.items.find(item => item.id === val.source)?.name));
-            }
-            //adding optional terms here.  these have a prerequisite
-            conditionalTerms.push(val)
+            itemFilter: ((item) => item.type !== 'weapon'),
+            reduce: "VALUES_WITH_MODIFIERS"
+        }).forEach(val => {
+            terms.push(...appendTerm(val.value, val.source, val.modifiers));
         })
-
-
-        terms.push(...this.temporaryChanges?.filter(c => c.key === "damage").map(c => appendTerm(c.value, "Custom")).flat() || []);
-
 
         for (let mod of this.modifiers("damage")) {
             terms.push(...appendTerms(mod.value, mod.source))
         }
 
         if (isMelee(item)) {
-            const meleeDamageAbilityModifier = this.getMeleeDamageAbilityModifier(actor, item);
+            const meleeDamageAbilityModifier = this.#getMeleeDamageAbilityModifier(actor, item);
             terms.push(...meleeDamageAbilityModifier)
         }
 
         let weaponTypes = getPossibleProficiencies(actor, item);
         terms.push(...getSpecializationDamageBonuses(actor, weaponTypes));
-        //actorData.
 
         if (terms[0] instanceof foundry.dice.terms.OperatorTerm) {
             terms[0] = null;
@@ -574,10 +584,20 @@ export class Attack {
         })
         roll.alter(1, toNumber(bonusDamageDice));
 
-        return new SWSERollWrapper(roll, doubleWeaponDamage, conditionalTerms);
+        return roll;
     }
 
-    getMeleeDamageAbilityModifier(actor, item) {
+    /**
+     * Calculates the melee damage ability modifier for a given actor and item.
+     * Factors in conditions such as the actor's strength, the item's size and type,
+     * and special attributes (e.g., lightsaber-specific properties).
+     *
+     * @param {Object} actor - The actor whose ability modifier is being calculated.
+     * @param {Object} item - The item for which the melee damage modifier is calculated.
+     * @return {Object} A numeric term representing the calculated melee damage ability modifier,
+     *                  which accounts for attributes like strength, item size, and wielding type.
+     */
+    #getMeleeDamageAbilityModifier(actor, item) {
         let abilityMod = parseInt(actor.system.attributes.str.mod);
         let isTwoHanded = this.hands === 2 || compareSizes(getSize(actor), getSize(item)) === 1;
         let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
@@ -826,7 +846,7 @@ export class Attack {
 
         let rangeDescription = outOfRange;
         for (const [range, details] of Object.entries(rangeGrid)) {
-            if(distance >= details.low && distance <= details.high ){
+            if (distance >= details.low && distance <= details.high) {
                 rangeDescription = range;
                 break;
             }
@@ -969,6 +989,13 @@ export class Attack {
     }
 
 
+    /**
+     * Determines if a given number represents a critical hit under specific conditions.
+     *
+     * @param {number} num - The number to check for critical status.
+     * @param {boolean} [excludeExtendedCritRange=false] - When true, excludes the evaluation of extended critical hit ranges.
+     * @return {boolean} Returns true if the number is a critical hit; otherwise, false.
+     */
     isCritical(num, excludeExtendedCritRange = false) {
         if (num === 20) return true;
         if (!excludeExtendedCritRange) return false;
@@ -980,10 +1007,9 @@ export class Attack {
     }
 
 
-
     static isMiss(attackRoll, defense, autohit, autoMiss) {
-        if(autoMiss) return true;
-        if(autohit) return false;
+        if (autoMiss) return true;
+        if (autohit) return false;
         return attackRoll < defense;
     }
 
@@ -995,6 +1021,12 @@ export class Attack {
         return this.item.ammunition?.hasAmmunition;
     }
 
+    /**
+     * Determines whether the given number is considered an automatic miss.
+     *
+     * @param {number} num - The number to check for an automatic miss.
+     * @return {boolean} Returns true if the number is deemed an automatic miss, otherwise false.
+     */
     isAutomaticMiss(num) {
         if (num === 1) {
             return true;
@@ -1087,14 +1119,14 @@ export class Attack {
         return {type: Attack.TARGET_TYPES.SINGLE_TARGET, criticalHitEnabled: true}
     }
 
-    get template(){
+    get template() {
         const item = this.item;
 
         const ammoTypes = []
-        if( item.ammunition?.hasAmmunition && this.parent){
+        if (item.ammunition?.hasAmmunition && this.parent) {
             const parent = this.parent;
             Object.entries(item.ammunition.ammunition).forEach(([key, value]) => {
-                if(value.queue?.length > 0){
+                if (value.queue?.length > 0) {
                     ammoTypes.push(parent.items.get(value.queue[0])?.subType)
                 }
             })
@@ -1102,13 +1134,35 @@ export class Attack {
 
         const autofire = item.effects?.find(effect => effect.name === "Autofire");
         if (autofire && autofire.disabled === false) {
-            return {shape: "circle", size: 1, disableRotation: true, type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON, criticalHitEnabled: false, snapPoint:"vertex"}
+            return {
+                shape: "circle",
+                size: 1,
+                disableRotation: true,
+                type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON,
+                criticalHitEnabled: false,
+                snapPoint: "vertex"
+            }
         }
 
         if (item.system.subtype === "Grenades" || ammoTypes.includes("Grenades")) {
-            return {shape: "circle", size: 2, disableRotation: true, type: Attack.TARGET_TYPES.BURST, criticalHitEnabled: false, snapPoint:"vertex"}
+            return {
+                shape: "circle",
+                size: 2,
+                disableRotation: true,
+                type: Attack.TARGET_TYPES.BURST,
+                criticalHitEnabled: false,
+                snapPoint: "vertex"
+            }
         }
-        return {shape: "circle", size: 0.5, disableRotation: true, type: Attack.TARGET_TYPES.SINGLE_TARGET, criticalHitEnabled: false, snapPoint:"center", cleanUp:true}
+        return {
+            shape: "circle",
+            size: 0.5,
+            disableRotation: true,
+            type: Attack.TARGET_TYPES.SINGLE_TARGET,
+            criticalHitEnabled: false,
+            snapPoint: "center",
+            cleanUp: true
+        }
     }
 
     async placeTemplate() {
@@ -1205,10 +1259,13 @@ export class Attack {
             let range = CONFIG.SWSE.Combat.range[this.range]
             let rangePenalty = CONFIG.SWSE.Combat.rangePenalty
             for (const entry of Object.entries(range)) {
-                options.push({value: rangePenalty[entry[0]], display: `${entry[0].titleCase()}: ${entry[1].string.titleCase()}`})
+                options.push({
+                    value: rangePenalty[entry[0]],
+                    display: `${entry[0].titleCase()}: ${entry[1].string.titleCase()}`
+                })
             }
 
-            if(options.length === 1){
+            if (options.length === 1) {
                 distance = options[0].value;
             } else {
                 distance = await selectOption(options, {
@@ -1239,12 +1296,12 @@ export class Attack {
             if (actor) {
                 let x = targetToken.x / gridSize.sizeX
                 let y = targetToken.y / gridSize.sizeY
-                targetActors.push({location:{x,y}, actors:[actor]})
+                targetActors.push({location: {x, y}, actors: [actor]})
             } else {
                 console.warn(`Could not find actor for ${targetToken.name}`)
             }
         }
-        if(targetActors.length > 0) return targetActors;
+        if (targetActors.length > 0) return targetActors;
 
         let templates = await this.placeTemplate()
         const actors = selectActorsByTemplates(templates);
@@ -1252,47 +1309,32 @@ export class Attack {
         return actors;
     }
 
-
-    clearTemporaryChanges(){
-        this.temporaryChanges = [];
-    }
     /**
      *
      * @return {Promise<{attack, damage}>}
      */
-    async resolve(changes){
+    async resolve(changes = []) {
+
         this.temporaryChanges = changes || [];
 
         let targetActors = await this.targetedActors();
-        let attackRoll = this.attackRoll.roll;
+        let attackRoll = this.attackRoll;
         await attackRoll.roll();
+
         let d20Value = d20Result(attackRoll);
         let autoMiss = this.isAutomaticMiss(d20Value);
-        let critical =  this.targetType.criticalHitEnabled && this.isCritical(d20Value);
+        let critical = this.targetType.criticalHitEnabled && this.isCritical(d20Value);
         let autoHit = this.isCritical(d20Value, true)
 
-        let damageRoll = this.damageRoll.roll;
-
-        if (critical) {
-            damageRoll = modifyRollForCriticalEvenOnAreaAttack(this, damageRoll);
-        }
         const areaAttack = this.targetType.type !== Attack.TARGET_TYPES.SINGLE_TARGET;
 
-        let ignoreCritical = getInheritableAttribute({
-            entity: this.item,
-            attributeKey: "skipCriticalMultiply",
-            reduce: "OR"
-        }) || areaAttack
-
-        if (critical && !ignoreCritical) {
-            damageRoll = modifyRollForCriticalHit(this, damageRoll);
-        }
-
+        let damageRoll = this.damageRoll;
+        damageRoll = this.processDamage(critical, damageRoll, areaAttack);
         await damageRoll.roll();
 
         const response = {
-            attack: attackRoll,
-            damage: damageRoll
+            attack: this.makeVariantRoll(attackRoll, {}),
+            damage: this.makeVariantRoll(damageRoll, {})
         };
         response.rangeBreakdown = []
         let attackSummaries = []
@@ -1302,8 +1344,9 @@ export class Attack {
             let {penalty, range} = await this.getDistanceModifier(this.actor, location);
 
             let found = response.rangeBreakdown.find(rb => rb.range === range)
-            let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, penalty, range, this.attackRoll.conditionalTerms, {range: range});
-            let modifiedDamageRoll = found ? found.attack : this.makeVariantRoll(damageRoll, 0, range, this.damageRoll.conditionalTerms, {range: range});
+            let modifiedRoll = found ? found.attack : this.makeVariantRoll(attackRoll, {range: range});
+
+            let modifiedDamageRoll = found ? found.attack : this.makeVariantRoll(damageRoll, {range: range});
             const targets = toTargets(actors, modifiedRoll, autoMiss, autoHit, critical, areaAttack, modifiedDamageRoll, this)
             attackSummaries.push(...targets);
             if (found) {
@@ -1324,23 +1367,73 @@ export class Attack {
         }
 
         await this.reduceAmmunition()
-        response.attackSummaries = JSON.stringify(simplify(attackSummaries))
+        response.attackSummaries = JSON.stringify(attackSummaries)
         return response;
     }
 
-    makeVariantRoll(rollResult, penalty, description, conditionalTerms, context) {
-        const terms = [...rollResult.terms]
-        terms.push(...appendTerm(penalty, description, true))
-        for (const term of conditionalTerms) {
-            const toks = term.value.split(":");
-            const contextElement = context[toks[1]?.toLowerCase()];
-            if(!!contextElement && contextElement.toLowerCase() === toks[2].toLowerCase()){
-                terms.push(...appendTerm(toks[0], term.sourceDescription, true));
-            }
+    processDamage(critical, damageRoll, areaAttack) {
+        if (critical) {
+            damageRoll = modifyRollForCriticalEvenOnAreaAttack(this, damageRoll);
         }
 
-        terms.forEach(t => t._evaluated = true)
-        return Roll.fromTerms(terms);
+        let ignoreCritical = getInheritableAttribute({
+            entity: this.item,
+            attributeKey: "skipCriticalMultiply",
+            reduce: "OR"
+        }) || areaAttack
+
+        if (critical && !ignoreCritical) {
+            damageRoll = modifyRollForCriticalHit(this, damageRoll);
+        }
+        return damageRoll;
+    }
+
+    makeVariantRoll(rollResult, context) {
+        const resultingTerms = [];
+
+        let cache = [];
+
+
+        for (const term of rollResult.terms) {
+            cache.push(term);
+            if (term.operator) {
+                continue;
+            }
+
+            let meetsPrereqs = true;
+            if (term.options.prerequisites && term.options.prerequisites.length > 0) {
+                for (const prerequisite of term.options.prerequisites) {
+                    if (prerequisite.requirement?.toLowerCase() !== context[prerequisite.type?.toLowerCase()]?.toLowerCase()) {
+                        meetsPrereqs = false;
+                        break;
+                    }
+                }
+            }
+            if (!term.options.prerequisites || term.options.prerequisites.length === 0 ) {
+                meetsPrereqs = true;
+            }
+            if (meetsPrereqs) {
+                resultingTerms.push(...cache);
+            }
+            cache = [];
+        }
+
+        //return resultingTerms;
+        resultingTerms.forEach(t => t._evaluated = true)
+        return Roll.fromTerms(resultingTerms);
+
+        // const terms = [...rollResult.terms]
+        // terms.push(...appendTerm(penalty, description, true))
+        // for (const term of conditionalTerms) {
+        //     const toks = term.value.split(":");
+        //     const contextElement = context[toks[1]?.toLowerCase()];
+        //     if(!!contextElement && contextElement.toLowerCase() === toks[2].toLowerCase()){
+        //         terms.push(...appendTerm(toks[0], term.sourceDescription, true));
+        //     }
+        // }
+        //
+        // terms.forEach(t => t._evaluated = true)
+        // return Roll.fromTerms(terms);
     }
 }
 
@@ -1413,6 +1506,13 @@ export function getDiceTermsFromString(dieString) {
 
     return {dice, additionalTerms: additionalTerms || []};
 }
+
+/**
+ *
+ * @type {function(): DiceTerm}
+ */
+const D20 = () => new foundry.dice.terms.Die({number: 1, faces: 20});
+
 
 /**
  * TODO move to unarmed attack object
@@ -1544,13 +1644,17 @@ export function doubleValueCrit(damageRoll, criticalMultiplier) {
     return multiplyNumericTerms(damageRoll, criticalMultiplier)
 }
 
-function modifyRollForCriticalHit(attack, damageRoll) {
+function modifyRollForCriticalHit(attack, damageRoll, conditionalTerms) {
     damageRoll = modifyRollForPreMultiplierBonuses(attack, damageRoll);
 
     const criticalMultiplier = attack.critical;
     switch (game.settings.get("swse", "criticalHitType")) {
         case "Double Dice":
             damageRoll = doubleDiceCrit(damageRoll, criticalMultiplier);
+            conditionalTerms = conditionalTerms.map(term => {
+                term.value = term.value.replace("x", "*")
+                return term;
+            })
             break;
         case "Crunchy Crit":
             damageRoll = crunchyCrit(damageRoll)
@@ -1563,9 +1667,16 @@ function modifyRollForCriticalHit(attack, damageRoll) {
     }
 
     damageRoll = modifyRollForPostMultiplierBonus(attack, damageRoll);
-    return damageRoll;
+    return [damageRoll, conditionalTerms];
 }
 
+/**
+ * Modifies the damage roll for a critical hit during an area attack, applying adjustments based on bonus critical damage die type.
+ *
+ * @param {Object} attack - The attack object containing details such as the attacking item.
+ * @param {Object} damageRoll - The current damage roll object to be potentially modified.
+ * @return {Object} The modified damage roll after applying any changes from bonus critical damage die type.
+ */
 function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     let bonusCriticalDamageDieType = getInheritableAttribute({
         entity: attack.item,
@@ -1578,7 +1689,6 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
     }
     return damageRoll;
 }
-
 
 
 function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack) {
@@ -1621,7 +1731,7 @@ function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, da
         conditionalDefenses: conditionalDefenses,
         uuid: actor.uuid,
         notes: attack.notes,
-        damage: damage,
+        damage: damage.total,
         damageType: attack.type,
     }
 }

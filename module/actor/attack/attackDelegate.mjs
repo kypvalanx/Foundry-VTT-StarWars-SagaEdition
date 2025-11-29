@@ -420,8 +420,8 @@ function setAttackPreviewValues(preview, attack, options, context) {
 
     preview.empty();
     attack.hands = getHandsFromAttackOptions(options);
-    let damageRoll = `${attack.damageRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(options, ".damage-modifier", context.damageMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
-    let attackRoll = `${attack.attackRoll?.renderFormulaHTML}` + getModifiersFromContextAndInputs(options, ".attack-modifier", context.attackMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+    let damageRoll = `${attack.damageRoll?.formattedFormula}` + getModifiersFromContextAndInputs(options, ".damage-modifier", context.damageMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
+    let attackRoll = `${attack.attackRoll?.formattedFormula}` + getModifiersFromContextAndInputs(options, ".attack-modifier", context.attackMods).map(bonus => `<span title="${bonus.source}">${bonus.value}</span>`).join('');
     preview.append(`<div class="flex flex-col"><div>Attack Roll: <div class="attack-roll flex flex-row">${attackRoll}</div></div><div>Damage Roll: <div class="damage-roll flex flex-row">${damageRoll}</div></div>`)
 }
 
