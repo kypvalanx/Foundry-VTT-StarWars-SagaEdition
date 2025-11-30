@@ -1399,110 +1399,70 @@ export function getDocumentByUuidOLD(uuid) {
 }
 
 export function getDocumentByUuid(uuid, from) {
+
     if(!uuid){
         return;
     }
-    let toks = uuid.split(".")
-    if(toks.length < 2){
-        return;
-    }
-    let source = from || game;
-    if(from){
-        const newToks = [];
-        let found = false;
-        for (const tok of toks) {
-            if(found){
-                newToks.push(tok);
-            } else if(from.id === tok){
-                found = true;
-            }
-        }
-        toks = newToks;
-    }
-    let last = "";
-    for (let [i, tok] of toks.entries()) {
-        switch (tok){
-            case "Scene":
-                source = source?.scenes;
-                break;
-            case "Token":
-                source = source?.tokens;
-                break;
-            case "Actor":
-                if(source?.actor){
-                    source = source?.actor
-                } else if(source?.actors){
-                    source = source?.actors;
-                }
-                break;
-            case "Item":
-                source = source?.items;
-                break;
-            case "ActiveEffect":
-                source = source?.effects
-                break;
-            case "Compendium":
-                source = source?.packs;
-                break;
-            default:
-                if (source?.id !== tok) {
-                    let cursor = source?.get(tok);
-                    if(!cursor){
-                        cursor = source?.get(`${last}.${tok}`)
-                    }
-                    if(cursor || i === toks.length-1){
-                        source = cursor
-                    }
-                }
-        }
-        last = tok;
-        if(!source){
-            return;
-        }
-        // if(!source ){
-        //     console.warn(`source is null at ${tok}`)
-        // }
-        // if (tok === "Scene") {
-        //     source = source?.scenes;
-        // }else if (tok === "Token") {
-        //     source = source?.tokens;
-        // } else if (tok === "Actor") {
-        //     source = source?.actors;
-        // } else if (tok === "Item") {
-        //     if (i === 0) {
-        //         source = game.items;
-        //         if(!source.get(toks[i+1])){
-        //             let compendiums = getCompendium("item");
-        //             let item;
-        //             for(let compendium of compendiums){
-        //                 if(compendium.find){
-        //                     item = compendium.find(item => item.id === toks[i+1]);
-        //                 }else{
-        //                     console.log("huh?")
-        //                     compendium.get(toks[i+1])
-        //                 }
-        //                 if(item) break;
-        //             }
-        //             if(item){
-        //                 source = {}
-        //                 source[toks[i+1]] = item;
-        //             }
-        //         }
-        //         continue;
-        //     }
-        //     source = source?.items;
-        // } else if (tok === "ActiveEffect") {
-        //     source = source?.effects;
-        // } else {
-        //     source = source?.get(tok)
-        //     if(!source){
-        //         if(last === "Actor"){
-        //             game.actors.get(tok)
-        //         }
-        //     }
-        // }
-        // last = tok
-    }
+    return fromUuidSync(uuid);
+    // let toks = uuid.split(".")
+    // if(toks.length < 2){
+    //     return;
+    // }
+    // let source = from || game;
+    // if(from){
+    //     const newToks = [];
+    //     let found = false;
+    //     for (const tok of toks) {
+    //         if(found){
+    //             newToks.push(tok);
+    //         } else if(from.id === tok){
+    //             found = true;
+    //         }
+    //     }
+    //     toks = newToks;
+    // }
+    // let last = "";
+    // for (let [i, tok] of toks.entries()) {
+    //     switch (tok){
+    //         case "Scene":
+    //             source = source?.scenes;
+    //             break;
+    //         case "Token":
+    //             source = source?.tokens;
+    //             break;
+    //         case "Actor":
+    //             if(source?.actor){
+    //                 source = source?.actor
+    //             } else if(source?.actors){
+    //                 source = source?.actors;
+    //             }
+    //             break;
+    //         case "Item":
+    //             source = source?.items;
+    //             break;
+    //         case "ActiveEffect":
+    //             source = source?.effects
+    //             break;
+    //         case "Compendium":
+    //             source = source?.packs;
+    //             break;
+    //         default:
+    //             if (source?.id !== tok) {
+    //                 let cursor = source?.get(tok);
+    //                 if(!cursor){
+    //                     cursor = source?.get(`${last}.${tok}`)
+    //                 }
+    //                 if(cursor || i === toks.length-1){
+    //                     source = cursor
+    //                 }
+    //             }
+    //     }
+    //     last = tok;
+    //     if(!source){
+    //         return;
+    //     }
+    //
+    // }
     return source;
 }
 

@@ -74,7 +74,7 @@ export function transferCredits(actor) {
                     let modifier = input.value;
 
                     let item = actor.items.get(select.value)
-                    let attr = Object.values(item.data.data.attributes).find(attr => attr.key === 'credit')
+                    let attr = Object.values(item.system.attributes).find(attr => attr.key === 'credit')
 
                     item.setAttribute("credit", toNumber(attr.value) + toNumber(modifier));
                     //TODO should we check for negative?
