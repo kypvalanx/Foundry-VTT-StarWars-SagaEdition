@@ -1,3 +1,7 @@
-2025/11/29-14:36:33.592 2d2c Recovering log #221
-2025/11/29-14:36:33.595 2d2c Delete type=0 #221
-2025/11/29-14:36:33.595 2d2c Delete type=3 #220
+2025/11/29-20:29:37.042 2b90 Recovering log #230
+2025/11/29-20:29:37.045 2b90 Delete type=0 #230
+2025/11/29-20:29:37.045 2b90 Delete type=3 #228
+2025/11/29-20:29:48.131 7e88 Level-0 table #235: started
+2025/11/29-20:29:48.131 7e88 Level-0 table #235: 0 bytes OK
+2025/11/29-20:29:48.132 7e88 Delete type=0 #233
+2025/11/29-20:29:48.151 7e88 Manual compaction at level-0 from '!items!0Rfdft1fveiRR2Lq' @ 72057594037927935 : 1 .. '!items.effects!zmScYUNGMw3vX3H9.dK8NBFLpdJrwgl9N' @ 0 : 0; will stop at (end)
