@@ -1,6 +1,6 @@
 import {SWSECompendiumBrowser} from "./compendium-browser.mjs";
 
-export class SWSECompendiumDirectory extends CompendiumDirectory{
+export class SWSECompendiumDirectory extends foundry.applications.sidebar.tabs.CompendiumDirectory{
     // static get defaultOptions() {
     //     return mergeObject(super.defaultOptions, {
     //         template: "systems/swse/templates/compendium/compendium.hbs",

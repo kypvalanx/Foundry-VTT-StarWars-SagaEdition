@@ -66,7 +66,7 @@ Hooks.once('init', async function () {
 
     //CONFIG.debug.hooks = true
 
-    DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
 
     registerSystemSettings();
     registerHandlebarsHelpers();
@@ -84,14 +84,14 @@ Hooks.once('init', async function () {
     })
 
     // Register sheet application classes
-    Actors.unregisterSheet("core", ActorSheet);
-    Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
-    Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
-    Items.unregisterSheet("core", ItemSheet);
-    Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
+    foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
+    foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
+    foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
+    foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
+    foundry.documents.collections.Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
 
 
-    await loadTemplates([
+    await foundry.applications.handlebars.loadTemplates([
         'systems/swse/templates/actor/manual/parts/actor-summary.hbs',
         'systems/swse/templates/actor/manual/parts/actor-ability-scores.hbs',
         'systems/swse/templates/actor/manual/parts/actor-health.hbs',
