@@ -1,3 +1,14 @@
-2025/11/29-14:36:33.576 1828 Recovering log #296
-2025/11/29-14:36:33.578 1828 Delete type=0 #296
-2025/11/29-14:36:33.578 1828 Delete type=3 #295
+2025/11/29-20:29:37.026 4dc4 Recovering log #305
+2025/11/29-20:29:37.028 4dc4 Delete type=0 #305
+2025/11/29-20:29:37.028 4dc4 Delete type=3 #303
+2025/11/29-20:29:48.128 7e88 Level-0 table #309: started
+2025/11/29-20:29:48.129 7e88 Level-0 table #309: 0 bytes OK
+2025/11/29-20:29:48.130 7e88 Delete type=0 #307
+2025/11/29-20:29:48.134 7e88 Manual compaction at level-0 from '!items!0a57Yr9Z0gRubNEP' @ 72057594037927935 : 1 .. '!items!zEOa8tI3ac24aVPd' @ 0 : 0; will stop at '!items!zEOa8tI3ac24aVPd' @ 384 : 1
+2025/11/29-20:29:48.134 7e88 Compacting 1@0 + 1@1 files
+2025/11/29-20:29:48.143 7e88 Generated table #310@0: 192 keys, 577030 bytes
+2025/11/29-20:29:48.143 7e88 Compacted 1@0 + 1@1 files => 577030 bytes
+2025/11/29-20:29:48.145 7e88 compacted to: files[ 0 1 0 0 0 0 0 ]
+2025/11/29-20:29:48.145 7e88 Delete type=2 #30
+2025/11/29-20:29:48.145 7e88 Delete type=2 #304
+2025/11/29-20:29:48.157 7e88 Manual compaction at level-0 from '!items!zEOa8tI3ac24aVPd' @ 384 : 1 .. '!items!zEOa8tI3ac24aVPd' @ 0 : 0; will stop at (end)
