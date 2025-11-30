@@ -84,9 +84,18 @@ Hooks.once('init', async function () {
     })
 
     // Register sheet application classes
-    foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
-    foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
-    foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
+    foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2);
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
+        types: ["character"],
+        makeDefault: true
+    });
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEManualActorSheet, {
+        types: ["character"],
+        makeDefault: true
+    });
+    //foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
+    //foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
+    //foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
     foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
     foundry.documents.collections.Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
 

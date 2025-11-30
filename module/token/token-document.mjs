@@ -1,8 +1,8 @@
 export class SWSETokenDocument extends TokenDocument {
-    getBarAttribute(barName, {alternative} = {}) {
+    getBarAttribute(barName, options = {}) {
         this.actor.health;
-        this.actor.shields
+        this.actor.shields;
 
-        return super.getBarAttribute(barName, {alternative});
+        return super.getBarAttribute(barName, options);
     }
 }

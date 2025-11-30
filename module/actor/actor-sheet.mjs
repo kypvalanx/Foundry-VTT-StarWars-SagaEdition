@@ -22,6 +22,8 @@ import {onAmmunition} from "../item/ammunition/ammunitionDelegate.mjs";
 import {makeAttack} from "./attack/attackDelegate.mjs";
 import {Attack} from "./attack/attack.mjs";
 import {buildRollContent} from "../common/chatMessageHelpers.mjs";
+const { ActorSheetV2 } = foundry.applications.sheets;
+const { HandlebarsApplicationMixin } = foundry.applications.api;
 
 // noinspection JSClosureCompilerSyntax
 
@@ -79,7 +81,7 @@ function getNotesFromDataSet(dataset) {
  * @extends {ActorSheet}
  */
 
-export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
+export class SWSEActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -87,22 +89,27 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     }
 
 
-    /** @override */
-    static get defaultOptions() {
+    // /** @override */
+    // static get defaultOptions() {
+    //
+    //     return foundry.utils.mergeObject(super.defaultOptions, {
+    //         classes: ["swse", "sheet", "actor"],
+    //         width: 1000,
+    //         height: 900,
+    //         tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}],
+    //         debug: false
+    //     });
+    // }
 
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            classes: ["swse", "sheet", "actor"],
-            width: 1000,
-            height: 900,
-            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}],
-            debug: false
-        });
+    static DEFAULT_OPTIONS = {
+        ...super.DEFAULT_OPTIONS,
+        classes: ["swse", "sheet", "actor"]
     }
 
     get template() {
         const path = "systems/swse/templates/actor";
 
-        let type = this.actor.type;
+        let type = this.actor?.type;
         if (type === 'character') {
             return `${path}/actor-sheet.hbs`;
         }
