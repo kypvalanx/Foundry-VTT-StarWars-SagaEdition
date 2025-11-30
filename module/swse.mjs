@@ -226,21 +226,32 @@ const applyAttack = async (event) => {
     let type = element.data("type")
 
     const attackSummaries = element.data("attackSummary");
-    let actorIds = attackSummaries.map(a=>a.id);
-    let targetActors = game.actors.filter(actor => actorIds.includes(actor.id)).reduce((actorMap, actor) => {actorMap[actor.id] = actor; return actorMap}, {})
+    let actorIds = attackSummaries.map(a=>a.uuid);
+    let targetActors = game.actors.filter(actor => actorIds.includes(actor.uuid)).reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, {})
+    targetActors = game.scenes.current.tokens.map(token => token.actor).filter(actor => actor && actorIds.includes(actor.uuid)).reduce((actorMap, actor) => {actorMap[actor.uuid] = actor; return actorMap}, targetActors)
     for (const attackSummary of attackSummaries) {
-        const targetActor = targetActors[attackSummary.id]
+        const targetActor = targetActors[attackSummary.uuid]
+
+
 
         if (type === "heal") {
-            targetActor.applyHealing({heal: attackSummary.damage})
+            targetActor.applyHealing({heal: attackSummary.damage, result:attackSummary.result})
         } else {
+            let damage = attackSummary.damage;
+
+            if(type === "half"){
+                damage = Math.floor(damage/2);
+            } else if(type === "double"){
+                damage = damage*2;
+            }
+
             await targetActor.applyDamage({
-                damage: attackSummary.damage,
+                damage: damage,
                 affectDamageThreshold: true,
                 damageType: attackSummary.damageType,
                 skipShields: false,
                 skipDamageReduction: false,
-                halfDamage: attackSummary.result === "Half Damage"
+                result: attackSummary.result
             })
         }
     }
