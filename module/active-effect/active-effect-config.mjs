@@ -10,7 +10,7 @@ import {
  * Extend the base ActiveEffect entity
  * @extends {ActiveEffectConfig}
  */
-export class SWSEActiveEffectConfig extends ActiveEffectConfig {
+export class SWSEActiveEffectConfig extends foundry.applications.sheets.ActiveEffectConfig {
     get template() {
         const path = "systems/swse/templates/active-effect";
         // if (this.object.flags.swse?.itemModifier) {

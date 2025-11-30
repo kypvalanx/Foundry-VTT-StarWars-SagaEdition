@@ -13,7 +13,7 @@ import {onAmmunition} from "./ammunition/ammunitionDelegate.mjs";
 
 
 
-export class SWSEItemSheet extends ItemSheet {
+export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};

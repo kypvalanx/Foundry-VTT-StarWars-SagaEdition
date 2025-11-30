@@ -79,7 +79,7 @@ function getNotesFromDataSet(dataset) {
  * @extends {ActorSheet}
  */
 
-export class SWSEActorSheet extends ActorSheet {
+export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
