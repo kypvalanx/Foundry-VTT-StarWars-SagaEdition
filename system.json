@@ -1,14 +1,12 @@
 {
-  "name": "swse",
   "id": "swse",
   "title": "Star Wars: Saga Edition",
   "description": "The Star Wars: Saga Edition system for FoundryVTT!",
   "version": "12.5.4",
-  "minimumCoreVersion": "12",
   "compatibility": {
     "minimum": 12,
     "verified": 12,
-    "maximum": 12
+    "maximum": 13
   },
   "authors": [
     {
