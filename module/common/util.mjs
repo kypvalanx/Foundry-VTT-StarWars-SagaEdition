@@ -1883,7 +1883,6 @@ export const getActorFromId = function (id) {
     if (id) {
         actor = game.actors?.tokens[id]
         if (!actor) actor = game.actors?.get(id);
-        if (!actor) actor = game.data.actors.find(a => a._id === id);
     }
     if (!actor) {
         const speaker = ChatMessage.getSpeaker();
