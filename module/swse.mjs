@@ -8,7 +8,6 @@ import {SWSEItemSheet} from "./item/item-sheet.mjs";
 import {registerSystemSettings} from "./settings/core.mjs";
 import {registerHandlebarsHelpers} from "./common/helpers.mjs";
 import {clearEmptyCompendiums, deleteEmptyCompendiums, generateCompendiums} from "./compendium/generation.mjs";
-import {measureDistances} from "./measure.mjs";
 import {SWSECompendiumBrowser} from "./compendium/compendium-browser.mjs";
 import {getActorFromId, toNumber} from "./common/util.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
@@ -32,6 +31,7 @@ Hooks.once('quenchReady',  (quench) => {
 
 
 Hooks.once('init', async function () {
+
 
     game.swse = {
         SWSEActor,
@@ -83,34 +83,17 @@ Hooks.once('init', async function () {
     //CONFIG.debug.hooks = true
 
     foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
-    // Register sheet application classes
-    //foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2);
     foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
         label: "SWSE Actor Sheet",
         types: ["character", "npc"], // adjust types as appropriate for your system
         makeDefault: true
     });
 
-    // foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEManualActorSheet, {
-    //     label: "SWSE Manual Actor Sheet",
-    //     types: ["character"],        // or whatever type it applies to
-    //     makeDefault: false
-    // });
-
-    // foundry.documents.collections.Actors.unregisterSheet("core", foundry.applications.sheets.ActorSheetV2);
-    // foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
-    // foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
-    // foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
-    // foundry.documents.collections.Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
-    //foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Item, "core", foundry.appv1.sheets.ItemSheet);
     foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
         label: "SWSE Item Sheet",
         makeDefault: true
     });
 
-    Hooks.on("renderActorSheet", (sheet, html, data) => {
-        console.log("Rendered sheet:", sheet.constructor.name, "for actor", sheet.actor.name);
-    });
 
 
     await foundry.applications.handlebars.loadTemplates([
@@ -326,10 +309,10 @@ Hooks.on("ready", async function () {
             let indices = await pack.getIndex()
             for (const index of indices.filter(i => i.type === "species")) {
                 const entity = await pack.getDocument(index._id)
-                if (entity.changes.filter(c => c.key === "isDroid" && (c.value === "true" || c.value === true)).length > 0) continue;
+                if (entity.changes?.filter(c => c.key === "isDroid" && (c.value === "true" || c.value === true)).length > 0) continue;
 
                 let attributes = [];
-                for (const change of entity.changes) {
+                for (const change of entity.changes || []) {
                     attributes.push({key: change.key, value: change.value});
                 }
                 replicaDroidChoices.push({name: entity.name, attributes: attributes});
@@ -393,10 +376,7 @@ Hooks.on("ready", async function () {
     console.log("TOTAL TIME FOR GENERATED FIELDS " + (new Date().getMilliseconds() - startTime.getMilliseconds()) + "ms");
 });
 
-Hooks.on("canvasInit", function () {
-    canvas.grid.diagonalRule = game.settings.get("swse", "enable5105Measurement");
-    foundry.grid.SquareGrid.prototype.measureDistances = measureDistances;
-})
+
 
 
 if (!Map.prototype.computeIfAbsent) {
