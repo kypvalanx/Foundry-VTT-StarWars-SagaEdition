@@ -23,7 +23,7 @@ export class SWSEActiveEffectConfig extends foundry.applications.sheets.ActiveEf
 
     /** @override */
     static get defaultOptions() {
-        return mergeObject(super.defaultOptions, {
+        return foundry.utils.mergeObject(super.defaultOptions, {
             classes: ["swse", "sheet", "effect"],
             closeOnSubmit: false,
             submitOnChange:true
