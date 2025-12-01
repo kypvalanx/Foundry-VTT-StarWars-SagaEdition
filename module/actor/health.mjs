@@ -4,10 +4,12 @@ import {SWSEActor} from "./actor.mjs";
 
 /**
  *
- * @param {SWSEActor} actor
- * @returns {{temp, other: number, max: number, value: *, dr, sr}}
+ * @param {SWSEActor|null} actor
+ * @returns {{temp, other: number, max: number, value: number, dr, sr}}
  */
 export function resolveHealth(actor) {
+    if(!actor) return {temp: 0, other: 0, max: 0, value: 0, dr: 0, sr: 0};
+
     let healthBonuses = [];
 
     if(actor.isFollower){
@@ -54,12 +56,12 @@ export function resolveHealth(actor) {
 
 /**
  *
- * @param {SWSEActor} actor
+ * @param {SWSEActor|null} actor
  * @returns {{value: number, max: number}}
  */
 export function resolveShield(actor) {
     if (!actor) {
-        return;
+        return {max: 0, value: 0, active: false, failureChance: 0};
     }
     let shields = actor.system.shields
     shields.max = shields.override ;
