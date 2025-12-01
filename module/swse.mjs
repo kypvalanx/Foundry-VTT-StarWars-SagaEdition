@@ -2,7 +2,7 @@
 import {initializeStatusEffects, SWSE} from "./common/config.mjs";
 import {getEntityKey, SWSEActor} from "./actor/actor.mjs";
 import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
-import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
+//import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {SWSEItemSheet} from "./item/item-sheet.mjs";
 import {registerSystemSettings} from "./settings/core.mjs";
@@ -56,17 +56,6 @@ Hooks.once('init', async function () {
         decimals: 2
     };
 
-    // Define custom Entity classes
-    CONFIG.SWSE = SWSE;
-    CONFIG.Actor.documentClass = SWSEActor;
-    CONFIG.Item.documentClass = SWSEItem;
-    CONFIG.Token.hudClass = SWSETokenHud;
-    CONFIG.Token.documentClass = SWSETokenDocument;
-    CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
-
-    //CONFIG.debug.hooks = true
-
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
 
     registerSystemSettings();
     registerHandlebarsHelpers();
@@ -83,21 +72,45 @@ Hooks.once('init', async function () {
 
     })
 
+    // Define custom Entity classes
+    CONFIG.SWSE = SWSE;
+    CONFIG.Actor.documentClass = SWSEActor;
+    CONFIG.Item.documentClass = SWSEItem;
+    CONFIG.Token.hudClass = SWSETokenHud;
+    CONFIG.Token.documentClass = SWSETokenDocument;
+    CONFIG.ActiveEffect.documentClass = SWSEActiveEffect;
+
+    //CONFIG.debug.hooks = true
+
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
     // Register sheet application classes
-    foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2);
+    //foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Actor, "core", foundry.applications.sheets.ActorSheetV2);
     foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
-        types: ["character"],
+        label: "SWSE Actor Sheet",
+        types: ["character", "npc"], // adjust types as appropriate for your system
         makeDefault: true
     });
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEManualActorSheet, {
-        types: ["character"],
+
+    // foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEManualActorSheet, {
+    //     label: "SWSE Manual Actor Sheet",
+    //     types: ["character"],        // or whatever type it applies to
+    //     makeDefault: false
+    // });
+
+    // foundry.documents.collections.Actors.unregisterSheet("core", foundry.applications.sheets.ActorSheetV2);
+    // foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
+    // foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
+    // foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
+    // foundry.documents.collections.Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
+    //foundry.applications.apps.DocumentSheetConfig.unregisterSheet(Item, "core", foundry.appv1.sheets.ItemSheet);
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
+        label: "SWSE Item Sheet",
         makeDefault: true
     });
-    //foundry.documents.collections.Actors.unregisterSheet("core", foundry.appv1.sheets.ActorSheet);
-    //foundry.documents.collections.Actors.registerSheet("swse", SWSEActorSheet, {makeDefault: true});
-    //foundry.documents.collections.Actors.registerSheet("swse", SWSEManualActorSheet, {makeDefault: false});
-    foundry.documents.collections.Items.unregisterSheet("core", foundry.appv1.sheets.ItemSheet);
-    foundry.documents.collections.Items.registerSheet("swse", SWSEItemSheet, {makeDefault: true});
+
+    Hooks.on("renderActorSheet", (sheet, html, data) => {
+        console.log("Rendered sheet:", sheet.constructor.name, "for actor", sheet.actor.name);
+    });
 
 
     await foundry.applications.handlebars.loadTemplates([

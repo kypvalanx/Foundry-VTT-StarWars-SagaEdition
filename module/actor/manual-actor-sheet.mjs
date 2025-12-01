@@ -8,18 +8,20 @@ import {SWSEActorSheet} from "./actor-sheet.mjs";
  * @extends {ActorSheet}
  */
 
-export class SWSEManualActorSheet extends SWSEActorSheet {
-    get template() {
-        const path = "systems/swse/templates/actor/manual";
 
-        let type = this.actor.type;
-        if (type === 'character') {
-            return `${path}/actor-sheet.hbs`;
-        }
-        if (type === 'npc') {
-            return `${path}/actor-sheet.hbs`;
-        }
 
-        return `${path}/actor-sheet.hbs`;
-    }
-}
+// export class SWSEManualActorSheet extends SWSEActorSheet {
+//     get template() {
+//         const path = "systems/swse/templates/actor/manual";
+//
+//         let type = this.actor.type;
+//         if (type === 'character') {
+//             return `${path}/actor-sheet.hbs`;
+//         }
+//         if (type === 'npc') {
+//             return `${path}/actor-sheet.hbs`;
+//         }
+//
+//         return `${path}/actor-sheet.hbs`;
+//     }
+// }

@@ -22,8 +22,7 @@ import {onAmmunition} from "../item/ammunition/ammunitionDelegate.mjs";
 import {makeAttack} from "./attack/attackDelegate.mjs";
 import {Attack} from "./attack/attack.mjs";
 import {buildRollContent} from "../common/chatMessageHelpers.mjs";
-const { ActorSheetV2 } = foundry.applications.sheets;
-const { HandlebarsApplicationMixin } = foundry.applications.api;
+
 
 // noinspection JSClosureCompilerSyntax
 
@@ -81,7 +80,7 @@ function getNotesFromDataSet(dataset) {
  * @extends {ActorSheet}
  */
 
-export class SWSEActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
+export class SWSEActorSheet extends ActorSheet {
     constructor(...args) {
         super(...args);
         this._pendingUpdates = {};
@@ -89,21 +88,25 @@ export class SWSEActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     }
 
 
-    // /** @override */
-    // static get defaultOptions() {
-    //
-    //     return foundry.utils.mergeObject(super.defaultOptions, {
-    //         classes: ["swse", "sheet", "actor"],
-    //         width: 1000,
-    //         height: 900,
-    //         tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}],
-    //         debug: false
-    //     });
-    // }
+    /** @override */
+    static get defaultOptions() {
+
+        return foundry.utils.mergeObject(super.defaultOptions, {
+            classes: ["swse", "sheet", "actor"],
+            width: 1000,
+            height: 900,
+            tabs: [{navSelector: ".sheet-tabs", contentSelector: ".sheet-body", initial: "summary"}],
+            debug: false
+        });
+    }
 
     static DEFAULT_OPTIONS = {
         ...super.DEFAULT_OPTIONS,
         classes: ["swse", "sheet", "actor"]
+    }
+
+    static get TEMPLATE(){
+        return "systems/swse/templates/actor/actor-sheet.hbs"
     }
 
     get template() {
@@ -132,8 +135,13 @@ export class SWSEActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
     /* -------------------------------------------- */
 
     /** @override */
-    getData(options) {
+    getData(options={}) {
+
+        console.log("SWSEActorSheet#getData called for", this.actor?.name);
+
         let data = super.getData(options);
+        console.log("SWSEActorSheet#getData result", data);
+
 
         data.modes = Object.entries(CONST.ACTIVE_EFFECT_MODES).reduce((obj, e) => {
             obj[e[1]] = game.i18n.localize("EFFECT.MODE_" + e[0]);
@@ -141,6 +149,15 @@ export class SWSEActorSheet extends HandlebarsApplicationMixin(ActorSheetV2) {
         }, {})
         return data;
     }
+
+
+    async _renderInner(...args) {
+        console.log("SWSEActorSheet#_renderInner", this.actor?.name);
+        const html = await super._renderInner(...args);
+        console.log("SWSEActorSheet#_renderInner finished");
+        return html;
+    }
+
 
     /** @override */
     activateListeners(html) {
