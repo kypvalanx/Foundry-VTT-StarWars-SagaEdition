@@ -1165,20 +1165,20 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         // Get the type of item to create.
         const type = header.dataset.type;
         // Grab any data associated with this control.
-        const data = duplicate(header.dataset);
+        const data = foundry.utils.duplicate(header.dataset);
         // Initialize a default name.
         const name = `New ${type.capitalize()}`;
         // Prepare the item object.
         const itemData = {
             name: name,
             type: type,
-            data: data
+            system: data
         };
         // Remove the type from the dataset since it's in the itemData.type prop.
         delete itemData.data["type"];
 
         // Finally, create the item!
-        return this.actor.createOwnedItem(itemData);
+        return this.actor.createEmbeddedDocuments('Item', [itemData]);
     }
 
     /**
