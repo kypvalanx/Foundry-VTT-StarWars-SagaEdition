@@ -13,12 +13,8 @@ import {
 export class SWSEActiveEffectConfig extends foundry.applications.sheets.ActiveEffectConfig {
     get template() {
         const path = "systems/swse/templates/active-effect";
-        // if (this.object.flags.swse?.itemModifier) {
-
         console.log(super.template)
-            return `${path}/active-effect-sheet.hbs`;
-        // }
-        //return super.template
+        return `${path}/active-effect-sheet.hbs`;
     }
 
     /** @override */
@@ -69,7 +65,7 @@ export class SWSEActiveEffectConfig extends foundry.applications.sheets.ActiveEf
 
     _onEditImage(event) {
         const attr = event.currentTarget.dataset.edit;
-        const current = foundry.utils.getProperty(this.object, attr);
+        const current = foundry.utils.getProperty(this.document, attr);
         const fp = new FilePicker({
             type: "image",
             current: current,
