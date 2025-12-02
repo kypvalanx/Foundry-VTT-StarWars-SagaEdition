@@ -6,11 +6,11 @@ import {getParentByHTMLClass, onCollapseToggle, toChat, toNumber} from "../commo
 import {
     _adjustPropertyBySpan,
     onChangeControl,
-    onEffectControl, onSpanTextInput,
+    onEffectControl,
+    onSpanTextInput,
     onToggle
 } from "../common/listeners.mjs";
 import {onAmmunition} from "./ammunition/ammunitionDelegate.mjs";
-
 
 
 export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
@@ -113,32 +113,36 @@ export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
         html.find('.value-plus').click(ev => {
             let target = $(ev.currentTarget)
             let name = ev.currentTarget.name;
-            let toks = name.split('.');
-            let cursor = this.object.data;
-            for (let tok of toks) {
-                cursor = cursor[tok];
-            }
-            let update = {}
-            update[name] = cursor + 1;
-            if (typeof target.data("high") === "number") {
-                update[name] = Math.min(update[name], target.data("high"));
-            }
+
+            const current = foundry.utils.getProperty(this.object, name);
+            const update = {};
+
+            const value = current + 1;
+            foundry.utils.setProperty(
+                update,
+                name,
+                typeof target.data("high") === "number" ?
+                    Math.min(value, target.data("high")) :
+                    value
+            );
             this.object.safeUpdate(update);
         });
 // TODO switch to data action
         html.find('.value-minus').click(ev => {
             let target = $(ev.currentTarget)
             let name = ev.currentTarget.name;
-            let toks = name.split('.');
-            let cursor = this.object.data;
-            for (let tok of toks) {
-                cursor = cursor[tok];
-            }
-            let update = {}
-            update[name] = cursor - 1;
-            if (typeof target.data("low") === "number") {
-                update[name] = Math.max(update[name], target.data("low"));
-            }
+
+            const current = foundry.utils.getProperty(this.object, name);
+            const update = {};
+
+            const value = current - 1;
+            foundry.utils.setProperty(
+                update,
+                name,
+                typeof target.data("low") === "number" ?
+                    Math.max(value, target.data("low")) :
+                    value
+            );
             this.object.safeUpdate(update);
         });
 
@@ -305,16 +309,16 @@ export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
         }
 
         if (application === 'WEAPON') {
-            return this.object.data.type === 'weapon';
+            return this.object.type === 'weapon';
         }
         if (application === 'ARMOR') {
-            return this.object.data.type === 'armor';
+            return this.object.type === 'armor';
         }
         if (application === 'ION') {
-            return this.object.data.data.weapon.type === 'Energy (Ion)';
+            return this.object.system.weapon.type === 'Energy (Ion)';
         }
         if (application === 'STUN') {
-            return this.object.data.data.weapon.stun?.isAvailable;
+            return this.object.system.weapon.stun?.isAvailable;
         }
         return false;
     }
