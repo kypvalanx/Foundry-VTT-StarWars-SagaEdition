@@ -266,7 +266,7 @@ function meetsPrerequisite(prereq, target, options) {
 
                 let filteredForceTechniques = ownedForceTechniques.filter(feat => feat.data.finalName === prereq.requirement);
                 if (filteredForceTechniques.length > 0) {
-                    if (!meetsPrerequisites(target, filteredForceTechniques[0].data.data.prerequisite, options).doesFail) {
+                    if (!meetsPrerequisites(target, filteredForceTechniques[0].system.prerequisite, options).doesFail) {
                         successList.push({prereq, count: 1});
                         break;
                     }
