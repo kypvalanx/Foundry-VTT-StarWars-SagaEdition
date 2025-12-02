@@ -139,12 +139,14 @@ export class SWSEActor extends Actor {
                 }, {updateChanges: false});
 
             } else if (system.isNPC && this.prototypeToken.actorLink) {
-                let children = canvas.tokens?.objects?.children || [];
-                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                const documents = canvas.tokens?.placeables
+                   ?.filter(t => t.actor?.id === this.id)
+                   .map(t => t.document) ?? [];
                 this.setActorLinkOnActorAndTokens(documents, false);
             } else if (!system.isNPC && !this.prototypeToken.actorLink) {
-                let children = canvas.tokens?.objects?.children || [];
-                let documents = children.filter(token => token.document.actorId === this.id).map(token => token.document)
+                const documents = canvas.tokens?.placeables
+                    ?.filter(t => t.actor?.id === this.id)
+                    .map(t => t.document) ?? [];
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
         }
