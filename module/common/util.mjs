@@ -1185,16 +1185,6 @@ export function equippedItems(entity, type = null) {
         return entity.items.filter(item => !!item.system.equipped && (!type || item.type === type));
     }
 }
-
-export function getItemParentId(id) {
-    let a = []//game.data.actors || []
-    let b = game.actors?.values() || []
-
-    let actors = [...a, ...b];
-    let actor = actors.find(actor => actor.items.find(item => item._id === id))
-    return !actor ? undefined : actor._id// || actor.data._id;
-}
-
 /**
  * these types are always inherited by actors if they meet prerequisites.
  * @type {string[]}
