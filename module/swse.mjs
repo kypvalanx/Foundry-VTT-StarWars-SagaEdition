@@ -82,14 +82,13 @@ Hooks.once('init', async function () {
 
     //CONFIG.debug.hooks = true
 
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
+    DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
+    DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
         label: "SWSE Actor Sheet",
         types: ["character", "npc"], // adjust types as appropriate for your system
         makeDefault: true
     });
-
-    foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
+    DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
         label: "SWSE Item Sheet",
         makeDefault: true
     });
