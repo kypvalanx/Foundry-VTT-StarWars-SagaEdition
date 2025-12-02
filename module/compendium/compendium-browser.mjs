@@ -151,7 +151,7 @@ export class SWSECompendiumBrowser extends Application {
     }
 
     async _addEntryElement(item) {
-        const elem = $(await renderTemplate("systems/swse/templates/compendium/compendium-browser_entry.hbs", item));
+        const elem = $(await foundry.applications.handlebars.renderTemplate("systems/swse/templates/compendium/compendium-browser_entry.hbs", item));
         const rootElem = this.element.find(".directory-list");
         rootElem.append(elem);
         this.activateEntryListeners(elem);
@@ -347,7 +347,7 @@ export class SWSECompendiumBrowser extends Application {
     _onProgress(progress) {
         progress.loaded++;
         progress.pct = Math.round((progress.loaded * 100) / progress.total);
-        SceneNavigation.displayProgressBar({label: progress.message, pct: progress.pct});
+        foundry.applications.ui.SceneNavigation.displayProgressBar({label: progress.message, pct: progress.pct});
     }
 
     async loadCompendium(p, filters = [null]) {

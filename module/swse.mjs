@@ -24,6 +24,7 @@ import {buildRollContent} from "./common/chatMessageHelpers.mjs";
 import {SWSETokenDocument} from "./token/token-document.mjs";
 
 
+
 Hooks.once('quenchReady',  (quench) => {
     //console.warn("It's Quenching time!")
     registerTestSuites(quench);
@@ -81,13 +82,13 @@ Hooks.once('init', async function () {
 
     //CONFIG.debug.hooks = true
 
-    DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
-    DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(ActiveEffect, "swse", SWSEActiveEffectConfig, { makeDefault: true })
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(Actor, "swse", SWSEActorSheet, {
         label: "SWSE Actor Sheet",
         types: ["character", "npc"], // adjust types as appropriate for your system
         makeDefault: true
     });
-    DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
+    foundry.applications.apps.DocumentSheetConfig.registerSheet(Item, "swse", SWSEItemSheet, {
         label: "SWSE Item Sheet",
         makeDefault: true
     });
