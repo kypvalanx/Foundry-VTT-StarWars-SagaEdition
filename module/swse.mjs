@@ -51,10 +51,9 @@ Hooks.once('init', async function () {
      * Set an initiative formula for the system
      * @type {String}
      */
-    CONFIG.Combat.initiative = {
-        formula: "1d20 + @initiative",
-        decimals: 2
-    };
+    CONFIG.Combat.initiative = CONFIG.Combat.initiative ?? {};
+    CONFIG.Combat.initiative.formula = "1d20 + @initiative";
+    CONFIG.Combat.initiative.decimals = 2;
 
 
     registerSystemSettings();
