@@ -175,7 +175,7 @@ export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
         let item;
 
         if (actorId) {
-            let actor = game.data.actors.find(actor => actor._id === actorId);
+            const actor = game.actors.get(actorId);
             item = actor.items.find(item => item._id === itemId);
         } else if (actionCompendium) {
             let compendium = game.packs.find(pack => pack.collection === actionCompendium);
