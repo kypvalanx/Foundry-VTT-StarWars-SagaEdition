@@ -415,7 +415,7 @@ export class SWSEActor extends Actor {
         if (['character', 'npc'].includes(this.type)) {
             let availableItems = []
             for (let crew of this.crew.members) {
-                let vehicle = game.data.actors.find(actor => actor._id === crew.id);
+                let vehicle = game.actors.get(crew.id);
                 if (vehicle) {
                     let itemIds = vehicle.system.equippedIds.filter(id => id.position.toLowerCase() === crew.position.toLowerCase() && `${id.slot}` === `${crew.slot}`).map(id => id.id)
 

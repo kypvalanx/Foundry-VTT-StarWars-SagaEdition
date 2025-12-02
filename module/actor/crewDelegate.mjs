@@ -226,7 +226,7 @@ export class CrewDelegate {
             slotName: type === "Gunner" ? `Gunner ${numericSlot} Slot` : `${type} Slot`
         };
         if (crew) {
-            let actor = game.data.actors.find(actor => actor._id === crew.id);
+            let actor = game.actors.get(crew.id);
             slot.id = crew.id;
             slot.uuid = crew.uuid;
             slot.img = actor?.img;
