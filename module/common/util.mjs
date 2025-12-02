@@ -666,7 +666,7 @@ export function getAttackRange(range, isAccurate, isInaccurate, actor) {
 
     let sources = Object.values(canvas.tokens.controlled).filter(token => token.document.actorId === (actor._id || actor.id)) || []; //get selected tokens of this actor
     if (sources.length === 0) {
-        sources = canvas.tokens.objects?.children.filter(token => token.document.actorId === (actor?._id || actor?.id)) || [];
+        sources = canvas.tokens.placeables.filter(token => token.document.actorId === (actor?._id || actor?.id)) || [];
     }
 
     let attackRange;
