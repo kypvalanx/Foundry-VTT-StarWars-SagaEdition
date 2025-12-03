@@ -20,6 +20,10 @@ export function generateAction(object, changes) {
         }]
     }
 
+    if(changes && !Array.isArray(changes)){
+        changes = Object.values(changes)
+    }
+
     if (changes?.find(change => change.key === "action")) {
         let type = itemType(object);
         return [{
