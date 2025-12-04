@@ -84,6 +84,47 @@ export class SWSEItem extends Item {
         return canModify;
     }
 
+    get errors(){
+        const errors = [];
+
+        //if we have an old style droid limb
+        if(["Probe", "Instrument", "Tool", "Claw", "Hand"].includes(this.name) && this.changes.find(c => c.key === "droidUnarmedDamage")){
+            errors.push(`<span data-action="item-warning" data-item-action="cleanup-droidUnarmedDamage" data-item="${this.id}">${this.name} should not contain a "droidUnarmedDamage" tag and should be updated to "droidUnarmedDamageScalable", you may experience issues until this is resolved</span>`)
+        }
+
+        return errors;
+    }
+
+    get warnings(){
+        return [];
+    }
+
+    resolveWarning(e){
+        let target = e.currentTarget
+        let action = target.dataset.itemAction
+
+        switch(action){
+            case "cleanup-droidUnarmedDamage":
+                const changes = this.changes.filter(c => c.key !== "droidUnarmedDamage");
+                const mediumSizeDie = this.getMediumSizeDieForDroidAppendage(this.name);
+                changes.push({key: "droidUnarmedDamageScalable", value: mediumSizeDie, mode: CONST.ACTIVE_EFFECT_MODES.ADD})
+                this.update({"system.changes": changes})
+                break;
+        }
+    }
+
+    getMediumSizeDieForDroidAppendage(name) {
+        switch(name){
+            case "Probe": return "1";
+            case "Instrument": return "1d2";
+            case "Tool": return "1d3";
+            case "Claw": return "1d4";
+            case "Hand": return "1d3";
+        }
+
+        return "1d6";
+    }
+
     get changes() {
         return this.system.changes;
     }

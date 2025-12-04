@@ -1530,7 +1530,6 @@ function resolveUnarmedDamageDie(actor) {
     const unarmedSudoItem = actor.unarmedAttack.item;
     let damageDie = getInheritableAttribute({
         entity: unarmedSudoItem,
-        parent: actor,
         attributeKey: isDroid ? "droidUnarmedDamage" : ["unarmedDamage", "unarmedDamageDie"],
         reduce: "MAX"
     });

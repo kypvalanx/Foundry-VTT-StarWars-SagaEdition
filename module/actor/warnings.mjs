@@ -118,5 +118,11 @@ export function errorsFromActor(actor) {
         errors.push(`<span data-action="remove-vehicleBaseType">CLICK ME!!!  You have a vehicleBaseType item on your sheet.  You may notice strange behavior if you do not remove it.  Click here to update your sheet.</span>`)
     }
 
+    for (const item of actor.items) {
+        for (const warning of item.errors) {
+            errors.push(warning);
+        }
+    }
+
     return errors;
 }

@@ -86,7 +86,9 @@ export class SWSEItemSheet extends foundry.appv1.sheets.ItemSheet {
             li.addEventListener("dragstart", (ev) => this._onDragStart(ev), false);
         });
 
-
+        html.find('[data-action="item-warning"]').click(async (e) => {
+            this.item.resolveWarning(e)
+        })
 
         if (this.actor) {
             // Update Inventory Item
