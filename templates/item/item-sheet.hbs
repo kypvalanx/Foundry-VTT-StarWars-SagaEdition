@@ -1,6 +1,15 @@
 <form class="{{cssClass}}" autocomplete="off">
     <header class="sheet-header">
         <div class="flex flex-col">
+            <div>
+
+                {{#each item.warnings as |warning id|}}
+                    <span class="warning">{{{warning}}}</span><br/>
+                {{/each}}
+                {{#each item.errors as |error id|}}
+                    <span class="error">{{{error}}}</span><br/>
+                {{/each}}
+            </div>
             <div class="flex flex-row">
                 <div>
                     <img class="profile-img" src="{{item.img}}" data-edit="img" title="{{item.name}}"

@@ -349,6 +349,12 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
             this.object.deleteEmbeddedDocuments("Item", ids);
         });
 
+        html.find('[data-action="item-warning"]').click(async (e) => {
+            let target = e.currentTarget
+            let item = target.dataset.item
+            this.actor.items.get(item)?.resolveWarning(e)
+        })
+
         //html.find()
     }
 
