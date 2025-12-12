@@ -1342,6 +1342,7 @@ export class SWSEActor extends Actor {
 
         const createData = foundry.utils.deepClone(statusEffect);
         createData.label = game.i18n.localize(statusEffect.label);
+        createData.name = createData.label;
         createData["statuses"] = [statusEffect.id]
         delete createData.id;
         const cls = getDocumentClass("ActiveEffect");
