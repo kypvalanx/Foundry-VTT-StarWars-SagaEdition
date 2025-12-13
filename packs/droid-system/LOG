@@ -1,5 +1,3 @@
-2025/11/29-14:44:50.901 4ca4 Recovering log #3
-2025/11/29-14:44:50.901 4ca4 Level-0 table #5: started
-2025/11/29-14:44:50.904 4ca4 Level-0 table #5: 90678 bytes OK
-2025/11/29-14:44:50.907 4ca4 Delete type=0 #3
-2025/11/29-14:44:50.907 4ca4 Delete type=3 #2
+2025/12/13-06:54:55.174 1d3c Recovering log #6
+2025/12/13-06:54:55.184 1d3c Delete type=0 #6
+2025/12/13-06:54:55.184 1d3c Delete type=3 #4

@@ -1,3 +1,5 @@
+import {getInheritableAttribute} from "../attribute-helper.mjs";
+
 export class UnarmedAttack {
     constructor(actor) {
         /**
@@ -31,7 +33,15 @@ export class UnarmedAttack {
     }
 
     get changes() {
-        return [{key: "damageType", value:"Bludgeoning"}, {"key": "unarmedDamageScalable", "value": "1d4"}]
+        let changes = getInheritableAttribute(
+            {
+                entity: this.actor,
+                attributeKey: "droidUnarmedDamage"
+            }
+        )
+        changes.push({"key": "damageType", "value": "Bludgeoning"})
+        changes.push({"key": "unarmedDamageScalable", "value": "1d4"})
+        return changes;
     }
 
     get parent() {
