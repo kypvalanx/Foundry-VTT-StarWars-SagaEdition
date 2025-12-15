@@ -126,3 +126,34 @@ export function errorsFromActor(actor) {
 
     return errors;
 }
+
+/**
+ *
+ * @param level
+ * @param entity
+ * @returns {*[]}
+ */
+export function errors(level, entity){
+    const checks = ERRORS[entity.type][level];
+    const err = [];
+    for (const item of checks){
+        err.push(...item.check(entity));
+    }
+    return err;
+}
+
+const ERRORS = {
+    "actor": {
+        "error":[
+            {
+                check: (actor) = {},
+                resolution
+            }
+        ],
+        "warning":[]
+    },
+    "item": {
+        "error":[],
+        "warning":[]
+    }
+}
