@@ -79,20 +79,22 @@ export function darthauthorHomebrewOptions() {
 }
 
 export function commonHomebrewOptions() {
-    game.settings.register("swse", "enable5105Measurement", {
-        name: "Enable counting alternating diagonals as double the distance",
-        hint: "Similar to games like Pathfinder",
+    game.settings.register("swse", "homebrewAdjustPointBuy", {
+        name: "Adjust Point Buy",
+        hint: "Adjust Point Buy",
         scope: "world",
         config: true,
-        default: "101010",
-        type: String,
-        choices: {
-            101010: "Diagonals are double move (default)",
-            555: "Diagonals are single move",
-            5105: "Alternating double distance diagonals"
-        },
-        onChange: (rule) => (canvas.grid.diagonalRule = rule)
-    });
+        default: 25,
+        type: Number,
+    })
+    game.settings.register("swse", "homebrewAdjustPointBuyDroid", {
+        name: "Adjust Droid Point Buy",
+        hint: "Adjust Droid Point Buy",
+        scope: "world",
+        config: true,
+        default: 21,
+        type: Number,
+    })
 
     game.settings.register("swse", "criticalHitType", {
         name: "Critical Hit Mode",

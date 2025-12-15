@@ -811,10 +811,12 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     }
 
     getPointBuyTotal() {
+        game.settings.get("swse", "homebrewAdjustPointBuy")
+
         if (this.actor.isDroid) {
-            return CONFIG.SWSE.Abilities.droidPointBuyTotal;
+            return game.settings.get("swse", "homebrewAdjustPointBuyDroid") ?? CONFIG.SWSE.Abilities.droidPointBuyTotal;
         }
-        return CONFIG.SWSE.Abilities.defaultPointBuyTotal;
+        return game.settings.get("swse", "homebrewAdjustPointBuy") ?? CONFIG.SWSE.Abilities.defaultPointBuyTotal;
     }
 
     updateTotal(html) {

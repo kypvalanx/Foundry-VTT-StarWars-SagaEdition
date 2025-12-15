@@ -146,8 +146,8 @@ const ERRORS = {
     "actor": {
         "error":[
             {
-                check: (actor) = {},
-                resolution
+                //check: (actor) = {},
+                //resolution
             }
         ],
         "warning":[]
