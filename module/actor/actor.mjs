@@ -2448,14 +2448,13 @@ export class SWSEActor extends Actor {
         const currentFeats = this.feats || [];
         if (context.isFirstLevel) {
             if (!(availableClassFeats > 0 && availableClassFeats < feats.length)) {
-                const items = feats.flatMap(feat => {
-                    return [{type: 'TRAIT', name: `Bonus Feat (${feat})`, parent: item}, {type: 'FEAT', name: feat, parent: item}]
-                });
-                // let addItemsCriteria = {
-                //     items: items}
-                //await this.addItems(addItemsCriteria);
-                toBeAdded.push(... items)
-
+                toBeAdded.push(... (feats.flatMap(feat => {
+                    return [ {
+                        type: 'FEAT',
+                        name: feat,
+                        parent: item
+                    }]
+                })))
 
                 if (!this.suppressDialog) {
                     new Dialog({
