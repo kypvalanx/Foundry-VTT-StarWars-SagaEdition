@@ -1769,7 +1769,7 @@ export class SWSEActor extends Actor {
             for (const type of ['weapon', 'armor', 'equipment', 'vehicleSystem', 'droid system', 'implant']) {
                 inventoryItems.push(...this.itemTypes[type])
             }
-            return inventoryItems.filter(item => !item.system.hasItemOwner);
+            return inventoryItems.filter(item => !item.system.hasItemOwner && !item.system.equipped);
         })
 
     }
