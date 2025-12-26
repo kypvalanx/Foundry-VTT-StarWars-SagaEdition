@@ -27,48 +27,52 @@
         {{!-- Sheet Body --}}
         <section class="sheet-body">
             {{!-- Summary Page --}}
-            <div class="tab summary flex-col" data-group="primary" data-tab="summary">
-                <div class="flex flex-row">
-                    <div class="flex flex-col">
-                        <!--attributes-->
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-crew.hbs'}}
-                        {{> 'systems/swse/templates/actor/parts/actor-ability-scores.hbs'}}
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
+            <div class="tab summary" data-group="primary" data-tab="summary">
+                <div class="flex-col">
+                    <div class="flex flex-row">
+                        <div class="flex flex-col">
+                            <!--attributes-->
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-crew.hbs'}}
+                            {{> 'systems/swse/templates/actor/parts/actor-ability-scores.hbs'}}
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
+                        </div>
+                        <div class="flex-grow">
+                            <!--summary-->
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
+                        </div>
                     </div>
-                    <div class="flex-grow">
-                        <!--summary-->
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
+                    <div class="flex flex-row">
+                        <div class="flex-grow">
+                            <!--health-->
+                            {{> 'systems/swse/templates/actor/parts/actor-health.hbs' disableFirstAid=true disableSecondWind=true disableForcePointsAndDestinyPoints=true disableSimpleSpeedAndBaseAttackBonus=true}}
+                        </div>
+                        <div class="flex flex-col">
+                            <!--condition-->
+                            {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
+                        </div>
+                        <div class="flex flex-col">
+                            <!--portrait-->
+                            {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
+                        </div>
                     </div>
-                </div>
-                <div class="flex flex-row">
-                    <div class="flex-grow">
-                        <!--health-->
-                        {{> 'systems/swse/templates/actor/parts/actor-health.hbs' disableFirstAid=true disableSecondWind=true disableForcePointsAndDestinyPoints=true disableSimpleSpeedAndBaseAttackBonus=true}}
+                    <div class="flex flex-row">
+                        <div class="flex-grow">
+                            <!--defenses-->
+                            {{> 'systems/swse/templates/actor/parts/actor-defenses.hbs'}}
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                    <!--condition-->
-                    {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
+                    <div class="flex flex-row">
+                        {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
+                        {{> 'systems/swse/templates/actor/parts/skills/actor-skills.hbs' disableTrained=true disableBonus=true}}
                     </div>
-                    <div class="flex flex-col">
-                        <!--portrait-->
-                        {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
-                    </div>
-                </div>
-                <div class="flex flex-row">
-                    <div class="flex-grow">
-                        <!--defenses-->
-                        {{> 'systems/swse/templates/actor/parts/actor-defenses.hbs'}}
-                    </div>
-                </div>
-                <div class="flex flex-row">
-                    {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
-                    {{> 'systems/swse/templates/actor/parts/skills/actor-skills.hbs' disableTrained=true disableBonus=true}}
                 </div>
             </div>
 
             <!--Stations Tab-->
-            <div class="tab summary flex-col" data-group="primary" data-tab="stations">
+            <div class="tab stations" data-group="primary" data-tab="stations">
+                <div class="flex-col">
                 {{> 'systems/swse/templates/actor/vehicle/vehicle-stations.hbs'}}
+                </div>
             </div>
 
             {{!-- Biography Tab --}}
