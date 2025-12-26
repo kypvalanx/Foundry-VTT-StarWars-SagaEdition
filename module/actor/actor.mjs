@@ -322,6 +322,11 @@ export class SWSEActor extends Actor {
         if(operation.bypass){
             user = game.users.get(operation.owner);
         }
+        for (const update of operation.updates) {
+            if(Object.hasOwn(update, "type")){
+                operation.recursive = false;
+            }
+        }
         return await this.database.update(this.implementation, operation, user);
     }
 
@@ -1681,7 +1686,7 @@ export class SWSEActor extends Actor {
 
     get skills() {
         return this.getCached("skills", () => {
-            return Object.entries(this.system.skills).map(entry => {
+            return Object.entries(this.system.skills ?? {}).map(entry => {
                 let value = entry[1];
                 value.label = entry[0].titleCase();
                 return value;
