@@ -840,9 +840,7 @@ export class SWSEActor extends Actor {
         })
     }
 
-    get cargo() {
-        return this.inventoryItems
-    }
+
 
     get species() {
         return this.getCached("species", () => {
@@ -964,23 +962,7 @@ export class SWSEActor extends Actor {
         })
     }
 
-    get equipped() {
-        return this.getCached("equipped", () => {
-            return SWSEActor._getEquippedItems(this.system, this.inventoryItems, "equipped").filter(item => this.isEquipable(item));
-        })
-    }
 
-    get unequipped() {
-        return this.getCached("unequipped", () => {
-            return this.inventoryItems.filter(item => this.isEquipable(item) && !item.system.equipped);
-        })
-    }
-
-    get inventory() {
-        return this.getCached("inventory", () => {
-            return this.inventoryItems.filter(item => !this.isEquipable(item));
-        })
-    }
 
     initializeCharacterSettings() {
         this.system.settings = this.system.settings || [];
@@ -1769,10 +1751,32 @@ export class SWSEActor extends Actor {
             for (const type of ['weapon', 'armor', 'equipment', 'vehicleSystem', 'droid system', 'implant']) {
                 inventoryItems.push(...this.itemTypes[type])
             }
-            return inventoryItems.filter(item => !item.system.hasItemOwner && !item.system.equipped);
+            return inventoryItems.filter(item => !item.system.hasItemOwner);
         })
 
     }
+    get cargo() {
+        return this.inventoryItems.filter(item => !item.system.equipped)
+    }
+
+    get equipped() {
+        return this.getCached("equipped", () => {
+            return SWSEActor._getEquippedItems(this.system, this.inventoryItems, "equipped").filter(item => this.isEquipable(item));
+        })
+    }
+
+    get unequipped() {
+        return this.getCached("unequipped", () => {
+            return this.inventoryItems.filter(item => this.isEquipable(item) && !item.system.equipped);
+        })
+    }
+
+    get inventory() {
+        return this.getCached("inventory", () => {
+            return this.inventoryItems.filter(item => !this.isEquipable(item));
+        })
+    }
+
     _getClassSkills() {
         let classSkills = new Set()
         let skills = getInheritableAttribute({
