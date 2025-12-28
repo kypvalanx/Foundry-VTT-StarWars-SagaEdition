@@ -110,4 +110,12 @@ export function commonHomebrewOptions() {
             "Max Damage": "replaces the roll with max damage"
         }
     });
+    game.settings.register("swse", "disableBackgroundDestinyLimit", {
+        name: "Disable Background Destiny Limit",
+        hint: "Allows you to select more than one Background or destiny",
+        scope: "world",
+        config: true,
+        default: false,
+        type: Boolean
+    });
 }

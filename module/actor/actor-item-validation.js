@@ -349,10 +349,10 @@ const handleSpeciesAndVehicleBase = async (context) => {
 }
 
 const handleBackgroundAndDestiny = async (context) => {
-    if (!(context.entity.type === "background" || context.entity.type === "destiny")) {
+    if (!(context.entity.type === "background" || context.entity.type === "destiny") || game.settings.get("swse", "disableBackgroundDestinyLimit")) {
         return true;
     }
-    if (context.actor.itemTypes["background"].length > 0 || context.actor.itemTypes["destiny"].length > 0) {
+    if (context.actor.itemTypes["background"].length > 0 || context.actor.itemTypes["destiny"].length > 0 ) {
         new Dialog({
             title: `${context.entity.type.titleCase()} Selection`,
             content: `Only one background or destiny allowed at a time.  Please remove the existing one before adding a new one.`,
