@@ -2510,10 +2510,6 @@ export class SWSEActor extends Actor {
                 if (availableFeats.includes(feat)) {
 
                     const items = [{
-                        type: 'TRAIT',
-                        name: `Bonus Feat (${feat})`,
-                        parent: parentItem
-                    }, {
                         type: 'FEAT',
                         name: feat,
                         parent: parentItem
@@ -2541,11 +2537,7 @@ export class SWSEActor extends Actor {
             callback: async (html) => {
                 let feat = html.find("#feat")[0].value;
                 let addItemsCriteria = JSON.parse(JSON.stringify(context));
-                const items = [{
-                    type: 'TRAIT',
-                    name: `Bonus Feat (${feat})`,
-                    parent: parentItem
-                }, {
+                const items = [ {
                     type: 'FEAT',
                     name: feat,
                     parent: parentItem
@@ -2565,9 +2557,10 @@ export class SWSEActor extends Actor {
 
     _explodeFeatNames(feats) {
         let explode = [];
+        const skils = skills();
         for (let feat of feats) {
             if ("Skill Focus" === feat) {
-                skills().forEach(skill => {
+                skils.forEach(skill => {
                     if (skill && !this.focusSkills.includes(skill.toLowerCase())) {
                         explode.push(`${feat} (${skill})`);
                     }
