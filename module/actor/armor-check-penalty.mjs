@@ -13,6 +13,12 @@ export function generateArmorCheckPenalties(actor) {
         reduce: "VALUES"
     });
 
+    let actsAs = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "actsAs",
+        reduce: "VALUES"
+    })
+
     let lightProficiency = armorProficiencies.includes("light");
     let mediumProficiency = armorProficiencies.includes("medium");
     let heavyProficiency = armorProficiencies.includes("heavy");
@@ -25,27 +31,39 @@ export function generateArmorCheckPenalties(actor) {
     let wearingMedium = false;
     let wearingHeavy = false;
 
-    for(let armor of filterItemsByTypes(equippedItems(actor), ["armor"])){
-        if('Heavy Armor' === armor.system.subtype){
+    /**
+     *
+     * @type {(string)[]}
+     */
+    const armorItems = filterItemsByTypes(equippedItems(actor), ["armor"]).map(a => a.system.subtype);
+    armorItems.push(...actsAs)
+    for(let armor of armorItems){
+        if('Heavy Armor' === armor){
             wearingHeavy = true;
         }
-        if('Medium Armor' === armor.system.subtype){
+        if('Medium Armor' === armor){
             wearingMedium = true;
         }
-        if('Light Armor' === armor.system.subtype){
+        if('Light Armor' === armor){
             wearingLight = true;
         }
     }
 
-    if(wearingHeavy && !heavyProficiency){
+    let energyShieldArmorTypes = getInheritableAttribute({
+        entity: actor,
+        attributeKey: "energyShieldArmorType",
+        reduce: "VALUES"
+    })
+
+    if((wearingHeavy && !heavyProficiency) || energyShieldArmorTypes.includes("Heavy Armor")){
         return -10;
     }
 
-    if(wearingMedium && !mediumProficiency){
+    if((wearingMedium && !mediumProficiency)||energyShieldArmorTypes.includes("Medium Armor")){
         return -5;
     }
 
-    if(wearingLight && !lightProficiency){
+    if((wearingLight && !lightProficiency)||energyShieldArmorTypes.includes("Light Armor")){
         return -2;
     }
 

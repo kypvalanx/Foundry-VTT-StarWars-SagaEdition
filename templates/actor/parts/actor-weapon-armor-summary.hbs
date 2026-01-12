@@ -3,17 +3,9 @@
         <button type="button" id="fullAttack" data-action="fullAttack">Full Attack</button>
 <!--        <button class="tiny fas fa-ellipsis" data-attack-key="fullAttack" data-action="attack-more"></button>-->
     </div>
-    {{#each actor.system.armors as |armor id|}}
-        {{#unless armor.hide}}
-            <div class="resource armor panel">
-                <div class="name"><label for="name">Armor</label><div class="plain input">{{armor.name}} ({{armor.type}})</div></div>
-                <div class="speed"><label for="name">Speed</label><div class="plain input">{{armor.speed}}</div></div>
-                <div class="reflex-defense"><label for="name">Reflex Defense</label><div class="plain input">+{{armor.refDefense}}</div></div>
-                <div class="fortitude-defense"><label for="name">Fortitude Defense</label><div class="plain input">+{{armor.fortDefense}}</div></div>
-                <div class="max-dexterity"><label for="name">Max Dexterity</label><div class="plain input">+{{armor.maxDex}}</div></div>
-                <div class="armor-notes"><label for="name">Notes</label><div class="plain input">{{armor.notes}}</div></div>
-            </div>
-        {{/unless}}
+    {{#each actor.armors as |armor id|}}
+
+        {{> 'systems/swse/templates/actor/parts/armor-block.hbs' armor=armor actor=../actor toggles=../actor.system.toggles id=id}}
     {{/each}}
     {{#each actor.attack.attacks as |attack id|}}
         {{> 'systems/swse/templates/actor/parts/attack/weapon-block.hbs' attack=attack actor=../actor toggles=../actor.system.toggles id=id}}

@@ -146,7 +146,8 @@ Hooks.once('init', async function () {
         'systems/swse/templates/roll/roll-tooltip.hbs',
         'systems/swse/templates/active-effect/active-effect-list.hbs',
         'systems/swse/templates/common/select.hbs',
-        'systems/swse/templates/common/rollable.hbs']);
+        'systems/swse/templates/common/rollable.hbs',
+        'systems/swse/templates/actor/parts/armor-block.hbs']);
 
 });
 

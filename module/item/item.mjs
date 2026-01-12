@@ -22,7 +22,10 @@ import {generateAction} from "../action/generate-action.mjs";
 export class SWSEItem extends Item {
 
     async _preUpdate(changed, options, user) {
-        super._preUpdate(changed, options, user);
+        if(this.type !== changed.type){
+            options.recursive = false;
+        }
+        await super._preUpdate(changed, options, user);
         //changed.system = changed.system || {};
     }
 
@@ -617,6 +620,10 @@ export class SWSEItem extends Item {
         return inheritableAttribute
     }
 
+    /**
+     *
+     * @returns {string}
+     */
     get armorType() {
         let armorType = (getInheritableAttribute({
             entity: this,
@@ -633,7 +640,7 @@ export class SWSEItem extends Item {
         if (armorType === 'Light Armor') {
             return 'Light';
         }
-        return 'NA';
+        return armorType ?? "NA";
     }
 
     get subType() {
