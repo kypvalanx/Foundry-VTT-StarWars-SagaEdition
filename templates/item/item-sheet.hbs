@@ -164,7 +164,7 @@
             <ol class="items-list">
                 {{#each item.effects as |mode id|}}
                     {{#if mode.isMode}}
-                        <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
+                        <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled-mode{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
                             <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
                             </div>
                             <h4 class="item-name">{{mode.name}}

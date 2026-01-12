@@ -27,14 +27,17 @@ export function generateArmorBlock(actor, armor) {
     if (!armor._parentIsProficientWithArmor()) {
         attributes.push("(Not Proficient)");
     }
+    const notes = attributes.join(", ");
     return {
         name: armor.name,
-        speed: actor.speed,
         refDefense: armor.armorReflexDefenseBonus,
         fortDefense: armor.fortitudeDefenseBonus,
         maxDex: armor.maximumDexterityBonus,
-        notes: attributes.join(", "),
-        type: armor.armorType
+        notes: notes,
+        subtype: armor.armorType,
+        notesHTML: notes,
+        notesText: notes,
+        modes : armor.modes
     };
 }
 
