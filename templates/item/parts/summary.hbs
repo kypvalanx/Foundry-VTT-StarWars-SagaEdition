@@ -6,10 +6,10 @@
     <div class="middle-right-sidebar">
             {{#if item.system}}
                 {{editor item.system.description target="system.description" button=true owner=owner
-                         editable=editable}}
+                         editable=editable engine="prosemirror"}}
             {{else}}
                 {{editor item._source.system.description target="system.description" button=true owner=owner
-                         editable=editable}}
+                         editable=editable engine="prosemirror"}}
             {{/if}}
             {{#each item.effects as |modification id|}}
                 {{#if modification.flags.swse.itemModifier}}
