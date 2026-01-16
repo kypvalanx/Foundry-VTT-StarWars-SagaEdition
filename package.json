@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Star Wars: Saga Edition system",
   "scripts": {
+    "test": "node --import ./module_test/setup.mjs --test module_test/**/*.test.mjs",
     "build": "gulp",
     "compile": "gulp css",
     "watch": "gulp",
@@ -25,8 +26,8 @@
     "node-sass": "^8.0.0"
   },
   "devDependencies": {
-    "@ethaks/fvtt-quench": "^0.9.2",
-    "@league-of-foundry-developers/foundry-vtt-types": "^9.280.0",
+    "@ethaks/fvtt-quench": "^0.10.0",
+    "@league-of-foundry-developers/foundry-vtt-types": "^13.341.1",
     "uuid": "^8.3.2"
   }
 }
