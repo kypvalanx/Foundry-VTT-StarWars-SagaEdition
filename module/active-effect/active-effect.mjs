@@ -1,5 +1,4 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {getDocumentByUuid} from "../common/util.mjs";
 import {generateAction} from "../action/generate-action.mjs";
 
 //import * as fields from "../data/fields.mjs";
@@ -145,7 +144,7 @@ export class SWSEActiveEffect extends ActiveEffect {
         let disabled = this.disabled;
         for(let link of this.links){
             if(link.type === "parent"){
-                let doc = getDocumentByUuid(link.uuid)
+                let doc = fromUuidSync(link.uuid)
                 disabled = disabled || doc.disabled
             }
         }

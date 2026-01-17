@@ -1388,81 +1388,13 @@ export function getDocumentByUuidOLD(uuid) {
     return source;
 }
 
-export function getDocumentByUuid(uuid, from) {
-
-    if(!uuid){
-        return;
-    }
-    return fromUuidSync(uuid);
-    // let toks = uuid.split(".")
-    // if(toks.length < 2){
-    //     return;
-    // }
-    // let source = from || game;
-    // if(from){
-    //     const newToks = [];
-    //     let found = false;
-    //     for (const tok of toks) {
-    //         if(found){
-    //             newToks.push(tok);
-    //         } else if(from.id === tok){
-    //             found = true;
-    //         }
-    //     }
-    //     toks = newToks;
-    // }
-    // let last = "";
-    // for (let [i, tok] of toks.entries()) {
-    //     switch (tok){
-    //         case "Scene":
-    //             source = source?.scenes;
-    //             break;
-    //         case "Token":
-    //             source = source?.tokens;
-    //             break;
-    //         case "Actor":
-    //             if(source?.actor){
-    //                 source = source?.actor
-    //             } else if(source?.actors){
-    //                 source = source?.actors;
-    //             }
-    //             break;
-    //         case "Item":
-    //             source = source?.items;
-    //             break;
-    //         case "ActiveEffect":
-    //             source = source?.effects
-    //             break;
-    //         case "Compendium":
-    //             source = source?.packs;
-    //             break;
-    //         default:
-    //             if (source?.id !== tok) {
-    //                 let cursor = source?.get(tok);
-    //                 if(!cursor){
-    //                     cursor = source?.get(`${last}.${tok}`)
-    //                 }
-    //                 if(cursor || i === toks.length-1){
-    //                     source = cursor
-    //                 }
-    //             }
-    //     }
-    //     last = tok;
-    //     if(!source){
-    //         return;
-    //     }
-    //
-    // }
-    return source;
-}
-
 function getEffectBlock(effect) {
     return `<div class="panel flex-col"><div>${effect.name}</div><div><img src="${effect.img}"></div></div>`;
 }
 
 export function linkEffects(effectId1, effectId2) {
-    const effect1 = getDocumentByUuid(effectId1)
-    const effect2 = getDocumentByUuid(effectId2)
+    const effect1 = fromUuidSync(effectId1)
+    const effect2 = fromUuidSync(effectId2)
 
     let effectBlock1 = getEffectBlock(effect1)
     let effectBlock2 = getEffectBlock(effect2)

@@ -23,8 +23,6 @@ import {
     d20Result,
     getAttackRange,
     getDistance,
-    getDocumentByUuid,
-    getEntityFromCompendiums,
     getOrdinal,
     increaseDieSize,
     minus,
@@ -262,7 +260,7 @@ export class Attack {
             }
 
             if (this.actorId) {
-                let find = getDocumentByUuid(this.actorId)
+                let find = fromUuidSync(this.actorId)
 
                 if (find) {
                     return find;
@@ -1442,11 +1440,7 @@ export function getActor(actorId) {
     if (!actorId) {
         return;
     }
-    let find = getDocumentByUuid(actorId);
-    if (!find) {
-        find = getEntityFromCompendiums("Actor", actorId)
-    }
-    return find;
+    return fromUuidSync(actorId);
 }
 
 /**

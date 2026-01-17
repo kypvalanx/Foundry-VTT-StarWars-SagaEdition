@@ -1,5 +1,5 @@
 import {SWSEActiveEffect} from "../active-effect/active-effect.mjs";
-import {addBlankMode, addBlankModificationEffect, getDocumentByUuid} from "./util.mjs";
+import {addBlankMode, addBlankModificationEffect} from "./util.mjs";
 
 export function onChangeControl(event) {
     event.preventDefault();
@@ -51,7 +51,7 @@ export function onEffectControl(event){
     let doc;
     let parentDoc;
     if(effectUuid){
-        doc = getDocumentByUuid(effectUuid, this.object);
+        doc = fromUuidSync(effectUuid);
         let toks = effectUuid.split(".");
         effectId = toks[toks.length-1]
         parentDoc = doc?.parent;

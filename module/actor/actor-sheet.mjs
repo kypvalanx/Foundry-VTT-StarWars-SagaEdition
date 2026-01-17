@@ -2,7 +2,6 @@ import {
     attackOptions,
     filterItemsByTypes,
     getCleanListFromCSV,
-    getDocumentByUuid,
     getParentByHTMLClass,
     linkEffects,
     numericOverrideOptions,
@@ -149,15 +148,6 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         }, {})
         return data;
     }
-
-
-    async _renderInner(...args) {
-        console.log("SWSEActorSheet#_renderInner", this.actor?.name);
-        const html = await super._renderInner(...args);
-        console.log("SWSEActorSheet#_renderInner finished");
-        return html;
-    }
-
 
     /** @override */
     activateListeners(html) {
@@ -983,7 +973,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         if (!vehicleActorTypes.includes(this.actor.type)) {
             return;
         }
-        let actor = getDocumentByUuid(data.uuid);
+        let actor = fromUuidSync(data.uuid);
         if (!characterActorTypes.includes(actor.type)) {
             return;
         }
@@ -1284,7 +1274,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         // Delete race
         if (a.classList.contains("crew-remove")) {
             const uuid = $(a).data("uuid");
-            let actor = getDocumentByUuid(uuid);
+            let actor = fromUuidSync(uuid);
             await this.object.removeActorLink(actor);
         }
     }
