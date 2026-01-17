@@ -5,7 +5,6 @@ import {
     convertOverrideToMode,
     filterItemsByTypes,
     getActorFromId,
-    getDocumentByUuid,
     getVariableFromActorData,
     inheritableItems,
     innerJoin,
@@ -115,7 +114,7 @@ export class SWSEActor extends Actor {
         this.initializeCharacterSettings();
 
         for (let link of this.actorLinks) {
-            let linkedActor = getDocumentByUuid(link.uuid);
+            let linkedActor = fromUuidSync(link.uuid);
             if (!linkedActor) continue;
             let reciLink = linkedActor.actorLinks?.find(link => link.uuid === this.uuid)
 
@@ -710,7 +709,7 @@ export class SWSEActor extends Actor {
      */
     get linkedActors(){
         return this.getCached("linkedActors", () => {
-            return new Map(this.actorLinks.map(actorLink => [actorLink.position, getDocumentByUuid(actorLink.uuid)]).filter(actorLink => !!(actorLink[1])));
+            return new Map(this.actorLinks.map(actorLink => [actorLink.position, fromUuidSync(actorLink.uuid)]).filter(actorLink => !!(actorLink[1])));
         })
     }
 
