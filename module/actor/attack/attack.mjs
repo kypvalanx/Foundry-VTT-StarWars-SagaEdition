@@ -289,7 +289,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get provider() {
-        return getActor(this.parentId);
+        return fromUuidSync(this.parentId);
     }
 
     /**
@@ -297,7 +297,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get operator() {
-        return getActor(this.operatorId) || getCrewByQuality(getActor(this.actorId).crew.quality?.quality);
+        return fromUuidSync(this.operatorId) || getCrewByQuality(fromUuidSync(this.actorId).crew.quality?.quality);
     }
 
     /**
@@ -305,7 +305,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get parent() {
-        return getActor(this.parentId);
+        return fromUuidSync(this.parentId);
     }
 
 
@@ -1435,13 +1435,6 @@ export class Attack {
     }
 }
 
-
-export function getActor(actorId) {
-    if (!actorId) {
-        return;
-    }
-    return fromUuidSync(actorId);
-}
 
 /**
  * @param dieString String

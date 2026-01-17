@@ -1,5 +1,5 @@
 import {SimpleCache} from "../../common/simple-cache.mjs";
-import {Attack, getActor} from "./attack.mjs";
+import {Attack} from "./attack.mjs";
 import {getInheritableAttribute} from "../../attribute-helper.mjs";
 import {equippedItems, getBonusString, handleAttackSelect} from "../../common/util.mjs";
 import {createAttackMacro} from "../../swse.mjs";
@@ -573,7 +573,7 @@ async function getAttacks(attack, data) {
  * @return {Promise<abstract.Document|abstract.Document[]|undefined>}
  */
 export async function makeAttack(data) {
-    const actor = getActor(data.actorUUID)
+    const actor = fromUuidSync(data.actorUUID)
     let attacks = await getAttacks(actor.attack, data);
 
     let attackRows = [];
