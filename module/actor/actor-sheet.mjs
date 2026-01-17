@@ -135,13 +135,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     /** @override */
     getData(options={}) {
-
-        console.log("SWSEActorSheet#getData called for", this.actor?.name);
-
         let data = super.getData(options);
-        console.log("SWSEActorSheet#getData result", data);
-
-
         data.modes = Object.entries(CONST.ACTIVE_EFFECT_MODES).reduce((obj, e) => {
             obj[e[1]] = game.i18n.localize("EFFECT.MODE_" + e[0]);
             return obj;
