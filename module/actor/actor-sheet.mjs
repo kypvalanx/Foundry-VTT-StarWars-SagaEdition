@@ -827,7 +827,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         return response;
     }
 
-
+//TODO WTF
     _updateObject(event, formData) {
         // Translate CR
         const cr = formData["system.details.cr.base"];
@@ -870,6 +870,17 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         this._pendingUpdates = {};
 
         return super._updateObject(event, formData);
+    }
+
+    async _onChangeInput(event) {
+        let element = $(event.currentTarget);
+        let action = element.data("action");
+        ///should we skip letting the sheet acknowledge the change?
+        if(["effect-control"].includes(action)){
+            return;
+        }
+
+        super._onChangeInput(event);
     }
 
     _adjustActorPropertyBySpan(event) {
