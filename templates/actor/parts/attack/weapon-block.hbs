@@ -56,7 +56,7 @@
                              data-mode-path="{{mode.modePath}}"
                              data-mode="{{mode.name}}" data-item-id="{{../../attack.weaponId}}"
                              data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
-                            <label for="{{mode.name}} {{../../attack.weaponId}}">{{mode.name}}</label>
+                            <label>{{mode.name}}</label>
                             <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable"
                                    data-action="effect-control" data-effect-uuid="{{mode.uuid}}"/>
                         </div>

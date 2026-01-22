@@ -120,24 +120,24 @@ export class SWSEActiveEffect extends ActiveEffect {
         await this.safeUpdate(data);
     }
 
-    disable(disabled = true, affected = []){
-        if(this.disabled === disabled || (affected.includes(this.id))){
+    async disable(disabled = true, affected = []) {
+        if (this.disabled === disabled || (affected.includes(this.id))) {
             return;
         }
-        for(let link of this.links){
-            if(link.type === "exclusive" && !disabled){
+        for (let link of this.links) {
+            if (link.type === "exclusive" && !disabled) {
                 let doc = this.getSiblingEffectByName(link.name)
                 affected.push(this.id)
-                doc.disable(true, affected)
-            } else if(link.type === "mirror") {
+                await doc.disable(true, affected)
+            } else if (link.type === "mirror") {
                 let doc = this.getSiblingEffectByName(link.name)
                 affected.push(this.id)
-                doc.disable(disabled, affected)
+                await doc.disable(disabled, affected)
             }
         }
 
 
-        this.safeUpdate({disabled})
+        await this.safeUpdate({disabled, "system.disabled": disabled}, {recursive: false});
     }
 
     get isDisabled(){

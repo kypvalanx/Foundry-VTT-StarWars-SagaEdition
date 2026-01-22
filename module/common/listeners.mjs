@@ -46,6 +46,9 @@ export function onEffectControl(event){
     event.stopPropagation();
     let element = $(event.currentTarget);
     let effectId = element.data("effectId");
+    if(effectId){
+        console.warn("onEffectControl should not use effectId")
+    }
     let effectUuid = element.data("effectUuid");
 
     let doc;
@@ -68,7 +71,7 @@ export function onEffectControl(event){
             parentDoc.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
             break;
         case 'disable':
-            toggleEffectDisabled.call(parentDoc, effectId, !event.currentTarget.checked)
+            fromUuidSync(effectUuid).disable(!event.currentTarget.checked)
             break;
         case "add-modification":
             addBlankModificationEffect.call(parentDoc);
@@ -78,12 +81,6 @@ export function onEffectControl(event){
             break;
     }
 }
-
-export function toggleEffectDisabled(effectId, disabled) {
-    this.effects.get(effectId).disable(disabled)
-}
-
-
 export function _adjustPropertyBySpan(event) {
     event.preventDefault();
     const el = event.currentTarget;

@@ -42,7 +42,6 @@
                         {{#if armor.hasAmmunition}}
                             {{> 'systems/swse/templates/item/parts/ammunition.hbs' ammunition=armor.ammunition}}
                         {{/if}}
-                    {{log armor}}
                     {{#each armor.modes as |mode id|}}
                         <div class="mode-selector mode-group editor" data-type="{{mode.type}}"
                              data-mode-path="{{mode.modePath}}"
