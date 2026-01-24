@@ -147,16 +147,8 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     activateListeners(html) {
         super.activateListeners(html);
 
-        //disable submit on enter  TODO: figure out if this is still needed, i think it may not be.
-        // $(document).ready(function () {
-        //     $(window).keydown(function (event) {
-        //         if (event.keyCode === 13) {
-        //             event.preventDefault();
-        //             return false;
-        //         }
-        //     });
-        // });
 
+        //should this be moved to a nonSubmittal method?
         html.find(".collapse-toggle").on("click", event => onCollapseToggle(event))
 
         // Everything below here is only needed if the sheet is editable
