@@ -260,7 +260,7 @@ const applyAttack = async (event) => {
     }
 }
 
-Hooks.on('renderChatMessage', async (message, html) => {
+Hooks.on('renderChatMessageHTML', async (message, html) => {
     if (typeof message.flags?.swse?.context === 'undefined') {
         return true;
     }
@@ -757,8 +757,8 @@ async function rollVariable(actorId, variable) {
     }
 }
 
-Hooks.on('renderChatMessage', (chatItem, html) => {
-    html.find(".toggle-hide").on("click", (ev) => {
+Hooks.on('renderChatMessageHTML', (chatItem, html) => {
+    $(html).find(".toggle-hide").on("click", (ev) => {
         let nodes = $(ev.currentTarget)[0].parentElement.childNodes;
         for (let node of nodes) {
             if (node?.classList?.contains("hideable")) {

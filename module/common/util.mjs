@@ -1702,9 +1702,9 @@ export function numericOverrideOptions(actor) {
         name: "Set Override",
         icon: '<i class="fas fa-edit">',
         callback: async element => {
-            let overrideKey = element.data('override-key');
-            let overrideName = element.data('override-name');
-            let context = element.data('context');
+            let overrideKey = element.dataset['overrideKey'];
+            let overrideName = element.dataset['overrideName'];
+            let context = element.dataset['context'];
             let value = await Dialog.prompt({
                 title: `Set ${overrideName}`,
                 content: `<p>Set ${overrideName}</p><br/><input class="choice" type="number" data-option-key="">`,
@@ -1735,8 +1735,8 @@ export function numericOverrideOptions(actor) {
         icon: '<i class="fas fa-delete">',
         callback: element => {
 
-            const overrideKey = element.data('override-key');
-            const context = element.data('context');
+            const overrideKey = element.dataset['overrideKey'];
+            const context = element.dataset['context'];
             const data = {};
             data[overrideKey] = null;
 
@@ -1750,7 +1750,7 @@ export function numericOverrideOptions(actor) {
             actor.safeUpdate(data);
         },
         condition: element => {
-            let override = element[0].dataset["override"]
+            let override = element.dataset["override"]
             return !!override
         }
     })
