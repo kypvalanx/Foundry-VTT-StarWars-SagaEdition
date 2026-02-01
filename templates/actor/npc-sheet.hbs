@@ -1,0 +1,582 @@
+<form class="{{cssClass}}" autocomplete="off">
+    <div class="flex flex-col" style="height:100%">
+        <div>
+
+            {{#each actor.warnings as |warning id|}}
+            <span class="warning">{{{warning}}}</span><br />
+            {{/each}}
+            {{#each actor.errors as |error id|}}
+            <span class="error">{{{error}}}</span><br />
+            {{/each}}
+        </div>
+        <div class="flex-grow1">
+            {{!-- Sheet Tab Navigation --}}
+            <nav class="sheet-tabs tabs" data-group="primary">
+                <a class="item" data-tab="summary">Summary</a>
+                <a class="item" data-tab="import">Import</a>{{!-- or make a button?? --}}
+                <a class="item" data-tab="settings">Settings</a>
+            </nav>
+
+            {{!-- Sheet Body --}}
+            <section class="sheet-body">
+                {{!-- npc header summary --}}
+                {{!-- ---------------------------------------------------------------- --}}
+                <div class="tab summary npc flex-col" data-group="primary" data-tab="summary">
+                    <div class="flex flex-row statblock">
+                        <div class="flex-grow1 flex-col">
+                            <div class="flex flex-row">
+                                {{#unless isEditable}}
+                                <div class="flex-row">
+                                    <div class="text">
+                                        <h2>{{actor.name}}</h2>
+                                    </div>
+                                    <div class="text right-elem">CL{{system.cl.value}}{{#if system.xp}} :
+                                        {{system.xp}}
+                                        xp{{/if}}</div>
+                                </div>
+                                {{else}}
+                                {{!-- name --}}
+                                <div class="labeled-input">
+                                    <label for="name" class="text">Name</label>
+                                    <input class="input" name="name" id="name" type="text" value="{{actor.name}}"
+                                        placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- challenge level --}}
+                                <div class="labeled-input">
+                                    <label for="cl" class="text">Challenge Level</label>
+                                    <input class="input" id="cl" name="system.cl.value" type="number"
+                                        value="{{system.cl.value}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- experience --}}
+                                <div class="labeled-input">
+                                    <label for="xp" class="text">XP</label>
+                                    <input class="input" id="xp" name="system.xp" type="text" value="{{system.xp}}"
+                                        placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div>
+                                    <h3 class="text">{{system.size}} {{system.details.species}}
+                                        {{system.details.classes}}</h3>
+                                </div>
+                                {{else}}
+                                {{!-- size --}}
+                                <div class="labeled-input">
+                                    <label for="size" class="text">Size</label>
+                                    <input class="left-input" id="size" name="system.size" type="text"
+                                        value="{{system.size}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- species --}}
+                                <div class="labeled-input">
+                                    <label for="species" class="text">Species</label>
+                                    <input class="middle-input" id="species" name="system.details.species" type="text"
+                                        value="{{system.details.species}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- classes --}}
+                                <div class="labeled-input">
+                                    <label for="classSummary" class="text">Classes</label>
+                                    <input class="right-input" id="classSummary" name="system.details.classes"
+                                        type="text" value="{{system.details.classes}}" placeholder=""
+                                        onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Destiny </b>{{system.destinyPoints}}; <span class="rollable"
+                                        data-roll="1d6"><b>Force </b>{{system.forcePoints}}</span>{{#if
+                                    system.forceSpecial}}, {{system.forceSpecial}}{{/if}}; <b>Dark Side
+                                    </b>{{system.darkSideScore}}</div>
+                                {{else}}
+                                {{!-- destinypoints --}}
+                                <div class="labeled-input">
+                                    <label for="destinyPts" class="text">Destiny Points</label>
+                                    <input class="left-input" id="destinyPts" name="system.destinyPoints" type="number"
+                                        value="{{system.destinyPoints}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- forcepoints --}}
+                                <div class="labeled-input">
+                                    <label for="forcePts" class="text">Force Points</label>
+                                    <input class="middle-input" id="forcePts" name="system.forcePoints" type="number"
+                                        value="{{system.forcePoints}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- forcepoints special --}}
+                                <div class="labeled-input">
+                                    <label for="forcePtsSp" class="text">Force Special</label>
+                                    <input class="middle-input" id="forcePtsSp" name="system.forceSpecial" type="text"
+                                        value="{{system.forceSpecial}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- darksidescore --}}
+                                <div class="labeled-input">
+                                    <label for="darkSideScore" class="text">DarkSideScore</label>
+                                    <input class="right-input" id="darkSideScore" name="system.darkSideScore"
+                                        type="number" value="{{system.darkSideScore}}" placeholder=""
+                                        onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><span class="rollable"><b>Init </b>+{{#if
+                                        system.skills.init.value}}{{system.skills.init.value}}{{else}}{{system.abilities.dex.mod}}{{/if}}</span>;
+                                    <b>Senses </b>{{system.details.senses}}
+                                </div>
+                                {{else}}
+                                {{!-- initiative --}}
+                                <div class="labeled-input">
+                                    <label for="initiative" class="text">Initiative</label>
+                                    <input class="left-input" id="initiative" name="system.skills.init.value"
+                                        type="number" value="{{system.skills.init.value}}" placeholder=""
+                                        onfocus="this.select()" />
+                                </div>
+                                {{!-- Senses --}}
+                                <div class="labeled-input">
+                                    <label for="senses" class="text">Senses</label>
+                                    <input class="right-input" id="senses" name="system.details.senses" type="text"
+                                        value="{{system.details.senses}}" placeholder="perception"
+                                        onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- languages --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Languages </b>{{system.details.lang}}</div>
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="lang" class="text">Languages</label>
+                                    <input class="input" id="lang" name="system.details.lang" type="text"
+                                        value="{{system.details.lang}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <hr>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- defenses --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Defenses </b>Ref {{system.defense.ref.value}} &#40;flat-footed
+                                    {{system.defense.reff.value}}&#41;, Fort {{system.defense.fort.value}}, Will
+                                    {{system.defense.will.value}}{{#if system.defense.special}};
+                                    {{system.defense.special}}{{/if}}</div>
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="ref" class="text">Ref</label>
+                                    <input class="input" id="ref" name="system.defense.ref.value" type="number"
+                                        value="{{system.defense.ref.value}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="reff" class="text">Ref flat-footed</label>
+                                    <input class="input" id="reff" name="system.defense.reff.value" type="number"
+                                        value="{{system.defense.reff.value}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="fort" class="text">Fort</label>
+                                    <input class="input" id="fort" name="system.defense.fort.value" type="number"
+                                        value="{{system.defense.fort.value}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="will" class="text">Will</label>
+                                    <input class="input" id="will" name="system.defense.will.value" type="number"
+                                        value="{{system.defense.will.value}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="specialD" class="text">Special Defense</label>
+                                    <input class="input" id="specialD" name="system.defense.special" type="text"
+                                        value="{{system.defense.special}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>hp </b>{{system.health.max}}; {{#if
+                                    system.details.specialHp}}{{system.details.specialHp}}; {{/if}}<b>Threshold
+                                    </b>{{system.defense.dt}}</div>
+                                {{else}}
+                                {{!-- hp --}}
+                                <div class="labeled-input">
+                                    <label for="health" class="text">Health</label>
+                                    <input class="left-input" id="health" name="system.health.max" type="number"
+                                        value="{{system.health.max}}" placeholder="max" onfocus="this.select()" />
+                                </div>
+                                {{!-- dr and other special hp optional --}}
+                                <div class="labeled-input">
+                                    <label for="specialhp" class="text">Special</label>
+                                    <input class="middle-input" id="specialhp" name="system.details.specialHp"
+                                        type="text" value="{{system.details.specialHp}}" placeholder="DR and SR"
+                                        onfocus="this.select()" />
+                                </div>
+                                {{!-- threshhold --}}
+                                <div class="labeled-input">
+                                    <label for="damageThresh" class="text">Damage Threshold</label>
+                                    <input class="right-input" id="damageThresh" name="system.defense.dt" type="number"
+                                        value="{{system.defense.dt}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- immunities optional--}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.immunities}}
+                                <div class="text"><b>Immunities </b>{{system.details.immunities}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="immunities" class="text">Immunities</label>
+                                    <input class="input" id="immunities" name="system.details.immunities" type="text"
+                                        value="{{system.details.immunities}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- weaknesses optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.weaknesses}}
+                                <div class="text"><b>Weaknesses </b>{{system.details.weaknesses}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="weaknesses" class="text">Weaknesses</label>
+                                    <input class="input" id="weaknesses" name="system.details.weaknesses" type="text"
+                                        value="{{system.details.weaknesses}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <hr>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- speed --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Speed </b>{{system.speed.base}} squares (walking){{#if
+                                    system.speed.swim}};
+                                    {{system.speed.swim}} squares (swimming){{/if}}{{#if system.speed.climb}};
+                                    {{system.speed.climb}} squares (climbing){{/if}}{{#if system.speed.fly}};
+                                    {{system.speed.fly}} squares (flying){{/if}}{{#if system.speed.special}};
+                                    {{system.speed.special}}{{/if}}</div>
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="walk" class="text">Walk Speed</label>
+                                    <input class="input units-input" id="walk" name="system.speed.base" type="number"
+                                        value="{{system.speed.base}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="units-label"> sq</div>
+                                <div class="labeled-input flex-col">
+                                    <label for="swim" class="text">Swim Speed</label>
+                                    <input class="input units-input" id="swim" name="system.speed.swim" type="number"
+                                        value="{{system.speed.swim}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="units-label"> sq</div>
+                                <div class="labeled-input">
+                                    <label for="climb" class="text">Climb Speed</label>
+                                    <input class="input units-input" id="climb" name="system.speed.climb" type="number"
+                                        value="{{system.speed.climb}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="units-label"> sq</div>
+                                <div class="labeled-input">
+                                    <label for="fly" class="text">Fly Speed</label>
+                                    <input class="input units-input" id="fly" name="system.speed.fly" type="number"
+                                        value="{{system.speed.fly}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                <div class="units-label"> sq</div>
+                                <div class="labeled-input">
+                                    <label for="speedSp" class="text">Special</label>
+                                    <input class="input" id="speedSp" name="system.speed.special" type="text"
+                                        value="{{system.speed.special}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- melee attacks --}}{{!-- ------------------------------ --}}
+                            {{!-- ranged attacks --}}{{!-- ------------------------------ --}}
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text">{{#if system.details.fightSpace}}<b>Fighting Space
+                                    </b>{{system.details.fightSpace}}; {{/if}}{{#if system.details.fightSpace}}<b>Reach
+                                    </b>{{system.details.reach}} square{{/if}}</div>
+                                {{else}}
+                                {{!-- fighting space optional --}}
+                                <div class="labeled-input">
+                                    <label for="fightSpace" class="text">Fighting Space</label>
+                                    <input class="left-input" id="fightSpace" name="system.details.fightSpace"
+                                        type="text" value="{{system.details.fightSpace}}" placeholder=""
+                                        onfocus="this.select()" />
+                                </div>
+                                {{!-- reach --}}
+                                <div class="labeled-input">
+                                    <label for="reach" class="text">Reach</label>
+                                    <input class="right-input" id="reach" name="system.reach" type="number"
+                                        value="{{system.reach}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Base Atk </b>+{{system.baseAttack}}; <b>Grp </b>+{{system.grapple}}
+                                </div>
+                                {{else}}
+                                {{!-- base attack --}}
+                                <div class="labeled-input">
+                                    <label for="baseAttack" class="text">Base Attack</label>
+                                    <input class="left-input" id="baseAttack" name="system.baseAttack" type="number"
+                                        value="{{system.baseAttack}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{!-- grapple --}}
+                                <div class="labeled-input">
+                                    <label for="grapple" class="text">Grapple</label>
+                                    <input class="right-input" id="grapple" name="system.grapple" type="number"
+                                        value="{{system.grapple}}" placeholder="" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- attack actions optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.specialActions}}
+                                <div class="text"><b>Atk Options </b>{{system.details.atkOptions}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="atkOptions" class="text">Attack Options</label>
+                                    <textarea class="input" id="atkOptions" name="system.details.atkOptions"
+                                        placeholder="" onfocus="this.select()">{{system.details.atkOptions}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- special actions optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.specialActions}}
+                                <div class="text"><b>Special Actions </b>{{system.details.specialActions}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="specialActions" class="text">Special Actions</label>
+                                    <textarea class="input" id="specialActions" name="system.details.specialActions"
+                                        placeholder=""
+                                        onfocus="this.select()">{{system.details.specialActions}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- force powers known optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.forceP}}
+                                <div class="text"><b>Force Powers Known </b>{{system.details.forceP}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="forceP" class="text">Force Powers</label>
+                                    <textarea class="input" id="forceP" name="system.details.forceP" placeholder=""
+                                        onfocus="this.select()">{{system.details.forceP}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- force secrets optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.forceS}}
+                                <div class="text"><b>Force Secrets </b>{{system.details.forceS}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="forceS" class="text">Force Secrets</label>
+                                    <textarea class="input" id="forceS" name="system.details.forceS" placeholder=""
+                                        onfocus="this.select()">{{system.details.forceS}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- force techniques optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.forceT}}
+                                <div class="text"><b>Force Techniques </b>{{system.details.forceT}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="forceT" class="text">Force Techniques</label>
+                                    <textarea class="input" id="forceT" name="system.details.forceT" placeholder=""
+                                        onfocus="this.select()">{{system.details.forceT}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            <hr>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- abilities --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}
+                                <div class="text"><b>Abilities </b>
+                                    <span class="rollable" data-roll="1d20+{{abilities.str.mod}}+{{condition}}">Str
+                                        {{abilities.str.value}}</span>,
+                                    <span class="rollable" data-roll="1d20+{{abilities.dex.mod}}+{{condition}}">Dex
+                                        {{abilities.dex.value}}</span>,
+                                    <span class="rollable" data-roll="1d20+{{abilities.con.mod}}+{{condition}}">Con
+                                        {{abilities.con.value}}</span>,
+                                    <span class="rollable" data-roll="1d20+{{abilities.wis.mod}}+{{condition}}">Wis
+                                        {{abilities.wis.value}}</span>,
+                                    <span class="rollable" data-roll="1d20+{{abilities.int.mod}}+{{condition}}">Int
+                                        {{abilities.int.value}}</span>,
+                                    <span class="rollable" data-roll="1d20+{{abilities.cha.mod}}+{{condition}}">Cha
+                                        {{abilities.cha.value}}</span>
+                                </div>
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="str" class="text">Strength</label>
+                                    <input class="input" id="str" name="system.abilities.str.base" type="number"
+                                        value="{{abilities.str.value}}" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="dex" class="text">Dexterity</label>
+                                    <input class="input" id="dex" name="system.abilities.dex.base" type="number"
+                                        value="{{abilities.dex.value}}" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="con" class="text">Constitution</label>
+                                    <input class="input" id="con" name="system.abilities.con.base" type="number"
+                                        value="{{abilities.con.value}}" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="wis" class="text">Wisdom</label>
+                                    <input class="input" id="wis" name="system.abilities.wis.base" type="number"
+                                        value="{{abilities.wis.value}}" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="int" class="text">Intelligence</label>
+                                    <input class="input" id="int" name="system.abilities.int.base" type="number"
+                                        value="{{abilities.int.value}}" onfocus="this.select()" />
+                                </div>
+                                <div class="labeled-input">
+                                    <label for="cha" class="text">Charisma</label>
+                                    <input class="input" id="cha" name="system.abilities.cha.base" type="number"
+                                        value="{{abilities.cha.value}}" onfocus="this.select()" />
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- special qualities optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.specialQualities}}
+                                <div class="text"><b>Special Qualities </b>{{system.details.specialQualities}}</div>
+                                {{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="specialQ" class="text">Special Qualities</label>
+                                    <textarea class="input" id="specialQ" name="system.details.specialQualities"
+                                        placeholder=""
+                                        onfocus="this.select()">{{system.details.specialQualities}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- talents optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.talents}}
+                                <div class="text"><b>Talents </b>{{system.details.talents}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="talents" class="text">Talents</label>
+                                    <textarea class="input" id="talents" name="system.details.talents" placeholder=""
+                                        onfocus="this.select()">{{system.details.talents}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- feats optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.feats}}
+                                <div class="text"><b>Feats </b>{{system.details.feats}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="feats" class="text">Feats</label>
+                                    <textarea class="input" id="feats" name="system.details.feats" placeholder=""
+                                        onfocus="this.select()">{{system.details.feats}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- skills optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.skills}}
+                                <div class="text"><b>Skills </b>{{system.details.skills}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="skills" class="text">Skills</label>
+                                    <textarea class="input" id="skills" name="system.details.skills" placeholder=""
+                                        onfocus="this.select()">{{system.details.skills}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- systems optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.systems}}
+                                <div class="text"><b>Systems </b>{{system.details.systems}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="systems" class="text">Systems</label>
+                                    <textarea class="input" id="systems" name="system.details.systems"
+                                        placeholder="Droids and Cyborgs only"
+                                        onfocus="this.select()">{{system.details.systems}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- possessions optional --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.possesses}}
+                                <div class="text"><b>Possessions </b>{{system.details.possesses}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="possesses" class="text">Possessions</label>
+                                    <textarea class="input" id="possesses" name="system.details.possesses"
+                                        placeholder="" onfocus="this.select()">{{system.details.possesses}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{#if system.details.notes}}
+                            <hr>{{/if}}
+                            {{!-- ---------------------------------------------------------------- --}}
+                            {{!-- special notes --}}
+                            <div class="flex-row">
+                                {{#unless isEditable}}{{#if system.details.notes}}
+                                <div class="text">{{system.details.notes}}</div>{{/if}}
+                                {{else}}
+                                <div class="labeled-input">
+                                    <label for="notes" class="text">Notes</label>
+                                    <textarea class="input" id="notes" name="system.details.notes" placeholder=""
+                                        onfocus="this.select()">{{system.details.notes}}</textarea>
+                                </div>
+                                {{/unless}}
+                            </div>
+                        </div>
+                        {{!-- ---------------------------------------------------------------- --}}
+                        <div style="display: flex; justify-content: flex-end"><i class="fa fa-gear sheetedit"
+                                style="font-size:24px;"></i></div>
+                        {{#unless isEditable}}
+                        <div class="right">
+                            {{> 'swse.actor-portrait'}}
+                            {{> 'swse.actor-condition'}}</div>
+                        {{/unless}}
+                    </div>
+                </div>
+                <div class="tab import flex-col" data-group="primary" data-tab="import">
+                    <div class="flexcol">
+                        <label for="import" class="text">Import statblock</label>
+                        <textarea class="input" id="import" name="import.data"
+                            placeholder="copy and paste stat-block here. Currently unsupported." rows="30"></textarea>
+                    </div>
+                </div>
+                <div class="tab settings flex-col" data-group="primary" data-tab="settings">
+                    <div class="flexcol">
+                        {{#each settings}}
+                        {{> 'swse.setting'}}
+                        {{/each}}
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</form>
