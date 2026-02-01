@@ -25,7 +25,7 @@ export async function processActor(actorData) {
 
     actor.suppressDialog = false;
     actor.skipPrepare = false;
-    actor.prepareData();
+    await actor.prepareData();
 
 
 
