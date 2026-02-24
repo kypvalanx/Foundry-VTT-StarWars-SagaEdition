@@ -23,6 +23,8 @@ import {initializeCompendiumButtons} from "./compendium/compendium-web.mjs";
 import {buildRollContent} from "./common/chatMessageHelpers.mjs";
 import {SWSETokenDocument} from "./token/token-document.mjs";
 import {CharacterDataModel} from "./actor/data/characterdata.mjs";
+import {NpcDataModel} from "./actor/data/npcdata.mjs";
+import {VehicleDataModel} from "./actor/data/vehicledata.mjs";
 
 
 
@@ -76,7 +78,10 @@ Hooks.once('init', async function () {
     // Define custom Entity classes
     CONFIG.SWSE = SWSE;
     CONFIG.Actor.documentClass = SWSEActor;
-    CONFIG.Actor.dataModels.swse = CharacterDataModel;
+    CONFIG.Actor.dataModels.character = CharacterDataModel;
+    CONFIG.Actor.dataModels.npc = CharacterDataModel;
+    CONFIG.Actor.dataModels.vehicle = VehicleDataModel;
+    CONFIG.Actor.dataModels["npc-vehicle"] = VehicleDataModel;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.hudClass = SWSETokenHud;
     CONFIG.Token.documentClass = SWSETokenDocument;

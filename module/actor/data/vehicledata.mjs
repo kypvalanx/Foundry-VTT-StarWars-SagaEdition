@@ -36,7 +36,7 @@ export class VehicleDataModel extends SystemDataModel.mixin(...vehicleFunctionCl
                 ...DetailFields.npc,
             }),
             ...TraitsFields.npc,
-            attacks: new fields.ArrayField({}),
+            ///attacks: new fields.ArrayField({}),
         };
     }
 

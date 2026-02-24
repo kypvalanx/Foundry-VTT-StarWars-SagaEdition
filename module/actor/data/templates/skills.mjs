@@ -64,8 +64,8 @@ export class SkillFields {
             surv: this.#_skillProperties("wis", "Survival"),
             swim: this.#_skillProperties("str", "Swim"),
             tinj: this.#_skillProperties("wis", "Treat Injury"),
-            ucom: this.#_skillProperties("int", "Use Computer"),
-            ufor: this.#_skillProperties("cha", "Use The Force"),
+            "Use Computer": this.#_skillProperties("int", "Use Computer"),
+            "use the force": this.#_skillProperties("cha", "Use The Force"),
         };
     }
 

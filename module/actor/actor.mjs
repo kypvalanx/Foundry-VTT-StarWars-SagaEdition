@@ -63,6 +63,7 @@ export class SWSEActor extends Actor {
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
         this.cache = new SimpleCache()
+        this.system.prepareDerivedData()
         super.prepareData();
 
         if (this.updateLegacyActor()) {
