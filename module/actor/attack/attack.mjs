@@ -596,7 +596,7 @@ export class Attack {
      *                  which accounts for attributes like strength, item size, and wielding type.
      */
     #getMeleeDamageAbilityModifier(actor, item) {
-        let abilityMod = parseInt(actor.system.attributes.str.mod);
+        let abilityMod = parseInt(actor.attributes.str.mod);
         let isTwoHanded = this.hands === 2 || compareSizes(getSize(actor), getSize(item)) === 1;
         let isMySize = compareSizes(getSize(actor), getSize(item)) === 0;
 

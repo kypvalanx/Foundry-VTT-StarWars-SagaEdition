@@ -42,7 +42,7 @@ export class WeightDelegate {
         return number * SIZE_CARRY_CAPACITY_MODIFIER[sizeArray[getResolvedSize(this.actor)]]
     }
     get heavyLoad() {
-        return this.#applyStandardCarryCapacityModifiers(Math.pow(this.actor.attributes.str.total * 0.5, 2))
+        return this.#applyStandardCarryCapacityModifiers(Math.pow(this.actor.system.abilities.str.total * 0.5, 2))
 
     }
 

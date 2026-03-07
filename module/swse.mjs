@@ -1,8 +1,6 @@
-// Import Modules
 import {initializeStatusEffects, SWSE} from "./common/config.mjs";
 import {getEntityKey, SWSEActor} from "./actor/actor.mjs";
 import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
-//import {SWSEManualActorSheet} from "./actor/manual-actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {SWSEItemSheet} from "./item/item-sheet.mjs";
 import {registerSystemSettings} from "./settings/core.mjs";
@@ -23,7 +21,6 @@ import {initializeCompendiumButtons} from "./compendium/compendium-web.mjs";
 import {buildRollContent} from "./common/chatMessageHelpers.mjs";
 import {SWSETokenDocument} from "./token/token-document.mjs";
 import {CharacterDataModel} from "./actor/data/characterdata.mjs";
-import {NpcDataModel} from "./actor/data/npcdata.mjs";
 import {VehicleDataModel} from "./actor/data/vehicledata.mjs";
 
 

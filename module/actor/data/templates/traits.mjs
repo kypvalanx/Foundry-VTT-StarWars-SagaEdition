@@ -132,16 +132,17 @@ export class TraitsFunctions {
         let classData = actor.resolvedClassData;
 
         system.level = system.level ?? {};
-        system.level.value = classData.level;
-        system.classSummary = classData.classSummary;
-        system.classLevel = classData.classLevels;
+        system.level.value = actor.characterLevel;
+        system.classSummary = actor.classSummary;
+        system.classLevel = actor.classLevels;
 
-        if (
-            game.settings.get("swse", "enableEncumbranceByWeight") &&
-            actor.weight >= actor.heavyLoad
-        ) {
-            system.heavyLoad = true;
-        } else system.heavyLoad = false;
+        //TODO move to appropriate part of model prepare
+        // if (
+        //     game.settings.get("swse", "enableEncumbranceByWeight") &&
+        //     actor.weight.carriedWeight >= actor.heavyLoad
+        // ) {
+        //     system.heavyLoad = true;
+        // } else system.heavyLoad = false;
 
         let activeTraits = inheritableItems(actor).filter(i => i.type === 'trait');
         system.traits = activeTraits.sort(ALPHA_FINAL_NAME);

@@ -24,7 +24,7 @@ export class CrewDelegate {
     }
 
     get members() {
-        return this.actor.system.crew;
+        return this.actor.system.crew ?? [];
     }
 
     get crewCount() {

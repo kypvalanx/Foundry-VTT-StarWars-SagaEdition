@@ -229,11 +229,13 @@
                 </div>
 
                 <div class="tab settings" data-group="primary" data-tab="settings">
+
                     <div class="flexcol">
-                        {{#each actor.system.settings as |setting id|}}
-                            {{> 'systems/swse/templates/settings/setting.hbs' setting=setting id=id}}
+                        {{#each settings}}
+                            {{> 'swse.setting'}}
                         {{/each}}
                     </div>
+
                 </div>
 
                 <div class="tab modes" data-group="primary" data-tab="modes">

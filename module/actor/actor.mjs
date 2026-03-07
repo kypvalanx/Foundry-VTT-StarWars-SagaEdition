@@ -17,7 +17,6 @@ import {
 } from "../common/util.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {generateArmorBlock, resolveDefenses} from "./defense.mjs";
-import {generateAttributes} from "./attribute-handler.mjs";
 import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {CLASSES_BY_STARTING_FEAT, COLORS, KNOWN_WEIRD_UNITS, sizeArray, skills} from "../common/constants.mjs";
@@ -52,17 +51,29 @@ export class SWSEActor extends Actor {
      * Augment the basic actor data with additional dynamic data.
      */
     async prepareData() {
+
         this._pendingUpdates = {};
         if (this.skipPrepare) {
             return;
         }
+
+        //TODO compartmentalize these and make the amll dynamic formulas and defined in a single place
         this.formulaFunctions = new Map();
         this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
-
         this.resolvedVariables = new Map();
         this.resolvedNotes = new Map();
         this.resolvedLabels = new Map();
+
         this.cache = new SimpleCache()
+
+        //generateAttributes(this);//TODO, make this lazy
+        this.attack = new AttackDelegate(this);
+        this.skill = new SkillDelegate(this);
+        this.weight = new WeightDelegate(this);
+        this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
+        this.crew = new CrewDelegate(this);
+        return;
+
         this.system.prepareDerivedData()
         super.prepareData();
 
@@ -100,19 +111,13 @@ export class SWSEActor extends Actor {
             this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
 
         }
-        //generateAttributes(this);//TODO, make this lazy
-        this.attack = new AttackDelegate(this);
-        this.skill = new SkillDelegate(this);
-        this.weight = new WeightDelegate(this);
-        this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
-        this.crew = new CrewDelegate(this);
 
 
         if (this.type === 'character') this._prepareCharacterData();
         if (this.type === 'computer') this._prepareComputerData(system);
         if (this.type === 'vehicle') this._prepareVehicleData(system);
 
-        this.initializeCharacterSettings();
+        //this.initializeCharacterSettings();
 
         for (let link of this.actorLinks) {
             let linkedActor = fromUuidSync(link.uuid);
@@ -280,7 +285,7 @@ export class SWSEActor extends Actor {
     }
 
     getRollData() {
-        this.system.initiative = this.skill.skills.find(skill => skill.key === 'initiative')?.value || 0;
+        this.system.initiative = this?.skill?.skills?.find(skill => skill.key === 'initiative')?.value || 0;
         return super.getRollData();
     }
 
@@ -965,24 +970,24 @@ export class SWSEActor extends Actor {
 
 
     initializeCharacterSettings() {
-        this.system.settings = [];
-        this.system.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
-        this.system.settings.push({type: "boolean", path: "system.autoSizeToken", label: "Autosize Token based on actor size?", value: this.system.autoSizeToken})
-        this.system.settings.push({type: "boolean", path: "system.allowSheetLighting", label: "Allow Sheet to modify token lighting", value: this.system.allowSheetLighting})
-        this.system.settings.push({
+        this.settings = [];
+        this.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
+        this.settings.push({type: "boolean", path: "system.autoSizeToken", label: "Autosize Token based on actor size?", value: this.system.autoSizeToken})
+        this.settings.push({type: "boolean", path: "system.allowSheetLighting", label: "Allow Sheet to modify token lighting", value: this.system.allowSheetLighting})
+        this.settings.push({
             type: "boolean",
             path: "system.ignorePrerequisites",
             label: "Ignore Prerequisites",
             value: this.system.ignorePrerequisites
         });
-        this.system.settings.push({
+        this.settings.push({
             type: "boolean",
             path: "system.ignorePrerequisitesOnDrop",
             label: "Ignore Prerequisites when adding new Items",
             value: this.system.ignorePrerequisites
         })
         if(this.type === "character"){
-            this.system.settings.push({
+            this.settings.push({
                 type: "select",
                 path: "system.attributeGenerationType",
                 label: "Attribute Generation Type",
@@ -1203,6 +1208,10 @@ export class SWSEActor extends Actor {
 
     get carriedWeight(){
         return this.weight.carriedWeight;
+    }
+
+    get heavyLoad(){
+        return this.weight.heavyLoad;
     }
 
 
@@ -1503,17 +1512,8 @@ export class SWSEActor extends Actor {
 
 
     get attributes() {
-        return this._attributes();
+        return this.system.abilities;
     }
-
-    _attributes(options){
-        //return this.getCached("attributes", () => {
-            generateAttributes(this, options)
-            return this.system.attributes;
-        //})
-    }
-
-
 
     getAttributeBases() {
         let response = {};
@@ -1549,7 +1549,7 @@ export class SWSEActor extends Actor {
      * @return {*}
      */
     static getActorAttribute(actor, attributeName, options) {
-        let attributes = actor._attributes(options);
+        let attributes = actor.attributes;
         let attribute = attributes[toShortAttribute(attributeName).toLowerCase()];
 
         return attribute.total;
