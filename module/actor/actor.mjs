@@ -72,10 +72,10 @@ export class SWSEActor extends Actor {
         this.weight = new WeightDelegate(this);
         this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
         this.crew = new CrewDelegate(this);
-        return;
 
-        this.system.prepareDerivedData()
         super.prepareData();
+
+        return;
 
         if (this.updateLegacyActor()) {
             return;

@@ -80,6 +80,7 @@ export class AbilityFunctions {
             let totalModifiers = ability.mod + (this.health.condition ?? 0);
             let label = CONFIG.SWSE.abilities[key].label;
 
+            ability.label = key.toUpperCase();
             let rollLabel = label;
             actor.setResolvedVariable(
                 "@" + key.toUpperCase() + "ROLL",
