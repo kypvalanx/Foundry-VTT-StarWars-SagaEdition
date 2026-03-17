@@ -78,7 +78,7 @@ export class AbilityFunctions {
 
             // Prepare the roll data
             let totalModifiers = ability.mod + (this.health.condition ?? 0);
-            let label = CONFIG.SWSE.abilities[key].label;
+            let label = CONFIG.SWSE.Abilities.abilitiesShort[key];
 
             ability.label = key.toUpperCase();
             let rollLabel = label;
