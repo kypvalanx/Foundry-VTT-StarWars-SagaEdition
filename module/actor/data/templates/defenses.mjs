@@ -43,12 +43,14 @@ export class DefenseFields {
                 initial: "",
                 label: "Defense Special",
             }),
-            dt: new fields.NumberField({
-                initial: 10,
-                integer: true,
-                min: 0,
-                label: `Damage Threshold`,
-            }),
+            dt:  new fields.SchemaField({
+                    value: new fields.NumberField({
+                        initial: 10,
+                        integer: true,
+                        min: 0,
+                        label: `Damage Threshold`,
+                    })
+                }),
             dr: new fields.NumberField({
                 initial: 0,
                 integer: true,
@@ -108,7 +110,9 @@ export class DefenseFunctions {
         bonuses.push(heroicLevel);
 
         //+ ability modifier
-        let ability = actor.isDroid ? "str" : CONFIG.SWSE.defenses.fort.ability;
+        let ability = actor.isDroid ?
+            CONFIG.SWSE.Defense.defense.fortitude.droidAbility :
+            CONFIG.SWSE.Defense.defense.fortitude.ability;
         let abilityBonus = system.abilities[ability].mod;
         bonuses.push(abilityBonus);
         fortitudeDefense.abilityBonus = abilityBonus;
@@ -177,7 +181,9 @@ export class DefenseFunctions {
         bonuses.push(heroicLevel);
 
         //+ ability modifier
-        let ability = CONFIG.SWSE.defenses.will.ability;
+        let ability = actor.isDroid ?
+            CONFIG.SWSE.Defense.defense.will.droidAbility :
+            CONFIG.SWSE.Defense.defense.will.ability;
         let abilityBonus = actor.system.abilities[ability].mod;
         bonuses.push(abilityBonus);
         willDefense.abilityBonus = abilityBonus;
@@ -265,7 +271,9 @@ export class DefenseFunctions {
         reflexDefense.armorBonus = armorBonus;
 
         //+ ability modifier
-        let ability = CONFIG.SWSE.defenses.ref.ability;
+        let ability = actor.isDroid ?
+            CONFIG.SWSE.Defense.defense.reflex.droidAbility :
+            CONFIG.SWSE.Defense.defense.reflex.ability;
         let abilityBonus = Math.min(
             actor.system.abilities[ability].mod,
             this._getEquipmentMaxDexBonus(actor)
@@ -522,7 +530,7 @@ export class DefenseFunctions {
             }).map((value) => "*" + value)
         );
 
-        let damageThreshold = toNumber(resolveValueArray(total, actor));
+        let damageThreshold = {value: toNumber(resolveValueArray(total, actor))};
         return damageThreshold;
     }
 

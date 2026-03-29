@@ -103,6 +103,26 @@ SWSE.Abilities.defaultAbilityRoll = "4d6kh3";
 SWSE.Abilities.defaultPointBuyTotal = 28;
 SWSE.Abilities.droidPointBuyTotal = 21;
 
+SWSE.Skills = {};
+SWSE.Skills.skills = {
+    acrobatics: "SWSE.SkillAcrobatics",
+    animalHandling: "SWSE.SkillAnimalHandling",
+    arcana: "SWSE.SkillArcana",
+    athletics: "SWSE.SkillAthletics",
+    deception: "SWSE.SkillDeception",
+    history: "SWSE.SkillHistory",
+    insight: "SWSE.SkillInsight",
+    intimidation: "SWSE.SkillIntimidation",
+    investigation: "SWSE.SkillInvestigation",
+}
+
+SWSE.Defense = {};
+SWSE.Defense.defense = {
+    fortitude: {ability: "con", droidAbility: "str"},
+    reflex: {ability: "dex", droidAbility: "dex"},
+    will: {ability: "wis", droidAbility: "wis"},
+}
+
 SWSE.conditionTrack = ["0", "-1", "-2", "-5", "-10", "OUT"]
 
 

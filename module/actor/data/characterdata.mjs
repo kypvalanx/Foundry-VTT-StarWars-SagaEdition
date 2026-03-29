@@ -101,7 +101,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         this._prepareSkillDerivedData();
 
         //Feats
-        let feats = this.parent.resolvedFeats;
+        let feats = this.parent.resolveFeats();
         this.feats = feats.activeFeats;
         this.#_manageAutomaticItems(feats.removeFeats).then(() => {});
 

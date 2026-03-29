@@ -47,6 +47,10 @@ export class AbilityFunctions {
     _prepareAbilityDerivedData() {
         let actor = this.parent;
         let abilityGenType = this.settings.abilityGeneration?.value;
+        if(abilityGenType === "Default"){
+            abilityGenType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
+        }
+
 
         // Loop through ability scores, and add their modifiers to our sheet output.
         for (let [key, ability] of Object.entries(this.abilities)) {

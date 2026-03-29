@@ -24,102 +24,56 @@ export class SkillFields {
                 integer: true,
                 label: `${skill} Mod`,
             }),
+            trainedOnly: new fields.BooleanField({
+                initial: false,
+                label: "Trained Only",
+            }),
+            armorPenalty: new fields.BooleanField({
+                initial: false,
+                label: "Armor Penalty",
+            })
         });
     }
 
     static get character() {
         return {
-            acro: this.#_skillProperties("dex", "Acrobatics"),
-            clim: this.#_skillProperties("str", "Climb"),
-            dece: this.#_skillProperties("cha", "Deception"),
-            endu: this.#_skillProperties("str", "Endurance"),
-            ginf: this.#_skillProperties("int", "Gather Information"),
-            init: this.#_skillProperties("dex", "Initiative"),
-            jump: this.#_skillProperties("str", "Jump"),
-            kbur: this.#_skillProperties("int", "Knowledge (Bureaucracy)"),
-            kgal: this.#_skillProperties(
-                "int",
-                "Knowledge (Galactic Lore)"
-            ),
-            klif: this.#_skillProperties(
-                "int",
-                "Knowledge (Life Sciences)"
-            ),
-            kphy: this.#_skillProperties(
-                "int",
-                "Knowledge (Physical Sciences)"
-            ),
-            ksoc: this.#_skillProperties(
-                "int",
-                "Knowledge (Social Sciences)"
-            ),
-            ktac: this.#_skillProperties("int", "Knowledge (Tactics)"),
-            ktec: this.#_skillProperties("int", "Knowledge (Technology)"),
-            mech: this.#_skillProperties("int", "Mechanics"),
-            perc: this.#_skillProperties("wis", "Perception"),
-            pers: this.#_skillProperties("cha", "Persuasion"),
-            pilo: this.#_skillProperties("dex", "Pilot"),
-            ride: this.#_skillProperties("dex", "Ride"),
-            stea: this.#_skillProperties("dex", "Stealth"),
-            surv: this.#_skillProperties("wis", "Survival"),
-            swim: this.#_skillProperties("str", "Swim"),
-            tinj: this.#_skillProperties("wis", "Treat Injury"),
+            Acrobatics: this.#_skillProperties("dex", "Acrobatics"),
+            Climb: this.#_skillProperties("str", "Climb"),
+            Deception: this.#_skillProperties("cha", "Deception"),
+            Endurance: this.#_skillProperties("str", "Endurance"),
+            "Gather Information": this.#_skillProperties("int", "Gather Information"),
+            Initiative: this.#_skillProperties("dex", "Initiative"),
+            Jump: this.#_skillProperties("str", "Jump"),
+            "Knowledge (Bureaucracy)": this.#_skillProperties("int", "Knowledge (Bureaucracy)"),
+            "Knowledge (Galactic Lore)": this.#_skillProperties("int", "Knowledge (Galactic Lore)"),
+            "Knowledge (Life Sciences)": this.#_skillProperties("int", "Knowledge (Life Sciences)"),
+            "Knowledge (Physical Sciences)": this.#_skillProperties("int", "Knowledge (Physical Sciences)"),
+            "Knowledge (Social Sciences)": this.#_skillProperties("int", "Knowledge (Social Sciences)"),
+            "Knowledge (Tactics)": this.#_skillProperties("int", "Knowledge (Tactics)"),
+            "Knowledge (Technology)": this.#_skillProperties("int", "Knowledge (Technology)"),
+            Mechanics: this.#_skillProperties("int", "Mechanics"),
+            Perception: this.#_skillProperties("wis", "Perception"),
+            Persuasion: this.#_skillProperties("cha", "Persuasion"),
+            Pilot: this.#_skillProperties("dex", "Pilot"),
+            Ride: this.#_skillProperties("dex", "Ride"),
+            Stealth: this.#_skillProperties("dex", "Stealth"),
+            Survival: this.#_skillProperties("wis", "Survival"),
+            Swim: this.#_skillProperties("str", "Swim"),
+            "Treat Injury": this.#_skillProperties("wis", "Treat Injury"),
             "Use Computer": this.#_skillProperties("int", "Use Computer"),
-            "use the force": this.#_skillProperties("cha", "Use The Force"),
-        };
-    }
-
-    static #_npcSkillProperties(skill) {
-        return new fields.SchemaField({
-            value: new fields.NumberField({
-                initial: 0,
-                integer: true,
-                label: `${skill}`,
-            }),
-        });
-    }
-
-    static get npc() {
-        return {
-            acro: this.#_npcSkillProperties("Acrobatics"),
-            clim: this.#_npcSkillProperties("Climb"),
-            dece: this.#_npcSkillProperties("Deception"),
-            endu: this.#_npcSkillProperties("Endurance"),
-            ginf: this.#_npcSkillProperties("Gather Information"),
-            init: this.#_npcSkillProperties("Initiative"),
-            jump: this.#_npcSkillProperties("Jump"),
-            kbur: this.#_npcSkillProperties("Knowledge (Bureaucracy)"),
-            kgal: this.#_npcSkillProperties("Knowledge (Galactic Lore)"),
-            klif: this.#_npcSkillProperties("Knowledge (Life Sciences)"),
-            kphy: this.#_npcSkillProperties(
-                "Knowledge (Physical Sciences)"
-            ),
-            ksoc: this.#_npcSkillProperties("Knowledge (Social Sciences)"),
-            ktac: this.#_npcSkillProperties("Knowledge (Tactics)"),
-            ktec: this.#_npcSkillProperties("Knowledge (Technology)"),
-            mech: this.#_npcSkillProperties("Mechanics"),
-            perc: this.#_npcSkillProperties("Perception"),
-            pers: this.#_npcSkillProperties("Persuasion"),
-            pilo: this.#_npcSkillProperties("Pilot"),
-            ride: this.#_npcSkillProperties("Ride"),
-            stea: this.#_npcSkillProperties("Stealth"),
-            surv: this.#_npcSkillProperties("Survival"),
-            swim: this.#_npcSkillProperties("Swim"),
-            tinj: this.#_npcSkillProperties("Treat Injury"),
-            ucom: this.#_npcSkillProperties("Use Computer"),
-            ufor: this.#_npcSkillProperties("Use The Force"),
+            "Use the Force": this.#_skillProperties("cha", "Use the Force"),
         };
     }
 
     static get vehicle() {
         return {
-            init: this.#_npcSkillProperties("Initiative"),
-            mech: this.#_npcSkillProperties("Mechanics"),
-            perc: this.#_npcSkillProperties("Perception"),
-            pilo: this.#_npcSkillProperties("Pilot"),
-            ride: this.#_npcSkillProperties("Ride"),
-            stea: this.#_npcSkillProperties("Stealth"),
-            ucom: this.#_npcSkillProperties("Use Computer"),
+            Initiative: this.#_skillProperties("dex", "Initiative"),
+            Mechanics: this.#_skillProperties("int", "Mechanics"),
+            Perception: this.#_skillProperties("wis", "Perception"),
+            Pilot: this.#_skillProperties("dex", "Pilot"),
+            Ride: this.#_skillProperties("dex", "Ride"),
+            Stealth: this.#_skillProperties("dex", "Stealth"),
+            "Use Computer": this.#_skillProperties("int", "Use Computer"),
         };
     }
 }
@@ -252,16 +206,13 @@ export class SkillFunctions {
 
         //Loop2
         for (let [id, skill] of Object.entries(system.skills)) {
-            let key = SWSE.skills[id].name.toLowerCase();
+            let key = id
             let dirtyKey = key.toLowerCase().replace(" ", "").trim();
             let bonuses = [];
             let abilityMod = system.abilities[skill.ability].mod;
             let notes = [];
 
-            skill.isClass =
-                key === "use the force"
-                    ? actor.isForceSensitive
-                    : classSkills.has(key);
+            skill.isClass = this.isClassSkill(key, actor, classSkills);
             if (key === "use the force" && !skill.isClass) {
                 skill.hide = true;
             }
@@ -401,6 +352,12 @@ export class SkillFunctions {
             //Roll Data
             system._prepareSkillRollData(key, skill, notes);
         }
+    }
+
+    isClassSkill(key, actor, classSkills) {
+        return key === "use the force"
+            ? actor.isForceSensitive
+            : classSkills.has(key);
     }
 
     _prepareSkillRollData(key, skill, notes) {

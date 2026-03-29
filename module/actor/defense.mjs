@@ -67,7 +67,7 @@ export function resolveDefenses(actor) {
             defense.will = {...defense.will, ..._resolveWill(actor, condition)};
         }
         defense.reflex = {...defense.reflex, ..._resolveRef(actor, condition)};
-        defense.damageThreshold = {...defense.damageThreshold, ..._resolveDt(actor, defense.fortitude.total)};
+        defense.damageThreshold = {value: {...defense.damageThreshold, ..._resolveDt(actor, defense.fortitude.total)}};
         defense.situationalBonuses = _getSituationalBonuses(actor);
 
         defense.damageReduction = getInheritableAttribute({

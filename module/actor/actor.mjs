@@ -66,7 +66,6 @@ export class SWSEActor extends Actor {
 
         this.cache = new SimpleCache()
 
-        //generateAttributes(this);//TODO, make this lazy
         this.attack = new AttackDelegate(this);
         this.skill = new SkillDelegate(this);
         this.weight = new WeightDelegate(this);
