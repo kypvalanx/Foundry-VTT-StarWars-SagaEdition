@@ -25,6 +25,13 @@ export class HealthFields {
                 min: 0,
                 label: "Bonus HP",
             }),
+            override: new fields.NumberField({
+                nullable: true,
+                initial: null,
+                integer: true,
+                min: 0,
+                label: "Override Max HP",
+            })
         };
     }
 }
@@ -52,41 +59,41 @@ export class HealthFunctions {
             entity: actor,
             attributeKey: "hitPointEq",
         });
-        let others = [];
-        let multipliers = [];
-
-        for (let item of traitAttributes || []) {
-            if (item) {
-                others.push(item.value);
-                healthBonuses.push(item.value);
-                if (
-                    item.value &&
-                    (item.value.startsWith("*") || item.value.startsWith("/"))
-                ) {
-                    multipliers.push(item.value);
-                }
-            }
-        }
-        let other = resolveValueArray(others, actor);
-        let healthMax =
-            system.overrides.health ?? resolveValueArray(healthBonuses, actor);
-
+        let {others, multipliers} = this.extractTraitValues(traitAttributes, healthBonuses);
         //Second Winds
         system._prepareSecondWinds();
 
         //Update totals
-        system.health.bonusHP = other;
-        if (healthMax !== system.health.max) {
-            system.health.max = healthMax;
-            this.parent.update({"system.health.max": healthMax});
-        }
+        system.health.bonusHP = resolveValueArray(others, actor);
+        system.health.max = system.overrides.health ?? resolveValueArray(healthBonuses, actor);
         system.health.multipliers = multipliers;
+    }
+
+    extractTraitValues(traitAttributes, healthBonuses) {
+        let others = [];
+        let multipliers = [];
+
+        for (let item of traitAttributes || []) {
+            if (!item) {
+                continue;
+            }
+            const value = item.value;
+            others.push(value);
+            healthBonuses.push(value);
+            if (
+                value &&
+                (value.startsWith("*") || value.startsWith("/"))
+            ) {
+                multipliers.push(value);
+            }
+        }
+        return {others, multipliers};
     }
 
     _prepareSecondWinds() {
         let system = this;
         const bonusSecondWind = getInheritableAttribute({
-            entity: this,
+            entity: this.parent,
             attributeKey: "bonusSecondWind",
             reduce: "SUM",
         });

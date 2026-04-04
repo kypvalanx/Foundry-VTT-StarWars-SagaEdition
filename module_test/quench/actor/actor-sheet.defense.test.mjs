@@ -33,10 +33,10 @@ export async function defenseTests(quench) {
 
                         it('rancors should have their intended defense stats', async function () {
                             await withTestActor(async actor => {
-                                assert.equal(actor.defense.reflex.total, 17, "reflex");
-                                assert.equal(actor.defense.reflex.defenseModifiers[0].total, 17, "FFReflex");
-                                assert.equal(actor.defense.fortitude.total, 16, "Fortitude");
-                                assert.equal(actor.defense.will.total, 8, "Will");
+                                assert.equal(actor.system.defense.reflex.total, 17, "reflex");
+                                assert.equal(actor.system.defense.reflex.defenseModifiers[0].total, 17, "FFReflex");
+                                assert.equal(actor.system.defense.fortitude.total, 16, "Fortitude");
+                                assert.equal(actor.system.defense.will.total, 8, "Will");
                             }, {entity: {path: "systems/swse/module_test/resources/rancor.json", name: "Rancor"}});
                         });
 

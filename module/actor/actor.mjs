@@ -67,7 +67,7 @@ export class SWSEActor extends Actor {
         this.cache = new SimpleCache()
 
         this.attack = new AttackDelegate(this);
-        this.skill = new SkillDelegate(this);
+        //this.skill = new SkillDelegate(this);
         this.weight = new WeightDelegate(this);
         this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
         this.crew = new CrewDelegate(this);
@@ -327,6 +327,10 @@ export class SWSEActor extends Actor {
             user = game.users.get(operation.owner);
         }
         for (const update of operation.updates) {
+            if(!update._id){
+                update._id = this. _id //.id;
+            }
+
             if(Object.hasOwn(update, "type")){
                 operation.recursive = false;
             }
@@ -698,6 +702,10 @@ export class SWSEActor extends Actor {
 
 
     get isHeroic() {
+        if(!!this._isHeroic && this.partialMock){
+            return this._isHeroic
+        }
+
         return this.getCached("isHeroic", () => {
             return getInheritableAttribute({
                 entity: this,
@@ -853,13 +861,30 @@ export class SWSEActor extends Actor {
         })
     }
 
+
+    get partialMock() {
+        return this._partialMock ?? false;
+    }
+
+    set partialMock(value) {
+        this._partialMock = value;
+    }
+
+    set isHeroic(value){
+        if(!this.partialMock){
+            throw new Error("Cannot set isHeroic on a real actor");
+        }
+        this._isHeroic = value;
+    }
     /**
      *
      * @return {[]}
      */
     get classes() {
         // return this.getCached("classes", () => {
-
+        if(this._classes && this.partialMock){
+            return this._classes;
+        }
         let classes = [];
         for (let co of this.itemTypes.class) for (let [i, characterLevel] of co.levelsTaken.entries()) {
             const levelOfClass = i + 1;
@@ -884,6 +909,13 @@ export class SWSEActor extends Actor {
         }
         return classes;
         //})
+    }
+
+    set classes(classes){
+        if(!this.partialMock){
+            throw new Error("Cannot set classes on a real actor");
+        }
+        this._classes = classes;
     }
 
 
@@ -1611,10 +1643,21 @@ export class SWSEActor extends Actor {
         })
     }
 
+    set isDroid(isDroid){
+        if(!this.partialMock){
+            throw new Error("Cannot set isDroid on a real actor");
+        }
+        this._isDroid = isDroid;
+    }
+
     /**
      * @return boolean
      */
     get isDroid() {
+        if(this._isDroid && this.partialMock){
+            return this._isDroid ?? false;
+        }
+
         if (this.type === 'vehicle' || this.type === 'npc-vehicle') {
             return false;
         } else {

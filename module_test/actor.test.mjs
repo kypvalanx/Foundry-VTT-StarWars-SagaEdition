@@ -1,39 +1,61 @@
 console.log("Starting actor tests ")
 
-// basic.test.mjs
 import test from 'node:test';
 import {expect} from 'chai';
-
-global.Actor = class {
-    constructor(data = {}) {
-        this.system = data.system || {};
-        this.name = data.name || "Unnamed Actor";
-    }
-
-    // You can add other Foundry methods your code might call
-    prepareData() {}
-};
-
 import {SWSEActor} from '../module/actor/actor.mjs';
 
-
-console.log("Running actor tests")
-// Minimal mock for Foundry's Actor base class
-
-
-// Optional globals some modules reference
-//global.game = { user: { id: "test-user" } };
-//global.CONFIG = {};
-
-test('i can make a new actor', () => {
-    try{
-
-        new SWSEActor()
-    } catch (e) {
-        console.log(e)
-    }
+test('SWSEActor instantiation', () => {
+    const actor = new SWSEActor({
+        name: "Test Character",
+        system: {
+            abilities: {
+                str: { value: 10 },
+                dex: { value: 12 },
+                con: { value: 14 },
+                int: { value: 8 },
+                wis: { value: 13 },
+                cha: { value: 15 }
+            }
+        }
+    });
+    expect(actor.name).to.equal("Test Character");
+    expect(actor.system.abilities.str.value).to.equal(10);
 });
 
-test('isEven returns false for odd numbers', () => {
-    expect(5).to.equal(5);
+test('SWSEActor levelSummary and firstAid', async () => {
+    const actor = new SWSEActor({
+        name: "Test Character",
+        system: {}
+    });
+    actor.itemTypes.class = [{
+        levelsTaken: [1, 2, 3],
+        id: "class-id",
+        name: "Jedi",
+        canRerollHealth: () => false,
+        classLevelHealth: () => 10
+    }];
+    
+    expect(actor.levelSummary).to.equal(3);
+    expect(actor.firstAid.perDay).to.equal(1);
+});
+
+test('SWSEActor forcePoints calculation at higher level', async () => {
+    const actor = new SWSEActor({
+        name: "Test Character",
+        system: {
+            forcePoints: 5
+        }
+    });
+    // Level 15
+    actor.itemTypes.class = [{
+        levelsTaken: Array.from({length: 15}, (_, i) => i + 1),
+        id: "class-id",
+        name: "Jedi",
+        canRerollHealth: () => false,
+        classLevelHealth: () => 10
+    }];
+    
+    const fp = actor.forcePoints;
+    expect(fp.quantity).to.equal(5);
+    expect(fp.roll).to.equal("3d6kh"); // Level 15 -> 3d6
 });

@@ -91,6 +91,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
      * collection.
      */
     prepareDerivedData() {
+        this.parent.cache?.invalidateAll();
         //Traits - currently needs to be first for grabbing class level resolved data.
         this._prepareCharacterTraitsDerivedData();
 

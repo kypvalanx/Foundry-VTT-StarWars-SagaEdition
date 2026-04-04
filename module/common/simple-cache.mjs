@@ -15,4 +15,18 @@ export class SimpleCache {
         }
         return this.lazyResolve[key];
     }
+
+    invalidate(key){
+        if(key instanceof Object){
+            let strKey = ""
+            for(const property in key){
+                strKey += `#${property}->${key[property]}#`
+            }
+            key = strKey;
+        }
+        delete this.lazyResolve[key];
+    }
+    invalidateAll(){
+        this.lazyResolve = {}
+    }
 }

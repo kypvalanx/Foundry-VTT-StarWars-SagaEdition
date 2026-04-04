@@ -129,7 +129,6 @@ export class TraitsFunctions {
     _prepareCharacterTraitsDerivedData() {
         let system = this;
         let actor = this.parent;
-        let classData = actor.resolvedClassData;
 
         system.level = system.level ?? {};
         system.level.value = actor.characterLevel;

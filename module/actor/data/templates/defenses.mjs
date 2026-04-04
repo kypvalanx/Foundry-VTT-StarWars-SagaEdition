@@ -372,9 +372,9 @@ export class DefenseFunctions {
 
         //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 
-        system.defense.fort = this.resolvedFort;
+        system.defense.fortitude = this.resolvedFort;
         system.defense.will = this.resolvedWill;
-        system.defense.ref = this.resolvedRef;
+        system.defense.reflex = this.resolvedRef;
         system.defense.damageThreshold = this._resolveDt(system);
         system.defense.situationalBonuses = this._getSituationalBonuses(actor);
         system.defense.damageReduction = getInheritableAttribute({
@@ -513,7 +513,7 @@ export class DefenseFunctions {
         const actor = system.parent;
         let total = [];
 
-        total.push(system.defense.fort.value);
+        total.push(system.defense.fortitude.value);
         total.push(this._getDamageThresholdSizeMod(actor));
         total.push(
             getInheritableAttribute({

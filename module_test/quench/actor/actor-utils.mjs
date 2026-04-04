@@ -19,6 +19,10 @@ export async function withTestActor(fn, options= {}) {
     }
 
     actor.suppressDialog = true
+    if(options.partialMock){
+        actor.partialMock = true;
+    }
+
     let context = {otherActors:[]}
 
     try {

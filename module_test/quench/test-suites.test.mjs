@@ -11,6 +11,7 @@ import {poltgotBasicTests} from "./module-integrations/polygot/basic-integration
 import {defenseTests} from "./actor/actor-sheet.defense.test.mjs";
 import {featTests} from "./actor/actor-sheet.feats-martial-artist.test.mjs";
 import {healthTests} from "./actor/actor-sheet.health.test.mjs";
+import {healthFunctionsTests} from "./actor/templates/HealthFunctions.test.mjs";
 import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting-feats.test.mjs";
 
 const registeredTests = [
@@ -27,6 +28,7 @@ const registeredTests = [
     defenseTests,
     featTests,
     healthTests,
+    healthFunctionsTests,
     featMulticlassTests
 ];
 
