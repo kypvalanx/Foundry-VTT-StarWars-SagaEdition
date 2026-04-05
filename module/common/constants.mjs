@@ -649,175 +649,175 @@ export function skills(actorType = "character") {
 export const skillDetails = {
     "Acrobatics": {
         value: 0,
-        attribute: "dex",
+        ability: "dex",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Acrobatics"
     },
     "Climb": {
         value: 0,
-        attribute: "str",
+        ability: "str",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Climb"
     },
     "Deception": {
         value: 0,
-        attribute: "cha",
+        ability: "cha",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Deception"
     },
     "Endurance": {
         value: 0,
-        attribute: "con",
+        ability: "con",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Endurance"
     },
     "Gather Information": {
         value: 0,
-        attribute: "cha",
+        ability: "cha",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Gather_Information"
     },
     "Initiative": {
         value: 0,
-        attribute: "dex",
+        ability: "dex",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Initiative"
     },
     "Jump": {
         value: 0,
-        attribute: "str",
+        ability: "str",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Jump"
     },
     "Knowledge (Bureaucracy)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Galactic Lore)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Life Sciences)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Physical Sciences)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Social Sciences)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Tactics)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Knowledge (Technology)": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Knowledge"
     },
     "Mechanics": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: false,
         acp: false,
         link: "https://swse.fandom.com/wiki/Mechanics"
     },
     "Perception": {
         value: 0,
-        attribute: "wis",
+        ability: "wis",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Perception"
     },
     "Persuasion": {
         value: 0,
-        attribute: "cha",
+        ability: "cha",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Persuasion"
     },
     "Pilot": {
         value: 0,
-        attribute: "dex",
+        ability: "dex",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Pilot"
     },
     "Ride": {
         value: 0,
-        attribute: "dex",
+        ability: "dex",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Ride"
     },
     "Stealth": {
         value: 0,
-        attribute: "dex",
+        ability: "dex",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Stealth"
     },
     "Survival": {
         value: 0,
-        attribute: "wis",
+        ability: "wis",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Survival"
     },
     "Swim": {
         value: 0,
-        attribute: "str",
+        ability: "str",
         uut: true,
         acp: true,
         link: "https://swse.fandom.com/wiki/Swim"
     },
     "Treat Injury": {
         value: 0,
-        attribute: "wis",
+        ability: "wis",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Treat_Injury"
     },
     "Use Computer": {
         value: 0,
-        attribute: "int",
+        ability: "int",
         uut: true,
         acp: false,
         link: "https://swse.fandom.com/wiki/Use_Computer"
     },
     "Use the Force": {
         value: 0,
-        attribute: "cha",
+        ability: "cha",
         uut: false,
         acp: false,
         link: "https://swse.fandom.com/wiki/Use_the_Force"
@@ -1033,7 +1033,7 @@ export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
         {
             grouped: ["Climb", "Swim"],
             classes: ["Scout", "Soldier", "Force Prodigy"],
-            attribute: "str",
+            ability: "str",
             uut: true
         }
     ],
@@ -1042,7 +1042,7 @@ export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
         {
             grouped: ["Jump", "Acrobatics"],
             classes: ["Scout", "Soldier", "Jedi", "Scoundrel", "Force Prodigy"],
-            attribute: "dex",
+            ability: "dex",
             uut: true
         }
     ],
@@ -1051,7 +1051,7 @@ export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
         {
             grouped: ["Gather Information", "Persuasion"],
             classes: ["Noble", "Scoundrel", "Technician"],
-            attribute: "cha",
+            ability: "cha",
             uut: true
         }
     ],
@@ -1059,7 +1059,7 @@ export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
         "Knowledge (Force)",
         {
             classes: ["Jedi", "Noble", "Scoundrel", "Scout", "Soldier", "Technician", "Force Prodigy"],
-            attribute: "int",
+            ability: "int",
             uut: false
         }
     ]
@@ -1067,7 +1067,7 @@ export const HOMEBREW_DARTHAUTHOR_SKILLS = new Map([
 export const HOMEBREW_LILLITERALIST_SKILLS = new Map([["Athletics", {
     grouped: ["Jump", "Climb", "Swim"],
     classes: ["Scout", "Soldier", "Jedi"],
-    attribute: "str",
+    ability: "str",
     uut: true
 }]]);
 export const UNINHERITABLE_AMMO_CHANGES = ['actsAs'];

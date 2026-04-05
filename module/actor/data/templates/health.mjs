@@ -65,8 +65,9 @@ export class HealthFunctions {
 
         //Update totals
         system.health.bonusHP = resolveValueArray(others, actor);
-        system.health.max = system.overrides.health ?? resolveValueArray(healthBonuses, actor);
+        system.health.max = system.overrides.health ?? system.health.override ?? resolveValueArray(healthBonuses, actor);
         system.health.multipliers = multipliers;
+        system.health.override = actor.system.health.override;
     }
 
     extractTraitValues(traitAttributes, healthBonuses) {

@@ -21,7 +21,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
 
                                 const update = {};
-                                update[`system.skills.use the force.trained`] = true;
+                                update[`system.skills.Use the Force.trained`] = true;
                                 await actor.safeUpdate(update);
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Force Training", type: "feat"})
@@ -38,31 +38,31 @@ export async function actorSheetTests(quench) {
                                 actor.suppressDialog = true
                                 actor.cacheDisabled = true
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, 0)
+                                assert.equal(actor.system.skills['Use the Force'].value, 0)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -1)
+                                assert.equal(actor.system.skills['Use the Force'].value, -1)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -2)
+                                assert.equal(actor.system.skills['Use the Force'].value, -2)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -3)
+                                assert.equal(actor.system.skills['Use the Force'].value, -3)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -4)
+                                assert.equal(actor.system.skills['Use the Force'].value, -4)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -5)
+                                assert.equal(actor.system.skills['Use the Force'].value, -5)
 
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Cybernetic Prosthesis", type: "item", equip: "equipped"})
 
-                                assert.equal(actor.skill.skills.find(skill => skill.key === "use the force").value, -5)
+                                assert.equal(actor.system.skills['Use the Force'].value, -5)
 
                             });
                         });

@@ -1,9 +1,18 @@
 import {getInheritableAttribute} from "../../../attribute-helper.mjs";
 import {SWSE} from "../../../common/config.mjs";
-import {NEW_LINE, PHYSICAL_SKILLS} from "../../../common/constants.mjs";
+import {
+    defaultAttributes,
+    getGroupedSkillMap,
+    NEW_LINE,
+    PHYSICAL_SKILLS,
+    skillDetails,
+    skills
+} from "../../../common/constants.mjs";
 import {resolveValueArray, toNumber} from "../../../common/util.mjs";
 import {generateArmorCheckPenalties} from "../../armor-check-penalty.mjs";
 import {titleCase} from "../../../common/helpers.mjs";
+import {DEFAULT_SKILL} from "../../../common/classDefaults.mjs";
+import * as options from "../../../common/constants.mjs";
 
 const fields = foundry.data.fields;
 
@@ -168,9 +177,11 @@ export class SkillFunctions {
         return classSkills;
     }
 
-    _prepareSkillDerivedData() {
+    _prepareSkillDerivedData(options = {}) {
         let actor = this.parent;
         let system = this;
+
+        let groupedSkillMap = getGroupedSkillMap()
 
         let heavyLoadAffected = actor.heavyLoad;
         let halfCharacterLevel = Math.floor(system.level.value / 2);
@@ -186,6 +197,11 @@ export class SkillFunctions {
             attributeKey: "skillBonus",
             reduce: "VALUES",
         }).map((skill) => (skill?.replace(" ", "") || "").toLowerCase());
+        let skillBonusAttr = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "skillBonus",
+            reduce: "VALUES"
+        })
         let untrainedSkillBonuses = getInheritableAttribute({
             entity: actor,
             attributeKey: "untrainedSkillBonus",
@@ -204,12 +220,34 @@ export class SkillFunctions {
 
         let acPenalty = generateArmorCheckPenalties(actor);
 
-        //Loop2
-        for (let [id, skill] of Object.entries(system.skills)) {
-            let key = id
-            let dirtyKey = key.toLowerCase().replace(" ", "").trim();
-            let bonuses = [];
-            let abilityMod = system.abilities[skill.ability].mod;
+        const skillMap = new Map();
+        const resolvedSkills = this.applyGroupedSkills(options.skills ?? skills(actor.type), groupedSkillMap);
+
+        const nonSituationalSkills = [];
+        const distinctSkillBonuses = skillBonusAttr.map(bonus => bonus.split(":")[0]).distinct()
+        for (const distinctSkillBonus of distinctSkillBonuses) {
+            let isSub = false;
+            let isAttribute = defaultAttributes.includes(this.standardizedAttribute(distinctSkillBonus));
+
+            for (const resolvedSkill of resolvedSkills) {
+                if (distinctSkillBonus.toLowerCase().startsWith(resolvedSkill.toLowerCase())) {
+                    isSub = true
+                    break;
+                }
+            }
+            if(!isSub && !isAttribute){
+                nonSituationalSkills.push(distinctSkillBonus)
+            }
+        }
+
+        resolvedSkills.push(...nonSituationalSkills);
+
+        for (let resSkill of resolvedSkills) {
+            let key = resSkill.toLowerCase();
+
+            const customSkill = groupedSkillMap?.get(resSkill)
+            const skill = this.createNewSkill(resSkill, actor.system.skills[key] || {}, customSkill)
+            let abilityMod = system.abilities[skill.ability]?.mod;
             let notes = [];
 
             skill.isClass = this.isClassSkill(key, actor, classSkills);
@@ -217,8 +255,10 @@ export class SkillFunctions {
                 skill.hide = true;
             }
 
-            //Skill adjustments
-            //----------------------------------------------------------------
+            let situationalSkillNames = customSkill?.grouped || []
+
+            let bonuses = [];
+
             //Level Bonus - Always
             bonuses.push({
                 value: halfCharacterLevel,
@@ -232,7 +272,6 @@ export class SkillFunctions {
             });
             skill.abilityBonus = abilityMod;
 
-            //TrainedBonus or 0 - Trained only
             if (automaticTrainedSkill.includes(key)) {
                 skill.trained = true;
                 skill.locked = true;
@@ -240,6 +279,7 @@ export class SkillFunctions {
                     skill.blockedSkill = true;
                 }
             }
+
             let trainedSkillBonus = skill.trained === true ? 5 : 0;
             bonuses.push({
                 value: trainedSkillBonus,
@@ -248,7 +288,7 @@ export class SkillFunctions {
 
             //UntrainedBonus or 0 - Untrained only
             let untrainedSkillBonus =
-                !skill.trained && untrainedSkillBonuses.includes(key) ? 2 : 0;
+                !skill.trained && untrainedSkillBonuses.includes(key) ? 2 : 0; //<<<TODO add support for other untrained bonuses
             bonuses.push({
                 value: untrainedSkillBonus,
                 description: `Untrained Skill Bonus: ${untrainedSkillBonus}`,
@@ -270,11 +310,12 @@ export class SkillFunctions {
             });
 
             //Armor and Weight penalty - only if exists
-            if (PHYSICAL_SKILLS.includes(key)) {
+            if (skill.acp) {
                 bonuses.push({
                     value: acPenalty,
                     description: `Armor Class Penalty: ${acPenalty}`,
                 });
+                skill.armorPenalty = acPenalty;
 
                 if (heavyLoadAffected) {
                     bonuses.push({
@@ -283,38 +324,47 @@ export class SkillFunctions {
                     });
                 }
             }
-            skill.armorPenalty = acPenalty;
 
             //Skill Focus bonus - Skill Focus only
-            let skillFocusBonus = 0;
             if (skillFocuses.includes(key)) {
-                skill.focus = true;
-                skillFocusBonus = 5;
-
+                let skillFocusBonus = 5;
                 let skillFocusCalculationOption = game.settings.get(
                     "swse",
                     "skillFocusCalculation"
                 );
                 if (skillFocusCalculationOption === "charLevelUp") {
-                    skillFocusBonus = Math.ceil(system.level / 2);
+                    skillFocusBonus = Math.ceil(system.level.value / 2);
                 } else if (skillFocusCalculationOption === "charLevelDown") {
-                    skillFocusBonus = Math.floor(system.level / 2);
+                    skillFocusBonus = Math.floor(system.level.value / 2);
                 }
+                bonuses.push({
+                    value: skillFocusBonus,
+                    description: `Skill Focus Bonus: ${skillFocusBonus}`,
+                });
+                skill.focusBonus = skillFocusBonus;
+                skill.focus = true;
             }
-            bonuses.push({
-                value: skillFocusBonus,
-                description: `Skill Focus Bonus: ${skillFocusBonus}`,
-            });
-            skill.focusBonus = skillFocusBonus;
 
             //Other Skill Bonuses from inherited - only if exists
-            let miscBonuses = skillBonus
-                .filter((bonus) => bonus.startsWith(dirtyKey))
-                .map((bonus) => bonus.split(":")[1]);
-            let miscBonus = miscBonuses.reduce(
-                (prev, curr) => prev + toNumber(curr),
-                0
-            );
+            // let miscBonuses = skillBonus
+            //     .filter((bonus) => bonus.startsWith(dirtyKey))
+            //     .map((bonus) => bonus.split(":")[1]);
+            // let miscBonus = miscBonuses.reduce(
+            //     (prev, curr) => prev + toNumber(curr),
+            //     0
+            // );
+
+            const rawSkillBonuses = skillBonusAttr.filter(bonus => {
+                const bonusKey = bonus.split(":")[0].toLowerCase();
+                return bonusKey === resSkill.toLowerCase() || this.standardizedAttribute(bonusKey) === this.standardizedAttribute(skill.attribute) || bonusKey === "all"
+            })
+
+            let miscBonuses = this.resolveBonusesAndHandleModifiers(rawSkillBonuses);
+
+            situationalSkillNames.push(... skillBonusAttr.map(bonus => bonus.split(":")[0]).filter(bonus =>
+                bonus.toLowerCase() !== resSkill.toLowerCase() && bonus.toLowerCase().startsWith(resSkill.toLowerCase())).map(bonus => bonus.split(":")[0]))
+            let miscBonus = miscBonuses.reduce((prev, curr) => prev + toNumber(curr), 0);
+
             bonuses.push({
                 value: miscBonus,
                 description: `Miscellaneous Bonus: ${miscBonus}`,
@@ -354,6 +404,88 @@ export class SkillFunctions {
         }
     }
 
+     applyGroupedSkills(skills, skillMap) {
+        const skillsCopy = [...skills];
+        if (!skillMap || skillMap.keys().length === 0){
+            return skillsCopy.sort();
+        }
+        //add groupers
+        skillsCopy.push(...Array.from(skillMap.keys()).flat())
+        //remove
+        const groupedSkills = Array.from(skillMap.values().map(skill => skill.grouped)).flat().distinct()
+
+        return skillsCopy.filter(s => !groupedSkills.includes(s)).sort()
+
+    }
+
+     resolveBonusesAndHandleModifiers(rawSkillBonuses) {
+        const skillBonuses = [];
+
+        let implant = 0;
+        for (const skillBonus of rawSkillBonuses) {
+            const toks = skillBonus.split(":");
+            if (toks.length > 2) {
+                const modifier = toks[2].toLowerCase().trim();
+                switch (modifier) {
+                    case "implant":
+                        implant = implant + parseInt(toks[1]);
+                        break;
+                }
+                continue;
+            }
+            skillBonuses.push(toks[1]);
+        }
+        if (implant) {
+            skillBonuses.push(Math.max(implant, -5));
+        }
+        return skillBonuses;
+    }
+
+     createNewSkill(skill, actualSkill = {}, customSkill = {}) {
+
+        return {...DEFAULT_SKILL, ...(skillDetails[skill] || {}), ...customSkill, ...actualSkill}
+
+    }
+
+
+     configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) {
+        skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
+        skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value), actor);
+        skill.variable = `@${actor.cleanSkillName(label)}`;
+        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+        skill.label = label.replace(/\(/g, "( ").titleCase().replace(/\( /g, "(")
+        skill.key = label.toLowerCase()
+        actor.resolvedLabels.set(skill.variable, skill.label);
+        skill.abilityBonus = skillAttributeMod;
+        skill.rowColor = label === "Initiative" || label === "Perception" ? "highlighted-skill" : "";
+        skill.situationalSkills = [];
+    }
+
+     standardizedAttribute(rerollKey)
+    {
+        if (!rerollKey) {
+            return rerollKey;
+        }
+        rerollKey = rerollKey.toLowerCase()
+        switch(rerollKey)
+        {
+            case "dex":
+                return "dexterity";
+            case "str":
+                return "strength";
+            case "con":
+                return "constitution";
+            case "int":
+                return "intelligence";
+            case "wis":
+                return "wisdom";
+            case "cha":
+                return "charisma";
+            default:
+                return rerollKey;
+        }
+    }
+
     isClassSkill(key, actor, classSkills) {
         return key === "use the force"
             ? actor.isForceSensitive
@@ -366,7 +498,7 @@ export class SkillFunctions {
         let variable = `@${system.cleanSkillName(key)}`;
         let label = key.titleCase().replace("Knowledge", "K.");
 
-        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+        actor.resolvedVariables.set(variable, "1d20 + " + skill.value);
         actor.resolvedLabels.set(variable, label);
         actor.resolvedNotes.set(variable, notes);
     }

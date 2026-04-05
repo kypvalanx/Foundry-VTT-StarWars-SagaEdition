@@ -1,4 +1,4 @@
-import {resolveHealth, resolveShield} from "./health.mjs";
+import {resolveShield} from "./health.mjs";
 import {
     ALPHA_FINAL_NAME,
     COMMMA_LIST,
@@ -558,7 +558,7 @@ export class SWSEActor extends Actor {
     }
 
     get health() {
-        return resolveHealth(this);
+        return this.system.health;
     }
 
 
@@ -1529,7 +1529,7 @@ export class SWSEActor extends Actor {
     async setAttributes(attributes) {
         let update = {};
         for (let [key, ability] of Object.entries(attributes)) {
-            update[`system.attributes.${key}.base`] = ability;
+            update[`system.abilities.${key}.base`] = ability;
         }
         await this.safeUpdate(update);
     }
@@ -1866,7 +1866,7 @@ export class SWSEActor extends Actor {
         });
     }
     getAbilitySkillBonus(skill) {
-        //TODO camelcase and simplify unless this could be more complex?
+        //TODO camelcase and simplify unless this could be more complex?  DEPRACATED, use skill bonus
         if (skill.toLowerCase() === 'stealth') {
             return getInheritableAttribute({
                 entity: this,

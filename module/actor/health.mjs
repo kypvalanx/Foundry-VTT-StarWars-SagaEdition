@@ -1,59 +1,5 @@
-import {resolveValueArray} from "../common/util.mjs";
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {SWSEActor} from "./actor.mjs";
-
-/**
- *
- * @param {SWSEActor|null} actor
- * @returns {{temp, other: number, max: number, value: number, dr, sr}}
- */
-export function resolveHealth(actor) {
-    if(!actor) return {temp: 0, other: 0, max: 0, value: 0, dr: 0, sr: 0};
-
-    let healthBonuses = [];
-
-    if(actor.isFollower){
-        healthBonuses.push(10)
-        healthBonuses.push(actor.heroicLevel)
-    } else {
-        for (let charClass of actor.classes || []) {
-            healthBonuses.push(charClass.classLevelHealth)
-            healthBonuses.push(resolveAttributeMod(actor, actor.ignoreCon()));
-        }
-    }
-
-    let others = [];
-    let multipliers = [];
-
-    healthBonuses.push(... getInheritableAttribute({
-        entity: actor,
-        attributeKey: 'healthHardenedMultiplier',
-        reduce: "NUMERIC_VALUES"
-    }).map(value => "*"+value))
-    for (let item of getInheritableAttribute({
-        entity: actor,
-        attributeKey: 'hitPointEq'
-    })) {
-        if (item) {
-            others.push(item.value);
-            healthBonuses.push(item.value);
-            if (item.value && (item.value.startsWith("*") || item.value.startsWith("/"))) {
-                multipliers.push(item.value)
-            }
-        }
-    }
-    let other = resolveValueArray(others, actor);
-
-    //TODO add traits and stuff that boost HP
-    let health = actor.system.health;
-    health.value = Array.isArray(actor.system.health.value) ? actor.system.health.value[0] : actor.system.health.value;
-    health.other = other;
-    health.max = actor.system.health.override ? actor.system.health.override : resolveValueArray(healthBonuses, actor);
-    health.multipliers = multipliers;
-    health.override = actor.system.health.override;
-    return health;
-}
-
 /**
  *
  * @param {SWSEActor|null} actor

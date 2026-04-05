@@ -98,6 +98,49 @@ export async function healthFunctionsTests(quench) {
                             assert.equal(actor.system.health.bonusHP, 5);
                         }, {partialMock: true});
                     });
+
+                    it("should override max health if system.overrides.health is set", async () => {
+                        await withTestActor(async (actor) => {
+                            actor.classes = [{ classLevelHealth: 10 }];
+                            actor.system.abilities.con.mod = 0;
+
+                            actor.system.overrides.health = 50;
+                            actor.system._prepareHealthDerivedData();
+
+                            assert.equal(actor.system.health.max, 50);
+                        }, {partialMock: true});
+                    });
+
+                    it("should override max health if system.health.override is set", async () => {
+                        await withTestActor(async (actor) => {
+                            actor.classes = [{ classLevelHealth: 10 }];
+                            actor.system.abilities.con.mod = 0;
+
+                            actor.system.health.override = 75;
+                            // resolveHealth is called via actor.health getter
+                            assert.equal(actor.health.max, 75);
+                        }, {partialMock: true});
+                    });
+                });
+
+                describe("extractTraitValues", () => {
+                    it("should correctly extract multipliers and bonus HP", async () => {
+                        await withTestActor(async (actor) => {
+                            const traitAttributes = [
+                                { value: "10" },
+                                { value: "*2" },
+                                { value: "/2" }
+                            ];
+                            const healthBonuses = [100];
+
+                            const result = actor.system.extractTraitValues(traitAttributes, healthBonuses);
+
+                            assert.sameMembers(result.others, ["10", "*2", "/2"]);
+                            assert.sameMembers(result.multipliers, ["*2", "/2"]);
+                            // healthBonuses should be updated by reference
+                            assert.includeMembers(healthBonuses, [100, "10", "*2", "/2"]);
+                        }, {partialMock: true});
+                    });
                 });
 
                 describe("_prepareSecondWinds", () => {

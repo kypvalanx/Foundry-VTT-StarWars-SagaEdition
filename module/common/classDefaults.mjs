@@ -38,7 +38,7 @@ export const DEFAULT_MODE_EFFECT = {
 
 export const DEFAULT_SKILL = {
     value: 0,
-    attribute: undefined,
+    ability: undefined,
     uut: false,
     trained: false,
     acp: false,
