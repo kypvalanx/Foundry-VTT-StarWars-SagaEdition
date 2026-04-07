@@ -24,6 +24,17 @@ export default class CommonActorData {
             overrides: new fields.ObjectField({
                 label: "Stored Sheet Overrides",
             }),
+            actorLinks: new fields.ArrayField(new fields.SchemaField({
+                id: new fields.DocumentIdField(),
+                uuid: new fields.StringField({required: true}),
+                position: new fields.StringField({initial: "neutral"}),
+                slot: new fields.StringField({
+                    nullable: true,
+                    initial: null}),
+            }), {
+                label: "Actor Links",
+                initial: []
+            })
         };
     }
 }

@@ -22,7 +22,7 @@ export class SkillFields {
             ability: new fields.StringField({
                 initial: ability,
                 blank: false,
-                label: "Ability Modifier",
+                label: "Related Ability",
             }),
             trained: new fields.BooleanField({
                 initial: false,
@@ -31,7 +31,7 @@ export class SkillFields {
             manualBonus: new fields.NumberField({
                 initial: 0,
                 integer: true,
-                label: `${skill} Mod`,
+                label: `Manual ${skill} Bonus`,
             }),
             trainedOnly: new fields.BooleanField({
                 initial: false,
@@ -40,6 +40,11 @@ export class SkillFields {
             armorPenalty: new fields.BooleanField({
                 initial: false,
                 label: "Armor Penalty",
+            }),
+            value: new fields.NumberField({
+                initial: 0,
+                integer: true,
+                label: `${skill} Mod`,
             })
         });
     }
@@ -181,7 +186,7 @@ export class SkillFunctions {
         let actor = this.parent;
         let system = this;
 
-        let groupedSkillMap = getGroupedSkillMap()
+        let groupedSkillMap = options.groupedSkillMap ?? getGroupedSkillMap()
 
         let heavyLoadAffected = actor.heavyLoad;
         let halfCharacterLevel = Math.floor(system.level.value / 2);
@@ -219,6 +224,7 @@ export class SkillFunctions {
         }).map((skill) => (skill || "").toLowerCase());
 
         let acPenalty = generateArmorCheckPenalties(actor);
+        let builtSkills = {};
 
         const skillMap = new Map();
         const resolvedSkills = this.applyGroupedSkills(options.skills ?? skills(actor.type), groupedSkillMap);
@@ -246,7 +252,7 @@ export class SkillFunctions {
             let key = resSkill.toLowerCase();
 
             const customSkill = groupedSkillMap?.get(resSkill)
-            const skill = this.createNewSkill(resSkill, actor.system.skills[key] || {}, customSkill)
+            const skill = this.createNewSkill(resSkill, actor.system.skills[resSkill] || {}, customSkill)
             let abilityMod = system.abilities[skill.ability]?.mod;
             let notes = [];
 
@@ -401,7 +407,12 @@ export class SkillFunctions {
 
             //Roll Data
             system._prepareSkillRollData(key, skill, notes);
+
+            builtSkills[resSkill] = skill
+            //system.skills[resSkill] = skill;
         }
+
+        system.skills = builtSkills;
     }
 
      applyGroupedSkills(skills, skillMap) {

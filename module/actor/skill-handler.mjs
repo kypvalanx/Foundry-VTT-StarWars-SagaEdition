@@ -414,7 +414,7 @@ function getSkillAttributeMod(actor, key, skill) {
  */
 export function getAvailableTrainedSkillCount(actor) {
     return actor.getCached("trained skills", () => {
-        let intBonus = actor.getAttributeMod("int")
+        let intBonus = actor.system.abilities.int.mod
         let classBonus = 0;
         for (let co of actor.itemTypes.class) {
             if (co.levelsTaken.includes(1)) {

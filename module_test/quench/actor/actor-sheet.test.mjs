@@ -189,7 +189,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
 
                                 const update = {};
-                                update[`system.skills.knowledge (bureaucracy).trained`] = true;
+                                update[`system.skills.Knowledge (Bureaucracy).trained`] = true;
 
                                 await actor.safeUpdate(update);
 
@@ -406,7 +406,7 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
 
                                 const update = {};
-                                update[`system.skills.use the force.trained`] = true;
+                                update[`system.skills.Use the Force.trained`] = true;
                                 await actor.safeUpdate(update);
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Light)", type: "feat"})
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Armor Proficiency (Medium)", type: "feat"})
@@ -430,8 +430,8 @@ export async function actorSheetTests(quench) {
                                 await actor.sheet._onDropItem(getMockEvent(), {name: "Fortune's Favor", type: "talent"})
 
                                 const update = {};
-                                update[`system.skills.deception.trained`] = true;
-                                update[`system.skills.persuasion.trained`] = true;
+                                update[`system.skills.Deception.trained`] = true;
+                                update[`system.skills.Persuasion.trained`] = true;
 
                                 await actor.safeUpdate(update);
 

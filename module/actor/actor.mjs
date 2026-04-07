@@ -310,7 +310,7 @@ export class SWSEActor extends Actor {
             user = game.users.get(userId);
             context.owner = userId;
         }
-        if ((this.canUserModify(user, 'update') && !this.pack && !!game.actors.get(this.id))) {
+        if (this.canUserModify(user, 'update') && !this.pack) {
             try {
                 await this.update(data, context);
             } catch (e) {
@@ -778,13 +778,9 @@ export class SWSEActor extends Actor {
             slot
         })
         let update = {};
-        if (Array.isArray(this.actorLinks)) {
-            const links = this.actorLinks.filter(link => link.uuid !== actor.uuid);
-            links.push(link)
-            update['system.actorLinks'] = links;
-        } else {
-            update['system.actorLinks'] = [link];
-        }
+        const links = this.actorLinks.filter(link => link.uuid !== actor.uuid && !(link.position === position && link.slot === slot));
+        links.push(link)
+        update['system.actorLinks'] = links;
 
         await this.safeUpdate(update);
     }
