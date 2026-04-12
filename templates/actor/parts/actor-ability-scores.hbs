@@ -1,5 +1,7 @@
 {{!-- Ability Scores --}}
 <div class="ability-scores panel">
+
+    {{log "ability score" actor data}}
     <div class="flex-row">
         <div class="medium"></div>
         {{#ifEquals actor.system.settings.abilityGeneration "Semi-Manual"}}<div class="small small-header">Base Score</div>{{/ifEquals}}
@@ -7,10 +9,7 @@
         <div class="small small-header">Temp</div>
         <div class="small small-header">Mod</div>
     </div>
-    {{log data}}
-    {{log actor}}
     {{#each actor.system.abilities as |attribute id|}}
-        {{log attribute}}
         {{#unless attribute.skip}}
             <div class="flex-row">
                 <div class="medium labeled-input" >

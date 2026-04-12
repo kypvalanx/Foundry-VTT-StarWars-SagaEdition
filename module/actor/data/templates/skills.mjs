@@ -362,7 +362,7 @@ export class SkillFunctions {
 
             const rawSkillBonuses = skillBonusAttr.filter(bonus => {
                 const bonusKey = bonus.split(":")[0].toLowerCase();
-                return bonusKey === resSkill.toLowerCase() || this.standardizedAttribute(bonusKey) === this.standardizedAttribute(skill.attribute) || bonusKey === "all"
+                return bonusKey === resSkill.toLowerCase() || this.standardizedAttribute(bonusKey) === this.standardizedAttribute(skill.ability) || bonusKey === "all"
             })
 
             let miscBonuses = this.resolveBonusesAndHandleModifiers(rawSkillBonuses);
@@ -394,16 +394,32 @@ export class SkillFunctions {
             //Final skill calculations
             let nonZeroBonuses = bonuses.filter((bonus) => bonus.value !== 0);
 
-            skill.title = nonZeroBonuses
-                .map((bonus) => bonus.description)
-                .join(NEW_LINE);
+            this.configureSkill(skill, nonZeroBonuses, actor, resSkill, abilityMod);
 
-            skill.value = resolveValueArray(
-                nonZeroBonuses.map((bonus) => bonus.value)
-            );
+            for (const situationalSkillName of situationalSkillNames) {
+                const modifiedSkill = JSON.parse(JSON.stringify(skill));
+                modifiedSkill.isClass = false;
+                delete modifiedSkill.situationalSkills
+                delete modifiedSkill.grouped
+                delete modifiedSkill.classes
 
-            //Remaining Skills
-            system._prepareRemainingSkills();
+
+                const resolvedName = situationalSkillName.startsWith(resSkill) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
+                const situationalBonuses = [...nonZeroBonuses]
+                //if(modifiedSkill.manualBonus){
+                const situationalKey = resolvedName.toLowerCase()
+
+                let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resolvedName).map(bonus => {return {value: bonus.split(":")[1], description: "Situational Bonuses"}});
+                situationalBonuses.push(...miscBonuses)
+                modifiedSkill.manualBonus = actor.system.skills[situationalKey]?.manualBonus || 0
+
+                situationalBonuses.push({value: modifiedSkill.manualBonus, description: "Situational Manual Bonus"})
+                //}
+
+
+                this.configureSkill(modifiedSkill, situationalBonuses, actor, resolvedName, abilityMod);
+                skill.situationalSkills.push(modifiedSkill)
+            }
 
             //Roll Data
             system._prepareSkillRollData(key, skill, notes);
@@ -412,7 +428,23 @@ export class SkillFunctions {
             //system.skills[resSkill] = skill;
         }
 
+        //Remaining Skills
+        system._prepareRemainingSkills();
         system.skills = builtSkills;
+    }
+
+    configureSkill(skill, nonZeroBonuses, actor, label, skillAttributeMod) {
+        skill.title = nonZeroBonuses.map(bonus => bonus.description).join(NEW_LINE);
+        skill.value = resolveValueArray(nonZeroBonuses.map(bonus => bonus.value), actor);
+        skill.variable = `@${actor.cleanSkillName(label)}`;
+        actor.resolvedVariables.set(skill.variable, "1d20 + " + skill.value);
+        skill.label = label.replace(/\(/g, "( ").titleCase().replace(/\( /g, "(")
+        skill.key = label.toLowerCase()
+        actor.resolvedLabels.set(skill.variable, skill.label);
+        skill.abilityBonus = skillAttributeMod;
+        skill.rowColor = label === "Initiative" || label === "Perception" ? "highlighted-skill" : "";
+        skill.situationalSkills = [];
+
     }
 
      applyGroupedSkills(skills, skillMap) {

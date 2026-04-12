@@ -8,7 +8,7 @@ import {
 } from "./common/util.mjs";
 import {sizeArray, weaponGroup} from "./common/constants.mjs";
 import {getInheritableAttribute, getResolvedSize} from "./attribute-helper.mjs";
-import {SWSEActor} from "./actor/actor.mjs";
+import SWSEActor from "./actor/actor.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {SimpleCache} from "./common/simple-cache.mjs";
 

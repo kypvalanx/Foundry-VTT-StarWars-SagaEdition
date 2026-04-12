@@ -2,7 +2,7 @@ import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {suppressibleDialog} from "../common/dialog.mjs";
 import {characterActorTypes, EQUIPABLE_TYPES, LIMITED_TO_ONE_TYPES, vehicleActorTypes} from "../common/constants.mjs";
 import {unique, viewableEntityFromEntityType} from "../common/util.mjs";
-import {SWSEActor} from "./actor.mjs";
+import SWSEActor from "./actor.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 
 //helpers

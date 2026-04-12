@@ -229,13 +229,17 @@
                 </div>
 
                 <div class="tab settings" data-group="primary" data-tab="settings">
-
                     <div class="flexcol">
-                        {{#each settings}}
-                            {{> 'swse.setting'}}
+                        <div class="flexrow">
+                            <div class="flex-1">
+                                <label class="resource-label">Settings</label>
+                            </div>
+                        </div>
+                        {{log actor.settings data.settings}}
+                        {{#each actor.settings as |setting key|}}
+                            {{> 'systems/swse/templates/settings/setting.hbs' setting=setting key=key}}
                         {{/each}}
                     </div>
-
                 </div>
 
                 <div class="tab modes" data-group="primary" data-tab="modes">

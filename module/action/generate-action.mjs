@@ -1,5 +1,5 @@
 import {SWSEItem} from "../item/item.mjs";
-import {SWSEActor} from "../actor/actor.mjs";
+import SWSEActor from "../actor/actor.mjs";
 
 function itemType(object) {
     if(object instanceof SWSEItem) {

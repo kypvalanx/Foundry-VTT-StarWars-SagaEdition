@@ -1,5 +1,5 @@
 import {initializeStatusEffects, SWSE} from "./common/config.mjs";
-import {getEntityKey, SWSEActor} from "./actor/actor.mjs";
+import SWSEActor, {getEntityKey} from "./actor/actor.mjs";
 import {SWSEActorSheet} from "./actor/actor-sheet.mjs";
 import {SWSEItem} from "./item/item.mjs";
 import {SWSEItemSheet} from "./item/item-sheet.mjs";

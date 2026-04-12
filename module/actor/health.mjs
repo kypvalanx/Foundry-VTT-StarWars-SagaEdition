@@ -1,5 +1,5 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
-import {SWSEActor} from "./actor.mjs";
+import SWSEActor from "./actor.mjs";
 /**
  *
  * @param {SWSEActor|null} actor

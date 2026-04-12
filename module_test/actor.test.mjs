@@ -2,7 +2,7 @@ console.log("Starting actor tests ")
 
 import test from 'node:test';
 import {expect} from 'chai';
-import {SWSEActor} from '../module/actor/actor.mjs';
+import SWSEActor from '../module/actor/actor.mjs';
 
 test('SWSEActor instantiation', () => {
     const actor = new SWSEActor({

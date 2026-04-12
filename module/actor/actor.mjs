@@ -45,7 +45,7 @@ export function getEntityKey(entity) {
  * Extend the base Actor entity
  * @extends {Actor}
  */
-export class SWSEActor extends Actor {
+class SWSEActor extends Actor {
 
     /**
      * Augment the basic actor data with additional dynamic data.
@@ -58,6 +58,8 @@ export class SWSEActor extends Actor {
         }
 
         //TODO compartmentalize these and make the amll dynamic formulas and defined in a single place
+        this.initializeCharacterSettings()
+        this.handleAbilityScore()
         this.formulaFunctions = new Map();
         this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
         this.resolvedVariables = new Map();
@@ -96,20 +98,6 @@ export class SWSEActor extends Actor {
             system.condition = conditionEffect.changes.find(change => change.key === "condition").value
         }
 
-        this.system.finalAttributeGenerationType = this.system.attributeGenerationType;
-
-        if (Array.isArray(this.system.attributeGenerationType)) {
-            console.error("this should not happen.  multiple attribute generation types found, using first.")
-            this.system.attributeGenerationType = this.system.attributeGenerationType[0];
-        }
-        this.system.sheetType = "Auto"
-        if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet" || this.type === "vehicle") {
-            this.system.finalAttributeGenerationType = "Manual";
-            this.system.sheetType = "Manual"
-        } else if (!this.system.attributeGenerationType || this.system.attributeGenerationType.toLowerCase() === "default") {
-            this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
-
-        }
 
 
         if (this.type === 'character') this._prepareCharacterData();
@@ -998,27 +986,27 @@ export class SWSEActor extends Actor {
 
     initializeCharacterSettings() {
         this.settings = [];
-        this.settings.push({type: "boolean", path: "system.isNPC", label: "Is NPC", value: this.system.isNPC})
-        this.settings.push({type: "boolean", path: "system.autoSizeToken", label: "Autosize Token based on actor size?", value: this.system.autoSizeToken})
-        this.settings.push({type: "boolean", path: "system.allowSheetLighting", label: "Allow Sheet to modify token lighting", value: this.system.allowSheetLighting})
+        this.settings.push({type: "boolean", path: "system.settings.isNPC", label: "Is NPC", value: this.system.settings.isNPC})
+        this.settings.push({type: "boolean", path: "system.settings.autoSizeToken", label: "Autosize Token based on actor size?", value: this.system.settings.autoSizeToken})
+        this.settings.push({type: "boolean", path: "system.settings.allowSheetLighting", label: "Allow Sheet to modify token lighting", value: this.system.settings.allowSheetLighting})
         this.settings.push({
             type: "boolean",
-            path: "system.ignorePrerequisites",
+            path: "system.settings.ignorePrerequisites",
             label: "Ignore Prerequisites",
-            value: this.system.ignorePrerequisites
+            value: this.system.settings.ignorePrerequisites
         });
         this.settings.push({
             type: "boolean",
-            path: "system.ignorePrerequisitesOnDrop",
+            path: "system.settings.ignorePrerequisitesOnDrop",
             label: "Ignore Prerequisites when adding new Items",
-            value: this.system.ignorePrerequisites
+            value: this.system.settings.ignorePrerequisitesOnDrop
         })
         if(this.type === "character"){
             this.settings.push({
                 type: "select",
-                path: "system.attributeGenerationType",
-                label: "Attribute Generation Type",
-                value: this.system.attributeGenerationType || "Default",
+                path: "system.settings.attributeGeneration",
+                label: "Ability Generation Type",
+                value: this.system.settings.attributeGeneration || "Default",
                 options: [
                     {value: "Default", display: "Default", tooltip: "Uses System Preference"},
                     {value: "Manual", display: "Manual", tooltip: "Your Attributes are exactly as you enter them"},
@@ -1531,10 +1519,14 @@ export class SWSEActor extends Actor {
     }
 
     async addChange(change) {
-        let update = {};
-        update[`system.changes`] = this.system.changes || [];
-        update[`system.changes`].push(change);
-        await this.safeUpdate(update);
+        // let update = {};
+        // update[`system.changes`] = this.system.changes || [];
+        // update[`system.changes`].push(change);
+
+        let item = { name: "Change", type: "trait", system:{changes: [change]} };
+
+        await this.createEmbeddedDocuments("Item", [item], {render: false, noHook: true, noRenderTemplate: true})
+        //await this.safeUpdate(update);
     }
 
 
@@ -3032,5 +3024,22 @@ export class SWSEActor extends Actor {
         }
         await this.safeUpdate(data);
     }
+
+    handleAbilityScore() {
+
+        const attributeGeneration = this.system.settings.attributeGeneration;
+        this.system.finalAttributeGenerationType = attributeGeneration;
+
+        this.system.sheetType = "Auto"
+        if (this.flags.core?.sheetClass === "swse.SWSEManualActorSheet" || this.type === "vehicle") {
+            this.system.finalAttributeGenerationType = "Manual";
+            this.system.sheetType = "Manual"
+        } else if (!attributeGeneration || attributeGeneration.toLowerCase() === "default") {
+            this.system.finalAttributeGenerationType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
+
+        }
+    }
 }
+
+export default SWSEActor
 

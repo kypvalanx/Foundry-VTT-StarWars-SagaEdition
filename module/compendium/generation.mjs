@@ -1,5 +1,5 @@
 import {SWSEItem} from "../item/item.mjs";
-import {SWSEActor} from "../actor/actor.mjs";
+import SWSEActor from "../actor/actor.mjs";
 
 export async function processActor(actorData) {
     let actors = await SWSEActor.create([actorData]);

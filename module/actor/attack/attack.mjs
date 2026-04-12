@@ -13,7 +13,7 @@ import {
     isRanged
 } from "../attack-handler.mjs";
 import {generateArmorCheckPenalties} from "../armor-check-penalty.mjs";
-import {SWSEActor} from "../actor.mjs";
+import SWSEActor from "../actor.mjs";
 import {reduceWeaponRange, SWSEItem} from "../../item/item.mjs";
 import {
     adjustDieSize,

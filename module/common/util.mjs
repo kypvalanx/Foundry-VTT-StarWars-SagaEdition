@@ -2,7 +2,7 @@
 
 import {SWSE} from "./config.mjs";
 import {dieSize_vanilla, dieType} from "./constants.mjs";
-import {SWSEActor} from "../actor/actor.mjs";
+import SWSEActor from "../actor/actor.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {meetsPrerequisites} from "../prerequisite.mjs";
 import {DEFAULT_MODE_EFFECT, DEFAULT_MODIFICATION_EFFECT} from "./classDefaults.mjs";

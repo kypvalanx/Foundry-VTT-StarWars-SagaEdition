@@ -1,4 +1,4 @@
-import {SWSEActor} from "../actor/actor.mjs";
+import SWSEActor from "../actor/actor.mjs";
 
 export class SWSETokenHud extends foundry.applications.hud.TokenHUD {
     _getStatusEffectChoices() {

@@ -8,7 +8,7 @@ import {
     UNINHERITABLE_AMMO_CHANGES,
     WEAPON_INCLUSION_LIST
 } from "./common/constants.mjs";
-import {SWSEActor} from "./actor/actor.mjs";
+import SWSEActor from "./actor/actor.mjs";
 import {SWSEActiveEffect} from "./active-effect/active-effect.mjs";
 import {UnarmedAttack} from "./actor/unarmed-attack.mjs";
 
@@ -252,7 +252,7 @@ function getChangesFromSize(entity, changes) {
 
     resolvedChanges.push(...changes.filter(change => !change.key?.toLowerCase().endsWith("scalable")))
 
-    for (const scalableChange of changes.filter(change => change.key.toLowerCase().endsWith("scalable"))) {
+    for (const scalableChange of changes.filter(change => change.key?.toLowerCase().endsWith("scalable"))) {
         resolvedChanges.push(...SCALABLE_CHANGES[scalableChange.key][scalableChange.value][size]);
     }
 

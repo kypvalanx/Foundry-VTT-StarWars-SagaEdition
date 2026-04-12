@@ -34,7 +34,8 @@ export default class CommonActorData {
             }), {
                 label: "Actor Links",
                 initial: []
-            })
+            }),
+            changes: new fields.ArrayField(new fields.SchemaField({}))
         };
     }
 }

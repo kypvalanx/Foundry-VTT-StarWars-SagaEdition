@@ -51,23 +51,24 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
                 ...DetailFields.character,
             }),
             settings: new fields.SchemaField({
-                isNPC: new fields.SchemaField({
-                    value: new fields.BooleanField({
-                        initial: false,
-                        label: "Is NPC",
-                    }),
+                isNPC: new fields.BooleanField({
+                    initial: false
                 }),
-                ignorePrerequisites: new fields.SchemaField({
-                    value: new fields.BooleanField({
-                        initial: false,
-                        label: "Ignore Prerequisites",
-                    }),
+                autoSizeToken: new fields.BooleanField({
+                    initial: false
                 }),
-                abilityGeneration: new fields.SchemaField({
-                    value: new fields.StringField({
-                        initial: "Default",
-                        label: "Ability Generation Type",
-                    }),
+                allowSheetLighting: new fields.BooleanField({
+                    initial: false
+                }),
+                ignorePrerequisites: new fields.BooleanField({
+                    initial: false
+                }),
+                ignorePrerequisitesOnDrop: new fields.BooleanField({
+                    initial: false
+                }),
+                attributeGeneration: new fields.StringField({
+                    initial: "Default",
+                    label: "Ability Generation",
                 }),
             }),
             credits: new fields.NumberField({
@@ -434,28 +435,28 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
     }
 
     #initializeCharacterSettings() {
-        const system = this;
-        let npcsetting = system.settings.isNPC;
-        npcsetting.type = "boolean";
-        npcsetting.path = "system.settings.isNPC.value";
-        npcsetting.label = "Is NPC";
-
-        let prereqSetting = system.settings.ignorePrerequisites;
-        prereqSetting.type = "boolean";
-        prereqSetting.path = "system.settings.ignorePrerequisites.value";
-        prereqSetting.label = "Ignore Prerequisites";
-
-        let abilitySetting = system.settings.abilityGeneration;
-        abilitySetting.type = "select";
-        abilitySetting.path = "system.settings.abilityGeneration.value";
-        abilitySetting.label = "Ability Generation Type";
-        abilitySetting.options = {
-            Default: "Default",
-            Manual: "Manual",
-            Roll: "Roll",
-            "Point Buy": "Point Buy",
-            "Standard Array": "Standard Array",
-        };
+        // const system = this;
+        // let npcsetting = system.settings.isNPC;
+        // npcsetting.type = "boolean";
+        // npcsetting.path = "system.settings.isNPC.value";
+        // npcsetting.label = "Is NPC";
+        //
+        // let prereqSetting = system.settings.ignorePrerequisites;
+        // prereqSetting.type = "boolean";
+        // prereqSetting.path = "system.settings.ignorePrerequisites.value";
+        // prereqSetting.label = "Ignore Prerequisites";
+        //
+        // let abilitySetting = system.settings.abilityGeneration;
+        // abilitySetting.type = "select";
+        // abilitySetting.path = "system.settings.abilityGeneration.value";
+        // abilitySetting.label = "Ability Generation Type";
+        // abilitySetting.options = {
+        //     Default: "Default",
+        //     Manual: "Manual",
+        //     Roll: "Roll",
+        //     "Point Buy": "Point Buy",
+        //     "Standard Array": "Standard Array",
+        // };
     }
 
     /**

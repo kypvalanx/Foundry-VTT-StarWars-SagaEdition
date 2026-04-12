@@ -35,9 +35,12 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.setAttributes({int:18})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
+
                         assert.lengthOf(skills, 25)
-                        assert.equal(skills["Knowledge (Bureaucracy)"].value, 4)
+                        assert.equal(actor.system.skills["Knowledge (Bureaucracy)"].value, 4)
                     });
                 });
 
@@ -45,9 +48,12 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Knowledge (Bureaucracy):4"})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
+
                         assert.lengthOf(skills, 25)
-                        assert.equal(skills["Knowledge (Bureaucracy)"].value, 4)
+                        assert.equal(actor.system.skills["Knowledge (Bureaucracy)"].value, 4)
                     });
                 });
 
@@ -55,9 +61,11 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Knowledge (Bureaucracy) (Watercooler Talk):4"})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
                         assert.lengthOf(skills, 25)
-                        const knowledgeBureaucracy = skills.filter(s => s.label === "Knowledge (Bureaucracy)")[0];
+                        const knowledgeBureaucracy = actor.system.skills["Knowledge (Bureaucracy)"];
                         assert.equal(knowledgeBureaucracy.value, 0)
 
                         assert.equal(knowledgeBureaucracy.situationalSkills.filter(s => s.label === "Knowledge (Bureaucracy) (Watercooler Talk)")[0].value, 4)
