@@ -35,7 +35,28 @@ export default class CommonActorData {
                 label: "Actor Links",
                 initial: []
             }),
-            changes: new fields.ArrayField(new fields.SchemaField({}))
+            changes: new fields.ArrayField(new fields.SchemaField({})),
+            settings: new fields.SchemaField({
+                isNPC: new fields.BooleanField({
+                    initial: false
+                }),
+                autoSizeToken: new fields.BooleanField({
+                    initial: false
+                }),
+                allowSheetLighting: new fields.BooleanField({
+                    initial: false
+                }),
+                ignorePrerequisites: new fields.BooleanField({
+                    initial: false
+                }),
+                ignorePrerequisitesOnDrop: new fields.BooleanField({
+                    initial: false
+                }),
+                attributeGeneration: new fields.StringField({
+                    initial: "Default",
+                    label: "Ability Generation",
+                }),
+            })
         };
     }
 }

@@ -51,13 +51,13 @@
 
     <div class="medium labeled-input clickable">
         <label for="gender" class="text clickable">Gender</label>
-        <div class="input clickable" data-action="gender" id="gender">{{#if actor.system.gender}}{{actor.system.gender}}{{else}}{{#if actor.system.sex}}{{actor.system.sex}}{{/if}}{{/if}}</div>
+        <div class="input clickable" data-action="gender" id="gender">{{#if actor.system.details.gender}}{{actor.system.details.gender}}{{else}}{{#if actor.system.details.sex}}{{actor.system.details.sex}}{{/if}}{{/if}}</div>
     </div>
 
 
     <div class="medium labeled-input">
         <label for="age" class="text clickable">Age</label>
-        <div class="input clickable" data-action="age" id="age">{{#if actor.system.age}}{{actor.system.age}} years{{/if}}</div>
+        <div class="input clickable" data-action="age" id="age">{{#if actor.system.details.age}}{{actor.system.details.age}} years{{/if}}</div>
     </div>
 
     <div class="small labeled-input">

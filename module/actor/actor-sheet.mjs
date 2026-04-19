@@ -661,7 +661,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     }
 
     buildAgeDialog(sheet) {
-        let age = sheet.actor.system.age ? parseInt(sheet.actor.system.age) : 0;
+        let age = sheet.actor.system.details.age ? parseInt(sheet.actor.system.details.age) : 0;
         let ageEffects = filterItemsByTypes(sheet.actor.items.values(), ["trait"])
             .map(trait => {
                 //let prereqs = trait.system.prerequisite.filter(prereq => );
@@ -709,8 +709,8 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
 
 
     buildGenderDialog(sheet) {
-        let sex = sheet.actor.system.sex ? sheet.actor.system.sex : "";
-        let gender = sheet.actor.system.gender ? sheet.actor.system.gender : "";
+        let sex = sheet.actor.system.details.sex ? sheet.actor.system.details.sex : "";
+        let gender = sheet.actor.system.details.gender ? sheet.actor.system.details.gender : "";
         let searchString = "GENDER";
         let genderEffects = filterItemsByTypes(sheet.actor.items.values(), ["trait"])
             .filter(trait => this._prerequisiteHasTypeInStructure(trait.system.prerequisite, searchString)).map(trait => {

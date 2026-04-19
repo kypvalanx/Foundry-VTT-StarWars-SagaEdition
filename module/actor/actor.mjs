@@ -2183,11 +2183,11 @@ class SWSEActor extends Actor {
 
 
     setAge(age) {
-        this.safeUpdate({'system.age': age}).then(() => {})
+        this.safeUpdate({'system.details.age': age}).then(() => {})
     }
 
     setGender(sex, gender) {
-        this.safeUpdate({'system.sex': sex, 'system.gender': gender}).then(()=> {})
+        this.safeUpdate({'system.details.sex': sex, 'system.details.gender': gender}).then(()=> {})
     }
 
 

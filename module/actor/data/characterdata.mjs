@@ -37,6 +37,16 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
             source.forcePoints = parseInt(source.forcePoints) || 0;
         }
 
+        if(source.details.sex === null) {
+            source.details.sex = source.sex;
+            source.sex = null;
+        }
+
+        if(source.details.gender === null) {
+            source.details.gender = source.gender;
+            source.gender = null;
+        }
+
         return super.migrateData(source);
     }
 
@@ -50,33 +60,13 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
             details: new fields.SchemaField({
                 ...DetailFields.character,
             }),
-            settings: new fields.SchemaField({
-                isNPC: new fields.BooleanField({
-                    initial: false
-                }),
-                autoSizeToken: new fields.BooleanField({
-                    initial: false
-                }),
-                allowSheetLighting: new fields.BooleanField({
-                    initial: false
-                }),
-                ignorePrerequisites: new fields.BooleanField({
-                    initial: false
-                }),
-                ignorePrerequisitesOnDrop: new fields.BooleanField({
-                    initial: false
-                }),
-                attributeGeneration: new fields.StringField({
-                    initial: "Default",
-                    label: "Ability Generation",
-                }),
-            }),
             credits: new fields.NumberField({
                 initial: 0,
                 integer: true,
                 min: 0,
                 label: "Credits",
-            }),
+            })
+
         };
     }
 
