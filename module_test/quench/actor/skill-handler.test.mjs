@@ -1,5 +1,3 @@
-import {generateSkills} from "../../../module/actor/skill-handler.mjs";
-import {defaultSkills} from "../../../module/common/constants.mjs";
 import {withTestActor} from "./actor-utils.mjs";
 
 export async function skillHandlerTest(quench) {
@@ -21,7 +19,6 @@ export async function skillHandlerTest(quench) {
 
                         let groupedSkillMap = new Map();
                         groupedSkillMap.set("Athletics", {grouped: ["Jump", "Climb", "Swim"], classes: ["Scout", "Soldier", "Jedi"], uut: true})
-                        //let skills = generateSkills(actor, {groupedSkillMap})
 
                         actor.system._prepareSkillDerivedData({groupedSkillMap})
                         let skills = Object.values(actor.system.skills)
@@ -76,7 +73,8 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"Competitive Origami:4"})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
                         assert.lengthOf(skills, 26)
                         const skill = skills.filter(s => s.label === "Competitive Origami")[0];
                         assert.equal(skill.value, 4)
@@ -88,7 +86,8 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"stealth:0"})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
                         assert.lengthOf(skills, 25)
                         const skill = skills.filter(s => s.label === "Stealth")[0];
                         assert.equal(!!skill, true)
@@ -101,7 +100,8 @@ export async function skillHandlerTest(quench) {
                     await withTestActor(async actor => {
                         actor.suppressDialog = true
                         await actor.addChange({key:"skillBonus", value:"stealth:6"})
-                        let skills = generateSkills(actor, {skills: defaultSkills})
+                        actor.system._prepareSkillDerivedData()
+                        let skills = Object.values(actor.system.skills)
                         assert.lengthOf(skills, 25)
                         const skill = skills.filter(s => s.label === "Stealth")[0];
                         assert.equal(!!skill, true)

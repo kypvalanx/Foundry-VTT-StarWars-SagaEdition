@@ -68,7 +68,6 @@ class SWSEActor extends Actor {
         this.cache = new SimpleCache()
 
         this.attack = new AttackDelegate(this);
-        //this.skill = new SkillDelegate(this);
         this.weight = new WeightDelegate(this);
         this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
         this.crew = new CrewDelegate(this);

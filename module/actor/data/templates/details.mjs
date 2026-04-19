@@ -36,8 +36,6 @@ export class DetailFields {
             source.details.cl = source.cl;
             source.cl = null;
         }
-
-        super.migrateData(source);
     }
 
 

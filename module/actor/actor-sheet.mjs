@@ -188,9 +188,9 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         //     }
         // });
 
-        // html.find("input.direct").on("click", (event) => {
-        //     this._pendingUpdates['data.classesfirst'] = event.target.value;
-        // });
+        html.find("input.direct").on("click", (event) => {
+            this._pendingUpdates['data.classesfirst'] = event.target.value;
+        });
 
         // crew controls
         html.find(".crew-control").click(this._onCrewControl.bind(this));
@@ -821,47 +821,47 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
     }
 
 //TODO WTF
-    _updateObject(event, formData) {
-        // Translate CR
-        const cr = formData["system.details.cr.base"];
-        if (typeof cr === "string") formData["system.details.cr.base"] = CR.fromString(cr);
+//     _updateObject(event, formData) {
+//         // Update from elements with 'data-name'
+//         {
+//             const elems = this.element.find("*[data-name]");
+//             let changedData = {};
+//             for (const el of elems) {
+//                 const name = el.dataset.name;
+//                 let value;
+//                 if (el.nodeName === "INPUT") {
+//                     switch (el.type) {
+//                         case "checkbox":
+//                             value = el.checked;
+//                             break;
+//                         default:
+//                             value = el.value;
+//                     }
+//                 } else if (el.nodeName === "SELECT") value = el.options[el.selectedIndex].value;
+//
+//                 if (el.dataset.dtype === "Number") value = Number(value);
+//                 else if (el.dataset.dtype === "Boolean") value = Boolean(value);
+//
+//                 if (foundry.utils.getProperty(this.actor, name) !== value) {
+//                     changedData[name] = value;
+//                 }
+//             }
+//
+//             for (let [k, v] of Object.entries(changedData)) {
+//                 formData[k] = v;
+//             }
+//         }
+//
+//         // Add pending updates
+//         for (let [k, v] of Object.entries(this._pendingUpdates)) {
+//             formData[k] = v;
+//         }
+//         this._pendingUpdates = {};
+//
+//         return super._updateObject(event, formData);
+//     }
 
-        // Update from elements with 'data-name'
-        {
-            const elems = this.element.find("*[data-name]");
-            let changedData = {};
-            for (const el of elems) {
-                const name = el.dataset.name;
-                let value;
-                if (el.nodeName === "INPUT") {
-                    switch (el.type) {
-                        case "checkbox":
-                            value = el.checked;
-                            break;
-                        default:
-                            value = el.value;
-                    }
-                } else if (el.nodeName === "SELECT") value = el.options[el.selectedIndex].value;
-
-                if (el.dataset.dtype === "Number") value = Number(value);
-                else if (el.dataset.dtype === "Boolean") value = Boolean(value);
-
-                if (foundry.utils.getProperty(this.actor, name) !== value) {
-                    changedData[name] = value;
-                }
-            }
-
-            for (let [k, v] of Object.entries(changedData)) {
-                formData[k] = v;
-            }
-        }
-
-        // Add pending updates
-        for (let [k, v] of Object.entries(this._pendingUpdates)) {
-            formData[k] = v;
-        }
-        this._pendingUpdates = {};
-
+    _updateObject(event, formData){
         return super._updateObject(event, formData);
     }
 

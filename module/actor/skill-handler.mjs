@@ -10,33 +10,6 @@ import {
     skills
 } from "../common/constants.mjs";
 import {DEFAULT_SKILL} from "../common/classDefaults.mjs";
-
-export class SkillDelegate {
-    constructor(swseActor) {
-        this.actor = swseActor;
-    }
-
-    /**
-     *
-     * @return {[]}
-     */
-    get skills(){
-        let groupedSkillMap = getGroupedSkillMap()
-
-        return this.getCached("SKILLS", ()=>{
-            return generateSkills(this.actor, {groupedSkillMap});
-        })
-    }
-
-    getCached(key, fn) {
-        if (!this.actor.cache) {
-            return fn();
-        }
-        return this.actor.cache.getCached(key, fn)
-    }
-}
-
-
 function applyGroupedSkills(skills, groupedSkillMap) {
     const skillsCopy = [...skills];
     if (!groupedSkillMap || groupedSkillMap.keys().length === 0){

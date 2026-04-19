@@ -304,10 +304,6 @@ export function getVariableFromActorData(swseActor, variableName) {
     }
 
     let value = swseActor.resolvedVariables?.get(variableName);
-    // if (value === undefined && (variableName.startsWith("@STR")|| variableName.startsWith("@DEX")|| variableName.startsWith("@CON")||variableName.startsWith("@INT")|| variableName.startsWith("@CHA")|| variableName.startsWith("@WIS"))) {
-    //     generateAttributes(swseActor);
-    //     value = swseActor.resolvedVariables?.get(variableName);
-    // }
 
     if(value === undefined){
         let fnct = swseActor.formulaFunctions?.get(variableName);
