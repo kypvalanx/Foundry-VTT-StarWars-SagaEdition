@@ -489,7 +489,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
 
                 break;
         }
-        return toChat(content);
+        return toChat(content, this.object);
     }
 
 
