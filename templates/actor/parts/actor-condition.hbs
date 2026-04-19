@@ -1,6 +1,6 @@
 {{!-- Condition Block --}}
 <div class="condition-block panel flex flex-col">
-    <h1 class="resource-label">Condition{{#if actor.system.condition}} <button type="button" data-action="recover">Recover {{actor.recoveryActions}}/{{actor.totalRecoveryActions}}</button>{{/if}}</h1>
+    <h1 class="resource-label">Condition{{#if actor.condition}} <button type="button" data-action="recover">Recover {{actor.recoveryActions}}/{{actor.totalRecoveryActions}}</button>{{/if}}</h1>
     <table>
         <thead>
         <tr>
@@ -14,7 +14,7 @@
         </thead>
         <tbody>
         <tr>
-            {{#radio actor.system.condition}}
+            {{#radio actor.condition}}
                 <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="0"/></label></td>
                 <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-1"/></label></td>
                 <td><label><input class="condition-radio" type="radio" name="condition-{{actor.id}}" value="-2"/></label></td>
@@ -39,7 +39,7 @@
         </thead>
         <tbody>
         <tr>
-            {{#radio actor.system.gravity}}
+            {{#radio actor.gravity}}
                 <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="Normal"/></label></td>
                 <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="High"/></label></td>
                 <td><label><input class="gravity-radio" type="radio" name="gravity-{{actor.id}}" value="Low"/></label></td>

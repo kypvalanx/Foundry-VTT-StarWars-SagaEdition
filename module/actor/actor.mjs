@@ -83,20 +83,7 @@ class SWSEActor extends Actor {
         }
         const system = this.system;
         system.description = system.description || ""
-        system.gravity = "Normal"
-        let gravityEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("gravity")))
 
-        if (gravityEffect) {
-            system.gravity = gravityEffect.changes.find(change => change.key === "gravity").value
-        }
-
-
-        system.condition = 0;
-        let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
-
-        if (conditionEffect) {
-            system.condition = conditionEffect.changes.find(change => change.key === "condition").value
-        }
 
 
 
@@ -228,6 +215,8 @@ class SWSEActor extends Actor {
         //     this.safeUpdate(this._pendingUpdates);
         // }
     }
+
+
 
 
     /**
@@ -388,7 +377,32 @@ class SWSEActor extends Actor {
     }
 
     get condition() {
-        return this.system.condition;
+        let condition = 0;
+
+        let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
+
+        if (conditionEffect) {
+            condition = conditionEffect.changes.find(change => change.key === "condition").value
+        }
+        return condition;
+    }
+
+    get gravity(){
+        let gravity = "Normal"
+        let gravityEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("gravity")))
+
+        if (gravityEffect) {
+            gravity = gravityEffect.changes.find(change => change.key === "gravity").value
+        }
+        return gravity;
+    }
+
+    set gravity(value){
+        this.setGroupedEffect('gravity', value, true);
+    }
+
+    set condition(value){
+        this.setGroupedEffect('condition', value, true);
     }
 
 
@@ -1264,16 +1278,14 @@ class SWSEActor extends Actor {
         let swseActor = this;
         return getVariableFromActorData(swseActor, variableName);
     }
-
-    get conditionBonus() {
-        return this.system.condition;
-    }
     /**
      * @param {string} effectGrouper
      * @param changeValue
+     * @param skipRenderOnClear if this is set to true, the clearing of the previous grouped status effect will not trigger a redraw
+     * might make this the default after looking at it
      */
-    async setGroupedEffect(effectGrouper, changeValue) {
-        await this.clearGroupedEffect(effectGrouper);
+    async setGroupedEffect(effectGrouper, changeValue, skipRenderOnClear = false) {
+
 
         let localEffect = this.effects.find(e => {
             return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
@@ -1286,6 +1298,8 @@ class SWSEActor extends Actor {
         if(localEffect){
             statusEffect.changes = localEffect.changes;
         }
+        //only skip the refresh if the we are adding a new effect, not if we are only removing
+        await this.clearGroupedEffect(effectGrouper, skipRenderOnClear && !!statusEffect);
 
         await this.activateStatusEffect(statusEffect);
     }
@@ -1293,7 +1307,7 @@ class SWSEActor extends Actor {
     /**
      * @param {string} effectGrouper
      */
-    async clearGroupedEffect(effectGrouper) {
+    async clearGroupedEffect(effectGrouper, skipRenderOnClear = false) {
         const ids = [];
         for (const effect of this.effects) {
             if(effect.statuses.find(status => status.startsWith(effectGrouper))){
@@ -1307,7 +1321,7 @@ class SWSEActor extends Actor {
             }
         }
 
-        await this.deleteEmbeddedDocuments("ActiveEffect", ids);
+        await this.deleteEmbeddedDocuments("ActiveEffect", ids, {render: !skipRenderOnClear});
     }
 
     changeShields(number) {
@@ -2145,12 +2159,12 @@ class SWSEActor extends Actor {
         if (item.type === "character") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
         if (item.type === "npc") await this.safeUpdate({
             "type": "character",
-            "system.isNPC": true
+            "system.settings.isNPC": true
         }, {updateChanges: false});
         if (item.type === "vehicle") await this.safeUpdate({"token.actorLink": true}, {updateChanges: false});
         if (item.type === "npc-vehicle") await this.safeUpdate({
             "type": "vehicle",
-            "system.isNPC": true
+            "system.settings.isNPC": true
         }, {updateChanges: false});
 
 

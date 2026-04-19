@@ -534,13 +534,14 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
 
     async _onConditionChange(event) {
         event.stopPropagation();
-        await this.object.setGroupedEffect('condition', event.currentTarget.value);
+        this.object.condition = event.currentTarget.value;
+        //await this.object.setGroupedEffect('condition', event.currentTarget.value);
     }
 
     async _onGravityChange(event) {
         event.stopPropagation();
-        await this.object.setGroupedEffect('gravity', event.currentTarget.value);
-        //await this.object.safeUpdate({"system.gravity": event.currentTarget.value})
+        this.object.gravity = event.currentTarget.value;
+        //await this.object.setGroupedEffect('gravity', event.currentTarget.value);
     }
 
     async _onShield(event) {
