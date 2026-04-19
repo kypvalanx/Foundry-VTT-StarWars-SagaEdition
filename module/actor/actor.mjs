@@ -17,7 +17,6 @@ import {
 } from "../common/util.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
 import {generateArmorBlock, resolveDefenses} from "./defense.mjs";
-import {SkillDelegate} from "./skill-handler.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {CLASSES_BY_STARTING_FEAT, COLORS, KNOWN_WEIRD_UNITS, sizeArray, skills} from "../common/constants.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
@@ -376,16 +375,7 @@ class SWSEActor extends Actor {
         //disable default effect resolution
     }
 
-    get condition() {
-        let condition = 0;
 
-        let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
-
-        if (conditionEffect) {
-            condition = conditionEffect.changes.find(change => change.key === "condition").value
-        }
-        return condition;
-    }
 
     get gravity(){
         let gravity = "Normal"
@@ -401,9 +391,39 @@ class SWSEActor extends Actor {
         this.setGroupedEffect('gravity', value, true);
     }
 
+    ///start condition section
+    get condition() {
+        let condition = 0;
+
+        let conditionEffect = this.effects.find(effect => !!effect && !!effect.statuses?.find(status => status.startsWith("condition")))
+
+        if (conditionEffect) {
+            condition = conditionEffect.changes.find(change => change.key === "condition").value
+        }
+        return condition;
+    }
+
     set condition(value){
         this.setGroupedEffect('condition', value, true);
     }
+
+    async reduceCondition(number = 1) {
+        let conditionIndex = SWSE.conditionTrack.indexOf(`${this.condition}`);
+
+        let resultFlavor = ""
+        //if this is reducing condition then we should consider anything that increases that reduction
+        if (number > 0 && getInheritableAttribute({entity: this, attributeKey: "implantDisruption", reduce: "OR"})) {
+            resultFlavor = "An additional step down the condition track was taken due to Implant Disruption."
+            number++;
+        }
+
+        let newCondition = SWSE.conditionTrack[Math.max(Math.min(conditionIndex + number, 5), 0)];
+
+        this.condition = newCondition;
+
+        return `condition set to ${newCondition}.  ${resultFlavor}`;
+    }
+    ///end condition section/
 
 
     get unarmedAttack(){
@@ -1285,8 +1305,6 @@ class SWSEActor extends Actor {
      * might make this the default after looking at it
      */
     async setGroupedEffect(effectGrouper, changeValue, skipRenderOnClear = false) {
-
-
         let localEffect = this.effects.find(e => {
             return e.changes && e.changes.find(c => c.key === effectGrouper && c.value === changeValue);
         })
@@ -1298,7 +1316,7 @@ class SWSEActor extends Actor {
         if(localEffect){
             statusEffect.changes = localEffect.changes;
         }
-        //only skip the refresh if the we are adding a new effect, not if we are only removing
+        //only skip the refresh if we are adding a new effect, not if we are only removing
         await this.clearGroupedEffect(effectGrouper, skipRenderOnClear && !!statusEffect);
 
         await this.activateStatusEffect(statusEffect);
@@ -1330,31 +1348,7 @@ class SWSEActor extends Actor {
         this.safeUpdate(data)
     }
 
-    async reduceCondition(number = 1) {
-        let i = SWSE.conditionTrack.indexOf(`${this.system.condition}`);
 
-        let resultFlavor = ""
-        //if this is reducing condition then we should consider anything that increases that reduction
-        if(number > 0){
-            if(getInheritableAttribute({entity:this, attributeKey:"implantDisruption", reduce: "OR"})){
-                resultFlavor = "An additional step down the condition track was taken due to Implant Disruption."
-                number++;
-            }
-        }
-
-        if(i+number === 0){
-            await this.clearGroupedEffect("condition");
-
-            return `condition track reset. ${resultFlavor}`
-        }else {
-            const number1 = Math.min(i + number, 5);
-            let newCondition = SWSE.conditionTrack[number1];
-
-            await this.setGroupedEffect('condition', newCondition)
-
-            return `condition set to ${newCondition}.  ${resultFlavor}`;
-        }
-    }
     async activateStatusEffect(statusEffect) {
         if (!statusEffect) {
             return;
