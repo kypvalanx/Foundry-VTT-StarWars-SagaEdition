@@ -2174,7 +2174,7 @@ class SWSEActor extends Actor {
     }
 
     set credits(credits) {
-        this.safeUpdate({'data.credits': credits})
+        this.safeUpdate({'system.credits': credits})
     }
 
     set shields(shields) {

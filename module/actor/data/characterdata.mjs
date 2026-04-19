@@ -36,7 +36,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         if (source.forcePoints !== undefined) {
             source.forcePoints = parseInt(source.forcePoints) || 0;
         }
-
+        //should detail migration be in the details data class?  how?
         if(source.details.sex === null) {
             source.details.sex = source.sex;
             source.sex = null;
@@ -45,6 +45,31 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         if(source.details.gender === null) {
             source.details.gender = source.gender;
             source.gender = null;
+        }
+
+        if(source.details.age === null) {
+            source.details.age = source.age;
+            source.age = null;
+        }
+
+        if(source.details.experience === null) {
+            source.details.experience = source.experience;
+            source.experience = null;
+        }
+
+        if(source.details.height === null) {
+            source.details.height = source.height;
+            source.height = null;
+        }
+
+        if(source.details.weight === null) {
+            source.details.weight = source.weight;
+            source.weight = null;
+        }
+
+        if(source.details.cl === null) {
+            source.details.cl = source.cl;
+            source.cl = null;
         }
 
         return super.migrateData(source);

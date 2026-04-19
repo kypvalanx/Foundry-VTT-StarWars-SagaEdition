@@ -1,6 +1,11 @@
 const fields = foundry.data.fields;
 
 export class DetailFields {
+    static migrateData(source) {
+        super.migrateData(source);
+    }
+
+
     static get #commonCharacter() {
         return {
             biography: new fields.HTMLField({
@@ -24,6 +29,15 @@ export class DetailFields {
                 integer: true,
                 label: "Age",
             }),
+            experience: new fields.NumberField({
+                initial: 0,
+                integer: true,
+                label: "XP",
+            }),
+            cl: new fields.StringField({
+                initial: "",
+                label: "CL",
+            }),
             height: new fields.StringField({
                 initial: "",
                 label: "Height",
@@ -44,6 +58,7 @@ export class DetailFields {
             }),
         };
     }
+//?? what is this?  npcs don't have these fields
 
     static get npc() {
         return {
