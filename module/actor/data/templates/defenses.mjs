@@ -43,14 +43,6 @@ export class DefenseFields {
                 initial: "",
                 label: "Defense Special",
             }),
-            dt:  new fields.SchemaField({
-                    value: new fields.NumberField({
-                        initial: 10,
-                        integer: true,
-                        min: 0,
-                        label: `Damage Threshold`,
-                    })
-                }),
             dr: new fields.NumberField({
                 initial: 0,
                 integer: true,
@@ -58,6 +50,18 @@ export class DefenseFields {
                 label: `Damage Reduction`,
             }),
         };
+    }
+
+    static get character() {
+        return {
+            damageThreshold:  new fields.SchemaField({
+                misc: new fields.NumberField({
+                    initial: 0,
+                    integer: true,
+                    label: `Misc Damage Threshold`,
+                })
+            }),
+        }
     }
 }
 export class DefenseFunctions {
@@ -98,10 +102,12 @@ export class DefenseFunctions {
         return Math.max(...bonuses);
     }
 
-    get resolvedFort() {
-        const system = this;
-        const actor = system.parent;
-        let fortitudeDefense = system.defense?.fort ?? {};
+    resolvedFort(condition) {
+
+
+
+        const actor = this.parent;
+        let fortitudeDefense = this.defense?.fortitude ?? {};
         let bonuses = [];
         bonuses.push(10); //base
 
@@ -109,11 +115,19 @@ export class DefenseFunctions {
         let heroicLevel = actor.heroicLevel;
         bonuses.push(heroicLevel);
 
+        //+ equipment bonus
+        let equipmentBonus = this._getEquipmentFortBonus(actor);
+        bonuses.push(equipmentBonus);
+
+        //armor/level bonus this field is for defense breakdown
+        fortitudeDefense.armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
+
+
         //+ ability modifier
-        let ability = actor.isDroid ?
+        let ability = actor.isDroid || actor.ignoreCon()?
             CONFIG.SWSE.Defense.defense.fortitude.droidAbility :
             CONFIG.SWSE.Defense.defense.fortitude.ability;
-        let abilityBonus = system.abilities[ability].mod;
+        let abilityBonus = this.abilities[ability].mod;
         bonuses.push(abilityBonus);
         fortitudeDefense.abilityBonus = abilityBonus;
 
@@ -127,6 +141,7 @@ export class DefenseFunctions {
         bonuses.push(classBonus);
         fortitudeDefense.classBonus = classBonus;
 
+        let miscBonuses = [];
         //+ fortitude defense bonus
         let fortitudeDefenseBonus = getInheritableAttribute({
             entity: actor,
@@ -136,39 +151,30 @@ export class DefenseFunctions {
         });
         let otherBonus = fortitudeDefenseBonus["SUM"];
         bonuses.push(otherBonus);
-        let miscBonusTip = fortitudeDefenseBonus["SUMMARY"];
-        let miscBonuses = [];
-
-        //+ equipment bonus
-        let equipmentBonus = this._getEquipmentFortBonus(actor);
-        bonuses.push(equipmentBonus);
+        fortitudeDefense.miscBonusTip  = fortitudeDefenseBonus["SUMMARY"];
+        miscBonuses.push(otherBonus);
 
         //+ condition modifier
-        miscBonusTip += `Condition: ${system.condition};  `;
-        bonuses.push(system.condition);
-        fortitudeDefense.miscBonusTip = miscBonusTip;
+        bonuses.push(condition);
+        miscBonuses.push(condition);
+        fortitudeDefense.miscBonusTip += `Condition: ${condition};  `;
 
-        //armor/level bonus
-        let armorBonus = resolveValueArray([equipmentBonus, heroicLevel]);
-        fortitudeDefense.armorBonus = armorBonus;
 
         //misc bonuses
-        miscBonuses.push(system.condition); //twice?
-        miscBonuses.push(otherBonus);
-        let miscBonus = resolveValueArray(miscBonuses);
-        fortitudeDefense.miscBonus = miscBonus;
+        fortitudeDefense.miscBonus = resolveValueArray(miscBonuses);
 
         //total
         let name = "Fortitude";
         let total = resolveValueArray(bonuses, actor);
-        fortitudeDefense.value = system.overrides.fort ?? total;
+        fortitudeDefense.value = this.overrides.fort ?? total;
+        fortitudeDefense.total = fortitudeDefense.value;
         actor.setResolvedVariable("@FortDef", total, name, name);
         fortitudeDefense.name = name;
         fortitudeDefense.defenseBlock = true;
         return fortitudeDefense;
     }
 
-    get resolvedWill() {
+     resolvedWill(condition) {
         const system = this;
         const actor = system.parent;
         const skip = ["vehicle", "npc-vehicle"].includes(actor.type);
@@ -184,10 +190,11 @@ export class DefenseFunctions {
         let ability = actor.isDroid ?
             CONFIG.SWSE.Defense.defense.will.droidAbility :
             CONFIG.SWSE.Defense.defense.will.ability;
-        let abilityBonus = actor.system.abilities[ability].mod;
+        let abilityBonus = actor.system.abilities[ability]?.mod ?? 0;
         bonuses.push(abilityBonus);
         willDefense.abilityBonus = abilityBonus;
 
+        bonuses.push(...this.implantInterference(actor))
         //+ class bonus
         let classBonus =
             getInheritableAttribute({
@@ -208,7 +215,7 @@ export class DefenseFunctions {
 
         let otherBonus = willDefenseBonus["SUM"];
         let miscBonusTip = willDefenseBonus["SUMMARY"];
-        let miscBonuses = [otherBonus, system.condition];
+        let miscBonuses = [otherBonus, condition];
 
         for (let val of getInheritableAttribute({
             entity: actor,
@@ -238,7 +245,7 @@ export class DefenseFunctions {
                 }
             }
         }
-        miscBonusTip += `Condition: ${system.condition};  `;
+        miscBonusTip += `Condition: ${condition};  `;
         willDefense.miscBonusTip = miscBonusTip;
 
         let miscBonus = resolveValueArray(miscBonuses);
@@ -251,6 +258,7 @@ export class DefenseFunctions {
         let total = resolveValueArray(bonuses, actor);
         let name = "Will";
         willDefense.value = system.overrides.will ?? total;
+        willDefense.total = willDefense.value;
         actor.setResolvedVariable("@WillDef", total, name, name);
         willDefense.name = name;
         willDefense.skip = skip;
@@ -258,7 +266,26 @@ export class DefenseFunctions {
         return willDefense;
     }
 
-    get resolvedRef() {
+     implantInterference(actor) {
+        let disruption = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "implantDisruption",
+            reduce: "OR"
+        })
+        let training = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "implantTraining",
+            reduce: "OR"
+        })
+
+        if(disruption && !training){
+            return [-2]
+        }
+
+        return [];
+    }
+
+    resolvedRef(condition) {
         const system = this;
         const actor = system.parent;
         let reflexDefense = system.defense?.ref ?? {};
@@ -318,10 +345,10 @@ export class DefenseFunctions {
 
         let dodgeBonus = bonusDodgeReflexDefense["SUM"];
         miscBonusTip += bonusDodgeReflexDefense["SUMMARY"];
-        miscBonusTip += `Condition: ${system.condition};  `;
+        miscBonusTip += `Condition: ${condition};  `;
         const miscBonuses = [
             otherBonus,
-            system.condition,
+            condition,
             dodgeBonus,
             naturalArmorBonus,
         ];
@@ -336,7 +363,7 @@ export class DefenseFunctions {
         }
         reflexDefense.miscBonusTip = miscBonusTip;
         bonuses.push(dodgeBonus);
-        bonuses.push(system.condition);
+        bonuses.push(condition);
         bonuses.push(naturalArmorBonus);
         let miscBonus = resolveValueArray(miscBonuses);
         reflexDefense.miscBonus = miscBonus;
@@ -344,7 +371,7 @@ export class DefenseFunctions {
         let defenseModifiers = [
             this._resolveFFRef(
                 actor,
-                system.condition,
+                condition,
                 abilityBonus,
                 armorBonus,
                 reflexDefenseBonus,
@@ -356,6 +383,7 @@ export class DefenseFunctions {
         let total = resolveValueArray(bonuses, actor);
         let name = "Reflex";
         reflexDefense.value = system.overrides.ref ?? total;
+        reflexDefense.total = reflexDefense.value;
         actor.setResolvedVariable("@RefDef", total, name, name);
 
         reflexDefense.name = name;
@@ -370,11 +398,19 @@ export class DefenseFunctions {
         const actor = system.parent;
         system.defense = system.defense ?? {};
 
+        let condition = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "condition",
+            reduce: "FIRST"
+        }) || "0"
+
+        condition = condition === "OUT" ?  "0" : condition;
+
         //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 
-        system.defense.fortitude = this.resolvedFort;
-        system.defense.will = this.resolvedWill;
-        system.defense.reflex = this.resolvedRef;
+        system.defense.fortitude = this.resolvedFort(condition);
+        system.defense.will = this.resolvedWill(condition);
+        system.defense.reflex = this.resolvedRef(condition);
         system.defense.damageThreshold = this._resolveDt(system);
         system.defense.situationalBonuses = this._getSituationalBonuses(actor);
         system.defense.damageReduction = getInheritableAttribute({
@@ -452,7 +488,7 @@ export class DefenseFunctions {
                     attributeKey: "armoredDefense",
                     reduce: "OR",
                 });
-                if (armoredDefense) {
+                if (armoredDefense || actor.isFollower) {
                     return Math.max(armorBonus, heroicLevel);
                 }
             }
@@ -506,32 +542,38 @@ export class DefenseFunctions {
         ffReflexDefense.defenseBlock = true;
 
         ffReflexDefense.value = total;
+        ffReflexDefense.total = ffReflexDefense.value;
         return ffReflexDefense;
     }
 
     _resolveDt(system) {
         const actor = system.parent;
-        let total = [];
+        let bonuses = [];
+        const damageThreshold = system.defense.damageThreshold;
 
-        total.push(system.defense.fortitude.value);
-        total.push(this._getDamageThresholdSizeMod(actor));
-        total.push(
+        bonuses.push(system.defense.fortitude.value);
+        bonuses.push(this._getDamageThresholdSizeMod(actor));
+        bonuses.push(
             getInheritableAttribute({
                 entity: actor,
                 attributeKey: "damageThresholdBonus",
                 reduce: "SUM",
             })
         );
-        total.push(
+        bonuses.push(
             ...getInheritableAttribute({
                 entity: actor,
                 attributeKey: "damageThresholdHardenedMultiplier",
                 reduce: "NUMERIC_VALUES",
             }).map((value) => "*" + value)
         );
+        bonuses.push(damageThreshold.misc)
 
-        let damageThreshold = {value: toNumber(resolveValueArray(total, actor))};
-        return damageThreshold;
+        let total = resolveValueArray(bonuses, actor);
+        damageThreshold.total = total
+        damageThreshold.value = total
+
+        return damageThreshold
     }
 
     _getDamageThresholdSizeMod(actor) {
@@ -586,20 +628,23 @@ export class DefenseFunctions {
             entity: armor,
             attributeKey: "special",
             reduce: "VALUES",
-        });
 
+
+        });
         if (!armor._parentIsProficientWithArmor()) {
             attributes.push("(Not Proficient)");
         }
-
+        const notes = attributes.join(", ");
         return {
             name: armor.name,
-            speed: actor.speed,
             refDefense: armor.armorReflexDefenseBonus,
             fortDefense: armor.fortitudeDefenseBonus,
             maxDex: armor.maximumDexterityBonus,
-            notes: attributes.join(", "),
-            type: armor.armorType,
+            notes: notes,
+            subtype: armor.armorType,
+            notesHTML: notes,
+            notesText: notes,
+            modes : armor.modes
         };
     }
 }

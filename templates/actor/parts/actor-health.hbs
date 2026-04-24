@@ -39,22 +39,22 @@
     {{/unless}}
     </div>
 
-
+{{log "damage threshold" actor.system.defense.damageThreshold}}
     <div class="flex-row">
         <div class="labeled-input">
             <label for="damageThreshold">Damage Threshold</label>
             <input class="left-input" id="damageThreshold" type="text"
-                   value="{{actor.defense.damageThreshold.total}}" placeholder="" disabled/>
+                   value="{{actor.system.defense.damageThreshold.total}}" placeholder="" disabled/>
         </div>
         <div class="labeled-input">
             <label for="dtFort">Fort</label>
             <input class="middle-input" id="dtFort" type="text"
-                   value="{{actor.defense.fortitude.total}}" placeholder="" disabled/>
+                   value="{{actor.system.defense.fortitude.total}}" placeholder="" disabled/>
         </div>
         <div class="labeled-input">
             <label for="dtMisc">Misc</label>
             <input class="right-input" id="dtMisc" type="number" name="system.defense.damageThreshold.misc"
-                   value="{{actor.defense.damageThreshold.misc}}" placeholder=""/>
+                   value="{{actor.system.defense.damageThreshold.misc}}" placeholder=""/>
         </div>
     </div>
 

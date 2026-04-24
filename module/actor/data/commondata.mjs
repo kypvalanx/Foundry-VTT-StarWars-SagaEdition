@@ -1,6 +1,7 @@
 import {AbilityFields} from "./templates/abilities.mjs";
 import {HealthFields} from "./templates/health.mjs";
 import {ShieldFields} from "./templates/shields.mjs";
+import {DefenseFields} from "./templates/defenses.mjs";
 
 const fields = foundry.data.fields;
 
@@ -56,6 +57,9 @@ export default class CommonActorData {
                     initial: "Default",
                     label: "Ability Generation",
                 }),
+            }),
+            defense: new fields.SchemaField({
+                ...DefenseFields.character
             })
         };
     }

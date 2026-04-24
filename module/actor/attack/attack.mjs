@@ -1679,7 +1679,7 @@ function modifyRollForCriticalEvenOnAreaAttack(attack, damageRoll) {
 
 
 function toTarget(actor, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack) {
-    let reflexDefense = actor.defense.reflex.total;
+    let reflexDefense = actor.system.defense.reflex.total;
     const attackRollTotal = parseInt(attackRoll.total);
     let isMiss = Attack.isMiss(attackRollTotal, reflexDefense, autoHit, autoMiss)
     const hitsTargetedArea = attackRollTotal >= 10;

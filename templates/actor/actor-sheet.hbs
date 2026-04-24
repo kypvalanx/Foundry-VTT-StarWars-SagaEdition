@@ -235,7 +235,6 @@
                                 <label class="resource-label">Settings</label>
                             </div>
                         </div>
-                        {{log actor.settings data.settings}}
                         {{#each actor.settings as |setting key|}}
                             {{> 'systems/swse/templates/settings/setting.hbs' setting=setting key=key}}
                         {{/each}}

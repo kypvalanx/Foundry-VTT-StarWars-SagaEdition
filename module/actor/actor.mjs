@@ -16,7 +16,7 @@ import {
     unique
 } from "../common/util.mjs";
 import {formatPrerequisites, meetsPrerequisites} from "../prerequisite.mjs";
-import {generateArmorBlock, resolveDefenses} from "./defense.mjs";
+import {generateArmorBlock} from "./defense.mjs";
 import {SWSEItem} from "../item/item.mjs";
 import {CLASSES_BY_STARTING_FEAT, COLORS, KNOWN_WEIRD_UNITS, sizeArray, skills} from "../common/constants.mjs";
 import {getInheritableAttribute, getResolvedSize} from "../attribute-helper.mjs";
@@ -611,7 +611,7 @@ class SWSEActor extends Actor {
     }
 
     get defense(){
-        return resolveDefenses(this);
+        return this.system.defense
     }
 
     get armors(){
@@ -1426,7 +1426,7 @@ class SWSEActor extends Actor {
         const currentHealth = this.system.health.value;
 
 
-        let damageThreshhold = this.defense.damageThreshold.total;
+        let damageThreshhold = this.system.defense.damageThreshold.total;
         let reducedToZero = false;
         if(damageTypes.includes("Energy (Ion)")){
             if (this.takesFullDamageFromIon) {
