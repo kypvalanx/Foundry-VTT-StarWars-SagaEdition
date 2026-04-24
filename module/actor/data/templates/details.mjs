@@ -2,37 +2,41 @@ const fields = foundry.data.fields;
 
 export class DetailFields {
     static migrateData(source) {
-        if(source.details.sex === null) {
+        if(!source.details) {
+            source.details = {};
+        }
+        
+        if(!source.details.sex && source.sex) {
             source.details.sex = source.sex;
             source.sex = null;
         }
 
-        if(source.details.gender === null) {
+        if(!source.details.gender && source.gender) {
             source.details.gender = source.gender;
             source.gender = null;
         }
 
-        if(source.details.age === null) {
+        if(!source.details.age && source.age) {
             source.details.age = source.age;
             source.age = null;
         }
 
-        if(source.details.experience === null) {
+        if(!source.details.experience && source.experience) {
             source.details.experience = source.experience;
             source.experience = null;
         }
 
-        if(source.details.height === null) {
+        if(!source.details.height && source.height) {
             source.details.height = source.height;
             source.height = null;
         }
 
-        if(source.details.weight === null) {
+        if(!source.details.weight && source.weight) {
             source.details.weight = source.weight;
             source.weight = null;
         }
 
-        if(source.details.cl === null) {
+        if(!source.details.cl && source.cl) {
             source.details.cl = source.cl;
             source.cl = null;
         }
