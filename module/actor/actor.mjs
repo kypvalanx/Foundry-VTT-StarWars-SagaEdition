@@ -72,25 +72,36 @@ class SWSEActor extends Actor {
         this.ammunitionDelegate = new ActorAmmunitionDelegate(this);
         this.crew = new CrewDelegate(this);
 
+
+
+        // if (this.updateLegacyActor()) {
+        //     return;
+        // }
+        // const system = this.system;
+        // system.description = system.description || ""
+        //
+        //
+        //
+        //
+        // if (this.type === 'character') this.darkside = new DarksideDelegate(this);
+        // if (this.type === 'computer') this._prepareComputerData(system);
+        // if (this.type === 'vehicle')
+
+            //this.initializeCharacterSettings();
+
+
+        this.handleActorLinks(this.system);
+        await this.handleTokenupdates();
+
         super.prepareData();
 
-        return;
-
-        if (this.updateLegacyActor()) {
-            return;
-        }
-        const system = this.system;
-        system.description = system.description || ""
+        // if(Object.values(this._pendingUpdates).length > 0){
+        //     this.safeUpdate(this._pendingUpdates);
+        // }
+    }
 
 
-
-
-        if (this.type === 'character') this._prepareCharacterData();
-        if (this.type === 'computer') this._prepareComputerData(system);
-        if (this.type === 'vehicle') this._prepareVehicleData(system);
-
-        //this.initializeCharacterSettings();
-
+    handleActorLinks(system) {
         for (let link of this.actorLinks) {
             let linkedActor = fromUuidSync(link.uuid);
             if (!linkedActor) continue;
@@ -117,8 +128,8 @@ class SWSEActor extends Actor {
 
             } else if (system.isNPC && this.prototypeToken.actorLink) {
                 const documents = canvas.tokens?.placeables
-                   ?.filter(t => t.actor?.id === this.id)
-                   .map(t => t.document) ?? [];
+                    ?.filter(t => t.actor?.id === this.id)
+                    .map(t => t.document) ?? [];
                 this.setActorLinkOnActorAndTokens(documents, false);
             } else if (!system.isNPC && !this.prototypeToken.actorLink) {
                 const documents = canvas.tokens?.placeables
@@ -127,12 +138,13 @@ class SWSEActor extends Actor {
                 this.setActorLinkOnActorAndTokens(documents, true);
             }
         }
+    }
 
-
+    async handleTokenupdates() {
         if (this.type === "character") {
             const tokenUpdates = {};
 
-            if (!!this.system.autoSizeToken) {
+            if (!!this.system.settings.autoSizeToken) {
 
                 //adjust tokens to size
                 const newSize = sizeArray[getResolvedSize(this)]
@@ -143,7 +155,7 @@ class SWSEActor extends Actor {
                 tokenUpdates["height"] = gridSize;
             }
 
-            if (!!this.system.allowSheetLighting) {
+            if (!!this.system.settings.allowSheetLighting) {
                 let auraColors = getInheritableAttribute({attributeKey: "auraColor", entity: this, reduce: "VALUES"})
 
                 auraColors = auraColors.filter(color => !!color).map(color => {
@@ -207,15 +219,7 @@ class SWSEActor extends Actor {
                 }
             }
         }
-
-
-        // if(Object.values(this._pendingUpdates).length > 0){
-        //     this.safeUpdate(this._pendingUpdates);
-        // }
     }
-
-
-
 
     /**
      * Handles the deletion process for the object, including removing associated actor links, and delegates further deletion to the parent class method.
@@ -581,25 +585,6 @@ class SWSEActor extends Actor {
     get health() {
         return this.system.health;
     }
-
-
-    /**
-     * Prepare Vehicle type specific data
-     * @param system
-     * @private
-     */
-    _prepareVehicleData(system) {
-
-    }
-
-    /**
-     * Prepare Character type specific data
-     */
-    _prepareCharacterData() {
-        this.darkside = new DarksideDelegate(this);
-
-    }
-
     get levelSummary(){
         return this.classes.length;
     }

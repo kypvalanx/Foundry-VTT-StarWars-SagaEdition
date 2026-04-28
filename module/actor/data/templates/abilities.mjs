@@ -130,6 +130,5 @@ export class AbilityFunctions {
             reduce: "SUM"}
         )
         this.darkside.finalScore = this.darkside.value + this.darkside.taint;
-        console.log(this.darkside)
     }
 }
