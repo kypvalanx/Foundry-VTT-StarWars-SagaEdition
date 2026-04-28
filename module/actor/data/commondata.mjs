@@ -13,6 +13,7 @@ export default class CommonActorData {
                 ...AbilityFields.physical,
                 ...AbilityFields.mental,
             }),
+            ...AbilityFields.darkside,
             health: new fields.SchemaField({
                 ...HealthFields.common,
             }),

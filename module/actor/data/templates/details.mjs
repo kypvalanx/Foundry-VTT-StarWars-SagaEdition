@@ -82,7 +82,7 @@ export class DetailFields {
             weight: new fields.StringField({
                 initial: "",
                 label: "Weight",
-            }),
+            })
         };
     }
 
@@ -188,4 +188,6 @@ export class DetailFunctions {
     get sex() {
         return this.details.gender ?? this.details.sex;
     }
+
+
 }

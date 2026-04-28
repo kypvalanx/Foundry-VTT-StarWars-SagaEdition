@@ -2,10 +2,20 @@ import {
     inheritableItems,
     ALPHA_FINAL_NAME,
 } from "../../../common/util.mjs";
+import {getInheritableAttribute} from "../../../attribute-helper.mjs";
 
 const fields = foundry.data.fields;
 
 export class TraitsFields {
+    static migrateData(source) {
+        if(source.darkSideScore && !source.darkside){
+            source.darkside = {
+                value: source.darkSideScore
+            }
+            delete source.darkSideScore;
+        }
+    }
+
     //Data common for all actors which needs to be persisted in the database
     static #_common() {
         return {
@@ -41,12 +51,20 @@ export class TraitsFields {
                 min: 0,
                 label: "DestinyPoints",
             }),
-            darkSideScore: new fields.NumberField({
-                initial: 0,
-                min: 0,
-                integer: true,
-                label: "Darkside Score",
-            }),
+            // darkSideScore: new fields.NumberField({
+            //     initial: 0,
+            //     min: 0,
+            //     integer: true,
+            //     label: "Darkside Score",
+            // }),
+            darkSide: new fields.SchemaField({
+                value:new fields.NumberField({
+                    initial: 0,
+                    min: 0,
+                    integer: true,
+                    label: "Darkside Score",
+                }),
+            })
         };
     }
 
@@ -134,6 +152,7 @@ export class TraitsFunctions {
         system.level.value = actor.characterLevel;
         system.classSummary = actor.classSummary;
         system.classLevel = actor.classLevels;
+
 
         //TODO move to appropriate part of model prepare
         // if (

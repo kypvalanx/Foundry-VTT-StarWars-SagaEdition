@@ -10,7 +10,7 @@ import {DefenseFunctions} from "./templates/defenses.mjs";
 import {DetailFields, DetailFunctions} from "./templates/details.mjs";
 import {HealthFunctions} from "./templates/health.mjs";
 import {ShieldFunctions} from "./templates/shields.mjs";
-import {SkillFields, SkillFunctions} from "./templates/skills.mjs";
+import { SkillFields, SkillFunctions} from "./templates/skills.mjs";
 import {TraitsFields, TraitsFunctions} from "./templates/traits.mjs";
 
 const fields = foundry.data.fields;
@@ -36,6 +36,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         if (source.forcePoints !== undefined) {
             source.forcePoints = parseInt(source.forcePoints) || 0;
         }
+
 
         //TODO figure out if this is already called
         DetailFields.migrateData(source)

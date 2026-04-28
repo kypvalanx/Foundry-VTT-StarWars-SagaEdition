@@ -1,5 +1,5 @@
 import {getInheritableAttribute} from "../../../attribute-helper.mjs";
-import {getLongKey, resolveValueArray} from "../../../common/util.mjs";
+import {getLongKey, inheritableItems, resolveValueArray} from "../../../common/util.mjs";
 
 const fields = foundry.data.fields;
 
@@ -40,6 +40,19 @@ export class AbilityFields {
             int: this.#abilityProperties("Intelligence"),
             wis: this.#abilityProperties("Wisdom"),
             cha: this.#abilityProperties("Charisma"),
+        };
+    }
+
+    static get darkside() {
+        return {
+            darkside: new fields.SchemaField({
+                value: new fields.NumberField({
+                    initial: 0,
+                    min: 0,
+                    integer: true,
+                    label: "Darkside Score",
+                }),
+            }),
         };
     }
 }
@@ -107,5 +120,16 @@ export class AbilityFunctions {
                 rollLabel
             );
         }
+
+
+        //move this somewhere else.  this is prepped too early
+        this.darkside.max = this.abilities.wis.value;
+        this.darkside.taint = getInheritableAttribute({
+            entity: actor,
+            attributeKey: "darksideTaint",
+            reduce: "SUM"}
+        )
+        this.darkside.finalScore = this.darkside.value + this.darkside.taint;
+        console.log(this.darkside)
     }
 }
