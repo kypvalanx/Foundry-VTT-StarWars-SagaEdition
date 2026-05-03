@@ -1,7 +1,8 @@
 import {getInheritableAttribute} from "../../../attribute-helper.mjs";
 import {SWSE} from "../../../common/config.mjs";
 import {
-    defaultAttributes,
+    allDefaultSkills,
+    defaultAttributes, defaultSkills,
     getGroupedSkillMap,
     NEW_LINE,
     PHYSICAL_SKILLS,
@@ -17,6 +18,32 @@ import * as options from "../../../common/constants.mjs";
 const fields = foundry.data.fields;
 
 export class SkillFields {
+
+    static migrateData(source) {
+
+        const entries = Object.entries(source.skills ?? {});
+        for (const skill of entries) {
+            const [key, value] = skill;
+            if(allDefaultSkills.includes(key)){
+                continue;
+            }
+
+            const matchedskill = allDefaultSkills.find(skill => skill.toLowerCase() === key.toLowerCase());
+            if(matchedskill){
+                source.skills[matchedskill] = value;
+            }
+
+            delete source.skills[key];
+        }
+
+
+        if(false){
+            source.darkside = {
+                value: source.darkSideScore
+            }
+            delete source.darkSideScore;
+        }
+    }
     static #_skillProperties(ability, skill) {
         return new fields.SchemaField({
             ability: new fields.StringField({

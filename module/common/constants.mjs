@@ -615,7 +615,8 @@ export const defaultSkills = ["Acrobatics", "Climb", "Deception", "Endurance", "
     "Persuasion", "Pilot", "Ride", "Stealth", "Survival", "Swim", "Treat Injury", "Use Computer", "Use the Force"];
 export const defaultVehicleSkills = ["Pilot (Pilot)", "Initiative (Pilot)", "Stealth (Pilot)", "Deception (Pilot)", "Pilot (Copilot)", "Use Computer (Commander)", "Knowledge (Tactics) (Commander)", "Mechanics (System Operator)", "Use Computer (System Operator)", "Mechanics (Engineer)"];
 
-export function getGroupedSkillMap() {
+export const allDefaultSkills = [...defaultSkills, ...defaultVehicleSkills];
+    export function getGroupedSkillMap() {
     if (game.settings.get("swse", "homebrewUseLilLiteralistSkills")) {
         return HOMEBREW_LILLITERALIST_SKILLS;
     }

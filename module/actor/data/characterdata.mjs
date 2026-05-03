@@ -40,6 +40,8 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
 
         //TODO figure out if this is already called
         DetailFields.migrateData(source)
+        TraitsFields.migrateData(source)
+        SkillFields.migrateData(source)
 
 
         return super.migrateData(source);
