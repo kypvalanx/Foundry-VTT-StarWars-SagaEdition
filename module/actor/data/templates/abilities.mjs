@@ -4,6 +4,27 @@ import {getLongKey, inheritableItems, resolveValueArray} from "../../../common/u
 const fields = foundry.data.fields;
 
 export class AbilityFields {
+    static migrateData(source) {
+        function coerceOldAttributes(attributes) {
+
+            for (let [key, value] of Object.entries(attributes)) {
+                if(value.manual === "-"){
+                    value.manual = null;
+                }
+            }
+            return attributes;
+        }
+
+        if(source.attributes){
+            source.abilities = coerceOldAttributes(source.attributes);
+            delete source.attributes;
+        }
+
+
+        //console.log("migrateData", source)
+    }
+
+
     static #abilityProperties(ability) {
         return new fields.SchemaField({
             value: new fields.NumberField({
@@ -11,6 +32,13 @@ export class AbilityFields {
                 integer: true,
                 min: 0,
                 label: `${ability} Score`,
+            }),
+            manual: new fields.NumberField({
+                nullable: true,
+                initial: null,
+                integer: true,
+                min: 0,
+                label: `${ability} manual`,
             }),
             base: new fields.NumberField({
                 nullable: true,

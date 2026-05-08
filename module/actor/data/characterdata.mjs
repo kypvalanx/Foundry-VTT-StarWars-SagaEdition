@@ -5,12 +5,12 @@ import {innerJoin, resolveExpression} from "../../common/util.mjs";
 import SystemDataModel from "./abstract.mjs";
 import CommonActorData from "./commondata.mjs";
 
-import {AbilityFunctions} from "./templates/abilities.mjs";
+import {AbilityFields, AbilityFunctions} from "./templates/abilities.mjs";
 import {DefenseFunctions} from "./templates/defenses.mjs";
 import {DetailFields, DetailFunctions} from "./templates/details.mjs";
 import {HealthFunctions} from "./templates/health.mjs";
 import {ShieldFunctions} from "./templates/shields.mjs";
-import { SkillFields, SkillFunctions} from "./templates/skills.mjs";
+import {SkillFields, SkillFunctions} from "./templates/skills.mjs";
 import {TraitsFields, TraitsFunctions} from "./templates/traits.mjs";
 
 const fields = foundry.data.fields;
@@ -39,9 +39,10 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
 
 
         //TODO figure out if this is already called
-        DetailFields.migrateData(source)
         TraitsFields.migrateData(source)
+        AbilityFields.migrateData(source)
         SkillFields.migrateData(source)
+        DetailFields.migrateData(source)
 
 
         return super.migrateData(source);
@@ -148,20 +149,10 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         });
 
         //Talents Available
-        let bonusTreeTalents = [];
-
         system.#_validateAvailableTalents(
             specificProvided,
-            bonusTalentTrees,
-            bonusTreeTalents
+            bonusTalentTrees
         );
-
-        bonusTreeTalents.forEach((system) => {
-            let type = Object.keys(system.availableItems).find((item) =>
-                item.includes("Talent")
-            );
-            system.#_reduceAvailable(type);
-        });
 
         //Feats Available
         system.#_validateAvailableFeats(specificProvided, dynamicGroups);
@@ -191,7 +182,6 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
         system.remainingLevelUpBonuses =
             system.availableItems["Ability Score Level Bonus"];
     }
-
     #_validateAvailableFeats(specificProvided, dynamicGroups) {
         let actor = this.parent;
         for (let feat of actor.itemTypes.feat) {
@@ -242,8 +232,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
 
     #_validateAvailableTalents(
         specificProvided,
-        bonusTalentTrees,
-        bonusTreeTalents
+        bonusTalentTrees
     ) {
         let system = this;
         let actor = system.parent;
@@ -273,8 +262,9 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
                 innerJoin(bonusTalentTrees, talent.system.possibleProviders)
                     .length > 0
             ) {
-                bonusTreeTalents.push(talent);
-                continue;
+                type = Object.keys(system.availableItems).find((item) =>
+                    item.includes("Talent")
+                );
             }
 
             system.#_reduceAvailable(type);
@@ -328,7 +318,7 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
 
             if (key.endsWith("Starting Feats")) {
                 //this means we need to check the source of the provision to figure out what feats are included
-                let providingItem = actor.get(provided.source);
+                let providingItem = actor.items.get(provided.source);
 
                 dynamicGroups[key] = actor._explodeFeatNames(
                     getInheritableAttribute({

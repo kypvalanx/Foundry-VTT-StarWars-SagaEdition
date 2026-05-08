@@ -2,7 +2,7 @@
 <div class="ability-scores panel">
     <div class="flex-row">
         <div class="medium"></div>
-        {{#ifEquals actor.system.settings.abilityGeneration "Semi-Manual"}}<div class="small small-header">Base Score</div>{{/ifEquals}}
+        {{#ifEquals actor.system.finalAttributeGenerationType "Semi-Manual"}}<div class="small small-header">Base Score</div>{{/ifEquals}}
         <div class="small small-header">Score</div>
         <div class="small small-header">Temp</div>
         <div class="small small-header">Mod</div>
@@ -14,7 +14,7 @@
                     <div class="input rollable draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability"
                          title="Roll 1d20 + {{attribute.roll}}"  data-roll="1d20 + {{attribute.roll}}">{{attribute.label}}</div>
                 </div>
-            {{#ifEquals ../actor.system.settings.abilityGeneration "Semi-Manual"}}
+            {{#ifEquals ../actor.system.finalAttributeGenerationType "Semi-Manual"}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.base}}"
                            placeholder="0"  name="system.abilities.{{id}}.base"/>
@@ -22,8 +22,8 @@
             {{/ifEquals}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.value}}"
-                           placeholder="0"{{#ifEquals ../actor.system.settings.abilityGeneration "Manual"}} name="system.abilities.{{id}}.base" {{/ifEquals}}
-                           {{#unlessEquals ../actor.system.settings.abilityGeneration "Manual"}} disabled{{/unlessEquals}}/>
+                           placeholder="0"{{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}} name="system.abilities.{{id}}.base" {{/ifEquals}}
+                           {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}} disabled{{/unlessEquals}}/>
                 </div>
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.customBonus}}"
@@ -38,6 +38,8 @@
     {{/each}}
     {{#unless actor.system.lockAttributes}}
         <div class="flex flex-row">
+            {{log "actor" actor "attributegeneration" actor.system.finalAttributeGenerationType}}
+
             {{#ifEquals actor.system.finalAttributeGenerationType "Roll"}}
                 <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}
