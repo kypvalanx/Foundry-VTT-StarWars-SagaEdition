@@ -38,8 +38,6 @@
     {{/each}}
     {{#unless actor.system.lockAttributes}}
         <div class="flex flex-row">
-            {{log "actor" actor "attributegeneration" actor.system.finalAttributeGenerationType}}
-
             {{#ifEquals actor.system.finalAttributeGenerationType "Roll"}}
                 <div class="rollAbilities" title="Roll Abilities"><a><i class="fas fa-edit"></i></a></div>
             {{/ifEquals}}

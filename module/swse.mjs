@@ -153,6 +153,38 @@ Hooks.once('init', async function () {
         'systems/swse/templates/common/rollable.hbs',
         'systems/swse/templates/actor/parts/armor-block.hbs']);
 
+        //
+        // if (!game.server) return;
+        //
+        // const app = game.server.app;
+        //
+        // app.get("/my-module/hello", (req, res) => {
+        //     res.json({
+        //         ok: true,
+        //         message: "hello from foundry"
+        //     });
+        // });
+        //
+        // app.post("/my-module/data", express.json(), (req, res) => {
+        //     console.log(req.body);
+        //
+        //     res.json({
+        //         received: req.body
+        //     });
+        // });
+});
+
+Hooks.once("ready", () => {
+    game.socket.on("module.my-module", async (payload) => {
+        console.log("Received:", payload);
+
+        if (payload.action === "createActor") {
+            await Actor.create({
+                name: payload.name,
+                type: "character"
+            });
+        }
+    });
 });
 
 

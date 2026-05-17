@@ -1776,7 +1776,9 @@ export class SWSEItem extends Item {
 
     toObject(source) {
         let o = super.toObject(source);
-        let cost = this.system.changes.find(c => !!c && c.key === "cost");
+
+        let changes = Array.isArray(o.system.changes) ? o.system.changes : Object.values(o.system.changes || {});
+        let cost = changes.find(c => !!c && c.key === "cost") ?? null;
         o.system.cost = (cost) ? cost["value"] : "0";
         return o;
     }
