@@ -13,6 +13,7 @@ import {featTests} from "./actor/actor-sheet.feats-martial-artist.test.mjs";
 import {healthTests} from "./actor/actor-sheet.health.test.mjs";
 import {healthFunctionsTests} from "./actor/templates/HealthFunctions.test.mjs";
 import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting-feats.test.mjs";
+import {actorSheetAbilitiesTests} from "./actor/actor-sheet.abilities.test.mjs";
 
 const registeredTests = [
     generationTests,
@@ -29,7 +30,8 @@ const registeredTests = [
     featTests,
     healthTests,
     healthFunctionsTests,
-    featMulticlassTests
+    featMulticlassTests,
+    actorSheetAbilitiesTests
 ];
 
 export function registerTestSuites(quench) {
