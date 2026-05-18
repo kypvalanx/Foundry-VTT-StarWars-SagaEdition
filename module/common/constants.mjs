@@ -579,6 +579,8 @@ export const SCALABLE_CHANGES = {
     }
 }
 
+export const SCALABLE_CHANGE_KEYS = Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8));
+
 export const XP_REQUIREMENT = {
     "1": 0,
     "2": 1000,

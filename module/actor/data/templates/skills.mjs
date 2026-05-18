@@ -215,7 +215,7 @@ export class SkillFunctions {
 
         let groupedSkillMap = options.groupedSkillMap ?? getGroupedSkillMap()
 
-        let heavyLoadAffected = actor.heavyLoad;
+        let heavyLoadAffected = actor.carriedWeight > actor.heavyLoad;
         let halfCharacterLevel = Math.floor(system.level.value / 2);
 
         let classSkills = system.classSkills;

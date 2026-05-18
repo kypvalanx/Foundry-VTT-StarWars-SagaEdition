@@ -3,6 +3,7 @@ import {SWSEItem} from "./item/item.mjs";
 import {meetsPrerequisites} from "./prerequisite.mjs";
 import {
     ITEM_ONLY_ATTRIBUTES,
+    SCALABLE_CHANGE_KEYS,
     SCALABLE_CHANGES,
     sizeArray,
     UNINHERITABLE_AMMO_CHANGES,
@@ -323,15 +324,10 @@ function containsScalableAttributes(changeKey) {
     {
         changeKey = [changeKey];
     }
-
-    const scalableChangeKeys = Object.keys(SCALABLE_CHANGES).map(c => c.substring(0, c.length-8));
     for (const changeKeyElement of changeKey.filter(c => !!c)) {
         if(changeKeyElement.endsWith("Scalable"))return true;
-
-        if(scalableChangeKeys.includes(changeKeyElement)) return true;
-
+        if(SCALABLE_CHANGE_KEYS.includes(changeKeyElement)) return true;
     }
-
     return false;
 }
 
