@@ -254,7 +254,9 @@ function getChangesFromSize(entity, changes) {
     resolvedChanges.push(...changes.filter(change => !change.key?.toLowerCase().endsWith("scalable")))
 
     for (const scalableChange of changes.filter(change => change.key?.toLowerCase().endsWith("scalable"))) {
-        resolvedChanges.push(...SCALABLE_CHANGES[scalableChange.key][scalableChange.value][size]);
+        const scalablechange = SCALABLE_CHANGES[scalableChange.key] ?? {};
+        const scalablechangeElement = scalablechange[scalableChange.value] ?? {};
+        resolvedChanges.push(...scalablechangeElement[size] ?? []);
     }
 
     return resolvedChanges;
