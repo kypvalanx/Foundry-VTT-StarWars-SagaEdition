@@ -1,37 +1,23 @@
 <div class="level-body">
-    <nav class="level-tabs tabs" data-group="levels">
-        {{#if item.system}}
-            {{#each item.system.levels as |levelDef id|}}
-                {{#if levelDef.level}}
-                    <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
-                {{/if}}
-            {{/each}}
-        {{else}}
-
-            {{#each item._source.system.levels as |levelDef id|}}
-                {{#if levelDef.level}}
-                    <a class="item level-tab" data-tab="{{id}}">{{id}}</a>
-                {{/if}}
-            {{/each}}
-        {{/if}}
-        <a data-type="add-level" data-action="class-control" title="Add Level"><i class="fas fa-plus"></i></a>
-        <a data-type="remove-level" data-action="class-control" title="Subtract Level"><i class="fas fa-minus"></i></a>
-    </nav>
-    <section class="level-content">
-        {{#if item.system}}
-            {{#each item.system.levels as |level id|}}
-            <div class="tab" data-group="levels" data-tab="{{id}}">
-                <h2>Level {{id}}</h2>
-                {{> 'systems/swse/templates/item/parts/attributes.hbs' attributes=level.data.attributes level=id path=(concat 'levels.' id '.data.attributes')}}
-            </div>
-            {{/each}}
-        {{else}}
-            {{#each item._source.system.levels as |level id|}}
-                <div class="tab" data-group="levels" data-tab="{{id}}">
-                    <h2>Level {{id}}</h2>
-                    {{> 'systems/swse/templates/item/parts/attributes.hbs' attributes=level.data.attributes level=id path=(concat 'levels.' id '.data.attributes')}}
+    <div class="section-header flexrow">
+        <div class="entry"></div>
+        <div class="section-header-controls">
+            <a data-type="add-level" data-action="class-control" title="Add Level"><i class="fas fa-plus"></i></a>
+            <a data-type="remove-level" data-action="class-control" title="Subtract Level"><i class="fas fa-minus"></i></a>
+        </div>
+    </div>
+    <ol class="items-list">
+        {{#each item.levels as |level id|}}
+            <li class="item flexrow effect{{#if level.isDisabled}} disabled{{/if}}" data-effect-id="{{level._id}}"
+                data-uuid="{{level.uuid}}">
+                <div class="item-image"><img src="{{level.img}}" title="{{level.name}}" width="24" height="24"/>
                 </div>
-            {{/each}}
-        {{/if}}
-    </section>
+                <h4 class="item-name">{{level.name}}</h4>
+                <div class="item-controls">
+                    <a data-type="view" data-action="effect-control" data-effect-id="{{level._id}}" class="item-control"
+                       title="Edit Item"><i class="fas fa-edit"></i></a>
+                </div>
+            </li>
+        {{/each}}
+    </ol>
 </div>

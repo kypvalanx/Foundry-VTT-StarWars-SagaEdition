@@ -1,7 +1,16 @@
 const gulp = require('gulp');
 const prefix = require('gulp-autoprefixer');
 const sourcemaps = require('gulp-sourcemaps');
-const sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('node-sass'));
+
+
+// const nodePackages = ["./node_modules/*puppeteer/*.*"];
+// function copyPackages(){
+//
+//   return gulp.src(nodePackages, {base: './'}).pipe(gulp.dest('module/lib'))
+// }
+
+//const package = gulp.series(copyPackages);
 
 /* ----------------------------------------- */
 /*  Compile Sass
@@ -48,3 +57,4 @@ exports.default = gulp.series(
   watchUpdates
 );
 exports.css = css;
+//exports.package = package;

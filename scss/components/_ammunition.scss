@@ -1,0 +1,16 @@
+.queued-ammo-empty, .queued-ammo-full
+{
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--color-foreground);
+}
+
+.queued-ammo-full
+{
+  background: var(--color-foreground);
+}
+
+.ammunition-block
+{
+  width: 100px;
+}

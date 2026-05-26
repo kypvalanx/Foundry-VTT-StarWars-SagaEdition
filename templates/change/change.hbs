@@ -1,0 +1,35 @@
+<li class="effect-change change flexcol collapsible-container" data-index="{{#if inherited}}inherited~{{/if}}{{index}}"
+    {{#if inherited}}title="{{change.sourceString}}"{{/if}}>
+    <div style="width:100%" class="flexrow">
+        <div class="key">
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.key"{{/if}} value="{{change.key}}"/>
+        </div>
+
+        <div class="mode" title="{{localize EFFECT.ModeDescription}}">
+            <select class="direct" {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.mode"{{/if}} data-dtype="Number">
+                {{selectOptions modes selected=change.mode}}
+            </select>
+        </div>
+        <div class="priority" title="{{localize EFFECT.PriorityDescription}}">
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="number"
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.priority"{{/if}} value="{{#unless change.priority}}1{{else}}{{change.priority}}{{/unless}}"/>
+        </div>
+        <div class="value">
+            <input class="direct{{#if inherited}} disabled{{/if}}" type="text"
+                   {{#if inherited}}disabled{{else}}name="{{changepath}}.{{index}}.value"{{/if}} value="{{change.value}}"/>
+        </div>
+        <div class="change-controls">
+            <a class="change-control toggle" style="display:none" data-toggle-id="toggle-change-{{prefix}}{{index}}"><i class="fas {{#if
+                    (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}fa-minus{{else}}fa-plus{{/if}}"></i></a>
+            {{#unless inherited}}
+                <a class="change-control" data-action="change-control" data-action-type="delete" data-index="{{index}}"><i
+                        class="fas fa-trash"></i></a>
+            {{/unless}}
+        </div>
+    </div>
+    <div style="display: {{#if
+            (lookup @root.document.toggles (concat "toggle-change-" prefix index))}}grid{{else}}none{{/if}}"
+         class="collapsible">
+    </div>
+</li>

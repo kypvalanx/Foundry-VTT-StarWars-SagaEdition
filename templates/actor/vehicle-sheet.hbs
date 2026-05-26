@@ -1,5 +1,16 @@
 <form class="{{cssClass}}" autocomplete="off">
+
+    <div class="flex flex-col" style="height:100%">
     <div>
+
+        {{#each actor.warnings as |warning id|}}
+            <span class="warning">{{{warning}}}</span><br/>
+        {{/each}}
+        {{#each actor.errors as |error id|}}
+            <span class="error">{{{error}}}</span><br/>
+        {{/each}}
+    </div>
+    <div class="flex-grow1">
         {{!-- Sheet Tab Navigation --}}
         <nav class="sheet-tabs tabs" data-group="primary">
             <a class="item" data-tab="summary">Summary</a>
@@ -7,61 +18,106 @@
             <a class="item" data-tab="stations">Stations</a>
             <a class="item" data-tab="cargo">Cargo</a>
             <a class="item" data-tab="traits">Traits</a>
-            <a class="item" data-tab="notes">Notes</a>
+            <a class="item" data-tab="modes">Modes</a>
+            <a class="item" data-tab="changes">Changes</a>
+            <a class="item" data-tab="description">Notes</a>
+            <a class="item" data-tab="settings">Settings</a>
         </nav>
 
         {{!-- Sheet Body --}}
         <section class="sheet-body">
             {{!-- Summary Page --}}
-            <div class="tab summary flex-col" data-group="primary" data-tab="summary">
-                <div class="flex flex-row">
-                    <div class="flex flex-col">
-                        <!--attributes-->
-                        {{> 'systems/swse/templates/actor/parts/actor-type.hbs'}}
-                        {{> 'systems/swse/templates/actor/parts/actor-ability-scores.hbs'}}
-                        {{> 'systems/swse/templates/actor/vehicle/crew-quality.hbs'}}
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
+            <div class="tab summary" data-group="primary" data-tab="summary">
+                <div class="flex-col">
+                    <div class="flex flex-row">
+                        <div class="flex flex-col">
+                            <!--attributes-->
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-crew.hbs'}}
+                            {{> 'systems/swse/templates/actor/parts/actor-ability-scores.hbs'}}
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-template.hbs'}}
+                        </div>
+                        <div class="flex-grow">
+                            <!--summary-->
+                            {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
+                        </div>
                     </div>
-                    <div class="flex-grow">
-                        <!--summary-->
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-summary.hbs'}}
+                    <div class="flex flex-row">
+                        <div class="flex-grow">
+                            <!--health-->
+                            {{> 'systems/swse/templates/actor/parts/actor-health.hbs' disableFirstAid=true disableSecondWind=true disableForcePointsAndDestinyPoints=true disableSimpleSpeedAndBaseAttackBonus=true}}
+                        </div>
+                        <div class="flex flex-col">
+                            <!--condition-->
+                            {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
+                        </div>
+                        <div class="flex flex-col">
+                            <!--portrait-->
+                            {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
+                        </div>
                     </div>
-                </div>
-                <div class="flex flex-row">
-                    <div class="flex-grow">
-                        <!--health-->
-                        {{> 'systems/swse/templates/actor/vehicle/vehicle-health.hbs'}}
-                        <!--Shields-->
-                        {{> 'systems/swse/templates/actor/parts/actor-shields.hbs'}}
+                    <div class="flex flex-row">
+                        <div class="flex-grow">
+                            <!--defenses-->
+                            {{> 'systems/swse/templates/actor/parts/actor-defenses.hbs'}}
+                        </div>
                     </div>
-                    <div class="flex flex-col">
-                        <!--portrait-->
-                        {{> 'systems/swse/templates/actor/parts/actor-portrait.hbs'}}
-                        <!--condition-->
-                        {{> 'systems/swse/templates/actor/parts/actor-condition.hbs'}}
+                    <div class="flex flex-row">
+                        {{> 'systems/swse/templates/actor/parts/actor-weapon-armor-summary.hbs'}}
+                        {{> 'systems/swse/templates/actor/parts/skills/actor-skills.hbs' disableTrained=true disableBonus=true}}
                     </div>
-                </div>
-                <div class="flex flex-row">
-                    <div class="flex-grow">
-                        <!--defenses-->
-                        {{> 'systems/swse/templates/actor/parts/actor-defenses.hbs'}}
-                    </div>
-                </div>
-                <div class="flex flex-row">
-                    {{> 'systems/swse/templates/actor/vehicle/vehicle-attacks-summary.hbs'}}
-                    {{> 'systems/swse/templates/actor/vehicle/vehicle-skills.hbs'}}
                 </div>
             </div>
 
-            <div class="tab summary flex-col" data-group="primary" data-tab="stations">
-
-                <!--summary-->
+            <!--Stations Tab-->
+            <div class="tab stations" data-group="primary" data-tab="stations">
+                <div class="flex-col">
                 {{> 'systems/swse/templates/actor/vehicle/vehicle-stations.hbs'}}
+                </div>
             </div>
 
             {{!-- Biography Tab --}}
-            <div class="tab biography" data-group="primary" data-tab="notes">
-                {{editor actor.system.biography target="biography" button=true owner=owner editable=editable}}
+            <div class="tab biography" data-group="primary" data-tab="description">
+                {{editor actor.system.description target="system.description" button=true owner=owner
+                         editable=editable engine="prosemirror"}}
+            </div>
+
+
+            <div class="tab changes" data-group="primary" data-tab="changes">
+                {{> 'systems/swse/templates/change/change-list.hbs' changes=actor.changes inheritedChanges=actor.inheritedChanges modes=modes changepath='system.changes'}}
+            </div>
+
+            <div class="tab settings" data-group="primary" data-tab="settings">
+                <div class="flexcol">
+                    {{#each actor.system.settings as |setting id|}}
+                        {{> 'systems/swse/templates/settings/setting.hbs' setting=setting id=id}}
+                    {{/each}}
+                </div>
+            </div>
+
+            <div class="tab modes" data-group="primary" data-tab="modes">
+                <div class="section-header flexrow">
+                    <div class="entry"></div>
+                    <div class="section-header-controls">
+                        <a class="control" data-action="effect-control" data-type="add-mode"><i class="far fa-plus-square"></i></a>
+                    </div>
+                </div>
+                <ol class="items-list">
+                    {{#each actor.effects as |mode id|}}
+                        {{#unless mode.flags.swse.itemModifier}}
+                            <li class="item flexrow draggable effect{{#if mode.isDisabled}} disabled{{/if}}" data-effect-id="{{mode._id}}" data-uuid="{{mode.uuid}}">
+                                <div class="item-image"><img src="{{mode.img}}" title="{{mode.name}}" width="24" height="24"/>
+                                </div>
+                                <h4 class="item-name">{{mode.name}}</h4>
+                                <div>{{#if mode.hasLinks}}<i class="fas fa-link" title="Has Links"></i>{{/if}}</div>
+                                <div class="item-controls">
+                                    <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable" data-action="effect-control" data-effect-id="{{mode._id}}">
+                                    <a data-type="view" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+                                    <a data-type="delete" data-action="effect-control" data-effect-id="{{mode._id}}" class="item-control" title="Delete Item"><i class="fas fa-trash"></i></a>
+                                </div>
+                            </li>
+                        {{/unless}}
+                    {{/each}}
+                </ol>
             </div>
 
 
@@ -76,19 +132,20 @@
                 </div>
                 <div class="grid-2col">
                     <div>
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="uninstalled" label="Uninstalled" items=actor.uninstalled draggable=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="ammunition" label="Ammunition" items=actor.ammunition draggable=true delete="always" quantity=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="templates" label="Templates" items=actor.templates draggable=true delete="always"}}
                     </div>
                     <div>
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true}}
-                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="installed" label="Installed Systems" items=actor.installed draggable=true delete="always"}}
+                        {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="pilotInstalled" label="Pilot Weapon Emplacements" items=actor.pilotInstalled draggable=true delete="always"}}
 
                         {{#each actor.gunnerPositions as |position id|}}
-                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true}}
+                            {{> 'systems/swse/templates/actor/parts/item-list.hbs' container=position.id label=(concat "Gunner Position " position.numericId " Weapon Emplacements") items=position.installed draggable=true delete="always"}}
                         {{/each}}
-                        <div class="subtle item-container new-gunner"
-                             title="Drag a weapon emplacement here to create a new gunner position"><a><i
-                                class="fas fa-plus"></i></a>New Gunner
+                        <div class="subtle item-container new-gunner panel" data-container-id="new-gunner"
+                             title="Drag a weapon emplacement here to create a new gunner position">
+                            <h2><label class="resource-label">New Gunner</label></h2>
                         </div>
                     </div>
                 </div>
@@ -96,44 +153,17 @@
 
             {{!-- Owned Equipment Tab --}}
             <div class="tab items" data-group="primary" data-tab="cargo">
-                <div>
-                    <h2><label class="resource-label">Cargo <a data-action="compendium" data-type="Item" data-pack="swse.items"
-                                                                   title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
 
-
-                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" label="Cargo" items=actor.cargo draggable=false delete="always"}}
-
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' container="general-equipment" bigLabel="Cargo" items=actor.cargo draggable=false delete="always" createNew="equipment" quantity=true quickCreate="equipment" compendiumPack="swse.items"}}
 
             </div>
 
             {{!-- Owned Traits Tab --}}
             <div class="tab items" data-group="primary" data-tab="traits">
-                <div>
-                    <h2><label class="resource-label">Traits <a data-action="compendium" data-type="Item" data-filter="-type:trait"
-                                                                title="{{localize "Open Compendium"}}"><i
-                            class="fas fa-folder-plus"></i></a></label></h2>
-                </div>
-                <ol class="items-list">
-                    {{#each actor.traits as |trait id|}}
-                        <li class="item" data-item-id="{{trait._id}}" title="{{trait.system.textDescription}}">
-                            <div class="flexrow">
-                                <h4 class="item-name"><b>{{trait.finalName}}</b></h4>
-                                <h4 class="item-name">Source: {{trait.system.supplier.type}}
-                                    , {{trait.system.supplier.name}}</h4>
-                                    <!--                            <h4 class="item-name">{{#if
-                                    trait.system.prerequisites}}-->
-                                    <!--                                <b>Prerequisites:</b> {{trait.system.prerequisites}}{{/if}}</h4>-->
-                                <div class="item-controls">
-                                    <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
-                                </div>
-                            </div>
-                            <!--<div>{{trait.system.textDescription}}</div>-->
-                        </li>
-                    {{/each}}
-                </ol>
+                {{> 'systems/swse/templates/actor/parts/item-list.hbs' bigLabel="Traits" compendiumFilter="-type:trait" container="items-list" fields= (arr "Source" "Prerequisites") items=actor.traits draggable=false quantity=false delete="unSupplied" overrideDelete=actor.system.ignorePrerequisites description="expandable" controls='<button type="button" class="flex-0" style="flex-basis:180px" data-action="gm-bonus">Add GM Bonus</button>'}}
+
             </div>
         </section>
+    </div>
     </div>
 </form>

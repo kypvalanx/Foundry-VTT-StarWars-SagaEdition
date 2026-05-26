@@ -17,12 +17,15 @@
   @import 'components/items';
   @import 'components/item';
   @import 'components/species';
-  @import 'components/summary';
   @import 'components/attack';
   @import 'components/attributes';
-  @import 'components/defenses';
+  @import 'components/ammunition';
   @import 'components/item_attribute';
   @import 'components/item_provided_item';
   @import 'components/vehicle';
   @import 'components/compendium';
+  @import 'components/change';
+  @import 'components/web';
 }
+@import 'components/chat';
+@import 'components/compendium';

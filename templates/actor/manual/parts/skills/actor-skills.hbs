@@ -1,0 +1,60 @@
+<div class="skills-header swse flex-grow resource flex-group-center">
+    <label class="resource-label">Skills</label>
+
+    <table class="skill">
+        <thead>
+        <tr>
+            <th></th>
+            <th>Total</th>
+            <th>Ability</th>
+            <th>Trained</th>
+            <th>Focus</th>
+            <th>Misc</th>
+            <th>Armor</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#each actor.system.skills as |skill id|}}
+            {{#unless skill.hide}}
+                <tr class="draggable {{skill.rowColor}}" data-variable="{{skill.variable}}" data-label="{{skill.label}}" data-type="skill">
+                    <th>
+                        <a class="rollable" title="Roll 1d20 + {{skill.value}}"
+                           data-label="{{id}}" data-roll="1d20 + {{skill.value}}"
+                           data-notes="{{skill.notes}}">
+                            <i class="fas fa-dice-d20"></i>
+                        </a>
+                        {{#unless skill.uut}}(TRAINED){{/unless}}
+                        <a href="{{skill.link}}">{{skill.label}}</a>
+                    </th>
+                    <td title="{{skill.title}}">{{skill.value}}</td>
+                    <td>
+                        <div class="background-text-container">
+                            {{toUpperCase skill.attribute}} ({{skill.abilityBonus}})
+<!--                            <div class="background-text">{{skill.attribute}}</div>-->
+<!--                            <div class="foreground-text">{{skill.abilityBonus}}</div>-->
+                        </div>
+                    </td>
+                    <td>
+                        <input class="plain tiny" name="system.skills.{{id}}.manualTrainingBonus" type="number"
+                               value="{{skill.manualTrainingBonus}}" placeholder="0"/>
+                    </td>
+                    <td>
+                        <input class="plain tiny" name="system.skills.{{id}}.manualFocusBonus" type="number"
+                               value="{{skill.manualFocusBonus}}" placeholder="0"/>
+                    </td>
+                    <td>
+                        <input class="plain tiny" name="system.skills.{{id}}.manualBonus" type="number"
+                               value="{{skill.manualBonus}}" placeholder="0"/>
+                    </td>
+                    <td>
+                        {{#if skill.acp}}
+                            <input class="plain tiny" name="system.skills.{{id}}.manualArmorBonus" type="number"
+                                   value="{{skill.manualArmorBonus}}" placeholder="0"/>
+                        {{/if}}
+                    </td>
+                </tr>
+            {{/unless}}
+        {{/each}}
+        </tbody>
+    </table>
+</div>

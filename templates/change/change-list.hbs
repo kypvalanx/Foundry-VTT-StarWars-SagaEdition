@@ -1,0 +1,19 @@
+<header class="change-list-header flexrow">
+    <div class="key" title="{{localize "CHANGE.KeyTT"}}">{{ localize "CHANGE.Key" }}</div>
+    <div class="mode" title="{{localize "CHANGE.ModeTT"}}">{{ localize "CHANGE.Mode" }}</div>
+    <div class="priority" title="{{localize "CHANGE.PriorityTT"}}">{{ localize "CHANGE.Priority" }}</div>
+    <div class="value">{{ localize "CHANGE.Value" }}</div>
+    <div class="change-controls">
+        <a class="change-control" data-action="change-control" data-action-type="add"><i class="far fa-plus-square"></i></a>
+    </div>
+</header>
+<ol class="change-list">
+    {{#each changes as |change i|}}
+        {{> 'systems/swse/templates/change/change.hbs' change=change prefix="active" index=i modes=../modes changepath=../changepath}}
+    {{/each}}
+    {{#if inheritedChanges}}
+        {{#each inheritedChanges as |change i|}}
+            {{> 'systems/swse/templates/change/change.hbs' change=change index=i prefix="inherited" inherited=true modes=../modes changepath=../changepath}}
+        {{/each}}
+    {{/if}}
+</ol>

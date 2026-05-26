@@ -13,9 +13,9 @@
         {{#unlessBoth ability.skip ../isDroid}}
             <tr class="adjustable">
                 <th class="attribute-label">{{key}}</th>
-                <td class="adjustable-minus"><button data-op="-" data-attrubute="{{key}}">-</button></td>
+                <td class="adjustable-minus"><button type="button" data-op="-" data-attrubute="{{key}}">-</button></td>
                 <td class="adjustable-value" data-label="{{key}}">{{ability.val}}</td>
-                <td class="adjustable-plus"><button data-op="+" data-attrubute="{{key}}">+</button></td>
+                <td class="adjustable-plus"><button type="button" data-op="+" data-attrubute="{{key}}">+</button></td>
                 <td class="attribute-total" data-attribute="{{key}}" data-bonus="{{ability.bonus}}"></td>
             </tr>
         {{/unlessBoth}}

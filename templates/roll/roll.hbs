@@ -1,0 +1,7 @@
+<div class="dice-roll">
+    <div class="dice-result">
+        <div class="dice-formula">{{roll._formula}}</div>
+        <div class="dice-tooltip">{{> 'systems/swse/templates/roll/roll-tooltip.hbs' roll=roll}}</div>
+        <h4 class="dice-total {{#if critical}}critical{{/if}} {{#if fail}}fail{{/if}}">{{roll._total}}</h4>
+    </div>
+</div>

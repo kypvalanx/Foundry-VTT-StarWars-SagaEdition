@@ -10,3 +10,30 @@
   .temp { grid-area: 1 / 4 / 2 / 5; }
   .mod { grid-area: 1 / 5 / 2 / 6; }
 }
+.background-text-container {
+  position: relative;
+}
+
+.background-text {
+  margin: 3rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: -1;
+  color: #18f1f1;
+}
+
+.foreground-text {
+  margin: 3rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: +1;
+  color: #000000;
+}
+
+.highlighted-skill {
+  background-color: darkcyan;
+}

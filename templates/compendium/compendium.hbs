@@ -2,7 +2,7 @@
     <header class="directory-header">
         <div class="header-actions action-buttons flexrow">
             {{#if user.isGM}}
-                <button class="create-compendium" type="submit"><i class="fas fa-atlas"></i> {{localize "COMPENDIUM.Create"}}</button>
+                <button type="button" class="create-compendium" type="submit"><i class="fas fa-atlas"></i> {{localize "COMPENDIUM.Create"}}</button>
             {{/if}}
         </div>
     </header>
@@ -37,7 +37,7 @@
     <footer class="directory-footer">
         <div class="compendium-footer flexcol">
             <div class="flexrow">
-                <button data-action="compendium" data-filter="-type:weapon -exotic" data-type="Item" class="compendium">Exotic Weapons</button>
+                <button type="button" data-action="compendium" data-filter="-type:weapon -exotic" data-type="Item" class="compendium">Exotic Weapons</button>
 <!--                <button class="compendium items">{{localize "PF1.BrowseItems"}}</button>-->
             </div>
             <div class="flexrow">

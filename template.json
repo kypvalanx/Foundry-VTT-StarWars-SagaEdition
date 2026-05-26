@@ -39,79 +39,49 @@
       },
       "crew": {
         "crewQuality": {},
-        "crew" : []
+        "crew": []
       },
       "characterAttributes": {
         "attributes": {
           "str": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "dex": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "con": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "int": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "wis": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           },
           "cha": {
             "total": 10,
+            "manual": 10,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 10
           }
@@ -119,206 +89,7 @@
       },
       "characterSkills": {
         "skills": {
-          "acrobatics": {
-            "value": 0,
-            "attribute": "dex",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Acrobatics"
-          },
-          "climb": {
-            "value": 0,
-            "attribute": "str",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Climb"
-          },
-          "deception": {
-            "value": 0,
-            "attribute": "cha",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Deception"
-          },
-          "endurance": {
-            "value": 0,
-            "attribute": "con",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Endurance"
-          },
-          "gather information": {
-            "value": 0,
-            "attribute": "cha",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Gather_Information"
-          },
-          "initiative": {
-            "value": 0,
-            "attribute": "dex",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Initiative"
-          },
-          "jump": {
-            "value": 0,
-            "attribute": "str",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Jump"
-          },
-          "knowledge (bureaucracy)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (galactic lore)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (life sciences)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (physical sciences)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (social sciences)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (tactics)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "knowledge (technology)": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Knowledge"
-          },
-          "mechanics": {
-            "value": 0,
-            "attribute": "int",
-            "uut": false,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Mechanics"
-          },
-          "perception": {
-            "value": 0,
-            "attribute": "wis",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Perception"
-          },
-          "persuasion": {
-            "value": 0,
-            "attribute": "cha",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Persuasion"
-          },
-          "pilot": {
-            "value": 0,
-            "attribute": "dex",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Pilot"
-          },
-          "ride": {
-            "value": 0,
-            "attribute": "dex",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Ride"
-          },
-          "stealth": {
-            "value": 0,
-            "attribute": "dex",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Stealth"
-          },
-          "survival": {
-            "value": 0,
-            "attribute": "wis",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Survival"
-          },
-          "swim": {
-            "value": 0,
-            "attribute": "str",
-            "uut": true,
-            "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Swim"
-          },
-          "treat injury": {
-            "value": 0,
-            "attribute": "wis",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Treat_Injury"
-          },
-          "use computer": {
-            "value": 0,
-            "attribute": "int",
-            "uut": true,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Use_Computer"
-          },
-          "use the force": {
-            "value": 0,
-            "attribute": "cha",
-            "uut": false,
-            "trained": false,
-            "acp": false,
-            "link": "https://swse.fandom.com/wiki/Use_the_Force"
-          }
+
         }
       },
       "vehicleAttributes": {
@@ -326,36 +97,18 @@
           "str": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           },
           "dex": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           },
           "int": {
             "total": 0,
             "mod": 0,
-            "classLevelBonus": 0,
-            "speciesBonus": 0,
-            "ageBonus": 0,
-            "equipmentBonus": 0,
-            "buffBonus": 0,
-            "customBonus": 0,
             "bonus": 0,
             "base": 0
           }
@@ -369,15 +122,35 @@
             "uut": true,
             "trained": false,
             "acp": false,
-            "link": "https://swse.fandom.com/wiki/Pilot"
+            "link": "https://swse.fandom.com/wiki/Pilot",
+            "sizeMod": true
           },
           "initiative (pilot)": {
             "value": 0,
             "attribute": "dex",
             "uut": true,
             "trained": false,
-            "acp": true,
-            "link": "https://swse.fandom.com/wiki/Initiative"
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Initiative",
+            "sizeMod": true
+          },
+          "deception (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Starship_Deception",
+            "sizeMod": true
+          },
+          "stealth (pilot)": {
+            "value": 0,
+            "attribute": "dex",
+            "uut": true,
+            "trained": false,
+            "acp": false,
+            "link": "https://swse.fandom.com/wiki/Stealth#Starship_Stealth",
+            "sizeMod": true
           },
           "pilot (copilot)": {
             "value": 0,
@@ -499,6 +272,7 @@
       "class",
       "upgrade",
       "forcePower",
+      "starShipManeuver",
       "affiliation",
       "forceTechnique",
       "forceSecret",
@@ -515,7 +289,10 @@
       "beastAttack",
       "beastSense",
       "beastType",
-      "beastQuality"
+      "beastQuality",
+      "droid system",
+      "hazard",
+      "implant"
     ],
     "templates": {
       "base": {
@@ -524,9 +301,10 @@
         "textDescription": "",
         "sourceString": "",
         "attributes": {},
+        "changes": [],
         "choices": [],
         "modes": [],
-        "providedItems": {},
+        "providedItems": [],
         "payload": "",
         "buildInstructions": []
       },
@@ -536,7 +314,8 @@
         "availability": "",
         "size": "",
         "type": "",
-        "subtype": ""
+        "subtype": "",
+        "quantity": 1
       },
       "modifiable": {
         "items": []
@@ -692,6 +471,13 @@
       "traits": []
     },
     "forcePower": {
+      "templates": [
+        "base",
+        "categories",
+        "source"
+      ]
+    },
+    "starShipManeuver": {
       "templates": [
         "base",
         "categories",

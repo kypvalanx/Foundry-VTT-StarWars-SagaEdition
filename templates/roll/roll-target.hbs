@@ -1,0 +1,7 @@
+<div class="target dice-formula">
+    <div>{{target.name}} ({{target.defenseType}} {{target.defense}})</div>
+    {{#each target.conditionalDefenses as |i defense|}}
+        <div>{{defense}}</div>
+    {{/each}}
+    <div class="flex flex-row flex-tight"><div>Result: </div><div class="{{target.highlight}}">{{target.result}}</div></div>
+</div>

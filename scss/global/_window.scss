@@ -2,11 +2,29 @@
   font-family: $font-primary;
 }
 
+.window-app .window-content{
+  background: var(--color-background);
+}
+
+.dialog .dialog-buttons button.default {
+  background: var(--color-foreground);
+  border: 2px groove var(--color-border-light-secondary);
+}
+
+.dialog .dialog-buttons button {
+  background: var(--color-foreground);
+  border: 2px groove var(--color-border-light-secondary);
+}
+
+.dialog .dialog-buttons {
+  flex-grow: 0;
+}
+
 .rollable {
   &:hover,
   &:focus {
     color: #000;
-    text-shadow: 0 0 10px red;
+    text-shadow: 0 0 10px var(--color-shadow-primary);
     cursor: pointer;
   }
 }
@@ -16,28 +34,18 @@
 
 .cursor {
   color: #000;
-  text-shadow: 0 0 10px red;
+  text-shadow: 0 0 10px var(--color-shadow-primary);
 }
 .input,
 .textarea {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
   font-family: inherit;
   font-size: inherit;
-  overflow: auto;
   padding: 3px 6px;
   background-color: rgba(0, 0, 0, 0.05);
   min-height: 25px;
 }
 
-.panel {
-  padding: 5px;
-  border: 1px solid #999;
-}
-
-.attack-block {
-  min-height: 225px;
-}
-
 .border-light {
-  border: 1px solid #7a7971;
+  border: 1px solid var(--color-foreground);
 }

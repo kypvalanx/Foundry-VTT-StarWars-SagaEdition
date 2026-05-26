@@ -14,7 +14,7 @@
     border-bottom: 1px solid #BBB;
 
     .item-image {
-      flex: 0 0 24px;
+      flex: 0 0 48px;
       margin-right: 5px;
     }
 
@@ -25,6 +25,7 @@
 
   .description{
     background-color: rgba(0,0,0,0.05);
+    padding: 3px;
   }
 
   .feat {
@@ -36,6 +37,12 @@
 
   .item-name {
     margin: 0;
+    flex: 5;
+  }
+
+  .item-upgrade {
+    flex:0;
+    white-space: nowrap;
   }
 
   .strikethrough{
@@ -44,6 +51,8 @@
 
   .item-controls {
     text-align: right;
+    flex:0;
+    flex-basis: 48px;
   }
 }
 
@@ -53,3 +62,6 @@ td{
  .item-attribute{
    cursor: pointer;
  }
+.flex-0{
+ flex:0;
+}

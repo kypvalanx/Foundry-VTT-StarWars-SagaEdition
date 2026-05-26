@@ -2,10 +2,10 @@
     <li class="flex flex-col">
         <div class="flex flex-row">
             <input class="provided-item"
-                   name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.name" type="text"
+                   name="system.providedItems.{{key}}.name" type="text"
                    value="{{providedItem.name}}" placeholder="" title=""/>
 
-            <select name="data.{{#if level}}levels.{{level}}.data.{{/if}}providedItems.{{key}}.type">
+            <select name="system.providedItems.{{key}}.type">
                 {{#select providedItem.type}}
                     <option value="trait">Trait</option>
                     <option value="item">Item</option>
@@ -18,13 +18,18 @@
                 {{/select}}
             </select>
             {{#if @root.editable}}
+                {{#unless providedItem.prerequisite}}
+                    <a data-action="prerequisite-control" data-type="add-child-prerequisite"
+                       data-path="system.providedItems.{{key}}.prerequisite"
+                       title="add prerequisite"><i class="fas fa-plus"></i></a>
+                {{/unless}}
                 <a data-action="provided-item-control" data-type="delete-item" data-entity-id="{{key}}"><i
                         class="fas fa-trash"></i></a>
             {{/if}}
         </div>
         {{#if providedItem.prerequisite}}
             <div class="flex flex-col">
-                {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=providedItem.prerequisite path=(concat 'data.providedItems.' key '.prerequisite')}}
+                {{> 'systems/swse/templates/item/parts/prerequisite.hbs' prerequisite=providedItem.prerequisite path=(concat 'system.providedItems.' key '.prerequisite')}}
             </div>
         {{/if}}
     </li>

@@ -1,6 +1,7 @@
 .resource-label {
-  font-weight: bold;
   text-transform: uppercase;
+  color: var(--color-foreground);
+  font-weight: 700;
 }
 .resource-block {
   padding: 3px;
@@ -55,11 +56,22 @@ table.fixed{
 .padding-3{
   padding: 3px;
 }
-.direct{
+input[type=text].direct{
   cursor: text;
+}
+input[type=radio].direct{
+  cursor: pointer;
+}
+input[type=checkbox].direct{
+  cursor: pointer;
 }
 .button{
   cursor: pointer;
+  padding: 3px;
+  text-align: center;
+  margin: auto;
+  background-color: rgba(0,0,0,0.05);
+  border: 1px solid black;
 }
 
 .draggable{
@@ -70,23 +82,35 @@ table.fixed{
   border: 1px solid black;
 }
 table.skill {
-  tr {
-    height: 30px;
+  tbody{
+    tr {
+      height: 30px;
 
-    th {
-      text-align: left;
+      th {
+        text-align: left;
+      }
+    }
+  }
+  thead{
+    tr {
+      height: 35px;
+
+      th {
+        text-align: center;
+        transform: rotate(-25deg);
+      }
     }
   }
 }
 
 .warning{
   opacity: 50%;
-  background-color: yellow;
+  background-color: var(--color-level-warning);
 }
 
 .error{
   opacity: 90%;
-  background-color: red;
+  background-color: var(--color-level-error);
   color: white;
 }
 
@@ -170,4 +194,8 @@ table.skill {
 .portrait-container{
   width: 200px;
   height: 200px;
+}
+
+.disabled {
+  color: #7a7971;
 }

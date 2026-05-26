@@ -1,0 +1,89 @@
+
+<li {{#if item.system.supplier}}title="Source: {{item.system.supplier.name}}"{{/if}} class="item flexcol {{#if draggable}}draggable{{/if}}
+    {{#ifEquals description "expandable"}}collapsible-container{{/ifEquals}}{{#if acceptsTemplates}} acceptsTemplates{{/if}}"
+    data-item-id="{{item.id}}"
+    data-item-name="{{item.name}}"
+    data-data="{{item.toJSONString}}">
+    <div class="flexrow {{#ifEquals description 'expandable'}}collapse-toggle{{/ifEquals}}">
+        <div class="flexrow">
+            <div class="item-image"><img src="{{item.img}}" title="{{item.name}}" width="48"
+                                         height="48" alt=""/></div>
+            <h4 class="item-name {{#ifLT item.system.quantity 1 }}strikethrough{{/ifLT}}">
+                {{item.finalName}}  {{#if item.system.hidden}} (Hidden){{/if}}
+
+                {{#if @root.options.debug}}
+                    {{item.id}} - source: {{item.system.supplier.name}}
+                {{/if}}
+                {{#if rollable}}
+                    {{> 'systems/swse/templates/common/rollable.hbs' rollable=rollable label=(concat 'Use the Force for ' item.finalName) itemId=item.id type='forcepower'}}
+                {{/if}}
+
+                {{#each item.itemRollables as |action id|}}
+                    {{> 'systems/swse/templates/common/rollable.hbs' action=action.action label=action.title itemId=../item.id}}
+                {{/each}}
+                {{#if quantity}}
+                    {{#unless usable}}
+                        {{#ifGT item.system.quantity 1 }}({{item.system.quantity}}){{/ifGT}}
+                    {{else}}
+                        Uses:
+                        {{#times item.system.quantity}}
+                            <input data-action="toggle-use"
+                                   type="checkbox"
+                                   data-id="{{../item.id}} uses {{this}}"
+                                   data-name="system.uses.{{this}}"
+                                   {{#if (lookup ../item.system.uses this)}}checked{{/if}}/>
+                        {{/times}}
+                    {{/unless}}
+                {{/if}}
+                {{#if item.hasAmmunition}}
+                    {{#each item.ammunition.current as |ammo id|}}
+                        ({{ammo.type}} {{ammo.current}}/{{ammo.capacity}})
+                    {{/each}}
+                {{/if}}
+            </h4>
+            {{#ifContains fields "Prerequisites"}}
+                <h4 class="item-name">{{#if item.system.prerequisite}}
+                    <b>Prerequisites:</b> {{item.system.prerequisite.text}}{{/if}}</h4>
+            {{/ifContains}}
+
+            {{#each item.itemActions as |action id|}}
+                <div><button type="button" data-action="{{action.action}}" {{{action.optionString}}}>{{action.buttonText}}</button></div>
+            {{/each}}
+
+        </div>
+        <div class="item-controls">
+            {{#if quantity}}
+                <a data-action="increase-quantity" class="item-control" title="Increase Quantity"><i
+                        class="fas fa-plus"></i></a>
+                <a data-action="decrease-quantity" class="item-control" title="Decrease Quantity"><i
+                        class="fas fa-minus"></i></a>
+            {{/if}}
+            <a data-action="view" class="item-control" title="Edit Item"><i class="fas fa-edit"></i></a>
+
+            {{#if overrideDelete}}
+                <a class="item-control item-delete" title="Delete Item"><i
+                        class="fas fa-trash"></i></a>
+            {{else}}
+                {{#ifEquals delete 'unSupplied'}}
+                    {{#if item.system.supplier.id}}
+                        {{#if item.system.supplier.unlocked}}
+                            <a class="item-control item-delete" title="Delete Item"><i
+                                    class="fas fa-trash"></i></a>
+                        {{/if}}
+                    {{else}}
+                        <a class="item-control item-delete" title="Delete Item"><i
+                                class="fas fa-trash"></i></a>
+                    {{/if}}
+                {{/ifEquals}}
+                {{#ifEquals delete 'always'}}
+                    <a class="item-control item-delete" title="Delete Item"><i
+                            class="fas fa-trash"></i></a>
+                {{/ifEquals}}
+            {{/if}}
+        </div>
+    </div>
+
+    {{#ifEquals description 'expandable'}}
+        <div style="display: none" class="collapsible description">{{{item.system.description}}}</div>
+    {{/ifEquals}}
+</li>

@@ -1,50 +1,64 @@
-{{#if attack}}
+ {{#if attack}}
     {{#unless attack.hide}}
-        <div class="flex flex-col {{#if attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container"
-             data-attacks="[{{attack.toJSONString}}]" data-item-id="{{attack.itemId}}"
-             data-provider-id="{{attack.providerId}}" data-actor-id="{{attack.actorId}}"
+        <div class="flex flex-col {{#if attack.provider}}vehicle{{/if}} panel summary-block resource attack collapsible-container" data-attack-key="{{attack.attackKey}}" data-type="attack"
              data-label="{{attack.name}}" data-img="{{attack.img}}">
-            <div class="flex flex-row-reverse">
-                <div class="collapse-toggle"><h3 class="plain input"><a data-action="hide"><i
-                        class="fas fa-plus"></i></a></h3></div>
-                <div class="flex-grow name"><h3 class="plain input">{{attack.name}}</h3></div>
+            <div class="flex flex-row">
+                <div class="huge labeled-input">
+                    <input class="input" type="text" value="{{attack.name}}{{#if attack.hasAmmunition}}{{#each attack.ammunition.current as |ammo id|}} ({{ammo.next}} {{ammo.current}}/{{ammo.capacity}}){{/each}}{{/if}}"
+                           placeholder="" disabled/>
+                    <div class="toggle control" data-toggle-id="{{concat "attack-" id}}">
+                        <a>
+                            <i class="fas {{#if
+                                    (lookup toggles (concat "attack-" id))}}fa-minus{{else}}fa-plus{{/if}}"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="attack-block collapsible" style="display: none">
+            <div class="flex flex-row">
+                <button class="attack" type="button" data-action="singleAttack" data-attack-key="{{attack.attackKey}}">Attack</button>
+<!--                <button class="tiny fas fa-ellipsis" data-attack-key="{{attack.attackKey}}" data-action="attack-more"></button>-->
+            </div>
+            <div class="collapsible" style="display: {{#if
+                    (lookup toggles (concat "attack-" id))}}grid{{else}}none{{/if}}">
 
-                <div class="to-hit"><label for="attack">Attack</label>
-                    <div class="plain input">{{{attack.attackRoll.renderFormulaHTML}}}</div>
+                <div class="attack-block">
+                    <div class="to-hit labeled-input"><label for="attack">Attack</label>
+                        <div class="plain input">{{{attack.attackRoll.formattedFormula}}}</div>
+                    </div>
+                    <div class="damage labeled-input"><label for="damage">Damage</label>
+                        <div class="plain input">{{{attack.damageRoll.formattedFormula}}}</div>
+                    </div>
+                    <div class="range labeled-input"><label for="range">Range</label>
+                        <div class="plain input">{{attack.rangeDisplay}}</div>
+                    </div>
+                    <div class="critical-multiplier labeled-input"><label for="critical">Crit.</label>
+                        <div class="plain input">{{attack.critical}}</div>
+                    </div>
+                    <div class="type labeled-input"><label for="type">Type</label>
+                        <div class="plain input">{{attack.type}}</div>
+                    </div>
                 </div>
-                <div class="damage"><label for="damage">Damage</label>
-                    <div class="plain input">{{{attack.damageRoll.renderFormulaHTML}}}</div>
-                </div>
-                <div class="attack-notes" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
+
+                <div class="attack-notes labeled-input" title="{{{attack.notesText}}}"><label for="notes">Notes</label>
                     <div class="plain input">{{{attack.notesHTML}}}</div>
                 </div>
-                <div class="range"><label for="range">Range</label>
-                    <div class="plain input">{{attack.rangeDisplay}}</div>
+
+                <div class="flex flex-col">
+                    
                 </div>
-                <div class="critical-multiplier"><label for="critical">Crit.</label>
-                    <div class="plain input">{{attack.critical}}</div>
-                </div>
-                <div class="type"><label for="type">Type</label>
-                    <div class="plain input">{{attack.type}}</div>
-                </div>
-                <div class="modes">
-                    {{#each attack.modes as |group groupId|}}
-                        <div class="mode-group">
-                            {{#each group as |mode id|}}
-                                {{#if mode}}
-                                    <div class="mode-selector" data-mode-path="{{mode.modePath}}"
-                                         data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}">
-                                        <label for="{{mode.name}} {{../../attack.itemId}}">{{mode.name}}</label>
-                                        <input class="" type="{{#unless mode.group}}checkbox{{/unless}}{{#if
-                                                mode.group}}radio{{/if}}" name="{{mode.group}} {{../../attack.itemId}}"
-                                               {{#if mode.isActive}}checked{{/if}}
-                                               data-mode="{{mode.name}}" data-item-id="{{../../attack.itemId}}"
-                                               id="{{mode.name}} {{../../attack.itemId}}"/>
-                                    </div>
-                                {{/if}}
-                            {{/each}}
+
+                <div class="flex flex-row flex-wrap">
+                        {{#if attack.hasAmmunition}}
+                            {{> 'systems/swse/templates/item/parts/ammunition.hbs' ammunition=attack.ammunition}}
+                        {{/if}}
+                    {{#each attack.modes as |mode id|}}
+                        <div class="mode-selector mode-group editor" data-type="{{mode.type}}"
+                             data-mode-path="{{mode.modePath}}"
+                             data-mode="{{mode.name}}" data-item-id="{{../../attack.weaponId}}"
+                             data-group="{{mode.group}}" data-attributes="{{stringify mode.attributes}}">
+                            <label>{{mode.name}}</label>
+                            <input type="checkbox" {{#unless mode.disabled}}checked{{/unless}} data-type="disable"
+                                   data-action="effect-control" data-effect-uuid="{{mode.uuid}}"/>
                         </div>
                     {{/each}}
                 </div>

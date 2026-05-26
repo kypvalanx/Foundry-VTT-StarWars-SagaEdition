@@ -3,21 +3,35 @@
   justify-content: center;
   text-align: center;
 }
+.flex-gap-small {
+  gap: 3px;
+}
 
 .flex-between {
   justify-content: space-between;
 }
 
 .flex-col{
+  display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
 }
 
 .flex-row{
+  display: flex;
   flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 }
 .flex-row-reverse{
   flex-direction: row-reverse;
 }
+
+.flex-tight{
+  justify-content: space-evenly;
+}
+
 
 .flex-grow,
 .flex-grow1{
@@ -35,9 +49,4 @@
 .flex-wrap    {
   -webkit-flex-wrap: wrap;
   flex-wrap: wrap;
-}
-
-.flex-float-right {
-  margin-left: auto;
-  order: 2;
 }

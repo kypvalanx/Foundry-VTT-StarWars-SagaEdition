@@ -1,8 +1,9 @@
 {
   "name": "swse",
   "version": "1.0.0",
-  "description": "CSS compiler for the Star Wars: Saga Edition system",
+  "description": "Star Wars: Saga Edition system",
   "scripts": {
+    "test": "node --import ./module_test/setup.mjs --test module_test/**/*.test.mjs",
     "build": "gulp",
     "compile": "gulp css",
     "watch": "gulp",
@@ -15,13 +16,18 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "chai": "^6.2.0",
     "eslint": "^8.23.0",
     "gulp": "^4.0.2",
-    "gulp-autoprefixer": "^7.0.1",
-    "gulp-sass": "^4.1.0",
-    "gulp-sourcemaps": "^2.6.5"
+    "gulp-autoprefixer": "^6.1.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-sourcemaps": "^2.6.5",
+    "leader-line-new": "^1.1.9",
+    "node-sass": "^8.0.0"
   },
   "devDependencies": {
+    "@ethaks/fvtt-quench": "^0.10.0",
+    "@league-of-foundry-developers/foundry-vtt-types": "^13.341.1",
     "uuid": "^8.3.2"
   }
 }
