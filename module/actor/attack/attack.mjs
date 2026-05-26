@@ -1102,12 +1102,18 @@ export class Attack {
     };
 
 
+    #isAutofireActive() {
+        const item = this.item;
+        const autofireEffect = item.effects?.find(effect => effect.name === "Autofire");
+        if (autofireEffect) return autofireEffect.disabled === false;
+        return Object.values(item.system?.modes || {}).some(mode => mode?.name === "Autofire" && mode.isActive);
+    }
+
     //TODO add an expected shape filter for area attacks
     get targetType() {
         const item = this.item;
 
-        const autofire = item.effects?.find(effect => effect.name === "Autofire");
-        if (autofire && autofire.disabled === false) {
+        if (this.#isAutofireActive()) {
             return {type: Attack.TARGET_TYPES.AUTOFIRE_WEAPON, criticalHitEnabled: false}
         }
 
@@ -1130,8 +1136,7 @@ export class Attack {
             })
         }
 
-        const autofire = item.effects?.find(effect => effect.name === "Autofire");
-        if (autofire && autofire.disabled === false) {
+        if (this.#isAutofireActive()) {
             return {
                 shape: "circle",
                 size: 1,
