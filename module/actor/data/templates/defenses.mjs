@@ -363,6 +363,7 @@ export class DefenseFunctions {
 
      applyBonuses(defense, total, bonuses) {
         defense.total = defense.override ? defense.override : total;
+        defense.value = defense.total;
         defense.abilityBonus = bonuses.find(b => b.type === "Ability")?.value || 0;
         defense.armorBonus = bonuses.find(b => b.type === "Armor")?.value || 0;
         defense.classBonus = bonuses.find(b => b.type === "Class")?.value || 0;
