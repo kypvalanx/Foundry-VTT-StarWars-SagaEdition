@@ -1631,7 +1631,7 @@ export function doubleValueCrit(damageRoll, criticalMultiplier) {
     return multiplyNumericTerms(damageRoll, criticalMultiplier)
 }
 
-function modifyRollForCriticalHit(attack, damageRoll, conditionalTerms) {
+function modifyRollForCriticalHit(attack, damageRoll, conditionalTerms = []) {
     damageRoll = modifyRollForPreMultiplierBonuses(attack, damageRoll);
 
     const criticalMultiplier = attack.critical;
