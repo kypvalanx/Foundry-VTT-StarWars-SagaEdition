@@ -18,8 +18,9 @@ export class AbilityFields {
         if(source.attributes){
             source.abilities = coerceOldAttributes(source.attributes);
             delete source.attributes;
+            foundry.utils.unsetProperty(source, "system.attributes");
         }
-
+        return super.migrateData(source);
 
         //console.log("migrateData", source)
     }
@@ -87,7 +88,7 @@ export class AbilityFields {
 export class AbilityFunctions {
     _prepareAbilityDerivedData() {
         let actor = this.parent;
-        let abilityGenType = this.settings.abilityGeneration?.value;
+        let abilityGenType = this.settings.attributeGeneration;
         if(abilityGenType === "Default"){
             abilityGenType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
         }
@@ -126,14 +127,14 @@ export class AbilityFunctions {
             let label = CONFIG.SWSE.Abilities.abilitiesShort[key];
 
             ability.label = key.toUpperCase();
-            let rollLabel = label;
+
+            let rollLabel = label + " Modifer";
             actor.setResolvedVariable(
                 "@" + key.toUpperCase() + "ROLL",
                 "1d20" + (totalModifiers ? " + " : " - ") + totalModifiers,
                 rollLabel,
                 rollLabel
             );
-            rollLabel = label + " Modifer";
             actor.setResolvedVariable(
                 "@" + key.toUpperCase() + "MOD",
                 totalModifiers,

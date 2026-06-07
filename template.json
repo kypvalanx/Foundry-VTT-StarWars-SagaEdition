@@ -2,10 +2,8 @@
   "Actor": {
     "types": [
       "character",
-      "npc",
       "computer",
-      "vehicle",
-      "npc-vehicle"
+      "vehicle"
     ],
     "templates": {
       "alignment": {

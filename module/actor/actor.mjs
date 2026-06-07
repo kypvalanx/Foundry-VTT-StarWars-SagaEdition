@@ -49,7 +49,7 @@ class SWSEActor extends Actor {
     /**
      * Augment the basic actor data with additional dynamic data.
      */
-    async prepareData() {
+     prepareData() {
 
         this._pendingUpdates = {};
         if (this.skipPrepare) {
@@ -91,7 +91,7 @@ class SWSEActor extends Actor {
 
 
         this.handleActorLinks(this.system);
-        await this.handleTokenupdates();
+        let promise = this.handleTokenupdates();
 
         super.prepareData();
 
@@ -119,19 +119,19 @@ class SWSEActor extends Actor {
 
         if (this.id) {
             if (this.type === "npc") {
-                this.safeUpdate({"type": "character", "system.isNPC": true}, {updateChanges: false});
+                this.safeUpdate({"type": "character", "system.settings.isNPC": true}, {updateChanges: false});
             } else if (this.type === "npc-vehicle") {
                 this.safeUpdate({
                     "type": "vehicle",
-                    "system.isNPC": true
+                    "system.settings.isNPC": true
                 }, {updateChanges: false});
 
-            } else if (system.isNPC && this.prototypeToken.actorLink) {
+            } else if (system.settings.isNPC && this.prototypeToken.actorLink) {
                 const documents = canvas.tokens?.placeables
                     ?.filter(t => t.actor?.id === this.id)
                     .map(t => t.document) ?? [];
                 this.setActorLinkOnActorAndTokens(documents, false);
-            } else if (!system.isNPC && !this.prototypeToken.actorLink) {
+            } else if (!system.settings.isNPC && !this.prototypeToken.actorLink) {
                 const documents = canvas.tokens?.placeables
                     ?.filter(t => t.actor?.id === this.id)
                     .map(t => t.document) ?? [];
@@ -140,7 +140,7 @@ class SWSEActor extends Actor {
         }
     }
 
-    async handleTokenupdates() {
+    handleTokenupdates() {
         if (this.type === "character") {
             const tokenUpdates = {};
 
@@ -211,7 +211,7 @@ class SWSEActor extends Actor {
                 for (const tokenDocument of dependentTokens) {
                     if (tokenDocument._id && game) {
                         try {
-                            await tokenDocument.update(tokenUpdates);
+                            tokenDocument.update(tokenUpdates);
                         } catch (e) {
                             console.log(e)
                         }
@@ -1502,9 +1502,9 @@ class SWSEActor extends Actor {
         return 3;
     }
 
-    async setAttributes(attributes) {
+    async setAttributes(abilities) {
         let update = {};
-        for (let [key, ability] of Object.entries(attributes)) {
+        for (let [key, ability] of Object.entries(abilities)) {
             update[`system.abilities.${key}.base`] = ability;
         }
         await this.safeUpdate(update);
@@ -1526,17 +1526,17 @@ class SWSEActor extends Actor {
         return this.system.abilities;
     }
 
-    getAttributeBases() {
+    get attributeBases() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.attributes)) {
+        for (let [key, attribute] of Object.entries(this.system.abilities)) {
             response[key] = attribute.base;
         }
         return response;
     }
 
-    getAttributeBonuses() {
+    get attributeBonuses() {
         let response = {};
-        for (let [key, attribute] of Object.entries(this.attributes)) {
+        for (let [key, attribute] of Object.entries(this.system.abilities)) {
             response[key] = attribute.bonus;
         }
         return response;
@@ -1755,7 +1755,7 @@ class SWSEActor extends Actor {
 
     ignoreCon() {
         let skip = this.attributes.con?.skip;
-        return skip === undefined ? true : skip;
+        return skip === true;
     }
 
 

@@ -5,7 +5,8 @@
         <div class="temp"><h3>Temp</h3></div>
         <div class="mod"><h3>Mod</h3></div>
     </div>
-    {{#each actor.system.attributes as |attribute id|}}
+    {{#each actor.system.abilities as |attribute id|}}
+        {{log attribute}}
         {{#unless attribute.skip}}
             <div class="ability-score rollable draggable" data-label="{{attribute.label}}"
                  data-variable="@{{attribute.label}}ROLL" data-type="ability">

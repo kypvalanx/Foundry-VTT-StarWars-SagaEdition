@@ -8,6 +8,7 @@
         <div class="small small-header">Mod</div>
     </div>
     {{#each actor.system.abilities as |attribute id|}}
+        {{log attribute attribute.value}}
         {{#unless attribute.skip}}
             <div class="flex-row">
                 <div class="medium labeled-input" >

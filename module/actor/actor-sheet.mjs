@@ -1447,7 +1447,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         let response = await Dialog.confirm({
             title: "Assign Ability Scores",
             content: content,
-            yes: async (html) => {
+            yes: (html) => {
                 let response = {str: 8, dex: 8, con: 8, int: 8, wis: 8, cha: 8};
                 html.find(".container").each((i, item) => {
                     let ability = $(item).data("ability");
@@ -1461,7 +1461,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
                 })
                 return response;
             },
-            no: async () => {
+            no: () => {
 
             },
             render: (html) => {
@@ -1503,7 +1503,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
             }
         });
         if (response) {
-            sheet.object.setAttributes(response);
+            await sheet.object.setAttributes(response);
         }
     }
 
@@ -1623,8 +1623,8 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
      * @private
      */
     async _assignAttributePoints(event, sheet) {
-        let existingValues = sheet.actor.getAttributeBases();
-        let bonuses = sheet.actor.getAttributeBonuses();
+        let existingValues = sheet.object.attributeBases;
+        let bonuses = sheet.object.attributeBonuses;
         let combined = {};
         for (let val of Object.keys(existingValues)) {
             combined[val] = {val: existingValues[val], skip: CONFIG.SWSE.Abilities.droidSkip[val], bonus: bonuses[val]};
@@ -1643,7 +1643,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         let response = await Dialog.confirm({
             title: "Assign Ability Score Points",
             content: content,
-            yes: async (html) => {
+            yes: (html) => {
                 let response = {};
                 html.find(".adjustable-value").each((i, item) => {
                     response[$(item).data("label")] = parseInt(item.innerHTML);
@@ -1678,7 +1678,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
             }
         });
         if (response) {
-            sheet.actor.setAttributes(response);
+            sheet.object.setAttributes(response);
         }
     }
 

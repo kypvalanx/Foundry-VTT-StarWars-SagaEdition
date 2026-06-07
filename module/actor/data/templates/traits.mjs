@@ -14,6 +14,8 @@ export class TraitsFields {
             }
             delete source.darkSideScore;
         }
+
+        return super.migrateData(source)
     }
 
     //Data common for all actors which needs to be persisted in the database
