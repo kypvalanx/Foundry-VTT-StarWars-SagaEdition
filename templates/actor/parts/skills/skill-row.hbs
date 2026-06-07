@@ -16,7 +16,7 @@
             <i class="fas fa-dice-d20"></i>
         </a>
         {{#unless skill.uut}}(TRAINED ONLY){{/unless}}
-        <a href="{{skill.link}}">{{skillId}}</a>
+        <a href="{{skill.link}}">{{skill.label}}</a>
     </th>
     <td title="{{skill.title}}">{{skill.value}}</td>
     <td>
@@ -51,7 +51,7 @@
     {{#if (lookup toggles (concat @root.actor._id "-" skillId))}}
         {{#each skill.situationalSkills as |skill id|}}
             {{#unless skill.hide}}
-                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill skillId=(concat ../skillId "-" id) toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus depth=(sum 1 ../depth)}}
             {{/unless}}
         {{/each}}
     {{/if}}

@@ -17,7 +17,7 @@
         <tbody>
         {{#each actor.system.skills as |skill id|}}
             {{#unless skill.hide}}
-                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill skillId=id toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill skillId=id toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus depth=0}}
             {{/unless}}
         {{/each}}
         </tbody>

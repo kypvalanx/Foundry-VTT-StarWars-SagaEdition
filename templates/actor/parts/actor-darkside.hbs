@@ -1,7 +1,7 @@
 {{!-- Darkside Block --}}
 <div class="dark-side-block panel">
     <h1 class="resource-label">Dark Side Score: {{actor.system.darkside.finalScore}}
-        / {{actor.system.darkside.max}}</h1>
+        / {{actor.system.darkside.max}}{{#ifGT actor.system.darkside.taint 0}} DST: {{actor.system.darkside.taint}}{{/ifGT}}</h1>
     <div class="flex flex-row flex-wrap">
         {{#times (math actor.system.darkside.max "+" 1)}}
             <label>
