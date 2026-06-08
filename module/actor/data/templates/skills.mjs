@@ -43,8 +43,6 @@ export class SkillFields {
             }
             delete source.darkSideScore;
         }
-
-        return super.migrateData(source);
     }
     static #_skillProperties(ability, skill) {
         return new fields.SchemaField({

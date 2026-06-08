@@ -368,7 +368,7 @@ export class DefenseFunctions {
         defense.armorBonus = bonuses.find(b => b.type === "Armor")?.value || 0;
         defense.classBonus = bonuses.find(b => b.type === "Class")?.value || 0;
         const miscBonus = bonuses.filter(b => !(b.type === "Ability" || b.type === "Armor" || b.type === "Class" || b.type === "Base"));
-        defense.miscBonus = miscBonus.reduce((acc, obj) => acc + obj.value, 0);
+        defense.miscBonus = miscBonus.reduce((acc, obj) => acc + toNumber(obj.value), 0);
         defense.miscBonusTip = miscBonus.map(b => `${b.type} ${b.value > -1 ? "Bonus" : "Modifier"}: ${b.value}`).join("\n");
     }
 
@@ -383,7 +383,7 @@ export class DefenseFunctions {
             reduce: "FIRST"
         }) || "0"
 
-        condition = condition === "OUT" ?  "0" : condition;
+        condition = condition === "OUT" ?  0 : condition;
 
         //TODO can we filter attributes by proficiency in the get search so we can get rid of some of the complex armor logic?
 

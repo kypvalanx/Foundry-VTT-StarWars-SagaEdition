@@ -18,11 +18,7 @@ export class AbilityFields {
         if(source.attributes){
             source.abilities = coerceOldAttributes(source.attributes);
             delete source.attributes;
-            foundry.utils.unsetProperty(source, "system.attributes");
         }
-        return super.migrateData(source);
-
-        //console.log("migrateData", source)
     }
 
 
