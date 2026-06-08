@@ -1,4 +1,3 @@
-import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {toNumber} from "../common/util.mjs";
 import {SWSEActorSheet} from "./base-sheet.mjs";
 import {addSubCredits, transferCredits} from "./credits.mjs";
@@ -89,7 +88,7 @@ export class SWSECharacterSheet extends SWSEActorSheet {
         html.find('[data-action="remove-class-level"]').on("click", event => this.removeClassLevel(event, this));
 
         html.find('.dark-side-button').click((ev) => {
-            this.object.update({"system.darkSideScore": $(ev.currentTarget).data("value")});
+            this.object.update({"system.darkside.value": $(ev.currentTarget).val()});
         });
     }
 
@@ -659,32 +658,6 @@ export class SWSECharacterSheet extends SWSEActorSheet {
 
     _prepareCharacterActorSheetData(context) {
         let system = context.system;
-
-        //********************************
-        //Dark Side Array
-        context.darkSideArray = [];
-        let score = system.darkSideScore;
-        for (let i = 0; i <= system.abilities.wis.value; i++) {
-            if (score < i) {
-                context.darkSideArray.push({
-                    value: i,
-                    active: false,
-                });
-            } else {
-                context.darkSideArray.push({
-                    value: i,
-                    active: true,
-                });
-            }
-        }
-
-        let darkSideTaint = getInheritableAttribute({
-            entity: system.parent,
-            attributeKey: "darksideTaint",
-            reduce: "SUM",
-        });
-
-        context.finalDarksideScore = system.darkSideScore + darkSideTaint;
 
         //********************************
         //Add skill data
