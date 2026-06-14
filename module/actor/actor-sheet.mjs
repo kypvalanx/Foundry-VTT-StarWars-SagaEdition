@@ -228,8 +228,8 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         html.find(".rollAbilities").on("click", async event => this._selectAttributeScores(event, this, {}, true));
         html.find(".assignStandardArray").on("click", async event => this._selectAttributeScores(event, this, CONFIG.SWSE.Abilities.standardScorePackage, false));
         html.find(".assignAttributePoints").on("click", event => this._assignAttributePoints(event, this));
-        html.find(".assignManual").on("click", async event => this._selectAttributesManually(event, this));
-        html.find(".assignSemiManual").on("click", async event => this._selectAttributesManually(event, this));
+        //html.find(".assignManual").on("click", async event => this._selectAttributesManually(event, this));
+        //html.find(".assignSemiManual").on("click", async event => this._selectAttributesManually(event, this));
         html.find(".leveledAttributeBonus").each((i, button) => {
             button.addEventListener("click", (event) => this._selectAttributeLevelBonuses(event, this));
         })

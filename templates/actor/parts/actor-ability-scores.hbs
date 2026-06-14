@@ -14,17 +14,17 @@
                     <div class="input rollable draggable" data-label="{{attribute.label}}" data-variable="@{{attribute.label}}ROLL" data-type="ability"
                          title="Roll 1d20 + {{attribute.roll}}"  data-roll="1d20 + {{attribute.roll}}">{{attribute.label}}</div>
                 </div>
-            {{#ifEquals ../actor.system.finalAttributeGenerationType "Semi-Manual"}}
+            {{#ifContains ../actor.system.finalAttributeGenerationType (array "Semi-Manual" "Manual")}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.base}}"
                            placeholder="0"  name="system.abilities.{{id}}.base"/>
                 </div>
-            {{/ifEquals}}
+            {{else}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.value}}"
-                           placeholder="0"{{#ifEquals ../actor.system.finalAttributeGenerationType "Manual"}} name="system.abilities.{{id}}.base" {{/ifEquals}}
-                           {{#unlessEquals ../actor.system.finalAttributeGenerationType "Manual"}} disabled{{/unlessEquals}}/>
+                           placeholder="0" disabled/>
                 </div>
+            {{/ifContains}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.customBonus}}"
                            placeholder="" name="system.abilities.{{id}}.customBonus"/>

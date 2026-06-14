@@ -347,3 +347,12 @@ export async function selectItemFromArray(items, dialog, options) {
     dialogConfig.content += `<select id="${select}">${itemOptions}</select>`
     return await Dialog.prompt(dialogConfig)
 }
+
+Handlebars.registerHelper("array", function () {
+    const args = Array.from(arguments);
+
+    // Remove the Handlebars options object
+    args.pop();
+
+    return args;
+});

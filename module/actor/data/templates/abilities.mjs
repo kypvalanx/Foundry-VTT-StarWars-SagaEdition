@@ -15,7 +15,7 @@ export class AbilityFields {
             return attributes;
         }
 
-        if(source.attributes){
+        if(!source.abilities && source.attributes){
             source.abilities = coerceOldAttributes(source.attributes);
             delete source.attributes;
         }
