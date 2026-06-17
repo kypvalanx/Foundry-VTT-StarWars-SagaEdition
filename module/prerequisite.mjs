@@ -21,6 +21,22 @@ function ensureArray(array) {
     return [array];
 }
 
+function filterEquippedItemsByCriteria(target, resolvedItems, req) {
+    let items = equippedItems(target);
+    let filteredEquippedItems = items.filter(item => {
+        let actsAs = getInheritableAttribute({
+            entity: item,
+            recursive: true,
+            embeddedItemOverride: resolvedItems,
+            attributeKey: ["actsAsForProficiency", "actsAs", "armorType"],
+            reduce: "VALUES"
+        })
+
+        return item.name === req || item.finalName === req || target.system?.subtype === req || actsAs.includes(req)
+    });
+    return filteredEquippedItems;
+}
+
 function meetsPrerequisite(prereq, target, options) {
     const fn = () => {
         let failureList = [];
@@ -209,6 +225,24 @@ function meetsPrerequisite(prereq, target, options) {
                     attributeKey: ["weaponProficiency", "armorProficiency"],
                     reduce: "VALUES_TO_LOWERCASE"
                 })
+                if(prereq.requirement === 'Armor equipped'){
+                    let proficientArmor = [];
+                    if(proficiencies.includes("light") || proficiencies.includes("light armor")){
+                        proficientArmor.push(...filterEquippedItemsByCriteria(target, resolvedItems, "Light Armor"))
+                    }
+                    if(proficiencies.includes("heavy") || proficiencies.includes("heavy armor")){
+                        proficientArmor.push(...filterEquippedItemsByCriteria(target, resolvedItems, "Heavy Armor"))
+                    }
+                    if(proficiencies.includes("medium") || proficiencies.includes("medium armor")){
+                        proficientArmor.push(...filterEquippedItemsByCriteria(target, resolvedItems, "Medium Armor"))
+                    }
+                    if(proficientArmor.length > 0){
+                        successList.push({prereq, count: 1});
+                        break;
+                    }
+                }
+
+
                 if (proficiencies.includes(prereq.requirement.toLowerCase())) {
                     successList.push({prereq, count: 1});
                     break;
@@ -439,18 +473,7 @@ function meetsPrerequisite(prereq, target, options) {
                     req = toks[0];
                     comparison = toks[1];
                 }
-                let items = equippedItems(target);
-                let filteredEquippedItems = items.filter(item => {
-                    let actsAs = getInheritableAttribute({
-                        entity: item,
-                        recursive: true,
-                        embeddedItemOverride: resolvedItems,
-                        attributeKey: ["actsAsForProficiency", "actsAs"],
-                        reduce: "VALUES"
-                    })
-
-                    return item.name === req || item.finalName === req || target.system?.subtype === req || actsAs.includes(req)
-                });
+                let filteredEquippedItems = filterEquippedItemsByCriteria(target, resolvedItems, req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
                     successList.push({prereq, count: 1});

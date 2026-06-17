@@ -938,6 +938,22 @@ export class SWSEItem extends Item {
         });
     }
 
+    /**
+     * provides a list of tags to put on an item sheet.
+     * @returns {*}
+     */
+    get tags(){
+        let tags = [];
+        if(Array.isArray(this.system.possibleProviders)){
+            tags.push(...this.system.possibleProviders)
+
+        }
+        if(!!this.system.bonusTalentTree && this.system.bonusTalentTree.length > 0){
+            tags.push(this.system.bonusTalentTree)
+        }
+        return tags.distinct();
+    }
+
     handleLegacyData(){
         if((!this.system.changes || this.system.changes.length === 0) && this.system.attributes && this.system.attributes.length > 0){
              this.system.changes = this.system.attributes;

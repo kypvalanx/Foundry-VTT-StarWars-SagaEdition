@@ -9,7 +9,7 @@ export async function actorsheetTalentTests(quench) {
             
             describe("actor.actor-sheet.talents", ()=>{
                 describe("Ataru", async () => {
-                    it("should switch the damage stat for lightsabers to dex", async () => {
+                    it("should switch the damage stat for lightsabers to dex (will fail if run before crystal list is generated)", async () => {
                         await withTestActor(async (actor) => {
                             actor.suppressDialog = true
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Human", type: "species", answers: ["Human (Default)"]})
@@ -40,6 +40,36 @@ export async function actorsheetTalentTests(quench) {
 
 
                 });
+                describe("Just a Scratch", async () => {
+                    it("should allow adding", async () => {
+                        await withTestActor(async (actor) => {
+                            actor.suppressDialog = true
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "4th-Degree Droid Model", type: "species", answers: ["Medium"]})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Soldier", type: "class"})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Duranium Plating", type: "item", equip: "equipped"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+
+                            const update = {};
+                            // update[`system.skills.Use the Force.trained`] = true;
+                            // update[`system.abilities.dex.base`] = 16;
+                            await actor.safeUpdate(update);
+
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Just a Scratch", type: "talent"})
+
+                            assert.isNotNull(actor.items.find(i => i.name === "Just a Scratch"))
+
+                        })
+                    })
+                    it("should do anything", ()=>{})
+
+
+                });
 
             })
 //move to other class
@@ -54,8 +84,10 @@ export async function actorsheetTalentTests(quench) {
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                            await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class", answers: ["Point-Blank Shot"]})
-                            await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class", answers: ["Point-Blank Shot"]})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Disciplined Strike", type: "talent"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Telekinetic Power", type: "talent"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Telekinetic Savant", type: "talent"})
