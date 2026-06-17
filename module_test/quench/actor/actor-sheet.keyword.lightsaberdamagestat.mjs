@@ -42,7 +42,7 @@ export async function actorsheetTalentTests(quench) {
                 });
 
             })
-
+//move to other class
             describe("actor.actor-sheet.classes", ()=>{
                 describe("Force Adept", async () => {
                     it("should allow adding class", async () => {
@@ -54,11 +54,14 @@ export async function actorsheetTalentTests(quench) {
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                            await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
-                            await actor.sheet._onDropItem(getMockEvent(), {name: "Jedi", type: "class"})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class", answers: ["Point-Blank Shot"]})
+                            await actor.sheet._onDropItem(getMockEvent(), {name: "Scoundrel", type: "class"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Disciplined Strike", type: "talent"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Telekinetic Power", type: "talent"})
                             await actor.sheet._onDropItem(getMockEvent(), {name: "Telekinetic Savant", type: "talent"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Blaster Deflect", type: "talent"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Force Intuition (Jedi Guardian Talent Tree)", type: "talent"})
+                            // await actor.sheet._onDropItem(getMockEvent(), {name: "Guardian's Insight", type: "talent"})
 
                             const update = {};
                             update[`system.skills.Use the Force.trained`] = true;
