@@ -15,7 +15,7 @@ import {healthFunctionsTests} from "./actor/templates/HealthFunctions.test.mjs";
 import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting-feats.test.mjs";
 import {actorSheetAbilitiesTests} from "./actor/actor-sheet.abilities.test.mjs";
 import {actorSheetSizeTests} from "./actor/actor-sheet.size.test.mjs";
-import {keywordLightsaberDamageStatTests} from "./actor/actor-sheet.keyword.lightsaberdamagestat.mjs";
+import {actorsheetTalentTests} from "./actor/actor-sheet.keyword.lightsaberdamagestat.mjs";
 
 const registeredTests = [
     generationTests,
@@ -35,7 +35,7 @@ const registeredTests = [
     featMulticlassTests,
     actorSheetAbilitiesTests,
     actorSheetSizeTests,
-    keywordLightsaberDamageStatTests
+    actorsheetTalentTests
 ];
 
 export function registerTestSuites(quench) {
