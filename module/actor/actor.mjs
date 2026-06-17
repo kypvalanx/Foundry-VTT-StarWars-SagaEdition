@@ -2753,7 +2753,7 @@ class SWSEActor extends Actor {
         return errorsFromActor(this);
     }
 
-    async equipItem(item, equipType, options) {
+    async equipItem(item, equipType, options = {}) {
         if (typeof item !== "object") {
             item = this.items.get(item);
         }

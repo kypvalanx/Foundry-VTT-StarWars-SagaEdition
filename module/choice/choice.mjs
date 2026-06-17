@@ -145,6 +145,7 @@ export async function activateChoices(item, context) {
         }
 
         if(actor.suppressDialog || context.suppressDialog) {
+            console.error("could not resolve choice", item, choice)
             return {success: false, items: []};
         }
 

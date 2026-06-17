@@ -625,7 +625,7 @@ export class Attack {
                 abilitySelect = abilitySelect.toLowerCase();
                 const abilities = ["str", "dex", "con", "int", "wis", "cha"];
                 if (abilities.includes(abilitySelect)) {
-                    let replaceAbilityMod = parseInt(actor.system.attributes[`${abilitySelect}`].mod);
+                    let replaceAbilityMod = parseInt(actor.system.abilities[`${abilitySelect}`].mod);
                     abilityMod = replaceAbilityMod > abilityMod ? replaceAbilityMod : abilityMod;
                 }
             }
