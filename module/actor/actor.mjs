@@ -52,6 +52,11 @@ class SWSEActor extends Actor {
      prepareData() {
 
         this._pendingUpdates = {};
+        this.resolvedVariables = new Map();
+        this.resolvedNotes = new Map();
+        this.resolvedLabels = new Map();
+        this.formulaFunctions = new Map();
+        this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
         if (this.skipPrepare) {
             return;
         }
@@ -59,11 +64,7 @@ class SWSEActor extends Actor {
         //TODO compartmentalize these and make the amll dynamic formulas and defined in a single place
         this.initializeCharacterSettings()
         this.handleAbilityScore()
-        this.formulaFunctions = new Map();
-        this.formulaFunctions['@charLevel'] = (actor) => actor.characterLevel;
-        this.resolvedVariables = new Map();
-        this.resolvedNotes = new Map();
-        this.resolvedLabels = new Map();
+
 
         this.cache = new SimpleCache()
 
@@ -1606,8 +1607,6 @@ class SWSEActor extends Actor {
                     }
                     charLevel += co.system.levelsTaken.length;
                 }
-                this.resolvedVariables.set("@heroicLevel", heroicLevel);
-                this.resolvedVariables.set("@charLevel", charLevel);
                 return heroicLevel;
             }
             return 0;

@@ -111,11 +111,11 @@ export class AbilityFunctions {
                 ability.value = 10;
             }
             // Assign the end total. Base is the manual number in case of 'Manual'
-            else ability.value = ability.base + (ability.bonus ?? 0);
+            else ability.value = ability.base + (ability.bonus ?? 0) + ability.customBonus;
 
             // Calculate the modifier using d20 rules.
             ability.mod = Math.floor(
-                (ability.value + ability.customBonus - 10) / 2
+                (ability.value - 10) / 2
             );
 
             // Prepare the roll data

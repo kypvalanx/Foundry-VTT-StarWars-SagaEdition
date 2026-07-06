@@ -19,12 +19,13 @@
                     <input class="input" type="number" value="{{attribute.base}}"
                            placeholder="0"  name="system.abilities.{{id}}.base"/>
                 </div>
-            {{else}}
+            {{/ifContains}}
+            {{#unlessContains ../actor.system.finalAttributeGenerationType (array "Manual")}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.value}}"
                            placeholder="0" disabled/>
                 </div>
-            {{/ifContains}}
+            {{/unlessContains}}
                 <div class="small labeled-input">
                     <input class="input" type="number" value="{{attribute.customBonus}}"
                            placeholder="" name="system.abilities.{{id}}.customBonus"/>

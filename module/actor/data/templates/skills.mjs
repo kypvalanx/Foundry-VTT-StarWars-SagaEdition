@@ -213,12 +213,22 @@ export class SkillFunctions {
         let actor = this.parent;
         let system = this;
 
-        let groupedSkillMap = options.groupedSkillMap ?? getGroupedSkillMap()
+
+        //move to parameter
+        let groupedSkillMap = options.groupedSkillMap ?? getGroupedSkillMap() ?? new Map()
 
         let heavyLoadAffected = actor.carriedWeight > actor.heavyLoad;
         let halfCharacterLevel = Math.floor(system.level.value / 2);
 
         let classSkills = system.classSkills;
+        let classes = Object.keys(system.classLevel)
+
+        groupedSkillMap.forEach((skill, key) => {
+            if(skill.classes.find(cls => classes.includes(cls))){
+                classSkills.add(key.toLowerCase())
+            }
+        })
+
         let automaticTrainedSkill = getInheritableAttribute({
             entity: actor,
             attributeKey: "automaticTrainedSkill",
