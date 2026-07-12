@@ -159,7 +159,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         new foundry.applications.ux.ContextMenu(html[0], ".numeric-override", numericOverrideOptions(this.actor), {jQuery: false})
         //new ContextMenu(html, `[data-action="attack-more"]`, numericOverrideOptions(this.actor))
 
-        new foundry.applications.ux.ContextMenu(html[0], `#fullAttack,button.attack`, attackOptions(this.actor), {jQuery: false})
+        new foundry.applications.ux.ContextMenu(html[0], `.attack-button`, attackOptions(this.actor), {jQuery: false})
 
 
         html.find("span.text-box.item-attribute").on("click", (event) => {
