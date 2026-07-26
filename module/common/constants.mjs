@@ -851,6 +851,8 @@ export const lightsaberForms = ["Ataru",
     "Maho-Kai",
     "Tripzest"];
 
+export const CREW_QUALITIES = ["Untrained","Normal","Skilled","Expert","Ace"];
+
 export const COLORS = {
     "red": "#FF0000",
     "green": "#00FF00",

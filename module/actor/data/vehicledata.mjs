@@ -1,13 +1,14 @@
 import SystemDataModel from "./abstract.mjs";
 import CommonActorData from "./commondata.mjs";
 
-import {AbilityFunctions} from "./templates/abilities.mjs";
+import {AbilityFields, AbilityFunctions} from "./templates/abilities.mjs";
 import {DefenseFields, DefenseFunctions} from "./templates/defenses.mjs";
 import {DetailFunctions, DetailFields} from "./templates/details.mjs";
 import {HealthFunctions} from "./templates/health.mjs";
 import {ShieldFunctions} from "./templates/shields.mjs";
 import {SkillFunctions, SkillFields} from "./templates/skills.mjs";
 import {TraitsFields, TraitsFunctions} from "./templates/traits.mjs";
+import {CREW_QUALITIES} from "../../common/constants.mjs";
 
 const fields = foundry.data.fields;
 const vehicleFunctionClasses = [
@@ -23,6 +24,16 @@ const vehicleFunctionClasses = [
 export class VehicleDataModel extends SystemDataModel.mixin(...vehicleFunctionClasses) {
     static _systemType = "vehicle";
 
+    static migrateData(source) {
+        if (source.crewQuality && typeof source.crewQuality === "object") {
+            source.crewQuality = source.crewQuality.quantity === "-" ? "Normal" : (source.crewQuality.quantity ?? "Normal");
+        }
+
+
+
+        return super.migrateData(source);
+    }
+
     static defineSchema() {
         return {
             ...CommonActorData.commonData,
@@ -36,6 +47,39 @@ export class VehicleDataModel extends SystemDataModel.mixin(...vehicleFunctionCl
                 ...DetailFields.npc,
             }),
             ...TraitsFields.npc,
+            vehicle: new fields.SchemaField({
+                cover: new fields.StringField({
+                }),
+                passengers: new fields.StringField({
+                    required: false,
+                }),
+                crewQuality: new fields.StringField({
+                    required: true,
+                    choices: CREW_QUALITIES,
+                    initial: "Normal",
+                    blank: false,
+                    label: "Crew Quality",
+                    hint: "The quality of the crew of this vehicle",
+                }),
+                consumables: new fields.StringField({
+                    required: false,
+                }),
+                cargo: new fields.SchemaField({
+                    capacity: new fields.NumberField({
+                    })
+                }),
+                speed: new fields.SchemaField({
+                    starshipScale: new fields.NumberField({
+                    }),
+                    characterScale: new fields.NumberField({
+                    }),
+                    maximumVelocity: new fields.NumberField({
+                    })
+                }),
+                crew: new fields.NumberField({
+                    initial: 0
+                })
+            })
             ///attacks: new fields.ArrayField({}),
         };
     }
@@ -51,5 +95,13 @@ export class VehicleDataModel extends SystemDataModel.mixin(...vehicleFunctionCl
      * access the actual document properties, e.g. this.parent.items to access the items
      * collection.
      */
-    prepareDerivedData() {}
+    prepareDerivedData() {
+        this.parent.cache?.invalidateAll();
+
+        //Traits - currently needs to be first for grabbing class level resolved data.
+        this._prepareCharacterTraitsDerivedData();
+
+        //Abilities
+        this._prepareAbilityDerivedData();
+    }
 }

@@ -78,7 +78,7 @@ Hooks.once('init', async function () {
     CONFIG.Actor.dataModels.character = CharacterDataModel;
     CONFIG.Actor.dataModels.npc = CharacterDataModel;
     CONFIG.Actor.dataModels.vehicle = VehicleDataModel;
-    CONFIG.Actor.dataModels["npc-vehicle"] = VehicleDataModel;
+    //CONFIG.Actor.dataModels["npc-vehicle"] = VehicleDataModel;
     CONFIG.Item.documentClass = SWSEItem;
     CONFIG.Token.hudClass = SWSETokenHud;
     CONFIG.Token.documentClass = SWSETokenDocument;

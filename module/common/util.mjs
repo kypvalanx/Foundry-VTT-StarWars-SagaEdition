@@ -1638,16 +1638,15 @@ function performAttack(actor, type, attackKey, macro) {
 
 export function attackOptions(actor) {
     const options = [];
-
-
-    
     
     options.push({
         name: "Attack or Add Macro with options",
-        icon: '<i class="fas fa-edit">',
-        callback: async (html) => {
-            const type = html.data('action')
-            const attackKey = html.data('attackKey')
+        icon: '<i class="fas fa-edit"/>',
+        callback: async (element) => {
+            console.log("Context menu clicked", element);
+
+            const type = element.dataset.action;
+            const attackKey = element.dataset.attackKey;
 
             const attackName = actor.attack.attacks.find(a => a.attackKey === attackKey)?.name;
 
@@ -1694,7 +1693,8 @@ export function numericOverrideOptions(actor) {
     options.push({
         name: "Set Override",
         icon: '<i class="fas fa-edit">',
-        callback: async element => {
+        callback: async (element) => {
+            console.log(element)
             let overrideKey = element.dataset['overrideKey'];
             let overrideName = element.dataset['overrideName'];
             let context = element.dataset['context'];

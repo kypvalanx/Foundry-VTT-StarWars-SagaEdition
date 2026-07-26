@@ -190,7 +190,7 @@ export class CrewDelegate {
             case "Gunner":
                 return this.gunner(slot)
         }
-        return getCrewByQuality(this.actor.system.crew.quality().quality);
+        return getCrewByQuality(this.quality);
     }
 
     #crewman(position, backup, third) {
@@ -199,7 +199,7 @@ export class CrewDelegate {
             crewman = this.#crewman(position, third);
         }
         if (!crewman) {
-            crewman = getCrewByQuality(this.actor.system.crewQuality.quality);
+            crewman = getCrewByQuality(this.actor.system.crewQuality);
             if (position === "Astromech Droid" && this.actor.system.hasAstromech && this.hasAstromechSlot) {
                 crewman.system.skills['mechanics'].value = 13;
                 crewman.system.skills['use computer'].value = 13;
@@ -212,7 +212,7 @@ export class CrewDelegate {
         let actor = this.actor.actorLinks.find(c => c.position === 'Gunner' && c.slot === (index || 0))
 
         if (!actor) {
-            actor = getCrewByQuality(this.actor.system.crew.quality().quality);
+            actor = getCrewByQuality(this.quality);
         }
 
         return actor;

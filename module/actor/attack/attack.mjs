@@ -297,7 +297,7 @@ export class Attack {
      * @returns {ActorData}
      */
     get operator() {
-        return fromUuidSync(this.operatorId) || getCrewByQuality(fromUuidSync(this.actorId).crew.quality?.quality);
+        return fromUuidSync(this.operatorId) || getCrewByQuality(fromUuidSync(this.actorId).crew.quality);
     }
 
     /**
@@ -417,7 +417,7 @@ export class Attack {
             terms.push(...getProficiencyBonus(operator, weaponTypes));
             terms.push(...getFocusAttackBonuses(operator, weaponTypes));
         } else {
-            terms.push(...appendNumericTerm(parent.system.attributes.int.mod, "Vehicle Computer Bonus"))
+            terms.push(...appendNumericTerm(parent.system.abilities.int.mod, "Vehicle Computer Bonus"))
 
             if (weapon.position === 'pilot' && operator.system.skills.pilot.trained) {
                 terms.push(...appendNumericTerm(2, "Trained Pilot Bonus"))

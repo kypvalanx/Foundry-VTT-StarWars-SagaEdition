@@ -1676,6 +1676,7 @@ export class SWSEItem extends Item {
 
 
     async addItemModificationEffectsFromItems(items, context={}) {
+        items = items.filter(i => !!i)
         if (!this.canUserModify(game.user, 'update')) {
             return;
         }

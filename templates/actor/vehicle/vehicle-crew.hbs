@@ -3,8 +3,7 @@
         <div class="crew-quality medium labeled-input">
             <label class="resource-label" for="crew-quality">Crew Quality</label>
             <select id="crew-quality" name="system.crewQuality.quality">
-                {{#select actor.system.crewQuality.quality}}
-                    <option value="-">-</option>
+                {{#select actor.system.crewQuality}}
                     <option value="Untrained">Untrained</option>
                     <option value="Normal">Normal</option>
                     <option value="Skilled">Skilled</option>

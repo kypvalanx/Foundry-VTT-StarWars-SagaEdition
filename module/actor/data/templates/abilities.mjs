@@ -1,5 +1,5 @@
 import {getInheritableAttribute} from "../../../attribute-helper.mjs";
-import {getLongKey, inheritableItems, resolveValueArray} from "../../../common/util.mjs";
+import {getLongKey, resolveValueArray} from "../../../common/util.mjs";
 
 const fields = foundry.data.fields;
 
@@ -35,7 +35,7 @@ export class AbilityFields {
                 initial: null,
                 integer: true,
                 min: 0,
-                label: `${ability} manual`,
+                label: `${ability} Manual`,
             }),
             base: new fields.NumberField({
                 nullable: true,
@@ -89,6 +89,10 @@ export class AbilityFunctions {
             abilityGenType = game.settings.get("swse", "defaultAttributeGenerationType") || "Manual";
         }
 
+        let hide = [];
+        if(actor.type === "vehicle"){
+            hide = ["cha", "wis"];
+        }
 
         // Loop through ability scores, and add their modifiers to our sheet output.
         for (let [key, ability] of Object.entries(this.abilities)) {
@@ -105,13 +109,12 @@ export class AbilityFunctions {
                 ability.bonus = resolveValueArray(bonuses, actor);
             }
 
-            if (ability.base === null) {
-                // for certain actors: droids, vehicles
-                // set to 10 for no bonuses
-                ability.value = 10;
+            if(hide.includes(key)){
+                ability.skip = true;
             }
-            // Assign the end total. Base is the manual number in case of 'Manual'
-            else ability.value = ability.base + (ability.bonus ?? 0) + ability.customBonus;
+
+            // if there's no base, set value to 10.  is that right?
+            ability.value = ability.base === null ? 10 : ability.base + (ability.bonus ?? 0) + ability.customBonus;
 
             // Calculate the modifier using d20 rules.
             ability.mod = Math.floor(

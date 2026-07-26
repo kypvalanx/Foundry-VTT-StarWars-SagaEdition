@@ -1,26 +1,26 @@
 import {SWSEItem} from "../item/item.mjs";
 import SWSEActor from "../actor/actor.mjs";
 
-export async function processActor(actorData) {
+export async function processActor(actorData, returnFailures = false) {
     let actors = await SWSEActor.create([actorData]);
     if (!(actors && actors.length === 1)) {
-        return;
+        return {actor: undefined, failures: []};
     }
     let actor = actors[0];
     let choiceAnswers = [];
     const size = actor.system.size;
     choiceAnswers.push(size);
-    let providedItems = actor.system.providedItems;
-    delete actor.system.providedItems;
+    let providedItems = actorData.system.providedItems;
     actor.prepareData();
     actor.skipPrepare = true;
-    actor.suppressDialog = true;
-    await actor.addItems({
+    actor.suppressDialog = false;
+    const failures = await actor.addItems({
         skipPrerequisite: true,
         generalAnswers: choiceAnswers,
         isUpload: true,
         suppressWarnings: true,
-        items: providedItems
+        items: providedItems,
+        returnFailures: true
     });
 
     actor.suppressDialog = false;
@@ -55,6 +55,10 @@ export async function processActor(actorData) {
 
             await actor.sheet._onDropItem(null, {name: "Natural Armor", type: "trait", answers:[proposedArmor]})
         }
+    }
+
+    if(returnFailures){
+        return {actor, failures};
     }
     return actor;
 }
@@ -141,7 +145,7 @@ async function importCompendium(jsonImport, forceRefresh) {
     console.log(`Generating ${compendiumName}... ${content.entries.length} entries`);
     ui.notifications.info(`Updating ${compendiumName}... ${content.entries.length} entries`);
 
-
+    let failedItems = [];
     if ('Item' === entity) {
         for (let itemData of content.entries) {
             const item = await processItem(itemData);
@@ -166,7 +170,8 @@ async function importCompendium(jsonImport, forceRefresh) {
         // }
     } else if ('Actor' === entity) {
         for (let actorData of content.entries) {
-            const actor = await processActor(actorData);
+            const {actor, failures} = await processActor(actorData, true);
+            failedItems.push(...failures)
             if(!actor){
                 continue;
             }
@@ -179,6 +184,10 @@ async function importCompendium(jsonImport, forceRefresh) {
             await actor.delete();
         }
     }
+    
+    failedItems = failedItems.map(i => `${i.name} : ${i.type}`).filter((value, index, self) => self.indexOf(value) === index);
+
+    console.log(failedItems);
     // await pack.createEntity(content.entries);
     //Promise.all(promises).then(() => {
     console.log(`Done Generating ${compendiumName}... ${content.entries.length} entries`);
@@ -200,6 +209,7 @@ export const generateCompendiums = async function (forceRefresh = false, type = 
     try {
         response = await fetch("systems/swse/raw_export/manifest.json");
     } catch (e) {
+        console.error(e);
         return;
     }
 

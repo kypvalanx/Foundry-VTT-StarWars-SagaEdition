@@ -26,7 +26,6 @@ import {SimpleCache} from "../common/simple-cache.mjs";
 import {SWSE} from "../common/config.mjs";
 import {AttackDelegate} from "./attack/attackDelegate.mjs";
 import {cleanItemName, resolveEntity} from "../compendium/compendium-util.mjs";
-import {DarksideDelegate} from "./darkside-delegate.js";
 import {VALIDATORS} from "./actor-item-validation.js";
 import {generateAction} from "../action/generate-action.mjs";
 import {ActorAmmunitionDelegate} from "../item/ammunition/ammunitionDelegate.mjs";
@@ -501,13 +500,7 @@ class SWSEActor extends Actor {
     }
 
     get maximumVelocity() {
-        return this.getCached("maximumVelocity", () => {
-             return getInheritableAttribute({
-                entity: this,
-                attributeKey: "maximumVelocity",
-                reduce: "FIRST"
-            })
-        })
+        return this.system?.speed?.maximumVelocity ?? "0";
     }
 
 
@@ -821,19 +814,19 @@ class SWSEActor extends Actor {
 
     get uninstalled() {
         return this.getCached("uninstalled", () => {
-            return this.itemTypes['vehicleSystem'].filter(item => !item.system.equipped);
+            return this.items.filter(item => !item.system.equipped && (item.type === "vehicleSystem" || item.name === "Droid Socket"));
         })
     }
 
     get installed() {
         return this.getCached("installed", () => {
-            return this.itemTypes['vehicleSystem'].filter(item => item.system.equipped === 'installed');
+            return this.items.filter(item => item.system.equipped === 'installed' && (item.type === "vehicleSystem" || item.name === "Droid Socket"));
         })
     }
 
     get pilotInstalled() {
         return this.getCached("pilotInstalled", () => {
-            return this.itemTypes['vehicleSystem'].filter(item => item.system.equipped === 'pilotInstalled');
+            return this.items.filter(item => item.system.equipped === 'pilotInstalled' && (item.type === "vehicleSystem" || item.name === "Droid Socket"));
         })
     }
 
@@ -848,7 +841,7 @@ class SWSEActor extends Actor {
                     return {
                         id: e,
                         numericId: toNumber(e.substring(15)),
-                        installed: items.filter(item => item.system.equipped === e)
+                        installed: items.filter(item => item.system.equipped === e  && (item.type === "vehicleSystem" || item.name === "Droid Socket"))
                     };
                 });
             return positions.sort((a, b) => a.numericId > b.numericId ? 1 : -1);
@@ -2599,14 +2592,15 @@ class SWSEActor extends Actor {
      * @param criteria
      * @param criteria.items {[{name: string,type: string, parent: undefined | {name: string, id: string, type: string}}]}
      * @param criteria.returnAdded this flag makes the method return added items
+     * @param criteria.returnFailures this flag makes the method return failures
      * @returns {string | [SWSEItem]}
      */
     async addItems(criteria = {}) {
-        const providedItems = [];
         if (!criteria.items) {
             return [];
         }
 
+        const providedItems = [];
         for (const item of criteria.items.filter(item => !!item)) {
             if (item.quantity > 0) {
                 for (let i = 0; i < item.quantity; i++) {
@@ -2617,25 +2611,27 @@ class SWSEActor extends Actor {
             }
         }
 
-
-
-        let notificationMessages = "";
+        let notificationMessages = [];
         let addedItems = [];
         const lazyAdd = [];
+        const failedItems = [];
         for (let providedItem of providedItems.filter(item => (item.name && item.type) || (item.uuid && item.type) || (item.id && item.pack) || item.duplicate)) {
             criteria.items = [];
 
-            const {notificationMessage, addedItem, toBeAdded} = await this.addItem(providedItem, criteria);
+            const {notificationMessage, addedItem, toBeAdded, failedToAdd} = await this.addItem(providedItem, criteria);
             if (toBeAdded) {
                 lazyAdd.push(...toBeAdded);
             }
-            notificationMessages += notificationMessage;
+            notificationMessages.push(notificationMessage);
             if (addedItem) {
                 addedItems.push(addedItem);
             }
+            if(failedToAdd){
+                failedItems.push(failedToAdd);
+            }
         }
         if (lazyAdd.length > 0) {
-                addedItems.push(...await this.addItems( {items: lazyAdd}))
+                addedItems.push(...await this.addItems( {items: lazyAdd, returnAdded: true}))
         }
 
         let addedToFollowers = getInheritableAttribute({entity: addedItems, attributeKey: "followerProvides"})
@@ -2646,9 +2642,16 @@ class SWSEActor extends Actor {
                 }
             }
         }
-
-
         this.sheet.render(false)
+
+        if(failedItems.length > 0) {
+            console.error("failed to add these items:", failedItems);
+        }
+
+        if(criteria.returnFailures) {
+            return failedItems
+        }
+
         if (criteria.returnAdded) {
             return addedItems;
         }
@@ -2702,7 +2705,7 @@ class SWSEActor extends Actor {
                 item.parent = null
                 console.warn(`attempted to add ${JSON.stringify(item)}`)
             }
-            return {};
+            return {failedToAdd: item};
         }
         entity.prepareData();
 
@@ -2964,13 +2967,13 @@ class SWSEActor extends Actor {
                         data['system.subType'] = change.value;
                         break;
                     case "baseStrength":
-                        data['system.attributes.str.manual'] = change.value;
+                        data['system.abilities.str.base'] = change.value;
                         break;
                     case "baseDexterity":
-                        data['system.attributes.dex.manual'] = change.value;
+                        data['system.abilities.dex.base'] = change.value;
                         break;
                     case "baseIntelligence":
-                        data['system.attributes.int.manual'] = change.value;
+                        data['system.abilities.int.base'] = change.value;
                         break;
                     case "speedCharacterScale":
                         data['system.vehicle.speed.characterScale'] = change.value;
@@ -2979,9 +2982,10 @@ class SWSEActor extends Actor {
                         data['system.vehicle.speed.starshipScale'] = change.value;
                         break;
                     case "hitPointEq":
-                        data['system.health.override'] = change.value;
-                        data['system.health.max'] = change.value;
-                        data['system.health.value'] = change.value;
+                        const number = parseInt(change.value.replace(",", ""));
+                        data['system.health.override'] = number;
+                        data['system.health.max'] = number;
+                        data['system.health.value'] = number;
                         break;
                     case "damageThresholdBonus":
                         await this.addChange(change)
