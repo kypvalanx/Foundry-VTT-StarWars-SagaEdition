@@ -463,7 +463,6 @@ export class Attack {
                 const possibleRanges = Object.keys(rangeBlock)
                 if(!possibleRanges.includes(modifier.requirement.toLowerCase())) return false;
             }
-            console.log(modifier);
         }
         return true;
     }
