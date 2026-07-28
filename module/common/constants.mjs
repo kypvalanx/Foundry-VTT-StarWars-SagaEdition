@@ -629,7 +629,7 @@ export const allDefaultSkills = [...defaultSkills, ...defaultVehicleSkills];
     return undefined;
 }
 
-export function skills(actorType = "character") {
+export function skills(actorType = "character", removeGroupedSkills = true) {
     let skills = actorType === "character" ? [...defaultSkills] : [...defaultVehicleSkills];
     let groupedSkillMap = getGroupedSkillMap();
 
@@ -641,7 +641,7 @@ export function skills(actorType = "character") {
                 grouped.push(...value.grouped)
             }
         }
-        if (grouped) {
+        if (grouped && removeGroupedSkills) {
             skills = skills.filter(s => !grouped.includes(s))
         }
     }

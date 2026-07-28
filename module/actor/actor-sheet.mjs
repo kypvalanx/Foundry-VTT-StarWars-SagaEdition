@@ -188,9 +188,9 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         //     }
         // });
 
-        html.find("input.direct").on("click", (event) => {
-            this._pendingUpdates['data.classesfirst'] = event.target.value;
-        });
+        // html.find("input.direct").on("click", (event) => {
+        //     this._pendingUpdates['data.classesfirst'] = event.target.value;
+        // });
 
         // crew controls
         html.find(".crew-control").click(this._onCrewControl.bind(this));

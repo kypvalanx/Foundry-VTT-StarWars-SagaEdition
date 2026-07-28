@@ -21,20 +21,20 @@ export class SkillFields {
 
     static migrateData(source) {
 
-        const entries = Object.entries(source.skills ?? {});
-        for (const skill of entries) {
-            const [key, value] = skill;
-            if(allDefaultSkills.includes(key)){
-                continue;
-            }
-
-            const matchedskill = allDefaultSkills.find(skill => skill.toLowerCase() === key.toLowerCase());
-            if(matchedskill){
-                source.skills[matchedskill] = value;
-            }
-
-            delete source.skills[key];
-        }
+        // const entries = Object.entries(source.skills ?? {});
+        // for (const skill of entries) {
+        //     const [key, value] = skill;
+        //     if(allDefaultSkills.includes(key)){
+        //         continue;
+        //     }
+        //
+        //     const matchedskill = allDefaultSkills.find(skill => skill.toLowerCase() === key.toLowerCase());
+        //     if(matchedskill){
+        //         source.skills[matchedskill] = value;
+        //     }
+        //
+        //     delete source.skills[key];
+        // }
 
 
         if(false){
@@ -77,33 +77,19 @@ export class SkillFields {
     }
 
     static get character() {
-        return {
-            Acrobatics: this.#_skillProperties("dex", "Acrobatics"),
-            Climb: this.#_skillProperties("str", "Climb"),
-            Deception: this.#_skillProperties("cha", "Deception"),
-            Endurance: this.#_skillProperties("str", "Endurance"),
-            "Gather Information": this.#_skillProperties("int", "Gather Information"),
-            Initiative: this.#_skillProperties("dex", "Initiative"),
-            Jump: this.#_skillProperties("str", "Jump"),
-            "Knowledge (Bureaucracy)": this.#_skillProperties("int", "Knowledge (Bureaucracy)"),
-            "Knowledge (Galactic Lore)": this.#_skillProperties("int", "Knowledge (Galactic Lore)"),
-            "Knowledge (Life Sciences)": this.#_skillProperties("int", "Knowledge (Life Sciences)"),
-            "Knowledge (Physical Sciences)": this.#_skillProperties("int", "Knowledge (Physical Sciences)"),
-            "Knowledge (Social Sciences)": this.#_skillProperties("int", "Knowledge (Social Sciences)"),
-            "Knowledge (Tactics)": this.#_skillProperties("int", "Knowledge (Tactics)"),
-            "Knowledge (Technology)": this.#_skillProperties("int", "Knowledge (Technology)"),
-            Mechanics: this.#_skillProperties("int", "Mechanics"),
-            Perception: this.#_skillProperties("wis", "Perception"),
-            Persuasion: this.#_skillProperties("cha", "Persuasion"),
-            Pilot: this.#_skillProperties("dex", "Pilot"),
-            Ride: this.#_skillProperties("dex", "Ride"),
-            Stealth: this.#_skillProperties("dex", "Stealth"),
-            Survival: this.#_skillProperties("wis", "Survival"),
-            Swim: this.#_skillProperties("str", "Swim"),
-            "Treat Injury": this.#_skillProperties("wis", "Treat Injury"),
-            "Use Computer": this.#_skillProperties("int", "Use Computer"),
-            "Use the Force": this.#_skillProperties("cha", "Use the Force"),
-        };
+        //CONFIG.SWSE.Skills
+        let availableSkills = skills("character", false).sort()
+        let groupedSkills = getGroupedSkillMap()
+
+        let resolvedSkills = {}
+
+        for (const availableSkill of availableSkills) {
+            let ability = skillDetails[availableSkill]?.ability ?? groupedSkills.get(availableSkill)?.ability
+
+            resolvedSkills[availableSkill] = this.#_skillProperties(ability, availableSkill);
+        }
+
+        return resolvedSkills;
     }
 
     static get vehicle() {
@@ -434,13 +420,15 @@ export class SkillFunctions {
             this.configureSkill(skill, nonZeroBonuses, actor, resSkill, abilityMod);
 
             for (const situationalSkillName of situationalSkillNames) {
-                const modifiedSkill = JSON.parse(JSON.stringify(skill));
+                //const modifiedSkill = JSON.parse(JSON.stringify(skill));
+
+                const modifiedSkill = this.createNewSkill(resSkill, actor.system.skills[situationalSkillName] || {}, JSON.parse(JSON.stringify(skill)))
                 modifiedSkill.isClass = false;
                 delete modifiedSkill.situationalSkills
                 delete modifiedSkill.grouped
                 delete modifiedSkill.classes
 
-
+                modifiedSkill.sitKey = situationalSkillName
                 const resolvedName = situationalSkillName.startsWith(resSkill) ? situationalSkillName : `${resSkill} (${situationalSkillName})`
                 const situationalBonuses = [...nonZeroBonuses]
                 //if(modifiedSkill.manualBonus){
@@ -448,7 +436,7 @@ export class SkillFunctions {
 
                 let miscBonuses = skillBonusAttr.filter(bonus => bonus.split(":")[0] === resolvedName).map(bonus => {return {value: bonus.split(":")[1], description: "Situational Bonuses"}});
                 situationalBonuses.push(...miscBonuses)
-                modifiedSkill.manualBonus = actor.system.skills[situationalKey]?.manualBonus || 0
+                //modifiedSkill.manualBonus = actor.system.skills[situationalKey]?.manualBonus || 0
 
                 situationalBonuses.push({value: modifiedSkill.manualBonus, description: "Situational Manual Bonus"})
                 //}
