@@ -93,6 +93,9 @@ export class AbilityFunctions {
         if(actor.type === "vehicle"){
             hide = ["cha", "wis"];
         }
+        if(actor.isDroid){
+            hide = ["con"]
+        }
 
         // Loop through ability scores, and add their modifiers to our sheet output.
         for (let [key, ability] of Object.entries(this.abilities)) {
