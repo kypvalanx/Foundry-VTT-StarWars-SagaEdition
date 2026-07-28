@@ -51,7 +51,9 @@
     {{#if (lookup toggles (concat @root.actor._id "-" skillId))}}
         {{#each skill.situationalSkills as |skill id|}}
             {{#unless skill.hide}}
-                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill skillId=(concat ../skillId "-" id) toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus depth=(sum 1 ../depth)}}
+
+                {{log skill id}}
+                {{> 'systems/swse/templates/actor/parts/skills/skill-row.hbs' skill=skill skillId=skill.sitKey toggles=../actor.system.toggles disableTrained=../disableTrained disableBonus=../disableBonus depth=(sum 1 ../depth)}}
             {{/unless}}
         {{/each}}
     {{/if}}
