@@ -36,7 +36,7 @@ Object.defineProperty(SWSE.Combat, "range", {
                     "long":        { "string": "31-40 squares", "low": 31, "high": 40 }
                 },
                 "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}},
-                "Melee Weapons":	        {"point-blank": {"string": "0-1 squares", "low":0,"high":1}}
+                "Melee Weapons":	        {"melee": {"string": "0-1 squares", "low":0,"high":1}}
             }
         }
 
@@ -47,7 +47,7 @@ Object.defineProperty(SWSE.Combat, "range", {
             "Rifles":	                {"point-blank": {"string": "0-30 squares", "low":0,"high":30},	"short": {"string": "31-60 squares", "low":31,"high":60},	"medium": {"string": "61-150 squares", "low":61,"high":150},	    "long": {"string": "151-300 squares", "low":151,"high":300}},
             "Simple Ranged Weapons":	{"point-blank": {"string": "0-20 squares", "low":0,"high":20},	"short": {"string": "21-40 squares", "low":21,"high":40},	"medium": {"string": "41-60 squares", "low":41,"high":60},	    "long": {"string": "61-80 squares", "low":61,"high":80}},
             "Thrown Weapons":	        {"point-blank": {"string": "0-6 squares", "low":0,"high":6},	"short": {"string": "7-8 squares", "low":7,"high":8},	    "medium": {"string": "9-10 squares", "low":9,"high":10},	    "long": {"string": "11-12 squares", "low":11,"high":12}},
-            "Melee Weapons":	        {"point-blank": {"string": "0-1 squares", "low":0,"high":1}}
+            "Melee Weapons":	        {"melee": {"string": "0-1 squares", "low":0,"high":1}}
         }
     }
 });

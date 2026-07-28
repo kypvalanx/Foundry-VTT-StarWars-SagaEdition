@@ -122,6 +122,8 @@ function simplify(attackSummaries) {
     return attackSummaries;
 }
 
+
+
 export class Attack {
     static TYPES = {
         FULL_ATTACK: "FULL_ATTACK",
@@ -439,11 +441,31 @@ export class Attack {
             itemFilter: ((item) => item.type !== 'weapon'),
             reduce: "VALUES_WITH_MODIFIERS"
         }).forEach(val => {
-            terms.push(...appendTerms(val.value, val.source, val.modifiers))
+
+            if(this.canEffectWeapon(val)) {
+                terms.push(...appendTerms(val.value, val.source, val.modifiers))
+            }
         })
 
         return Roll.fromTerms(terms
             .filter(term => !!term));
+    }
+
+    /*
+    checks if this can even be applied to the current weapon.  looks at prereqs and sees if the answer is a possible answer for this weapon
+     */
+    canEffectWeapon(value) {
+        if(!value.modifiers || value.modifiers.length === 0) return true;
+
+        for (const modifier of value.modifiers) {
+            if(modifier.type === "RANGE"){
+                const rangeBlock = SWSE.Combat.range[this.range]
+                const possibleRanges = Object.keys(rangeBlock)
+                if(!possibleRanges.includes(modifier.requirement.toLowerCase())) return false;
+            }
+            console.log(modifier);
+        }
+        return true;
     }
 
     /**
@@ -550,7 +572,10 @@ export class Attack {
             itemFilter: ((item) => item.type !== 'weapon'),
             reduce: "VALUES_WITH_MODIFIERS"
         }).forEach(val => {
-            terms.push(...appendTerm(val.value, val.source, val.modifiers));
+            if(this.canEffectWeapon(val)){
+                terms.push(...appendTerm(val.value, val.source, val.modifiers));
+            }
+
         })
 
         for (let mod of this.modifiers("damage")) {

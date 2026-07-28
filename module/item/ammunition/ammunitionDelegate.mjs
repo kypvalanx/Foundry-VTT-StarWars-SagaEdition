@@ -317,7 +317,7 @@ export class ItemAmmunitionDelegate {
     }
 
     get hasAmmunition() {
-        return (this.item?.changes || []).filter(c => c.key === "ammo").length > 0;
+        return (Object.values(this.item?.changes ?? {}) ?? []).filter(c => c.key === "ammo").length > 0;
     }
 
 }

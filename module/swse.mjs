@@ -480,8 +480,10 @@ if(Roll.prototype.formattedFormula === undefined){
                     classes.push("conditional-term");
                 }
 
-                const asterix = term.options.prerequisites && term.options.prerequisites.length > 0 ? "*" : "";
-                renderedExpressions.push(`<span class="${classes.join(" ")}"${title}>${term.expression}${flavor}${asterix}</span>`);
+
+                    const asterix = term.options.prerequisites && term.options.prerequisites.length > 0 ? "*" : "";
+                    renderedExpressions.push(`<span class="${classes.join(" ")}"${title}>${term.expression}${flavor}${asterix}</span>`);
+
             }
 
             return renderedExpressions.join("");
