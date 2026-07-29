@@ -37,7 +37,12 @@ export default class CommonActorData {
                 label: "Actor Links",
                 initial: []
             }),
-            changes: new fields.ArrayField(new fields.SchemaField({})),
+            changes: new fields.ArrayField(new fields.SchemaField({
+                key: new fields.StringField({required: true}),
+                mode: new fields.NumberField({required: true, initial: 2}),
+                priority: new fields.NumberField({initial: 1}),
+                value: new fields.StringField({})
+            })),
             settings: new fields.SchemaField({
                 isNPC: new fields.BooleanField({
                     initial: false
