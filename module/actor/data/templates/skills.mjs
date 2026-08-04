@@ -1,47 +1,27 @@
 import {getInheritableAttribute} from "../../../attribute-helper.mjs";
-import {SWSE} from "../../../common/config.mjs";
-import {
-    allDefaultSkills,
-    defaultAttributes, defaultSkills,
-    getGroupedSkillMap,
-    NEW_LINE,
-    PHYSICAL_SKILLS,
-    skillDetails,
-    skills
-} from "../../../common/constants.mjs";
+import {defaultAttributes, getGroupedSkillMap, NEW_LINE, skillDetails, skills} from "../../../common/constants.mjs";
 import {resolveValueArray, toNumber} from "../../../common/util.mjs";
 import {generateArmorCheckPenalties} from "../../armor-check-penalty.mjs";
-import {titleCase} from "../../../common/helpers.mjs";
 import {DEFAULT_SKILL} from "../../../common/classDefaults.mjs";
-import * as options from "../../../common/constants.mjs";
 
 const fields = foundry.data.fields;
 
 export class SkillFields {
 
     static migrateData(source) {
+        const entries = Object.entries(source.skills ?? {});
 
-        // const entries = Object.entries(source.skills ?? {});
-        // for (const skill of entries) {
-        //     const [key, value] = skill;
-        //     if(allDefaultSkills.includes(key)){
-        //         continue;
-        //     }
-        //
-        //     const matchedskill = allDefaultSkills.find(skill => skill.toLowerCase() === key.toLowerCase());
-        //     if(matchedskill){
-        //         source.skills[matchedskill] = value;
-        //     }
-        //
-        //     delete source.skills[key];
-        // }
-
-
-        if(false){
-            source.darkside = {
-                value: source.darkSideScore
+        let skillKeys = Object.keys(this.character)
+        for (const [key, value]  of entries) {
+            if(skillKeys.includes(key)){
+                continue;
             }
-            delete source.darkSideScore;
+
+            const matchedSkill = skillKeys.find(skill => skill.toLowerCase() === key.toLowerCase());
+            if(matchedSkill && !!value){
+                source.skills[matchedSkill] = value;
+                delete source.skills[key];
+            }
         }
     }
     static #_skillProperties(ability, skill) {
@@ -76,8 +56,11 @@ export class SkillFields {
         });
     }
 
+    /**
+     * Returns the current schema based on configuration
+     * @returns {{}}
+     */
     static get character() {
-        //CONFIG.SWSE.Skills
         let availableSkills = skills("character", false).sort()
         let groupedSkills = getGroupedSkillMap()
 

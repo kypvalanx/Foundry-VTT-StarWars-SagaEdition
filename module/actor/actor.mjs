@@ -221,6 +221,9 @@ class SWSEActor extends Actor {
         }
     }
 
+
+
+
     /**
      * Handles the deletion process for the object, including removing associated actor links, and delegates further deletion to the parent class method.
      *
@@ -263,7 +266,7 @@ class SWSEActor extends Actor {
     }
 
     getRollData() {
-        this.system.initiative = this?.skill?.skills?.find(skill => skill.key === 'initiative')?.value || 0;
+        this.system.initiative = this.system.skills.Initiative?.value || 0;
         return super.getRollData();
     }
 

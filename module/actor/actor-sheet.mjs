@@ -143,6 +143,7 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         return data;
     }
 
+
     /** @override */
     activateListeners(html) {
         super.activateListeners(html);
