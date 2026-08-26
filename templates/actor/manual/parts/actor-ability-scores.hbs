@@ -6,7 +6,6 @@
         <div class="mod"><h3>Mod</h3></div>
     </div>
     {{#each actor.system.abilities as |attribute id|}}
-        {{log attribute}}
         {{#unless attribute.skip}}
             <div class="ability-score rollable draggable" data-label="{{attribute.label}}"
                  data-variable="@{{attribute.label}}ROLL" data-type="ability">
