@@ -1560,7 +1560,7 @@ class SWSEActor extends Actor {
         let attributes = actor.attributes;
         let attribute = attributes[toShortAttribute(attributeName).toLowerCase()];
 
-        return attribute.total;
+        return attribute.value;
     }
 
     getHalfCharacterLevel(round = "down") {

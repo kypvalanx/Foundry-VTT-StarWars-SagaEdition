@@ -16,6 +16,7 @@ import {featMulticlassTests} from "./actor/actor-sheet.feats-multiclass-starting
 import {actorSheetAbilitiesTests} from "./actor/actor-sheet.abilities.test.mjs";
 import {actorSheetSizeTests} from "./actor/actor-sheet.size.test.mjs";
 import {actorsheetTalentTests} from "./actor/actor-sheet.keyword.lightsaberdamagestat.mjs";
+import {prerequisiteTests} from "./prerequisite.test.mjs";
 
 const registeredTests = [
     generationTests,
@@ -35,7 +36,8 @@ const registeredTests = [
     featMulticlassTests,
     actorSheetAbilitiesTests,
     actorSheetSizeTests,
-    actorsheetTalentTests
+    actorsheetTalentTests,
+    prerequisiteTests
 ];
 
 export function registerTestSuites(quench) {

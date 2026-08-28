@@ -23,7 +23,7 @@ function ensureArray(array) {
 
 function filterEquippedItemsByCriteria(target, resolvedItems, req) {
     let items = equippedItems(target);
-    let filteredEquippedItems = items.filter(item => {
+    return items.filter(item => {
         let actsAs = getInheritableAttribute({
             entity: item,
             recursive: true,
@@ -34,12 +34,89 @@ function filterEquippedItemsByCriteria(target, resolvedItems, req) {
 
         return item.name === req || item.finalName === req || target.system?.subtype === req || actsAs.includes(req)
     });
-    return filteredEquippedItems;
 }
 
+
+function checkAbilityPrereq(prereq, target, options) {
+    //checks a given ability score is greater or equal to a value
+    let toks = prereq.requirement.split(" ");
+    let actorAttribute = SWSEActor.getActorAttribute(target, toks[0], options);
+    let number = parseInt(toks[1]);
+    if (actorAttribute >= number) {
+        return {successList: [{prereq, count: 1}], failureList: [], doesFail: false};
+    }
+    return {successList: [], failureList: [{fail: true, message: `${prereq.text}`}], doesFail: true};
+}
+
+function checkChangePrereq(prereq, target, resolvedItems) {
+    //checks a given change value
+    let toks = prereq.requirement.split(":");
+    let val = getInheritableAttribute({
+        entity: target,
+        recursive: true,
+        embeddedItemOverride: resolvedItems,
+        attributeKey: toks[0],
+        reduce: "SUM"
+    });
+    let check = parseInt(toks[1].substring(1));
+    if (toks[1].startsWith(">")) {
+        if (val > check) {
+            return {successList: [{prereq, count: 1}], failureList: [], doesFail: false};
+        }
+    } else if (toks[1].startsWith("<")) {
+        if (val < check) {
+            return {successList: [{prereq, count: 1}], failureList: [], doesFail: false};
+        }
+    } else if (toks[1].startsWith("=")) {
+        if (val === check) {
+            return {successList: [{prereq, count: 1}], failureList: [], doesFail: false};
+        }
+    } else {
+        if (val === toks[1]) {
+            return {successList: [{prereq, count: 1}], failureList: [], doesFail: false};
+        }
+    }
+    return {successList: [], failureList: [{fail: true, message: `${prereq.text}`}], doesFail: true};
+}
+
+function explodeProficiencies(proficiencies) {
+
+    proficiencies = proficiencies.map(p => p.toLowerCase());
+
+    if (proficiencies.includes("light") || proficiencies.includes("light armor")) {
+        proficiencies.push("light");
+        proficiencies.push("light armor");
+    }
+    if (proficiencies.includes("medium") || proficiencies.includes("medium armor")) {
+        proficiencies.push("medium");
+        proficiencies.push("medium armor");
+    }
+    if (proficiencies.includes("heavy") || proficiencies.includes("heavy armor")) {
+        proficiencies.push("heavy");
+        proficiencies.push("heavy armor");
+    }
+
+    proficiencies = proficiencies.distinct()
+
+    return proficiencies;
+}
+
+/**
+ *
+ * @param prereq
+ * @param target
+ * @param options
+ * @returns {*|{failureList: *[], successList: *[]}}
+ */
 function meetsPrerequisite(prereq, target, options) {
     const fn = () => {
+        /**
+         * @deprecated
+         */
         let failureList = [];
+        /**
+         * @deprecated
+         */
         let successList = [];
         const resolvedItems = options.embeddedItemOverride || inheritableItems(target);
         switch (prereq.type.toUpperCase()) {
@@ -107,7 +184,7 @@ function meetsPrerequisite(prereq, target, options) {
             case 'FEAT':
                 let filteredFeats;
                 if (prereq.requirement.toLowerCase().includes("(any)")) {
-                    let req = prereq.requirement.replace(/ \(a|Any\)/, "");
+                    let req = prereq.requirement.replace(/ \((any|Any)\)/, "");
                     filteredFeats = resolvedItems
                         .filter(item => item.type === "feat"
                             && SWSEItem.buildItemName(item).startsWith(req));
@@ -225,6 +302,9 @@ function meetsPrerequisite(prereq, target, options) {
                     attributeKey: ["weaponProficiency", "armorProficiency"],
                     reduce: "VALUES_TO_LOWERCASE"
                 })
+
+                proficiencies = explodeProficiencies(proficiencies);
+
                 if(prereq.requirement === 'Armor equipped'){
                     let proficientArmor = [];
                     if(proficiencies.includes("light") || proficiencies.includes("light armor")){
@@ -325,48 +405,16 @@ function meetsPrerequisite(prereq, target, options) {
                 }
                 failureList.push({fail: true, message: `${prereq.text}`});
                 break;
-            case 'ATTRIBUTE':
+            case 'ABILITY':
+                return checkAbilityPrereq(prereq, target, options);
+            case 'CHANGE':
+                return checkChangePrereq(prereq, target, resolvedItems);
+            case 'ATTRIBUTE': //LEGACY.  use ABILITY and CHANGE
                 if (prereq.requirement.includes(":")) {
-                    let toks = prereq.requirement.split(":");
-                    let val = getInheritableAttribute({
-                        entity: target,
-                        recursive: true,
-                        embeddedItemOverride: resolvedItems,
-                        attributeKey: toks[0],
-                        reduce: "SUM"
-                    });
-                    let check = parseInt(toks[1].substring(1));
-                    if (toks[1].startsWith(">")) {
-                        if (val > check) {
-                            successList.push({prereq, count: 1});
-                            break;
-                        }
-                    } else if (toks[1].startsWith("<")) {
-                        if (val < check) {
-                            successList.push({prereq, count: 1});
-                            break;
-                        }
-                    } else if (toks[1].startsWith("=")) {
-                        if (val === check) {
-                            successList.push({prereq, count: 1});
-                            break;
-                        }
-                    } else {
-                        if (val === toks[1]) {
-                            successList.push({prereq, count: 1});
-                            break;
-                        }
-                    }
+                    return checkChangePrereq(prereq, target, resolvedItems);
                 } else {
-                    let toks = prereq.requirement.split(" ");
-                    let actorAttribute = SWSEActor.getActorAttribute(target, toks[0], options);
-                    let number = parseInt(toks[1]);
-                    if (!(actorAttribute < number)) {
-                        successList.push({prereq, count: 1});
-                        break;
-                    }
+                    return checkAbilityPrereq(prereq, target, options);
                 }
-                break;
             case 'NOT': {
                 let meetsChildPrereqs = meetsPrerequisites(target, prereq.child, options);
                 if (meetsChildPrereqs.doesFail) {
@@ -426,22 +474,21 @@ function meetsPrerequisite(prereq, target, options) {
                         reduce: "OR"
                     });
                     if (!inheritableAttributesByKey) {
-                        successList.push({prereq, count: 1});
-                        break;
+                        return {successList: [{prereq, count: 1}], failureList: []};
                     }
-                    break;
+                    return {successList: [], failureList: [{fail: true, message: `${prereq.text}`}]};
                 } else if (prereq.requirement.toLowerCase() === 'is a droid') {
-                    if (getInheritableAttribute({
+                    const inheritableAttribute = getInheritableAttribute({
                         entity: target,
                         recursive: true,
                         embeddedItemOverride: resolvedItems,
                         attributeKey: "isDroid",
                         reduce: "OR"
-                    })) {
-                        successList.push({prereq, count: 1});
-                        break;
+                    });
+                    if (inheritableAttribute) {
+                        return {successList: [{prereq, count: 1}], failureList: []};
                     }
-                    break;
+                    return {successList: [], failureList: [{fail: true, message: `${prereq.text}`}]};
                 } else if (prereq.requirement === 'Has Built Lightsaber') {
                     failureList.push({fail: false, message: `${prereq.type}: ${prereq.text}`});
                     break;
@@ -459,7 +506,8 @@ function meetsPrerequisite(prereq, target, options) {
                 failureList.push({fail: false, message: `${prereq.text}`});
                 break;
             case 'GENDER':
-                if (target.system.sex && target.system.sex.toLowerCase() === prereq.requirement.toLowerCase()) {
+                const sex = target.system.details.sex;
+                if (sex && sex.toLowerCase() === prereq.requirement.toLowerCase()) {
                     successList.push({prereq, count: 1});
                     break;
                 }
@@ -473,7 +521,7 @@ function meetsPrerequisite(prereq, target, options) {
                     req = toks[0];
                     comparison = toks[1];
                 }
-                let filteredEquippedItems = filterEquippedItemsByCriteria(target, resolvedItems, req);
+                let filteredEquippedItems = filterEquippedItemsByCriteria(target, [], req);
                 let count = filteredEquippedItems.length;
                 if ((count > 0 && !comparison) || (comparison && resolveExpression(`${count}${comparison}`))) {
                     successList.push({prereq, count: 1});
@@ -568,7 +616,7 @@ function meetsPrerequisite(prereq, target, options) {
 export function meetsPrerequisites(target, prereqs, options = {}) {
     //TODO add links to failures to open up the fancy compendium to show the missing thing.  when you make a fancy compendium
 
-    if (!prereqs || (target.system.ignorePrerequisites && options.isLoad)|| (target.system.ignorePrerequisitesOnDrop && options.isAdd) || options.skipPrerequisite || options.isUpload) {
+    if (!prereqs || (!!target && !!target.system && target.system.ignorePrerequisites && options.isLoad)|| (!!target && !!target.system && target.system.ignorePrerequisitesOnDrop && options.isAdd) || options.skipPrerequisite || options.isUpload) {
         return {doesFail: false, failureList: [], successList: []};
     }
     if (!target) {

@@ -13,7 +13,7 @@ export async function processActor(actorData, returnFailures = false) {
     let providedItems = actorData.system.providedItems;
     actor.prepareData();
     actor.skipPrepare = true;
-    actor.suppressDialog = false;
+    actor.suppressDialog = true;
     const failures = await actor.addItems({
         skipPrerequisite: true,
         generalAnswers: choiceAnswers,
