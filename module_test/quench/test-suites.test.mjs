@@ -9,6 +9,7 @@ import {utilTests} from "./common/util.test.js";
 import {attackTests} from "./actor/attack/attack.test.mjs";
 import {poltgotBasicTests} from "./module-integrations/polygot/basic-integration.test.mjs";
 import {defenseTests} from "./actor/actor-sheet.defense.test.mjs";
+import {defenseCalculationTests} from "./actor/defense.test.mjs";
 import {featTests} from "./actor/actor-sheet.feats-martial-artist.test.mjs";
 import {healthTests} from "./actor/actor-sheet.health.test.mjs";
 import {healthFunctionsTests} from "./actor/templates/HealthFunctions.test.mjs";
@@ -17,6 +18,7 @@ import {actorSheetAbilitiesTests} from "./actor/actor-sheet.abilities.test.mjs";
 import {actorSheetSizeTests} from "./actor/actor-sheet.size.test.mjs";
 import {actorsheetTalentTests} from "./actor/actor-sheet.keyword.lightsaberdamagestat.mjs";
 import {prerequisiteTests} from "./prerequisite.test.mjs";
+import {migrationTests} from "./migration.test.mjs";
 
 const registeredTests = [
     generationTests,
@@ -30,6 +32,7 @@ const registeredTests = [
     attackTests,
     poltgotBasicTests,
     defenseTests,
+    defenseCalculationTests,
     featTests,
     healthTests,
     healthFunctionsTests,
@@ -37,7 +40,8 @@ const registeredTests = [
     actorSheetAbilitiesTests,
     actorSheetSizeTests,
     actorsheetTalentTests,
-    prerequisiteTests
+    prerequisiteTests,
+    migrationTests
 ];
 
 export function registerTestSuites(quench) {

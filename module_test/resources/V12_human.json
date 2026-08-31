@@ -1,0 +1,3321 @@
+{
+  "name": "V12 Test",
+  "type": "character",
+  "img": "icons/svg/mystery-man.svg",
+  "system": {
+    "health": {
+      "value": 10,
+      "min": 0,
+      "max": 10,
+      "condition": 0
+    },
+    "shields": {
+      "value": 0,
+      "min": 0,
+      "max": 0,
+      "shieldDamage": 0
+    },
+    "description": "",
+    "credits": 0,
+    "classes": [],
+    "traits": [],
+    "age": 0,
+    "gender": "",
+    "genderDisplay": "",
+    "player": "",
+    "darkSideScore": "0",
+    "darkSideArray": [],
+    "attributes": {
+      "str": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 12,
+        "customBonus": null
+      },
+      "dex": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 13,
+        "customBonus": null
+      },
+      "con": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 14,
+        "customBonus": null
+      },
+      "int": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 15,
+        "customBonus": null
+      },
+      "wis": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 11,
+        "customBonus": null
+      },
+      "cha": {
+        "total": 10,
+        "manual": 10,
+        "mod": 0,
+        "bonus": 0,
+        "base": 10,
+        "customBonus": null
+      }
+    },
+    "crewQuality": {},
+    "crew": [],
+    "equippedIds": [],
+    "skills": {
+      "acrobatics": {
+        "manualBonus": null
+      },
+      "climb": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "deception": {
+        "manualBonus": null
+      },
+      "endurance": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "gather information": {
+        "manualBonus": null
+      },
+      "initiative": {
+        "manualBonus": null,
+        "trained": false
+      },
+      "jump": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "knowledge (bureaucracy)": {
+        "manualBonus": null
+      },
+      "knowledge (galactic lore)": {
+        "manualBonus": null
+      },
+      "knowledge (life sciences)": {
+        "manualBonus": null
+      },
+      "knowledge (physical sciences)": {
+        "manualBonus": null
+      },
+      "knowledge (social sciences)": {
+        "manualBonus": null
+      },
+      "knowledge (tactics)": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "knowledge (technology)": {
+        "manualBonus": null
+      },
+      "mechanics": {
+        "manualBonus": null,
+        "trained": false
+      },
+      "perception": {
+        "manualBonus": null,
+        "trained": false
+      },
+      "persuasion": {
+        "manualBonus": null
+      },
+      "pilot": {
+        "manualBonus": null,
+        "trained": false
+      },
+      "ride": {
+        "manualBonus": null
+      },
+      "stealth": {
+        "manualBonus": null
+      },
+      "survival": {
+        "manualBonus": null
+      },
+      "swim": {
+        "manualBonus": null,
+        "trained": false
+      },
+      "treat injury": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "use computer": {
+        "manualBonus": null,
+        "trained": true
+      },
+      "use the force": {
+        "manualBonus": null
+      }
+    },
+    "biography": "",
+    "cl": "",
+    "height": "",
+    "weight": "",
+    "experience": null,
+    "defense": {
+      "damageThreshold": {
+        "misc": null
+      }
+    },
+    "forcePoints": {
+      "quantity": 0
+    },
+    "destinyPoints": null,
+    "isNPC": false,
+    "autoSizeToken": false,
+    "allowSheetLighting": false,
+    "ignorePrerequisites": false,
+    "ignorePrerequisitesOnDrop": false,
+    "attributeGenerationType": "Default",
+    "firstDay": {
+      "toggles": {
+        "0": true
+      }
+    },
+    "secondWind": {
+      "toggles": {
+        "0": false
+      }
+    }
+  },
+  "prototypeToken": {
+    "name": "V12 Test",
+    "displayName": 0,
+    "actorLink": true,
+    "appendNumber": false,
+    "prependAdjective": false,
+    "width": 1,
+    "height": 1,
+    "texture": {
+      "src": "icons/svg/mystery-man.svg",
+      "anchorX": 0.5,
+      "anchorY": 0.5,
+      "offsetX": 0,
+      "offsetY": 0,
+      "fit": "contain",
+      "scaleX": 1,
+      "scaleY": 1,
+      "rotation": 0,
+      "tint": "#ffffff",
+      "alphaThreshold": 0.75
+    },
+    "hexagonalShape": 0,
+    "lockRotation": false,
+    "rotation": 0,
+    "alpha": 1,
+    "disposition": -1,
+    "displayBars": 0,
+    "bar1": {
+      "attribute": "health"
+    },
+    "bar2": {
+      "attribute": "shields"
+    },
+    "light": {
+      "negative": false,
+      "priority": 0,
+      "alpha": 0.5,
+      "angle": 360,
+      "bright": 0,
+      "color": null,
+      "coloration": 1,
+      "dim": 0,
+      "attenuation": 0.5,
+      "luminosity": 0.5,
+      "saturation": 0,
+      "contrast": 0,
+      "shadows": 0,
+      "animation": {
+        "type": null,
+        "speed": 5,
+        "intensity": 5,
+        "reverse": false
+      },
+      "darkness": {
+        "min": 0,
+        "max": 1
+      }
+    },
+    "sight": {
+      "enabled": false,
+      "range": 0,
+      "angle": 360,
+      "visionMode": "basic",
+      "color": null,
+      "attenuation": 0.1,
+      "brightness": 0,
+      "saturation": 0,
+      "contrast": 0
+    },
+    "detectionModes": [],
+    "occludable": {
+      "radius": 0
+    },
+    "ring": {
+      "enabled": false,
+      "colors": {
+        "ring": null,
+        "background": null
+      },
+      "effects": 1,
+      "subject": {
+        "scale": 1,
+        "texture": null
+      }
+    },
+    "flags": {},
+    "randomImg": false
+  },
+  "items": [
+    {
+      "_id": "tJJ0BldO7b27hxyz",
+      "name": "Human",
+      "type": "species",
+      "img": "systems/swse/icon/species/default.png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>See also: <a href=\"https://swse.fandom.com/wiki/Near-Humans\" title=\"Near-Humans\">Near-Humans</a></i> </p><p>Humans dominate the <a href=\"https://swse.fandom.com/wiki/Core_Worlds\" class=\"mw-redirect\" title=\"Core Worlds\">Core Worlds</a> and can be found in virtually every corner of the galaxy. They are the ancestors of early spacefaring pioneers, conquerors, traders, travelers, and refugees. Humans have always been people on the move. As a result, they can be found on almost every inhabited planet. As a Species, Humans are physically, culturally, and politically diverse. Hardy or fine, light-skinned or dark, Humans remain one of the most dominant Species throughout all eras of play. </p><h3><span class=\"mw-headline\" id=\"Human_Characteristics\">Human Characteristics</span></h3><p><b>Personality:</b> Human personality runs the gamut of possibilities, though members of this Species tend to be highly adaptable, tenacious, and willing to keep striving no matter the odds. They are flexible and ambitious, diverse in their tastes, morals, customs, and habits. </p><p><b><a href=\"https://swse.fandom.com/wiki/Age_Groups\" class=\"mw-redirect\" title=\"Age Groups\">Age Groups</a>:</b> Humans age at the following stages: </p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>CHILD </th> \n   <th>YOUNG ADULT </th> \n   <th>ADULT </th> \n   <th>MIDDLE AGE </th> \n   <th>OLD </th> \n   <th>VENERABLE </th>\n  </tr> \n  <tr> \n   <td>1-11 Years </td> \n   <td>12-15 Years </td> \n   <td>16-40 Years </td> \n   <td>41-59 Years </td> \n   <td>60-79 Years </td> \n   <td>80+ Years </td>\n  </tr>\n </tbody>\n</table><p><b>Homeworlds:</b> Various, including <a href=\"https://swse.fandom.com/wiki/Coruscant\" title=\"Coruscant\">Coruscant</a>, <a href=\"https://swse.fandom.com/wiki/Corellia\" title=\"Corellia\">Corellia</a>, <a href=\"https://swse.fandom.com/wiki/Naboo\" title=\"Naboo\">Naboo</a>, <a href=\"https://swse.fandom.com/wiki/Tatooine\" title=\"Tatooine\">Tatooine</a>, and <a href=\"https://swse.fandom.com/wiki/Alderaan\" title=\"Alderaan\">Alderaan</a>. </p><p><b>Languages:</b> Humans speak, read, and write Basic. They often learn other languages as well, including obscure ones. </p><p><b>Example Names:</b> Anakin, Arani, Bail, Ben, Biggs, Boba, Corran, Dack, Dané, Galak, Garm, Han, Jango, Jodo, Lando, Leia, Luke, Mace, Mara, Obi-Wan, Owen, Padmé, Qui-Gon, Sia-Lan, Rann, Talon, Vor'en, Wedge, Winter. </p><p><b>Adventurers:</b> Humans aren't afraid to try anything, and Human adventurers are the most audacious, daring, and ambitious members of an audacious, daring, and ambitious Species. A Human can earn glory by amassing power, wealth, and fame. More than any other <a href=\"https://swse.fandom.com/wiki/Species\" title=\"Species\">Species</a>, Humans champion causes rather than territories or groups. </p><h3><span class=\"mw-headline\" id=\"Human_Species_Traits\">Human Species Traits</span></h3><p>Humans share the following Species Traits: </p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [],
+        "choices": [
+          {
+            "noOptions": "NO_AVAILABLE_OPTIONS",
+            "availableSelections": 1,
+            "payload": "#payload#",
+            "options": [
+              {
+                "isDefault": true,
+                "providedItems": [
+                  {
+                    "name": "Bonus Trained Skill",
+                    "type": "trait"
+                  },
+                  {
+                    "name": "Bonus Feat",
+                    "type": "trait"
+                  }
+                ],
+                "payloads": {},
+                "display": "Human (Default)",
+                "name": "Human (Default)",
+                "attributes": {},
+                "value": "Human (Default)"
+              },
+              {
+                "providedItems": [
+                  {
+                    "name": "Bonus Trained Skill",
+                    "type": "trait"
+                  },
+                  {
+                    "name": "Near-Human Trait",
+                    "type": "trait"
+                  }
+                ],
+                "payloads": {},
+                "display": "Near-Human (Give Up Bonus Feat)",
+                "name": "Near-Human (Give Up Bonus Feat)",
+                "attributes": {},
+                "value": "Near-Human (Give Up Bonus Feat)"
+              },
+              {
+                "providedItems": [
+                  {
+                    "name": "Bonus Feat",
+                    "type": "trait"
+                  },
+                  {
+                    "name": "Near-Human Trait",
+                    "type": "trait"
+                  }
+                ],
+                "payloads": {},
+                "display": "Near-Human (Give Up Bonus Trained Skill)",
+                "name": "Near-Human (Give Up Bonus Trained Skill)",
+                "attributes": {},
+                "value": "Near-Human (Give Up Bonus Trained Skill)"
+              }
+            ],
+            "description": "Select Near-Human Option:",
+            "type": "SELECT",
+            "isFirstLevel": false,
+            "showSelectionInName": true
+          }
+        ],
+        "modes": [],
+        "providedItems": [
+          {
+            "name": "Medium",
+            "type": "trait"
+          },
+          {
+            "name": "Base Speed (6)",
+            "type": "trait"
+          },
+          {
+            "name": "Middle age",
+            "prerequisite": {
+              "high": "59",
+              "low": "41",
+              "text": "41-59",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Adult",
+            "prerequisite": {
+              "high": "40",
+              "low": "16",
+              "text": "16-40",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Child",
+            "prerequisite": {
+              "high": "11",
+              "low": "1",
+              "text": "1-11",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Venerable",
+            "prerequisite": {
+              "high": "",
+              "low": "80",
+              "text": "80+",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Old",
+            "prerequisite": {
+              "high": "79",
+              "low": "60",
+              "text": "60-79",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Young adult",
+            "prerequisite": {
+              "high": "15",
+              "low": "12",
+              "text": "12-15",
+              "type": "AGE"
+            },
+            "type": "trait"
+          },
+          {
+            "name": "Bonus Trained Skill",
+            "type": "trait"
+          },
+          {
+            "name": "Bonus Feat",
+            "type": "trait"
+          }
+        ],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [
+          {
+            "value": "Humans"
+          },
+          {
+            "value": "Bonus Feat"
+          },
+          {
+            "value": "Medium"
+          },
+          {
+            "value": "Species"
+          },
+          {
+            "value": "Bonus Trained Skill"
+          }
+        ],
+        "traits": [],
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Human (Default)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "tih8Q1fJUuDFWVCX": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.species.Item.hkBEXYR8S6uTxWST",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442836,
+        "modifiedTime": 1788195442836,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "pV0qrGD5uv9nIIpr",
+      "name": "Medium",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "Medium",
+            "key": "size"
+          },
+          {
+            "mode": 2,
+            "value": 0,
+            "key": "reflexDefenseBonusScalable"
+          },
+          {
+            "mode": 2,
+            "value": "1 square",
+            "key": "characterFightingSpaceScalable"
+          },
+          {
+            "mode": 2,
+            "value": 0,
+            "key": "shipSkillModifierScalable"
+          },
+          {
+            "mode": 2,
+            "value": "1d4",
+            "key": "unarmedDamageScalable"
+          },
+          {
+            "mode": 2,
+            "value": "stealth:0",
+            "key": "skillBonusScalable"
+          },
+          {
+            "mode": 2,
+            "value": 0,
+            "key": "damageThresholdSizeModifierScalable"
+          },
+          {
+            "mode": 2,
+            "value": "0 squares",
+            "key": "vehicleFightingSpaceScalable"
+          },
+          {
+            "mode": 2,
+            "value": 0,
+            "key": "grappleSizeModifierScalable"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.DPeq6Tr6b0wEKSyw",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442845,
+        "modifiedTime": 1788195442845,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "4YWbmDpKVxjcmtop",
+      "name": "Base Speed",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being has a base speed of 6.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "Base Speed 6",
+            "key": "speed"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "6"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.6A1vRwNg2rlurjMA",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442887,
+        "modifiedTime": 1788195442887,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "h04Pn3VtXDtwUmVh",
+      "name": "Middle age",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is a middle aged.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "strengthBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "constitutionBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "dexterityBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "intelligenceBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "wisdomBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "charismaBonus"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "59",
+          "low": "41",
+          "text": "41-59",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.VaMxFu7QNOucLCcJ",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442901,
+        "modifiedTime": 1788195442901,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "rfXyXRMQFtcerQIH",
+      "name": "Adult",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is an adult.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "40",
+          "low": "16",
+          "text": "16-40",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.kdOvDdi3EpOfhOIw",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442907,
+        "modifiedTime": 1788195442907,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "Bha7qogp343mQpGK",
+      "name": "Child",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is a child.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": -3,
+            "key": "strengthBonus"
+          },
+          {
+            "mode": 2,
+            "value": -3,
+            "key": "constitutionBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "dexterityBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "intelligenceBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "wisdomBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "charismaBonus"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "11",
+          "low": "1",
+          "text": "1-11",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.Pj1hSmcH33rMDOIR",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442912,
+        "modifiedTime": 1788195442912,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "PdxzSZkDjYMKkiUR",
+      "name": "Venerable",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is venerable.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": -3,
+            "key": "strengthBonus"
+          },
+          {
+            "mode": 2,
+            "value": -3,
+            "key": "constitutionBonus"
+          },
+          {
+            "mode": 2,
+            "value": -3,
+            "key": "dexterityBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "intelligenceBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "wisdomBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "charismaBonus"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "",
+          "low": "80",
+          "text": "80+",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qQPLCh5BpKJaaCXR",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442921,
+        "modifiedTime": 1788195442921,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "m8Rv4J7JM59KsCrg",
+      "name": "Old",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is old.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": -2,
+            "key": "strengthBonus"
+          },
+          {
+            "mode": 2,
+            "value": -2,
+            "key": "constitutionBonus"
+          },
+          {
+            "mode": 2,
+            "value": -2,
+            "key": "dexterityBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "intelligenceBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "wisdomBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "charismaBonus"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "79",
+          "low": "60",
+          "text": "60-79",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.6ju8DHsOzWBCwPQk",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442928,
+        "modifiedTime": 1788195442928,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "d6gxA45CHFoYYkzS",
+      "name": "Young adult",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "A being is a young adult.",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "strengthBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "constitutionBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "dexterityBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "intelligenceBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "wisdomBonus"
+          },
+          {
+            "mode": 2,
+            "value": -1,
+            "key": "charismaBonus"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": {
+          "high": "15",
+          "low": "12",
+          "text": "12-15",
+          "type": "AGE"
+        },
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.muFqvp4tHoPs1RPP",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442934,
+        "modifiedTime": 1788195442934,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "fAst1M9X3ere2myu",
+      "name": "Bonus Trained Skill",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>A being chooses one additional <a href=\"https://swse.fandom.com/wiki/Skills\" title=\"Skills\">Trained Skill</a> at 1st level. The <a href=\"https://swse.fandom.com/wiki/Skills\" title=\"Skills\">Skill</a> must be chosen from the character's list of Class Skills.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "1",
+            "key": "trainedSkills"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.0WeHx5NPbtiIi7QE",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442939,
+        "modifiedTime": 1788195442939,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "sgdJXerFZ6xX4rdW",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "tJJ0BldO7b27hxyz",
+          "name": "Human",
+          "type": "species"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195442944,
+        "modifiedTime": 1788195442944,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "nrAB02IjO9S1vnfX",
+      "name": "Soldier",
+      "type": "class",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p><br> <i>Reference Book: Star Wars Saga Edition Core Rulebook</i> </p><p>Soldiers combine discipline with martial skills to become the best pure warriors in the galaxy. Soldiers can be stalwart defenders of those in need, cruel marauders, or brave adventurers. They can be hired guns, noble champions, or cold-hearted killers. They fight for glory, for honor, to right wrongs, to gain power, to acquire wealth, or simply for the thrill of battle. </p><h3><span class=\"mw-headline\" id=\"Adventurers\">Adventurers</span></h3><p>Many Soldiers see adventures, raids on enemy strongholds, and dangerous missions as their jobs. Some want to defend those who can't defend themselves; others seek to use their muscle to carve their own place of importance in the galaxy. Whatever their initial motivation, most Soldiers wind up living for the thrill of combat and the excitement of adventure. Adventuring Soldiers call themselves guards, bodyguards, champions, enforcers, mercenaries, warriors, soldiers of fortune, or simple adventurers. </p><h3><span class=\"mw-headline\" id=\"Characteristics\">Characteristics</span></h3><p>Soldiers have the best all-around fighting abilities, and an individual Soldier develops styles and techniques that set him apart from their peers. A given Soldier might be especially capable with certain weapons, another trained to execute specific combat maneuvers. As Soldiers gain experience, they get more opportunities to develop their fighting skills. </p><h3><span class=\"mw-headline\" id=\"Backgrounds\">Backgrounds</span></h3><p>Most Soldiers come to the profession after receiving at least some amount of formal training from a military organization, local militia, or private army. Some attend formal academies; others are self-taught and well tested. A Soldier may have taken up his weapon to escape a mundane life. Another may be following a proud family tradition. Soldiers in a particular unit share certain camaraderie, but most have nothing in common except battle prowess and the desire to apply it to a given situation. </p><h4><span class=\"mw-headline\" id=\"Examples_of_Soldiers_in_Star_Wars\"><b>Examples of Soldiers in <i>Star Wars</i></b></span></h4><p>Admiral Ackbar, Corran Horn, Captain Panaka, Captain Typho, General Crix Madine, Kyle Katarn, Wedge Antilles, Zam Wesell </p><h3><span class=\"mw-headline\" id=\"Game_Rule_Information\">Game Rule Information</span></h3><p>Soldiers have the following game statistics: </p><table class=\"wikitable\"> \n <tbody>\n  <tr> \n   <th>CLASS LEVEL </th> \n   <th><a href=\"https://swse.fandom.com/wiki/BASE_ATTACK_BONUS\" class=\"mw-redirect\" title=\"BASE ATTACK BONUS\">BASE ATTACK BONUS</a> </th> \n   <th>CLASS FEATURES </th>\n  </tr> \n  <tr> \n   <td>1st </td> \n   <td>+1 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Defense\" class=\"mw-redirect\" title=\"Defense\">Defense</a> Bonuses, Starting <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a>, <a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>2nd </td> \n   <td>+2 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>3rd </td> \n   <td>+3 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>4th </td> \n   <td>+4 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>5th </td> \n   <td>+5 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>6th </td> \n   <td>+6 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>7th </td> \n   <td>+7 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>8th </td> \n   <td>+8 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>9th </td> \n   <td>+9 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>10th </td> \n   <td>+10 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>11th </td> \n   <td>+11 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>12th </td> \n   <td>+12 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>13th </td> \n   <td>+13 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>14th </td> \n   <td>+14 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>15th </td> \n   <td>+15 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>16th </td> \n   <td>+16 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>17th </td> \n   <td>+17 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>18th </td> \n   <td>+18 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr> \n  <tr> \n   <td>19th </td> \n   <td>+19 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent</a> </td>\n  </tr> \n  <tr> \n   <td>20th </td> \n   <td>+20 </td> \n   <td><a href=\"https://swse.fandom.com/wiki/Bonus_Feat_(Soldier)\" class=\"mw-redirect\" title=\"Bonus Feat (Soldier)\">Bonus Feat (Soldier)</a> </td>\n  </tr>\n </tbody>\n</table><h4><span class=\"mw-headline\" id=\"Abilities\"><b>Abilities</b></span></h4><p>Since most combat in the <i>Star Wars</i> universe uses blasters and other ranged weapons, <a href=\"https://swse.fandom.com/wiki/Dexterity\" title=\"Dexterity\">Dexterity</a> is the Soldier's most important <a href=\"https://swse.fandom.com/wiki/Ability_Score\" class=\"mw-redirect\" title=\"Ability Score\">Ability Score</a>, followed closely by <a href=\"https://swse.fandom.com/wiki/Constitution\" title=\"Constitution\">Constitution</a> and <a href=\"https://swse.fandom.com/wiki/Strength\" title=\"Strength\">Strength</a>. Don't underestimate the importance of <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence</a> and <a href=\"https://swse.fandom.com/wiki/Wisdom\" title=\"Wisdom\">Wisdom</a>, however, since many of a Soldier's useful <a href=\"https://swse.fandom.com/wiki/Skills\" title=\"Skills\">Skills</a> are based on these abilities. </p><h4><span class=\"mw-headline\" id=\"Class_Skills\"><b>Class Skills </b></span></h4><p><a href=\"https://swse.fandom.com/wiki/Trained\" class=\"mw-redirect\" title=\"Trained\">Trained</a> in 3 + <a href=\"https://swse.fandom.com/wiki/Intelligence\" title=\"Intelligence\">Intelligence</a> modifier: </p><ul>\n <li><a href=\"https://swse.fandom.com/wiki/Climb\" title=\"Climb\">Climb</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Endurance\" title=\"Endurance\">Endurance</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Initiative\" title=\"Initiative\">Initiative</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Jump\" title=\"Jump\">Jump</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Knowledge_(Tactics)\" class=\"mw-redirect\" title=\"Knowledge (Tactics)\">Knowledge (Tactics)</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Mechanics\" title=\"Mechanics\">Mechanics</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Perception\" title=\"Perception\">Perception</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Pilot\" title=\"Pilot\">Pilot</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Swim\" title=\"Swim\">Swim</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Treat_Injury\" title=\"Treat Injury\">Treat Injury</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Use_Computer\" title=\"Use Computer\">Use Computer</a></li>\n</ul><h4><span class=\"mw-headline\" id=\"Hit_Points\"><b>Hit Points</b></span></h4><p>Soldiers begin play at 1st level with a number of hit points equal to 30 + their <a href=\"https://swse.fandom.com/wiki/Constitution\" title=\"Constitution\">Constitution</a> modifier. At each level after 1st, Soldiers gain 1d10 hit points + their <a href=\"https://swse.fandom.com/wiki/Constitution\" title=\"Constitution\">Constitution</a> modifier. </p><h4><span class=\"mw-headline\" id=\"Force_Points\"><b>Force Points</b></span></h4><p>Soldiers gain a number of <a href=\"https://swse.fandom.com/wiki/Force_Points\" title=\"Force Points\">Force Points</a> equal to 5 + one-half their Character Level (rounded down) at 1st level, and every time they gain a new level in this class. Any <a href=\"https://swse.fandom.com/wiki/Force_Points\" title=\"Force Points\">Force Points</a> left over from previous levels are lost. </p><h3><span class=\"mw-headline\" id=\"Class_Features.\">Class Features.</span></h3><p>All of the following are features of the Soldier class. </p><h4><span class=\"mw-headline\" id=\"Defense_Bonuses\"><b>Defense Bonuses</b></span></h4><p>At 1st level, a Soldier gains a +1 Class bonus to their <a href=\"https://swse.fandom.com/wiki/Reflex_Defense\" class=\"mw-redirect\" title=\"Reflex Defense\">Reflex Defense</a> and a +2 Class bonus to their <a href=\"https://swse.fandom.com/wiki/Fortitude_Defense\" class=\"mw-redirect\" title=\"Fortitude Defense\">Fortitude Defense</a>. </p><h4><span class=\"mw-headline\" id=\"Starting_Feats\"><b>Starting Feats</b></span></h4><p>A Soldier begins play with the following bonus <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a>: </p><ul>\n <li><a href=\"https://swse.fandom.com/wiki/Armor_Proficiency_(Light)\" title=\"Armor Proficiency (Light)\">Armor Proficiency (Light)</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Armor_Proficiency_(Medium)\" title=\"Armor Proficiency (Medium)\">Armor Proficiency (Medium)</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Weapon_Proficiency_(Pistols)\" class=\"mw-redirect\" title=\"Weapon Proficiency (Pistols)\">Weapon Proficiency (Pistols)</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Weapon_Proficiency_(Rifles)\" class=\"mw-redirect\" title=\"Weapon Proficiency (Rifles)\">Weapon Proficiency (Rifles)</a></li> \n <li><a href=\"https://swse.fandom.com/wiki/Weapon_Proficiency_(Simple_Weapons)\" class=\"mw-redirect\" title=\"Weapon Proficiency (Simple Weapons)\">Weapon Proficiency (Simple Weapons)</a></li>\n</ul><h4><span class=\"mw-headline\" id=\"Talent_Trees\"><b>Talent Trees</b></span></h4><p>At every odd-numbered level (1st, 3rd, 5th, and so on), a Soldier gains an additional <a href=\"https://swse.fandom.com/wiki/Talent\" class=\"mw-redirect\" title=\"Talent\">Talent</a>. A Soldier may choose a <a href=\"https://swse.fandom.com/wiki/Talent\" class=\"mw-redirect\" title=\"Talent\">Talent</a> from any of the <a href=\"https://swse.fandom.com/wiki/Talent_Trees_(Soldier)\" title=\"Talent Trees (Soldier)\">Talent Trees (Soldier)</a> they wish, but they must meet the prerequisites (if any) of the chosen <a href=\"https://swse.fandom.com/wiki/Talent\" class=\"mw-redirect\" title=\"Talent\">Talent</a>. No <a href=\"https://swse.fandom.com/wiki/Talent\" class=\"mw-redirect\" title=\"Talent\">Talent</a> can be selected more than once unless expressly indicated. </p><h4><span class=\"mw-headline\" id=\"Bonus_Feats\"><b>Bonus Feats</b></span></h4><p>At every even-numbered level (2nd, 4th, 6th, etc.), a Soldier gains a bonus <a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>. This&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;must be selected from the related page (<a href=\"https://swse.fandom.com/wiki/Bonus_Feats_(Soldier)\" title=\"Bonus Feats (Soldier)\">Bonus Feats (Soldier)</a>). As with normal&nbsp;<a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a>, you must meet the prerequisites to select the&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>. The Bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;must be from the&nbsp;<a href=\"https://swse.fandom.com/wiki/Bonus_Feats_(Soldier)\" title=\"Bonus Feats (Soldier)\">Bonus Feats (Soldier)</a>, unless explicitly stated otherwise. </p><h4><span class=\"mw-headline\" id=\"Credits\"><b>Credits</b></span></h4><p>A 1st-level Soldier starts play with 3d4 x 250 credits. </p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": 3,
+            "key": "trainedSkillsFirstLevel"
+          },
+          {
+            "mode": 2,
+            "value": "Climb",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Endurance",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Initiative",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Jump",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Knowledge (Tactics)",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Mechanics",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Perception",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Pilot",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Swim",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Treat Injury",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": "Use Computer",
+            "key": "classSkill"
+          },
+          {
+            "mode": 2,
+            "value": 30,
+            "key": "firstLevelHitPoints"
+          },
+          {
+            "mode": 2,
+            "value": "1d10",
+            "key": "levelUpHitPoints"
+          },
+          {
+            "mode": 2,
+            "value": 5,
+            "key": "classForcePoints"
+          },
+          {
+            "mode": 2,
+            "value": 2,
+            "key": "classFortitudeDefenseBonus"
+          },
+          {
+            "mode": 2,
+            "value": 1,
+            "key": "classReflexDefenseBonus"
+          },
+          {
+            "mode": 2,
+            "value": "Armor Proficiency (Light)",
+            "key": "classFeat"
+          },
+          {
+            "mode": 2,
+            "value": "Armor Proficiency (Medium)",
+            "key": "classFeat"
+          },
+          {
+            "mode": 2,
+            "value": "Weapon Proficiency (Pistols)",
+            "key": "classFeat"
+          },
+          {
+            "mode": 2,
+            "value": "Weapon Proficiency (Rifles)",
+            "key": "classFeat"
+          },
+          {
+            "mode": 2,
+            "value": "Weapon Proficiency (Simple Weapons)",
+            "key": "classFeat"
+          },
+          {
+            "mode": 2,
+            "value": true,
+            "key": "isHeroic"
+          },
+          {
+            "mode": 2,
+            "value": false,
+            "key": "isPrestige"
+          },
+          {
+            "mode": 2,
+            "value": false,
+            "key": "isFollowerTemplate"
+          },
+          {
+            "value": true,
+            "key": "isFirstLevel"
+          },
+          {
+            "value": 30,
+            "key": "rolledHP"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": null,
+        "levels": [],
+        "cost": "0",
+        "quantity": 1,
+        "levelsTaken": [
+          1,
+          2,
+          3
+        ]
+      },
+      "effects": [
+        {
+          "_id": "GUNbcOHylJ9aHv8j",
+          "name": "Level 1",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 1
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "cb5jtAdwNOcMISh3",
+          "name": "Level 2",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "rolledHp",
+              "mode": 2,
+              "value": "7",
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 2
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": 1788195515968,
+            "lastModifiedBy": "5ULHg8iILlzWHzoi"
+          }
+        },
+        {
+          "_id": "jFqdpOyNb00ISRCq",
+          "name": "Level 3",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "rolledHp",
+              "mode": 2,
+              "value": "8",
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 3
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": 1788195516809,
+            "lastModifiedBy": "5ULHg8iILlzWHzoi"
+          }
+        },
+        {
+          "_id": "JZvnbK8fFjF6uIiv",
+          "name": "Level 4",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 4
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "962ikr6c9YGjs32b",
+          "name": "Level 5",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 5
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "eLdnqjTmpNFcrm5H",
+          "name": "Level 6",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 6
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "YILX15FhQGVYsJCR",
+          "name": "Level 7",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 7
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "CGAYpFLxOrmO0zvb",
+          "name": "Level 8",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 8
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "mz06OXJPhMr9ff53",
+          "name": "Level 9",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 9
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "D5H6ybsA8sQRCzaD",
+          "name": "Level 10",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 10
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "B3Nqrv98WBIJHhNS",
+          "name": "Level 11",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 11
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "QgAJtHW0oSH7O1MC",
+          "name": "Level 12",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 12
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "qYBlO5G1W8r2yqIs",
+          "name": "Level 13",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 13
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "wRYTKSZDH3091Aha",
+          "name": "Level 14",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 14
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "XSrMFp4ApsXwnxMj",
+          "name": "Level 15",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 15
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "Sq0UiLQSVzNswxL6",
+          "name": "Level 16",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 16
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "RlXeyGZGdfL7YjFc",
+          "name": "Level 17",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 17
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "gBzXLQo6zsotlBQ8",
+          "name": "Level 18",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 18
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "9FpclWxXy3Nxa8q8",
+          "name": "Level 19",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Talent Trees",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 19
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        },
+        {
+          "_id": "l4DkVSwnNf64yYuF",
+          "name": "Level 20",
+          "img": null,
+          "type": "base",
+          "system": {},
+          "changes": [
+            {
+              "key": "provides",
+              "value": "Soldier Bonus Feats",
+              "mode": 2,
+              "priority": null
+            },
+            {
+              "key": "baseAttackBonus",
+              "value": "1",
+              "mode": 2,
+              "priority": null
+            }
+          ],
+          "disabled": true,
+          "duration": {
+            "startTime": null,
+            "seconds": null,
+            "combat": null,
+            "rounds": null,
+            "turns": null,
+            "startRound": null,
+            "startTurn": null
+          },
+          "description": "",
+          "origin": null,
+          "tint": "#ffffff",
+          "transfer": false,
+          "statuses": [],
+          "sort": 0,
+          "flags": {
+            "swse": {
+              "isLevel": true,
+              "level": 20
+            }
+          },
+          "_stats": {
+            "compendiumSource": null,
+            "duplicateSource": null,
+            "coreVersion": "12.343",
+            "systemId": "swse",
+            "systemVersion": "12.5.4",
+            "createdTime": null,
+            "modifiedTime": null,
+            "lastModifiedBy": null
+          }
+        }
+      ],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "tih8Q1fJUuDFWVCX": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.classes.Item.GIY3MFbgiA5PvvZq",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505918,
+        "modifiedTime": 1788195512458,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "9ERW4XngRDZjQxNL",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Armor Proficiency (Light)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505934,
+        "modifiedTime": 1788195505934,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "5iPQwbgOyh4iaCUP",
+      "name": "Armor Proficiency (Light)",
+      "type": "feat",
+      "img": "systems/swse/icon/feat/Armor Proficiency (Light).png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>Reference Book: Star Wars Saga Edition Core Rulebook</i></p><p><i>See also: <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a></i></p><p>You are proficient with <a href=\"https://swse.fandom.com/wiki/Light_Armor\" title=\"Light Armor\">Light Armor</a>, and can wear it without impediment.</p><p><b>Effect:</b> When you wear <a href=\"https://swse.fandom.com/wiki/Light_Armor\" title=\"Light Armor\">Light Armor</a>, you take no <a href=\"https://swse.fandom.com/wiki/Armor_Check_Penalty\" class=\"mw-redirect\" title=\"Armor Check Penalty\">Armor Check Penalty</a> on attack rolls or <a href=\"https://swse.fandom.com/wiki/Skill_Checks\" title=\"Skill Checks\">Skill Checks</a>. Additionally, you benefit from all of the armor's special <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment</a> bonuses (if any).</p><p><b>Normal:</b> A character who wears <a href=\"https://swse.fandom.com/wiki/Light_Armor\" title=\"Light Armor\">Light Armor</a> with which they are not proficient takes a -2 <a href=\"https://swse.fandom.com/wiki/Armor_Check_Penalty\" class=\"mw-redirect\" title=\"Armor Check Penalty\">Armor Check Penalty</a> on attack rolls as well as <a href=\"https://swse.fandom.com/wiki/Skill_Checks\" title=\"Skill Checks\">Skill Checks</a> made using the following <a href=\"https://swse.fandom.com/wiki/Skills\" title=\"Skills\">Skills</a>: <a href=\"https://swse.fandom.com/wiki/Acrobatics\" title=\"Acrobatics\">Acrobatics</a>, <a href=\"https://swse.fandom.com/wiki/Climb\" title=\"Climb\">Climb</a>, <a href=\"https://swse.fandom.com/wiki/Endurance\" title=\"Endurance\">Endurance</a>, <a href=\"https://swse.fandom.com/wiki/Initiative\" title=\"Initiative\">Initiative</a>, <a href=\"https://swse.fandom.com/wiki/Jump\" title=\"Jump\">Jump</a>, <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth</a>, and <a href=\"https://swse.fandom.com/wiki/Swim\" title=\"Swim\">Swim</a>. Additionally, the character gains none of the armor's special <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment</a> bonuses.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "light",
+            "key": "armorProficiency"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": null,
+        "categories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Core Rulebook"
+          },
+          {
+            "value": "Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [
+          "Soldier Bonus Feats",
+          "General Feats",
+          "Scout Bonus Feats",
+          "Noble Bonus Feats",
+          "Armor Proficiency Feat"
+        ],
+        "isSupplied": false,
+        "source": "Star Wars Saga Edition Core Rulebook",
+        "cost": "0",
+        "quantity": 1,
+        "bonusFeatCategories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "hasBonusFeatCategories": true
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.feats.Item.HlNyaX47WkI2GyKg",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505942,
+        "modifiedTime": 1788195505942,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "hB6WS4c67cIQ4DW7",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Armor Proficiency (Medium)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505949,
+        "modifiedTime": 1788195505949,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "HtYCms49XiscIVsg",
+      "name": "Armor Proficiency (Medium)",
+      "type": "feat",
+      "img": "systems/swse/icon/feat/Armor Proficiency (Medium).png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>Reference Book: Star Wars Saga Edition Core Rulebook</i></p><p><i>See also: <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a></i></p><p>You are proficient with <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor</a>, and can wear it without impediment.</p><p><b>Prerequisite:</b> <a href=\"https://swse.fandom.com/wiki/Armor_Proficiency_(Light)\" title=\"Armor Proficiency (Light)\">Armor Proficiency (Light)</a> Feat</p><p><b>Effect:</b> When you wear <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor</a>, you take no <a href=\"https://swse.fandom.com/wiki/Armor_Check_Penalty\" class=\"mw-redirect\" title=\"Armor Check Penalty\">Armor Check Penalty</a> on attack rolls or <a href=\"https://swse.fandom.com/wiki/Skill_Checks\" title=\"Skill Checks\">Skill Checks</a>. Additionally, you benefit from all of the armor's special <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment</a> bonuses (if any).</p><p><b>Normal:</b>&nbsp;A character who wears <a href=\"https://swse.fandom.com/wiki/Medium_Armor\" title=\"Medium Armor\">Medium Armor</a> with which they are not proficient takes a -5 <a href=\"https://swse.fandom.com/wiki/Armor_Check_Penalty\" class=\"mw-redirect\" title=\"Armor Check Penalty\">Armor Check Penalty</a> on attack rolls as well as <a href=\"https://swse.fandom.com/wiki/Skill_Checks\" title=\"Skill Checks\">Skill Checks</a> made using the following <a href=\"https://swse.fandom.com/wiki/Skills\" title=\"Skills\">Skills</a>: <a href=\"https://swse.fandom.com/wiki/Acrobatics\" title=\"Acrobatics\">Acrobatics</a>, <a href=\"https://swse.fandom.com/wiki/Climb\" title=\"Climb\">Climb</a>, <a href=\"https://swse.fandom.com/wiki/Endurance\" title=\"Endurance\">Endurance</a>, <a href=\"https://swse.fandom.com/wiki/Initiative\" title=\"Initiative\">Initiative</a>, <a href=\"https://swse.fandom.com/wiki/Jump\" title=\"Jump\">Jump</a>, <a href=\"https://swse.fandom.com/wiki/Stealth\" title=\"Stealth\">Stealth</a>, and <a href=\"https://swse.fandom.com/wiki/Swim\" title=\"Swim\">Swim</a>. Additionally, the character gains none of the armor's special <a href=\"https://swse.fandom.com/wiki/Equipment\" title=\"Equipment\">Equipment</a> bonuses.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "medium",
+            "key": "armorProficiency"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": {
+          "text": "Armor Proficiency (Light) feat",
+          "requirement": "Armor Proficiency (Light)",
+          "type": "FEAT"
+        },
+        "categories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Core Rulebook"
+          },
+          {
+            "value": "Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          }
+        ],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [
+          "Soldier Bonus Feats",
+          "General Feats",
+          "Scout Bonus Feats",
+          "Armor Proficiency Feat"
+        ],
+        "isSupplied": false,
+        "source": "Star Wars Saga Edition Core Rulebook",
+        "cost": "0",
+        "quantity": 1,
+        "bonusFeatCategories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          }
+        ],
+        "hasBonusFeatCategories": true
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.feats.Item.npkQpzGjQe9knZHm",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505959,
+        "modifiedTime": 1788195505959,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "MCdzE4679mscSR2O",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Weapon Proficiency (Pistols)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505967,
+        "modifiedTime": 1788195505967,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "beG2obq3XdQXMlo3",
+      "name": "Weapon Proficiency",
+      "type": "feat",
+      "img": "systems/swse/icon/feat/Weapon Proficiency.png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>See also: <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a></i></p><p>You are proficient with a particular kind of weaponry.</p><p><b>Effect:</b> Choose one Weapon Group. You are proficient with all weapons of the selected group. Weapon Groups include the following:</p><ul>\n <li>Simple Weapons (includes <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Melee)\" title=\"Simple Weapons (Melee)\">Simple Weapons (Melee)</a>, <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Ranged)\" title=\"Simple Weapons (Ranged)\">Simple Weapons (Ranged)</a>, and <a href=\"https://swse.fandom.com/wiki/Grenades\" title=\"Grenades\">Grenades</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Lightsabers\" title=\"Lightsabers\">Lightsabers</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> (includes both <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> and <a href=\"https://swse.fandom.com/wiki/Vehicle_Weapons\" class=\"mw-redirect\" title=\"Vehicle Weapons\">Vehicle Weapons</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapons\" title=\"Advanced Melee Weapons\">Advanced Melee Weapons</a></li>\n</ul><p><b>Normal:</b> If you wield a weapon with which you are not proficient, you take a -5 penalty to your attack rolls.</p><p><b>Special:</b> You can gain this Feat multiple times. Each time you take the Feat, it applies to a different Weapon Group. You cannot take <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons\" title=\"Exotic Weapons\">Exotic Weapons</a> as a weapon group; instead you must select the <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_Proficiency\" title=\"Exotic Weapon Proficiency\">Exotic Weapon Proficiency</a> Feat to gain proficiency with a specific Exotic Weapon.</p><h2><span class=\"mw-headline\" id=\"Additional_Weapon_Proficiency\">Additional Weapon Proficiency</span></h2><p><i>Reference Book:</i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide</a></i></p><p><b><a href=\"https://swse.fandom.com/wiki/Combined_Feat\" class=\"mw-redirect\" title=\"Combined Feat\">Combined Feat</a> (<a href=\"https://swse.fandom.com/wiki/Quick_Draw\" title=\"Quick Draw\">Quick Draw</a>):</b> You can draw and ignite your <a href=\"https://swse.fandom.com/wiki/Lightsaber\" class=\"mw-redirect\" title=\"Lightsaber\">Lightsaber</a> as a single <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action</a>.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "true",
+            "key": "takeMultipleTimes"
+          },
+          {
+            "mode": 2,
+            "value": "Pistols",
+            "key": "weaponProficiency"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": null,
+        "categories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [
+          "Soldier Bonus Feats",
+          "Technician Bonus Feats",
+          "Force Prodigy Bonus Feats",
+          "Scoundrel Bonus Feats",
+          "General Feats",
+          "Scout Bonus Feats",
+          "Noble Bonus Feats",
+          "Weapon Proficiency Feat"
+        ],
+        "isSupplied": false,
+        "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide",
+        "cost": "0",
+        "quantity": 1,
+        "bonusFeatCategories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "hasBonusFeatCategories": true,
+        "selectedChoices": [
+          "Pistols"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.feats.Item.wQvKz0VytQhN8uS3",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505976,
+        "modifiedTime": 1788195505976,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "9rq3b0NnMkWdCdMx",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Weapon Proficiency (Rifles)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505983,
+        "modifiedTime": 1788195505983,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "QUwLFW4lEN2Po8vE",
+      "name": "Weapon Proficiency",
+      "type": "feat",
+      "img": "systems/swse/icon/feat/Weapon Proficiency.png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>See also: <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a></i></p><p>You are proficient with a particular kind of weaponry.</p><p><b>Effect:</b> Choose one Weapon Group. You are proficient with all weapons of the selected group. Weapon Groups include the following:</p><ul>\n <li>Simple Weapons (includes <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Melee)\" title=\"Simple Weapons (Melee)\">Simple Weapons (Melee)</a>, <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Ranged)\" title=\"Simple Weapons (Ranged)\">Simple Weapons (Ranged)</a>, and <a href=\"https://swse.fandom.com/wiki/Grenades\" title=\"Grenades\">Grenades</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Lightsabers\" title=\"Lightsabers\">Lightsabers</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> (includes both <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> and <a href=\"https://swse.fandom.com/wiki/Vehicle_Weapons\" class=\"mw-redirect\" title=\"Vehicle Weapons\">Vehicle Weapons</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapons\" title=\"Advanced Melee Weapons\">Advanced Melee Weapons</a></li>\n</ul><p><b>Normal:</b> If you wield a weapon with which you are not proficient, you take a -5 penalty to your attack rolls.</p><p><b>Special:</b> You can gain this Feat multiple times. Each time you take the Feat, it applies to a different Weapon Group. You cannot take <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons\" title=\"Exotic Weapons\">Exotic Weapons</a> as a weapon group; instead you must select the <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_Proficiency\" title=\"Exotic Weapon Proficiency\">Exotic Weapon Proficiency</a> Feat to gain proficiency with a specific Exotic Weapon.</p><h2><span class=\"mw-headline\" id=\"Additional_Weapon_Proficiency\">Additional Weapon Proficiency</span></h2><p><i>Reference Book:</i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide</a></i></p><p><b><a href=\"https://swse.fandom.com/wiki/Combined_Feat\" class=\"mw-redirect\" title=\"Combined Feat\">Combined Feat</a> (<a href=\"https://swse.fandom.com/wiki/Quick_Draw\" title=\"Quick Draw\">Quick Draw</a>):</b> You can draw and ignite your <a href=\"https://swse.fandom.com/wiki/Lightsaber\" class=\"mw-redirect\" title=\"Lightsaber\">Lightsaber</a> as a single <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action</a>.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "true",
+            "key": "takeMultipleTimes"
+          },
+          {
+            "mode": 2,
+            "value": "Rifles",
+            "key": "weaponProficiency"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": null,
+        "categories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [
+          "Soldier Bonus Feats",
+          "Technician Bonus Feats",
+          "Force Prodigy Bonus Feats",
+          "Scoundrel Bonus Feats",
+          "General Feats",
+          "Scout Bonus Feats",
+          "Noble Bonus Feats",
+          "Weapon Proficiency Feat"
+        ],
+        "isSupplied": false,
+        "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide",
+        "cost": "0",
+        "quantity": 1,
+        "bonusFeatCategories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "hasBonusFeatCategories": true,
+        "selectedChoices": [
+          "Rifles"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.feats.Item.wQvKz0VytQhN8uS3",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505991,
+        "modifiedTime": 1788195505991,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "38gucagai72qJY5d",
+      "name": "Bonus Feat",
+      "type": "trait",
+      "img": "icons/svg/item-bag.svg",
+      "system": {
+        "finalName": "",
+        "description": "<p>Beings gain one bonus&nbsp;<a href=\"https://swse.fandom.com/wiki/Feat\" class=\"mw-redirect\" title=\"Feat\">Feat</a>&nbsp;at 1st level.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "General Feats",
+            "key": "provides"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "categories": [],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [],
+        "isSupplied": false,
+        "prerequisite": null,
+        "cost": "0",
+        "quantity": 1,
+        "selectedChoices": [
+          "Weapon Proficiency (Simple Weapons)"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.traits.Item.qKShB24UnXsrVxcf",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195505999,
+        "modifiedTime": 1788195505999,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    },
+    {
+      "_id": "r1sj43fk0uIp5BOd",
+      "name": "Weapon Proficiency",
+      "type": "feat",
+      "img": "systems/swse/icon/feat/Weapon Proficiency.png",
+      "system": {
+        "finalName": "",
+        "description": "<p><i>See also: <a href=\"https://swse.fandom.com/wiki/Feats\" title=\"Feats\">Feats</a></i></p><p>You are proficient with a particular kind of weaponry.</p><p><b>Effect:</b> Choose one Weapon Group. You are proficient with all weapons of the selected group. Weapon Groups include the following:</p><ul>\n <li>Simple Weapons (includes <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Melee)\" title=\"Simple Weapons (Melee)\">Simple Weapons (Melee)</a>, <a href=\"https://swse.fandom.com/wiki/Simple_Weapons_(Ranged)\" title=\"Simple Weapons (Ranged)\">Simple Weapons (Ranged)</a>, and <a href=\"https://swse.fandom.com/wiki/Grenades\" title=\"Grenades\">Grenades</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Pistols\" title=\"Pistols\">Pistols</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Rifles\" title=\"Rifles\">Rifles</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Lightsabers\" title=\"Lightsabers\">Lightsabers</a></li>\n <li><a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> (includes both <a href=\"https://swse.fandom.com/wiki/Heavy_Weapons\" title=\"Heavy Weapons\">Heavy Weapons</a> and <a href=\"https://swse.fandom.com/wiki/Vehicle_Weapons\" class=\"mw-redirect\" title=\"Vehicle Weapons\">Vehicle Weapons</a>)</li>\n <li><a href=\"https://swse.fandom.com/wiki/Advanced_Melee_Weapons\" title=\"Advanced Melee Weapons\">Advanced Melee Weapons</a></li>\n</ul><p><b>Normal:</b> If you wield a weapon with which you are not proficient, you take a -5 penalty to your attack rolls.</p><p><b>Special:</b> You can gain this Feat multiple times. Each time you take the Feat, it applies to a different Weapon Group. You cannot take <a href=\"https://swse.fandom.com/wiki/Exotic_Weapons\" title=\"Exotic Weapons\">Exotic Weapons</a> as a weapon group; instead you must select the <a href=\"https://swse.fandom.com/wiki/Exotic_Weapon_Proficiency\" title=\"Exotic Weapon Proficiency\">Exotic Weapon Proficiency</a> Feat to gain proficiency with a specific Exotic Weapon.</p><h2><span class=\"mw-headline\" id=\"Additional_Weapon_Proficiency\">Additional Weapon Proficiency</span></h2><p><i>Reference Book:</i>&nbsp;<i><a href=\"https://swse.fandom.com/wiki/Star_Wars_Saga_Edition_Knights_of_the_Old_Republic_Campaign_Guide\" title=\"Star Wars Saga Edition Knights of the Old Republic Campaign Guide\">Star Wars Saga Edition Knights of the Old Republic Campaign Guide</a></i></p><p><b><a href=\"https://swse.fandom.com/wiki/Combined_Feat\" class=\"mw-redirect\" title=\"Combined Feat\">Combined Feat</a> (<a href=\"https://swse.fandom.com/wiki/Quick_Draw\" title=\"Quick Draw\">Quick Draw</a>):</b> You can draw and ignite your <a href=\"https://swse.fandom.com/wiki/Lightsaber\" class=\"mw-redirect\" title=\"Lightsaber\">Lightsaber</a> as a single <a href=\"https://swse.fandom.com/wiki/Swift_Action\" class=\"mw-redirect\" title=\"Swift Action\">Swift Action</a>.</p>",
+        "textDescription": "",
+        "sourceString": "",
+        "attributes": {},
+        "changes": [
+          {
+            "mode": 2,
+            "value": "true",
+            "key": "takeMultipleTimes"
+          },
+          {
+            "mode": 2,
+            "value": "Simple Weapons",
+            "key": "weaponProficiency"
+          }
+        ],
+        "choices": [],
+        "modes": [],
+        "providedItems": [],
+        "payload": "",
+        "buildInstructions": [],
+        "prerequisite": null,
+        "categories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "supplier": {
+          "id": "nrAB02IjO9S1vnfX",
+          "name": "Soldier",
+          "type": "class"
+        },
+        "possibleProviders": [
+          "Soldier Bonus Feats",
+          "Technician Bonus Feats",
+          "Force Prodigy Bonus Feats",
+          "Scoundrel Bonus Feats",
+          "General Feats",
+          "Scout Bonus Feats",
+          "Noble Bonus Feats",
+          "Weapon Proficiency Feat"
+        ],
+        "isSupplied": false,
+        "source": "Star Wars Saga Edition Knights of the Old Republic Campaign Guide",
+        "cost": "0",
+        "quantity": 1,
+        "bonusFeatCategories": [
+          {
+            "value": "Soldier Bonus Feats"
+          },
+          {
+            "value": "Technician Bonus Feats"
+          },
+          {
+            "value": "Force Prodigy Bonus Feats"
+          },
+          {
+            "value": "Scoundrel Bonus Feats"
+          },
+          {
+            "value": "Scout Bonus Feats"
+          },
+          {
+            "value": "Noble Bonus Feats"
+          }
+        ],
+        "hasBonusFeatCategories": true,
+        "selectedChoices": [
+          "Simple Weapons"
+        ]
+      },
+      "effects": [],
+      "folder": null,
+      "sort": 0,
+      "ownership": {
+        "default": 0,
+        "QbSDmWtCxkDQdQLb": 3,
+        "5ULHg8iILlzWHzoi": 3
+      },
+      "flags": {},
+      "_stats": {
+        "compendiumSource": "Compendium.swse.feats.Item.wQvKz0VytQhN8uS3",
+        "duplicateSource": null,
+        "coreVersion": "12.343",
+        "systemId": "swse",
+        "systemVersion": "12.5.4",
+        "createdTime": 1788195506007,
+        "modifiedTime": 1788195506007,
+        "lastModifiedBy": "5ULHg8iILlzWHzoi"
+      }
+    }
+  ],
+  "effects": [],
+  "folder": null,
+  "flags": {
+    "exportSource": {
+      "world": "test-v12",
+      "system": "swse",
+      "coreVersion": "12.343",
+      "systemVersion": "12.5.4"
+    }
+  },
+  "_stats": {
+    "coreVersion": "12.343",
+    "systemId": "swse",
+    "systemVersion": "12.5.4",
+    "createdTime": 1788195429471,
+    "modifiedTime": 1788195568635,
+    "lastModifiedBy": "5ULHg8iILlzWHzoi"
+  }
+}
