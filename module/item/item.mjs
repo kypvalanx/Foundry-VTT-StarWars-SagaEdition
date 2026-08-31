@@ -508,6 +508,10 @@ export class SWSEItem extends Item {
         return 0;
     }
 
+    /**
+     *
+     * @returns {number}
+     */
     get armorReflexDefenseBonus() {
         let ardb = toNumber(getInheritableAttribute({
             entity: this,

@@ -184,6 +184,9 @@ export async function generationTests(quench) {
 export async function getEntityRawData(file, unitName) {
     let response = await getFile(file);
     const content = await response.json();
+    if(!content.entries){
+        return content;
+    }
     return content.entries.find(entry=> entry.name === unitName);
 }
 

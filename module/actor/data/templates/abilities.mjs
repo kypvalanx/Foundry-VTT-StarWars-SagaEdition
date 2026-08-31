@@ -49,6 +49,10 @@ export class AbilityFields {
                 integer: true,
                 label: `${ability} Custom`,
             }),
+            skip: new fields.BooleanField({
+                initial: false,
+                label: `${ability} Skip`,
+            })
         });
     }
 

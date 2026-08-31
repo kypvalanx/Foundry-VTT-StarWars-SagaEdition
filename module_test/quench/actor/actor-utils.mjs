@@ -10,7 +10,13 @@ export async function withTestActor(fn, options= {}) {
 
         actorData.system.test = true;
         actor = await processActor(actorData);
-    } else {
+    } else if (options.export)
+    {
+        let actorData = await getEntityRawData(options.export.path, options.export.name)
+        actorData.system.test = true;
+        actor = await SWSEActor.create(actorData);
+    }
+    else {
         actor = await SWSEActor.create({
             name: name,
             type: "character",

@@ -438,42 +438,43 @@ export class DefenseFunctions {
     }
 
     _selectRefBonus(actor, heroicLevel, armorBonus) {
-        if (armorBonus) {
-            let proficientWithEquipped = true;
-
-            for (const armor of actor.itemTypes.armor.filter(
-                (item) => item.system.equipped
-            )) {
-                if (!armor._parentIsProficientWithArmor()) {
-                    proficientWithEquipped = false;
-                }
-            }
-
-            if (proficientWithEquipped) {
-                let improvedArmoredDefense = getInheritableAttribute({
-                    entity: actor,
-                    attributeKey: "improvedArmoredDefense",
-                    reduce: "OR",
-                });
-                if (improvedArmoredDefense) {
-                    return Math.max(
-                        armorBonus,
-                        heroicLevel + Math.floor(armorBonus / 2)
-                    );
-                }
-
-                let armoredDefense = getInheritableAttribute({
-                    entity: actor,
-                    attributeKey: "armoredDefense",
-                    reduce: "OR",
-                });
-                if (armoredDefense || actor.isFollower) {
-                    return Math.max(armorBonus, heroicLevel);
-                }
-            }
-            return armorBonus;
+        if (!armorBonus) {
+            return heroicLevel;
         }
-        return heroicLevel;
+
+        let proficientWithEquipped = true;
+
+        for (const armor of actor.itemTypes.armor.filter(
+            (item) => item.system.equipped
+        )) {
+            if (!armor._parentIsProficientWithArmor()) {
+                proficientWithEquipped = false;
+            }
+        }
+
+        if (proficientWithEquipped) {
+            let improvedArmoredDefense = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "improvedArmoredDefense",
+                reduce: "OR",
+            });
+            if (improvedArmoredDefense) {
+                return Math.max(
+                    armorBonus,
+                    heroicLevel + Math.floor(armorBonus / 2)
+                );
+            }
+
+            let armoredDefense = getInheritableAttribute({
+                entity: actor,
+                attributeKey: "armoredDefense",
+                reduce: "OR",
+            });
+            if (armoredDefense || actor.isFollower) {
+                return Math.max(armorBonus, heroicLevel);
+            }
+        }
+        return armorBonus;
     }
 
     _resolveFFRef(
