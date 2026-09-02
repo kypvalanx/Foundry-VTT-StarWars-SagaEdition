@@ -20,7 +20,10 @@ export async function withTestActor(fn, options= {}) {
         actor = await SWSEActor.create({
             name: name,
             type: "character",
-            img: "artwork/character-profile.jpg"
+            img: "artwork/character-profile.jpg",
+            system: {
+                test: true
+            }
         })
     }
 
@@ -35,12 +38,20 @@ export async function withTestActor(fn, options= {}) {
         await fn(actor, context);
     } finally {
         for(let a of context.otherActors){
-            a.delete()
+            if(game.actors.has(a.id)){
+                await a.delete()
+            }
         }
-        await actor.delete();
-        game.actors.forEach(a => {if(a.system.test === true){
-            a.delete()
-        }})
+        if(game.actors.has(actor.id))
+        {
+            await actor.delete()
+        }
+
+        for(let a of game.actors){
+            if(a.system.test === true && game.actors.has(a.id)){
+                await a.delete()
+            }
+        }
     }
 }
 

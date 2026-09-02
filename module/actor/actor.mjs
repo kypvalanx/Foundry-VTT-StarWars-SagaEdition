@@ -292,6 +292,13 @@ class SWSEActor extends Actor {
             user = game.users.get(userId);
             context.owner = userId;
         }
+
+        // Ensure the document actually exists in the collection and hasn't been deleted
+        const exists = this.id && game.actors.has(this.id);
+        if (!exists) {
+            return;
+        }
+
         if (this.canUserModify(user, 'update') && !this.pack) {
             try {
                 await this.update(data, context);
@@ -410,7 +417,11 @@ class SWSEActor extends Actor {
     }
 
     set condition(value){
-        this.setGroupedEffect('condition', value, true);
+        this.setCondition(value);
+    }
+
+    async setCondition(value){
+        await this.setGroupedEffect('condition', value, true);
     }
 
     async reduceCondition(number = 1) {
@@ -425,7 +436,7 @@ class SWSEActor extends Actor {
 
         let newCondition = SWSE.conditionTrack[Math.max(Math.min(conditionIndex + number, 5), 0)];
 
-        this.condition = newCondition;
+        await this.setCondition(newCondition);
 
         return `condition set to ${newCondition}.  ${resultFlavor}`;
     }
@@ -1281,7 +1292,7 @@ class SWSEActor extends Actor {
     }
     /**
      * @param {string} effectGrouper
-     * @param changeValue
+     * @param {string} changeValue
      * @param skipRenderOnClear if this is set to true, the clearing of the previous grouped status effect will not trigger a redraw
      * might make this the default after looking at it
      */
@@ -1309,7 +1320,7 @@ class SWSEActor extends Actor {
     async clearGroupedEffect(effectGrouper, skipRenderOnClear = false) {
         const ids = [];
         for (const effect of this.effects) {
-            if(effect.statuses.find(status => status.startsWith(effectGrouper))){
+            if(effect.statuses.find(status => status.startsWith(effectGrouper) && !status.startsWith(effectGrouper + "-persistent"))){
                 if(effect.origin){
                     if(!effect.isDisabled){
                         effect.disable(true)

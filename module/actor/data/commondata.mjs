@@ -9,6 +9,7 @@ export default class CommonActorData {
     static get commonData() {
 
         return {
+            test: new fields.BooleanField({initial: false, label:"this is only true if this was created during testing"}),
             abilities: new fields.SchemaField({
                 ...AbilityFields.physical,
                 ...AbilityFields.mental,

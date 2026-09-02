@@ -19,6 +19,7 @@ import {actorSheetSizeTests} from "./actor/actor-sheet.size.test.mjs";
 import {actorsheetTalentTests} from "./actor/actor-sheet.keyword.lightsaberdamagestat.mjs";
 import {prerequisiteTests} from "./prerequisite.test.mjs";
 import {migrationTests} from "./migration.test.mjs";
+import {conditionTrackTests} from "./actor/condition-track.test.mjs";
 
 const registeredTests = [
     generationTests,
@@ -36,6 +37,7 @@ const registeredTests = [
     featTests,
     healthTests,
     healthFunctionsTests,
+    conditionTrackTests,
     featMulticlassTests,
     actorSheetAbilitiesTests,
     actorSheetSizeTests,

@@ -316,8 +316,8 @@ export class SkillFunctions {
 
             //Condition modifier - always
             bonuses.push({
-                value: system.health?.condition ?? 0,
-                description: `Condition Modifier: ${system.health?.condition ?? 0
+                value: actor.condition ?? 0,
+                description: `Condition Modifier: ${actor.condition ?? 0
                     }`,
             });
 
