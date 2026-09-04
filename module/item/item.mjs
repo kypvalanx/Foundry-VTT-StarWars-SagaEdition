@@ -132,6 +132,15 @@ export class SWSEItem extends Item {
         return this.system.changes;
     }
 
+    get defaultChanges() {
+        // Backward compat: if this item has no mode Active Effects, read from legacy system.modes
+        const hasModeEffects = this.effects?.some(effect => effect.isMode);
+        if (hasModeEffects) return [];
+        return Object.values(this.system.modes || {})
+            .filter(mode => mode?.isActive)
+            .flatMap(mode => Object.values(mode.attributes || {}));
+    }
+
     updateOrAddChange(change){
         this.system.changes.filter(c => c.key === change.key && c.mode === change.mode)
     }

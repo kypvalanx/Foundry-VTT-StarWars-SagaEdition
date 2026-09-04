@@ -1078,7 +1078,7 @@ export function reduceArray(reduce, values, actor) {
             return values.map(attr => attr.value.toLowerCase());
         case "VALUES_WITH_MODIFIERS":
             return values.map(attr => {
-                const toks = attr.value.split("|")
+                const toks = `${attr.value ?? ""}`.split("|")
                 return {value: toks[0], modifiers: parseModifiers(toks.length > 1 ? toks.slice(1) : []), source: attr.sourceString};
             });
         case "UNIQUE":
