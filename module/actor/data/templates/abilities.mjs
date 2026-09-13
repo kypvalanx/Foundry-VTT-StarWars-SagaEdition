@@ -165,5 +165,8 @@ export class AbilityFunctions {
             reduce: "SUM"}
         )
         this.darkside.finalScore = this.darkside.value + this.darkside.taint;
+
+        this.baseAttack = actor.baseAttackBonus;
+        this.grapple = actor.grapple;
     }
 }

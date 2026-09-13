@@ -9,7 +9,7 @@ export async function conditionTrackTests(quench) {
         (context) => {
             const {describe, it, assert} = context;
 
-            describe("Condition Track & Active Effects", () => {
+            describe("actor.condition-track", () => {
                 describe("Step Progression", () => {
                     it("should start at 0 condition (Normal)", async () => {
                         await withTestActor(async (actor) => {
@@ -264,5 +264,5 @@ export async function conditionTrackTests(quench) {
                     });
                 });
             });
-        }, {displayName: "Condition Track & Active Effects Tests"});
+        }, {displayName: "actor.condition-track"});
 }

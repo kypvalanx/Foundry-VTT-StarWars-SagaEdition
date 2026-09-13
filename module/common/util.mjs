@@ -1230,7 +1230,9 @@ export function inheritableItems(actor, options={}) {
         return actualInheritable;
     }
 
-    return actor.getCached && !options.skipCache ? actor.getCached(`inheritableItems`, fn) : fn();
+    const hash = JSON.stringify(options);
+
+    return actor.getCached && !options.skipCache ? actor.getCached(`inheritableItems` + hash, fn) : fn();
 }
 
 export function resolveWeight(weight, quantity = 1, costFactor = 1, actor) {

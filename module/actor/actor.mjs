@@ -1266,23 +1266,23 @@ class SWSEActor extends Actor {
     }
 
     resolveFeats() {
-        return this.getCached("feats", () => {
+        return this.getCached("feats"+Date.now(), () => {
             let feats = filterItemsByTypes(this.items.values(), ["feat"]);
-            let activeFeats = filterItemsByTypes(inheritableItems(this), ["feat"]);
-            let removeFeats = [];
-            let inactiveProvidedFeats = [];
-            for (let feat of feats) {
-                let active = activeFeats.includes(feat)
-                if (!active) {
-                    if (!feat.system.supplier) {
-                        removeFeats.push(feat);
-                    } else {
-                        inactiveProvidedFeats.push(feat);
-                    }
-                }
-            }
+            // let activeFeats = filterItemsByTypes(inheritableItems(this), ["feat"]);
+            // let removeFeats = [];
+            // let inactiveProvidedFeats = [];
+            // for (let feat of feats) {
+            //     let active = activeFeats.includes(feat)
+            //     if (!active) {
+            //         if (!feat.system.supplier) {
+            //             removeFeats.push(feat);
+            //         } else {
+            //             inactiveProvidedFeats.push(feat);
+            //         }
+            //     }
+            // }
 
-            return {activeFeats, removeFeats, inactiveProvidedFeats};
+            return {activeFeats: feats, removeFeats: [], inactiveProvidedFeats: []};
         })
     }
 

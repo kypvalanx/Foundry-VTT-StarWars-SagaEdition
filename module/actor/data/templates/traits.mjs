@@ -162,11 +162,9 @@ export class TraitsFunctions {
         //     system.heavyLoad = true;
         // } else system.heavyLoad = false;
 
-        let activeTraits = inheritableItems(actor).filter(i => i.type === 'trait');
+        let activeTraits = inheritableItems(actor, {hash: "PRE_ABILITY"}).filter(i => i.type === 'trait');
         system.traits = activeTraits.sort(ALPHA_FINAL_NAME);
 
-        this.baseAttack = actor.baseAttackBonus;
-        this.grapple = actor.grapple;
     }
 
     _prepareNpcTraitsDerivedData() {

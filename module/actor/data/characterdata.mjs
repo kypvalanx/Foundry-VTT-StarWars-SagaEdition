@@ -109,6 +109,8 @@ export class CharacterDataModel extends SystemDataModel.mixin(...characterFuncti
 
         //Settings
         this.#initializeCharacterSettings();
+
+        //TODO add analysis section that finds issues and adds warnings
     }
 
     #_validateLevelUpOptions() {
