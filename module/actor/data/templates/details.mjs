@@ -21,9 +21,9 @@ export class DetailFields {
             source.age = null;
         }
 
-        if(!source.details.experience && source.experience) {
-            source.details.experience = source.experience;
-            source.experience = null;
+        if(!source.details.experience) {
+            source.details.experience = source.experience ?? 0;
+            //source.experience = null;
         }
 
         if(!source.details.height && source.height) {

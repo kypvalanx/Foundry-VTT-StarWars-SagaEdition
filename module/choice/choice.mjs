@@ -100,9 +100,17 @@ export async function activateChoices(item, context) {
                 preprogrammedAnswer = found?.value;
             }
             if (!preprogrammedAnswer && context.generalAnswers?.length > 0) {
-                const contextualAnswers = context.generalAnswers.map(ia => ia.toLowerCase());
+                const contextualAnswers = context.generalAnswers.filter(ia => !!ia).map(ia => ia.toLowerCase());
                 const found = options.find(o => contextualAnswers.includes((o.value).toLowerCase()));
                 preprogrammedAnswer = found?.value;
+            }
+
+            if(!preprogrammedAnswer){
+                const defaultOption = options.find(o => o.isDefault)
+
+                if(defaultOption){
+                    preprogrammedAnswer = defaultOption.value;
+                }
             }
 
             if(preprogrammedAnswer){
