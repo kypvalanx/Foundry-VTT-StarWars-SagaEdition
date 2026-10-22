@@ -1189,11 +1189,11 @@ export function equippedItems(entity, type = null) {
  * these types are always inherited by actors if they meet prerequisites.
  * @type {string[]}
  */
-const CONDITIONALLY_INHERITABLE_TYPES = [ "trait", "feat", "talent"];
+const CONDITIONALLY_INHERITABLE_TYPES = [ "trait"];
 const ALWAYS_INHERITABLE_TYPES = ["background", "destiny", "class", "forcePower", "forceSecret", "forceTechnique", "affiliation", "forceRegimen", "species", "vehicleBaseType", "beastAttack",
     "beastSense",
     "beastType",
-    "beastQuality"];
+    "beastQuality", "feat", "talent"];
 
 export function inheritableItems(actor, options={}) {
     let fn = () => {
