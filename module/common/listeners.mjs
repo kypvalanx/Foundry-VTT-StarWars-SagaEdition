@@ -71,7 +71,7 @@ export function onEffectControl(event){
             parentDoc.deleteEmbeddedDocuments("ActiveEffect", [effectId]);
             break;
         case 'disable':
-            fromUuidSync(effectUuid).disable(!event.currentTarget.checked)
+            doc.disable(!event.currentTarget.checked)
             break;
         case "add-modification":
             addBlankModificationEffect.call(parentDoc);
