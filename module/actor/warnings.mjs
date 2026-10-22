@@ -1,6 +1,7 @@
 import {getInheritableAttribute} from "../attribute-helper.mjs";
 import {getAvailableTrainedSkillCount} from "./skill-handler.mjs";
 import {XP_REQUIREMENT} from "../common/constants.mjs";
+import {meetsPrerequisites} from "../prerequisite.mjs";
 
 function getAvailableTrainedSkills(actor) {
     let trainedSkills = actor.trainedSkills;
@@ -92,6 +93,24 @@ export function warningsFromActor(actor) {
 
             if (actor.weight >= actor.maximumCapacity) {
                 warnings.push(`<span>You're carrying more than your <b>Maximum Capacity</b></span>`)
+            }
+        }
+
+        const prereqValidationItems = actor.itemTypes["feat"]
+        prereqValidationItems.push(...actor.itemTypes["talent"])
+        prereqValidationItems.push(...actor.itemTypes["class"])
+        console.log(actor)
+        for (let item of prereqValidationItems){
+            const prerequisite = item.system.prerequisite
+            if(!prerequisite){
+                continue;
+            }
+
+            let result = meetsPrerequisites(actor, prerequisite)
+
+            if(result.doesFail){
+                let prereq = result.failureList.map(f => f.message).join(", ")
+                warnings.push(`<span>The ${item.finalName} ${item.type} is on your sheet but is missing prerequisites: ${prereq}</span>`)
             }
         }
     }

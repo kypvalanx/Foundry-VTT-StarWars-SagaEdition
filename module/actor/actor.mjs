@@ -2659,7 +2659,7 @@ class SWSEActor extends Actor {
         this.sheet.render(false)
 
         if(failedItems.length > 0) {
-            console.error("failed to add these items:", failedItems);
+            console.error("failed to add these items:", failedItems, criteria);
         }
 
         if(criteria.returnFailures) {
