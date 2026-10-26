@@ -9,18 +9,27 @@ const fields = foundry.data.fields;
 export class SkillFields {
 
     static migrateData(source) {
-        const entries = Object.entries(source.skills ?? {});
+        if (!source.skills || typeof source.skills !== "object") return;
 
-        let skillKeys = Object.keys(this.character)
+        const entries = Object.entries(source.skills);
+        const skillKeys = Object.keys(this.character);
+
         for (const [key, value]  of entries) {
-            if(skillKeys.includes(key)){
+            // Ignore deletion markers or keys already matching the current schema
+            if (key.startsWith("-=") || key.startsWith("==") || skillKeys.includes(key)) {
                 continue;
             }
 
             const matchedSkill = skillKeys.find(skill => skill.toLowerCase() === key.toLowerCase());
-            if(matchedSkill && !!value){
-                source.skills[matchedSkill] = value;
+            if (matchedSkill) {
+                // Transfer data if target does not already have defined values
+                if (value !== null && value !== undefined) {
+                    source.skills[matchedSkill] = source.skills[matchedSkill] ?? value;
+                }
+                // Remove lowercase key from in-memory source
                 delete source.skills[key];
+                // Emit deletion key for persistent database cleanup
+                source.skills[`-=${key}`] = null;
             }
         }
     }
