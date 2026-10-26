@@ -1209,12 +1209,12 @@ export class SWSEActorSheet extends foundry.appv1.sheets.ActorSheet {
         const exceptionalSkill = exceptionalSkills.includes(label)
 
         for (let formula of rawFormula.split(",")) {
-
-            if (!!variable && variable.startsWith('@initiative') && game.combat) {
-                await this.object.rollInitiative({
+//TODO create combatants and rereoll initiative should have config flags
+            if (!!variable && variable.toLowerCase().startsWith('@initiative') && game.combat.combatants) {
+                let combatant = await this.object.rollInitiative({
                     createCombatants: false,
-                    rerollInitiative: true
-                    //,initiativeOptions: {formula: formula}
+                    rerollInitiative: false
+                    ,initiativeOptions: {formula: formula}
                 })
 
                 return;
