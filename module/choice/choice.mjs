@@ -105,13 +105,13 @@ export async function activateChoices(item, context) {
                 preprogrammedAnswer = found?.value;
             }
 
-            if(!preprogrammedAnswer){
-                const defaultOption = options.find(o => o.isDefault)
-
-                if(defaultOption){
-                    preprogrammedAnswer = defaultOption.value;
-                }
-            }
+            // if(!preprogrammedAnswer){
+            //     const defaultOption = options.find(o => o.isDefault)
+            //
+            //     if(defaultOption){
+            //         preprogrammedAnswer = defaultOption.value;
+            //     }
+            // }
 
             if(preprogrammedAnswer){
                 items.push(...await resolveActionsFromChoice(choice, item, preprogrammedAnswer, options));
