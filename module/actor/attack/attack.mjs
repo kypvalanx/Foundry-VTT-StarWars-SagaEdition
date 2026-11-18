@@ -1189,6 +1189,7 @@ export class Attack {
 
     async placeTemplate() {
         const templates = [];
+        placeAttackRegion(this)
         for (const template of SWSETemplate.fromAttack(this)) {
             const result = await template.drawPreview();
             if (result) templates.push(...result);
@@ -1751,3 +1752,41 @@ function toTargets(actors, attackRoll, autoMiss, autoHit, critical, areaAttack, 
     return actors.map((a) => toTarget(a, attackRoll, autoMiss, autoHit, critical, areaAttack, damage, attack));
 }
 
+/**
+ *
+ * @param attack Attack
+ */
+async function placeAttackRegion(attack){
+    const target = attack.template;
+    if (!target?.shape) return null;
+    if (target.shape !== "circle") throw new Error("Unsupported attack shape");
+
+
+    const sheet = attack.actor?.sheet;
+    await sheet?.minimize();
+
+    const canvas = game.canvas
+
+    try{
+        return await canvas.regions.placeRegion({
+            name: attack.name,
+            shapes: [{
+                type: "circle",
+                x: 0,
+                y: 0,
+                radius: target.size * canvas.dimensions.distancePixels,
+                gridBased: false
+            }],
+            color: game.user.color,
+            levels: [canvas.level.id],
+            visibility: CONST.REGION_VISIBILITY.ALWAYS,
+            ownership: {[game.user.id]: CONST.DOCUMENT_OWNERSHIP_LEVELS.OWNER}
+        }, {
+            allowRotation: false,
+            // Single-target regions are temporary; area regions persist.
+            create: !target.cleanUp
+        });
+    } finally {
+        await sheet?.maximize();
+    }
+}

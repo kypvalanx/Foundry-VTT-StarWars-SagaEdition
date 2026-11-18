@@ -41,6 +41,7 @@ export default class SWSETemplate extends (foundry.canvas?.placeables?.MeasuredT
         });
     }
 
+
     static fromAttack(attack, options={}) {
         const target = attack.template ?? {};
         if ( !target.shape ) return [];
